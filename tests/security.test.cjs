@@ -93,6 +93,41 @@ assert.doesNotMatch(sw, /cache\.put/, 'service worker must not dynamically cache
   })()`, context);
   assert.equal(tamperedPayloadRejected, true);
 
+  const pinRotation = await vm.runInContext(`(async()=>{
+    const oldPass='PIN-antigo-seguro';
+    const newPass='PIN-novo-seguro-2026';
+    const salt=crypto.getRandomValues(new Uint8Array(16));
+    const oldKey=await deriveVaultKey(oldPass,salt);
+    const check=await encryptBytes(oldKey,enc.encode(CHECK_TEXT_CURRENT));
+    const state=ensureStateShape({
+      bills:[{id:'b1',title:'Conta Teste',category:'Casa',totalCents:3210,dueAt:'2026-09-30T12:00:00.000Z'}],
+      payments:[],incomes:[],market:[],goals:[],activity:[]
+    });
+    const securePayload=await encryptBytes(oldKey,enc.encode(JSON.stringify(state)));
+    let storedMeta={key:'vault',version:2,salt:b64(salt),checkIv:check.iv,checkCipher:check.cipher,iterations:PBKDF2_ITERATIONS,createdAt:'2026-09-01T12:00:00.000Z'};
+    let storedSecure={key:'state',iv:securePayload.iv,cipher:securePayload.cipher,updatedAt:'2026-09-01T12:00:00.000Z'};
+    idbGet=async(store,key)=>store==='meta'&&key==='vault'?storedMeta:store==='secure'&&key==='state'?storedSecure:null;
+    idbPutVaultPair=async(meta,secure)=>{storedMeta=meta;storedSecure=secure;return true;};
+    saveState=async()=>{};
+    appState=state;
+    vaultKey=oldKey;
+    await changeVaultPassphrase(oldPass,newPass);
+    const newKey=await verifyVaultPassphrase(newPass);
+    const restored=JSON.parse(dec.decode(await decryptBytes(newKey,storedSecure.iv,storedSecure.cipher)));
+    let oldRejected=false;
+    try{
+      const oldDerived=await deriveVaultKey(oldPass,unb64(storedMeta.salt),storedMeta.iterations);
+      await decryptBytes(oldDerived,storedMeta.checkIv,storedMeta.checkCipher);
+    }catch(_err){oldRejected=true;}
+    let wrongRejected=false;
+    try{await verifyVaultPassphrase('PIN-errado-qualquer');}catch(_err){wrongRejected=true;}
+    return {title:restored.bills[0].title,amount:restored.bills[0].totalCents,oldRejected,wrongRejected};
+  })()`, context);
+  assert.equal(pinRotation.title, 'Conta Teste');
+  assert.equal(pinRotation.amount, 3210);
+  assert.equal(pinRotation.oldRejected, true);
+  assert.equal(pinRotation.wrongRejected, true);
+
   const backupChecks = await vm.runInContext(`(async()=>{
     const salt=crypto.getRandomValues(new Uint8Array(16));
     const key=await deriveVaultKey('frase longa local',salt);
