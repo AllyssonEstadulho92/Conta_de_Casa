@@ -46,7 +46,7 @@ function openBillDetail(id){
   const payments=billPayments(id).sort((a,c)=>new Date(c.paidAt)-new Date(a.paidAt));
   const paymentSummary=paid>0?`<span><small>Já pago</small><strong data-money>${money(paid)}</strong></span>`:'';
   openDialog('Detalhes da fatura',`
-    <section class="bill-detail">
+    <div class="bill-detail">
       <div class="bill-detail-hero">
         <div class="bill-detail-title">
           <small>Fatura</small>
@@ -63,10 +63,10 @@ function openBillDetail(id){
       </div>
 
       <div class="detail-grid bill-detail-grid">
-        <div class="detail-item"><small>Vencimento</small><strong>${fmtDateTime(b.dueAt)}</strong></div>
+        <div class="detail-item"><small>Vencimento</small><strong>${fmtDateTime(b.dueAt)}</strong><span class="detail-hint">${dueText(b)}</span></div>
         <div class="detail-item"><small>Urgência</small><strong class="${urg==='critical'||urg==='urgent'?'danger-text':''}">${urgencyLabel(urg)}</strong></div>
         <div class="detail-item"><small>Método</small><strong>${esc(b.method||'—')}</strong></div>
-        <div class="detail-item"><small>Recorrência</small><strong>${b.recurrence&&b.recurrence!=='none'?esc(b.recurrence):'Sem recorrência'}</strong></div>
+        <div class="detail-item"><small>Recorrência</small><strong>${recurrenceLabel(b.recurrence)}</strong></div>
         ${b.reference?`<div class="detail-item full-detail"><small>Referência</small><strong>${esc(b.reference)}</strong></div>`:''}
         ${b.notes?`<div class="detail-item full-detail"><small>Observações</small><strong>${esc(b.notes)}</strong></div>`:''}
       </div>
@@ -82,7 +82,7 @@ function openBillDetail(id){
         ${!b.cancelled?`<button class="btn danger" data-detail-cancel="${attr(b.id)}">Cancelar fatura</button>`:''}
         <button class="btn secondary" type="button" data-close-dialog>Fechar</button>
       </div>
-    </section>`, 'detail');
+    </div>`, 'detail');
 }
 function openPaymentForm(id){
   const b=appState.bills.find(x=>x.id===id); if(!b)return;
