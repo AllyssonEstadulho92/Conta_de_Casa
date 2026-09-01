@@ -52,3 +52,11 @@ assert.match(events, /vaultTransferToggle/);
 assert.match(events, /aria-expanded/);
 
 console.log('Mobile product polish v6 tests: OK');
+
+
+assert.match(css, /Bill detail modal v1/);
+assert.match(css, /\.detail-dialog \.dialog-head\{[\s\S]*position:sticky/);
+assert.match(css, /\.detail-actions\{[\s\S]*position:sticky/);
+assert.match(css, /\.bill-detail-grid\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+
+console.log('Bill detail modal tests: OK');
