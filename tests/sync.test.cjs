@@ -108,3 +108,10 @@ assert.match(source, /cfg\.disabledByUser=false; cfg\.enabled=true/);
 assert.match(source, /cfg\.disabledByUser=true;[\s\S]*cfg\.enabled=false/);
 
 console.log('Sync auto-enable migration tests: OK');
+
+
+assert.match(source, /const localOnly=state==='not-configured'\|\|state==='needs-token'/);
+assert.match(source, /const headerClass=localOnly\?'paid':syncStatusClass\(state\)/);
+assert.match(source, /Cofre local ativo/);
+
+console.log('Local vault header status tests: OK');
