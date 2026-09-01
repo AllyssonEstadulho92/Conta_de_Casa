@@ -29,5 +29,8 @@ jobs:
       - name: Finance tests
         run: node tests/finance.test.cjs
 
+      - name: Invoice form regression tests
+        run: node tests/form-regression.test.cjs
+
       - name: Validate manifest
         run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('Manifest: OK')"
