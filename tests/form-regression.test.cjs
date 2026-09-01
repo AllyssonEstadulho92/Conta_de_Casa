@@ -28,3 +28,11 @@ assert.match(forms, /if \(!dialog\.open\) dialog\.showModal\(\)/, 'opening a new
 assert.match(forms, /data-close-dialog>Fechar<\/button>/, 'bill details must include a redundant close action');
 
 console.log('Modal close regression tests: OK');
+
+
+assert.match(forms, /<div class="bill-detail">/, 'bill detail must preserve semantic layout through sanitizer');
+assert.doesNotMatch(forms, /<section class="bill-detail">/, 'bill detail must not use a dynamic tag stripped by the HTML sanitizer');
+assert.match(forms, /recurrenceLabel\(b\.recurrence\)/, 'bill detail must localize recurrence labels');
+assert.match(forms, /dueText\(b\)/, 'bill detail must show a human-readable due countdown');
+
+console.log('Bill detail structure regression tests: OK');
