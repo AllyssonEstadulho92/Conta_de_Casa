@@ -27,11 +27,11 @@ function dueText(bill) {
   const diff = new Date(bill.dueAt).getTime() - Date.now();
   if (remainingForBill(bill) === 0) return 'Concluída';
   if (diff < 0) {
-    const d = Math.ceil(Math.abs(diff)/DAY_MS); return \`\${d} dia\${d===1?'':'s'} em atraso\`;
+    const d = Math.ceil(Math.abs(diff)/DAY_MS); return `${d} dia${d===1?'':'s'} em atraso`;
   }
   const hours = Math.ceil(diff/3600000);
-  if (hours <= 24) return \`\${hours}h para vencer\`;
-  const days = Math.ceil(diff/DAY_MS); return \`\${days} dia\${days===1?'':'s'} para vencer\`;
+  if (hours <= 24) return `${hours}h para vencer`;
+  const days = Math.ceil(diff/DAY_MS); return `${days} dia${days===1?'':'s'} para vencer`;
 }
 function nextDueAt(dueAt, recurrence) {
   const d = new Date(dueAt);
@@ -83,7 +83,7 @@ function categoryTotals(month = selectedMonth) {
   }
   const market = appState.market.filter(i=>i.purchased && inSelectedMonth(i.purchasedAt || i.updatedAt, month));
   for (const item of market) {
-    const cat = item.category ? \`Mercado · \${item.category}\` : 'Mercado';
+    const cat = item.category ? `Mercado · ${item.category}` : 'Mercado';
     map.set(cat,(map.get(cat)||0)+(item.actualCents||item.estimatedCents||0));
   }
   return [...map.entries()].sort((a,b)=>b[1]-a[1]);
