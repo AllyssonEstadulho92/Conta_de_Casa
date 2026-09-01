@@ -95,6 +95,11 @@
     <div class="detail-item"><small>Credencial deste dispositivo</small><strong id="syncTokenState">Token ainda não guardado</strong></div>
     <div class="detail-item"><small>Confidencialidade</small><strong>Somente envelope cifrado</strong></div>
   </div>
+  <div class="sync-health section-gap" aria-label="Saúde da sincronização">
+    <div><small>Cofre local</small><strong id="syncHealthLocal">Protegido neste dispositivo</strong></div>
+    <div><small>Cofre remoto</small><strong id="syncHealthRemote">Ainda não ligado ao remoto</strong></div>
+    <div><small>Modo</small><strong id="syncHealthMode">Só local</strong></div>
+  </div>
   <div class="detail-grid section-gap">
     <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div>
   </div>
@@ -109,6 +114,13 @@
     <button id="syncDisableBtn" class="btn danger" type="button">Desativar neste dispositivo</button>
   </div>
   <p id="syncMessage" class="form-message" role="status"></p>
+  <div id="syncResolveBox" class="sync-resolve section-gap" hidden>
+    <h3>Unir web e telemóvel sem perder dados</h3>
+    <p class="muted">Foi encontrado um cofre remoto diferente. Introduza o PIN do dispositivo que iniciou a sincronização. A aplicação junta os dois conjuntos de dados, mantém o cofre remoto como identidade comum e alinha este dispositivo automaticamente.</p>
+    <label>PIN do cofre sincronizado<input id="syncResolvePin" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" /></label>
+    <button id="syncResolveBtn" class="btn primary" type="button">Unir dados e alinhar este dispositivo</button>
+    <p id="syncResolveMessage" class="form-message" role="status"></p>
+  </div>
   <div class="section-gap">
     <hr />
     <h3>Juntar dados de outro dispositivo</h3>
