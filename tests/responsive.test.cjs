@@ -14,3 +14,16 @@ assert.match(css, /\.calendar-grid\{[\s\S]*repeat\(7,minmax\(0,1fr\)\)/);
 assert.match(css, /@media\(max-width:360px\)[\s\S]*\.kpi-grid\{grid-template-columns:minmax\(0,1fr\)\}/);
 
 console.log('Responsive layout tests: OK');
+
+
+assert.match(css, /Responsive enclosure v3/);
+assert.match(css, /@media\(max-width:359px\)/);
+assert.match(css, /@media\(max-width:319px\)/);
+assert.match(css, /@media\(min-width:821px\)/);
+assert.match(css, /@media\(min-width:1440px\)/);
+assert.match(css, /inline-size:calc\(100% - var\(--sidebar\)\)/);
+assert.match(css, /max-inline-size:calc\(100vw - var\(--sidebar\)\)/);
+assert.match(css, /\.calendar-day small\{[\s\S]*display:none/);
+assert.match(css, /\.bill-meta\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
+
+console.log('Responsive enclosure v3 tests: OK');
