@@ -81,6 +81,7 @@ function openBillDetail(id){
         <button class="btn secondary" data-detail-edit="${attr(b.id)}">Editar</button>
         ${!b.cancelled?`<button class="btn danger" data-detail-cancel="${attr(b.id)}">Cancelar fatura</button>`:''}
         <button class="btn secondary" type="button" data-close-dialog>Fechar</button>
+        <button class="btn danger detail-delete" type="button" data-detail-delete="${attr(b.id)}">Excluir fatura</button>
       </div>
     </div>`, 'detail');
 }
