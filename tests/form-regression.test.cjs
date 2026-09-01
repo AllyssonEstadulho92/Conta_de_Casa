@@ -56,3 +56,16 @@ assert.match(events, /dataset\.deleteBill/);
 assert.match(events, /await deleteBillEnteredByMistake/);
 
 console.log('Bill card delete action tests: OK');
+
+
+assert.match(forms, /const BILL_CATEGORIES = Object\.freeze/);
+assert.match(forms, /Renda \/ Condomínio/);
+assert.match(forms, /Internet \/ Telecomunicações/);
+assert.match(forms, /Alimentação \/ Supermercado/);
+assert.match(forms, /Ginásio \/ Desporto/);
+assert.match(forms, /function billCategoryOptions\(selected='Casa'\)/);
+assert.match(forms, /appState\?\.bills/);
+assert.match(forms, /<select name="category" required>/);
+assert.doesNotMatch(forms, /list="categoryList"/);
+
+console.log('Invoice category taxonomy tests: OK');
