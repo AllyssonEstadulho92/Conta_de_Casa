@@ -2,36 +2,36 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const css = fs.readFileSync('styles.css','utf8');
+const events = fs.readFileSync('events.js','utf8');
 
-assert.match(css, /html,body\{[\s\S]*overflow-x:hidden/);
+assert.match(css, /Responsive system v5/);
+assert.match(css, /overflow-x:hidden/);
 assert.match(css, /-webkit-text-size-adjust:100%/);
 assert.match(css, /@media\(max-width:820px\)/);
-assert.match(css, /\.main\{[\s\S]*width:100%;[\s\S]*overflow-x:hidden/);
-assert.match(css, /\.kpi-grid\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
-assert.match(css, /\.dashboard-grid,[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
-assert.match(css, /\.mobile-nav\{[\s\S]*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
-assert.match(css, /\.calendar-grid\{[\s\S]*repeat\(7,minmax\(0,1fr\)\)/);
-assert.match(css, /@media\(max-width:360px\)[\s\S]*\.kpi-grid\{grid-template-columns:minmax\(0,1fr\)\}/);
-
-console.log('Responsive layout tests: OK');
-
-
-assert.match(css, /Responsive enclosure v3/);
 assert.match(css, /@media\(max-width:359px\)/);
 assert.match(css, /@media\(max-width:319px\)/);
-assert.match(css, /@media\(min-width:821px\)/);
-assert.match(css, /@media\(min-width:1440px\)/);
-assert.match(css, /inline-size:calc\(100% - var\(--sidebar\)\)/);
-assert.match(css, /max-inline-size:calc\(100vw - var\(--sidebar\)\)/);
-assert.match(css, /\.calendar-day small\{[\s\S]*display:none/);
-assert.match(css, /\.bill-meta\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
+assert.match(css, /@media\(min-width:1181px\)/);
+assert.match(css, /@media\(min-width:821px\) and \(max-width:1180px\)/);
 
-console.log('Responsive enclosure v3 tests: OK');
+assert.match(css, /\.kpi-grid\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+assert.match(css, /@media\(max-width:359px\)[\s\S]*\.kpi-grid\{grid-template-columns:minmax\(0,1fr\)/);
+assert.match(css, /\.dashboard-grid,\.two-col,\.cards-list,\.goal-grid\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
+assert.match(css, /\.panel-head\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
 
+assert.match(css, /--browser-bottom-offset:0px/);
+assert.match(css, /\.mobile-nav\{[\s\S]*bottom:var\(--browser-bottom-offset\)/);
+assert.match(css, /\.fab\{[\s\S]*bottom:calc\(var\(--browser-bottom-offset\) \+ 30px\)/);
+assert.match(css, /\.main\{[\s\S]*var\(--browser-bottom-offset\)/);
+assert.match(css, /\.dialog-shell\{[\s\S]*var\(--visual-vh\)/);
 
-assert.match(css, /Mobile enclosure polish v4/);
-assert.match(css, /@media\(max-width:480px\)[\s\S]*\.panel-head\{[\s\S]*display:grid/);
-assert.match(css, /@media\(max-width:359px\)[\s\S]*\.kpi-grid\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
-assert.match(css, /@media\(min-width:1101px\)[\s\S]*\.topbar,[\s\S]*\.page/);
+assert.match(events, /function installViewportMetrics\(\)/);
+assert.match(events, /window\.visualViewport/);
+assert.match(events, /--visual-vh/);
+assert.match(events, /--browser-bottom-offset/);
+assert.match(events, /display-mode: standalone/);
+assert.match(events, /keyboard-open/);
 
-console.log('Mobile enclosure polish v4 tests: OK');
+assert.doesNotMatch(css, /\bzoom\s*:/i);
+assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
+
+console.log('Responsive system v5 tests: OK');
