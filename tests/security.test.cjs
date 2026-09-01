@@ -87,7 +87,8 @@ assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline even
 
 const sw = fs.readFileSync('sw.js','utf8');
 assert.match(sw, /PUBLIC_ASSET_SET/);
-assert.match(sw, /url\.search \|\| url\.hash/);
+assert.match(sw, /if \(url\.hash\) return null/);
+assert.match(sw, /url\.searchParams\.size===1 && url\.searchParams\.has\('v'\)/, 'service worker may only accept the controlled cache-busting v query');
 assert.doesNotMatch(sw, /cache\.put\(event\.request|cache\.put\(request/i, 'service worker must not cache arbitrary request URLs');
 
 (async () => {
