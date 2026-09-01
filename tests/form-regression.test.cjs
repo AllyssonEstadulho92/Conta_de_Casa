@@ -38,8 +38,6 @@ assert.match(forms, /dueText\(b\)/, 'bill detail must show a human-readable due 
 console.log('Bill detail structure regression tests: OK');
 
 
-const events = fs.readFileSync('events.js','utf8');
-
 assert.match(forms, /data-detail-delete/);
 assert.match(events, /function billDeletionScope\(rootId\)/);
 assert.match(events, /Não é possível excluir uma fatura com pagamentos/);
