@@ -750,7 +750,7 @@ input:-webkit-autofill:focus{
 }
 .bill-detail-money{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
   gap:8px;
 }
 .bill-detail-money>span{
@@ -889,4 +889,12 @@ input:-webkit-autofill:focus{
   .bill-detail-grid .full-detail{
     grid-column:auto;
   }
+}
+
+.detail-hint{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:.64rem;
+  line-height:1.25;
 }
