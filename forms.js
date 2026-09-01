@@ -1,9 +1,25 @@
-function openDialog(title, html) {
+let lastDialogOpener = null;
+
+function openDialog(title, html, mode='form') {
+  const dialog = $('#formDialog');
+  lastDialogOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   $('#dialogTitle').textContent = title;
   setHTML('#dialogBody', html);
-  $('#formDialog').showModal();
+  dialog.dataset.mode = mode;
+  dialog.classList.toggle('detail-dialog', mode === 'detail');
+  if (!dialog.open) dialog.showModal();
+  requestAnimationFrame(() => dialog.querySelector('[data-close-dialog], input, select, textarea, button')?.focus({preventScroll:true}));
 }
-function closeDialog(){ $('#formDialog').close(); }
+
+function closeDialog() {
+  const dialog = $('#formDialog');
+  if (dialog?.open) dialog.close();
+  dialog?.classList.remove('detail-dialog');
+  if (dialog) delete dialog.dataset.mode;
+  const target = lastDialogOpener;
+  lastDialogOpener = null;
+  if (target?.isConnected) requestAnimationFrame(() => target.focus({preventScroll:true}));
+}
 function billFormHtml(bill=null){
   const due=bill?new Date(bill.dueAt):new Date(); if(!bill) due.setDate(due.getDate()+7);
   const date=due.toISOString().slice(0,10); const time=`${String(due.getHours()).padStart(2,'0')}:${String(due.getMinutes()).padStart(2,'0')}`;
@@ -28,7 +44,45 @@ function openBillDetail(id){
   const b=appState.bills.find(x=>x.id===id); if(!b)return;
   const paid=paidForBill(id),rem=remainingForBill(b),st=billStatus(b),urg=billUrgency(b);
   const payments=billPayments(id).sort((a,c)=>new Date(c.paidAt)-new Date(a.paidAt));
-  openDialog('Detalhes da fatura',`<div class="detail-grid"><div class="detail-item"><small>Descrição</small><strong>${esc(b.title)}</strong></div><div class="detail-item"><small>Estado</small><strong>${statusLabel(st)}</strong></div><div class="detail-item"><small>Valor total</small><strong data-money>${money(b.totalCents)}</strong></div><div class="detail-item"><small>Restante</small><strong data-money>${money(rem)}</strong></div><div class="detail-item"><small>Vencimento</small><strong>${fmtDateTime(b.dueAt)}</strong></div><div class="detail-item"><small>Urgência</small><strong>${urgencyLabel(urg)}</strong></div><div class="detail-item"><small>Fornecedor</small><strong>${esc(b.provider||'—')}</strong></div><div class="detail-item"><small>Categoria</small><strong>${esc(b.category||'Outros')}</strong></div></div><h3 class="section-gap">Pagamentos</h3><div class="stack-list">${payments.length?payments.map(p=>`<div class="list-row"><div class="list-main"><strong data-money>${money(p.amountCents)}</strong><small>${fmtDateTime(p.paidAt)} · ${esc(p.method||'')}</small></div></div>`).join(''):empty('Sem pagamentos registados.')}</div><div class="button-row section-gap">${rem>0&&!b.cancelled?`<button class="btn primary" data-detail-pay="${attr(b.id)}">Registar pagamento</button>`:''}<button class="btn secondary" data-detail-edit="${attr(b.id)}">Editar</button>${!b.cancelled?`<button class="btn danger" data-detail-cancel="${attr(b.id)}">Cancelar fatura</button>`:''}</div>`);
+  const paymentSummary=paid>0?`<span><small>Já pago</small><strong data-money>${money(paid)}</strong></span>`:'';
+  openDialog('Detalhes da fatura',`
+    <section class="bill-detail">
+      <div class="bill-detail-hero">
+        <div class="bill-detail-title">
+          <small>Fatura</small>
+          <h3>${esc(b.title)}</h3>
+          <p>${esc(b.provider||'Sem fornecedor')} · ${esc(b.category||'Outros')}</p>
+        </div>
+        <span class="status-chip ${st}">${statusLabel(st)}</span>
+      </div>
+
+      <div class="bill-detail-money">
+        <span><small>Restante</small><strong data-money>${money(rem)}</strong></span>
+        <span><small>Valor total</small><strong data-money>${money(b.totalCents)}</strong></span>
+        ${paymentSummary}
+      </div>
+
+      <div class="detail-grid bill-detail-grid">
+        <div class="detail-item"><small>Vencimento</small><strong>${fmtDateTime(b.dueAt)}</strong></div>
+        <div class="detail-item"><small>Urgência</small><strong class="${urg==='critical'||urg==='urgent'?'danger-text':''}">${urgencyLabel(urg)}</strong></div>
+        <div class="detail-item"><small>Método</small><strong>${esc(b.method||'—')}</strong></div>
+        <div class="detail-item"><small>Recorrência</small><strong>${b.recurrence&&b.recurrence!=='none'?esc(b.recurrence):'Sem recorrência'}</strong></div>
+        ${b.reference?`<div class="detail-item full-detail"><small>Referência</small><strong>${esc(b.reference)}</strong></div>`:''}
+        ${b.notes?`<div class="detail-item full-detail"><small>Observações</small><strong>${esc(b.notes)}</strong></div>`:''}
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-head"><h3>Pagamentos</h3><small>${payments.length} registo${payments.length===1?'':'s'}</small></div>
+        <div class="stack-list compact">${payments.length?payments.map(p=>`<div class="list-row"><div class="list-main"><strong data-money>${money(p.amountCents)}</strong><small>${fmtDateTime(p.paidAt)} · ${esc(p.method||'')}</small></div></div>`).join(''):empty('Sem pagamentos registados.')}</div>
+      </div>
+
+      <div class="dialog-actions detail-actions">
+        ${rem>0&&!b.cancelled?`<button class="btn primary" data-detail-pay="${attr(b.id)}">Registar pagamento</button>`:''}
+        <button class="btn secondary" data-detail-edit="${attr(b.id)}">Editar</button>
+        ${!b.cancelled?`<button class="btn danger" data-detail-cancel="${attr(b.id)}">Cancelar fatura</button>`:''}
+        <button class="btn secondary" type="button" data-close-dialog>Fechar</button>
+      </div>
+    </section>`, 'detail');
 }
 function openPaymentForm(id){
   const b=appState.bills.find(x=>x.id===id); if(!b)return;
