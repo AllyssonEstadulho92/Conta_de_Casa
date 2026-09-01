@@ -4,7 +4,7 @@ Esta aplicação está em fase de hardening. Ela reduz riscos para uso local, ma
 
 ## Regra obrigatória de confidencialidade
 
-Nenhum dado financeiro, pessoal, fatura, referência, comprovativo, anexo, histórico, valor, fornecedor ou informação de autenticação deve ser transmitido, registado, sincronizado, incluído em URL, enviado para telemetria, guardado em GitHub ou exposto a terceiros sem autorização explícita do utilizador.
+Nenhum dado financeiro, pessoal, fatura, referência, comprovativo, anexo, histórico, valor, fornecedor ou informação de autenticação pode ser transmitido em claro, incluído em URL, enviado para telemetria ou exposto a terceiros. A única exceção de rede autorizada é a sincronização opcional para o repositório GitHub privado configurado, contendo apenas o envelope cifrado.
 
 ## Implementado
 
@@ -17,7 +17,7 @@ Nenhum dado financeiro, pessoal, fatura, referência, comprovativo, anexo, hist�
 - sanitização/escaping antes de renderizar dados do utilizador;
 - histórico de atividade sem nomes, valores, fornecedores ou referências;
 - guardas contra escrita sensível em `localStorage` e `sessionStorage`;
-- CSP por `meta` compatível com GitHub Pages, bloqueando scripts externos e ligações externas;
+- CSP por `meta` compatível com GitHub Pages, bloqueando scripts externos e permitindo apenas `self` e `https://api.github.com` para a sincronização cifrada;
 - service worker limitado a assets públicos conhecidos;
 - bloqueio automático por inatividade e ao perder foco;
 - destruição das referências da chave e do estado em memória ao bloquear;
@@ -52,3 +52,20 @@ Recomenda-se só introduzir faturas reais quando estes pontos estiverem concluí
 ## Desenvolvimento
 
 Nunca colocar dados reais, tokens, backups, anexos privados, palavras-passe ou chaves no repositório. Qualquer nova dependência deve ser justificada, auditada e preferencialmente evitada.
+
+
+## Sincronização automática cifrada
+
+Quando ativada, a aplicação usa apenas `https://api.github.com` para ler/escrever `sync/vault.json` no repositório privado configurado.
+
+O ficheiro remoto contém:
+- metadados técnicos de revisão;
+- envelope de backup cifrado validado;
+- nenhum PIN, palavra-passe ou token.
+
+O token GitHub é protegido localmente com uma chave AES-GCM não exportável guardada no IndexedDB do dispositivo. Deve ser um fine-grained token limitado ao repositório privado, com `Contents: Read and write`.
+
+Riscos residuais adicionais:
+- um token comprometido pode permitir substituir ou apagar o ficheiro cifrado remoto;
+- conflitos simultâneos podem exigir intervenção manual;
+- a segurança continua dependente da conta GitHub, do dispositivo e do navegador.
