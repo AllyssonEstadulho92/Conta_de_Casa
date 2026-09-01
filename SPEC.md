@@ -13,7 +13,7 @@ Aplicação financeira doméstica pessoal, mensal e local-first, para saber quan
 - separar estado financeiro de urgência;
 - preservar o histórico dos meses anteriores;
 - GitHub guarda código/documentação, nunca dados financeiros reais;
-- nenhum dado financeiro/pessoal pode ir para terceiros, logs, URLs, telemetria ou GitHub;
+- nenhum dado financeiro/pessoal pode ir em claro para terceiros, logs, URLs ou telemetria; a sincronização opcional usa apenas um envelope cifrado num repositório GitHub privado;
 - considerar concluído apenas o que possui critérios e testes verificáveis.
 
 ## Navegação
@@ -158,3 +158,19 @@ Alteração segura da palavra-passe, WebAuthn/biometria quando suportado e audit
 ### v1.0
 
 Apenas após QA funcional, segurança, acessibilidade, persistência, PWA, anexos cifrados se forem usados, revisão em navegador real e critérios de aceitação concluídos.
+
+
+## Sincronização automática
+
+Transporte remoto: repositório privado `AllyssonEstadulho92/conta-de-casa-`, caminho `sync/vault.json`.
+
+Regras:
+- GitHub Pages continua a hospedar apenas o código público;
+- o repositório privado recebe apenas envelope cifrado;
+- token GitHub cifrado localmente e nunca sincronizado;
+- repositório público é rejeitado;
+- sincronização no desbloqueio, alterações locais, regresso online/visível e intervalo periódico;
+- merge por ID/timestamp;
+- tombstones para eliminações;
+- conflito concorrente preservado e sinalizado em vez de sobrescrito silenciosamente;
+- adoção de cofre remoto exige ação explícita quando o dispositivo possui outro cofre.
