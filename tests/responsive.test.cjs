@@ -66,3 +66,12 @@ assert.match(events, /setProperty\('--browser-bottom-offset', '0px'\)/, 'navigat
 assert.doesNotMatch(events, /Math\.max\(bottomOffset, 56\)/, 'Safari toolbar must not push navigation upward');
 
 console.log('Fixed mobile navigation v7 tests: OK');
+
+
+assert.match(css, /Native mobile shell v8/);
+assert.match(css, /html\.app-active \.app-shell\{[\s\S]*height:var\(--visual-vh\)/);
+assert.match(css, /html\.app-active \.main\{[\s\S]*overflow-y:auto/);
+assert.match(css, /html\.app-active \.mobile-nav\{[\s\S]*position:fixed!important[\s\S]*bottom:0!important/);
+assert.match(events, /document\.documentElement\.classList\.add\('app-active'\)/);
+
+console.log('Native mobile shell v8 tests: OK');
