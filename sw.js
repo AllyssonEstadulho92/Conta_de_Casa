@@ -45,5 +45,13 @@ self.addEventListener('fetch', event => {
 
   const key = publicAssetKey(event.request.url);
   if (!key || !PUBLIC_ASSET_SET.has(key)) return;
-  event.respondWith(caches.match(key).then(cached => cached || fetch(event.request)));
+  event.respondWith(
+    fetch(event.request).then(response => {
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE).then(cache => cache.put(key, copy));
+      }
+      return response;
+    }).catch(() => caches.match(key))
+  );
 });
