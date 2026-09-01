@@ -164,7 +164,14 @@ function wireEvents(){
   formDialog.addEventListener('click',e=>{if(e.target===formDialog)closeDialog();});
   formDialog.addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
   formDialog.addEventListener('close',()=>{formDialog.classList.remove('detail-dialog');delete formDialog.dataset.mode;});
-  $('#billsList').addEventListener('click',e=>{const pay=e.target.closest('[data-pay-bill]');if(pay){openPaymentForm(pay.dataset.payBill);return;}const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
+  $('#billsList').addEventListener('click',async e=>{
+    const pay=e.target.closest('[data-pay-bill]');
+    if(pay){openPaymentForm(pay.dataset.payBill);return;}
+    const del=e.target.closest('[data-delete-bill]');
+    if(del){await deleteBillEnteredByMistake(del.dataset.deleteBill);return;}
+    const b=e.target.closest('[data-bill-id]');
+    if(b)openBillDetail(b.dataset.billId);
+  });
   $('#upcomingBills').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#calendarAgenda').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#dialogBody').addEventListener('click',async e=>{
