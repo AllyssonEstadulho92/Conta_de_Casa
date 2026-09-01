@@ -33,5 +33,9 @@
       "short_name": "Mercado",
       "url": "./#market"
     }
+  ],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
   ]
 }
