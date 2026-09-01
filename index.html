@@ -95,16 +95,16 @@
     <div class="detail-item"><small>Credencial deste dispositivo</small><strong id="syncTokenState">Token ainda não guardado</strong></div>
     <div class="detail-item"><small>Confidencialidade</small><strong>Somente envelope cifrado</strong></div>
   </div>
-  <div class="form-grid two section-gap">
-    <label>Conta GitHub<input id="syncOwner" value="AllyssonEstadulho92" autocomplete="off" spellcheck="false" /></label>
-    <label>Repositório privado<input id="syncRepo" value="conta-de-casa-" autocomplete="off" spellcheck="false" /></label>
-    <label class="full-row">Caminho remoto<input id="syncPath" value="sync/vault.json" autocomplete="off" spellcheck="false" /></label>
-    <label class="full-row">Token GitHub deste dispositivo<input id="syncToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Fine-grained token com acesso apenas ao repositório privado" /></label>
+  <div class="detail-grid section-gap">
+    <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div>
   </div>
-  <p class="muted">O token fica cifrado localmente neste dispositivo e não é enviado dentro do cofre sincronizado. Use um fine-grained token limitado ao repositório privado, com Contents: Read and write.</p>
+  <div class="form-grid section-gap">
+    <label>Credencial GitHub deste dispositivo — introduzir apenas uma vez<input id="syncToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Fine-grained token com Contents: Read and write" /></label>
+  </div>
+  <p class="muted">Conta, repositório e caminho são definidos automaticamente e não podem ser alterados pela interface. Depois de validar a credencial uma vez, a sincronização passa a funcionar automaticamente neste dispositivo.</p>
   <div class="button-row">
-    <button id="syncConfigureBtn" class="btn primary" type="button">Ativar e exportar cofre cifrado</button>
-    <button id="syncNowBtn" class="btn secondary" type="button">Sincronizar agora</button>
+    <button id="syncConfigureBtn" class="btn primary" type="button">Ligar sincronização automática</button>
+    <button id="syncNowBtn" class="btn secondary" type="button">Verificar agora</button>
     <button id="syncAdoptBtn" class="btn secondary" type="button" hidden>Adotar dados sincronizados neste dispositivo</button>
     <button id="syncDisableBtn" class="btn danger" type="button">Desativar neste dispositivo</button>
   </div>
