@@ -115,3 +115,14 @@ assert.match(source, /const headerClass=localOnly\?'paid':syncStatusClass\(state
 assert.match(source, /Cofre local ativo/);
 
 console.log('Local vault header status tests: OK');
+
+
+assert.match(source, /async function manualSyncFromUi\(\)/);
+assert.match(source, /Falta a credencial deste dispositivo/);
+assert.match(source, /tokenInput\?\.scrollIntoView/);
+assert.match(source, /await configureSyncFromUi\(\)/);
+assert.match(source, /await syncNow\('manual'\)/);
+assert.match(source, /btn\.textContent='A sincronizar…'/);
+assert.match(source, /addEventListener\('click',manualSyncFromUi\)/);
+
+console.log('Manual sync button UX tests: OK');
