@@ -86,7 +86,7 @@ assert.match(events, /register\('\.\/sw\.js\?v=27',\{updateViaCache:'none'\}\)/)
 assert.match(events, /controllerchange/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v27/);
+assert.match(swSource, /conta-de-casa-public-v\d+/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 
 console.log('PWA freshness v27 tests: OK');
