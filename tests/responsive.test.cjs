@@ -19,16 +19,16 @@ assert.match(css, /\.dashboard-grid,\.two-col,\.cards-list,\.goal-grid\{[\s\S]*g
 assert.match(css, /\.panel-head\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
 
 assert.match(css, /--browser-bottom-offset:0px/);
-assert.match(css, /\.mobile-nav\{[\s\S]*bottom:var\(--browser-bottom-offset\)/);
-assert.match(css, /\.fab\{[\s\S]*bottom:calc\(var\(--browser-bottom-offset\) \+ 30px\)/);
-assert.match(css, /\.main\{[\s\S]*var\(--browser-bottom-offset\)/);
+assert.match(css, /Fixed mobile navigation v7/);
+assert.match(css, /\.mobile-nav\{[\s\S]*position:fixed!important[\s\S]*bottom:0!important/);
+assert.match(css, /\.fab\{[\s\S]*position:fixed!important/);
+assert.match(css, /\.main\{[\s\S]*var\(--mobile-nav-height\)/);
 assert.match(css, /\.dialog-shell\{[\s\S]*var\(--visual-vh\)/);
 
 assert.match(events, /function installViewportMetrics\(\)/);
 assert.match(events, /window\.visualViewport/);
 assert.match(events, /--visual-vh/);
 assert.match(events, /--browser-bottom-offset/);
-assert.match(events, /display-mode: standalone/);
 assert.match(events, /keyboard-open/);
 
 assert.doesNotMatch(css, /\bzoom\s*:/i);
@@ -60,3 +60,9 @@ assert.match(css, /\.detail-actions\{[\s\S]*position:sticky/);
 assert.match(css, /\.bill-detail-grid\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 
 console.log('Bill detail modal tests: OK');
+
+
+assert.match(events, /setProperty\('--browser-bottom-offset', '0px'\)/, 'navigation must not receive a positive browser toolbar offset');
+assert.doesNotMatch(events, /Math\.max\(bottomOffset, 56\)/, 'Safari toolbar must not push navigation upward');
+
+console.log('Fixed mobile navigation v7 tests: OK');
