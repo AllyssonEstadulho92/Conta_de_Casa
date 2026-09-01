@@ -143,3 +143,21 @@ assert.match(indexSource, /id="syncMergeBackupPin"/);
 assert.match(indexSource, /Juntar dados sem apagar/);
 
 console.log('Encrypted cross-device merge tests: OK');
+
+
+assert.match(source, /cfg\.owner = SYNC_DEFAULT_OWNER/);
+assert.match(source, /cfg\.repo = SYNC_DEFAULT_REPO/);
+assert.match(source, /cfg\.path = SYNC_DEFAULT_PATH/);
+assert.doesNotMatch(source, /\$\('#syncOwner'\)/);
+assert.doesNotMatch(source, /\$\('#syncRepo'\)/);
+assert.doesNotMatch(source, /\$\('#syncPath'\)/);
+assert.match(source, /function syncUserError\(/);
+
+const syncIndex=fs.readFileSync('index.html','utf8');
+assert.match(syncIndex, /id="syncDestination"/);
+assert.doesNotMatch(syncIndex, /id="syncOwner"/);
+assert.doesNotMatch(syncIndex, /id="syncRepo"/);
+assert.doesNotMatch(syncIndex, /id="syncPath"/);
+assert.match(syncIndex, /Ligar sincronização automática/);
+
+console.log('Automatic fixed sync destination tests: OK');
