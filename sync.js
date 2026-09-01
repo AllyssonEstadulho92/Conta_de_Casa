@@ -7,6 +7,7 @@ const SYNC_DEFAULT_PATH = 'sync/vault.json';
 const SYNC_FORMAT_VERSION = 1;
 const SYNC_INTERVAL_MS = 60000;
 const SYNC_PUSH_DELAY_MS = 1400;
+const SYNC_RETRY_DELAYS_MS = [5000,15000,60000,180000,300000];
 
 let syncBusy = false;
 let syncSuppressAuto = false;
@@ -18,6 +19,8 @@ let syncLastStatus = { state:'not-configured', message:'Sincronização não con
 let syncRemoteCandidate = null;
 let syncPending = false;
 let syncRetryTimer = null;
+let syncRetryAttempt = 0;
+let syncCredentialTimer = null;
 
 function syncConfig() {
   if (!appState) return null;
@@ -47,9 +50,46 @@ function syncUserError(err, fallback='Não foi possível sincronizar. Os dados l
     'Falha ao guardar o cofre cifrado no repositório privado.',
     'Ficheiro remoto inválido.',
     'Formato remoto incompatível.',
-    'Cofre local incompleto.'
+    'Cofre local incompleto.',
+    'Confirmação remota falhou: cofre não encontrado.',
+    'Confirmação remota falhou: revisão inesperada.',
+    'Confirmação remota falhou: conteúdo inesperado.',
+    'Confirmação remota falhou: identidade do cofre diferente.'
   ];
   return allowed.includes(message)?message:fallback;
+}
+
+function clearSyncRetry() {
+  clearTimeout(syncRetryTimer);
+  syncRetryTimer=null;
+  syncRetryAttempt=0;
+}
+
+function permanentSyncError(err) {
+  const message=String(err?.message||'');
+  return [
+    'Token GitHub inválido.',
+    'Repositório privado não encontrado ou sem acesso.',
+    'O token não tem permissão para este repositório.',
+    'O token não tem permissão de leitura.',
+    'O token precisa de Contents: Read and write.',
+    'A sincronização é recusada: o repositório tem de ser privado.',
+    'Repositório de sincronização inesperado.',
+    'Ficheiro remoto inválido.',
+    'Formato remoto incompatível.',
+    'REMOTE_VAULT_MISMATCH',
+    'SYNC_RACE'
+  ].includes(message);
+}
+
+function scheduleSyncRetry(err) {
+  if(permanentSyncError(err) || !navigator.onLine || !syncConfig()?.enabled) return 0;
+  clearTimeout(syncRetryTimer);
+  const index=Math.min(syncRetryAttempt,SYNC_RETRY_DELAYS_MS.length-1);
+  const delay=SYNC_RETRY_DELAYS_MS[index];
+  syncRetryAttempt=Math.min(syncRetryAttempt+1,SYNC_RETRY_DELAYS_MS.length);
+  syncRetryTimer=setTimeout(()=>syncNow('retry'),delay);
+  return delay;
 }
 
 function syncSetStatus(state, message, at = new Date().toISOString()) {
@@ -469,24 +509,35 @@ async function saveSyncDeviceMeta(patch={}) {
   return next;
 }
 
+async function confirmRemoteWrite(token,cfg,expectedSha,expectedRevision) {
+  const confirmed=await fetchRemoteSyncFile(token,cfg);
+  if(!confirmed) throw new Error('Confirmação remota falhou: cofre não encontrado.');
+  if(expectedSha && confirmed.sha!==expectedSha) throw new Error('Confirmação remota falhou: conteúdo inesperado.');
+  if(Number(confirmed.revision)!==Number(expectedRevision)) throw new Error('Confirmação remota falhou: revisão inesperada.');
+  const localMeta=await idbGet('meta','vault');
+  if(!vaultMetaMatches(localMeta,confirmed.normalized.meta)) throw new Error('Confirmação remota falhou: identidade do cofre diferente.');
+  return confirmed;
+}
+
 async function pushLocalEncryptedVault(token,cfg,remote=null,revision=null) {
   const device=await syncDeviceMeta();
   const nextRevision=revision ?? ((remote?.revision||0)+1);
   const wrapper=await buildSyncWrapper(nextRevision,device.deviceId);
   const sha=await putRemoteSyncFile(token,cfg,wrapper,remote?.sha||null);
-  await saveSyncDeviceMeta({lastRemoteSha:sha,lastRevision:nextRevision,lastSyncedAt:new Date().toISOString()});
-  return {sha,revision:nextRevision};
+  const confirmed=await confirmRemoteWrite(token,cfg,sha,nextRevision);
+  await saveSyncDeviceMeta({lastRemoteSha:confirmed.sha,lastRevision:confirmed.revision,lastSyncedAt:new Date().toISOString()});
+  return {sha:confirmed.sha,revision:confirmed.revision};
 }
 
 async function syncNow(reason='manual') {
-  if(syncBusy){syncPending=true;return;}
+  if(syncBusy){syncPending=true;return 'syncing';}
   syncPending=false;
-  if(!vaultKey||!appState) return;
+  if(!vaultKey||!appState) return 'not-ready';
   const cfg=syncConfig();
-  if(!cfg?.enabled){syncSetStatus('not-configured','Sincronização automática ainda não está ativa.');return;}
-  if(!navigator.onLine){syncSetStatus('offline','Sem ligação. As alterações permanecem cifradas neste dispositivo.');return;}
+  if(!cfg?.enabled){syncSetStatus('not-configured','Sincronização automática ainda não está ativa.');return 'not-configured';}
+  if(!navigator.onLine){syncSetStatus('offline','Sem ligação. As alterações permanecem cifradas neste dispositivo.');return 'offline';}
   const token=await loadSyncToken();
-  if(!token){syncSetStatus('needs-token','Introduza o token GitHub deste dispositivo.');return;}
+  if(!token){syncSetStatus('needs-token','Introduza o token GitHub deste dispositivo.');return 'needs-token';}
 
   syncBusy=true;
   syncSetStatus('syncing',reason==='manual'?'Sincronização manual em curso...':'A sincronizar alterações cifradas...');
@@ -498,14 +549,16 @@ async function syncNow(reason='manual') {
     if(!remote){
       await pushLocalEncryptedVault(token,cfg,null,1);
       syncRemoteCandidate=null;
-      syncSetStatus('synced','Cofre cifrado exportado para o repositório privado.');
-      return;
+      clearSyncRetry();
+      syncSetStatus('synced','Cofre cifrado exportado e confirmado no repositório privado.');
+      return 'synced';
     }
 
     if(!vaultMetaMatches(localMeta,remote.normalized.meta)){
       syncRemoteCandidate=remote;
+      clearSyncRetry();
       syncSetStatus('vault-mismatch','Este dispositivo tem um cofre diferente do remoto. Use a união segura para preservar os dados dos dois lados e passar ambos para o mesmo cofre.');
-      return;
+      return 'vault-mismatch';
     }
 
     const remoteState=await decryptRemoteState(remote);
@@ -521,8 +574,9 @@ async function syncNow(reason='manual') {
         await saveState();
       } finally { syncSuppressAuto=false; }
       await saveSyncDeviceMeta({lastRemoteSha:remote.sha,lastRevision:remote.revision,lastSyncedAt:new Date().toISOString()});
+      clearSyncRetry();
       syncSetStatus('conflict',`${merged.conflicts.length} conflito(s) preservado(s). Nenhuma versão foi apagada silenciosamente.`);
-      return;
+      return 'conflict';
     }
 
     if(localDigest!==mergedDigest){
@@ -539,8 +593,9 @@ async function syncNow(reason='manual') {
         await pushLocalEncryptedVault(token,cfg,remote,remote.revision+1);
       } catch(err){
         if(err?.message==='SYNC_RACE'){
+          clearSyncRetry();
           syncSetStatus('conflict','O outro dispositivo alterou o cofre ao mesmo tempo. A aplicação não sobrescreveu os dados; volte a sincronizar.');
-          return;
+          return 'conflict';
         }
         throw err;
       }
@@ -549,14 +604,24 @@ async function syncNow(reason='manual') {
     }
 
     syncRemoteCandidate=null;
+    clearSyncRetry();
     syncSetStatus('synced','Web e móvel estão alinhados com o cofre cifrado remoto.');
+    return 'synced';
   }catch(err){
     if(err?.message==='REMOTE_VAULT_MISMATCH'){
-      syncSetStatus('vault-mismatch','O cofre remoto utiliza outra chave. Adote o cofre remoto ou reveja o PIN.');
+      clearSyncRetry();
+      syncSetStatus('vault-mismatch','O cofre remoto utiliza outra chave. Use a união segura para preservar os dados dos dois dispositivos.');
+      return 'vault-mismatch';
     }else if(err?.message==='SYNC_RACE'){
+      clearSyncRetry();
       syncSetStatus('conflict','Conflito de versão detetado; os dados locais foram preservados.');
+      return 'conflict';
     }else{
-      syncSetStatus('error',safeUserError(err,'Falha de sincronização. Os dados locais foram preservados.'));
+      const message=syncUserError(err);
+      const retryDelay=scheduleSyncRetry(err);
+      const retryText=retryDelay?` Nova tentativa automática em ${Math.ceil(retryDelay/1000)} s.`:'';
+      syncSetStatus('error',message+retryText);
+      return 'error';
     }
   }finally{
     syncBusy=false;
@@ -612,7 +677,7 @@ async function configureSyncFromUi() {
   try{await saveState();}finally{syncSuppressAuto=false;}
   if($('#syncToken')) $('#syncToken').value='';
   syncSetStatus('syncing','Credencial validada. A sincronização automática está a iniciar...');
-  await syncNow('setup');
+  return await syncNow('setup');
 }
 
 async function disableSync() {
@@ -683,6 +748,46 @@ function setSyncActionMessage(message,type='') {
   msg.className=`form-message${type?` ${type}`:''}`;
 }
 
+function showSyncSetupOutcome(state,msg) {
+  if(!msg) return;
+  if(state==='synced'){
+    msg.textContent='Sincronização confirmada: o cofre remoto foi gravado e relido com sucesso. A partir de agora funciona automaticamente.';
+    msg.className='form-message success';
+  }else if(state==='vault-mismatch'){
+    msg.textContent='Cofre remoto encontrado. Para não perder dados, use “Unir web e telemóvel sem perder dados”.';
+    msg.className='form-message error';
+  }else if(state==='conflict'){
+    msg.textContent='Foi detetado um conflito. Os dados foram preservados; reveja a sincronização antes de continuar.';
+    msg.className='form-message error';
+  }else{
+    msg.textContent=syncLastStatus.message||'A sincronização ainda não foi confirmada.';
+    msg.className='form-message error';
+  }
+}
+
+function scheduleCredentialAutoSetup() {
+  clearTimeout(syncCredentialTimer);
+  const input=$('#syncToken');
+  const value=String(input?.value||'').trim();
+  if(value.length<20) return;
+  syncCredentialTimer=setTimeout(async()=>{
+    if(syncBusy) return;
+    const btn=$('#syncConfigureBtn');
+    const msg=$('#syncMessage');
+    try{
+      if(btn){btn.disabled=true;btn.textContent='A validar…';}
+      if(msg){msg.textContent='Credencial detetada. A validar e a ligar a sincronização automaticamente…';msg.className='form-message';}
+      const state=await configureSyncFromUi();
+      showSyncSetupOutcome(state,msg);
+    }catch(err){
+      if(msg){msg.textContent=syncUserError(err,'Não foi possível validar a credencial. Os dados locais foram preservados.');msg.className='form-message error';}
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent='Ligar sincronização automática';}
+      renderSyncUi();
+    }
+  },900);
+}
+
 async function manualSyncFromUi() {
   const btn=$('#syncNowBtn');
   const tokenInput=$('#syncToken');
@@ -746,12 +851,13 @@ function wireSyncControls() {
     if(msg){msg.textContent='';msg.className='form-message';}
     try{
       $('#syncConfigureBtn').disabled=true;
-      await configureSyncFromUi();
-      if(msg){msg.textContent='Sincronização configurada neste dispositivo.';msg.className='form-message success';}
+      const state=await configureSyncFromUi();
+      showSyncSetupOutcome(state,msg);
     }catch(err){
       if(msg){msg.textContent=syncUserError(err,'Não foi possível configurar a sincronização. Os dados locais foram preservados.');msg.className='form-message error';}
     }finally{$('#syncConfigureBtn').disabled=false;renderSyncUi();}
   });
+  $('#syncToken')?.addEventListener('input',scheduleCredentialAutoSetup);
   $('#syncNowBtn')?.addEventListener('click',manualSyncFromUi);
   $('#syncResolveBtn')?.addEventListener('click',async()=>{
     const btn=$('#syncResolveBtn');
@@ -818,6 +924,7 @@ function startSyncLifecycle() {
     syncLifecycleInstalled=true;
     window.addEventListener('online',()=>syncNow('online'));
     window.addEventListener('focus',()=>syncNow('focus'));
+    window.addEventListener('pageshow',()=>syncNow('pageshow'));
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible') syncNow('visible');});
   }
   clearInterval(syncIntervalTimer);

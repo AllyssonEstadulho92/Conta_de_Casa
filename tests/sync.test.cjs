@@ -180,3 +180,19 @@ assert.match(healthIndex, /id="syncResolveBox"/);
 assert.match(healthIndex, /Unir dados e alinhar este dispositivo/);
 
 console.log('Safe remote union and adoption tests: OK');
+
+
+assert.match(source, /const SYNC_RETRY_DELAYS_MS = \[5000,15000,60000,180000,300000\]/);
+assert.match(source, /function confirmRemoteWrite\(token,cfg,expectedSha,expectedRevision\)/);
+assert.match(source, /await confirmRemoteWrite\(token,cfg,sha,nextRevision\)/);
+assert.match(source, /Cofre cifrado exportado e confirmado no repositório privado/);
+assert.match(source, /const message=syncUserError\(err\)/);
+assert.doesNotMatch(source, /syncSetStatus\('error',safeUserError\(err,'Falha de sincronização/);
+assert.match(source, /return await syncNow\('setup'\)/);
+assert.match(source, /function showSyncSetupOutcome\(state,msg\)/);
+assert.match(source, /function scheduleCredentialAutoSetup\(\)/);
+assert.match(source, /addEventListener\('input',scheduleCredentialAutoSetup\)/);
+assert.match(source, /window\.addEventListener\('pageshow'/);
+assert.match(source, /function scheduleSyncRetry\(err\)/);
+
+console.log('Confirmed automatic synchronization tests: OK');
