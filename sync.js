@@ -525,11 +525,21 @@ async function renderSyncUi() {
   const header=$('#syncHeaderStatus');
   if(header){
     const state=syncLastStatus.state;
-    header.className=`sync-header-status ${syncStatusClass(state)}`;
-    header.title=`${syncStatusLabel(state)} — ${syncLastStatus.message}`;
+    const localOnly=state==='not-configured'||state==='needs-token';
+    const headerClass=localOnly?'paid':syncStatusClass(state);
+    header.className=`sync-header-status ${headerClass}`;
+    header.title=localOnly
+      ? `Cofre local ativo — ${syncLastStatus.message}`
+      : `${syncStatusLabel(state)} — ${syncLastStatus.message}`;
     header.setAttribute('aria-label',header.title);
     const text=header.querySelector('.sync-header-text');
-    if(text) text.textContent=state==='synced'?'Sync':state==='syncing'?'...':state==='offline'?'Offline':state==='conflict'?'Conflito':state==='error'?'Erro':'Local';
+    if(text) text.textContent=
+      state==='synced'?'Sync':
+      state==='syncing'?'...':
+      state==='offline'?'Offline':
+      state==='conflict'?'Conflito':
+      state==='vault-mismatch'?'Rever':
+      state==='error'?'Erro':'Local';
   }
   if($('#syncStatusText')) $('#syncStatusText').textContent=syncLastStatus.message;
   if($('#syncLastAt')) $('#syncLastAt').textContent=meta?.lastSyncedAt?fmtDateTime(meta.lastSyncedAt):'Ainda não sincronizado';
