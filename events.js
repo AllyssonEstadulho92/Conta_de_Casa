@@ -16,6 +16,19 @@ function installPinRecoveryUi() {
     const actions = document.createElement('div');
     actions.className = 'pin-recovery-actions';
     setHTML(actions, `<button id="togglePinVisibility" class="link-btn pin-help-link" type="button">Mostrar PIN</button>
+      <button id="changePinLockedToggle" class="btn secondary full pin-change-entry" type="button">Alterar PIN</button>
+      <div id="changePinLockedBox" class="device-transfer-box pin-recovery-box" hidden>
+        <strong>Alterar PIN deste cofre</strong>
+        <p>Para preservar as faturas e restantes dados, confirme primeiro o PIN atual. O cofre será recifrado com o novo PIN.</p>
+        <form id="changePinLockedForm" class="form-grid">
+          <label>PIN atual<input id="lockedCurrentPin" name="currentPin" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" required></label>
+          <label>Novo PIN<input id="lockedNewPin" name="newPin" type="password" minlength="8" autocomplete="new-password" autocapitalize="off" spellcheck="false" required></label>
+          <label>Confirmar novo PIN<input id="lockedConfirmPin" name="confirmPin" type="password" minlength="8" autocomplete="new-password" autocapitalize="off" spellcheck="false" required></label>
+          <button id="changePinLockedBtn" class="btn primary full" type="submit">Guardar novo PIN</button>
+          <p id="changePinLockedMessage" class="form-message" role="status"></p>
+        </form>
+        <small>Se não souber o PIN atual, ele não pode ser substituído sem perder o acesso criptográfico ao cofre. Nesse caso, use um backup cifrado válido ou recrie apenas o cofre local.</small>
+      </div>
       <button id="pinHelpToggle" class="link-btn pin-help-link" type="button">Problemas com o PIN?</button>
       <div id="pinRecoveryBox" class="device-transfer-box pin-recovery-box" hidden>
         <strong>Recuperar acesso neste dispositivo</strong>
@@ -119,6 +132,60 @@ async function initVaultUi() {
       const show=input.type==='password';
       input.type=show?'text':'password';
       togglePin.textContent=show?'Ocultar PIN':'Mostrar PIN';
+    });
+  }
+  const changePinLockedToggle=$('#changePinLockedToggle');
+  if(changePinLockedToggle){
+    changePinLockedToggle.addEventListener('click',()=>{
+      const box=$('#changePinLockedBox');
+      box.hidden=!box.hidden;
+      changePinLockedToggle.textContent=box.hidden?'Alterar PIN':'Fechar alteração de PIN';
+      if(!box.hidden) $('#lockedCurrentPin')?.focus();
+    });
+  }
+  const changePinLockedForm=$('#changePinLockedForm');
+  if(changePinLockedForm){
+    changePinLockedForm.addEventListener('submit',async e=>{
+      e.preventDefault();
+      const current=$('#lockedCurrentPin').value;
+      const next=$('#lockedNewPin').value;
+      const confirmPin=$('#lockedConfirmPin').value;
+      const msg=$('#changePinLockedMessage');
+      msg.className='form-message';
+      if(next.length<8){
+        msg.textContent='O novo PIN deve ter pelo menos 8 caracteres.';
+        msg.classList.add('error');
+        return;
+      }
+      if(next!==confirmPin){
+        msg.textContent='A confirmação do novo PIN não coincide.';
+        msg.classList.add('error');
+        return;
+      }
+      try{
+        $('#changePinLockedBtn').disabled=true;
+        msg.textContent='A validar o PIN atual e a recifrar o cofre...';
+        await changeVaultPassphrase(current,next);
+        ['#unlockPassphrase','#lockedCurrentPin','#lockedNewPin','#lockedConfirmPin'].forEach(sel=>{const el=$(sel);if(el)el.value='';});
+        msg.textContent='PIN alterado com sucesso. A abrir a aplicação...';
+        msg.classList.add('success');
+        await enterApp();
+        toast('PIN alterado com sucesso.');
+      }catch(err){
+        if(err?.message==='Palavra-passe/PIN incorreto.'){
+          msg.textContent='O PIN atual não corresponde a este cofre. Se este dispositivo tem outro cofre, importe o backup cifrado correto ou use “Problemas com o PIN?”.';
+        }else if(err?.message==='O novo PIN deve ser diferente do atual.'){
+          msg.textContent=err.message;
+        }else if(err?.message==='O cofre local não passou na validação de integridade.'){
+          msg.textContent='O cofre local parece estar danificado. Preserve os dados e restaure um backup cifrado válido.';
+        }else{
+          msg.textContent='Não foi possível alterar o PIN.';
+        }
+        msg.classList.add('error');
+      }finally{
+        const btn=$('#changePinLockedBtn');
+        if(btn) btn.disabled=false;
+      }
     });
   }
   const pinHelp=$('#pinHelpToggle');
