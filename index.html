@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f9fc" />
+  <meta name="description" content="Conta de Casa — gestão privada de faturas e despesas domésticas." />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>Conta de Casa</title>
+</head>
+<body>
+  <div id="vaultScreen" class="vault-screen">
+    <div class="vault-card">
+      <div class="brand brand-large"><span class="brand-mark">⌂</span><div><strong>Conta de Casa</strong><small>O seu controlo financeiro privado</small></div></div>
+      <div id="vaultCreate">
+        <h1>Criar cofre local</h1>
+        <p>Defina uma palavra-passe ou PIN com pelo menos 6 caracteres. Os dados serão cifrados no dispositivo.</p>
+        <label>Palavra-passe/PIN<input id="newPassphrase" type="password" minlength="6" autocomplete="new-password" /></label>
+        <label>Confirmar<input id="confirmPassphrase" type="password" minlength="6" autocomplete="new-password" /></label>
+        <button id="createVaultBtn" class="btn primary full">Criar cofre e entrar</button>
+      </div>
+      <div id="vaultUnlock" hidden>
+        <h1>Desbloquear</h1>
+        <p>Introduza a palavra-passe/PIN do seu cofre local.</p>
+        <label>Palavra-passe/PIN<input id="unlockPassphrase" type="password" autocomplete="current-password" /></label>
+        <button id="unlockVaultBtn" class="btn primary full">Entrar</button>
+      </div>
+      <p id="vaultMessage" class="form-message" role="status"></p>
+      <small class="privacy-note">Sem conta online, sem publicidade e sem telemetria financeira.</small>
+    </div>
+  </div>
+
+  <div id="app" class="app-shell" hidden>
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">⌂</span><div><strong>Conta de Casa</strong><small>Finanças pessoais</small></div></div>
+      <nav id="desktopNav" class="nav-list" aria-label="Navegação principal"></nav>
+      <div class="sidebar-footer">
+        <button id="privacyToggle" class="icon-text-btn" type="button">◉ <span>Ocultar valores</span></button>
+        <button id="lockBtn" class="icon-text-btn" type="button">⌁ <span>Bloquear</span></button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Conta de Casa</p>
+          <h1 id="pageTitle">Início</h1>
+        </div>
+        <div class="topbar-actions">
+          <label class="month-picker" aria-label="Mês em análise"><input id="monthPicker" type="month" /></label>
+          <button id="themeToggle" class="icon-btn" type="button" aria-label="Alternar tema">☼</button>
+          <button id="notificationsBtn" class="icon-btn" type="button" aria-label="Alertas">♢<span id="alertBadge" class="badge-dot" hidden></span></button>
+        </div>
+      </header>
+
+      <section id="page-dashboard" class="page active">
+        <div id="alertsPanel" class="alerts-panel"></div>
+        <div id="kpiGrid" class="kpi-grid"></div>
+        <div class="dashboard-grid">
+          <article class="panel span-2">
+            <div class="panel-head"><div><h2>Próximos vencimentos</h2><p>Contas que exigem atenção.</p></div><button class="link-btn" data-go="bills">Ver faturas</button></div>
+            <div id="upcomingBills" class="stack-list"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><h2>Despesas por categoria</h2><p>Mês selecionado</p></div></div>
+            <div id="categoryBars" class="bar-list"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><h2>Orçamento</h2><p>Quanto ainda está disponível.</p></div></div>
+            <div id="budgetPanel"></div>
+          </article>
+          <article class="panel span-2">
+            <div class="panel-head"><div><h2>Atividade recente</h2><p>Registo local das últimas ações.</p></div></div>
+            <div id="activityList" class="stack-list compact"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="page-bills" class="page">
+        <div class="section-toolbar">
+          <div class="search-wrap"><input id="billSearch" type="search" placeholder="Pesquisar faturas..." /></div>
+          <select id="billStatusFilter" aria-label="Filtrar estado">
+            <option value="all">Todos os estados</option><option value="pending">Por pagar</option><option value="partial">Pago parcialmente</option><option value="paid">Pago</option><option value="overdue">Em atraso</option><option value="cancelled">Cancelado</option>
+          </select>
+          <button id="newBillBtn" class="btn primary">+ Nova fatura</button>
+        </div>
+        <div id="billSummary" class="mini-summary"></div>
+        <div id="billsList" class="cards-list"></div>
+      </section>
+
+      <section id="page-calendar" class="page">
+        <article class="panel"><div class="panel-head"><div><h2>Calendário financeiro</h2><p>Vencimentos e pagamentos do mês.</p></div></div><div id="calendarGrid" class="calendar-grid"></div><div id="calendarAgenda" class="stack-list"></div></article>
+      </section>
+
+      <section id="page-planning" class="page">
+        <div class="two-col">
+          <article class="panel">
+            <div class="panel-head"><div><h2>Planeamento mensal</h2><p>Defina saldo inicial e orçamento do período.</p></div></div>
+            <form id="monthPlanForm" class="form-grid">
+              <label>Saldo inicial<input id="openingBalance" inputmode="decimal" placeholder="0,00" /></label>
+              <label>Orçamento do mês<input id="monthlyBudget" inputmode="decimal" placeholder="0,00" /></label>
+              <button class="btn primary" type="submit">Guardar planeamento</button>
+            </form>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><h2>Rendimentos</h2><p>Salários, reembolsos e outras entradas.</p></div><button id="newIncomeBtn" class="btn secondary">+ Rendimento</button></div>
+            <div id="incomeList" class="stack-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="page-market" class="page">
+        <div class="section-toolbar"><div><h2>Mercado</h2><p class="muted">Lista → comprado, com preço previsto e real.</p></div><button id="newMarketBtn" class="btn primary">+ Adicionar item</button></div>
+        <div id="marketSummary" class="mini-summary"></div>
+        <div id="marketList" class="market-list"></div>
+      </section>
+
+      <section id="page-reports" class="page">
+        <div id="reportCards" class="kpi-grid"></div>
+        <div class="two-col">
+          <article class="panel"><div class="panel-head"><div><h2>Por categoria</h2><p>Distribuição do mês.</p></div></div><div id="reportCategoryBars" class="bar-list"></div></article>
+          <article class="panel"><div class="panel-head"><div><h2>Últimos 6 meses</h2><p>Pagamentos e compras efetivas.</p></div></div><div id="monthlyTrend" class="trend-chart"></div></article>
+        </div>
+      </section>
+
+      <section id="page-goals" class="page">
+        <div class="section-toolbar"><div><h2>Objetivos</h2><p class="muted">Metas de poupança acompanhadas separadamente.</p></div><button id="newGoalBtn" class="btn primary">+ Novo objetivo</button></div>
+        <div id="goalList" class="goal-grid"></div>
+      </section>
+
+      <section id="page-security" class="page">
+        <div class="two-col">
+          <article class="panel">
+            <h2>Privacidade local</h2>
+            <p>O conteúdo financeiro é cifrado com AES-GCM. A chave é derivada da sua palavra-passe e só permanece em memória enquanto a aplicação está desbloqueada.</p>
+            <div class="security-status"><span class="status-good">✓ Cofre ativo</span><span>Dados locais cifrados</span><span>Sem telemetria financeira</span></div>
+            <button id="securityLockBtn" class="btn secondary">Bloquear agora</button>
+          </article>
+          <article class="panel">
+            <h2>Backup cifrado</h2>
+            <p>Exporte um ficheiro que contém apenas dados já cifrados. Guarde-o num local seguro.</p>
+            <div class="button-row"><button id="exportBackupBtn" class="btn primary">Exportar backup</button><label class="btn secondary file-btn">Restaurar backup<input id="importBackupInput" type="file" accept="application/json,.json" hidden /></label></div>
+            <p id="backupMessage" class="form-message" role="status"></p>
+          </article>
+        </div>
+      </section>
+
+      <section id="page-settings" class="page">
+        <article class="panel narrow">
+          <h2>Preferências</h2>
+          <form id="settingsForm" class="form-grid">
+            <label>Nome opcional<input id="profileName" autocomplete="name" /></label>
+            <label>Moeda<select id="currencySelect"><option value="EUR">EUR — Euro</option></select></label>
+            <label>Modo visual<select id="themeSelect"><option value="light">Claro</option><option value="dark">Escuro</option><option value="system">Sistema</option></select></label>
+            <button class="btn primary" type="submit">Guardar preferências</button>
+          </form>
+          <hr />
+          <button id="resetDataBtn" class="btn danger">Apagar todos os dados locais</button>
+        </article>
+      </section>
+    </main>
+
+    <nav id="mobileNav" class="mobile-nav" aria-label="Navegação móvel"></nav>
+    <button id="quickAddBtn" class="fab" type="button" aria-label="Adicionar">+</button>
+  </div>
+
+  <dialog id="formDialog" class="dialog">
+    <form method="dialog" class="dialog-shell" id="dialogShell">
+      <div class="dialog-head"><div><p class="eyebrow">Conta de Casa</p><h2 id="dialogTitle">Novo registo</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">×</button></div>
+      <div id="dialogBody"></div>
+    </form>
+  </dialog>
+
+  <dialog id="quickDialog" class="dialog">
+    <form method="dialog" class="dialog-shell small">
+      <div class="dialog-head"><h2>Adicionar</h2><button class="icon-btn" value="cancel">×</button></div>
+      <div class="quick-grid">
+        <button type="button" data-quick="bill">Fatura</button>
+        <button type="button" data-quick="income">Rendimento</button>
+        <button type="button" data-quick="market">Mercado</button>
+        <button type="button" data-quick="goal">Objetivo</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js" defer></script>
+</body>
+</html>
