@@ -891,3 +891,157 @@ table{
     place-items:center;
   }
 }
+
+
+/* ===== Mobile enclosure polish v4 ===== */
+@media(max-width:480px){
+  .main{
+    inline-size:100%;
+    max-inline-size:100vw;
+    padding-inline:10px;
+  }
+
+  .topbar{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    column-gap:8px;
+  }
+  .topbar>div:first-child{
+    min-width:0;
+    max-width:none;
+  }
+  .topbar-actions{
+    min-width:0;
+    max-width:100%;
+    justify-content:end;
+  }
+  .topbar-actions .icon-btn{
+    display:none;
+  }
+  .month-picker input{
+    width:132px;
+    max-width:38vw;
+    white-space:normal;
+    line-height:1.05;
+    text-align:center;
+  }
+
+  .kpi-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    width:100%;
+  }
+  .kpi{
+    width:100%;
+    min-width:0;
+  }
+
+  .panel-head{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    width:100%;
+  }
+  .panel-head>div{
+    min-width:0;
+    width:100%;
+  }
+  .panel-head .link-btn{
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    text-align:left;
+    justify-self:stretch;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    padding:3px 0 0;
+  }
+
+  .panel,
+  .bill-card,
+  .goal-card,
+  .list-row,
+  .empty{
+    max-width:100%;
+  }
+
+  .empty{
+    overflow-wrap:anywhere;
+  }
+
+  .mobile-nav{
+    padding-inline:2px;
+  }
+}
+
+@media(max-width:390px){
+  .main{
+    padding-inline:8px;
+  }
+  .topbar{
+    grid-template-columns:minmax(0,1fr) minmax(108px,124px);
+  }
+  .month-picker input{
+    width:100%;
+    max-width:124px;
+    font-size:.68rem;
+  }
+  .kpi{
+    padding:9px;
+  }
+  .kpi .label{
+    font-size:.66rem;
+  }
+  .kpi strong{
+    font-size:.92rem;
+  }
+  .kpi small{
+    font-size:.6rem;
+  }
+}
+
+@media(max-width:359px){
+  .topbar{
+    grid-template-columns:minmax(0,1fr) minmax(100px,116px);
+  }
+  .month-picker input{
+    max-width:116px;
+  }
+  .kpi-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .panel-head .link-btn{
+    font-size:.7rem;
+  }
+}
+
+/* On wide web layouts, keep content centered and fully enclosed. */
+@media(min-width:1101px){
+  .main{
+    overflow-x:hidden;
+  }
+  .topbar,
+  .page{
+    width:min(100%,var(--content-max));
+    max-width:var(--content-max);
+    margin-inline:auto;
+  }
+  .kpi-grid,
+  .dashboard-grid,
+  .cards-list,
+  .goal-grid,
+  .two-col{
+    width:100%;
+    max-width:100%;
+  }
+}
+
+/* Last-resort containment for any user-generated text or long values. */
+.page *{
+  min-inline-size:0;
+}
+.page button,
+.page input,
+.page select,
+.page textarea{
+  max-inline-size:100%;
+}
