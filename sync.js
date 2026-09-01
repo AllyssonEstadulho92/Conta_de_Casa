@@ -56,6 +56,8 @@ function syncUserError(err, fallback='Não foi possível sincronizar. Os dados l
     'Confirmação remota falhou: conteúdo inesperado.',
     'Confirmação remota falhou: identidade do cofre diferente.'
   ];
+  if(message.startsWith('Token guardado, mas sem acesso a ')) return message;
+  if(message.startsWith('Token guardado, mas sem permissão suficiente em ')) return message;
   return allowed.includes(message)?message:fallback;
 }
 
@@ -223,8 +225,8 @@ async function verifyPrivateSyncRepo(token,cfg) {
     method:'GET',headers:githubHeaders(token),cache:'no-store',referrerPolicy:'no-referrer'
   });
   if (res.status===401) throw new Error('Token GitHub inválido.');
-  if (res.status===404) throw new Error('Repositório privado não encontrado ou sem acesso.');
-  if (res.status===403) throw new Error('O token não tem permissão para este repositório.');
+  if (res.status===404) throw new Error(`Token guardado, mas sem acesso a ${owner}/${repo}. No GitHub, edite/regere o fine-grained token com Resource owner ${owner}, acesso apenas ao repositório ${repo} e Contents: Read and write.`);
+  if (res.status===403) throw new Error(`Token guardado, mas sem permissão suficiente em ${owner}/${repo}. Defina Repository permissions → Contents como Read and write.`);
   if (!res.ok) throw new Error('Não foi possível validar o repositório de sincronização.');
   const data=await res.json();
   if (data.private !== true) throw new Error('A sincronização é recusada: o repositório tem de ser privado.');

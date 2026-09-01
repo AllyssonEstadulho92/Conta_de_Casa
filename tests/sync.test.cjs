@@ -209,3 +209,12 @@ assert.match(source, /addEventListener\('paste'/);
 assert.match(source, /addEventListener\('blur',scheduleCredentialAutoSetup\)/);
 
 console.log('Token persistence before validation tests: OK');
+
+
+assert.match(source, /Token guardado, mas sem acesso a/);
+assert.match(source, /Resource owner/);
+assert.match(source, /acesso apenas ao repositório/);
+assert.match(source, /Contents: Read and write/);
+assert.match(source, /Token guardado, mas sem permissão suficiente em/);
+
+console.log('Fine-grained token scope diagnostic tests: OK');
