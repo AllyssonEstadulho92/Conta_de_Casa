@@ -58,7 +58,8 @@ for (const file of appFiles) {
   const content = fs.readFileSync(file, 'utf8');
   const externalUrls = content.match(/https?:\/\/[^\s"'\`<>)]+/gi) || [];
   for (const url of externalUrls) {
-    assert.equal(new URL(url).origin, 'https://api.github.com', `${file} may only reference the approved GitHub API origin`);
+    const normalizedUrl = url.replace(/[;,]+$/g, '');
+    assert.equal(new URL(normalizedUrl).origin, 'https://api.github.com', `${file} may only reference the approved GitHub API origin`);
   }
   assert.doesNotMatch(content, /\b(sendBeacon|XMLHttpRequest|gtag|analytics)\b|cdn\.jsdelivr|cdnjs|unpkg/i, `${file} must not include telemetry or CDN hooks`);
 }
