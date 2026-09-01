@@ -30,11 +30,16 @@
         <button id="unlockVaultBtn" class="btn primary full">Entrar</button>
       </div>
 
-      <div class="device-transfer-box">
-        <strong>Usar neste dispositivo os dados do computador</strong>
-        <p>Pode importar um backup cifrado manualmente. Depois de entrar, também pode ativar a sincronização automática cifrada em Segurança.</p>
-        <label class="btn secondary full file-btn">Importar cofre cifrado<input id="vaultImportInput" type="file" accept="application/json,.json" hidden /></label>
-        <small>O ficheiro continua cifrado. Depois do restauro, use a palavra-passe/PIN do cofre de origem.</small>
+      <div class="vault-transfer">
+        <button id="vaultTransferToggle" class="vault-disclosure" type="button" aria-expanded="false" aria-controls="vaultTransferPanel">
+          <span><strong>Usar dados de outro dispositivo</strong><small>Importar um cofre cifrado</small></span>
+          <span class="vault-disclosure-icon" aria-hidden="true">⌄</span>
+        </button>
+        <div id="vaultTransferPanel" class="device-transfer-box" hidden>
+          <p>Importe um backup cifrado do computador. Depois de entrar, pode ativar a sincronização automática cifrada em Segurança.</p>
+          <label class="btn secondary full file-btn">Importar cofre cifrado<input id="vaultImportInput" type="file" accept="application/json,.json" hidden /></label>
+          <small>O ficheiro continua cifrado. Depois do restauro, use a palavra-passe/PIN do cofre de origem.</small>
+        </div>
       </div>
 
       <p id="vaultMessage" class="form-message" role="status"></p>
