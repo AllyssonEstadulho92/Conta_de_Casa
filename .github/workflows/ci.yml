@@ -28,6 +28,7 @@ jobs:
           node --check render.js
           node --check forms.js
           node --check events.js
+          node --check sync.js
           node --check sw.js
 
       - name: Finance tests
@@ -41,6 +42,9 @@ jobs:
 
       - name: Responsive layout tests
         run: node tests/responsive.test.cjs
+
+      - name: Sync safety tests
+        run: node tests/sync.test.cjs
 
       - name: Validate manifest
         run: |
