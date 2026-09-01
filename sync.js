@@ -16,6 +16,8 @@ let syncLifecycleInstalled = false;
 let syncControlsWired = false;
 let syncLastStatus = { state:'not-configured', message:'Sincronização não configurada.', at:null };
 let syncRemoteCandidate = null;
+let syncPending = false;
+let syncRetryTimer = null;
 
 function syncConfig() {
   if (!appState) return null;
@@ -356,7 +358,8 @@ async function pushLocalEncryptedVault(token,cfg,remote=null,revision=null) {
 }
 
 async function syncNow(reason='manual') {
-  if(syncBusy) return;
+  if(syncBusy){syncPending=true;return;}
+  syncPending=false;
   if(!vaultKey||!appState) return;
   const cfg=syncConfig();
   if(!cfg?.enabled){syncSetStatus('not-configured','Sincronização automática ainda não está ativa.');return;}
@@ -437,14 +440,20 @@ async function syncNow(reason='manual') {
   }finally{
     syncBusy=false;
     renderSyncUi();
+    if(syncPending && appState?.settings?.sync?.enabled && navigator.onLine){
+      clearTimeout(syncRetryTimer);
+      syncRetryTimer=setTimeout(()=>syncNow('pending-change'),800);
+    }
   }
 }
 
 function queueRemoteSync() {
-  if(syncSuppressAuto||syncBusy||!appState||!vaultKey) return;
+  if(syncSuppressAuto||!appState||!vaultKey) return;
   const cfg=syncConfig();
   if(!cfg?.enabled) return;
+  syncPending=true;
   clearTimeout(syncPushTimer);
+  if(syncBusy) return;
   syncPushTimer=setTimeout(()=>syncNow('local-change'),SYNC_PUSH_DELAY_MS);
 }
 
@@ -509,6 +518,15 @@ async function renderSyncUi() {
     badge.className=`status-chip ${syncStatusClass(syncLastStatus.state)}`;
     badge.textContent=syncStatusLabel(syncLastStatus.state);
   }
+  const header=$('#syncHeaderStatus');
+  if(header){
+    const state=syncLastStatus.state;
+    header.className=`sync-header-status ${syncStatusClass(state)}`;
+    header.title=`${syncStatusLabel(state)} — ${syncLastStatus.message}`;
+    header.setAttribute('aria-label',header.title);
+    const text=header.querySelector('.sync-header-text');
+    if(text) text.textContent=state==='synced'?'Sync':state==='syncing'?'...':state==='offline'?'Offline':state==='conflict'?'Conflito':state==='error'?'Erro':'Local';
+  }
   if($('#syncStatusText')) $('#syncStatusText').textContent=syncLastStatus.message;
   if($('#syncLastAt')) $('#syncLastAt').textContent=meta?.lastSyncedAt?fmtDateTime(meta.lastSyncedAt):'Ainda não sincronizado';
   if($('#syncOwner')&&!$('#syncOwner').matches(':focus')) $('#syncOwner').value=cfg.owner||SYNC_DEFAULT_OWNER;
@@ -522,7 +540,8 @@ async function renderSyncUi() {
 function wireSyncControls() {
   if(syncControlsWired) return;
   syncControlsWired=true;
-  $('#syncConfigureBtn')?.addEventListener('click',async()=>{
+  $('#syncHeaderStatus')?.addEventListener('click',()=>showPage('security'));
+    $('#syncConfigureBtn')?.addEventListener('click',async()=>{
     const msg=$('#syncMessage');
     if(msg){msg.textContent='';msg.className='form-message';}
     try{
@@ -550,6 +569,7 @@ function startSyncLifecycle() {
   if(!syncLifecycleInstalled){
     syncLifecycleInstalled=true;
     window.addEventListener('online',()=>syncNow('online'));
+    window.addEventListener('focus',()=>syncNow('focus'));
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible') syncNow('visible');});
   }
   clearInterval(syncIntervalTimer);
