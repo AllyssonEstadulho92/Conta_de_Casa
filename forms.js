@@ -20,10 +20,47 @@ function closeDialog() {
   lastDialogOpener = null;
   if (target?.isConnected) requestAnimationFrame(() => target.focus({preventScroll:true}));
 }
+const BILL_CATEGORIES = Object.freeze([
+  'Casa',
+  'Renda / Condomínio',
+  'Energia',
+  'Água',
+  'Gás',
+  'Internet / Telecomunicações',
+  'Telemóvel',
+  'Alimentação / Supermercado',
+  'Saúde',
+  'Farmácia',
+  'Educação',
+  'Transporte',
+  'Combustível',
+  'Automóvel',
+  'Seguros',
+  'Subscrições',
+  'Ginásio / Desporto',
+  'Impostos / Taxas',
+  'Bancos / Crédito',
+  'Lazer',
+  'Animais',
+  'Manutenção / Reparações',
+  'Serviços',
+  'Outros'
+]);
+
+function billCategoryOptions(selected='Casa') {
+  const current=cleanString(selected||'Casa',80)||'Casa';
+  const existing=[...new Set((appState?.bills||[]).map(b=>cleanString(b?.category,80)).filter(Boolean))];
+  const categories=[...BILL_CATEGORIES];
+  for(const name of existing){
+    if(!categories.includes(name)) categories.splice(categories.length-1,0,name);
+  }
+  if(!categories.includes(current)) categories.splice(categories.length-1,0,current);
+  return categories.map(name=>`<option value="${attr(name)}"${name===current?' selected':''}>${esc(name)}</option>`).join('');
+}
 function billFormHtml(bill=null){
   const due=bill?new Date(bill.dueAt):new Date(); if(!bill) due.setDate(due.getDate()+7);
   const date=due.toISOString().slice(0,10); const time=`${String(due.getHours()).padStart(2,'0')}:${String(due.getMinutes()).padStart(2,'0')}`;
-  return `<form id="billForm" class="form-grid two"><input type="hidden" name="id" value="${attr(bill?.id||'')}"><label>Descrição<input name="title" required maxlength="80" value="${attr(bill?.title||'')}" autocomplete="off" spellcheck="false"></label><label>Fornecedor/entidade<input name="provider" maxlength="80" value="${attr(bill?.provider||'')}" autocomplete="off" spellcheck="false"></label><label>Categoria<input name="category" list="categoryList" required value="${attr(bill?.category||'Casa')}" autocomplete="off"><datalist id="categoryList"><option>Casa</option><option>Energia</option><option>Água</option><option>Internet</option><option>Saúde</option><option>Educação</option><option>Transporte</option><option>Seguros</option><option>Outros</option></datalist></label><label>Valor total<input name="amount" inputmode="decimal" required value="${bill?(bill.totalCents/100).toFixed(2).replace('.',','):''}" placeholder="0,00" autocomplete="off"></label><label>Vencimento<input name="dueDate" type="date" required value="${date}" autocomplete="off"></label><label>Hora limite<input name="dueTime" type="time" value="${time||'23:59'}" autocomplete="off"></label><label>Método<select name="method"><option>Débito automático</option><option>Transferência</option><option>Referência Multibanco</option><option>Cartão</option><option>Dinheiro</option><option>Outro</option></select></label><label>Recorrência<select name="recurrence"><option value="none">Sem recorrência</option><option value="weekly">Semanal</option><option value="monthly">Mensal</option><option value="quarterly">Trimestral</option><option value="semiannual">Semestral</option><option value="annual">Anual</option></select></label><label class="full-row">Referência<input name="reference" value="${attr(bill?.reference||'')}" autocomplete="off" spellcheck="false"></label><label class="full-row">Observações<textarea name="notes" autocomplete="off" spellcheck="false">${esc(bill?.notes||'')}</textarea></label><div class="button-row full-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button type="submit" class="btn primary">${bill?'Guardar alterações':'Criar fatura'}</button></div></form>`;
+  return `<form id="billForm" class="form-grid two"><input type="hidden" name="id" value="${attr(bill?.id||'')}"><label>Descrição<input name="title" required maxlength="80" value="${attr(bill?.title||'')}" autocomplete="off" spellcheck="false"></label><label>Fornecedor/entidade<input name="provider" maxlength="80" value="${attr(bill?.provider||'')}" autocomplete="off" spellcheck="false"></label><label>Categoria<select name="category" required>${billCategoryOptions(bill?.category||'Casa')}</select></label><label>Valor total<input name="amount" inputmode="decimal" required value="${bill?(bill.totalCents/100).toFixed(2).replace('.',','):''}" placeholder="0,00" autocomplete="off"></label><label>Vencimento<input name="dueDate" type="date" required value="${date}" autocomplete="off"></label><label>Hora limite<input name="dueTime" type="time" value="${time||'23:59'}" autocomplete="off"></label><label>Método<select name="method"><option>Débito automático</option><option>Transferência</option><option>Referência Multibanco</option><option>Cartão</option><option>Dinheiro</option><option>Outro</option></select></label><label>Recorrência<select name="recurrence"><option value="none">Sem recorrência</option><option value="weekly">Semanal</option><option value="monthly">Mensal</option><option value="quarterly">Trimestral</option><option value="semiannual">Semestral</option><option value="annual">Anual</option></select></label><label class="full-row">Referência<input name="reference" value="${attr(bill?.reference||'')}" autocomplete="off" spellcheck="false"></label><label class="full-row">Observações<textarea name="notes" autocomplete="off" spellcheck="false">${esc(bill?.notes||'')}</textarea></label><div class="button-row full-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button type="submit" class="btn primary">${bill?'Guardar alterações':'Criar fatura'}</button></div></form>`;
 }
 function openBillForm(bill=null){ openDialog(bill?'Editar fatura':'Nova fatura',billFormHtml(bill)); const f=$('#billForm'); if(bill){f.method.value=bill.method||'Outro';f.recurrence.value=bill.recurrence||'none';} f.addEventListener('submit',handleBillSubmit); }
 async function handleBillSubmit(e){
