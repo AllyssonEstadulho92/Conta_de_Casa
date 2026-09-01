@@ -90,3 +90,13 @@ assert.equal(plain.state.market.length, 0);
 assert.equal(plain.conflicts.length, 0);
 
 console.log('Encrypted sync tests: OK');
+
+
+assert.match(source, /let syncPending = false/);
+assert.match(source, /if\(syncBusy\)\{syncPending=true;return;\}/);
+assert.match(source, /syncPending=true;[\s\S]*if\(syncBusy\) return/);
+assert.match(source, /syncNow\('pending-change'\)/);
+assert.match(source, /window\.addEventListener\('focus'/);
+assert.match(source, /syncHeaderStatus/);
+
+console.log('Automatic bidirectional sync queue tests: OK');
