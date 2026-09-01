@@ -1,4 +1,7 @@
-let eventsWired = false;\nfunction wireEvents(){\n  if (eventsWired) return;\n  eventsWired = true;
+let eventsWired = false;
+function wireEvents(){
+  if (eventsWired) return;
+  eventsWired = true;
   $('#desktopNav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)showPage(b.dataset.page);});
   $('#mobileNav').addEventListener('click',e=>{const b=e.target.closest('[data-mobile]');if(!b)return;if(b.dataset.mobile==='add')$('#quickDialog').showModal();else if(b.dataset.mobile==='more')openMoreMenu();else showPage(b.dataset.mobile);});
   $('#quickAddBtn').addEventListener('click',()=>$('#quickDialog').showModal());
