@@ -169,6 +169,34 @@ async function loadSyncToken() {
   }
 }
 
+async function saveSyncTokenStatus(patch={}) {
+  const current=await idbGet('device','sync-token-status').catch(()=>null);
+  const next={
+    key:'sync-token-status',
+    valid:Boolean(patch.valid),
+    lastError:cleanString(patch.lastError||'',220),
+    validatedAt:patch.valid?new Date().toISOString():(current?.validatedAt||null),
+    updatedAt:new Date().toISOString()
+  };
+  await idbPut('device',next);
+  return next;
+}
+
+async function loadSyncTokenStatus() {
+  return await idbGet('device','sync-token-status').catch(()=>null);
+}
+
+async function persistEnteredSyncToken() {
+  const input=$('#syncToken');
+  const entered=String(input?.value||'').trim();
+  if(!entered) return await loadSyncToken();
+  await storeSyncToken(entered);
+  await saveSyncTokenStatus({valid:false,lastError:'Aguardando validação remota.'});
+  if(input) input.value='';
+  renderSyncUi();
+  return entered;
+}
+
 async function deleteDeviceRecord(keyName) {
   const d = await openDb();
   await new Promise((resolve,reject)=>{
@@ -543,6 +571,7 @@ async function syncNow(reason='manual') {
   syncSetStatus('syncing',reason==='manual'?'Sincronização manual em curso...':'A sincronizar alterações cifradas...');
   try{
     await verifyPrivateSyncRepo(token,cfg);
+    await saveSyncTokenStatus({valid:true,lastError:''});
     const remote=await fetchRemoteSyncFile(token,cfg);
     const localMeta=await idbGet('meta','vault');
 
@@ -618,6 +647,7 @@ async function syncNow(reason='manual') {
       return 'conflict';
     }else{
       const message=syncUserError(err);
+      if(permanentSyncError(err)) await saveSyncTokenStatus({valid:false,lastError:message}).catch(()=>{});
       const retryDelay=scheduleSyncRetry(err);
       const retryText=retryDelay?` Nova tentativa automática em ${Math.ceil(retryDelay/1000)} s.`:'';
       syncSetStatus('error',message+retryText);
@@ -664,19 +694,25 @@ async function adoptRemoteSyncedVault() {
 }
 
 async function configureSyncFromUi() {
-  if(!appState||!vaultKey) return;
-  const entered=String($('#syncToken')?.value||'').trim();
-  const token=entered||await loadSyncToken();
+  if(!appState||!vaultKey) return 'not-ready';
+  const token=await persistEnteredSyncToken();
   if(!token) throw new Error('Introduza um token GitHub de acesso ao repositório privado.');
   const cfg=syncConfig();
-  await verifyPrivateSyncRepo(token,cfg);
-  if(entered) await storeSyncToken(entered);
+
+  try{
+    await verifyPrivateSyncRepo(token,cfg);
+    await saveSyncTokenStatus({valid:true,lastError:''});
+  }catch(err){
+    await saveSyncTokenStatus({valid:false,lastError:syncUserError(err)});
+    syncSetStatus('error',syncUserError(err));
+    throw err;
+  }
+
   cfg.disabledByUser=false;
   cfg.enabled=true;
   syncSuppressAuto=true;
   try{await saveState();}finally{syncSuppressAuto=false;}
-  if($('#syncToken')) $('#syncToken').value='';
-  syncSetStatus('syncing','Credencial validada. A sincronização automática está a iniciar...');
+  syncSetStatus('syncing','Credencial guardada e validada. A sincronização automática está a iniciar...');
   return await syncNow('setup');
 }
 
@@ -688,6 +724,7 @@ async function disableSync() {
   syncSuppressAuto=true;
   try{await saveState();}finally{syncSuppressAuto=false;}
   await deleteDeviceRecord('sync-token').catch(()=>{});
+  await deleteDeviceRecord('sync-token-status').catch(()=>{});
   syncRemoteCandidate=null;
   syncSetStatus('not-configured','Sincronização automática desativada neste dispositivo.');
 }
@@ -698,6 +735,7 @@ async function renderSyncUi() {
   const cfg=syncConfig();
   const meta=await syncDeviceMeta().catch(()=>null);
   const token=await loadSyncToken().catch(()=>null);
+  const tokenStatus=await loadSyncTokenStatus().catch(()=>null);
   const badge=$('#syncStatusBadge');
   if(badge){
     badge.className=`status-chip ${syncStatusClass(syncLastStatus.state)}`;
@@ -725,7 +763,11 @@ async function renderSyncUi() {
   if($('#syncStatusText')) $('#syncStatusText').textContent=syncLastStatus.message;
   if($('#syncLastAt')) $('#syncLastAt').textContent=meta?.lastSyncedAt?fmtDateTime(meta.lastSyncedAt):'Ainda não sincronizado';
   if($('#syncDestination')) $('#syncDestination').textContent=`${SYNC_DEFAULT_OWNER}/${SYNC_DEFAULT_REPO} · ${SYNC_DEFAULT_PATH}`;
-  if($('#syncTokenState')) $('#syncTokenState').textContent=token?'Token cifrado neste dispositivo':'Token ainda não guardado';
+  if($('#syncTokenState')) $('#syncTokenState').textContent=
+    !token?'Token ainda não guardado':
+    tokenStatus?.valid?'Token guardado e validado':
+    tokenStatus?.lastError?'Token guardado — validação pendente/falhou':
+    'Token cifrado guardado neste dispositivo';
   const mismatch=syncLastStatus.state==='vault-mismatch';
   if($('#syncResolveBox')) $('#syncResolveBox').hidden=!mismatch;
   if($('#syncAdoptBtn')) $('#syncAdoptBtn').hidden=true;
@@ -775,17 +817,20 @@ function scheduleCredentialAutoSetup() {
     const btn=$('#syncConfigureBtn');
     const msg=$('#syncMessage');
     try{
-      if(btn){btn.disabled=true;btn.textContent='A validar…';}
-      if(msg){msg.textContent='Credencial detetada. A validar e a ligar a sincronização automaticamente…';msg.className='form-message';}
+      if(btn){btn.disabled=true;btn.textContent='A guardar e validar…';}
+      if(msg){msg.textContent='A guardar a credencial cifrada neste dispositivo e a validar o acesso ao cofre privado…';msg.className='form-message';}
       const state=await configureSyncFromUi();
       showSyncSetupOutcome(state,msg);
     }catch(err){
-      if(msg){msg.textContent=syncUserError(err,'Não foi possível validar a credencial. Os dados locais foram preservados.');msg.className='form-message error';}
+      if(msg){
+        msg.textContent=`Token guardado neste dispositivo. Validação: ${syncUserError(err,'não concluída. Verifique as permissões do token e tente “Verificar agora”.')}`;
+        msg.className='form-message error';
+      }
     }finally{
       if(btn){btn.disabled=false;btn.textContent='Ligar sincronização automática';}
       renderSyncUi();
     }
-  },900);
+  },700);
 }
 
 async function manualSyncFromUi() {
@@ -799,8 +844,12 @@ async function manualSyncFromUi() {
     return;
   }
 
-  const stored=await loadSyncToken();
-  if(!stored && !entered){
+  if(entered){
+    try{await storeSyncToken(entered);await saveSyncTokenStatus({valid:false,lastError:'Aguardando validação remota.'});}
+    catch(err){setSyncActionMessage(syncUserError(err,'Não foi possível guardar a credencial neste dispositivo.'),'error');return;}
+  }
+  const stored=entered||await loadSyncToken();
+  if(!stored){
     syncSetStatus('needs-token','Introduza o token GitHub deste dispositivo.');
     setSyncActionMessage('Falta a credencial deste dispositivo. Introduza o token GitHub no campo acima; depois pode tocar diretamente em “Sincronizar agora”.','error');
     tokenInput?.focus({preventScroll:true});
@@ -858,6 +907,9 @@ function wireSyncControls() {
     }finally{$('#syncConfigureBtn').disabled=false;renderSyncUi();}
   });
   $('#syncToken')?.addEventListener('input',scheduleCredentialAutoSetup);
+  $('#syncToken')?.addEventListener('change',scheduleCredentialAutoSetup);
+  $('#syncToken')?.addEventListener('paste',()=>setTimeout(scheduleCredentialAutoSetup,0));
+  $('#syncToken')?.addEventListener('blur',scheduleCredentialAutoSetup);
   $('#syncNowBtn')?.addEventListener('click',manualSyncFromUi);
   $('#syncResolveBtn')?.addEventListener('click',async()=>{
     const btn=$('#syncResolveBtn');

@@ -196,3 +196,16 @@ assert.match(source, /window\.addEventListener\('pageshow'/);
 assert.match(source, /function scheduleSyncRetry\(err\)/);
 
 console.log('Confirmed automatic synchronization tests: OK');
+
+
+assert.match(source, /async function persistEnteredSyncToken\(\)/);
+assert.match(source, /await storeSyncToken\(entered\)/);
+assert.match(source, /await saveSyncTokenStatus\(\{valid:false,lastError:'Aguardando validação remota\.'/);
+assert.match(source, /const token=await persistEnteredSyncToken\(\)/);
+assert.match(source, /await verifyPrivateSyncRepo\(token,cfg\)/);
+assert.match(source, /Token guardado e validado/);
+assert.match(source, /Token guardado — validação pendente\/falhou/);
+assert.match(source, /addEventListener\('paste'/);
+assert.match(source, /addEventListener\('blur',scheduleCredentialAutoSetup\)/);
+
+console.log('Token persistence before validation tests: OK');
