@@ -754,6 +754,7 @@ function lockApp(_reason = 'manual') {
   const quickDialog = $('#quickDialog');
   if (formDialog?.open) formDialog.close();
   if (quickDialog?.open) quickDialog.close();
+  document.documentElement.classList.remove('app-active');
   $('#app').hidden = true;
   $('#vaultScreen').hidden = false;
   $('#vaultCreate').hidden = true;
