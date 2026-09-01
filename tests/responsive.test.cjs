@@ -27,3 +27,11 @@ assert.match(css, /\.calendar-day small\{[\s\S]*display:none/);
 assert.match(css, /\.bill-meta\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
 
 console.log('Responsive enclosure v3 tests: OK');
+
+
+assert.match(css, /Mobile enclosure polish v4/);
+assert.match(css, /@media\(max-width:480px\)[\s\S]*\.panel-head\{[\s\S]*display:grid/);
+assert.match(css, /@media\(max-width:359px\)[\s\S]*\.kpi-grid\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/);
+assert.match(css, /@media\(min-width:1101px\)[\s\S]*\.topbar,[\s\S]*\.page/);
+
+console.log('Mobile enclosure polish v4 tests: OK');
