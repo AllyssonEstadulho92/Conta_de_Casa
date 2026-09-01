@@ -551,6 +551,66 @@ async function renderSyncUi() {
   if($('#syncNowBtn')) $('#syncNowBtn').disabled=!cfg.enabled||syncBusy;
 }
 
+function setSyncActionMessage(message,type='') {
+  const msg=$('#syncMessage');
+  if(!msg) return;
+  msg.textContent=message||'';
+  msg.className=`form-message${type?` ${type}`:''}`;
+}
+
+async function manualSyncFromUi() {
+  const btn=$('#syncNowBtn');
+  const tokenInput=$('#syncToken');
+  const entered=String(tokenInput?.value||'').trim();
+
+  if(!navigator.onLine){
+    syncSetStatus('offline','Sem ligação. As alterações permanecem cifradas neste dispositivo.');
+    setSyncActionMessage('Sem Internet neste momento. Os dados locais estão preservados e serão sincronizados quando a ligação regressar.','error');
+    return;
+  }
+
+  const stored=await loadSyncToken();
+  if(!stored && !entered){
+    syncSetStatus('needs-token','Introduza o token GitHub deste dispositivo.');
+    setSyncActionMessage('Falta a credencial deste dispositivo. Introduza o token GitHub no campo acima; depois pode tocar diretamente em “Sincronizar agora”.','error');
+    tokenInput?.focus({preventScroll:true});
+    tokenInput?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
+  try{
+    if(btn){btn.disabled=true;btn.textContent='A sincronizar…';}
+    setSyncActionMessage('A verificar o cofre privado e a sincronizar alterações…');
+
+    if(entered){
+      await configureSyncFromUi();
+    }else{
+      await syncNow('manual');
+    }
+
+    const state=syncLastStatus.state;
+    if(state==='synced'){
+      setSyncActionMessage('Sincronização concluída. Web e telemóvel estão alinhados com o cofre cifrado.','success');
+    }else if(state==='vault-mismatch'){
+      setSyncActionMessage('Foi encontrado um cofre diferente. Use “Adotar dados sincronizados neste dispositivo” apenas se pretende usar esse cofre aqui.','error');
+    }else if(state==='conflict'){
+      setSyncActionMessage('Foi detetado um conflito. Os dados foram preservados; nenhuma versão foi apagada silenciosamente.','error');
+    }else if(state==='offline'){
+      setSyncActionMessage('Sem Internet. As alterações ficam guardadas localmente até ser possível sincronizar.','error');
+    }else if(state==='error'){
+      setSyncActionMessage(syncLastStatus.message||'Não foi possível sincronizar.','error');
+    }else{
+      setSyncActionMessage(syncLastStatus.message||'Sincronização processada.');
+    }
+  }catch(err){
+    syncSetStatus('error',safeUserError(err,'Falha de sincronização. Os dados locais foram preservados.'));
+    setSyncActionMessage(safeUserError(err,'Não foi possível sincronizar. Os dados locais foram preservados.'),'error');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Sincronizar agora';}
+    renderSyncUi();
+  }
+}
+
 function wireSyncControls() {
   if(syncControlsWired) return;
   syncControlsWired=true;
@@ -566,7 +626,7 @@ function wireSyncControls() {
       if(msg){msg.textContent=safeUserError(err,'Não foi possível configurar a sincronização.');msg.className='form-message error';}
     }finally{$('#syncConfigureBtn').disabled=false;renderSyncUi();}
   });
-  $('#syncNowBtn')?.addEventListener('click',()=>syncNow('manual'));
+  $('#syncNowBtn')?.addEventListener('click',manualSyncFromUi);
   $('#syncAdoptBtn')?.addEventListener('click',async()=>{
     try{await adoptRemoteSyncedVault();}catch(err){
       const msg=$('#syncMessage');if(msg){msg.textContent=safeUserError(err,'Não foi possível adotar o cofre remoto.');msg.className='form-message error';}
