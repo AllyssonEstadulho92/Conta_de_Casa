@@ -109,6 +109,19 @@
     <button id="syncDisableBtn" class="btn danger" type="button">Desativar neste dispositivo</button>
   </div>
   <p id="syncMessage" class="form-message" role="status"></p>
+  <div class="section-gap">
+    <hr />
+    <h3>Juntar dados de outro dispositivo</h3>
+    <p class="muted">Use isto antes da primeira sincronização quando computador e telemóvel já têm dados diferentes. O backup é decifrado apenas neste dispositivo, os registos são unidos e o cofre atual não é substituído.</p>
+    <div class="form-grid two">
+      <label class="full-row">Backup cifrado do outro dispositivo<input id="syncMergeBackupInput" type="file" accept="application/json,.json" /></label>
+      <label class="full-row">PIN do backup de origem<input id="syncMergeBackupPin" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" /></label>
+    </div>
+    <div class="button-row">
+      <button id="syncMergeBackupBtn" class="btn secondary" type="button">Juntar dados sem apagar</button>
+    </div>
+    <p id="syncMergeMessage" class="form-message" role="status"></p>
+  </div>
 </article><article class="panel span-2"><div class="panel-head"><div><h2>Políticas ativas</h2><p>Regras aplicadas para impedir fuga de dados financeiros ou pessoais.</p></div></div><div id="securityPolicyList"></div></article></div></section>
       <section id="page-settings" class="page"><article class="panel narrow"><h2>Preferências</h2><form id="settingsForm" class="form-grid"><label>Nome opcional<input id="profileName" autocomplete="name" /></label><label>Moeda<select id="currencySelect"><option value="EUR">EUR — Euro</option></select></label><label>Modo visual<select id="themeSelect"><option value="light">Claro</option><option value="dark">Escuro</option><option value="system">Sistema</option></select></label><button class="btn primary" type="submit">Guardar preferências</button></form><hr /><button id="resetDataBtn" class="btn danger">Apagar todos os dados locais</button></article></section>
     </main>
