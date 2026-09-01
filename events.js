@@ -70,22 +70,15 @@ function updateViewportMetrics() {
     root.style.setProperty('--visual-vh', `${viewportHeight}px`);
 
     const narrow = window.matchMedia('(max-width: 820px)').matches;
-    const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-    const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
     const layoutHeight = Math.max(root.clientHeight || 0, window.innerHeight || 0);
-    const measuredInset = vv ? Math.max(0, Math.round(layoutHeight - vv.height - vv.offsetTop)) : 0;
-    const keyboardOpen = narrow && vv && measuredInset > 220;
+    const keyboardInset = vv ? Math.max(0, Math.round(layoutHeight - vv.height - vv.offsetTop)) : 0;
+    const keyboardOpen = Boolean(narrow && vv && keyboardInset > 220);
 
-    root.classList.toggle('keyboard-open', Boolean(keyboardOpen));
+    root.classList.toggle('keyboard-open', keyboardOpen);
 
-    let bottomOffset = 0;
-    if (narrow && !standalone && !keyboardOpen) {
-      bottomOffset = Math.min(96, measuredInset);
-      if (isIOS) bottomOffset = Math.max(bottomOffset, 56);
-    }
-    root.style.setProperty('--browser-bottom-offset', `${bottomOffset}px`);
+    // Modern mobile browsers already position fixed elements inside the visual viewport.
+    // Extra manual offsets caused the navigation to float in the middle of Safari.
+    root.style.setProperty('--browser-bottom-offset', '0px');
   });
 }
 
