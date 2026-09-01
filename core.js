@@ -188,7 +188,8 @@ function normalizeMonths(months = {}) {
     if (!/^\d{4}-\d{2}$/.test(month) || !isPlainObject(value)) continue;
     out[month] = {
       openingBalanceCents: cleanCents(value.openingBalanceCents, 0, -1000000000000),
-      budgetCents: cleanCents(value.budgetCents, 0, 0)
+      budgetCents: cleanCents(value.budgetCents, 0, 0),
+      updatedAt: optionalIso(value.updatedAt)
     };
   }
   return out;
@@ -261,6 +262,7 @@ function normalizeGoal(g = {}) {
     savedCents: cleanCents(g.savedCents),
     deadline: optionalIso(g.deadline),
     createdAt: cleanIso(g.createdAt, now),
+    updatedAt: cleanIso(g.updatedAt || g.createdAt, now),
     archived: Boolean(g.archived)
   };
 }
@@ -268,7 +270,14 @@ function normalizeGoal(g = {}) {
 function defaultState() {
   return {
     version: STATE_VERSION,
-    settings: { profileName: '', currency: 'EUR', theme: 'light', lockMinutes: AUTO_LOCK_MINUTES, lockOnHidden: true },
+    settings: {
+      profileName: '',
+      currency: 'EUR',
+      theme: 'light',
+      lockMinutes: AUTO_LOCK_MINUTES,
+      lockOnHidden: true,
+      sync: { enabled:false, owner:'AllyssonEstadulho92', repo:'conta-de-casa-', path:'sync/vault.json' }
+    },
     months: {},
     bills: [],
     payments: [],
@@ -277,6 +286,8 @@ function defaultState() {
     goals: [],
     activity: [],
     security: { lastBackupAt: null, lastRestoreAt: null },
+    syncTombstones: [],
+    syncConflicts: [],
     attachments: { enabled: false, items: [] }
   };
 }
@@ -291,7 +302,13 @@ function ensureStateShape(s) {
       currency: settings.currency === 'EUR' ? 'EUR' : 'EUR',
       theme: ['light','dark','system'].includes(settings.theme) ? settings.theme : 'light',
       lockMinutes: clamp(Number(settings.lockMinutes) || AUTO_LOCK_MINUTES, 1, 30),
-      lockOnHidden: settings.lockOnHidden !== false
+      lockOnHidden: settings.lockOnHidden !== false,
+      sync: {
+        enabled: Boolean(settings.sync?.enabled),
+        owner: cleanString(settings.sync?.owner || 'AllyssonEstadulho92', 80),
+        repo: cleanString(settings.sync?.repo || 'conta-de-casa-', 100),
+        path: cleanString(settings.sync?.path || 'sync/vault.json', 180)
+      }
     },
     months: normalizeMonths(s?.months),
     bills: Array.isArray(s?.bills) ? s.bills.slice(0, 5000).map(normalizeBill) : [],
@@ -304,11 +321,23 @@ function ensureStateShape(s) {
       lastBackupAt: optionalIso(s?.security?.lastBackupAt),
       lastRestoreAt: optionalIso(s?.security?.lastRestoreAt)
     },
+    syncTombstones: Array.isArray(s?.syncTombstones) ? s.syncTombstones.slice(-500).map(t => ({
+      entity: cleanString(t?.entity, 30),
+      id: cleanString(t?.id, 100),
+      deletedAt: cleanIso(t?.deletedAt, new Date().toISOString())
+    })).filter(t => t.entity && t.id) : [],
+    syncConflicts: Array.isArray(s?.syncConflicts) ? s.syncConflicts.slice(-50).map(x => ({
+      entity: cleanString(x?.entity, 30),
+      id: cleanString(x?.id, 100),
+      at: cleanIso(x?.at, new Date().toISOString()),
+      local: isPlainObject(x?.local) ? x.local : {},
+      remote: isPlainObject(x?.remote) ? x.remote : {}
+    })).filter(x => x.entity && x.id) : [],
     attachments: { enabled: ATTACHMENTS_REAL_FILES_ENABLED, items: [] }
   };
 }
 function monthProfile(month = selectedMonth) {
-  appState.months[month] ||= { openingBalanceCents: 0, budgetCents: 0 };
+  appState.months[month] ||= { openingBalanceCents: 0, budgetCents: 0, updatedAt: new Date().toISOString() };
   return appState.months[month];
 }
 
