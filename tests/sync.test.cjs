@@ -102,19 +102,22 @@ assert.match(source, /syncHeaderStatus/);
 console.log('Automatic bidirectional sync queue tests: OK');
 
 
-assert.match(source, /enabled:true,[\s\S]*disabledByUser:false/);
 assert.match(source, /cfg\.enabled = !cfg\.disabledByUser/);
-assert.match(source, /cfg\.disabledByUser=false; cfg\.enabled=true/);
+assert.match(source, /cfg\.owner = SYNC_DEFAULT_OWNER/);
+assert.match(source, /cfg\.repo = SYNC_DEFAULT_REPO/);
+assert.match(source, /cfg\.path = SYNC_DEFAULT_PATH/);
+assert.match(source, /cfg\.disabledByUser=false/);
 assert.match(source, /cfg\.disabledByUser=true;[\s\S]*cfg\.enabled=false/);
 
 console.log('Sync auto-enable migration tests: OK');
 
 
 assert.match(source, /const localOnly=state==='not-configured'\|\|state==='needs-token'/);
-assert.match(source, /const headerClass=localOnly\?'paid':syncStatusClass\(state\)/);
-assert.match(source, /Cofre local ativo/);
+assert.match(source, /const headerClass=localOnly\?'attention':syncStatusClass\(state\)/);
+assert.match(source, /Ainda sem sincronização remota/);
+assert.match(source, /'Sem sync'/);
 
-console.log('Local vault header status tests: OK');
+console.log('Local-only status clarity tests: OK');
 
 
 assert.match(source, /async function manualSyncFromUi\(\)/);
@@ -161,3 +164,19 @@ assert.doesNotMatch(syncIndex, /id="syncPath"/);
 assert.match(syncIndex, /Ligar sincronização automática/);
 
 console.log('Automatic fixed sync destination tests: OK');
+
+
+assert.match(source, /async function decryptRemoteWithPassphrase\(remote,passphrase\)/);
+assert.match(source, /async function mergeAndAdoptRemoteVault\(passphrase\)/);
+assert.match(source, /mergeAppStates\(appState,remoteUnlocked\.state\)/);
+assert.match(source, /buildSyncWrapperFromPair/);
+assert.match(source, /await idbPutVaultPair\(remote\.normalized\.meta,secure\)/);
+assert.match(source, /syncResolveBtn/);
+assert.doesNotMatch(source, /addEventListener\('click',async\(\)=>\{\s*try\{await adoptRemoteSyncedVault/);
+
+const healthIndex=fs.readFileSync('index.html','utf8');
+assert.match(healthIndex, /id="syncHealthRemote"/);
+assert.match(healthIndex, /id="syncResolveBox"/);
+assert.match(healthIndex, /Unir dados e alinhar este dispositivo/);
+
+console.log('Safe remote union and adoption tests: OK');
