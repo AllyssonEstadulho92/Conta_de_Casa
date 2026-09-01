@@ -100,3 +100,11 @@ assert.match(source, /window\.addEventListener\('focus'/);
 assert.match(source, /syncHeaderStatus/);
 
 console.log('Automatic bidirectional sync queue tests: OK');
+
+
+assert.match(source, /enabled:true,[\s\S]*disabledByUser:false/);
+assert.match(source, /cfg\.enabled = !cfg\.disabledByUser/);
+assert.match(source, /cfg\.disabledByUser=false; cfg\.enabled=true/);
+assert.match(source, /cfg\.disabledByUser=true;[\s\S]*cfg\.enabled=false/);
+
+console.log('Sync auto-enable migration tests: OK');
