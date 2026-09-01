@@ -943,3 +943,42 @@ html.keyboard-open .mobile-nav,
 html.keyboard-open .fab{
   display:none!important;
 }
+
+
+/* ===== Sync status in app bar v1 ===== */
+.sync-header-status{
+  min-width:36px;
+  height:36px;
+  padding:0 9px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--surface);
+  color:var(--muted);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  font:inherit;
+  font-size:.68rem;
+  font-weight:700;
+  cursor:pointer;
+}
+.sync-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--muted);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--muted) 12%,transparent);
+}
+.sync-header-status.paid .sync-dot{background:var(--success)}
+.sync-header-status.partial .sync-dot{background:var(--primary)}
+.sync-header-status.attention .sync-dot{background:var(--warning)}
+.sync-header-status.overdue .sync-dot{background:var(--danger)}
+@media(max-width:430px){
+  .sync-header-status{
+    width:36px;
+    min-width:36px;
+    padding:0;
+  }
+  .sync-header-text{display:none}
+}
