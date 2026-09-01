@@ -71,7 +71,14 @@ for (const file of appFiles) {
   const externalUrls = content.match(/https?:\/\/[^\s"'\`<>)]+/gi) || [];
   for (const url of externalUrls) {
     const normalizedUrl = url.replace(/[;,]+$/g, '');
-    assert.equal(new URL(normalizedUrl).origin, 'https://api.github.com', `${file} may only reference the approved GitHub API origin`);
+    const parsed = new URL(normalizedUrl);
+    const approvedApi = parsed.origin === 'https://api.github.com';
+    const approvedTokenSetup = file === 'index.html'
+      && parsed.origin === 'https://github.com'
+      && parsed.pathname === '/settings/personal-access-tokens/new'
+      && parsed.searchParams.get('target_name') === 'AllyssonEstadulho92'
+      && parsed.searchParams.get('contents') === 'write';
+    assert.equal(approvedApi || approvedTokenSetup, true, `${file} may only reference the approved GitHub API or the fixed token-setup page`);
   }
   assert.doesNotMatch(content, /\b(sendBeacon|XMLHttpRequest|gtag|analytics)\b|cdn\.jsdelivr|cdnjs|unpkg/i, `${file} must not include telemetry or CDN hooks`);
 }
