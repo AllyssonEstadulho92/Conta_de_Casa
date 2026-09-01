@@ -9,8 +9,9 @@ Projeto em fase inicial com hardening de segurança. Não é versão 1.0 e não 
 ## Privacidade por desenho
 
 - sem backend próprio;
-- sem contas online;
+- sem conta própria da aplicação;
 - sem analytics, anúncios, trackers ou CDNs;
+- sincronização opcional apenas por envelope cifrado num repositório GitHub privado;
 - dados financeiros cifrados em repouso no IndexedDB;
 - `localStorage` e `sessionStorage` bloqueados para dados sensíveis;
 - backups sempre cifrados e validados;
@@ -29,9 +30,24 @@ node --check core.js
 node --check finance.js
 node --check render.js
 node --check forms.js
+node --check sync.js
 node --check events.js
 node --check sw.js
 node tests/finance.test.cjs
 node tests/form-regression.test.cjs
 node tests/security.test.cjs
+node tests/sync.test.cjs
 ```
+
+
+## Sincronização entre dispositivos
+
+A sincronização automática é opcional e usa o repositório privado `AllyssonEstadulho92/conta-de-casa-` apenas como transporte de um envelope cifrado.
+
+- o conteúdo financeiro é cifrado antes do envio;
+- o PIN/palavra-passe nunca é enviado;
+- o token GitHub fica cifrado localmente em cada dispositivo;
+- a aplicação recusa repositório de sincronização público;
+- a sincronização ocorre ao desbloquear, após alterações, ao regressar online/visível e periodicamente;
+- conflitos de versão não são sobrescritos silenciosamente;
+- eliminações são propagadas através de tombstones cifrados.
