@@ -383,6 +383,17 @@ async function idbPut(store, value) {
     req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error);
   });
 }
+async function idbPutVaultPair(meta, secure) {
+  const d = await openDb();
+  return await new Promise((resolve, reject) => {
+    const tx = d.transaction(['meta','secure'], 'readwrite');
+    tx.objectStore('meta').put(meta);
+    tx.objectStore('secure').put(secure);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error || new Error('Falha ao atualizar o cofre.'));
+    tx.onabort = () => reject(tx.error || new Error('Atualização do cofre cancelada.'));
+  });
+}
 async function idbClearAll() {
   const d = await openDb();
   await Promise.all(['meta','secure'].map(store => new Promise((resolve, reject) => {
@@ -441,6 +452,66 @@ async function unlockVault(passphrase) {
   monthProfile(selectedMonth);
   await syncRecurringBills();
 }
+async function verifyVaultPassphrase(passphrase) {
+  const meta = await idbGet('meta','vault');
+  if (!meta) throw new Error('Cofre não encontrado.');
+  try {
+    const key = await deriveVaultKey(passphrase, unb64(meta.salt), Number(meta.iterations));
+    const check = dec.decode(await decryptBytes(key, meta.checkIv, meta.checkCipher));
+    if (![CHECK_TEXT_CURRENT, CHECK_TEXT_LEGACY].includes(check)) throw new Error('check-failed');
+    return key;
+  } catch (_err) {
+    throw new Error('Palavra-passe/PIN incorreto.');
+  }
+}
+async function changeVaultPassphrase(currentPassphrase, newPassphrase) {
+  const current = String(currentPassphrase ?? '');
+  const next = String(newPassphrase ?? '');
+  if (next.length < 8) throw new Error('O novo PIN deve ter pelo menos 8 caracteres.');
+  if (current === next) throw new Error('O novo PIN deve ser diferente do atual.');
+
+  const oldKey = await verifyVaultPassphrase(current);
+  const secure = await idbGet('secure','state');
+  let state = appState;
+  if (!state && secure) {
+    try {
+      state = ensureStateShape(JSON.parse(dec.decode(await decryptBytes(oldKey, secure.iv, secure.cipher))));
+    } catch (_err) {
+      throw new Error('O cofre local não passou na validação de integridade.');
+    }
+  }
+  state = ensureStateShape(state || defaultState());
+
+  const oldMeta = await idbGet('meta','vault');
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const newKey = await deriveVaultKey(next, salt);
+  const check = await encryptBytes(newKey, enc.encode(CHECK_TEXT_CURRENT));
+  const encryptedState = await encryptBytes(newKey, enc.encode(JSON.stringify(state)));
+  const now = new Date().toISOString();
+  const newMeta = {
+    key:'vault',
+    version:2,
+    salt:b64(salt),
+    checkIv:check.iv,
+    checkCipher:check.cipher,
+    iterations:PBKDF2_ITERATIONS,
+    createdAt:oldMeta?.createdAt || now,
+    rotatedAt:now
+  };
+  const newSecure = { key:'state', ...encryptedState, updatedAt:now };
+  await idbPutVaultPair(newMeta, newSecure);
+  vaultKey = newKey;
+  appState = state;
+  logActivity('rotated', 'security');
+  await saveState();
+  return true;
+}
+async function resetLocalVaultForRecovery() {
+  destroyVaultSession();
+  await idbClearAll();
+  return true;
+}
+
 async function saveState() {
   if (!vaultKey || !appState) return;
   appState = ensureStateShape(appState);
