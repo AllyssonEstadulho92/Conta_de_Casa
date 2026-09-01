@@ -94,6 +94,47 @@ function installViewportMetrics() {
   }
 }
 
+function billDeletionScope(rootId) {
+  const ids=new Set([String(rootId)]);
+  let changed=true;
+  while(changed){
+    changed=false;
+    for(const bill of appState?.bills||[]){
+      if(bill?.recurrenceParentId && ids.has(String(bill.recurrenceParentId)) && !ids.has(String(bill.id))){
+        ids.add(String(bill.id));
+        changed=true;
+      }
+    }
+  }
+  return ids;
+}
+
+async function deleteBillEnteredByMistake(id) {
+  const bill=appState?.bills?.find(x=>x.id===id);
+  if(!bill) return;
+
+  const scope=billDeletionScope(id);
+  const payments=(appState.payments||[]).filter(p=>scope.has(String(p.billId)));
+  if(payments.length){
+    toast('Não é possível excluir uma fatura com pagamentos. Cancele-a para preservar o histórico financeiro.');
+    return;
+  }
+
+  const generated=Math.max(0,scope.size-1);
+  const warning=generated
+    ? `Excluir definitivamente esta fatura e ${generated} recorrência(s) futura(s) gerada(s)? Esta ação é apenas para registos criados por engano.`
+    : 'Excluir definitivamente esta fatura? Use esta opção apenas quando o registo foi criado por engano.';
+  if(!confirm(warning)) return;
+
+  for(const billId of scope){
+    if(typeof recordSyncDeletion==='function') recordSyncDeletion('bill',billId);
+  }
+  appState.bills=appState.bills.filter(x=>!scope.has(String(x.id)));
+  await commit('deleted','bill');
+  closeDialog();
+  toast(generated?'Fatura e recorrências futuras excluídas.':'Fatura excluída.');
+}
+
 function wireEvents(){
   if (eventsWired) return;
   eventsWired = true;
@@ -126,7 +167,25 @@ function wireEvents(){
   $('#billsList').addEventListener('click',e=>{const pay=e.target.closest('[data-pay-bill]');if(pay){openPaymentForm(pay.dataset.payBill);return;}const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#upcomingBills').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#calendarAgenda').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
-  $('#dialogBody').addEventListener('click',async e=>{const pay=e.target.closest('[data-detail-pay]');if(pay){openPaymentForm(pay.dataset.detailPay);return;}const edit=e.target.closest('[data-detail-edit]');if(edit){const b=appState.bills.find(x=>x.id===edit.dataset.detailEdit);openBillForm(b);return;}const cancel=e.target.closest('[data-detail-cancel]');if(cancel){const b=appState.bills.find(x=>x.id===cancel.dataset.detailCancel);if(b&&confirm('Cancelar esta fatura? O histórico de pagamentos será preservado.')){b.cancelled=true;b.updatedAt=new Date().toISOString();await commit('cancelled','bill');closeDialog();toast('Fatura cancelada.');}}});
+  $('#dialogBody').addEventListener('click',async e=>{
+    const pay=e.target.closest('[data-detail-pay]');
+    if(pay){openPaymentForm(pay.dataset.detailPay);return;}
+    const edit=e.target.closest('[data-detail-edit]');
+    if(edit){const b=appState.bills.find(x=>x.id===edit.dataset.detailEdit);openBillForm(b);return;}
+    const del=e.target.closest('[data-detail-delete]');
+    if(del){await deleteBillEnteredByMistake(del.dataset.detailDelete);return;}
+    const cancel=e.target.closest('[data-detail-cancel]');
+    if(cancel){
+      const b=appState.bills.find(x=>x.id===cancel.dataset.detailCancel);
+      if(b&&confirm('Cancelar esta fatura? O histórico de pagamentos será preservado.')){
+        b.cancelled=true;
+        b.updatedAt=new Date().toISOString();
+        await commit('cancelled','bill');
+        closeDialog();
+        toast('Fatura cancelada.');
+      }
+    }
+  });
   $('#monthPicker').addEventListener('change',()=>{selectedMonth=$('#monthPicker').value||selectedMonth;monthProfile();renderCurrentPage();});
   $('#monthPlanForm').addEventListener('submit',async e=>{e.preventDefault();const open=parseCents($('#openingBalance').value),budget=parseCents($('#monthlyBudget').value);if(!Number.isFinite(open)||!Number.isFinite(budget)||budget<0){toast('Valores de planeamento inválidos.');return;}const p=monthProfile();p.openingBalanceCents=open;p.budgetCents=budget;p.updatedAt=new Date().toISOString();await commit('updated','planning');toast('Planeamento guardado.');});
   $('#incomeList').addEventListener('click',async e=>{const b=e.target.closest('[data-delete-income]');if(b&&confirm('Eliminar este rendimento?')){if(typeof recordSyncDeletion==='function')recordSyncDeletion('income',b.dataset.deleteIncome);appState.incomes=appState.incomes.filter(x=>x.id!==b.dataset.deleteIncome);await commit('deleted','income');}});
@@ -173,6 +232,7 @@ async function enterApp() {
   ensureDialogShellIsContainer();
   installPinRecoveryUi();
   clearPassphraseInputs();
+  document.documentElement.classList.add('app-active');
   $('#vaultScreen').hidden=true; $('#app').hidden=false; $('#monthPicker').value=selectedMonth; renderNav(); applyTheme(); setPrivacy(false); wireEvents(); installSessionLockGuards(); showPage(currentPage()); recordUserActivity();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
   if (typeof startSyncLifecycle === 'function') startSyncLifecycle();
