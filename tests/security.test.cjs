@@ -54,6 +54,18 @@ vm.runInContext('installStorageGuards(); localStorage.setItem("cdc_public_theme"
 assert.throws(() => vm.runInContext('localStorage.setItem("bill", "Fornecedor privado")', context), /Armazenamento em claro bloqueado/);
 assert.throws(() => vm.runInContext('sessionStorage.setItem("cdc_public_note", "amountCents=123")', context), /Armazenamento em claro bloqueado/);
 
+const syncState = vm.runInContext(`ensureStateShape({
+  settings:{sync:{enabled:true,owner:'AllyssonEstadulho92',repo:'conta-de-casa-',path:'sync/vault.json'}},
+  months:{'2026-09':{openingBalanceCents:12345,budgetCents:9999,updatedAt:'2026-09-01T12:00:00.000Z'}},
+  syncTombstones:[{entity:'market',id:'m1',deletedAt:'2026-09-01T13:00:00.000Z'}],
+  syncConflicts:[{entity:'bill',id:'b1',at:'2026-09-01T14:00:00.000Z',local:{id:'b1'},remote:{id:'b1'}}]
+})`, context);
+assert.equal(syncState.settings.sync.enabled, true);
+assert.equal(syncState.settings.sync.repo, 'conta-de-casa-');
+assert.equal(syncState.months['2026-09'].updatedAt, '2026-09-01T12:00:00.000Z');
+assert.equal(syncState.syncTombstones.length, 1);
+assert.equal(syncState.syncConflicts.length, 1);
+
 for (const file of appFiles) {
   const content = fs.readFileSync(file, 'utf8');
   const externalUrls = content.match(/https?:\/\/[^\s"'\`<>)]+/gi) || [];
