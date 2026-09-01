@@ -23,6 +23,16 @@ function statusLabel(st) {
   return ({pending:'Por pagar',partial:'Pago parcialmente',paid:'Pago',overdue:'Em atraso',cancelled:'Cancelado',archived:'Arquivado'})[st] || st;
 }
 function urgencyLabel(st) { return ({normal:'Normal',attention:'Atenção',urgent:'Urgente',critical:'Crítico'})[st] || st; }
+function recurrenceLabel(value) {
+  return ({
+    none:'Sem recorrência',
+    weekly:'Semanal',
+    monthly:'Mensal',
+    quarterly:'Trimestral',
+    semiannual:'Semestral',
+    annual:'Anual'
+  })[value] || 'Sem recorrência';
+}
 function dueText(bill) {
   const diff = new Date(bill.dueAt).getTime() - Date.now();
   if (remainingForBill(bill) === 0) return 'Concluída';
