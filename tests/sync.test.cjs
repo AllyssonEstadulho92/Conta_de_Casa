@@ -126,3 +126,20 @@ assert.match(source, /btn\.textContent='A sincronizar…'/);
 assert.match(source, /addEventListener\('click',manualSyncFromUi\)/);
 
 console.log('Manual sync button UX tests: OK');
+
+
+assert.match(source, /async function mergeEncryptedBackupFile\(file,passphrase\)/);
+assert.match(source, /mergeAppStates\(appState,sourceState\)/);
+assert.match(source, /await saveState\(\)/);
+assert.match(source, /syncMergeBackupBtn/);
+
+const coreSource=fs.readFileSync('core.js','utf8');
+assert.match(coreSource, /async function decryptBackupState\(normalized, passphrase\)/);
+assert.match(coreSource, /PIN do backup incorreto ou backup incompatível/);
+
+const indexSource=fs.readFileSync('index.html','utf8');
+assert.match(indexSource, /id="syncMergeBackupInput"/);
+assert.match(indexSource, /id="syncMergeBackupPin"/);
+assert.match(indexSource, /Juntar dados sem apagar/);
+
+console.log('Encrypted cross-device merge tests: OK');
