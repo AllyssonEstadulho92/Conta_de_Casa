@@ -56,6 +56,49 @@ function installPinRecoveryUi() {
     securityGrid.appendChild(panel);
   }
 }
+let viewportMetricsWired = false;
+let viewportRaf = 0;
+
+function updateViewportMetrics() {
+  cancelAnimationFrame(viewportRaf);
+  viewportRaf = requestAnimationFrame(() => {
+    const root = document.documentElement;
+    const vv = window.visualViewport;
+    const viewportHeight = Math.max(320, Math.round(vv?.height || window.innerHeight || root.clientHeight || 0));
+    root.style.setProperty('--visual-vh', `${viewportHeight}px`);
+
+    const narrow = window.matchMedia('(max-width: 820px)').matches;
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    const layoutHeight = Math.max(root.clientHeight || 0, window.innerHeight || 0);
+    const measuredInset = vv ? Math.max(0, Math.round(layoutHeight - vv.height - vv.offsetTop)) : 0;
+    const keyboardOpen = narrow && vv && measuredInset > 220;
+
+    root.classList.toggle('keyboard-open', Boolean(keyboardOpen));
+
+    let bottomOffset = 0;
+    if (narrow && !standalone && !keyboardOpen) {
+      bottomOffset = Math.min(96, measuredInset);
+      if (isIOS) bottomOffset = Math.max(bottomOffset, 56);
+    }
+    root.style.setProperty('--browser-bottom-offset', `${bottomOffset}px`);
+  });
+}
+
+function installViewportMetrics() {
+  if (viewportMetricsWired) return;
+  viewportMetricsWired = true;
+  updateViewportMetrics();
+  window.addEventListener('resize', updateViewportMetrics, { passive:true });
+  window.addEventListener('orientationchange', updateViewportMetrics, { passive:true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', updateViewportMetrics, { passive:true });
+    window.visualViewport.addEventListener('scroll', updateViewportMetrics, { passive:true });
+  }
+}
+
 function wireEvents(){
   if (eventsWired) return;
   eventsWired = true;
@@ -112,6 +155,7 @@ function wireEvents(){
 }
 
 async function enterApp() {
+  installViewportMetrics();
   ensureDialogShellIsContainer();
   installPinRecoveryUi();
   clearPassphraseInputs();
@@ -120,6 +164,7 @@ async function enterApp() {
   if (typeof startSyncLifecycle === 'function') startSyncLifecycle();
 }
 async function initVaultUi() {
+  installViewportMetrics();
   installStorageGuards();
   installRuntimeErrorGuards();
   installPinRecoveryUi();
