@@ -107,10 +107,29 @@ function wireEvents(){
   $('#desktopNav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)showPage(b.dataset.page);});
   $('#mobileNav').addEventListener('click',e=>{const b=e.target.closest('[data-mobile]');if(!b)return;if(b.dataset.mobile==='add')$('#quickDialog').showModal();else if(b.dataset.mobile==='more')openMoreMenu();else showPage(b.dataset.mobile);});
   $('#quickAddBtn').addEventListener('click',()=>$('#quickDialog').showModal());
-  document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go)showPage(go.dataset.go);const c=e.target.closest('[data-close-dialog]');if(c)closeDialog();const more=e.target.closest('[data-more-page]');if(more){closeDialog();showPage(more.dataset.morePage);}});
-  $('#quickDialog').addEventListener('click',e=>{const b=e.target.closest('[data-quick]');if(!b)return;$('#quickDialog').close();({bill:openBillForm,income:openIncomeForm,market:openMarketForm,goal:openGoalForm})[b.dataset.quick]?.();});
+  document.addEventListener('click',e=>{
+    const go=e.target.closest('[data-go]');
+    if(go) showPage(go.dataset.go);
+    const close=e.target.closest('[data-close-dialog]');
+    if(close){e.preventDefault();closeDialog();return;}
+    const closeQuick=e.target.closest('[data-close-quick-dialog]');
+    if(closeQuick){e.preventDefault();const q=$('#quickDialog');if(q?.open)q.close();return;}
+    const more=e.target.closest('[data-more-page]');
+    if(more){closeDialog();showPage(more.dataset.morePage);}
+  });
+  $('#quickDialog').addEventListener('click',e=>{
+    if(e.target===$('#quickDialog')){$('#quickDialog').close();return;}
+    const b=e.target.closest('[data-quick]');
+    if(!b)return;
+    $('#quickDialog').close();
+    ({bill:openBillForm,income:openIncomeForm,market:openMarketForm,goal:openGoalForm})[b.dataset.quick]?.();
+  });
   $('#newBillBtn').addEventListener('click',()=>openBillForm()); $('#newIncomeBtn').addEventListener('click',openIncomeForm); $('#newMarketBtn').addEventListener('click',openMarketForm); $('#newGoalBtn').addEventListener('click',openGoalForm);
   $('#billSearch').addEventListener('input',renderBills); $('#billStatusFilter').addEventListener('change',renderBills);
+  const formDialog=$('#formDialog');
+  formDialog.addEventListener('click',e=>{if(e.target===formDialog)closeDialog();});
+  formDialog.addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
+  formDialog.addEventListener('close',()=>{formDialog.classList.remove('detail-dialog');delete formDialog.dataset.mode;});
   $('#billsList').addEventListener('click',e=>{const pay=e.target.closest('[data-pay-bill]');if(pay){openPaymentForm(pay.dataset.payBill);return;}const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#upcomingBills').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#calendarAgenda').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
