@@ -2,7 +2,7 @@
 
 const APP_ID = 'Conta_de_Casa';
 const DB_NAME = 'conta_de_casa_secure';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STATE_VERSION = 2;
 const BACKUP_FORMAT_VERSION = 2;
 const CHECK_TEXT_CURRENT = 'Conta_de_Casa::vault-check::v2';
@@ -363,6 +363,7 @@ async function openDb() {
       const d = req.result;
       if (!d.objectStoreNames.contains('meta')) d.createObjectStore('meta', { keyPath: 'key' });
       if (!d.objectStoreNames.contains('secure')) d.createObjectStore('secure', { keyPath: 'key' });
+      if (!d.objectStoreNames.contains('device')) d.createObjectStore('device', { keyPath: 'key' });
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -396,7 +397,7 @@ async function idbPutVaultPair(meta, secure) {
 }
 async function idbClearAll() {
   const d = await openDb();
-  await Promise.all(['meta','secure'].map(store => new Promise((resolve, reject) => {
+  await Promise.all(['meta','secure','device'].map(store => new Promise((resolve, reject) => {
     const req = d.transaction(store, 'readwrite').objectStore(store).clear();
     req.onsuccess = () => resolve(); req.onerror = () => reject(req.error);
   })));
@@ -518,6 +519,7 @@ async function saveState() {
   const payload = enc.encode(JSON.stringify(appState));
   const encrypted = await encryptBytes(vaultKey, payload);
   await idbPut('secure', { key:'state', ...encrypted, updatedAt:new Date().toISOString() });
+  if (typeof queueRemoteSync === 'function') queueRemoteSync();
 }
 function logActivity(text, type='general') {
   if (!appState) return;
