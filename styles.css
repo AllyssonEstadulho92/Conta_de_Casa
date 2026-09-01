@@ -982,3 +982,59 @@ html.keyboard-open .fab{
   }
   .sync-header-text{display:none}
 }
+
+
+/* ===== Native mobile shell v8 ===== */
+.detail-actions .detail-delete{
+  flex-basis:100%;
+  border-color:color-mix(in srgb,var(--danger) 32%,var(--border));
+  background:color-mix(in srgb,var(--danger) 7%,var(--surface));
+}
+
+@media(max-width:820px){
+  html.app-active,
+  html.app-active body{
+    height:100%;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
+
+  html.app-active .app-shell{
+    height:var(--visual-vh);
+    max-height:var(--visual-vh);
+    overflow:hidden;
+  }
+
+  html.app-active .main{
+    height:var(--visual-vh);
+    max-height:var(--visual-vh);
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:contain;
+    scroll-padding-bottom:calc(var(--mobile-nav-height) + max(env(safe-area-inset-bottom),8px) + 18px);
+  }
+
+  html.app-active .mobile-nav{
+    position:fixed!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    z-index:120;
+  }
+
+  html.app-active .fab{
+    position:fixed!important;
+    z-index:130;
+  }
+
+  .detail-actions .detail-delete{
+    grid-column:1/-1;
+  }
+}
+
+@media(display-mode:standalone){
+  .mobile-nav{
+    background:color-mix(in srgb,var(--surface) 98%,transparent);
+  }
+}
