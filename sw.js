@@ -9,6 +9,7 @@ const PUBLIC_ASSETS = [
   './finance.js',
   './render.js',
   './forms.js',
+  './sync.js',
   './events.js',
   './manifest.webmanifest',
   './icon.svg'
