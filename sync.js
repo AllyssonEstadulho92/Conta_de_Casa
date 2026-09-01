@@ -22,20 +22,34 @@ let syncRetryTimer = null;
 function syncConfig() {
   if (!appState) return null;
   appState.settings ||= {};
-  appState.settings.sync ||= {
-    enabled:true,
-    disabledByUser:false,
-    owner:SYNC_DEFAULT_OWNER,
-    repo:SYNC_DEFAULT_REPO,
-    path:SYNC_DEFAULT_PATH
-  };
+  appState.settings.sync ||= {};
   const cfg = appState.settings.sync;
   cfg.disabledByUser = Boolean(cfg.disabledByUser);
   cfg.enabled = !cfg.disabledByUser;
-  cfg.owner = cleanString(cfg.owner || SYNC_DEFAULT_OWNER, 80);
-  cfg.repo = cleanString(cfg.repo || SYNC_DEFAULT_REPO, 100);
-  cfg.path = cleanString(cfg.path || SYNC_DEFAULT_PATH, 180);
+  cfg.owner = SYNC_DEFAULT_OWNER;
+  cfg.repo = SYNC_DEFAULT_REPO;
+  cfg.path = SYNC_DEFAULT_PATH;
   return cfg;
+}
+
+function syncUserError(err, fallback='Não foi possível sincronizar. Os dados locais foram preservados.') {
+  const message=String(err?.message||'');
+  const allowed=[
+    'Token GitHub inválido.',
+    'Repositório privado não encontrado ou sem acesso.',
+    'O token não tem permissão para este repositório.',
+    'O token não tem permissão de leitura.',
+    'O token precisa de Contents: Read and write.',
+    'Não foi possível validar o repositório de sincronização.',
+    'A sincronização é recusada: o repositório tem de ser privado.',
+    'Repositório de sincronização inesperado.',
+    'Falha ao obter o cofre sincronizado.',
+    'Falha ao guardar o cofre cifrado no repositório privado.',
+    'Ficheiro remoto inválido.',
+    'Formato remoto incompatível.',
+    'Cofre local incompleto.'
+  ];
+  return allowed.includes(message)?message:fallback;
 }
 
 function syncSetStatus(state, message, at = new Date().toISOString()) {
@@ -521,20 +535,18 @@ async function adoptRemoteSyncedVault() {
 
 async function configureSyncFromUi() {
   if(!appState||!vaultKey) return;
-  const owner=safeRepoPart($('#syncOwner')?.value,SYNC_DEFAULT_OWNER);
-  const repo=safeRepoPart($('#syncRepo')?.value,SYNC_DEFAULT_REPO);
-  const path=safeSyncPath($('#syncPath')?.value||SYNC_DEFAULT_PATH);
   const entered=String($('#syncToken')?.value||'').trim();
-  let token=entered||await loadSyncToken();
+  const token=entered||await loadSyncToken();
   if(!token) throw new Error('Introduza um token GitHub de acesso ao repositório privado.');
-  await verifyPrivateSyncRepo(token,{owner,repo,path});
-  if(entered) await storeSyncToken(entered);
   const cfg=syncConfig();
-  cfg.disabledByUser=false; cfg.enabled=true; cfg.owner=owner; cfg.repo=repo; cfg.path=path;
+  await verifyPrivateSyncRepo(token,cfg);
+  if(entered) await storeSyncToken(entered);
+  cfg.disabledByUser=false;
+  cfg.enabled=true;
   syncSuppressAuto=true;
   try{await saveState();}finally{syncSuppressAuto=false;}
   if($('#syncToken')) $('#syncToken').value='';
-  syncSetStatus('syncing','Configuração validada. A exportar/sincronizar o cofre cifrado...');
+  syncSetStatus('syncing','Credencial validada. A sincronização automática está a iniciar...');
   await syncNow('setup');
 }
 
@@ -582,9 +594,7 @@ async function renderSyncUi() {
   }
   if($('#syncStatusText')) $('#syncStatusText').textContent=syncLastStatus.message;
   if($('#syncLastAt')) $('#syncLastAt').textContent=meta?.lastSyncedAt?fmtDateTime(meta.lastSyncedAt):'Ainda não sincronizado';
-  if($('#syncOwner')&&!$('#syncOwner').matches(':focus')) $('#syncOwner').value=cfg.owner||SYNC_DEFAULT_OWNER;
-  if($('#syncRepo')&&!$('#syncRepo').matches(':focus')) $('#syncRepo').value=cfg.repo||SYNC_DEFAULT_REPO;
-  if($('#syncPath')&&!$('#syncPath').matches(':focus')) $('#syncPath').value=cfg.path||SYNC_DEFAULT_PATH;
+  if($('#syncDestination')) $('#syncDestination').textContent=`${SYNC_DEFAULT_OWNER}/${SYNC_DEFAULT_REPO} · ${SYNC_DEFAULT_PATH}`;
   if($('#syncTokenState')) $('#syncTokenState').textContent=token?'Token cifrado neste dispositivo':'Token ainda não guardado';
   if($('#syncAdoptBtn')) $('#syncAdoptBtn').hidden=syncLastStatus.state!=='vault-mismatch';
   if($('#syncNowBtn')) $('#syncNowBtn').disabled=!cfg.enabled||syncBusy;
@@ -642,8 +652,9 @@ async function manualSyncFromUi() {
       setSyncActionMessage(syncLastStatus.message||'Sincronização processada.');
     }
   }catch(err){
-    syncSetStatus('error',safeUserError(err,'Falha de sincronização. Os dados locais foram preservados.'));
-    setSyncActionMessage(safeUserError(err,'Não foi possível sincronizar. Os dados locais foram preservados.'),'error');
+    const message=syncUserError(err);
+    syncSetStatus('error',message);
+    setSyncActionMessage(message,'error');
   }finally{
     if(btn){btn.disabled=false;btn.textContent='Sincronizar agora';}
     renderSyncUi();
@@ -662,7 +673,7 @@ function wireSyncControls() {
       await configureSyncFromUi();
       if(msg){msg.textContent='Sincronização configurada neste dispositivo.';msg.className='form-message success';}
     }catch(err){
-      if(msg){msg.textContent=safeUserError(err,'Não foi possível configurar a sincronização.');msg.className='form-message error';}
+      if(msg){msg.textContent=syncUserError(err,'Não foi possível configurar a sincronização. Os dados locais foram preservados.');msg.className='form-message error';}
     }finally{$('#syncConfigureBtn').disabled=false;renderSyncUi();}
   });
   $('#syncNowBtn')?.addEventListener('click',manualSyncFromUi);
