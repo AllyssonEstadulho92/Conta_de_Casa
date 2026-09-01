@@ -40,4 +40,5 @@ jobs:
         run: node tests/security.test.cjs
 
       - name: Validate manifest
-        run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('Manifest: OK')"
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8')); console.log('Manifest OK')"
