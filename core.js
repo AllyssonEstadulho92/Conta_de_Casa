@@ -651,6 +651,20 @@ function backupContainsPlaintextFinancialData(text) {
   return ['"bills"','"payments"','"incomes"','"market"','"goals"','"provider"','"reference"','"notes"','"totalCents"','"amountCents"','"savedCents"','"targetCents"'].some(token => body.includes(token));
 }
 
+async function decryptBackupState(normalized, passphrase) {
+  const phrase=String(passphrase??'');
+  if(!phrase) throw new Error('Introduza o PIN do backup.');
+  try{
+    const key=await deriveVaultKey(phrase,unb64(normalized.meta.salt),Number(normalized.meta.iterations));
+    const check=dec.decode(await decryptBytes(key,normalized.meta.checkIv,normalized.meta.checkCipher));
+    if(![CHECK_TEXT_CURRENT,CHECK_TEXT_LEGACY].includes(check)) throw new Error('check-failed');
+    const plain=dec.decode(await decryptBytes(key,normalized.secure.iv,normalized.secure.cipher));
+    return ensureStateShape(JSON.parse(plain));
+  }catch(_err){
+    throw new Error('PIN do backup incorreto ou backup incompatível.');
+  }
+}
+
 const SENSITIVE_STORAGE_PATTERN = /(bill|fatura|invoice|payment|pagamento|income|rendimento|amount|valor|provider|fornecedor|reference|referencia|notes|observa|market|mercado|goal|objetivo|finance|vault|cofre|cipher|backup|pass|senha|pin|key|chave)/i;
 function installStorageGuards() {
   if (typeof Storage === 'undefined' || Storage.prototype.__contaDeCasaGuarded) return;
