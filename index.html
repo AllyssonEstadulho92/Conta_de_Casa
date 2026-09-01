@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; media-src 'none'; manifest-src 'self'; worker-src 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src https://api.github.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; media-src 'none'; manifest-src 'self'; worker-src 'self'" />
   <meta name="referrer" content="no-referrer" />
   <meta name="theme-color" content="#f7f9fc" />
   <meta name="description" content="Conta de Casa — gestão privada de faturas e despesas domésticas." />
@@ -32,7 +32,7 @@
 
       <div class="device-transfer-box">
         <strong>Usar neste dispositivo os dados do computador</strong>
-        <p>Os dados não sincronizam automaticamente entre dispositivos. Importe aqui o backup cifrado exportado no computador.</p>
+        <p>Pode importar um backup cifrado manualmente. Depois de entrar, também pode ativar a sincronização automática cifrada em Segurança.</p>
         <label class="btn secondary full file-btn">Importar cofre cifrado<input id="vaultImportInput" type="file" accept="application/json,.json" hidden /></label>
         <small>O ficheiro continua cifrado. Depois do restauro, use a palavra-passe/PIN do cofre de origem.</small>
       </div>
@@ -78,7 +78,29 @@
       <section id="page-market" class="page"><div class="section-toolbar"><div><h2>Mercado</h2><p class="muted">Lista → comprado, com preço previsto e real.</p></div><button id="newMarketBtn" class="btn primary">+ Adicionar item</button></div><div id="marketSummary" class="mini-summary"></div><div id="marketList" class="market-list"></div></section>
       <section id="page-reports" class="page"><div id="reportCards" class="kpi-grid"></div><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Por categoria</h2><p>Distribuição do mês.</p></div></div><div id="reportCategoryBars" class="bar-list"></div></article><article class="panel"><div class="panel-head"><div><h2>Últimos 6 meses</h2><p>Pagamentos e compras efetivas.</p></div></div><div id="monthlyTrend" class="trend-chart"></div></article></div></section>
       <section id="page-goals" class="page"><div class="section-toolbar"><div><h2>Objetivos</h2><p class="muted">Metas de poupança acompanhadas separadamente.</p></div><button id="newGoalBtn" class="btn primary">+ Novo objetivo</button></div><div id="goalList" class="goal-grid"></div></section>
-      <section id="page-security" class="page"><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Estado de segurança</h2><p>Confirmações locais antes de usar dados reais.</p></div></div><div id="securityStatusGrid" class="security-grid"></div><button id="securityLockBtn" class="btn secondary">Bloquear agora</button></article><article class="panel"><h2>Backup cifrado</h2><p>Exporte apenas envelopes cifrados. O restauro valida versão, estrutura e integridade antes de substituir o cofre local.</p><div id="securityBackupInfo" class="section-gap"></div><div class="button-row"><button id="exportBackupBtn" class="btn primary">Exportar backup</button><label class="btn secondary file-btn">Restaurar backup<input id="importBackupInput" type="file" accept="application/json,.json" hidden /></label></div><p id="backupMessage" class="form-message" role="status"></p></article><article class="panel span-2"><div class="panel-head"><div><h2>Políticas ativas</h2><p>Regras aplicadas para impedir fuga de dados financeiros ou pessoais.</p></div></div><div id="securityPolicyList"></div></article></div></section>
+      <section id="page-security" class="page"><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Estado de segurança</h2><p>Confirmações locais antes de usar dados reais.</p></div></div><div id="securityStatusGrid" class="security-grid"></div><button id="securityLockBtn" class="btn secondary">Bloquear agora</button></article><article class="panel"><h2>Backup cifrado</h2><p>Exporte apenas envelopes cifrados. O restauro valida versão, estrutura e integridade antes de substituir o cofre local.</p><div id="securityBackupInfo" class="section-gap"></div><div class="button-row"><button id="exportBackupBtn" class="btn primary">Exportar backup</button><label class="btn secondary file-btn">Restaurar backup<input id="importBackupInput" type="file" accept="application/json,.json" hidden /></label></div><p id="backupMessage" class="form-message" role="status"></p></article><article id="syncPanel" class="panel span-2">
+  <div class="panel-head"><div><h2>Sincronização automática cifrada</h2><p>Web e móvel usam o mesmo cofre cifrado através de um repositório GitHub privado.</p></div><span id="syncStatusBadge" class="status-chip normal">Não configurado</span></div>
+  <div class="detail-grid">
+    <div class="detail-item"><small>Estado</small><strong id="syncStatusText">Sincronização não configurada.</strong></div>
+    <div class="detail-item"><small>Última sincronização</small><strong id="syncLastAt">Ainda não sincronizado</strong></div>
+    <div class="detail-item"><small>Credencial deste dispositivo</small><strong id="syncTokenState">Token ainda não guardado</strong></div>
+    <div class="detail-item"><small>Confidencialidade</small><strong>Somente envelope cifrado</strong></div>
+  </div>
+  <div class="form-grid two section-gap">
+    <label>Conta GitHub<input id="syncOwner" value="AllyssonEstadulho92" autocomplete="off" spellcheck="false" /></label>
+    <label>Repositório privado<input id="syncRepo" value="conta-de-casa-" autocomplete="off" spellcheck="false" /></label>
+    <label class="full-row">Caminho remoto<input id="syncPath" value="sync/vault.json" autocomplete="off" spellcheck="false" /></label>
+    <label class="full-row">Token GitHub deste dispositivo<input id="syncToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Fine-grained token com acesso apenas ao repositório privado" /></label>
+  </div>
+  <p class="muted">O token fica cifrado localmente neste dispositivo e não é enviado dentro do cofre sincronizado. Use um fine-grained token limitado ao repositório privado, com Contents: Read and write.</p>
+  <div class="button-row">
+    <button id="syncConfigureBtn" class="btn primary" type="button">Ativar e exportar cofre cifrado</button>
+    <button id="syncNowBtn" class="btn secondary" type="button">Sincronizar agora</button>
+    <button id="syncAdoptBtn" class="btn secondary" type="button" hidden>Adotar dados sincronizados neste dispositivo</button>
+    <button id="syncDisableBtn" class="btn danger" type="button">Desativar neste dispositivo</button>
+  </div>
+  <p id="syncMessage" class="form-message" role="status"></p>
+</article><article class="panel span-2"><div class="panel-head"><div><h2>Políticas ativas</h2><p>Regras aplicadas para impedir fuga de dados financeiros ou pessoais.</p></div></div><div id="securityPolicyList"></div></article></div></section>
       <section id="page-settings" class="page"><article class="panel narrow"><h2>Preferências</h2><form id="settingsForm" class="form-grid"><label>Nome opcional<input id="profileName" autocomplete="name" /></label><label>Moeda<select id="currencySelect"><option value="EUR">EUR — Euro</option></select></label><label>Modo visual<select id="themeSelect"><option value="light">Claro</option><option value="dark">Escuro</option><option value="system">Sistema</option></select></label><button class="btn primary" type="submit">Guardar preferências</button></form><hr /><button id="resetDataBtn" class="btn danger">Apagar todos os dados locais</button></article></section>
     </main>
     <nav id="mobileNav" class="mobile-nav" aria-label="Navegação móvel"></nav><button id="quickAddBtn" class="fab" type="button" aria-label="Adicionar">+</button>
@@ -88,6 +110,6 @@
   <dialog id="quickDialog" class="dialog"><form method="dialog" class="dialog-shell small"><div class="dialog-head"><h2>Adicionar</h2><button class="icon-btn" value="cancel">×</button></div><div class="quick-grid"><button type="button" data-quick="bill">Fatura</button><button type="button" data-quick="income">Rendimento</button><button type="button" data-quick="market">Mercado</button><button type="button" data-quick="goal">Objetivo</button></div></form></dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="./core.js" defer></script><script src="./finance.js" defer></script><script src="./render.js" defer></script><script src="./forms.js" defer></script><script src="./events.js" defer></script>
+  <script src="./core.js" defer></script><script src="./finance.js" defer></script><script src="./render.js" defer></script><script src="./forms.js" defer></script><script src="./sync.js" defer></script><script src="./events.js" defer></script>
 </body>
 </html>
