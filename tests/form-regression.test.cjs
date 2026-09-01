@@ -36,3 +36,15 @@ assert.match(forms, /recurrenceLabel\(b\.recurrence\)/, 'bill detail must locali
 assert.match(forms, /dueText\(b\)/, 'bill detail must show a human-readable due countdown');
 
 console.log('Bill detail structure regression tests: OK');
+
+
+const events = fs.readFileSync('events.js','utf8');
+
+assert.match(forms, /data-detail-delete/);
+assert.match(events, /function billDeletionScope\(rootId\)/);
+assert.match(events, /Não é possível excluir uma fatura com pagamentos/);
+assert.match(events, /recordSyncDeletion\('bill',billId\)/);
+assert.match(events, /appState\.bills=appState\.bills\.filter/);
+assert.match(events, /await commit\('deleted','bill'\)/);
+
+console.log('Delete invoice safety tests: OK');
