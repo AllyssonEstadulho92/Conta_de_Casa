@@ -12,11 +12,11 @@ O estado financeiro fica no IndexedDB da origem da aplicação, cifrado em repou
 
 ## GitHub
 
-O repositório deve conter apenas código, documentação, workflows e assets públicos. Nunca guardar no GitHub:
+O repositório público `Conta_de_Casa` deve conter apenas código, documentação, workflows e assets públicos. Nunca guardar nele:
 
 - faturas reais;
 - valores pessoais;
-- backups exportados;
+- backups exportados em claro ou backups pessoais manuais;
 - anexos privados;
 - tokens, palavras-passe, PINs ou chaves.
 
@@ -29,7 +29,7 @@ O restauro aceita apenas backups com versão, estrutura e integridade válidas. 
 ## Limitações
 
 - limpar dados do navegador pode apagar o cofre local;
-- outro dispositivo não recebe automaticamente os dados;
+- outro dispositivo só recebe dados automaticamente depois de configurar explicitamente a sincronização cifrada nesse dispositivo;
 - perder simultaneamente palavra-passe e backups pode tornar os dados irrecuperáveis;
 - dados visíveis enquanto o cofre está desbloqueado dependem da segurança do navegador e do dispositivo;
 - anexos reais ainda não são permitidos.
@@ -37,3 +37,12 @@ O restauro aceita apenas backups com versão, estrutura e integridade válidas. 
 ## Recomendação
 
 Faça backups cifrados regularmente e guarde-os fora do GitHub. Use uma palavra-passe longa e bloqueie a aplicação quando sair do dispositivo.
+
+
+## Repositório privado de sincronização
+
+A sincronização automática usa, opcionalmente, o repositório privado `AllyssonEstadulho92/conta-de-casa-`.
+
+Esse repositório pode conter somente `sync/vault.json`, que é um envelope cifrado da aplicação. Não deve conter dados financeiros em texto legível, PIN, palavra-passe, token GitHub ou chave de cifragem.
+
+O token de acesso não é enviado para o repositório; fica cifrado localmente em cada dispositivo. A aplicação valida que o repositório é privado antes de ativar a sincronização.
