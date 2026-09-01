@@ -737,7 +737,7 @@ function securitySnapshot() {
     encryption: vaultKey ? 'Ativa' : 'Bloqueada',
     storage: 'IndexedDB cifrado',
     localStorage: 'Bloqueado para dados sensíveis',
-    cloud: 'Desativada',
+    cloud: appState?.settings?.sync?.enabled ? 'Sincronização cifrada opcional via GitHub privado' : 'Desativada',
     telemetry: 'Desativada',
     csp: 'Ativa por meta tag compatível com GitHub Pages',
     serviceWorker: 'Cache limitado a assets públicos',
