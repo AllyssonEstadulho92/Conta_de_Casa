@@ -384,6 +384,71 @@ async function mergeEncryptedBackupFile(file,passphrase) {
   };
 }
 
+async function decryptRemoteWithPassphrase(remote,passphrase) {
+  const phrase=String(passphrase??'');
+  if(!phrase) throw new Error('Introduza o PIN do cofre sincronizado.');
+  try{
+    const key=await deriveVaultKey(phrase,unb64(remote.normalized.meta.salt),Number(remote.normalized.meta.iterations));
+    const check=dec.decode(await decryptBytes(key,remote.normalized.meta.checkIv,remote.normalized.meta.checkCipher));
+    if(![CHECK_TEXT_CURRENT,CHECK_TEXT_LEGACY].includes(check)) throw new Error('check-failed');
+    const json=dec.decode(await decryptBytes(key,remote.normalized.secure.iv,remote.normalized.secure.cipher));
+    return {key,state:ensureStateShape(JSON.parse(json))};
+  }catch(_err){
+    throw new Error('PIN do cofre sincronizado incorreto.');
+  }
+}
+
+async function buildSyncWrapperFromPair(meta,secure,revision,deviceId) {
+  const backup=await buildBackupEnvelope(meta,secure);
+  const serialized=JSON.stringify(backup);
+  if(backupContainsPlaintextFinancialData(serialized)) throw new Error('Sincronização bloqueada por validação de confidencialidade.');
+  return {
+    app:'Conta_de_Casa_Sync',
+    formatVersion:SYNC_FORMAT_VERSION,
+    revision,
+    updatedAt:new Date().toISOString(),
+    deviceId,
+    backup
+  };
+}
+
+async function mergeAndAdoptRemoteVault(passphrase) {
+  if(!vaultKey||!appState) throw new Error('Cofre local bloqueado.');
+  const cfg=syncConfig();
+  const token=await loadSyncToken();
+  if(!token) throw new Error('Introduza o token GitHub deste dispositivo.');
+  const remote=syncRemoteCandidate||await fetchRemoteSyncFile(token,cfg);
+  if(!remote) throw new Error('Ainda não existe cofre remoto.');
+
+  const remoteUnlocked=await decryptRemoteWithPassphrase(remote,passphrase);
+  const merged=mergeAppStates(appState,remoteUnlocked.state);
+  const now=new Date().toISOString();
+  const encrypted=await encryptBytes(remoteUnlocked.key,enc.encode(JSON.stringify(merged.state)));
+  const secure={key:'state',iv:encrypted.iv,cipher:encrypted.cipher,updatedAt:now};
+  const device=await syncDeviceMeta();
+  const wrapper=await buildSyncWrapperFromPair(remote.normalized.meta,secure,remote.revision+1,device.deviceId);
+
+  let sha;
+  try{
+    sha=await putRemoteSyncFile(token,cfg,wrapper,remote.sha);
+  }catch(err){
+    if(err?.message==='SYNC_RACE') throw new Error('O outro dispositivo sincronizou ao mesmo tempo. Tente novamente.');
+    throw err;
+  }
+
+  await idbPutVaultPair(remote.normalized.meta,secure);
+  await saveSyncDeviceMeta({lastRemoteSha:sha,lastRevision:remote.revision+1,lastSyncedAt:now});
+  syncRemoteCandidate=null;
+  lockApp('sync-merge-adopt');
+  const msg=$('#vaultMessage');
+  if(msg){
+    msg.textContent=merged.conflicts.length
+      ? `Dados dos dois dispositivos unidos; ${merged.conflicts.length} conflito(s) foram preservados para revisão. Entre com o PIN do cofre sincronizado.`
+      : 'Dados dos dois dispositivos unidos com segurança. Entre agora com o PIN do cofre sincronizado.';
+    msg.className=merged.conflicts.length?'form-message error':'form-message success';
+  }
+}
+
 async function syncDigest(value) {
   const bytes=enc.encode(canonicalize(value));
   return b64(await crypto.subtle.digest('SHA-256',bytes));
@@ -439,7 +504,7 @@ async function syncNow(reason='manual') {
 
     if(!vaultMetaMatches(localMeta,remote.normalized.meta)){
       syncRemoteCandidate=remote;
-      syncSetStatus('vault-mismatch','Existe um cofre sincronizado diferente. Pode adotá-lo neste dispositivo sem o apagar no computador.');
+      syncSetStatus('vault-mismatch','Este dispositivo tem um cofre diferente do remoto. Use a união segura para preservar os dados dos dois lados e passar ambos para o mesmo cofre.');
       return;
     }
 
@@ -577,10 +642,10 @@ async function renderSyncUi() {
   if(header){
     const state=syncLastStatus.state;
     const localOnly=state==='not-configured'||state==='needs-token';
-    const headerClass=localOnly?'paid':syncStatusClass(state);
+    const headerClass=localOnly?'attention':syncStatusClass(state);
     header.className=`sync-header-status ${headerClass}`;
     header.title=localOnly
-      ? `Cofre local ativo — ${syncLastStatus.message}`
+      ? `Ainda sem sincronização remota — ${syncLastStatus.message}`
       : `${syncStatusLabel(state)} — ${syncLastStatus.message}`;
     header.setAttribute('aria-label',header.title);
     const text=header.querySelector('.sync-header-text');
@@ -590,14 +655,25 @@ async function renderSyncUi() {
       state==='offline'?'Offline':
       state==='conflict'?'Conflito':
       state==='vault-mismatch'?'Rever':
-      state==='error'?'Erro':'Local';
+      state==='error'?'Erro':'Sem sync';
   }
   if($('#syncStatusText')) $('#syncStatusText').textContent=syncLastStatus.message;
   if($('#syncLastAt')) $('#syncLastAt').textContent=meta?.lastSyncedAt?fmtDateTime(meta.lastSyncedAt):'Ainda não sincronizado';
   if($('#syncDestination')) $('#syncDestination').textContent=`${SYNC_DEFAULT_OWNER}/${SYNC_DEFAULT_REPO} · ${SYNC_DEFAULT_PATH}`;
   if($('#syncTokenState')) $('#syncTokenState').textContent=token?'Token cifrado neste dispositivo':'Token ainda não guardado';
-  if($('#syncAdoptBtn')) $('#syncAdoptBtn').hidden=syncLastStatus.state!=='vault-mismatch';
+  const mismatch=syncLastStatus.state==='vault-mismatch';
+  if($('#syncResolveBox')) $('#syncResolveBox').hidden=!mismatch;
+  if($('#syncAdoptBtn')) $('#syncAdoptBtn').hidden=true;
   if($('#syncNowBtn')) $('#syncNowBtn').disabled=!cfg.enabled||syncBusy;
+  if($('#syncHealthLocal')) $('#syncHealthLocal').textContent='Protegido neste dispositivo';
+  if($('#syncHealthRemote')) $('#syncHealthRemote').textContent=
+    syncLastStatus.state==='synced'?'Cofre remoto alinhado':
+    mismatch?'Cofre remoto encontrado — união necessária':
+    token?'Credencial pronta; a verificar remoto':'Ainda não ligado ao remoto';
+  if($('#syncHealthMode')) $('#syncHealthMode').textContent=
+    syncLastStatus.state==='synced'?'Automático':
+    localOnly?'Só local':
+    syncStatusLabel(syncLastStatus.state);
 }
 
 function setSyncActionMessage(message,type='') {
@@ -677,9 +753,24 @@ function wireSyncControls() {
     }finally{$('#syncConfigureBtn').disabled=false;renderSyncUi();}
   });
   $('#syncNowBtn')?.addEventListener('click',manualSyncFromUi);
-  $('#syncAdoptBtn')?.addEventListener('click',async()=>{
-    try{await adoptRemoteSyncedVault();}catch(err){
-      const msg=$('#syncMessage');if(msg){msg.textContent=safeUserError(err,'Não foi possível adotar o cofre remoto.');msg.className='form-message error';}
+  $('#syncResolveBtn')?.addEventListener('click',async()=>{
+    const btn=$('#syncResolveBtn');
+    const pin=$('#syncResolvePin');
+    const msg=$('#syncResolveMessage');
+    try{
+      if(!pin?.value) throw new Error('Introduza o PIN do cofre sincronizado.');
+      btn.disabled=true;
+      btn.textContent='A unir e alinhar…';
+      if(msg){msg.textContent='A unir os dados locais e remotos sem apagar registos…';msg.className='form-message';}
+      await mergeAndAdoptRemoteVault(pin.value);
+    }catch(err){
+      if(msg){
+        msg.textContent=syncUserError(err,err?.message||'Não foi possível unir os cofres. Os dados foram preservados.');
+        msg.className='form-message error';
+      }
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent='Unir dados e alinhar este dispositivo';}
+      if(pin) pin.value='';
     }
   });
   $('#syncDisableBtn')?.addEventListener('click',async()=>{
