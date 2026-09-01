@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v24';
+const CACHE = 'conta-de-casa-public-v27';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -19,7 +19,8 @@ const PUBLIC_ASSET_SET = new Set(PUBLIC_ASSETS);
 function publicAssetKey(requestUrl) {
   const url = new URL(requestUrl);
   if (url.origin !== self.location.origin) return null;
-  if (url.search || url.hash) return null;
+  if (url.hash) return null;
+  if (url.search && !(url.searchParams.size===1 && url.searchParams.has('v'))) return null;
   const scopePath = new URL('./', self.registration.scope).pathname;
   if (!url.pathname.startsWith(scopePath)) return null;
   const rel = url.pathname.slice(scopePath.length);

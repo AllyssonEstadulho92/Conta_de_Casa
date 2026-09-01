@@ -75,3 +75,18 @@ assert.match(css, /html\.app-active \.mobile-nav\{[\s\S]*position:fixed!importan
 assert.match(events, /document\.documentElement\.classList\.add\('app-active'\)/);
 
 console.log('Native mobile shell v8 tests: OK');
+
+
+assert.match(index, /name="app-build" content="v27"/);
+assert.match(index, /styles\.css\?v=27/);
+assert.match(index, /sync\.js\?v=27/);
+assert.match(index, /events\.js\?v=27/);
+assert.match(index, /id="appBuildVersion">v27</);
+assert.match(events, /register\('\.\/sw\.js\?v=27',\{updateViaCache:'none'\}\)/);
+assert.match(events, /controllerchange/);
+
+const swSource=fs.readFileSync('sw.js','utf8');
+assert.match(swSource, /conta-de-casa-public-v27/);
+assert.match(swSource, /url\.searchParams\.has\('v'\)/);
+
+console.log('PWA freshness v27 tests: OK');

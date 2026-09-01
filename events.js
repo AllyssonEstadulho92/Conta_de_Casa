@@ -241,7 +241,23 @@ async function enterApp() {
   clearPassphraseInputs();
   document.documentElement.classList.add('app-active');
   $('#vaultScreen').hidden=true; $('#app').hidden=false; $('#monthPicker').value=selectedMonth; renderNav(); applyTheme(); setPrivacy(false); wireEvents(); installSessionLockGuards(); showPage(currentPage()); recordUserActivity();
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  if ('serviceWorker' in navigator) {
+    (async()=>{
+      try{
+        const reg=await navigator.serviceWorker.register('./sw.js?v=27',{updateViaCache:'none'});
+        await reg.update().catch(()=>{});
+        if(!window.__swReloadBound){
+          window.__swReloadBound=true;
+          let refreshing=false;
+          navigator.serviceWorker.addEventListener('controllerchange',()=>{
+            if(refreshing) return;
+            refreshing=true;
+            location.reload();
+          });
+        }
+      }catch(_err){}
+    })();
+  }
   if (typeof startSyncLifecycle === 'function') startSyncLifecycle();
 }
 async function initVaultUi() {
