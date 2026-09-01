@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; media-src 'none'; manifest-src 'self'; worker-src 'self'" />
+  <meta name="referrer" content="no-referrer" />
   <meta name="theme-color" content="#f7f9fc" />
   <meta name="description" content="Conta de Casa — gestão privada de faturas e despesas domésticas." />
   <link rel="manifest" href="./manifest.webmanifest" />
@@ -16,15 +18,15 @@
       <div class="brand brand-large"><span class="brand-mark">⌂</span><div><strong>Conta de Casa</strong><small>O seu controlo financeiro privado</small></div></div>
       <div id="vaultCreate">
         <h1>Criar cofre local</h1>
-        <p>Defina uma palavra-passe ou PIN com pelo menos 6 caracteres. Os dados serão cifrados no dispositivo.</p>
-        <label>Palavra-passe/PIN<input id="newPassphrase" type="password" minlength="6" autocomplete="new-password" /></label>
-        <label>Confirmar<input id="confirmPassphrase" type="password" minlength="6" autocomplete="new-password" /></label>
+        <p>Defina uma palavra-passe ou PIN com pelo menos 8 caracteres. Os dados serão cifrados no dispositivo.</p>
+        <label>Palavra-passe/PIN<input id="newPassphrase" type="password" minlength="8" autocomplete="new-password" autocapitalize="off" spellcheck="false" /></label>
+        <label>Confirmar<input id="confirmPassphrase" type="password" minlength="8" autocomplete="new-password" autocapitalize="off" spellcheck="false" /></label>
         <button id="createVaultBtn" class="btn primary full">Criar cofre e entrar</button>
       </div>
       <div id="vaultUnlock" hidden>
         <h1>Desbloquear</h1>
         <p>Introduza a palavra-passe/PIN do seu cofre local.</p>
-        <label>Palavra-passe/PIN<input id="unlockPassphrase" type="password" autocomplete="current-password" /></label>
+        <label>Palavra-passe/PIN<input id="unlockPassphrase" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" /></label>
         <button id="unlockVaultBtn" class="btn primary full">Entrar</button>
       </div>
       <p id="vaultMessage" class="form-message" role="status"></p>
@@ -133,16 +135,20 @@
       <section id="page-security" class="page">
         <div class="two-col">
           <article class="panel">
-            <h2>Privacidade local</h2>
-            <p>O conteúdo financeiro é cifrado com AES-GCM. A chave é derivada da sua palavra-passe e só permanece em memória enquanto a aplicação está desbloqueada.</p>
-            <div class="security-status"><span class="status-good">✓ Cofre ativo</span><span>Dados locais cifrados</span><span>Sem telemetria financeira</span></div>
+            <div class="panel-head"><div><h2>Estado de segurança</h2><p>Confirmações locais antes de usar dados reais.</p></div></div>
+            <div id="securityStatusGrid" class="security-grid"></div>
             <button id="securityLockBtn" class="btn secondary">Bloquear agora</button>
           </article>
           <article class="panel">
             <h2>Backup cifrado</h2>
-            <p>Exporte um ficheiro que contém apenas dados já cifrados. Guarde-o num local seguro.</p>
+            <p>Exporte apenas envelopes cifrados. O restauro valida versão, estrutura e integridade antes de substituir o cofre local.</p>
+            <div id="securityBackupInfo" class="section-gap"></div>
             <div class="button-row"><button id="exportBackupBtn" class="btn primary">Exportar backup</button><label class="btn secondary file-btn">Restaurar backup<input id="importBackupInput" type="file" accept="application/json,.json" hidden /></label></div>
             <p id="backupMessage" class="form-message" role="status"></p>
+          </article>
+          <article class="panel span-2">
+            <div class="panel-head"><div><h2>Políticas ativas</h2><p>Regras aplicadas para impedir fuga de dados financeiros ou pessoais.</p></div></div>
+            <div id="securityPolicyList"></div>
           </article>
         </div>
       </section>
@@ -186,6 +192,10 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="./core.js" defer></script>\n  <script src="./finance.js" defer></script>\n  <script src="./render.js" defer></script>\n  <script src="./forms.js" defer></script>\n  <script src="./events.js" defer></script>
+  <script src="./core.js" defer></script>
+  <script src="./finance.js" defer></script>
+  <script src="./render.js" defer></script>
+  <script src="./forms.js" defer></script>
+  <script src="./events.js" defer></script>
 </body>
 </html>

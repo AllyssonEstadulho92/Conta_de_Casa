@@ -22,7 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
       - name: Validate application
         run: |
@@ -33,6 +38,8 @@ jobs:
           node --check events.js
           node --check sw.js
           node tests/finance.test.cjs
+          node tests/form-regression.test.cjs
+          node tests/security.test.cjs
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
