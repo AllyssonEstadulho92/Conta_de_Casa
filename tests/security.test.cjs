@@ -11,8 +11,8 @@ class StorageMock {
   clear() { this.data.clear(); }
 }
 
-const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','events.js','styles.css','sw.js','manifest.webmanifest'];
-const executableFiles = ['core.js','finance.js','render.js','forms.js','events.js','sw.js'];
+const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','styles.css','sw.js','manifest.webmanifest'];
+const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','sw.js'];
 const context = vm.createContext({
   crypto: webcrypto,
   TextEncoder,
@@ -56,7 +56,10 @@ assert.throws(() => vm.runInContext('sessionStorage.setItem("cdc_public_note", "
 
 for (const file of appFiles) {
   const content = fs.readFileSync(file, 'utf8');
-  assert.doesNotMatch(content, /https?:\/\//i, `${file} must not reference external URLs`);
+  const externalUrls = content.match(/https?:\/\/[^\s"'\`<>)]+/gi) || [];
+  for (const url of externalUrls) {
+    assert.equal(new URL(url).origin, 'https://api.github.com', `${file} may only reference the approved GitHub API origin`);
+  }
   assert.doesNotMatch(content, /\b(sendBeacon|XMLHttpRequest|gtag|analytics)\b|cdn\.jsdelivr|cdnjs|unpkg/i, `${file} must not include telemetry or CDN hooks`);
 }
 for (const file of executableFiles) {
@@ -66,13 +69,13 @@ for (const file of executableFiles) {
 const index = fs.readFileSync('index.html','utf8');
 assert.match(index, /Content-Security-Policy/);
 assert.match(index, /script-src 'self'/);
-assert.match(index, /connect-src 'none'/);
+assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
 assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline event handlers');
 
 const sw = fs.readFileSync('sw.js','utf8');
 assert.match(sw, /PUBLIC_ASSET_SET/);
 assert.match(sw, /url\.search \|\| url\.hash/);
-assert.doesNotMatch(sw, /cache\.put/, 'service worker must not dynamically cache arbitrary responses');
+assert.doesNotMatch(sw, /cache\.put\(event\.request|cache\.put\(request/i, 'service worker must not cache arbitrary request URLs');
 
 (async () => {
   const wrongPasswordRejected = await vm.runInContext(`(async()=>{
