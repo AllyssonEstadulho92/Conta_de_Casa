@@ -1,10 +1,20 @@
 'use strict';
 
+const APP_ID = 'Conta_de_Casa';
 const DB_NAME = 'conta_de_casa_secure';
 const DB_VERSION = 1;
-const CHECK_TEXT = 'Conta_de_Casa::vault-check::v1';
+const STATE_VERSION = 2;
+const BACKUP_FORMAT_VERSION = 2;
+const CHECK_TEXT_CURRENT = 'Conta_de_Casa::vault-check::v2';
+const CHECK_TEXT_LEGACY = 'Conta_de_Casa::vault-check::v1';
 const PBKDF2_ITERATIONS = 250000;
+const MIN_BACKUP_ITERATIONS = 250000;
 const DAY_MS = 86400000;
+const AUTO_LOCK_MINUTES = 5;
+const HIDDEN_LOCK_GRACE_MS = 60000;
+const ABSOLUTE_IDLE_MAX_MS = 30 * 60000;
+const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
+const ATTACHMENTS_REAL_FILES_ENABLED = false;
 
 let db;
 let vaultKey = null;
@@ -12,6 +22,9 @@ let appState = null;
 let selectedMonth = new Date().toISOString().slice(0, 7);
 let privacyHidden = false;
 let lockTimer = null;
+let hiddenLockTimer = null;
+let lastActivityAt = Date.now();
+let sessionLockGuardsInstalled = false;
 
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -33,10 +46,6 @@ const ICONS = {
   lock: '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'
 };
 
-function icon(name, size = 19) {
-  return `<svg class="svg-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.more}</svg>`;
-}
-
 const NAV_ITEMS = [
   ['dashboard', 'Início', 'home'],
   ['bills', 'Faturas', 'bill'],
@@ -49,12 +58,23 @@ const NAV_ITEMS = [
   ['settings', 'Configurações', 'settings']
 ];
 
+function icon(name, size = 19) {
+  const safeSize = clamp(Number(size) || 19, 12, 28);
+  return `<svg class="svg-icon" width="${safeSize}" height="${safeSize}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.more}</svg>`;
+}
+
 function uid() {
-  return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  if (crypto.randomUUID) return crypto.randomUUID();
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 function esc(v = '') {
   return String(v).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 }
+function attr(v = '') { return esc(v); }
 function parseCents(value) {
   if (typeof value === 'number') return Math.round(value * 100);
   let s = String(value ?? '').trim().replace(/\s|€/g, '');
@@ -76,6 +96,7 @@ function fmtDate(value, opts = {}) {
 function fmtDateTime(value) {
   if (!value) return '—';
   const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '—';
   return new Intl.DateTimeFormat('pt-PT', { dateStyle: 'short', timeStyle: 'short' }).format(d);
 }
 function monthOf(value) {
@@ -107,30 +128,231 @@ function b64(bytes) {
   return btoa(s);
 }
 function unb64(value) {
-  const s = atob(value);
+  const s = atob(String(value));
   const out = new Uint8Array(s.length);
   for (let i=0;i<s.length;i++) out[i] = s.charCodeAt(i);
   return out;
 }
 
+function isPlainObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+function cleanString(value, max = 160) {
+  return String(value ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+function cleanMultiline(value, max = 1200) {
+  return String(value ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, ' ').trim().slice(0, max);
+}
+function cleanCents(value, fallback = 0, min = 0) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return clamp(Math.round(n), min, 1000000000000);
+}
+function cleanIso(value, fallback = new Date().toISOString()) {
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? fallback : d.toISOString();
+}
+function optionalIso(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+function cleanRecurrence(value) {
+  return ['none','weekly','monthly','quarterly','semiannual','annual'].includes(value) ? value : 'none';
+}
+function cleanActivityType(type = 'general') {
+  return ['security','backup','bill','payment','planning','income','market','goal','settings','general'].includes(type) ? type : 'general';
+}
+function safeActivityText(_text, type = 'general') {
+  return ({
+    security: 'Evento de segurança registado',
+    backup: 'Backup cifrado atualizado',
+    bill: 'Fatura atualizada',
+    payment: 'Pagamento registado',
+    planning: 'Planeamento atualizado',
+    income: 'Rendimento atualizado',
+    market: 'Mercado atualizado',
+    goal: 'Objetivo atualizado',
+    settings: 'Preferências atualizadas',
+    general: 'Atividade local registada'
+  })[cleanActivityType(type)];
+}
+function normalizeActivityEntry(entry = {}) {
+  const type = cleanActivityType(entry.type);
+  return { id: cleanString(entry.id || uid(), 80), text: safeActivityText(entry.text, type), type, at: cleanIso(entry.at) };
+}
+function normalizeMonths(months = {}) {
+  const out = {};
+  if (!isPlainObject(months)) return out;
+  for (const [month, value] of Object.entries(months)) {
+    if (!/^\d{4}-\d{2}$/.test(month) || !isPlainObject(value)) continue;
+    out[month] = {
+      openingBalanceCents: cleanCents(value.openingBalanceCents, 0, -1000000000000),
+      budgetCents: cleanCents(value.budgetCents, 0, 0)
+    };
+  }
+  return out;
+}
+function normalizeBill(b = {}) {
+  const now = new Date().toISOString();
+  return {
+    id: cleanString(b.id || uid(), 80),
+    title: cleanString(b.title, 80),
+    provider: cleanString(b.provider, 80),
+    category: cleanString(b.category || 'Outros', 80),
+    totalCents: cleanCents(b.totalCents),
+    dueAt: cleanIso(b.dueAt, now),
+    issueAt: optionalIso(b.issueAt),
+    method: cleanString(b.method || 'Outro', 60),
+    recurrence: cleanRecurrence(b.recurrence),
+    reference: cleanString(b.reference, 160),
+    notes: cleanMultiline(b.notes, 1200),
+    createdAt: cleanIso(b.createdAt, now),
+    updatedAt: cleanIso(b.updatedAt, now),
+    recurrenceParentId: b.recurrenceParentId ? cleanString(b.recurrenceParentId, 80) : undefined,
+    cancelled: Boolean(b.cancelled),
+    archived: Boolean(b.archived)
+  };
+}
+function normalizePayment(p = {}) {
+  const now = new Date().toISOString();
+  return {
+    id: cleanString(p.id || uid(), 80),
+    billId: cleanString(p.billId, 80),
+    amountCents: cleanCents(p.amountCents),
+    paidAt: cleanIso(p.paidAt, now),
+    method: cleanString(p.method || 'Outro', 60),
+    notes: cleanMultiline(p.notes, 600),
+    createdAt: cleanIso(p.createdAt, now)
+  };
+}
+function normalizeIncome(i = {}) {
+  const now = new Date().toISOString();
+  return {
+    id: cleanString(i.id || uid(), 80),
+    description: cleanString(i.description, 100),
+    amountCents: cleanCents(i.amountCents),
+    receivedAt: cleanIso(i.receivedAt, now),
+    createdAt: cleanIso(i.createdAt, now)
+  };
+}
+function normalizeMarketItem(i = {}) {
+  const now = new Date().toISOString();
+  return {
+    id: cleanString(i.id || uid(), 80),
+    name: cleanString(i.name, 100),
+    category: cleanString(i.category || 'Outros', 80),
+    quantity: cleanString(i.quantity || '1', 40),
+    unit: cleanString(i.unit || 'un', 20),
+    estimatedCents: cleanCents(i.estimatedCents),
+    actualCents: cleanCents(i.actualCents),
+    purchased: Boolean(i.purchased),
+    createdAt: cleanIso(i.createdAt, now),
+    updatedAt: cleanIso(i.updatedAt, now),
+    purchasedAt: optionalIso(i.purchasedAt)
+  };
+}
+function normalizeGoal(g = {}) {
+  const now = new Date().toISOString();
+  return {
+    id: cleanString(g.id || uid(), 80),
+    name: cleanString(g.name, 100),
+    targetCents: cleanCents(g.targetCents),
+    savedCents: cleanCents(g.savedCents),
+    deadline: optionalIso(g.deadline),
+    createdAt: cleanIso(g.createdAt, now),
+    archived: Boolean(g.archived)
+  };
+}
+
 function defaultState() {
   return {
-    version: 1,
-    settings: { profileName: '', currency: 'EUR', theme: 'light', lockMinutes: 15 },
-    months: {}, bills: [], payments: [], incomes: [], market: [], goals: [], activity: []
+    version: STATE_VERSION,
+    settings: { profileName: '', currency: 'EUR', theme: 'light', lockMinutes: AUTO_LOCK_MINUTES, lockOnHidden: true },
+    months: {},
+    bills: [],
+    payments: [],
+    incomes: [],
+    market: [],
+    goals: [],
+    activity: [],
+    security: { lastBackupAt: null, lastRestoreAt: null },
+    attachments: { enabled: false, items: [] }
   };
 }
 function ensureStateShape(s) {
   const d = defaultState();
+  const settings = isPlainObject(s?.settings) ? s.settings : {};
   return {
-    ...d, ...s,
-    settings: { ...d.settings, ...(s?.settings || {}) },
-    months: s?.months || {}, bills: s?.bills || [], payments: s?.payments || [], incomes: s?.incomes || [], market: s?.market || [], goals: s?.goals || [], activity: s?.activity || []
+    ...d,
+    version: STATE_VERSION,
+    settings: {
+      profileName: cleanString(settings.profileName, 80),
+      currency: settings.currency === 'EUR' ? 'EUR' : 'EUR',
+      theme: ['light','dark','system'].includes(settings.theme) ? settings.theme : 'light',
+      lockMinutes: clamp(Number(settings.lockMinutes) || AUTO_LOCK_MINUTES, 1, 30),
+      lockOnHidden: settings.lockOnHidden !== false
+    },
+    months: normalizeMonths(s?.months),
+    bills: Array.isArray(s?.bills) ? s.bills.slice(0, 5000).map(normalizeBill) : [],
+    payments: Array.isArray(s?.payments) ? s.payments.slice(0, 10000).map(normalizePayment) : [],
+    incomes: Array.isArray(s?.incomes) ? s.incomes.slice(0, 5000).map(normalizeIncome) : [],
+    market: Array.isArray(s?.market) ? s.market.slice(0, 5000).map(normalizeMarketItem) : [],
+    goals: Array.isArray(s?.goals) ? s.goals.slice(0, 1000).map(normalizeGoal) : [],
+    activity: Array.isArray(s?.activity) ? s.activity.slice(0, 300).map(normalizeActivityEntry) : [],
+    security: {
+      lastBackupAt: optionalIso(s?.security?.lastBackupAt),
+      lastRestoreAt: optionalIso(s?.security?.lastRestoreAt)
+    },
+    attachments: { enabled: ATTACHMENTS_REAL_FILES_ENABLED, items: [] }
   };
 }
 function monthProfile(month = selectedMonth) {
   appState.months[month] ||= { openingBalanceCents: 0, budgetCents: 0 };
   return appState.months[month];
+}
+
+const ALLOWED_TAGS = new Set(['article','br','button','circle','datalist','div','em','form','h2','h3','input','label','option','p','path','rect','select','small','span','strong','svg','textarea']);
+const ALLOWED_ATTRS = new Set(['accept','aria-hidden','aria-label','checked','class','d','disabled','fill','height','hidden','id','inputmode','list','max','maxlength','method','min','minlength','name','placeholder','r','required','role','rx','selected','stroke','stroke-linecap','stroke-linejoin','stroke-width','type','value','viewbox','width','x','y']);
+function sanitizeHtmlFragment(html) {
+  if (typeof document === 'undefined') return String(html ?? '');
+  const template = document.createElement('template');
+  template.innerHTML = String(html ?? '');
+  const walk = node => {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const tag = node.tagName.toLowerCase();
+      if (!ALLOWED_TAGS.has(tag)) {
+        node.replaceWith(document.createTextNode(node.textContent || ''));
+        return;
+      }
+      for (const a of [...node.attributes]) {
+        const name = a.name.toLowerCase();
+        const value = a.value || '';
+        const allowed = ALLOWED_ATTRS.has(name) || name.startsWith('data-') || name.startsWith('aria-');
+        if (!allowed || name.startsWith('on') || /javascript:/i.test(value)) node.removeAttribute(a.name);
+      }
+    }
+    for (const child of [...node.childNodes]) walk(child);
+  };
+  for (const child of [...template.content.childNodes]) walk(child);
+  return template.innerHTML;
+}
+function applyDynamicStyles(root) {
+  if (!root?.querySelectorAll) return;
+  root.querySelectorAll('[data-width]').forEach(el => {
+    const pct = clamp(Number(el.dataset.width) || 0, 0, 100);
+    el.style.width = `${pct}%`;
+  });
+  root.querySelectorAll('[data-height]').forEach(el => {
+    const px = clamp(Number(el.dataset.height) || 0, 0, 180);
+    el.style.height = `${px}px`;
+  });
+}
+function setHTML(target, html) {
+  const el = typeof target === 'string' ? $(target) : target;
+  if (!el) return;
+  el.innerHTML = sanitizeHtmlFragment(html);
+  applyDynamicStyles(el);
 }
 
 async function openDb() {
@@ -168,10 +390,11 @@ async function idbClearAll() {
     req.onsuccess = () => resolve(); req.onerror = () => reject(req.error);
   })));
 }
-async function deriveVaultKey(passphrase, salt) {
-  const base = await crypto.subtle.importKey('raw', enc.encode(passphrase), { name:'PBKDF2' }, false, ['deriveKey']);
+async function deriveVaultKey(passphrase, salt, iterations = PBKDF2_ITERATIONS) {
+  const safeIterations = Number.isInteger(iterations) && iterations >= MIN_BACKUP_ITERATIONS ? iterations : PBKDF2_ITERATIONS;
+  const base = await crypto.subtle.importKey('raw', enc.encode(String(passphrase)), { name:'PBKDF2' }, false, ['deriveKey']);
   return crypto.subtle.deriveKey(
-    { name:'PBKDF2', salt, iterations:PBKDF2_ITERATIONS, hash:'SHA-256' },
+    { name:'PBKDF2', salt, iterations:safeIterations, hash:'SHA-256' },
     base, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
   );
 }
@@ -186,39 +409,270 @@ async function decryptBytes(key, iv64, cipher64) {
 async function createVault(passphrase) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   vaultKey = await deriveVaultKey(passphrase, salt);
-  const check = await encryptBytes(vaultKey, enc.encode(CHECK_TEXT));
-  await idbPut('meta', { key:'vault', version:1, salt:b64(salt), checkIv:check.iv, checkCipher:check.cipher, iterations:PBKDF2_ITERATIONS, createdAt:new Date().toISOString() });
+  const check = await encryptBytes(vaultKey, enc.encode(CHECK_TEXT_CURRENT));
+  await idbPut('meta', { key:'vault', version:2, salt:b64(salt), checkIv:check.iv, checkCipher:check.cipher, iterations:PBKDF2_ITERATIONS, createdAt:new Date().toISOString() });
   appState = defaultState();
   monthProfile(selectedMonth);
-  logActivity('Cofre local criado', 'security');
+  logActivity('created', 'security');
   await saveState();
 }
 async function unlockVault(passphrase) {
   const meta = await idbGet('meta','vault');
   if (!meta) throw new Error('Cofre não encontrado.');
-  const key = await deriveVaultKey(passphrase, unb64(meta.salt));
-  const check = dec.decode(await decryptBytes(key, meta.checkIv, meta.checkCipher));
-  if (check !== CHECK_TEXT) throw new Error('Palavra-passe/PIN incorreto.');
+  let key;
+  try {
+    key = await deriveVaultKey(passphrase, unb64(meta.salt), Number(meta.iterations));
+    const check = dec.decode(await decryptBytes(key, meta.checkIv, meta.checkCipher));
+    if (![CHECK_TEXT_CURRENT, CHECK_TEXT_LEGACY].includes(check)) throw new Error('check-failed');
+  } catch (_err) {
+    vaultKey = null;
+    throw new Error('Palavra-passe/PIN incorreto.');
+  }
   vaultKey = key;
   const secured = await idbGet('secure','state');
-  if (!secured) appState = defaultState();
-  else appState = ensureStateShape(JSON.parse(dec.decode(await decryptBytes(vaultKey, secured.iv, secured.cipher))));
+  try {
+    if (!secured) appState = defaultState();
+    else appState = ensureStateShape(JSON.parse(dec.decode(await decryptBytes(vaultKey, secured.iv, secured.cipher))));
+  } catch (_err) {
+    vaultKey = null;
+    appState = null;
+    throw new Error('O cofre local não passou na validação de integridade.');
+  }
   monthProfile(selectedMonth);
   await syncRecurringBills();
 }
 async function saveState() {
   if (!vaultKey || !appState) return;
+  appState = ensureStateShape(appState);
   const payload = enc.encode(JSON.stringify(appState));
   const encrypted = await encryptBytes(vaultKey, payload);
   await idbPut('secure', { key:'state', ...encrypted, updatedAt:new Date().toISOString() });
 }
 function logActivity(text, type='general') {
   if (!appState) return;
-  appState.activity.unshift({ id:uid(), text, type, at:new Date().toISOString() });
+  const safeType = cleanActivityType(type);
+  appState.activity.unshift({ id:uid(), text:safeActivityText(text, safeType), type:safeType, at:new Date().toISOString() });
   if (appState.activity.length > 300) appState.activity.length = 300;
 }
 async function commit(message, type='general') {
   if (message) logActivity(message, type);
   await saveState();
   renderCurrentPage();
+}
+
+function requireBase64Bytes(value, min, max, label) {
+  if (typeof value !== 'string' || !value) throw new Error(`Campo ${label} inválido.`);
+  let bytes;
+  try { bytes = unb64(value); } catch (_err) { throw new Error(`Campo ${label} inválido.`); }
+  if (bytes.length < min || bytes.length > max) throw new Error(`Campo ${label} inválido.`);
+  return value;
+}
+function validIsoOrNow(value) {
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+}
+function normalizeVaultMetaForBackup(meta) {
+  if (!isPlainObject(meta)) throw new Error('Ficheiro de backup inválido.');
+  const iterations = Number(meta.iterations);
+  if (!Number.isInteger(iterations) || iterations < MIN_BACKUP_ITERATIONS) throw new Error('Parâmetros criptográficos inválidos.');
+  return {
+    key:'vault',
+    version: Number(meta.version) >= 1 ? Number(meta.version) : 1,
+    salt: requireBase64Bytes(meta.salt, 16, 64, 'salt'),
+    checkIv: requireBase64Bytes(meta.checkIv, 12, 12, 'checkIv'),
+    checkCipher: requireBase64Bytes(meta.checkCipher, 16, 4096, 'checkCipher'),
+    iterations,
+    createdAt: validIsoOrNow(meta.createdAt)
+  };
+}
+function normalizeSecureRecordForBackup(secure) {
+  if (!isPlainObject(secure)) throw new Error('Ficheiro de backup inválido.');
+  return {
+    key:'state',
+    iv: requireBase64Bytes(secure.iv, 12, 12, 'iv'),
+    cipher: requireBase64Bytes(secure.cipher, 16, MAX_IMPORT_BYTES, 'cipher'),
+    updatedAt: validIsoOrNow(secure.updatedAt)
+  };
+}
+function canonicalize(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalize).join(',')}]`;
+  if (isPlainObject(value)) {
+    return `{${Object.keys(value).filter(k => value[k] !== undefined).sort().map(k => `${JSON.stringify(k)}:${canonicalize(value[k])}`).join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+async function sha256Text(text) {
+  return b64(new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(text))));
+}
+async function buildBackupEnvelope(meta, secure) {
+  const envelope = {
+    app: APP_ID,
+    formatVersion: BACKUP_FORMAT_VERSION,
+    exportedAt: new Date().toISOString(),
+    crypto: { cipher:'AES-GCM', kdf:'PBKDF2-SHA-256', stateVersion:STATE_VERSION },
+    meta: normalizeVaultMetaForBackup(meta),
+    secure: normalizeSecureRecordForBackup(secure)
+  };
+  envelope.integrity = { alg:'SHA-256', digest: await sha256Text(canonicalize(envelope)) };
+  return envelope;
+}
+async function verifyBackupIntegrity(obj) {
+  if (!isPlainObject(obj?.integrity) || obj.integrity.alg !== 'SHA-256' || typeof obj.integrity.digest !== 'string') {
+    throw new Error('Backup sem validação de integridade.');
+  }
+  const clone = { ...obj };
+  delete clone.integrity;
+  const digest = await sha256Text(canonicalize(clone));
+  if (digest !== obj.integrity.digest) throw new Error('Backup corrompido ou adulterado.');
+  return true;
+}
+function validateBackupEnvelope(obj) {
+  if (!isPlainObject(obj) || obj.app !== APP_ID || obj.formatVersion !== BACKUP_FORMAT_VERSION) {
+    throw new Error('Ficheiro de backup inválido ou desatualizado.');
+  }
+  if (!isPlainObject(obj.crypto) || obj.crypto.cipher !== 'AES-GCM' || obj.crypto.kdf !== 'PBKDF2-SHA-256') {
+    throw new Error('Parâmetros criptográficos inválidos.');
+  }
+  return { meta: normalizeVaultMetaForBackup(obj.meta), secure: normalizeSecureRecordForBackup(obj.secure) };
+}
+async function parseBackupText(text) {
+  if (String(text).length > MAX_IMPORT_BYTES) throw new Error('Ficheiro de backup demasiado grande.');
+  let obj;
+  try { obj = JSON.parse(text); } catch (_err) { throw new Error('Ficheiro de backup inválido.'); }
+  const normalized = validateBackupEnvelope(obj);
+  await verifyBackupIntegrity(obj);
+  return normalized;
+}
+function backupContainsPlaintextFinancialData(text) {
+  const body = String(text);
+  return ['"bills"','"payments"','"incomes"','"market"','"goals"','"provider"','"reference"','"notes"','"totalCents"','"amountCents"','"savedCents"','"targetCents"'].some(token => body.includes(token));
+}
+
+const SENSITIVE_STORAGE_PATTERN = /(bill|fatura|invoice|payment|pagamento|income|rendimento|amount|valor|provider|fornecedor|reference|referencia|notes|observa|market|mercado|goal|objetivo|finance|vault|cofre|cipher|backup|pass|senha|pin|key|chave)/i;
+function installStorageGuards() {
+  if (typeof Storage === 'undefined' || Storage.prototype.__contaDeCasaGuarded) return;
+  const originalSetItem = Storage.prototype.setItem;
+  Storage.prototype.setItem = function guardedSetItem(key, value) {
+    const k = String(key ?? '');
+    const v = String(value ?? '');
+    if (!k.startsWith('cdc_public_') || SENSITIVE_STORAGE_PATTERN.test(`${k} ${v}`) || v.length > 256) {
+      throw new Error('Armazenamento em claro bloqueado pela política de segurança.');
+    }
+    return originalSetItem.call(this, k, v);
+  };
+  Object.defineProperty(Storage.prototype, '__contaDeCasaGuarded', { value:true });
+}
+function installRuntimeErrorGuards() {
+  if (typeof window === 'undefined' || window.__contaDeCasaRuntimeGuarded) return;
+  const showSafeMessage = () => {
+    const msg = 'Ocorreu um erro interno. A aplicação bloqueou detalhes sensíveis.';
+    if (appState && !$('#app')?.hidden) toast(msg);
+    else {
+      const el = $('#vaultMessage');
+      if (el) { el.textContent = msg; el.className = 'form-message error'; }
+    }
+  };
+  window.addEventListener('error', event => { event.preventDefault(); showSafeMessage(); });
+  window.addEventListener('unhandledrejection', event => { event.preventDefault(); showSafeMessage(); });
+  window.__contaDeCasaRuntimeGuarded = true;
+}
+function safeUserError(err, fallback = 'Operação não concluída por validação de segurança.') {
+  const msg = cleanString(err?.message, 140);
+  const allowed = [
+    'Ficheiro de backup inválido.',
+    'Ficheiro de backup inválido ou desatualizado.',
+    'Backup sem validação de integridade.',
+    'Backup corrompido ou adulterado.',
+    'Ficheiro de backup demasiado grande.',
+    'Parâmetros criptográficos inválidos.'
+  ];
+  return allowed.includes(msg) || msg.startsWith('Campo ') ? msg : fallback;
+}
+
+function recordUserActivity() {
+  lastActivityAt = Date.now();
+  resetLockTimer();
+}
+function resetLockTimer() {
+  clearTimeout(lockTimer);
+  if (!vaultKey || !appState) return;
+  const mins = clamp(Number(appState.settings?.lockMinutes) || AUTO_LOCK_MINUTES, 1, 30);
+  const timeoutMs = Math.min(mins * 60000, ABSOLUTE_IDLE_MAX_MS);
+  lockTimer = setTimeout(() => { if (vaultKey) lockApp('idle'); }, timeoutMs);
+}
+function scheduleHiddenLock() {
+  clearTimeout(hiddenLockTimer);
+  if (!vaultKey || !appState || appState.settings?.lockOnHidden === false) return;
+  hiddenLockTimer = setTimeout(() => { if (vaultKey) lockApp('hidden'); }, HIDDEN_LOCK_GRACE_MS);
+}
+function handleVisibilityReturn() {
+  clearTimeout(hiddenLockTimer);
+  if (!vaultKey || !appState) return;
+  if (Date.now() - lastActivityAt > HIDDEN_LOCK_GRACE_MS) lockApp('hidden-return');
+  else resetLockTimer();
+}
+function installSessionLockGuards() {
+  if (typeof window === 'undefined' || typeof document === 'undefined' || sessionLockGuardsInstalled) return;
+  sessionLockGuardsInstalled = true;
+  ['pointerdown','keydown','touchstart','input','scroll'].forEach(ev => document.addEventListener(ev, recordUserActivity, { passive:true }));
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) scheduleHiddenLock();
+    else handleVisibilityReturn();
+  });
+  window.addEventListener('blur', scheduleHiddenLock);
+  window.addEventListener('focus', handleVisibilityReturn);
+  window.addEventListener('pagehide', () => { if (vaultKey) lockApp('pagehide'); });
+}
+function clearPassphraseInputs() {
+  if (typeof document === 'undefined') return;
+  ['#newPassphrase','#confirmPassphrase','#unlockPassphrase'].forEach(sel => { const el = $(sel); if (el) el.value = ''; });
+}
+function wipeSensitiveUi() {
+  if (typeof document === 'undefined') return;
+  ['#alertsPanel','#kpiGrid','#upcomingBills','#categoryBars','#budgetPanel','#activityList','#billSummary','#billsList','#calendarGrid','#calendarAgenda','#incomeList','#marketSummary','#marketList','#reportCards','#reportCategoryBars','#monthlyTrend','#goalList','#securityStatusGrid','#securityBackupInfo','#dialogBody'].forEach(sel => {
+    const el = $(sel);
+    if (el) el.textContent = '';
+  });
+  const app = $('#app');
+  if (app) $$('input, textarea', app).forEach(el => { if (el.type !== 'file') el.value = ''; });
+  clearPassphraseInputs();
+}
+function destroyVaultSession() {
+  clearTimeout(lockTimer);
+  clearTimeout(hiddenLockTimer);
+  vaultKey = null;
+  appState = null;
+}
+function lockApp(_reason = 'manual') {
+  destroyVaultSession();
+  wipeSensitiveUi();
+  if (typeof document === 'undefined') return;
+  const formDialog = $('#formDialog');
+  const quickDialog = $('#quickDialog');
+  if (formDialog?.open) formDialog.close();
+  if (quickDialog?.open) quickDialog.close();
+  $('#app').hidden = true;
+  $('#vaultScreen').hidden = false;
+  $('#vaultCreate').hidden = true;
+  $('#vaultUnlock').hidden = false;
+  const unlock = $('#unlockPassphrase');
+  if (unlock) unlock.focus();
+}
+function securitySnapshot() {
+  const lockMinutes = clamp(Number(appState?.settings?.lockMinutes) || AUTO_LOCK_MINUTES, 1, 30);
+  return {
+    encryption: vaultKey ? 'Ativa' : 'Bloqueada',
+    storage: 'IndexedDB cifrado',
+    localStorage: 'Bloqueado para dados sensíveis',
+    cloud: 'Desativada',
+    telemetry: 'Desativada',
+    csp: 'Ativa por meta tag compatível com GitHub Pages',
+    serviceWorker: 'Cache limitado a assets públicos',
+    attachments: ATTACHMENTS_REAL_FILES_ENABLED ? 'Cifragem de ficheiros ativa' : 'Anexos reais bloqueados',
+    lock: `${lockMinutes} min de inatividade e bloqueio ao perder foco`,
+    lastBackupAt: appState?.security?.lastBackupAt || null
+  };
+}
+function ensureAttachmentsFeatureBlocked() {
+  throw new Error('Anexos reais estão bloqueados até a cifragem de ficheiros estar concluída.');
 }

@@ -33,6 +33,8 @@ jobs:
           node --check events.js
           node --check sw.js
           node tests/finance.test.cjs
+          node tests/form-regression.test.cjs
+          node tests/security.test.cjs
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

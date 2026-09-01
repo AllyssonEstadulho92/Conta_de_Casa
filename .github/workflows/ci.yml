@@ -32,5 +32,8 @@ jobs:
       - name: Invoice form regression tests
         run: node tests/form-regression.test.cjs
 
+      - name: Security hardening tests
+        run: node tests/security.test.cjs
+
       - name: Validate manifest
         run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('Manifest: OK')"

@@ -1,0 +1,146 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const { webcrypto } = require('node:crypto');
+
+class StorageMock {
+  constructor() { this.data = new Map(); }
+  setItem(key, value) { this.data.set(String(key), String(value)); }
+  getItem(key) { return this.data.has(String(key)) ? this.data.get(String(key)) : null; }
+  removeItem(key) { this.data.delete(String(key)); }
+  clear() { this.data.clear(); }
+}
+
+const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','events.js','styles.css','sw.js','manifest.webmanifest'];
+const executableFiles = ['core.js','finance.js','render.js','forms.js','events.js','sw.js'];
+const context = vm.createContext({
+  crypto: webcrypto,
+  TextEncoder,
+  TextDecoder,
+  Intl,
+  Date,
+  Math,
+  Number,
+  String,
+  Boolean,
+  Map,
+  Set,
+  Uint8Array,
+  Array,
+  Object,
+  JSON,
+  RegExp,
+  Error,
+  Promise,
+  atob,
+  btoa,
+  Storage: StorageMock,
+  localStorage: new StorageMock(),
+  sessionStorage: new StorageMock()
+});
+
+const core = fs.readFileSync('core.js','utf8');
+vm.runInContext(core, context);
+
+assert.doesNotMatch(core, /Math\.random/, 'IDs must not fall back to Math.random');
+assert.match(vm.runInContext('uid()', context), /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+
+const escaped = vm.runInContext('esc(`<img src=x onerror=alert(1)>`)', context);
+assert.doesNotMatch(escaped, /<img/i);
+assert.match(escaped, /&lt;img/);
+assert.doesNotMatch(vm.runInContext('attr(`" autofocus onfocus=alert(1)`)', context), /"/);
+
+vm.runInContext('installStorageGuards(); localStorage.setItem("cdc_public_theme", "light")', context);
+assert.throws(() => vm.runInContext('localStorage.setItem("bill", "Fornecedor privado")', context), /Armazenamento em claro bloqueado/);
+assert.throws(() => vm.runInContext('sessionStorage.setItem("cdc_public_note", "amountCents=123")', context), /Armazenamento em claro bloqueado/);
+
+for (const file of appFiles) {
+  const content = fs.readFileSync(file, 'utf8');
+  assert.doesNotMatch(content, /https?:\/\//i, `${file} must not reference external URLs`);
+  assert.doesNotMatch(content, /\b(sendBeacon|XMLHttpRequest|gtag|analytics)\b|cdn\.jsdelivr|cdnjs|unpkg/i, `${file} must not include telemetry or CDN hooks`);
+}
+for (const file of executableFiles) {
+  assert.doesNotMatch(fs.readFileSync(file, 'utf8'), /console\./, `${file} must not write app data to console`);
+}
+
+const index = fs.readFileSync('index.html','utf8');
+assert.match(index, /Content-Security-Policy/);
+assert.match(index, /script-src 'self'/);
+assert.match(index, /connect-src 'none'/);
+assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline event handlers');
+
+const sw = fs.readFileSync('sw.js','utf8');
+assert.match(sw, /PUBLIC_ASSET_SET/);
+assert.match(sw, /url\.search \|\| url\.hash/);
+assert.doesNotMatch(sw, /cache\.put/, 'service worker must not dynamically cache arbitrary responses');
+
+(async () => {
+  const wrongPasswordRejected = await vm.runInContext(`(async()=>{
+    const salt=crypto.getRandomValues(new Uint8Array(16));
+    const key=await deriveVaultKey('palavra-passe-correta',salt);
+    const payload=await encryptBytes(key,enc.encode('conteudo privado'));
+    const wrong=await deriveVaultKey('palavra-passe-errada',salt);
+    try{await decryptBytes(wrong,payload.iv,payload.cipher);return false;}catch(_err){return true;}
+  })()`, context);
+  assert.equal(wrongPasswordRejected, true);
+
+  const tamperedPayloadRejected = await vm.runInContext(`(async()=>{
+    const salt=crypto.getRandomValues(new Uint8Array(16));
+    const key=await deriveVaultKey('palavra-passe-correta',salt);
+    const payload=await encryptBytes(key,enc.encode('conteudo privado'));
+    const bad={...payload,cipher:payload.cipher.slice(0,-4)+'AAAA'};
+    try{await decryptBytes(key,bad.iv,bad.cipher);return false;}catch(_err){return true;}
+  })()`, context);
+  assert.equal(tamperedPayloadRejected, true);
+
+  const backupChecks = await vm.runInContext(`(async()=>{
+    const salt=crypto.getRandomValues(new Uint8Array(16));
+    const key=await deriveVaultKey('frase longa local',salt);
+    const check=await encryptBytes(key,enc.encode(CHECK_TEXT_CURRENT));
+    const state=ensureStateShape({
+      bills:[{id:'b1',title:'Fornecedor <script>',provider:'Privado',category:'Casa',totalCents:1234,dueAt:'2026-09-20T12:00:00.000Z'}],
+      payments:[],
+      incomes:[],
+      market:[],
+      goals:[],
+      activity:[{id:'a1',type:'bill',text:'Fatura "Fornecedor" criada',at:'2026-09-01T12:00:00.000Z'}]
+    });
+    const securePayload=await encryptBytes(key,enc.encode(JSON.stringify(state)));
+    const meta={key:'vault',version:2,salt:b64(salt),checkIv:check.iv,checkCipher:check.cipher,iterations:PBKDF2_ITERATIONS,createdAt:'2026-09-01T12:00:00.000Z'};
+    const secure={key:'state',iv:securePayload.iv,cipher:securePayload.cipher,updatedAt:'2026-09-01T12:00:00.000Z'};
+    const backup=await buildBackupEnvelope(meta,secure);
+    const text=JSON.stringify(backup);
+    const parsed=await parseBackupText(text);
+    const corrupted={...backup,secure:{...backup.secure,updatedAt:'2026-09-02T12:00:00.000Z'}};
+    let corruptRejected=false;
+    try{await parseBackupText(JSON.stringify(corrupted));}catch(_err){corruptRejected=true;}
+    appState=null;
+    const restored=ensureStateShape(JSON.parse(dec.decode(await decryptBytes(key,securePayload.iv,securePayload.cipher))));
+    return {
+      parsed:parsed.meta.key==='vault'&&parsed.secure.key==='state',
+      hasPlain:backupContainsPlaintextFinancialData(text),
+      corruptRejected,
+      restoredTitle:restored.bills[0].title,
+      restoredAmount:restored.bills[0].totalCents,
+      activityText:restored.activity[0].text,
+      backupText:text
+    };
+  })()`, context);
+  assert.equal(backupChecks.parsed, true);
+  assert.equal(backupChecks.hasPlain, false);
+  assert.equal(backupChecks.corruptRejected, true);
+  assert.equal(backupChecks.restoredTitle, 'Fornecedor <script>');
+  assert.equal(backupChecks.restoredAmount, 1234);
+  assert.equal(backupChecks.activityText, 'Fatura atualizada');
+  assert.doesNotMatch(backupChecks.backupText, /Fornecedor|Privado|amountCents|totalCents|bills/);
+
+  await assert.rejects(
+    () => vm.runInContext('parseBackupText(JSON.stringify({app:APP_ID,formatVersion:1}))', context),
+    /desatualizado/
+  );
+
+  console.log('Security tests: OK');
+})().catch(err => {
+  console.error(err);
+  process.exitCode = 1;
+});
