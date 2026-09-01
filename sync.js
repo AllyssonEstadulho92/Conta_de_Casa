@@ -331,6 +331,45 @@ function mergeAppStates(localState,remoteState) {
   return {state:ensureStateShape(merged),conflicts};
 }
 
+async function mergeEncryptedBackupFile(file,passphrase) {
+  if(!vaultKey||!appState) throw new Error('Cofre local bloqueado.');
+  if(!file) throw new Error('Selecione o backup cifrado do outro dispositivo.');
+  if(file.size>MAX_IMPORT_BYTES) throw new Error('Ficheiro de backup demasiado grande.');
+  const text=await file.text();
+  if(backupContainsPlaintextFinancialData(text)) throw new Error('Backup em claro bloqueado.');
+  const normalized=await parseBackupText(text);
+  const sourceState=await decryptBackupState(normalized,passphrase);
+
+  const before={
+    bills:appState.bills.length,
+    payments:appState.payments.length,
+    incomes:appState.incomes.length,
+    market:appState.market.length,
+    goals:appState.goals.length
+  };
+  const merged=mergeAppStates(appState,sourceState);
+  appState=merged.state;
+  logActivity('merged','backup');
+  await saveState();
+  renderCurrentPage();
+
+  const after={
+    bills:appState.bills.length,
+    payments:appState.payments.length,
+    incomes:appState.incomes.length,
+    market:appState.market.length,
+    goals:appState.goals.length
+  };
+  return {
+    addedBills:Math.max(0,after.bills-before.bills),
+    addedPayments:Math.max(0,after.payments-before.payments),
+    addedIncomes:Math.max(0,after.incomes-before.incomes),
+    addedMarket:Math.max(0,after.market-before.market),
+    addedGoals:Math.max(0,after.goals-before.goals),
+    conflicts:merged.conflicts.length
+  };
+}
+
 async function syncDigest(value) {
   const bytes=enc.encode(canonicalize(value));
   return b64(await crypto.subtle.digest('SHA-256',bytes));
@@ -634,6 +673,39 @@ function wireSyncControls() {
   });
   $('#syncDisableBtn')?.addEventListener('click',async()=>{
     if(confirm('Desativar a sincronização automática neste dispositivo? O ficheiro cifrado remoto não será apagado.')) await disableSync();
+  });
+  $('#syncMergeBackupBtn')?.addEventListener('click',async()=>{
+    const btn=$('#syncMergeBackupBtn');
+    const msg=$('#syncMergeMessage');
+    const input=$('#syncMergeBackupInput');
+    const pin=$('#syncMergeBackupPin');
+    if(msg){msg.textContent='';msg.className='form-message';}
+    try{
+      if(!input?.files?.[0]) throw new Error('Selecione o backup cifrado do outro dispositivo.');
+      if(!pin?.value) throw new Error('Introduza o PIN do backup.');
+      btn.disabled=true;
+      btn.textContent='A juntar dados…';
+      const result=await mergeEncryptedBackupFile(input.files[0],pin.value);
+      pin.value='';
+      input.value='';
+      const added=result.addedBills+result.addedPayments+result.addedIncomes+result.addedMarket+result.addedGoals;
+      if(msg){
+        msg.textContent=result.conflicts
+          ? `Dados unidos: ${added} registo(s) acrescentado(s), com ${result.conflicts} conflito(s) preservado(s) para revisão.`
+          : `Dados unidos com segurança: ${added} registo(s) acrescentado(s). Agora ative/exporte a sincronização neste dispositivo.`;
+        msg.className=result.conflicts?'form-message error':'form-message success';
+      }
+      if((await loadSyncToken().catch(()=>null)) && syncConfig()?.enabled) await syncNow('backup-merge');
+    }catch(err){
+      if(msg){
+        const known=['Selecione o backup cifrado do outro dispositivo.','Introduza o PIN do backup.','PIN do backup incorreto ou backup incompatível.','Ficheiro de backup demasiado grande.','Backup em claro bloqueado.'];
+        msg.textContent=known.includes(err?.message)?err.message:'Não foi possível juntar o backup. Os dados locais foram preservados.';
+        msg.className='form-message error';
+      }
+    }finally{
+      btn.disabled=false;
+      btn.textContent='Juntar dados sem apagar';
+    }
   });
 }
 
