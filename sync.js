@@ -23,12 +23,15 @@ function syncConfig() {
   if (!appState) return null;
   appState.settings ||= {};
   appState.settings.sync ||= {
-    enabled:false,
+    enabled:true,
+    disabledByUser:false,
     owner:SYNC_DEFAULT_OWNER,
     repo:SYNC_DEFAULT_REPO,
     path:SYNC_DEFAULT_PATH
   };
   const cfg = appState.settings.sync;
+  cfg.disabledByUser = Boolean(cfg.disabledByUser);
+  cfg.enabled = !cfg.disabledByUser;
   cfg.owner = cleanString(cfg.owner || SYNC_DEFAULT_OWNER, 80);
   cfg.repo = cleanString(cfg.repo || SYNC_DEFAULT_REPO, 100);
   cfg.path = cleanString(cfg.path || SYNC_DEFAULT_PATH, 180);
@@ -488,7 +491,7 @@ async function configureSyncFromUi() {
   await verifyPrivateSyncRepo(token,{owner,repo,path});
   if(entered) await storeSyncToken(entered);
   const cfg=syncConfig();
-  cfg.enabled=true; cfg.owner=owner; cfg.repo=repo; cfg.path=path;
+  cfg.disabledByUser=false; cfg.enabled=true; cfg.owner=owner; cfg.repo=repo; cfg.path=path;
   syncSuppressAuto=true;
   try{await saveState();}finally{syncSuppressAuto=false;}
   if($('#syncToken')) $('#syncToken').value='';
@@ -499,6 +502,7 @@ async function configureSyncFromUi() {
 async function disableSync() {
   if(!appState) return;
   const cfg=syncConfig();
+  cfg.disabledByUser=true;
   cfg.enabled=false;
   syncSuppressAuto=true;
   try{await saveState();}finally{syncSuppressAuto=false;}
