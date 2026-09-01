@@ -40,6 +40,9 @@ jobs:
           node tests/finance.test.cjs
           node tests/form-regression.test.cjs
           node tests/security.test.cjs
+          node tests/responsive.test.cjs
+          node tests/form-regression.test.cjs
+          node tests/security.test.cjs
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
