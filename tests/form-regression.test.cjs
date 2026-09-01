@@ -3,7 +3,7 @@ const fs = require('node:fs');
 
 const forms = fs.readFileSync('forms.js', 'utf8');
 
-assert.match(forms, /function openDialog\(title, html\)/, 'dialog helper must exist');
+assert.match(forms, /function openDialog\(title, html, mode='form'\)/, 'dialog helper must exist');
 assert.match(forms, /setHTML\('#dialogBody', html\)/, 'dialog body must pass through the sanitizer');
 assert.match(forms, /f\.addEventListener\('submit',handleBillSubmit\)/, 'invoice submit handler must be wired');
 assert.match(forms, /e\.preventDefault\(\)/, 'invoice submission must not trigger native form navigation');
@@ -15,3 +15,16 @@ assert.match(forms, /cleanMultiline\(fd\.get\('notes'\),1200\)/, 'invoice notes 
 assert.doesNotMatch(forms, /commit\(`Fatura/, 'commit history must not include sensitive invoice text');
 
 console.log('Invoice form regression tests: OK');
+
+
+const index = fs.readFileSync('index.html','utf8');
+const events = fs.readFileSync('events.js','utf8');
+
+assert.match(index, /id="formDialog"[\s\S]*data-close-dialog[\s\S]*aria-label="Fechar janela"/, 'main dialog must expose an explicit close button');
+assert.doesNotMatch(index, /id="formDialog"[^>]*>[\s\S]{0,80}<form method="dialog"/, 'main dialog shell must not rely on nested/native form-dialog behavior');
+assert.match(events, /formDialog\.addEventListener\('cancel'[\s\S]*closeDialog\(\)/, 'Escape/cancel must close the main dialog');
+assert.match(events, /e\.target===formDialog\)closeDialog\(\)/, 'backdrop tap must close the main dialog');
+assert.match(forms, /if \(!dialog\.open\) dialog\.showModal\(\)/, 'opening a new view inside an existing modal must not throw');
+assert.match(forms, /data-close-dialog>Fechar<\/button>/, 'bill details must include a redundant close action');
+
+console.log('Modal close regression tests: OK');
