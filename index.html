@@ -111,8 +111,24 @@
     <nav id="mobileNav" class="mobile-nav" aria-label="Navegação móvel"></nav><button id="quickAddBtn" class="fab" type="button" aria-label="Adicionar">+</button>
   </div>
 
-  <dialog id="formDialog" class="dialog"><form method="dialog" class="dialog-shell" id="dialogShell"><div class="dialog-head"><div><p class="eyebrow">Conta de Casa</p><h2 id="dialogTitle">Novo registo</h2></div><button class="icon-btn" value="cancel" aria-label="Fechar">×</button></div><div id="dialogBody"></div></form></dialog>
-  <dialog id="quickDialog" class="dialog"><form method="dialog" class="dialog-shell small"><div class="dialog-head"><h2>Adicionar</h2><button class="icon-btn" value="cancel">×</button></div><div class="quick-grid"><button type="button" data-quick="bill">Fatura</button><button type="button" data-quick="income">Rendimento</button><button type="button" data-quick="market">Mercado</button><button type="button" data-quick="goal">Objetivo</button></div></form></dialog>
+  <dialog id="formDialog" class="dialog" aria-labelledby="dialogTitle">
+    <div class="dialog-shell" id="dialogShell">
+      <div class="dialog-head">
+        <div><p class="eyebrow">Conta de Casa</p><h2 id="dialogTitle">Novo registo</h2></div>
+        <button class="icon-btn dialog-close" type="button" data-close-dialog aria-label="Fechar janela">×</button>
+      </div>
+      <div id="dialogBody"></div>
+    </div>
+  </dialog>
+  <dialog id="quickDialog" class="dialog" aria-labelledby="quickDialogTitle">
+    <div class="dialog-shell small">
+      <div class="dialog-head">
+        <h2 id="quickDialogTitle">Adicionar</h2>
+        <button class="icon-btn dialog-close" type="button" data-close-quick-dialog aria-label="Fechar janela">×</button>
+      </div>
+      <div class="quick-grid"><button type="button" data-quick="bill">Fatura</button><button type="button" data-quick="income">Rendimento</button><button type="button" data-quick="market">Mercado</button><button type="button" data-quick="goal">Objetivo</button></div>
+    </div>
+  </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./core.js" defer></script><script src="./finance.js" defer></script><script src="./render.js" defer></script><script src="./forms.js" defer></script><script src="./sync.js" defer></script><script src="./events.js" defer></script>
