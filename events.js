@@ -38,6 +38,32 @@ async function initVaultUi() {
   installRuntimeErrorGuards();
   await openDb();
   const meta=await idbGet('meta','vault'); $('#vaultCreate').hidden=!!meta; $('#vaultUnlock').hidden=!meta;
+
+  const vaultImportInput=$('#vaultImportInput');
+  if(vaultImportInput){
+    vaultImportInput.addEventListener('change',async e=>{
+      const file=e.target.files?.[0];
+      const msg=$('#vaultMessage');
+      msg.className='form-message';
+      if(!file)return;
+      try{
+        msg.textContent='A validar e restaurar o cofre cifrado...';
+        await importBackup(file);
+        msg.textContent='Cofre restaurado neste dispositivo. Introduza agora a palavra-passe/PIN do cofre do computador.';
+        msg.classList.add('success');
+        $('#vaultCreate').hidden=true;
+        $('#vaultUnlock').hidden=false;
+        $('#unlockPassphrase').value='';
+        $('#unlockPassphrase').focus();
+      }catch(err){
+        msg.textContent=safeUserError(err,'Não foi possível restaurar este backup cifrado.');
+        msg.classList.add('error');
+      }finally{
+        e.target.value='';
+      }
+    });
+  }
+
   $('#createVaultBtn').addEventListener('click',async()=>{const a=$('#newPassphrase').value,b=$('#confirmPassphrase').value,msg=$('#vaultMessage');msg.className='form-message';if(a.length<8){msg.textContent='Use pelo menos 8 caracteres.';msg.classList.add('error');return;}if(a!==b){msg.textContent='As confirmações não coincidem.';msg.classList.add('error');return;}try{$('#createVaultBtn').disabled=true;msg.textContent='A criar cofre cifrado...';await createVault(a);clearPassphraseInputs();await enterApp();}catch(err){msg.textContent=safeUserError(err,'Não foi possível criar o cofre neste navegador.');msg.classList.add('error');}finally{$('#createVaultBtn').disabled=false;}});
   const unlock=async()=>{const msg=$('#vaultMessage');msg.className='form-message';try{$('#unlockVaultBtn').disabled=true;msg.textContent='A desbloquear...';await unlockVault($('#unlockPassphrase').value);clearPassphraseInputs();await enterApp();}catch(_err){msg.textContent='Não foi possível desbloquear. Verifique a palavra-passe/PIN.';msg.classList.add('error');}finally{$('#unlockVaultBtn').disabled=false;}};
   $('#unlockVaultBtn').addEventListener('click',unlock); $('#unlockPassphrase').addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
