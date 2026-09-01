@@ -218,3 +218,13 @@ assert.match(source, /Contents: Read and write/);
 assert.match(source, /Token guardado, mas sem permissão suficiente em/);
 
 console.log('Fine-grained token scope diagnostic tests: OK');
+
+
+const tokenHelperIndex=fs.readFileSync('index.html','utf8');
+assert.match(tokenHelperIndex, /personal-access-tokens\/new\?/);
+assert.match(tokenHelperIndex, /target_name=AllyssonEstadulho92/);
+assert.match(tokenHelperIndex, /contents=write/);
+assert.match(tokenHelperIndex, /Only select repositories/);
+assert.match(tokenHelperIndex, /conta-de-casa-/);
+
+console.log('Prefilled fine-grained token helper tests: OK');

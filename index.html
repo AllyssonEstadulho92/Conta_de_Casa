@@ -108,6 +108,11 @@
     <label>Credencial GitHub deste dispositivo — introduzir apenas uma vez<input id="syncToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Fine-grained token com Contents: Read and write" /><small>Ao colar, o token é primeiro guardado cifrado neste dispositivo e depois validado automaticamente.</small></label>
   </div>
   <p class="muted">Conta, repositório e caminho são definidos automaticamente e não podem ser alterados pela interface. Depois de validar a credencial uma vez, a sincronização passa a funcionar automaticamente neste dispositivo.</p>
+  <div class="sync-token-help section-gap">
+    <strong>Corrigir ou criar a credencial correta</strong>
+    <p class="muted">O GitHub abre com o proprietário <b>AllyssonEstadulho92</b> e a permissão <b>Contents: Read and write</b> já preparadas. No GitHub, escolha <b>Only select repositories</b> e selecione apenas <b>conta-de-casa-</b>; depois gere o token e cole-o acima.</p>
+    <a class="btn secondary" href="https://github.com/settings/personal-access-tokens/new?name=Conta+de+Casa+Sync&description=Sincronizacao+cifrada+do+Conta+de+Casa&target_name=AllyssonEstadulho92&expires_in=366&contents=write" target="_blank" rel="noopener noreferrer">Criar token correto no GitHub</a>
+  </div>
   <div class="button-row">
     <button id="syncConfigureBtn" class="btn primary" type="button">Ligar sincronização automática</button>
     <button id="syncNowBtn" class="btn secondary" type="button">Verificar agora</button>
