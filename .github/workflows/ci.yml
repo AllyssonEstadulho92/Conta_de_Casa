@@ -39,6 +39,9 @@ jobs:
       - name: Security hardening tests
         run: node tests/security.test.cjs
 
+      - name: Responsive layout tests
+        run: node tests/responsive.test.cjs
+
       - name: Validate manifest
         run: |
           node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8')); console.log('Manifest OK')"
