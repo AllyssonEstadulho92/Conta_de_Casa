@@ -46,3 +46,13 @@ assert.match(events, /appState\.bills=appState\.bills\.filter/);
 assert.match(events, /await commit\('deleted','bill'\)/);
 
 console.log('Delete invoice safety tests: OK');
+
+
+const render = fs.readFileSync('render.js','utf8');
+
+assert.match(render, /const canDelete=b\.cancelled && paid===0/);
+assert.match(render, /data-delete-bill/);
+assert.match(events, /dataset\.deleteBill/);
+assert.match(events, /await deleteBillEnteredByMistake/);
+
+console.log('Bill card delete action tests: OK');
