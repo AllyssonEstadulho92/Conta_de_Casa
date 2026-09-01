@@ -1,0 +1,41 @@
+function wireEvents(){
+  $('#desktopNav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)showPage(b.dataset.page);});
+  $('#mobileNav').addEventListener('click',e=>{const b=e.target.closest('[data-mobile]');if(!b)return;if(b.dataset.mobile==='add')$('#quickDialog').showModal();else if(b.dataset.mobile==='more')openMoreMenu();else showPage(b.dataset.mobile);});
+  $('#quickAddBtn').addEventListener('click',()=>$('#quickDialog').showModal());
+  document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go)showPage(go.dataset.go);const c=e.target.closest('[data-close-dialog]');if(c)closeDialog();const more=e.target.closest('[data-more-page]');if(more){closeDialog();showPage(more.dataset.morePage);}});
+  $('#quickDialog').addEventListener('click',e=>{const b=e.target.closest('[data-quick]');if(!b)return;$('#quickDialog').close();({bill:openBillForm,income:openIncomeForm,market:openMarketForm,goal:openGoalForm})[b.dataset.quick]?.();});
+  $('#newBillBtn').addEventListener('click',()=>openBillForm()); $('#newIncomeBtn').addEventListener('click',openIncomeForm); $('#newMarketBtn').addEventListener('click',openMarketForm); $('#newGoalBtn').addEventListener('click',openGoalForm);
+  $('#billSearch').addEventListener('input',renderBills); $('#billStatusFilter').addEventListener('change',renderBills);
+  $('#billsList').addEventListener('click',e=>{const pay=e.target.closest('[data-pay-bill]');if(pay){openPaymentForm(pay.dataset.payBill);return;}const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
+  $('#upcomingBills').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
+  $('#calendarAgenda').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
+  $('#dialogBody').addEventListener('click',async e=>{const pay=e.target.closest('[data-detail-pay]');if(pay){openPaymentForm(pay.dataset.detailPay);return;}const edit=e.target.closest('[data-detail-edit]');if(edit){const b=appState.bills.find(x=>x.id===edit.dataset.detailEdit);openBillForm(b);return;}const cancel=e.target.closest('[data-detail-cancel]');if(cancel){const b=appState.bills.find(x=>x.id===cancel.dataset.detailCancel);if(b&&confirm('Cancelar esta fatura? O histórico de pagamentos será preservado.')){b.cancelled=true;b.updatedAt=new Date().toISOString();await commit(`Fatura “${b.title}” cancelada`,'bill');closeDialog();toast('Fatura cancelada.');}}});
+  $('#monthPicker').addEventListener('change',()=>{selectedMonth=$('#monthPicker').value||selectedMonth;monthProfile();renderCurrentPage();});
+  $('#monthPlanForm').addEventListener('submit',async e=>{e.preventDefault();const open=parseCents($('#openingBalance').value),budget=parseCents($('#monthlyBudget').value);if(!Number.isFinite(open)||!Number.isFinite(budget)||budget<0){toast('Valores de planeamento inválidos.');return;}const p=monthProfile();p.openingBalanceCents=open;p.budgetCents=budget;await commit(`Planeamento de ${selectedMonth} atualizado`,'planning');toast('Planeamento guardado.');});
+  $('#incomeList').addEventListener('click',async e=>{const b=e.target.closest('[data-delete-income]');if(b&&confirm('Eliminar este rendimento?')){const i=appState.incomes.find(x=>x.id===b.dataset.deleteIncome);appState.incomes=appState.incomes.filter(x=>x.id!==b.dataset.deleteIncome);await commit(`Rendimento “${i?.description||''}” eliminado`,'income');}});
+  $('#marketList').addEventListener('change',async e=>{const t=e.target;if(t.matches('[data-market-toggle]')){const i=appState.market.find(x=>x.id===t.dataset.marketToggle);i.purchased=t.checked;i.purchasedAt=t.checked?new Date().toISOString():null;i.updatedAt=new Date().toISOString();await commit(`Item “${i.name}” ${t.checked?'marcado como comprado':'reaberto'}`,'market');}if(t.matches('[data-market-actual]')){const i=appState.market.find(x=>x.id===t.dataset.marketActual),v=parseCents(t.value);if(Number.isFinite(v)&&v>=0){i.actualCents=v;i.updatedAt=new Date().toISOString();await saveState();renderMarket();}}});
+  $('#marketList').addEventListener('click',async e=>{const b=e.target.closest('[data-delete-market]');if(b&&confirm('Eliminar este item?')){const i=appState.market.find(x=>x.id===b.dataset.deleteMarket);appState.market=appState.market.filter(x=>x.id!==b.dataset.deleteMarket);await commit(`Item “${i?.name||''}” eliminado do mercado`,'market');}});
+  $('#goalList').addEventListener('click',async e=>{const add=e.target.closest('[data-goal-add]');if(add){openGoalContribution(add.dataset.goalAdd);return;}const ar=e.target.closest('[data-goal-archive]');if(ar&&confirm('Arquivar este objetivo?')){const g=appState.goals.find(x=>x.id===ar.dataset.goalArchive);g.archived=true;await commit(`Objetivo “${g.name}” arquivado`,'goal');}});
+  $('#settingsForm').addEventListener('submit',async e=>{e.preventDefault();appState.settings.profileName=$('#profileName').value.trim();appState.settings.currency=$('#currencySelect').value;appState.settings.theme=$('#themeSelect').value;applyTheme();await commit('Preferências atualizadas','settings');toast('Preferências guardadas.');});
+  $('#themeToggle').addEventListener('click',async()=>{appState.settings.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';applyTheme();$('#themeSelect').value=appState.settings.theme;await saveState();});
+  $('#privacyToggle').addEventListener('click',()=>setPrivacy(!privacyHidden));
+  $('#lockBtn').addEventListener('click',lockApp); $('#securityLockBtn').addEventListener('click',lockApp);
+  $('#exportBackupBtn').addEventListener('click',exportBackup); $('#importBackupInput').addEventListener('change',async e=>{try{if(e.target.files[0])await importBackup(e.target.files[0]);}catch(err){$('#backupMessage').textContent=err.message;$('#backupMessage').className='form-message error';}});
+  $('#resetDataBtn').addEventListener('click',async()=>{if(confirm('ATENÇÃO: isto apaga definitivamente o cofre e todos os dados deste dispositivo. Continuar?')){await idbClearAll();location.reload();}});
+  $('#notificationsBtn').addEventListener('click',()=>{showPage('dashboard');toast('Os alertas importantes aparecem no topo do Início.');});
+  ['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,resetLockTimer,{passive:true}));
+}
+
+async function enterApp() {
+  $('#vaultScreen').hidden=true; $('#app').hidden=false; $('#monthPicker').value=selectedMonth; renderNav(); applyTheme(); setPrivacy(false); wireEvents(); showPage(currentPage()); resetLockTimer();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+async function initVaultUi() {
+  await openDb();
+  const meta=await idbGet('meta','vault'); $('#vaultCreate').hidden=!!meta; $('#vaultUnlock').hidden=!meta;
+  $('#createVaultBtn').addEventListener('click',async()=>{const a=$('#newPassphrase').value,b=$('#confirmPassphrase').value,msg=$('#vaultMessage');msg.className='form-message';if(a.length<6){msg.textContent='Use pelo menos 6 caracteres.';msg.classList.add('error');return;}if(a!==b){msg.textContent='As confirmações não coincidem.';msg.classList.add('error');return;}try{$('#createVaultBtn').disabled=true;msg.textContent='A criar cofre cifrado…';await createVault(a);await enterApp();}catch(err){msg.textContent=err.message;msg.classList.add('error');}finally{$('#createVaultBtn').disabled=false;}});
+  const unlock=async()=>{const msg=$('#vaultMessage');msg.className='form-message';try{$('#unlockVaultBtn').disabled=true;msg.textContent='A desbloquear…';await unlockVault($('#unlockPassphrase').value);await enterApp();}catch(err){msg.textContent='Não foi possível desbloquear. Verifique a palavra-passe/PIN.';msg.classList.add('error');}finally{$('#unlockVaultBtn').disabled=false;}};
+  $('#unlockVaultBtn').addEventListener('click',unlock); $('#unlockPassphrase').addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
+}
+
+window.addEventListener('DOMContentLoaded',()=>{initVaultUi().catch(err=>{console.error(err);$('#vaultMessage').textContent='Este navegador não conseguiu iniciar o armazenamento seguro.';});});
