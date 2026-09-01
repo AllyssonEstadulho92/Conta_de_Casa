@@ -35,3 +35,20 @@ assert.doesNotMatch(css, /\bzoom\s*:/i);
 assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
 
 console.log('Responsive system v5 tests: OK');
+
+
+const index = fs.readFileSync('index.html','utf8');
+
+assert.match(css, /Mobile product polish v6/);
+assert.match(css, /\.vault-screen\{[\s\S]*display:block[\s\S]*place-items:unset/);
+assert.match(css, /max\(14px,env\(safe-area-inset-top\)\)/);
+assert.match(css, /\.vault-action-row\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+assert.match(css, /\.vault-disclosure/);
+assert.match(css, /@media\(max-width:359px\)[\s\S]*\.vault-action-row\{grid-template-columns:minmax\(0,1fr\)/);
+
+assert.match(index, /id="vaultTransferToggle"/);
+assert.match(index, /id="vaultTransferPanel"[^>]*hidden/);
+assert.match(events, /vaultTransferToggle/);
+assert.match(events, /aria-expanded/);
+
+console.log('Mobile product polish v6 tests: OK');
