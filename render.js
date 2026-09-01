@@ -28,7 +28,9 @@ function showPage(page) {
   $('#pageTitle').textContent = NAV_ITEMS.find(x=>x[0]===known)?.[1] || 'Início';
   history.replaceState(null,'',`#${known}`);
   renderPage(known);
-  window.scrollTo({top:0,behavior:'smooth'});
+  const mobileScroller=window.matchMedia('(max-width: 820px)').matches?$('.main'):null;
+  if(mobileScroller) mobileScroller.scrollTo({top:0,behavior:'smooth'});
+  else window.scrollTo({top:0,behavior:'smooth'});
 }
 function currentPage() { return NAV_ITEMS.some(x=>x[0]===location.hash.replace('#','')) ? location.hash.replace('#','') : 'dashboard'; }
 function renderCurrentPage() { renderPage(currentPage()); }
