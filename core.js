@@ -34,7 +34,7 @@ const ICONS = {
 };
 
 function icon(name, size = 19) {
-  return \`<svg class="svg-icon" width="\${size}" height="\${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">\${ICONS[name] || ICONS.more}</svg>\`;
+  return `<svg class="svg-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.more}</svg>`;
 }
 
 const NAV_ITEMS = [
@@ -50,7 +50,7 @@ const NAV_ITEMS = [
 ];
 
 function uid() {
-  return crypto.randomUUID ? crypto.randomUUID() : \`\${Date.now()}-\${Math.random().toString(16).slice(2)}\`;
+  return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 function esc(v = '') {
   return String(v).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -84,11 +84,11 @@ function monthOf(value) {
   if (Number.isNaN(d.getTime())) return '';
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
-  return \`\${y}-\${m}\`;
+  return `${y}-${m}`;
 }
 function localDateTimeInput(date = new Date()) {
   const pad = n => String(n).padStart(2, '0');
-  return \`\${date.getFullYear()}-\${pad(date.getMonth()+1)}-\${pad(date.getDate())}T\${pad(date.getHours())}:\${pad(date.getMinutes())}\`;
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 function selectedMonthBounds(month = selectedMonth) {
   const [y, m] = month.split('-').map(Number);
