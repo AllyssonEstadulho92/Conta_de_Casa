@@ -15,8 +15,10 @@ function installPinRecoveryUi() {
   if (unlockBox && !$('#pinHelpToggle')) {
     const actions = document.createElement('div');
     actions.className = 'pin-recovery-actions';
-    setHTML(actions, `<button id="togglePinVisibility" class="link-btn pin-help-link" type="button">Mostrar PIN</button>
-      <button id="changePinLockedToggle" class="btn secondary full pin-change-entry" type="button">Alterar PIN</button>
+    setHTML(actions, `<div class="vault-action-row">
+        <button id="togglePinVisibility" class="link-btn pin-help-link" type="button">Mostrar PIN</button>
+        <button id="changePinLockedToggle" class="link-btn pin-help-link" type="button">Alterar PIN</button>
+      </div>
       <div id="changePinLockedBox" class="device-transfer-box pin-recovery-box" hidden>
         <strong>Alterar PIN deste cofre</strong>
         <p>Para preservar as faturas e restantes dados, confirme primeiro o PIN atual. O cofre será recifrado com o novo PIN.</p>
@@ -171,6 +173,17 @@ async function initVaultUi() {
   await openDb();
   const meta=await idbGet('meta','vault'); $('#vaultCreate').hidden=!!meta; $('#vaultUnlock').hidden=!meta;
 
+  const vaultTransferToggle=$('#vaultTransferToggle');
+  if(vaultTransferToggle){
+    vaultTransferToggle.addEventListener('click',()=>{
+      const panel=$('#vaultTransferPanel');
+      const open=panel.hidden;
+      panel.hidden=!open;
+      vaultTransferToggle.setAttribute('aria-expanded',String(open));
+      vaultTransferToggle.classList.toggle('open',open);
+    });
+  }
+
   const togglePin=$('#togglePinVisibility');
   if(togglePin){
     togglePin.addEventListener('click',()=>{
@@ -184,9 +197,15 @@ async function initVaultUi() {
   if(changePinLockedToggle){
     changePinLockedToggle.addEventListener('click',()=>{
       const box=$('#changePinLockedBox');
-      box.hidden=!box.hidden;
-      changePinLockedToggle.textContent=box.hidden?'Alterar PIN':'Fechar alteração de PIN';
-      if(!box.hidden) $('#lockedCurrentPin')?.focus();
+      const open=box.hidden;
+      box.hidden=!open;
+      changePinLockedToggle.textContent=open?'Fechar alteração':'Alterar PIN';
+      changePinLockedToggle.setAttribute('aria-expanded',String(open));
+      if(open){
+        const help=$('#pinRecoveryBox');
+        if(help) help.hidden=true;
+        $('#lockedCurrentPin')?.focus();
+      }
     });
   }
   const changePinLockedForm=$('#changePinLockedForm');
@@ -238,8 +257,13 @@ async function initVaultUi() {
   if(pinHelp){
     pinHelp.addEventListener('click',()=>{
       const box=$('#pinRecoveryBox');
-      box.hidden=!box.hidden;
-      pinHelp.textContent=box.hidden?'Problemas com o PIN?':'Fechar ajuda do PIN';
+      const open=box.hidden;
+      box.hidden=!open;
+      pinHelp.textContent=open?'Fechar ajuda':'Problemas com o PIN?';
+      if(open){
+        const change=$('#changePinLockedBox');
+        if(change) change.hidden=true;
+      }
     });
   }
   const resetLocal=$('#resetLocalVaultBtn');
