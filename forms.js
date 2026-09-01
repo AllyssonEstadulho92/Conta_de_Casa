@@ -86,7 +86,7 @@ function openGoalContribution(id){
     e.preventDefault();
     const amount=parseCents(new FormData(e.currentTarget).get('amount'));
     if(!Number.isFinite(amount)||amount<=0){toast('Valor inválido.');return;}
-    g.savedCents=Math.min(g.targetCents,g.savedCents+amount);await commit('updated','goal');closeDialog();toast('Objetivo atualizado.');
+    g.savedCents=Math.min(g.targetCents,g.savedCents+amount);g.updatedAt=new Date().toISOString();await commit('updated','goal');closeDialog();toast('Objetivo atualizado.');
   });
 }
 function openMoreMenu(){
