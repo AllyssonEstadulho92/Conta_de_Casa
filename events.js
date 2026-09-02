@@ -104,8 +104,7 @@ function installViewportMetrics() {
   document.addEventListener('focusin',e=>{
     if(!e.target?.matches?.('#formDialog input, #formDialog select, #formDialog textarea')) return;
     updateViewportMetrics();
-    keepFocusedDialogFieldVisible(80);
-    keepFocusedDialogFieldVisible(320);
+    keepFocusedDialogFieldVisible(280);
   });
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize',()=>{
