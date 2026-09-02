@@ -1,4 +1,4 @@
-/* Conta de Casa v39 — design foundation and adaptive application shell */
+/* Conta de Casa v40 — design foundation and adaptive application shell */
 :root{
   color-scheme:light;
   --bg:#f5f7fa;
@@ -338,6 +338,74 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
   .bill-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
+
+/* Mercado v40: planeamento, compra e preço real numa única vista operacional. */
+.market-command-bar{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.market-search-wrap{flex:1 1 auto;min-width:260px}
+.market-search-wrap input{margin:0}
+.market-new-btn{flex:0 0 auto;white-space:nowrap}
+.market-filter-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr)) auto;
+  gap:10px;
+  align-items:end;
+  margin-bottom:14px;
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:var(--surface);
+}
+.market-filter-field{min-width:0;display:grid;gap:6px;margin:0}
+.market-filter-field>span{color:var(--muted);font-size:.6875rem;font-weight:600;letter-spacing:.035em;text-transform:uppercase}
+.market-filter-field select{margin:0;min-height:44px}
+.market-filter-clear{white-space:nowrap}
+.market-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.market-summary-item{min-width:0;display:grid;gap:3px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)}
+.market-summary-item>span{font-size:.75rem;font-weight:600;color:var(--muted)}
+.market-summary-item>strong{font-size:1.125rem;font-weight:600;font-variant-numeric:tabular-nums lining-nums}
+.market-summary-item>small{font-size:.6875rem}
+.market-summary-item.primary>strong{color:var(--primary)}
+.market-summary-item.success>strong{color:var(--success)}
+.market-summary-item.warning>strong{color:var(--warning)}
+.market-summary-item.danger>strong{color:var(--danger)}
+.market-results-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 8px}
+.market-results-head>strong{font-size:.8125rem}
+.market-results-head>span{font-size:.75rem}
+.market-results{min-width:0}
+.market-table-shell{width:100%;overflow:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+.market-table{width:100%;min-width:1040px;border-collapse:separate;border-spacing:0;font-size:.8125rem}
+.market-table th{padding:11px 12px;border-bottom:1px solid var(--border);background:var(--surface-2);color:var(--muted);font-size:.6875rem;font-weight:600;letter-spacing:.035em;text-align:left;text-transform:uppercase;white-space:nowrap}
+.market-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.market-table tbody tr:last-child td{border-bottom:0}
+.market-table-row:hover td{background:color-mix(in srgb,var(--primary-2) 30%,var(--surface))}
+.market-table-row.purchased .market-identity strong{text-decoration:line-through;text-decoration-thickness:1px;color:var(--muted)}
+.market-table .check-col{width:88px;text-align:center}
+.market-table .money-col{text-align:right;font-variant-numeric:tabular-nums lining-nums;white-space:nowrap}
+.market-table .actions-col{width:142px}
+.market-identity{display:grid;gap:3px;min-width:180px}
+.market-identity strong{font-size:.875rem;font-weight:600}
+.market-identity small{font-size:.6875rem;color:var(--muted)}
+.market-quantity{white-space:nowrap}
+.market-check{width:44px;height:44px;display:grid;place-items:center;margin:0 auto;cursor:pointer}
+.market-check input{width:20px;height:20px;min-height:0;margin:0}
+.market-real-field{display:block;margin:0}
+.market-real-field input{width:108px;min-height:44px;margin:0;padding:8px 10px;text-align:right;font-variant-numeric:tabular-nums lining-nums}
+.market-real-cell{text-align:right}
+.market-table-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+.market-table-actions .btn{min-height:44px;padding:8px 11px;font-size:.75rem}
+.market-table-actions .icon-btn{width:44px;height:44px}
+.market-mobile-list{display:none}
+.market-empty-state{display:grid;justify-items:center;gap:8px}
+.market-empty-state strong{font-size:.9375rem;color:var(--text)}
+.market-empty-state span{font-size:.8125rem}
+.market-empty-state .btn{margin-top:4px}
+
+@media(min-width:821px) and (max-width:1180px){
+  .market-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .market-filter-clear{width:100%}
+  .market-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
 /* Secondary navigation keeps related tools out of the main menu. */
 .section-tabs{display:flex;align-items:center;gap:4px;width:max-content;max-width:100%;margin:0 0 20px;padding:4px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2)}
 .section-tab{min-height:44px;padding:7px 13px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:.8125rem;font-weight:500;white-space:nowrap}
@@ -415,6 +483,34 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
   .mobile-nav .nav-btn:nth-child(3){visibility:visible}
   .mobile-nav .nav-btn.active{background:transparent;color:var(--primary)}
   .mobile-nav .nav-btn::before{inset:auto 30% 0;height:3px;width:auto;border-radius:4px 4px 0 0}
+  .market-command-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-bottom:10px}
+  .market-search-wrap{min-width:0}
+  .market-new-btn{min-height:44px}
+  .market-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px;margin-bottom:10px}
+  .market-filter-clear{grid-column:1/-1;width:100%}
+  .market-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+  .market-summary-item{padding:10px 11px}
+  .market-summary-item>strong{font-size:1rem}
+  .market-table-shell{display:none}
+  .market-mobile-list{display:grid;gap:10px}
+  .market-mobile-card{min-width:0;display:grid;gap:10px;padding:14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+  .market-mobile-card.purchased{background:color-mix(in srgb,var(--success-bg) 18%,var(--surface))}
+  .market-mobile-head{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:8px;align-items:center}
+  .market-mobile-head .market-check{margin:0}
+  .market-mobile-head>div{min-width:0}
+  .market-mobile-head h3{margin:0;font-size:.9375rem;line-height:1.3}
+  .market-mobile-head small{display:block;margin-top:2px;font-size:.6875rem;color:var(--muted)}
+  .market-mobile-card.purchased .market-mobile-head h3{text-decoration:line-through;text-decoration-thickness:1px;color:var(--muted)}
+  .market-mobile-money{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px 0;border-block:1px solid var(--border)}
+  .market-mobile-money>div{display:grid;gap:2px;min-width:0}
+  .market-mobile-money span,.market-mobile-real>span{font-size:.6875rem;color:var(--muted)}
+  .market-mobile-money strong{font-size:.8125rem;font-weight:600;overflow-wrap:anywhere}
+  .market-mobile-real{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center}
+  .market-mobile-real .market-real-field{grid-column:2}
+  .market-mobile-real .market-real-field input{width:126px}
+  .market-mobile-real small{grid-column:1/-1;font-size:.6875rem;color:var(--muted)}
+  .market-mobile-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .market-mobile-actions .btn{width:100%;min-height:44px}
   .bill-command-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-bottom:10px}
   .bill-search-wrap{min-width:0}
   .bill-new-btn{min-height:44px}
@@ -455,6 +551,15 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
 }
 
 @media(max-width:560px){
+  .market-command-bar{grid-template-columns:1fr}
+  .market-new-btn{width:100%}
+  .market-filter-grid{grid-template-columns:1fr}
+  .market-filter-clear{grid-column:auto}
+  .market-summary-grid{grid-template-columns:1fr}
+  .market-mobile-money{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .market-mobile-money>div:last-child{grid-column:1/-1}
+  .market-mobile-head{grid-template-columns:44px minmax(0,1fr)}
+  .market-mobile-head>.status-chip{grid-column:2;justify-self:start}
   .bill-command-bar{grid-template-columns:1fr}
   .bill-new-btn{width:100%}
   .bill-filter-grid{grid-template-columns:1fr}

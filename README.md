@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão preparada: v39. O schema de dados permanece na versão 5; esta fase mantém o motor financeiro e a segurança existentes e transforma a área de Faturas numa vista operacional: tabela no desktop, cartões no mobile, filtros organizados e vencimentos mais legíveis.
+Versão preparada: v40. O schema de dados permanece na versão 5; esta fase mantém o motor financeiro, o cofre e a sincronização existentes e transforma Mercado/Compras numa vista operacional com estimativa, gasto contabilizado, preço real, diferença, filtros e edição segura.
 
 ## Estado
 

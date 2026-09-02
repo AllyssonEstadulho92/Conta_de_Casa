@@ -245,11 +245,110 @@ function renderPlanning() {
   setHTML('#incomeList', incomes.length?incomes.map(i=>`<div class="list-row"><div class="list-main"><strong>${esc(i.description)}</strong><small>${fmtDate(i.receivedAt)}</small></div><div class="list-side"><strong class="success-text" data-money>+${money(i.amountCents)}</strong><br><button class="link-btn danger-text" data-delete-income="${attr(i.id)}">Eliminar</button></div></div>`).join(''):empty('Sem rendimentos registados neste mês.'));
 }
 
+function marketItemEffectiveCents(item) {
+  if(!item?.purchased) return 0;
+  return item.actualCents || item.estimatedCents || 0;
+}
+function marketMetrics(items) {
+  const purchased=items.filter(i=>i.purchased);
+  const pending=items.filter(i=>!i.purchased);
+  const estimatedTotal=sumCents(items.map(i=>i.estimatedCents||0));
+  const accounted=sumCents(purchased.map(marketItemEffectiveCents));
+  const pendingEstimated=sumCents(pending.map(i=>i.estimatedCents||0));
+  const purchasedEstimated=sumCents(purchased.map(i=>i.estimatedCents||0));
+  const variance=sumCents([accounted,-purchasedEstimated]);
+  const missingReal=purchased.filter(i=>!(i.actualCents>0)).length;
+  return {estimatedTotal,accounted,pendingEstimated,purchasedEstimated,variance,missingReal,purchasedCount:purchased.length,pendingCount:pending.length};
+}
+function marketFilteredItems(items) {
+  const search=cleanString($('#marketSearch')?.value||'',160).toLocaleLowerCase('pt-PT');
+  const status=$('#marketStatusFilter')?.value||'all';
+  const category=$('#marketCategoryFilter')?.value||'all';
+  const sort=$('#marketSort')?.value||'pending-first';
+  const filtered=items.filter(item=>{
+    const text=`${item.name||''} ${item.category||''}`.toLocaleLowerCase('pt-PT');
+    if(search&&!text.includes(search)) return false;
+    if(status==='pending'&&item.purchased) return false;
+    if(status==='purchased'&&!item.purchased) return false;
+    if(status==='missing-price'&&(!item.purchased||item.actualCents>0)) return false;
+    if(category!=='all'&&(item.category||'Outros')!==category) return false;
+    return true;
+  });
+  const sorters={
+    'pending-first':(a,b)=>Number(a.purchased)-Number(b.purchased)||String(a.name||'').localeCompare(String(b.name||''),'pt-PT'),
+    'name-asc':(a,b)=>String(a.name||'').localeCompare(String(b.name||''),'pt-PT'),
+    'estimate-desc':(a,b)=>(b.estimatedCents||0)-(a.estimatedCents||0),
+    'actual-desc':(a,b)=>marketItemEffectiveCents(b)-marketItemEffectiveCents(a),
+    'recent':(a,b)=>new Date(b.updatedAt||b.createdAt)-new Date(a.updatedAt||a.createdAt)
+  };
+  return filtered.sort(sorters[sort]||sorters['pending-first']);
+}
+function marketVarianceHtml(item) {
+  if(!item.purchased||!(item.actualCents>0)) return '<span class="muted">—</span>';
+  const diff=sumCents([item.actualCents,-(item.estimatedCents||0)]);
+  if(!Number.isSafeInteger(diff)) return '<span class="danger-text">Inválido</span>';
+  const cls=diff>0?'danger-text':diff<0?'success-text':'muted';
+  const prefix=diff>0?'+':'';
+  return `<strong class="${cls}" data-money>${prefix}${money(diff)}</strong>`;
+}
+function marketStatusHtml(item) {
+  if(!item.purchased) return '<span class="status-chip pending">Por comprar</span>';
+  if(!(item.actualCents>0)) return '<span class="status-chip attention">Falta preço real</span>';
+  return '<span class="status-chip paid">Comprado</span>';
+}
+function marketActualInputHtml(item) {
+  const value=item.actualCents>0?(item.actualCents/100).toFixed(2).replace('.',','):'';
+  return `<label class="market-real-field"><span class="sr-only">Preço real de ${esc(item.name)}</span><input data-market-actual="${attr(item.id)}" inputmode="decimal" value="${attr(value)}" placeholder="0,00" autocomplete="off" aria-label="Preço real de ${attr(item.name)}"></label>`;
+}
+function marketTableHtml(list) {
+  return `<div class="market-table-shell"><table class="market-table"><thead><tr><th scope="col" class="check-col">Comprado</th><th scope="col">Produto</th><th scope="col">Qtd.</th><th scope="col" class="money-col">Estimado</th><th scope="col" class="money-col">Preço real</th><th scope="col" class="money-col">Diferença</th><th scope="col">Estado</th><th scope="col" class="actions-col">Ações</th></tr></thead><tbody>${list.map(marketTableRowHtml).join('')}</tbody></table></div>`;
+}
+function marketTableRowHtml(item) {
+  return `<tr class="market-table-row ${item.purchased?'purchased':''}">
+    <td><label class="market-check"><input type="checkbox" data-market-toggle="${attr(item.id)}" ${item.purchased?'checked':''}><span class="sr-only">Marcar ${esc(item.name)} como comprado</span></label></td>
+    <td><div class="market-identity"><strong>${esc(item.name)}</strong><small>${esc(item.category||'Outros')}</small></div></td>
+    <td><span class="market-quantity">${esc(item.quantity||'1')} ${esc(item.unit||'un')}</span></td>
+    <td class="money-col" data-money>${money(item.estimatedCents||0)}</td>
+    <td class="market-real-cell">${marketActualInputHtml(item)}</td>
+    <td class="money-col">${marketVarianceHtml(item)}</td>
+    <td>${marketStatusHtml(item)}</td>
+    <td><div class="market-table-actions"><button class="btn secondary" type="button" data-edit-market="${attr(item.id)}">Editar</button><button class="icon-btn danger-text" type="button" data-delete-market="${attr(item.id)}" aria-label="Eliminar ${attr(item.name)}">×</button></div></td>
+  </tr>`;
+}
+function marketMobileCardHtml(item) {
+  const effective=marketItemEffectiveCents(item);
+  return `<article class="market-mobile-card ${item.purchased?'purchased':''}">
+    <div class="market-mobile-head"><label class="market-check"><input type="checkbox" data-market-toggle="${attr(item.id)}" ${item.purchased?'checked':''}><span class="sr-only">Marcar ${esc(item.name)} como comprado</span></label><div><h3>${esc(item.name)}</h3><small>${esc(item.category||'Outros')} · ${esc(item.quantity||'1')} ${esc(item.unit||'un')}</small></div>${marketStatusHtml(item)}</div>
+    <div class="market-mobile-money"><div><span>Estimado</span><strong data-money>${money(item.estimatedCents||0)}</strong></div><div><span>${item.purchased?'Contabilizado':'Previsto'}</span><strong data-money>${money(item.purchased?effective:(item.estimatedCents||0))}</strong></div><div><span>Diferença</span>${marketVarianceHtml(item)}</div></div>
+    <div class="market-mobile-real"><span>Preço real</span>${marketActualInputHtml(item)}<small>${item.purchased&&!(item.actualCents>0)?'Enquanto faltar o preço real, os relatórios usam o valor estimado.':'Guardado automaticamente ao sair do campo.'}</small></div>
+    <div class="market-mobile-actions"><button class="btn secondary" type="button" data-edit-market="${attr(item.id)}">Editar</button><button class="btn danger" type="button" data-delete-market="${attr(item.id)}">Eliminar</button></div>
+  </article>`;
+}
 function renderMarket() {
-  const list=appState.market.filter(i=>monthOf(i.createdAt)===selectedMonth || (i.purchased&&inSelectedMonth(i.purchasedAt))).sort((a,b)=>Number(a.purchased)-Number(b.purchased));
-  const estimated=sumCents(list.map(i=>i.estimatedCents||0)); const actual=sumCents(list.filter(i=>i.purchased).map(i=>i.actualCents||i.estimatedCents||0));
-  setHTML('#marketSummary', `<span class="summary-pill">Estimado <strong data-money>${money(estimated)}</strong></span><span class="summary-pill">Comprado <strong data-money>${money(actual)}</strong></span><span class="summary-pill">Itens <strong>${list.length}</strong></span>`);
-  setHTML('#marketList', list.length?list.map(i=>`<div class="market-row ${i.purchased?'done':''}"><input type="checkbox" data-market-toggle="${attr(i.id)}" ${i.purchased?'checked':''} aria-label="Marcar ${attr(i.name)} como comprado"><div><strong>${esc(i.name)}</strong><small>${esc(i.category||'Outros')}</small></div><div class="market-qty"><small>Qtd.</small><strong>${esc(i.quantity||'1')} ${esc(i.unit||'un')}</strong></div><div class="market-estimate"><small>Estimado</small><strong data-money>${money(i.estimatedCents||0)}</strong></div><label class="market-price">Preço real<input data-market-actual="${attr(i.id)}" inputmode="decimal" value="${i.actualCents? (i.actualCents/100).toFixed(2).replace('.',','):''}" placeholder="0,00" autocomplete="off"></label><button class="icon-btn danger-text" data-delete-market="${attr(i.id)}" aria-label="Eliminar">×</button></div>`).join(''):empty('A lista de mercado está vazia.'));
+  const all=appState.market.filter(i=>monthOf(i.createdAt)===selectedMonth || (i.purchased&&inSelectedMonth(i.purchasedAt)));
+  const categorySelect=$('#marketCategoryFilter');
+  if(categorySelect){
+    const selected=categorySelect.value||'all';
+    const categories=[...new Set(all.map(i=>i.category||'Outros'))].sort((a,b)=>a.localeCompare(b,'pt-PT'));
+    setHTML(categorySelect,`<option value="all">Todas as categorias</option>${categories.map(c=>`<option value="${attr(c)}">${esc(c)}</option>`).join('')}`);
+    categorySelect.value=categories.includes(selected)?selected:'all';
+  }
+  const list=marketFilteredItems(all);
+  const metrics=marketMetrics(all);
+  const varianceKind=metrics.variance>0?'danger':metrics.variance<0?'success':'normal';
+  setHTML('#marketSummary',`
+    <article class="market-summary-item primary"><span>Estimado total</span><strong data-money>${money(metrics.estimatedTotal)}</strong><small>${all.length} item${all.length===1?'':'s'} no mês</small></article>
+    <article class="market-summary-item success"><span>Gasto contabilizado</span><strong data-money>${money(metrics.accounted)}</strong><small>${metrics.missingReal?`${metrics.missingReal} comprado${metrics.missingReal===1?'':'s'} sem preço real`:'Preços reais registados'}</small></article>
+    <article class="market-summary-item warning"><span>Por comprar</span><strong data-money>${money(metrics.pendingEstimated)}</strong><small>${metrics.pendingCount} item${metrics.pendingCount===1?'':'s'} pendente${metrics.pendingCount===1?'':'s'}</small></article>
+    <article class="market-summary-item ${varianceKind}"><span>Diferença nas compras</span><strong data-money>${metrics.variance>0?'+':''}${money(metrics.variance)}</strong><small>Contabilizado vs. estimado dos comprados</small></article>
+  `);
+  const resultCount=$('#marketResultCount');
+  if(resultCount) resultCount.textContent=`${list.length} de ${all.length} item${all.length===1?'':'s'}`;
+  if(!list.length){
+    setHTML('#marketList',`<div class="empty market-empty-state"><strong>Sem resultados</strong><span>Nenhum item corresponde aos filtros atuais.</span><button class="btn secondary" type="button" data-clear-market-filters>Limpar filtros</button></div>`);
+    return;
+  }
+  setHTML('#marketList',marketTableHtml(list)+`<div class="market-mobile-list">${list.map(marketMobileCardHtml).join('')}</div>`);
 }
 
 function renderReports() {

@@ -1,5 +1,17 @@
 # Changelog
 
+## v40 — Mercado e Compras operacionais
+
+- Mercado passa a ter pesquisa, filtros por estado/categoria e ordenação sem alterar o schema de dados;
+- resumo distingue estimado total, gasto contabilizado, valor ainda por comprar e diferença entre estimado e contabilizado dos itens comprados;
+- quando um item comprado ainda não tem preço real, a interface indica explicitamente que os relatórios continuam a usar o estimado, preservando a regra financeira existente;
+- desktop passa a usar tabela operacional com quantidade, estimado, preço real, diferença, estado e ações;
+- mobile passa a usar cartões próprios com controlos de compra, preço real e comparação de valores;
+- itens podem agora ser editados sem perder estado de compra, preço real, data de compra ou identidade do registo;
+- pesquisa, filtros, edição e estado vazio usam os fluxos cifrados já existentes;
+- schema 5, cálculo mensal, cofre, backups e protocolo de sincronização permanecem inalterados;
+- Service Worker e cache público promovidos para v40.
+
 ## v39 — Faturas operacionais
 
 - área de Faturas reorganizada com pesquisa e ação de criação em primeiro nível e filtros agrupados por estado, categoria, período e ordenação;
