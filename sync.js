@@ -212,7 +212,7 @@ async function deleteDeviceRecord(keyName) {
 async function syncDeviceMeta() {
   let row = await idbGet('device','sync-meta');
   if (!row) {
-    row = { key:'sync-meta', deviceId:uid(), lastRemoteSha:null, lastRevision:0, lastSyncedAt:null };
+    row = { key:'sync-meta', deviceId:uid(), lastRemoteSha:null, lastRevision:0, lastSyncedAt:null, pairedAt:null };
     await idbPut('device',row);
   }
   return row;
@@ -535,6 +535,7 @@ function recordSyncDeletion(entity,id) {
 async function saveSyncDeviceMeta(patch={}) {
   const current=await syncDeviceMeta();
   const next={...current,...patch,key:'sync-meta'};
+  if(next.lastRemoteSha && next.lastSyncedAt && !next.pairedAt) next.pairedAt=next.lastSyncedAt;
   await idbPut('device',next);
   return next;
 }
@@ -779,9 +780,11 @@ async function renderSyncUi() {
     syncLastStatus.state==='synced'?'Cofre remoto alinhado':
     mismatch?'Cofre remoto encontrado — união necessária':
     token?'Credencial pronta; a verificar remoto':'Ainda não ligado ao remoto';
+  const paired=Boolean(meta?.pairedAt && meta?.lastRemoteSha);
   if($('#syncHealthMode')) $('#syncHealthMode').textContent=
-    syncLastStatus.state==='synced'?'Automático':
-    localOnly?'Só local':
+    syncLastStatus.state==='synced'?'Automático · cofre comum':
+    syncLastStatus.state==='offline'&&paired?'Offline · última cópia confirmada':
+    localOnly?'Ligação ao cofre necessária':
     syncStatusLabel(syncLastStatus.state);
 }
 
@@ -971,7 +974,48 @@ function wireSyncControls() {
   });
 }
 
-function startSyncLifecycle() {
+async function syncStartupGate() {
+  if(!appState||!vaultKey) return 'not-ready';
+  wireSyncControls();
+  await renderSyncUi();
+  const cfg=syncConfig();
+  const meta=await syncDeviceMeta().catch(()=>null);
+
+  if(!cfg?.enabled){
+    syncSetStatus('not-configured','A sincronização está desativada neste dispositivo.');
+    return 'not-configured';
+  }
+
+  const token=await loadSyncToken().catch(()=>null);
+  if(!token){
+    syncSetStatus('needs-token','Ligue este dispositivo ao cofre privado comum antes de utilizar os registos financeiros.');
+    return 'needs-token';
+  }
+
+  if(!navigator.onLine){
+    const paired=Boolean(meta?.pairedAt && meta?.lastRemoteSha);
+    syncSetStatus('offline',paired
+      ? 'Offline: a usar a última cópia sincronizada. As alterações serão enviadas quando a ligação regressar.'
+      : 'A primeira ligação ao cofre comum requer Internet.');
+    return paired?'offline-paired':'offline-first';
+  }
+
+  let timeoutId;
+  const timeout=new Promise(resolve=>{timeoutId=setTimeout(()=>resolve('startup-timeout'),8000);});
+  const result=await Promise.race([syncNow('startup'),timeout]);
+  clearTimeout(timeoutId);
+
+  if(result==='startup-timeout'){
+    const paired=Boolean(meta?.pairedAt && meta?.lastRemoteSha);
+    syncSetStatus('offline',paired
+      ? 'O cofre remoto demorou a responder. A mostrar a última cópia confirmada; a sincronização continua em segundo plano.'
+      : 'Não foi possível confirmar o cofre remoto antes de abrir os registos.');
+    return paired?'offline-paired':'error';
+  }
+  return result;
+}
+
+function startSyncLifecycle(options={}) {
   wireSyncControls();
   renderSyncUi();
   if(!syncLifecycleInstalled){
@@ -983,5 +1027,5 @@ function startSyncLifecycle() {
   }
   clearInterval(syncIntervalTimer);
   syncIntervalTimer=setInterval(()=>syncNow('interval'),SYNC_INTERVAL_MS);
-  setTimeout(()=>syncNow('unlock'),700);
+  if(!options.skipInitial) setTimeout(()=>syncNow('unlock'),700);
 }
