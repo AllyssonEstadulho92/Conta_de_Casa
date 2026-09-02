@@ -172,15 +172,15 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
 .page-heading h1{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .topbar-actions{gap:8px}
 .topbar-actions label{margin:0}
-.month-picker input{width:148px;min-height:42px;border-radius:var(--radius-sm);font-size:.8125rem;font-weight:500}
+.month-picker input{width:148px;min-height:44px;border-radius:var(--radius-sm);font-size:.8125rem;font-weight:500}
 .topbar-create{white-space:nowrap}
 .topbar-create>span:first-child{font-size:1.1rem;line-height:1}
-.sync-header-status{height:42px;min-width:42px;border-radius:var(--radius-sm);font-size:.75rem;font-weight:600}
+.sync-header-status{height:44px;min-width:44px;border-radius:var(--radius-sm);font-size:.75rem;font-weight:600}
 .page{max-width:var(--content-max);padding-top:24px}
 
 /* Secondary navigation keeps related tools out of the main menu. */
 .section-tabs{display:flex;align-items:center;gap:4px;width:max-content;max-width:100%;margin:0 0 20px;padding:4px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2)}
-.section-tab{min-height:38px;padding:7px 13px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:.8125rem;font-weight:500;white-space:nowrap}
+.section-tab{min-height:44px;padding:7px 13px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:.8125rem;font-weight:500;white-space:nowrap}
 .section-tab:hover{color:var(--text)}
 .section-tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(20,35,60,.08)}
 
