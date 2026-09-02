@@ -1,5 +1,12 @@
 # Changelog
 
+## v37 — atualização segura da fundação visual
+
+- seletor do mês, estado de sincronização e tabs secundárias normalizados para alvos mínimos de 44 px;
+- testes de acessibilidade reforçados para impedir regressões nesses controlos;
+- identificador de build, referências de assets, Service Worker e cache promovidos em conjunto para garantir que móvel e computador recebem o CSS corrigido imediatamente;
+- schema financeiro, cofre, backups e protocolo de sincronização permanecem inalterados.
+
 ## v36 — fundação visual e navegação adaptativa
 
 ### Arquitetura da informação
