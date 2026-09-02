@@ -225,7 +225,7 @@ function wireEvents(){
     $('#quickDialog').close();
     ({bill:openBillForm,income:openIncomeForm,market:openMarketForm,goal:openGoalForm})[b.dataset.quick]?.();
   });
-  $('#newBillBtn').addEventListener('click',()=>openBillForm()); $('#newIncomeBtn').addEventListener('click',openIncomeForm); $('#newMarketBtn').addEventListener('click',openMarketForm); $('#newGoalBtn').addEventListener('click',openGoalForm);
+  $('#newBillBtn').addEventListener('click',()=>openBillForm()); $('#newIncomeBtn').addEventListener('click',openIncomeForm); $('#newMarketBtn').addEventListener('click',()=>openMarketForm()); $('#newGoalBtn').addEventListener('click',openGoalForm);
   $('#billSearch').addEventListener('input',renderBills);
   ['#billStatusFilter','#billCategoryFilter','#billDateFrom','#billDateTo','#billSort'].forEach(sel=>$(sel)?.addEventListener('change',renderBills));
   const clearBillFilters=()=>{
@@ -309,8 +309,42 @@ function wireEvents(){
   $('#monthPicker').addEventListener('change',()=>{selectedMonth=$('#monthPicker').value||selectedMonth;monthProfile();renderCurrentPage();});
   $('#monthPlanForm').addEventListener('submit',async e=>{e.preventDefault();const open=parseCents($('#openingBalance').value),budget=parseCents($('#monthlyBudget').value);if(!validCents(open,-MAX_MONEY_CENTS)||!validCents(budget,0)){toast('Valores de planeamento inválidos.');return;}const p=monthProfile();p.openingBalanceCents=open;p.budgetCents=budget;p.updatedAt=new Date().toISOString();await commit('updated','planning');toast('Planeamento guardado.');});
   $('#incomeList').addEventListener('click',async e=>{const b=e.target.closest('[data-delete-income]');if(b&&confirm('Eliminar este rendimento?')){if(typeof recordSyncDeletion==='function')recordSyncDeletion('income',b.dataset.deleteIncome);appState.incomes=appState.incomes.filter(x=>x.id!==b.dataset.deleteIncome);await commit('deleted','income');}});
-  $('#marketList').addEventListener('change',async e=>{const t=e.target;if(t.matches('[data-market-toggle]')){const i=appState.market.find(x=>x.id===t.dataset.marketToggle);if(!i)return;i.purchased=t.checked;i.purchasedAt=t.checked?new Date().toISOString():null;i.updatedAt=new Date().toISOString();await commit('updated','market');}if(t.matches('[data-market-actual]')){const i=appState.market.find(x=>x.id===t.dataset.marketActual),v=parseCents(t.value);if(i&&validCents(v,0)){i.actualCents=v;i.updatedAt=new Date().toISOString();await saveState();renderMarket();}else toast('Preço real inválido.');}});
-  $('#marketList').addEventListener('click',async e=>{const b=e.target.closest('[data-delete-market]');if(b&&confirm('Eliminar este item?')){if(typeof recordSyncDeletion==='function')recordSyncDeletion('market',b.dataset.deleteMarket);appState.market=appState.market.filter(x=>x.id!==b.dataset.deleteMarket);await commit('deleted','market');}});
+  $('#marketSearch')?.addEventListener('input',renderMarket);
+  ['#marketStatusFilter','#marketCategoryFilter','#marketSort'].forEach(sel=>$(sel)?.addEventListener('change',renderMarket));
+  const clearMarketFilters=()=>{
+    $('#marketSearch').value='';
+    $('#marketStatusFilter').value='all';
+    $('#marketCategoryFilter').value='all';
+    $('#marketSort').value='pending-first';
+    renderMarket();
+  };
+  $('#marketClearFilters')?.addEventListener('click',clearMarketFilters);
+  $('#marketList').addEventListener('change',async e=>{
+    const t=e.target;
+    if(t.matches('[data-market-toggle]')){
+      const i=appState.market.find(x=>x.id===t.dataset.marketToggle);if(!i)return;
+      i.purchased=t.checked;i.purchasedAt=t.checked?new Date().toISOString():null;i.updatedAt=new Date().toISOString();
+      await commit('updated','market');
+      return;
+    }
+    if(t.matches('[data-market-actual]')){
+      const i=appState.market.find(x=>x.id===t.dataset.marketActual),v=parseCents(t.value);
+      if(i&&validCents(v,0)){i.actualCents=v;i.updatedAt=new Date().toISOString();await saveState();renderMarket();}
+      else toast('Preço real inválido.');
+    }
+  });
+  $('#marketList').addEventListener('click',async e=>{
+    const clear=e.target.closest('[data-clear-market-filters]');
+    if(clear){clearMarketFilters();return;}
+    const edit=e.target.closest('[data-edit-market]');
+    if(edit){const item=appState.market.find(x=>x.id===edit.dataset.editMarket);if(item)openMarketForm(item);return;}
+    const b=e.target.closest('[data-delete-market]');
+    if(b&&confirm('Eliminar este item?')){
+      if(typeof recordSyncDeletion==='function')recordSyncDeletion('market',b.dataset.deleteMarket);
+      appState.market=appState.market.filter(x=>x.id!==b.dataset.deleteMarket);
+      await commit('deleted','market');
+    }
+  });
   $('#goalList').addEventListener('click',async e=>{const add=e.target.closest('[data-goal-add]');if(add){openGoalContribution(add.dataset.goalAdd);return;}const ar=e.target.closest('[data-goal-archive]');if(ar&&confirm('Arquivar este objetivo?')){const g=appState.goals.find(x=>x.id===ar.dataset.goalArchive);if(!g)return;g.archived=true;g.updatedAt=new Date().toISOString();await commit('archived','goal');}});
   $('#settingsForm').addEventListener('submit',async e=>{e.preventDefault();appState.settings.profileName=cleanString($('#profileName').value,80);appState.settings.currency=$('#currencySelect').value;appState.settings.theme=$('#themeSelect').value;applyTheme();await commit('updated','settings');toast('Preferências guardadas.');});
   const changePinForm=$('#changePinForm');
@@ -379,7 +413,7 @@ async function enterApp() {
   if ('serviceWorker' in navigator) {
     (async()=>{
       try{
-        const reg=await navigator.serviceWorker.register('./sw.js?v=39',{updateViaCache:'none'});
+        const reg=await navigator.serviceWorker.register('./sw.js?v=40',{updateViaCache:'none'});
         await reg.update().catch(()=>{});
         if(!window.__swReloadBound){
           window.__swReloadBound=true;
