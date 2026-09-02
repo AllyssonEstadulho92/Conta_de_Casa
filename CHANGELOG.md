@@ -1,5 +1,14 @@
 # Changelog
 
+## v38 — hierarquia financeira do Dashboard
+
+- os indicadores principais passam a concentrar Saldo atual, Por pagar, Em atraso e Saldo projetado;
+- Pago no mês e Próximos 7 dias passam a indicadores complementares, mantendo os mesmos valores e regras existentes;
+- grelha principal otimizada para 4 colunas no desktop e 2 colunas em tablet/mobile;
+- indicadores complementares adaptam-se para 2 colunas no desktop e 1 coluna no mobile;
+- nenhuma alteração ao schema 5, motor financeiro, cofre, backups ou protocolo de sincronização;
+- assets públicos, Service Worker e cache promovidos para v38 para evitar reutilização visual da v37.
+
 ## v37 — atualização segura da fundação visual
 
 - seletor do mês, estado de sincronização e tabs secundárias normalizados para alvos mínimos de 44 px;
