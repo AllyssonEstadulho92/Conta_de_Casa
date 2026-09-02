@@ -1073,3 +1073,16 @@ html.keyboard-open .fab{
 @media(max-width:820px){
   .sync-health{grid-template-columns:minmax(0,1fr)}
 }
+
+
+/* Payment correction controls v1 */
+.payment-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.payment-integrity-alert{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 14px;border:1px solid #ffcaca;border-radius:14px;background:var(--danger-bg);color:var(--text);margin:2px 0 16px}
+.payment-integrity-alert>div{min-width:0;display:grid;gap:4px}
+.payment-integrity-alert strong{color:var(--danger)}
+.payment-integrity-alert small{display:block;color:var(--muted);line-height:1.45}
+@media(max-width:820px){
+  .payment-integrity-alert{align-items:stretch;flex-direction:column}
+  .payment-integrity-alert .btn{width:100%}
+  .payment-actions{justify-content:flex-start}
+}
