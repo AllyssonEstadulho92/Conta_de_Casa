@@ -326,6 +326,7 @@ function normalizeBill(b = {}) {
 }
 function normalizePayment(p = {}) {
   const now = new Date().toISOString();
+  const createdAt = cleanIso(p.createdAt || p.paidAt, now);
   return {
     id: cleanString(p.id || uid(), 80),
     billId: cleanString(p.billId, 80),
@@ -333,7 +334,8 @@ function normalizePayment(p = {}) {
     paidAt: cleanIso(p.paidAt, now),
     method: cleanString(p.method || 'Outro', 60),
     notes: cleanMultiline(p.notes, 600),
-    createdAt: cleanIso(p.createdAt, now)
+    createdAt,
+    updatedAt: cleanIso(p.updatedAt || createdAt, now)
   };
 }
 function normalizeIncome(i = {}) {
