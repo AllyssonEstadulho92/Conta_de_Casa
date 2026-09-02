@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão preparada: v41. O schema de dados permanece na versão 5; esta fase corrige a experiência de edição no iPhone/Safari, evita auto-zoom ao focar campos, mantém o formulário visível com o teclado aberto e disponibiliza edição direta de faturas mesmo quando já estão pagas, sem alterar o motor financeiro.
+Versão preparada: v42. O schema de dados permanece na versão 5; esta fase estabiliza os diálogos no iPhone/Safari durante a abertura do teclado, mantém o cabeçalho e o campo ativo dentro da área visível e permite excluir faturas com pagamentos através de uma remoção em cascata confirmada, sem criar pagamentos órfãos.
 
 ## Estado
 
