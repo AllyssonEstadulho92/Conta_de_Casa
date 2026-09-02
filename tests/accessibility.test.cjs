@@ -28,6 +28,9 @@ for (const palette of [light,dark]) {
 
 assert.match(css, /\.btn\{min-height:44px/);
 assert.match(css, /\.icon-btn\{width:44px;height:44px/);
+assert.match(css, /\.month-picker input\{width:148px;min-height:44px/);
+assert.match(css, /\.sync-header-status\{height:44px;min-width:44px/);
+assert.match(css, /\.section-tab\{min-height:44px/);
 assert.match(css, /\.status-chip\{font-size:\.75rem/);
 assert.match(css, /\.sr-only\{position:absolute!important/);
 assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
