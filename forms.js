@@ -75,9 +75,9 @@ async function withFormSubmissionLock(event, task) {
 function paymentFingerprint(payment) {
   return [payment.billId,payment.amountCents,payment.paidAt,payment.method].join('|');
 }
-function duplicatePaymentExists(payment) {
+function duplicatePaymentExists(payment, ignoreId='') {
   const key=paymentFingerprint(payment);
-  return (appState?.payments||[]).some(existing=>paymentFingerprint(existing)===key);
+  return (appState?.payments||[]).some(existing=>existing.id!==ignoreId && paymentFingerprint(existing)===key);
 }
 
 function billFormHtml(bill=null){
@@ -124,6 +124,12 @@ function openBillDetail(id){
   const paid=paidForBill(id),rem=remainingForBill(b),st=billStatus(b),urg=billUrgency(b);
   const payments=billPayments(id).sort((a,c)=>new Date(c.paidAt)-new Date(a.paidAt));
   const paymentSummary=paid>0?`<span><small>Já pago</small><strong data-money>${money(paid)}</strong></span>`:'';
+  const excess=Math.max(0,paid-b.totalCents);
+  const newestPayment=payments[0]||null;
+  const excessWarning=excess&&newestPayment?`<div class="payment-integrity-alert" role="alert">
+    <div><strong>Pagamento excedente detetado</strong><small>Os pagamentos ultrapassam o valor da fatura em <span data-money>${money(excess)}</span>. O registo mais recente é ${money(newestPayment.amountCents)} em ${fmtDateTime(newestPayment.paidAt)}.</small></div>
+    <button class="btn danger" type="button" data-remove-excess-payment="${attr(newestPayment.id)}" data-payment-bill="${attr(b.id)}">Remover pagamento mais recente</button>
+  </div>`:'';
   openDialog('Detalhes da fatura',`
     <div class="bill-detail">
       <div class="bill-detail-hero">
@@ -150,9 +156,10 @@ function openBillDetail(id){
         ${b.notes?`<div class="detail-item full-detail"><small>Observações</small><strong>${esc(b.notes)}</strong></div>`:''}
       </div>
 
+      ${excessWarning}
       <div class="detail-section">
         <div class="detail-section-head"><h3>Pagamentos</h3><small>${payments.length} registo${payments.length===1?'':'s'}</small></div>
-        <div class="stack-list compact">${payments.length?payments.map(p=>`<div class="list-row"><div class="list-main"><strong data-money>${money(p.amountCents)}</strong><small>${fmtDateTime(p.paidAt)} · ${esc(p.method||'')}</small></div><div class="list-side"><button class="link-btn danger-text" type="button" data-delete-payment="${attr(p.id)}" data-payment-bill="${attr(b.id)}">Desfazer</button></div></div>`).join(''):empty('Sem pagamentos registados.')}</div>
+        <div class="stack-list compact">${payments.length?payments.map(p=>`<div class="list-row"><div class="list-main"><strong data-money>${money(p.amountCents)}</strong><small>${fmtDateTime(p.paidAt)} · ${esc(p.method||'')}</small></div><div class="list-side payment-actions"><button class="link-btn" type="button" data-edit-payment="${attr(p.id)}" data-payment-bill="${attr(b.id)}">Editar</button><button class="link-btn danger-text" type="button" data-delete-payment="${attr(p.id)}" data-payment-bill="${attr(b.id)}">Eliminar</button></div></div>`).join(''):empty('Sem pagamentos registados.')}</div>
       </div>
 
       <div class="dialog-actions detail-actions">
@@ -165,31 +172,41 @@ function openBillDetail(id){
       </div>
     </div>`, 'detail');
 }
-function openPaymentForm(id){
+function openPaymentForm(id,paymentId=''){
   const b=appState.bills.find(x=>x.id===id); if(!b)return;
+  const existing=paymentId?appState.payments.find(x=>x.id===paymentId&&x.billId===id):null;
   const rem=remainingForBill(b);
-  openDialog('Registar pagamento',`<form id="paymentForm" class="form-grid"><input type="hidden" name="billId" value="${attr(b.id)}"><p>Fatura: <strong>${esc(b.title)}</strong><br>Restante: <strong data-money>${money(rem)}</strong></p><label>Valor<input name="amount" inputmode="decimal" required value="${(rem/100).toFixed(2).replace('.',',')}" autocomplete="off"></label><label>Data e hora<input name="paidAt" type="datetime-local" required value="${localDateTimeInput()}" autocomplete="off"></label><label>Método<select name="method"><option>Débito automático</option><option>Transferência</option><option>Referência Multibanco</option><option>Cartão</option><option>Dinheiro</option><option>Outro</option></select></label><label>Nota<input name="notes" autocomplete="off" spellcheck="false"></label><div class="button-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary" type="submit">Guardar pagamento</button></div></form>`);
-  $('#paymentForm').addEventListener('submit',handlePaymentSubmit);
+  const allowed=rem+(existing?.amountCents||0);
+  const amount=existing?.amountCents??rem;
+  const paidAt=existing?localDateTimeInput(new Date(existing.paidAt)):localDateTimeInput();
+  openDialog(existing?'Editar pagamento':'Registar pagamento',`<form id="paymentForm" class="form-grid"><input type="hidden" name="billId" value="${attr(b.id)}"><input type="hidden" name="paymentId" value="${attr(existing?.id||'')}"><p>Fatura: <strong>${esc(b.title)}</strong><br>${existing?'Máximo permitido após edição':'Restante'}: <strong data-money>${money(allowed)}</strong></p><label>Valor<input name="amount" inputmode="decimal" required value="${(amount/100).toFixed(2).replace('.',',')}" autocomplete="off"></label><label>Data e hora<input name="paidAt" type="datetime-local" required value="${paidAt}" autocomplete="off"></label><label>Método<select name="method"><option>Débito automático</option><option>Transferência</option><option>Referência Multibanco</option><option>Cartão</option><option>Dinheiro</option><option>Outro</option></select></label><label>Nota<input name="notes" value="${attr(existing?.notes||'')}" autocomplete="off" spellcheck="false"></label><div class="button-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary" type="submit">${existing?'Guardar alterações':'Guardar pagamento'}</button></div></form>`);
+  const form=$('#paymentForm');
+  form.method.value=existing?.method||b.method||'Outro';
+  form.addEventListener('submit',handlePaymentSubmit);
 }
 async function handlePaymentSubmit(e){
   return withFormSubmissionLock(e,async form=>{
     const fd=new FormData(form);
     const b=appState.bills.find(x=>x.id===fd.get('billId'));
     if(!b){toast('A fatura já não existe. Atualize a lista.');return false;}
-    if(b.cancelled||b.archived){toast('Não é possível pagar uma fatura cancelada ou arquivada.');return false;}
+    if(b.cancelled||b.archived){toast('Não é possível alterar pagamentos de uma fatura cancelada ou arquivada.');return false;}
+    const paymentId=String(fd.get('paymentId')||'');
+    const existing=paymentId?appState.payments.find(x=>x.id===paymentId&&x.billId===b.id):null;
+    if(paymentId&&!existing){toast('O pagamento já não existe. Atualize a lista.');return false;}
     const amount=parseCents(fd.get('amount'));
-    const rem=remainingForBill(b);
-    if(!Number.isFinite(amount)||amount<=0||amount>rem){toast(`O pagamento deve estar entre 0,01 e ${money(rem)}.`);return false;}
+    const maxAllowed=remainingForBill(b)+(existing?.amountCents||0);
+    if(!Number.isFinite(amount)||amount<=0||amount>maxAllowed){toast(`O pagamento deve estar entre 0,01 e ${money(maxAllowed)}.`);return false;}
     const at=new Date(fd.get('paidAt'));
     if(Number.isNaN(at.getTime())){toast('Data de pagamento inválida.');return false;}
-    const payment={id:uid(),billId:b.id,amountCents:amount,paidAt:at.toISOString(),method:cleanString(fd.get('method'),60),notes:cleanMultiline(fd.get('notes'),600),createdAt:new Date().toISOString()};
-    if(duplicatePaymentExists(payment)){toast('Este pagamento já está registado com o mesmo valor, data/hora e método.');return false;}
-    appState.payments.push(payment);
-    b.updatedAt=new Date().toISOString();
+    const now=new Date().toISOString();
+    const payment={id:existing?.id||uid(),billId:b.id,amountCents:amount,paidAt:at.toISOString(),method:cleanString(fd.get('method'),60),notes:cleanMultiline(fd.get('notes'),600),createdAt:existing?.createdAt||now,updatedAt:now};
+    if(duplicatePaymentExists(payment,existing?.id||'')){toast('Este pagamento já está registado com o mesmo valor, data/hora e método.');return false;}
+    if(existing) Object.assign(existing,payment); else appState.payments.push(payment);
+    b.updatedAt=now;
     await syncRecurringBills();
-    await commit('created','payment');
+    await commit(existing?'updated':'created','payment');
     closeDialog();
-    toast('Pagamento registado.');
+    toast(existing?'Pagamento atualizado.':'Pagamento registado.');
     return true;
   });
 }
