@@ -156,13 +156,65 @@ function renderBills() {
   };
   const list=filterBills(all,criteria);
   const totals=monthNumbers();
-  setHTML('#billSummary', `<span class="summary-pill">Total por pagar <strong data-money>${money(totals.pending)}</strong></span><span class="summary-pill">Em atraso <strong class="danger-text" data-money>${money(totals.overdue)}</strong></span><span class="summary-pill">Faturas no mês <strong>${all.length}</strong></span><span class="summary-pill">Resultados <strong>${list.length}</strong></span>`);
-  setHTML('#billsList', list.length?list.map(b=>billCardHtml(b)).join(''):empty('Nenhuma fatura corresponde aos filtros atuais.'));
+  const summary=[
+    ['Em aberto',totals.outstanding,'Valor ainda por liquidar','primary'],
+    ['A vencer',totals.pending,'Dentro do prazo','normal'],
+    ['Em atraso',totals.overdue,'Requer atenção','danger']
+  ];
+  setHTML('#billSummary', summary.map(([label,value,sub,kind])=>`<article class="bill-summary-item ${kind}"><span>${esc(label)}</span><strong data-money>${money(value)}</strong><small>${esc(sub)}</small></article>`).join('')+`<article class="bill-summary-item normal"><span>Resultados</span><strong>${list.length}</strong><small>de ${all.length} fatura${all.length===1?'':'s'} no mês</small></article>`);
+  if(!list.length){
+    setHTML('#billsList',`<div class="empty bill-empty-state"><strong>Sem resultados</strong><span>Nenhuma fatura corresponde aos filtros atuais.</span><button class="btn secondary" type="button" data-clear-bill-filters>Limpar filtros</button></div>`);
+    return;
+  }
+  setHTML('#billsList', billTableHtml(list)+`<div class="bill-mobile-list">${list.map(b=>billCardHtml(b)).join('')}</div>`);
+}
+function billDueSignal(b, st=billStatus(b), urg=billUrgency(b)) {
+  if(st==='invalid') return ['Dados inválidos','danger'];
+  if(st==='overdue') return [dueText(b),'danger'];
+  if(st==='due-today'||urg==='critical') return [dueText(b),'danger'];
+  if(urg==='urgent'||urg==='attention') return [dueText(b),'warning'];
+  if(st==='paid') return ['Concluída','success'];
+  if(st==='cancelled') return ['Cancelada','normal'];
+  return [dueText(b),'normal'];
+}
+function billActionsHtml(b, compact=false) {
+  const rem=remainingForBill(b), paid=paidForBill(b.id);
+  const canDelete=b.cancelled && paid===0;
+  const detailLabel=compact?'Detalhes':'Abrir';
+  const detail=`<button class="btn secondary" type="button" data-bill-id="${attr(b.id)}">${detailLabel}</button>`;
+  if(canDelete) return detail+`<button class="btn danger" type="button" data-delete-bill="${attr(b.id)}">Excluir</button>`;
+  if(rem>0&&!b.cancelled) return detail+`<button class="btn primary" type="button" data-pay-bill="${attr(b.id)}">Pagar</button>`;
+  return detail;
+}
+function billTableHtml(list) {
+  return `<div class="bill-table-shell"><table class="bill-table"><thead><tr><th scope="col">Fatura</th><th scope="col">Estado</th><th scope="col">Vencimento</th><th scope="col" class="money-col">Total</th><th scope="col" class="money-col">Pago</th><th scope="col" class="money-col">Em falta</th><th scope="col" class="actions-col">Ações</th></tr></thead><tbody>${list.map(b=>billTableRowHtml(b)).join('')}</tbody></table></div>`;
+}
+function billTableRowHtml(b) {
+  const st=billStatus(b), urg=billUrgency(b), rem=remainingForBill(b), paid=paidForBill(b.id);
+  const [dueLabel,dueKind]=billDueSignal(b,st,urg);
+  return `<tr class="bill-table-row">
+    <td><div class="bill-identity"><strong>${esc(b.title)}</strong><small>${esc(b.provider||'Sem fornecedor')} · ${esc(b.category||'Outros')}</small></div></td>
+    <td><span class="status-chip ${st}">${esc(statusLabel(st))}</span></td>
+    <td><div class="bill-due-cell"><strong>${fmtDate(billDueDateKey(b))}</strong><span class="bill-due-signal ${dueKind}">${esc(dueLabel)}</span></div></td>
+    <td class="money-col" data-money>${money(b.totalCents)}</td>
+    <td class="money-col" data-money>${money(paid)}</td>
+    <td class="money-col bill-remaining" data-money>${money(rem)}</td>
+    <td><div class="bill-table-actions">${billActionsHtml(b)}</div></td>
+  </tr>`;
 }
 function billCardHtml(b) {
-  const st=billStatus(b), urg=billUrgency(b), rem=remainingForBill(b), paid=paidForBill(b.id), pct=b.totalCents?clamp(paid/b.totalCents*100,0,100):0;
-  const canDelete=b.cancelled && paid===0;
-  return `<article class="bill-card"><div class="bill-title"><div><h3>${esc(b.title)}</h3><small>${esc(b.provider||'Sem fornecedor')}</small></div><span class="status-chip ${st}">${statusLabel(st)}</span></div><div class="bill-amount" data-money>${money(rem)}</div><div class="bill-meta"><span>Vence<br><strong>${fmtDate(billDueDateKey(b))}</strong></span><span>Prioridade<br><strong class="${urg==='critical'?'danger-text':''}">${urgencyLabel(urg)}</strong></span><span>Categoria<br><strong>${esc(b.category||'Outros')}</strong></span><span>Pago<br><strong data-money>${money(paid)}</strong></span></div><div class="progress ${st==='paid'?'success':st==='overdue'?'danger':'warning'}"><span data-width="${pct}"></span></div><div class="bill-actions"><button class="btn secondary" data-bill-id="${attr(b.id)}">Detalhes</button>${canDelete?`<button class="btn danger" data-delete-bill="${attr(b.id)}">Excluir</button>`:rem>0&&!b.cancelled?`<button class="btn primary" data-pay-bill="${attr(b.id)}">Pagar</button>`:''}</div></article>`;
+  const st=billStatus(b), urg=billUrgency(b), rem=remainingForBill(b), paid=paidForBill(b.id);
+  const [dueLabel,dueKind]=billDueSignal(b,st,urg);
+  const validProgress=Number.isSafeInteger(b.totalCents)&&b.totalCents>0&&Number.isSafeInteger(paid)&&paid>=0;
+  const pct=validProgress?clamp(paid/b.totalCents*100,0,100):0;
+  return `<article class="bill-mobile-card">
+    <div class="bill-mobile-head"><div><h3>${esc(b.title)}</h3><small>${esc(b.provider||'Sem fornecedor')}</small></div><span class="status-chip ${st}">${esc(statusLabel(st))}</span></div>
+    <div class="bill-mobile-focus"><div><span>Em falta</span><strong data-money>${money(rem)}</strong></div><span class="bill-due-signal ${dueKind}">${esc(dueLabel)}</span></div>
+    <div class="bill-mobile-due"><span>Vencimento</span><strong>${fmtDate(billDueDateKey(b))}</strong></div>
+    <div class="bill-mobile-finance"><div><span>Total</span><strong data-money>${money(b.totalCents)}</strong></div><div><span>Pago</span><strong data-money>${money(paid)}</strong></div><div><span>Categoria</span><strong>${esc(b.category||'Outros')}</strong></div></div>
+    <div class="progress ${st==='paid'?'success':st==='overdue'?'danger':'warning'}" aria-label="Progresso de pagamento"><span data-width="${pct}"></span></div>
+    <div class="bill-mobile-actions">${billActionsHtml(b,true)}</div>
+  </article>`;
 }
 
 function renderCalendar() {
