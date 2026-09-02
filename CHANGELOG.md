@@ -1,5 +1,19 @@
 # Changelog
 
+## v35 — resolução de conflitos de sincronização
+
+### Reconciliação assistida
+- comparação lado a lado apenas dos campos que realmente divergem;
+- escolha explícita por registo entre “Manter deste dispositivo” e “Usar o sincronizado”;
+- nenhuma diferença financeira é escolhida automaticamente;
+- a versão não escolhida continua preservada no histórico cifrado de conflitos;
+- atualização remota somente após todas as decisões, com verificação do SHA e da revisão para impedir sobrescrita concorrente;
+- o antigo ciclo de “Reconciliar novamente” foi substituído por uma resolução conclusiva.
+
+### Validação
+- teste de execução completo para migração v33/v34, deteção de conflito, decisão e avanço da revisão remota;
+- cache e referências de assets atualizados para v35.
+
 ## v34 — integridade financeira
 
 ### Cálculos

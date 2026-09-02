@@ -52,6 +52,9 @@ jobs:
       - name: Sync safety tests
         run: node tests/sync.test.cjs
 
+      - name: Sync runtime tests
+        run: node tests/sync-runtime.test.cjs
+
       - name: Validate manifest
         run: |
           node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8')); console.log('Manifest OK')"

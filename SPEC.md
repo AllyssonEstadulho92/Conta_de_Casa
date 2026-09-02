@@ -192,6 +192,40 @@ Centralizar os cálculos monetários num motor determinístico e acrescentar uma
 
 Resolução visual lado a lado de conflitos, previsões recorrentes por confirmar, orçamento avançado e anexos cifrados permanecem para versões seguintes.
 
+## Prompt de Projeto — v35 Resolução de conflitos
+
+### Problema confirmado
+
+- a v34 preserva corretamente divergências financeiras reais, mas o botão “Reconciliar novamente” volta a comparar os mesmos valores e não permite concluir;
+- o cofre remoto permanece íntegro e não deve ser alterado até existir uma decisão humana;
+- diferenças meramente técnicas continuam a ser reconciliadas automaticamente.
+
+### Objetivo
+
+Permitir que web ou telemóvel resolvam cada conflito real de forma explícita, verificável e convergente, sem escolher valores financeiros automaticamente e sem apagar silenciosamente a alternativa rejeitada.
+
+### Regras funcionais e técnicas
+
+- cada conflito mostra somente os campos de negócio diferentes, em colunas “Este dispositivo” e “Sincronizado”;
+- o utilizador escolhe por registo “Manter deste dispositivo” ou “Usar o sincronizado”;
+- a escolha é guardada primeiro no cofre local cifrado;
+- a versão não escolhida permanece no histórico cifrado de conflitos;
+- nenhuma atualização remota ocorre enquanto existir uma decisão pendente;
+- antes do envio final, SHA e revisão remotos são confirmados novamente;
+- se outro dispositivo alterar o cofre durante a revisão, a gravação é recusada e uma nova comparação é exigida;
+- a resolução funciona para faturas, pagamentos, rendimentos, mercado, objetivos e planeamento mensal;
+- o layout permanece utilizável em iPhone e computador.
+
+### Critérios de aceitação v35
+
+- um estado v33/v34 compatível continua a sincronizar sem conflito e sem escrita desnecessária;
+- uma diferença real de montante produz “Revisão necessária” e não é enviada automaticamente;
+- escolher uma das versões conclui a sincronização e avança exatamente uma revisão remota;
+- a versão rejeitada continua presente no histórico cifrado;
+- uma alteração remota concorrente bloqueia o envio da decisão antiga;
+- o cache, os assets e a versão mostrada na interface usam v35;
+- todos os testes anteriores e o novo teste de execução da sincronização passam antes da publicação.
+
 ## Roadmap
 
 ### v0.2

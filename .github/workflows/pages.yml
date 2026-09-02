@@ -49,6 +49,7 @@ jobs:
           node tests/security.test.cjs
           node tests/responsive.test.cjs
           node tests/sync.test.cjs
+          node tests/sync-runtime.test.cjs
           node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8')); console.log('Manifest OK')"
 
       - name: Configure Pages

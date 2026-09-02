@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão publicada do código: v34. O schema 4 acrescenta cálculos monetários centralizados e histórico financeiro cifrado por fatura.
+Versão publicada do código: v35. O schema 4 mantém cálculos monetários centralizados e histórico financeiro cifrado por fatura; a v35 acrescenta resolução assistida de conflitos reais.
 
 ## Estado
 
@@ -40,6 +40,7 @@ node tests/audit.test.cjs
 node tests/form-regression.test.cjs
 node tests/security.test.cjs
 node tests/sync.test.cjs
+node tests/sync-runtime.test.cjs
 ```
 
 
@@ -52,5 +53,6 @@ A sincronização automática é opcional e usa o repositório privado `Allysson
 - o token GitHub fica cifrado localmente em cada dispositivo;
 - a aplicação recusa repositório de sincronização público;
 - a sincronização ocorre ao desbloquear, após alterações, ao regressar online/visível e periodicamente;
-- conflitos de versão não são sobrescritos silenciosamente;
+- conflitos reais são comparados campo a campo e exigem escolha explícita entre a versão deste dispositivo e a versão sincronizada;
+- o resultado escolhido só é enviado depois de todas as decisões, com proteção contra gravações concorrentes;
 - eliminações são propagadas através de tombstones cifrados.

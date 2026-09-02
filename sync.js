@@ -22,6 +22,23 @@ let syncPending = false;
 let syncRetryTimer = null;
 let syncRetryAttempt = 0;
 let syncCredentialTimer = null;
+let syncReviewBusy = false;
+
+const SYNC_CONFLICT_FIELDS = Object.freeze({
+  bill:['title','provider','category','totalCents','dueDate','dueTime','issueAt','method','recurrence','reference','notes','cancelled','archived'],
+  payment:['billId','amountCents','paidAt','method','notes'],
+  income:['description','amountCents','receivedAt'],
+  market:['name','category','quantity','unit','estimatedCents','actualCents','purchased','purchasedAt'],
+  goal:['name','targetCents','savedCents','deadline','archived'],
+  month:['openingBalanceCents','budgetCents']
+});
+const SYNC_CONFLICT_FIELD_LABELS = Object.freeze({
+  title:'Descrição',provider:'Fornecedor',category:'Categoria',totalCents:'Valor total',dueDate:'Vencimento',dueTime:'Hora limite',issueAt:'Emissão',method:'Método',recurrence:'Recorrência',reference:'Referência',notes:'Observações',cancelled:'Cancelada',archived:'Arquivada',
+  billId:'Fatura associada',amountCents:'Valor do pagamento',paidAt:'Data do pagamento',description:'Descrição',receivedAt:'Data do rendimento',name:'Nome',quantity:'Quantidade',unit:'Unidade',estimatedCents:'Valor estimado',actualCents:'Valor real',purchased:'Comprado',purchasedAt:'Data da compra',targetCents:'Meta',savedCents:'Poupado',deadline:'Prazo',openingBalanceCents:'Saldo inicial',budgetCents:'Orçamento'
+});
+const SYNC_CONFLICT_MONEY_FIELDS = new Set(['totalCents','amountCents','estimatedCents','actualCents','targetCents','savedCents','openingBalanceCents','budgetCents']);
+const SYNC_CONFLICT_DATE_FIELDS = new Set(['dueDate','deadline']);
+const SYNC_CONFLICT_DATETIME_FIELDS = new Set(['issueAt','paidAt','receivedAt','purchasedAt']);
 
 function syncConfig() {
   if (!appState) return null;
@@ -343,7 +360,12 @@ function syncBusinessView(entity,item) {
   const out=syncClone(item||{});
   delete out.updatedAt;
   delete out.createdAt;
-  if(entity==='bill' && out.dueDate && out.dueTime) delete out.dueAt;
+  if(entity==='bill'){
+    if(out.dueDate&&out.dueTime) delete out.dueAt;
+    delete out.recurrenceParentId;
+    delete out.recurrenceSeriesId;
+    delete out.recurrenceKey;
+  }
   if(entity==='activity') return {id:out.id||'',text:out.text||'',type:out.type||'',at:out.at||''};
   return out;
 }
@@ -618,6 +640,7 @@ async function pushLocalEncryptedVault(token,cfg,remote=null,revision=null) {
 
 async function syncNow(reason='manual') {
   if(syncBusy){syncPending=true;return 'syncing';}
+  if(reason!=='manual'&&syncLastStatus.state==='conflict'&&syncActiveConflicts.length) return 'conflict';
   syncPending=false;
   if(!vaultKey||!appState) return 'not-ready';
   const cfg=syncConfig();
@@ -657,6 +680,7 @@ async function syncNow(reason='manual') {
 
     if(merged.conflicts.length){
       syncActiveConflicts=merged.conflicts;
+      syncRemoteCandidate=remote;
       syncSuppressAuto=true;
       try{
         appState=merged.state;
@@ -858,8 +882,136 @@ async function renderSyncUi() {
       if(summary) summary.textContent=syncActiveConflicts.length
         ? `${syncActiveConflicts.length} alteração(ões) simultânea(s) em ${names.join(', ')}. Diferenças apenas técnicas são resolvidas automaticamente; só diferenças reais ficam para revisão.`
         : 'Foi detetada uma alteração simultânea. Os dados continuam preservados.';
+      renderSyncConflictList();
     }
   }
+}
+
+function syncConflictRecordName(conflict) {
+  const item=conflict?.local||conflict?.remote||{};
+  if(conflict?.entity==='month') return conflict.id;
+  return cleanString(item.title||item.description||item.name||item.provider||conflict?.id||'Registo',100);
+}
+
+function syncConflictDifferences(conflict) {
+  const fields=SYNC_CONFLICT_FIELDS[conflict?.entity]||[];
+  return fields.filter(field=>canonicalize(conflict?.local?.[field])!==canonicalize(conflict?.remote?.[field]));
+}
+
+function syncConflictValueHtml(field,value) {
+  if(value===null||value===undefined||value==='') return '<span class="muted">Sem valor</span>';
+  if(SYNC_CONFLICT_MONEY_FIELDS.has(field)) return `<span data-money>${money(value)}</span>`;
+  if(SYNC_CONFLICT_DATE_FIELDS.has(field)) return esc(fmtDate(value));
+  if(SYNC_CONFLICT_DATETIME_FIELDS.has(field)) return esc(fmtDateTime(value));
+  if(field==='billId'){
+    const bill=appState?.bills?.find(item=>item.id===value);
+    return esc(bill?.title||String(value));
+  }
+  if(field==='recurrence') return esc(recurrenceLabel(value));
+  if(typeof value==='boolean') return value?'Sim':'Não';
+  return esc(String(value));
+}
+
+function renderSyncConflictList() {
+  const root=$('#syncConflictList');
+  if(!root) return;
+  if(!syncActiveConflicts.length){
+    root.innerHTML='<p class="muted">Atualize a comparação para receber os detalhes mais recentes do cofre.</p>';
+    return;
+  }
+  const entityLabels={bill:'Fatura',payment:'Pagamento',income:'Rendimento',market:'Mercado',goal:'Objetivo',month:'Planeamento'};
+  root.innerHTML=syncActiveConflicts.map((conflict,index)=>{
+    const fields=syncConflictDifferences(conflict);
+    const rows=fields.map(field=>`<div class="sync-conflict-row" role="row">
+      <strong role="cell">${esc(SYNC_CONFLICT_FIELD_LABELS[field]||field)}</strong>
+      <span role="cell">${syncConflictValueHtml(field,conflict.local?.[field])}</span>
+      <span role="cell">${syncConflictValueHtml(field,conflict.remote?.[field])}</span>
+    </div>`).join('');
+    return `<article class="sync-conflict-card" data-sync-conflict-card="${index}">
+      <div class="sync-conflict-head"><div><small>${esc(entityLabels[conflict.entity]||'Registo')}</small><h4>${esc(syncConflictRecordName(conflict))}</h4></div><span class="status-chip attention">${fields.length} diferença${fields.length===1?'':'s'}</span></div>
+      <div class="sync-conflict-table" role="table" aria-label="Comparação do conflito">
+        <div class="sync-conflict-row sync-conflict-columns" role="row"><strong role="columnheader">Campo</strong><strong role="columnheader">Este dispositivo</strong><strong role="columnheader">Sincronizado</strong></div>
+        ${rows||'<p class="muted">Não há diferenças financeiras visíveis. Compare novamente.</p>'}
+      </div>
+      <div class="sync-conflict-actions">
+        <button class="btn primary" type="button" data-sync-conflict-choice="local" data-sync-conflict-index="${index}">Manter deste dispositivo</button>
+        <button class="btn secondary" type="button" data-sync-conflict-choice="remote" data-sync-conflict-index="${index}">Usar o sincronizado</button>
+      </div>
+      <small class="muted">A versão não escolhida permanece preservada no histórico cifrado de conflitos.</small>
+    </article>`;
+  }).join('');
+}
+
+function applySyncConflictChoice(conflict,choice) {
+  if(!appState||!conflict||!['local','remote'].includes(choice)) throw new Error('Decisão de conflito inválida.');
+  const selected=syncClone(choice==='remote'?conflict.remote:conflict.local);
+  if(conflict.entity==='month'){
+    appState.months ||= {};
+    appState.months[conflict.id]=selected;
+    return;
+  }
+  const collections={bill:'bills',payment:'payments',income:'incomes',market:'market',goal:'goals'};
+  const field=collections[conflict.entity];
+  if(!field||!selected?.id) throw new Error('Registo de conflito inválido.');
+  appState[field] ||= [];
+  const index=appState[field].findIndex(item=>item.id===conflict.id);
+  if(index>=0) appState[field][index]=selected;
+  else appState[field].push(selected);
+}
+
+async function finishSyncConflictResolution() {
+  const cfg=syncConfig();
+  const token=await loadSyncToken();
+  if(!cfg?.enabled||!token) throw new Error('Introduza o token GitHub deste dispositivo.');
+  const expected=syncRemoteCandidate;
+  if(!expected) throw new Error('Compare novamente antes de concluir a revisão.');
+
+  syncBusy=true;
+  syncSetStatus('syncing','A aplicar as decisões e a confirmar o cofre cifrado...');
+  try{
+    await verifyPrivateSyncRepo(token,cfg);
+    const latest=await fetchRemoteSyncFile(token,cfg);
+    if(!latest||latest.sha!==expected.sha||latest.revision!==expected.revision) throw new Error('SYNC_RACE');
+    const localMeta=await idbGet('meta','vault');
+    if(!vaultMetaMatches(localMeta,latest.normalized.meta)) throw new Error('REMOTE_VAULT_MISMATCH');
+    await pushLocalEncryptedVault(token,cfg,latest,latest.revision+1);
+    syncRemoteCandidate=null;
+    syncActiveConflicts=[];
+    clearSyncRetry();
+    syncSetStatus('synced','Revisão concluída. Web e móvel estão alinhados com as decisões confirmadas.');
+    renderCurrentPage();
+    return 'synced';
+  }catch(err){
+    if(err?.message==='SYNC_RACE'){
+      syncRemoteCandidate=null;
+      syncSetStatus('conflict','O outro dispositivo alterou o cofre durante a revisão. Compare novamente; os dados e as decisões locais foram preservados.');
+      return 'conflict';
+    }
+    if(err?.message==='REMOTE_VAULT_MISMATCH'){
+      syncSetStatus('vault-mismatch','O cofre remoto utiliza outra chave. Use a união segura para preservar os dados dos dois dispositivos.');
+      return 'vault-mismatch';
+    }
+    const message=syncUserError(err,err?.message==='Compare novamente antes de concluir a revisão.'?err.message:'Não foi possível concluir a revisão. As decisões locais foram preservadas.');
+    syncSetStatus('error',message);
+    return 'error';
+  }finally{
+    syncBusy=false;
+    renderSyncUi();
+  }
+}
+
+async function resolveSyncConflictFromUi(index,choice) {
+  const conflict=syncActiveConflicts[index];
+  if(!conflict) throw new Error('Este conflito já foi atualizado. Compare novamente.');
+  applySyncConflictChoice(conflict,choice);
+  syncActiveConflicts.splice(index,1);
+  syncSuppressAuto=true;
+  try{await saveState();}finally{syncSuppressAuto=false;}
+  if(syncActiveConflicts.length){
+    syncSetStatus('conflict',`${syncActiveConflicts.length} alteração(ões) ainda precisa(m) de decisão.`);
+    return 'conflict';
+  }
+  return await finishSyncConflictResolution();
 }
 
 function setSyncActionMessage(message,type='') {
@@ -991,6 +1143,23 @@ function wireSyncControls() {
   $('#syncToken')?.addEventListener('blur',scheduleCredentialAutoSetup);
   $('#syncNowBtn')?.addEventListener('click',manualSyncFromUi);
   $('#syncConflictRetryBtn')?.addEventListener('click',manualSyncFromUi);
+  $('#syncConflictList')?.addEventListener('click',async event=>{
+    const button=event.target.closest('[data-sync-conflict-choice]');
+    if(!button||syncBusy||syncReviewBusy) return;
+    const index=Number(button.dataset.syncConflictIndex);
+    const choice=button.dataset.syncConflictChoice;
+    const prompt=choice==='remote'?'Usar a versão do cofre sincronizado para este registo?':'Manter a versão deste dispositivo para este registo?';
+    if(!confirm(`${prompt} A outra versão continuará preservada no histórico cifrado.`)) return;
+    const card=button.closest('[data-sync-conflict-card]');
+    card?.querySelectorAll('button').forEach(item=>{item.disabled=true;});
+    syncReviewBusy=true;
+    try{
+      await resolveSyncConflictFromUi(index,choice);
+    }catch(err){
+      setSyncActionMessage(syncUserError(err,err?.message||'Não foi possível guardar esta decisão.'),'error');
+      renderSyncUi();
+    }finally{syncReviewBusy=false;}
+  });
   $('#syncResolveBtn')?.addEventListener('click',async()=>{
     const btn=$('#syncResolveBtn');
     const pin=$('#syncResolvePin');

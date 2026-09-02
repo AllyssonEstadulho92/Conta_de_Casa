@@ -96,6 +96,51 @@ const auditMerged = vm.runInContext(`mergeAppStates(
 )`, context);
 assert.deepEqual(JSON.parse(JSON.stringify(auditMerged.state.auditTrail.map(x=>x.id))),['a1','a2']);
 
+const paymentChoice = vm.runInContext(`(()=> {
+  appState={settings:{sync:{}},months:{},bills:[],payments:[{id:'p1',amountCents:1000}],incomes:[],market:[],goals:[]};
+  const conflict={entity:'payment',id:'p1',local:{id:'p1',amountCents:1000},remote:{id:'p1',amountCents:2500}};
+  applySyncConflictChoice(conflict,'remote');
+  return appState.payments[0];
+})()`, context);
+assert.equal(JSON.parse(JSON.stringify(paymentChoice)).amountCents,2500);
+
+const monthChoice = vm.runInContext(`(()=> {
+  appState={settings:{sync:{}},months:{'2026-09':{openingBalanceCents:1000}},bills:[],payments:[],incomes:[],market:[],goals:[]};
+  const conflict={entity:'month',id:'2026-09',local:{openingBalanceCents:1000},remote:{openingBalanceCents:3000}};
+  applySyncConflictChoice(conflict,'local');
+  return appState.months['2026-09'];
+})()`, context);
+assert.equal(JSON.parse(JSON.stringify(monthChoice)).openingBalanceCents,1000);
+
+assert.match(source, /syncRemoteCandidate=remote;[\s\S]*syncSetStatus\('conflict'/);
+assert.match(source, /function renderSyncConflictList\(\)/);
+assert.match(source, /Manter deste dispositivo/);
+assert.match(source, /Usar o sincronizado/);
+assert.match(source, /await pushLocalEncryptedVault\(token,cfg,latest,latest\.revision\+1\)/);
+assert.match(source, /latest\.sha!==expected\.sha\|\|latest\.revision!==expected\.revision/);
+assert.match(source, /reason!=='manual'&&syncLastStatus\.state==='conflict'&&syncActiveConflicts\.length/);
+assert.match(source, /syncBusy\|\|syncReviewBusy/);
+
+const escapedConflictHtml = vm.runInContext(`(()=>{
+  const root={innerHTML:''};
+  $=selector=>selector==='#syncConflictList'?root:null;
+  esc=value=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  money=value=>String(value);
+  fmtDate=value=>String(value);
+  fmtDateTime=value=>String(value);
+  recurrenceLabel=value=>String(value);
+  syncActiveConflicts=[{entity:'bill',id:'b-x',local:{id:'b-x',title:'<img src=x onerror=alert(1)>',notes:'<script>alert(1)</script>',totalCents:1000},remote:{id:'b-x',title:'Seguro',notes:'Normal',totalCents:2000}}];
+  renderSyncConflictList();
+  return root.innerHTML;
+})()`,context);
+assert.doesNotMatch(escapedConflictHtml,/<img|<script/i);
+assert.match(escapedConflictHtml,/&lt;img/);
+
+const conflictIndex=source.indexOf("if(merged.conflicts.length)");
+const conflictReturn=source.indexOf("return 'conflict';",conflictIndex);
+const conflictBranch=source.slice(conflictIndex,conflictReturn);
+assert.doesNotMatch(conflictBranch,/pushLocalEncryptedVault/,'unresolved conflicts must never be uploaded');
+
 console.log('Encrypted sync tests: OK');
 
 
@@ -255,6 +300,17 @@ const safeConflict = vm.runInContext(`(()=> {
   return {conflicts,merged};
 })()`, context);
 assert.equal(JSON.parse(JSON.stringify(safeConflict)).conflicts.length,0);
+
+const recurringMetadataNoConflict = vm.runInContext(`(()=> {
+  const conflicts=[];
+  mergeById('bill',
+    [{id:'b1',title:'Internet',totalCents:3999,dueDate:'2026-09-10',dueTime:'23:59',recurrence:'monthly',recurrenceSeriesId:'series-local',updatedAt:'2026-09-01T10:00:00.000Z'}],
+    [{id:'b1',title:'Internet',totalCents:3999,dueDate:'2026-09-10',dueTime:'23:59',recurrence:'monthly',recurrenceSeriesId:'series-remote',updatedAt:'2026-09-01T10:00:00.000Z'}],
+    conflicts
+  );
+  return conflicts;
+})()`, context);
+assert.equal(JSON.parse(JSON.stringify(recurringMetadataNoConflict)).length,0);
 
 const trueConflict = vm.runInContext(`(()=> {
   const conflicts=[];
