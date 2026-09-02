@@ -39,13 +39,17 @@ console.log('Bill detail structure regression tests: OK');
 
 
 assert.match(forms, /data-detail-delete/);
+assert.match(forms, /Excluir fatura e pagamentos/);
 assert.match(events, /function billDeletionScope\(rootId\)/);
-assert.match(events, /Não é possível excluir uma fatura com pagamentos/);
+assert.match(events, /recordSyncDeletion\('payment',payment\.id\)/);
 assert.match(events, /recordSyncDeletion\('bill',billId\)/);
+assert.match(events, /appState\.payments=appState\.payments\.filter/);
 assert.match(events, /appState\.bills=appState\.bills\.filter/);
+assert.match(events, /Esta ação altera os totais e relatórios e não pode ser desfeita/);
 assert.match(events, /await commit\('deleted','bill'\)/);
+assert.doesNotMatch(events, /Não é possível excluir uma fatura com pagamentos/);
 
-console.log('Delete invoice safety tests: OK');
+console.log('Cascade invoice deletion tests: OK');
 
 
 const render = fs.readFileSync('render.js','utf8');
@@ -137,3 +141,11 @@ assert.match(forms, /if\(id && total<paidForBill\(id\)\)/);
 assert.match(forms, /O valor total não pode ficar abaixo do montante já pago/);
 
 console.log('Paid invoice direct edit regression tests: OK');
+
+
+assert.match(forms, /Editar pagamento<\/button><button class="btn danger"/);
+assert.match(forms, /Eliminar pagamento<\/button>/);
+assert.match(events, /deletePaymentRecord\(/);
+assert.match(events, /Pagamento eliminado\./);
+
+console.log('Payment action visibility tests: OK');
