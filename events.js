@@ -228,7 +228,7 @@ function wireEvents(){
   $('#newBillBtn').addEventListener('click',()=>openBillForm()); $('#newIncomeBtn').addEventListener('click',openIncomeForm); $('#newMarketBtn').addEventListener('click',openMarketForm); $('#newGoalBtn').addEventListener('click',openGoalForm);
   $('#billSearch').addEventListener('input',renderBills);
   ['#billStatusFilter','#billCategoryFilter','#billDateFrom','#billDateTo','#billSort'].forEach(sel=>$(sel)?.addEventListener('change',renderBills));
-  $('#billClearFilters')?.addEventListener('click',()=>{
+  const clearBillFilters=()=>{
     $('#billSearch').value='';
     $('#billStatusFilter').value='all';
     $('#billCategoryFilter').value='all';
@@ -236,12 +236,11 @@ function wireEvents(){
     $('#billDateTo').value='';
     $('#billSort').value='due-asc';
     renderBills();
-  });
-  const formDialog=$('#formDialog');
-  formDialog.addEventListener('click',e=>{if(e.target===formDialog)closeDialog();});
-  formDialog.addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
-  formDialog.addEventListener('close',()=>{formDialog.classList.remove('detail-dialog');delete formDialog.dataset.mode;});
+  };
+  $('#billClearFilters')?.addEventListener('click',clearBillFilters);
   $('#billsList').addEventListener('click',async e=>{
+    const clear=e.target.closest('[data-clear-bill-filters]');
+    if(clear){clearBillFilters();return;}
     const pay=e.target.closest('[data-pay-bill]');
     if(pay){openPaymentForm(pay.dataset.payBill);return;}
     const del=e.target.closest('[data-delete-bill]');
@@ -249,6 +248,10 @@ function wireEvents(){
     const b=e.target.closest('[data-bill-id]');
     if(b)openBillDetail(b.dataset.billId);
   });
+  const formDialog=$('#formDialog');
+  formDialog.addEventListener('click',e=>{if(e.target===formDialog)closeDialog();});
+  formDialog.addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
+  formDialog.addEventListener('close',()=>{formDialog.classList.remove('detail-dialog');delete formDialog.dataset.mode;});
   $('#upcomingBills').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#calendarAgenda').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#dialogBody').addEventListener('click',async e=>{
@@ -376,7 +379,7 @@ async function enterApp() {
   if ('serviceWorker' in navigator) {
     (async()=>{
       try{
-        const reg=await navigator.serviceWorker.register('./sw.js?v=38',{updateViaCache:'none'});
+        const reg=await navigator.serviceWorker.register('./sw.js?v=39',{updateViaCache:'none'});
         await reg.update().catch(()=>{});
         if(!window.__swReloadBound){
           window.__swReloadBound=true;
