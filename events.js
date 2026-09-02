@@ -267,6 +267,7 @@ function wireEvents(){
     ({bill:openBillForm,income:openIncomeForm,market:openMarketForm,goal:openGoalForm})[b.dataset.quick]?.();
   });
   $('#newBillBtn').addEventListener('click',()=>openBillForm()); $('#newIncomeBtn').addEventListener('click',openIncomeForm); $('#newMarketBtn').addEventListener('click',()=>openMarketForm()); $('#newGoalBtn').addEventListener('click',openGoalForm);
+  $('#kpiGrid').addEventListener('click',e=>{if(e.target.closest('[data-update-balance]'))openAccountBalanceForm();});
   $('#billSearch').addEventListener('input',renderBills);
   ['#billStatusFilter','#billCategoryFilter','#billDateFrom','#billDateTo','#billSort'].forEach(sel=>$(sel)?.addEventListener('change',renderBills));
   const clearBillFilters=()=>{
@@ -354,7 +355,21 @@ function wireEvents(){
     }
   });
   $('#monthPicker').addEventListener('change',()=>{selectedMonth=$('#monthPicker').value||selectedMonth;monthProfile();renderCurrentPage();});
-  $('#monthPlanForm').addEventListener('submit',async e=>{e.preventDefault();const open=parseCents($('#openingBalance').value),budget=parseCents($('#monthlyBudget').value);if(!validCents(open,-MAX_MONEY_CENTS)||!validCents(budget,0)){toast('Valores de planeamento inválidos.');return;}const p=monthProfile();p.openingBalanceCents=open;p.budgetCents=budget;p.updatedAt=new Date().toISOString();await commit('updated','planning');toast('Planeamento guardado.');});
+  $('#monthPlanForm').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const balanceRaw=$('#accountBalance').value.trim();
+    const balance=balanceRaw===''?null:parseCents(balanceRaw);
+    const open=parseCents($('#openingBalance').value),budget=parseCents($('#monthlyBudget').value);
+    if((balance!==null&&!validCents(balance,-MAX_MONEY_CENTS))||!validCents(open,-MAX_MONEY_CENTS)||!validCents(budget,0)){toast('Valores de planeamento inválidos.');return;}
+    const p=monthProfile(),now=new Date().toISOString();
+    p.accountBalanceCents=balance;
+    p.accountBalanceUpdatedAt=balance===null?null:now;
+    p.openingBalanceCents=open;
+    p.budgetCents=budget;
+    p.updatedAt=now;
+    await commit('updated','planning');
+    toast('Planeamento guardado.');
+  });
   $('#incomeList').addEventListener('click',async e=>{const b=e.target.closest('[data-delete-income]');if(b&&confirm('Eliminar este rendimento?')){if(typeof recordSyncDeletion==='function')recordSyncDeletion('income',b.dataset.deleteIncome);appState.incomes=appState.incomes.filter(x=>x.id!==b.dataset.deleteIncome);await commit('deleted','income');}});
   $('#marketSearch')?.addEventListener('input',renderMarket);
   ['#marketStatusFilter','#marketCategoryFilter','#marketSort'].forEach(sel=>$(sel)?.addEventListener('change',renderMarket));
@@ -460,7 +475,7 @@ async function enterApp() {
   if ('serviceWorker' in navigator) {
     (async()=>{
       try{
-        const reg=await navigator.serviceWorker.register('./sw.js?v=42',{updateViaCache:'none'});
+        const reg=await navigator.serviceWorker.register('./sw.js?v=43',{updateViaCache:'none'});
         await reg.update().catch(()=>{});
         if(!window.__swReloadBound){
           window.__swReloadBound=true;
