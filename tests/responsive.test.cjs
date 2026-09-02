@@ -78,11 +78,11 @@ console.log('Native mobile shell v8 tests: OK');
 
 
 assert.match(index, /name="app-build" content="v33"/);
-assert.match(index, /styles\.css\?v=32/);
-assert.match(index, /sync\.js\?v=32/);
-assert.match(index, /events\.js\?v=32/);
+assert.match(index, /styles\.css\?v=33/);
+assert.match(index, /sync\.js\?v=33/);
+assert.match(index, /events\.js\?v=33/);
 assert.match(index, /id="appBuildVersion">v33</);
-assert.match(events, /register\('\.\/sw\.js\?v=32',\{updateViaCache:'none'\}\)/);
+assert.match(events, /register\('\.\/sw\.js\?v=33',\{updateViaCache:'none'\}\)/);
 assert.match(events, /controllerchange/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
