@@ -98,9 +98,17 @@ function renderDashboard() {
   const n = dashboardNumbers();
   const paidBills = n.paymentTotal;
   const kpis = [
-    ['Saldo atual',n.current,'success','Disponível registado'],['Por pagar',n.pending,'primary',`${n.pendingCount} contas`],['Pago',paidBills,'success','Pagamentos do mês'],['Em atraso',n.overdue,'danger',`${n.overdueCount} contas`],['Próximos 7 dias',n.next7,'warning',`${n.next7Count} vencimento${n.next7Count===1?'':'s'}`],['Saldo projetado',n.projected,n.projected<0?'danger':'success','Após todas as obrigações do mês']
+    ['Saldo atual',n.current,'success','Disponível registado'],
+    ['Por pagar',n.pending,'primary',`${n.pendingCount} conta${n.pendingCount===1?'':'s'}`],
+    ['Em atraso',n.overdue,'danger',`${n.overdueCount} conta${n.overdueCount===1?'':'s'}`],
+    ['Saldo projetado',n.projected,n.projected<0?'danger':'success','Após todas as obrigações do mês']
   ];
   setHTML('#kpiGrid', kpis.map(([label,value,kind,sub])=>`<article class="kpi ${kind}"><span class="label">${esc(label)}</span><strong data-money>${money(value)}</strong><small>${esc(sub)}</small></article>`).join(''));
+  const secondaryMetrics = [
+    ['Pago no mês',paidBills,'Pagamentos confirmados'],
+    ['Próximos 7 dias',n.next7,`${n.next7Count} vencimento${n.next7Count===1?'':'s'}`]
+  ];
+  setHTML('#dashboardSecondary', secondaryMetrics.map(([label,value,sub])=>`<article class="dashboard-secondary-card"><div><span>${esc(label)}</span><small>${esc(sub)}</small></div><strong data-money>${money(value)}</strong></article>`).join(''));
   const alerts = [];
   const overdueCount = n.overdueCount;
   const critical = n.criticalCount;

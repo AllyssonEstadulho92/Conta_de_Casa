@@ -6,8 +6,9 @@ const designCss = fs.readFileSync('design-system.css','utf8');
 const css = `${legacyCss}\n${designCss}`;
 const events = fs.readFileSync('events.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
+const render = fs.readFileSync('render.js','utf8');
 
-assert.match(designCss, /Conta de Casa v37 — design foundation/);
+assert.match(designCss, /Conta de Casa v38 — design foundation/);
 assert.match(designCss, /--content-max:1440px/);
 assert.match(designCss, /--sidebar-expanded:248px/);
 assert.match(designCss, /--sidebar-rail:76px/);
@@ -36,24 +37,30 @@ assert.match(index, /id="mobileMenuBtn"/);
 assert.match(index, /id="mobileDrawer"/);
 assert.match(index, /id="drawerNav"/);
 assert.match(index, /id="mobileNav" class="mobile-nav"/);
+assert.match(index, /id="kpiGrid" class="kpi-grid dashboard-kpis"/);
+assert.match(index, /id="dashboardSecondary" class="dashboard-secondary"/);
+assert.match(designCss, /#page-dashboard \.kpi-grid\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)\}/);
+assert.match(designCss, /\.dashboard-secondary-card\{/);
+assert.match(render, /\['Pago no mês',paidBills,'Pagamentos confirmados'\]/);
+assert.match(render, /setHTML\('#dashboardSecondary'/);
 assert.doesNotMatch(index, /class="fab"/);
 
 assert.doesNotMatch(css, /\bzoom\s*:/i);
 assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
 
-assert.match(index, /name="app-build" content="v37"/);
-assert.match(index, /styles\.css\?v=37/);
-assert.match(index, /design-system\.css\?v=37/);
-assert.match(index, /manifest\.webmanifest\?v=37/);
+assert.match(index, /name="app-build" content="v38"/);
+assert.match(index, /styles\.css\?v=38/);
+assert.match(index, /design-system\.css\?v=38/);
+assert.match(index, /manifest\.webmanifest\?v=38/);
 for (const asset of ['core','finance','render','forms','sync','events']) {
-  assert.match(index,new RegExp(`${asset}\\.js\\?v=37`));
+  assert.match(index,new RegExp(`${asset}\\.js\\?v=38`));
 }
-assert.match(index, /id="appBuildVersion">v37</);
-assert.match(events, /register\('\.\/sw\.js\?v=37',\{updateViaCache:'none'\}\)/);
+assert.match(index, /id="appBuildVersion">v38</);
+assert.match(events, /register\('\.\/sw\.js\?v=38',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v37/);
+assert.match(swSource, /conta-de-casa-public-v38/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 
-console.log('Responsive shell and PWA freshness v37 tests: OK');
+console.log('Responsive shell and PWA freshness v38 tests: OK');
