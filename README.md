@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão preparada: v38. O schema de dados permanece na versão 5; esta fase mantém a fundação visual adaptativa e reorganiza o Dashboard para destacar saldo, obrigações e projeção antes dos indicadores complementares, sem alterar cálculos, cifragem ou sincronização.
+Versão preparada: v39. O schema de dados permanece na versão 5; esta fase mantém o motor financeiro e a segurança existentes e transforma a área de Faturas numa vista operacional: tabela no desktop, cartões no mobile, filtros organizados e vencimentos mais legíveis.
 
 ## Estado
 
