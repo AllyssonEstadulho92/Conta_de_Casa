@@ -109,6 +109,21 @@ function billDeletionScope(rootId) {
   return ids;
 }
 
+async function deletePaymentRecord(paymentId,billId,confirmMessage='Eliminar este pagamento? O valor volta a ficar pendente na fatura.') {
+  const payment=appState?.payments?.find(x=>x.id===paymentId);
+  const targetBillId=String(billId||payment?.billId||'');
+  if(!payment) return false;
+  if(!confirm(confirmMessage)) return false;
+  if(typeof recordSyncDeletion==='function') recordSyncDeletion('payment',payment.id);
+  appState.payments=appState.payments.filter(x=>x.id!==payment.id);
+  const bill=appState.bills.find(x=>x.id===targetBillId);
+  if(bill) bill.updatedAt=new Date().toISOString();
+  await commit('deleted','payment');
+  if(bill) openBillDetail(bill.id); else closeDialog();
+  toast('Pagamento eliminado.');
+  return true;
+}
+
 async function deleteBillEnteredByMistake(id) {
   const bill=appState?.bills?.find(x=>x.id===id);
   if(!bill) return;
@@ -187,6 +202,17 @@ function wireEvents(){
   $('#dialogBody').addEventListener('click',async e=>{
     const pay=e.target.closest('[data-detail-pay]');
     if(pay){openPaymentForm(pay.dataset.detailPay);return;}
+    const editPayment=e.target.closest('[data-edit-payment]');
+    if(editPayment){openPaymentForm(editPayment.dataset.paymentBill,editPayment.dataset.editPayment);return;}
+    const repairPayment=e.target.closest('[data-remove-excess-payment]');
+    if(repairPayment){
+      await deletePaymentRecord(
+        repairPayment.dataset.removeExcessPayment,
+        repairPayment.dataset.paymentBill,
+        'Remover o pagamento mais recente para corrigir o valor excedente desta fatura?'
+      );
+      return;
+    }
     const edit=e.target.closest('[data-detail-edit]');
     if(edit){const b=appState.bills.find(x=>x.id===edit.dataset.detailEdit);openBillForm(b);return;}
     const duplicate=e.target.closest('[data-detail-duplicate]');
@@ -204,17 +230,7 @@ function wireEvents(){
     }
     const undo=e.target.closest('[data-delete-payment]');
     if(undo){
-      const payment=appState.payments.find(x=>x.id===undo.dataset.deletePayment);
-      const billId=undo.dataset.paymentBill||payment?.billId;
-      if(payment&&confirm('Desfazer este pagamento? O valor volta a ficar pendente na fatura.')){
-        if(typeof recordSyncDeletion==='function') recordSyncDeletion('payment',payment.id);
-        appState.payments=appState.payments.filter(x=>x.id!==payment.id);
-        const bill=appState.bills.find(x=>x.id===billId);
-        if(bill) bill.updatedAt=new Date().toISOString();
-        await commit('deleted','payment');
-        if(bill) openBillDetail(bill.id); else closeDialog();
-        toast('Pagamento desfeito.');
-      }
+      await deletePaymentRecord(undo.dataset.deletePayment,undo.dataset.paymentBill);
       return;
     }
     const del=e.target.closest('[data-detail-delete]');
