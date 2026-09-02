@@ -6,7 +6,7 @@ const forms = fs.readFileSync('forms.js', 'utf8');
 assert.match(forms, /function openDialog\(title, html, mode='form'\)/, 'dialog helper must exist');
 assert.match(forms, /setHTML\('#dialogBody', html\)/, 'dialog body must pass through the sanitizer');
 assert.match(forms, /f\.addEventListener\('submit',handleBillSubmit\)/, 'invoice submit handler must be wired');
-assert.match(forms, /e\.preventDefault\(\)/, 'invoice submission must not trigger native form navigation');
+assert.match(forms, /event\.preventDefault\(\)/, 'submission lock must prevent native form navigation before financial writes');
 assert.match(forms, /await commit\('created','bill'\)/, 'new invoice save must use the encrypted commit path');
 assert.match(forms, /await commit\('updated','bill'\)/, 'invoice edit must use the encrypted commit path');
 assert.match(forms, /toast\('Fatura guardada\.'\)/, 'successful save must provide visible confirmation');
