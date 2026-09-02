@@ -49,22 +49,20 @@ function renderPage(page) {
 }
 
 function renderDashboard() {
-  const n = monthNumbers();
-  const now = Date.now();
-  const next7 = n.bills.filter(b=>remainingForBill(b)>0 && new Date(b.dueAt).getTime()>=now && new Date(b.dueAt).getTime()<=now+7*DAY_MS).reduce((s,b)=>s+remainingForBill(b),0);
+  const n = dashboardNumbers();
   const paidBills = n.paymentTotal;
   const kpis = [
-    ['Saldo atual',n.current,'success','Disponível registado'],['Por pagar',n.pending,'primary',`${n.bills.filter(b=>remainingForBill(b)>0).length} contas`],['Pago',paidBills,'success','Pagamentos do mês'],['Em atraso',n.overdue,'danger',`${n.bills.filter(b=>billStatus(b)==='overdue').length} contas`],['Próximos 7 dias',next7,'warning','Vencimentos próximos'],['Saldo projetado',n.projected,n.projected<0?'danger':'success','Depois de pagar pendentes']
+    ['Saldo atual',n.current,'success','Disponível registado'],['Por pagar',n.pending,'primary',`${n.pendingCount} contas`],['Pago',paidBills,'success','Pagamentos do mês'],['Em atraso',n.overdue,'danger',`${n.overdueCount} contas`],['Próximos 7 dias',n.next7,'warning',`${n.next7Count} vencimento${n.next7Count===1?'':'s'}`],['Saldo projetado',n.projected,n.projected<0?'danger':'success','Após todas as obrigações do mês']
   ];
   setHTML('#kpiGrid', kpis.map(([label,value,kind,sub])=>`<article class="kpi ${kind}"><span class="label">${esc(label)}</span><strong data-money>${money(value)}</strong><small>${esc(sub)}</small></article>`).join(''));
   const alerts = [];
-  const overdueCount = n.bills.filter(b=>billStatus(b)==='overdue').length;
-  const critical = n.bills.filter(b=>billUrgency(b)==='critical' && billStatus(b)!=='overdue').length;
+  const overdueCount = n.overdueCount;
+  const critical = n.criticalCount;
   if (overdueCount) alerts.push(`<div class="alert danger"><span><strong>${overdueCount} fatura${overdueCount===1?'':'s'} em atraso</strong> — reveja os pagamentos pendentes.</span><button class="link-btn" data-go="bills">Abrir</button></div>`);
   if (critical) alerts.push(`<div class="alert warning"><span><strong>${critical} vencimento${critical===1?'':'s'} nas próximas 24 horas.</strong></span><button class="link-btn" data-go="bills">Ver</button></div>`);
   if (n.projected < 0) alerts.push(`<div class="alert danger"><span>O saldo projetado está negativo em <strong data-money>${money(Math.abs(n.projected))}</strong>.</span><button class="link-btn" data-go="planning">Planear</button></div>`);
   setHTML('#alertsPanel', alerts.join(''));
-  const upcoming = n.bills.filter(b=>remainingForBill(b)>0).sort((a,b)=>new Date(a.dueAt)-new Date(b.dueAt)).slice(0,6);
+  const upcoming = n.bills.filter(b=>{const days=billDaysUntil(b);return remainingForBill(b)>0&&Number.isFinite(days)&&days>=0;}).sort(compareBillsByDue).slice(0,6);
   setHTML('#upcomingBills', upcoming.length ? upcoming.map(b=>billRowHtml(b)).join('') : empty('Sem faturas pendentes neste mês.'));
   renderCategoryBars('#categoryBars', categoryTotals());
   const budget = n.profile.budgetCents || 0;
@@ -76,7 +74,7 @@ function renderDashboard() {
 }
 function billRowHtml(bill) {
   const st=billStatus(bill), urg=billUrgency(bill), rem=remainingForBill(bill);
-  return `<button class="list-row row-button" data-bill-id="${attr(bill.id)}" type="button"><div class="list-main"><strong>${esc(bill.title)}</strong><small>${fmtDate(bill.dueAt)} · ${esc(bill.provider||bill.category||'Sem entidade')}</small></div><div class="list-side"><strong data-money>${money(rem)}</strong><br><span class="status-chip ${st==='overdue'?'overdue':urg}">${st==='overdue'?'Em atraso':esc(dueText(bill))}</span></div></button>`;
+  return `<button class="list-row row-button" data-bill-id="${attr(bill.id)}" type="button"><div class="list-main"><strong>${esc(bill.title)}</strong><small>${fmtDate(billDueDateKey(bill))} · ${esc(bill.provider||bill.category||'Sem entidade')}</small></div><div class="list-side"><strong data-money>${money(rem)}</strong><br><span class="status-chip ${st==='overdue'?'overdue':urg}">${st==='overdue'?'Em atraso':esc(dueText(bill))}</span></div></button>`;
 }
 function renderCategoryBars(selector, entries) {
   const root=$(selector); if (!root) return;
@@ -88,12 +86,12 @@ function renderCategoryBars(selector, entries) {
 function renderBills() {
   const search=$('#billSearch')?.value?.trim().toLowerCase()||'';
   const filter=$('#billStatusFilter')?.value||'all';
-  const all=appState.bills.filter(b=>inSelectedMonth(b.dueAt) && !b.archived);
+  const all=appState.bills.filter(b=>billInMonth(b) && !b.archived);
   let list=all.filter(b=>{
     const st=billStatus(b);
     const text=`${b.title} ${b.provider||''} ${b.category||''} ${b.reference||''}`.toLowerCase();
     return (!search||text.includes(search)) && (filter==='all'||st===filter);
-  }).sort((a,b)=>new Date(a.dueAt)-new Date(b.dueAt));
+  }).sort(compareBillsByDue);
   const totals=monthNumbers();
   setHTML('#billSummary', `<span class="summary-pill">Total por pagar <strong data-money>${money(totals.pending)}</strong></span><span class="summary-pill">Em atraso <strong class="danger-text" data-money>${money(totals.overdue)}</strong></span><span class="summary-pill">Faturas <strong>${all.length}</strong></span>`);
   setHTML('#billsList', list.length?list.map(b=>billCardHtml(b)).join(''):empty('Nenhuma fatura encontrada para este mês.'));
@@ -101,7 +99,7 @@ function renderBills() {
 function billCardHtml(b) {
   const st=billStatus(b), urg=billUrgency(b), rem=remainingForBill(b), paid=paidForBill(b.id), pct=b.totalCents?clamp(paid/b.totalCents*100,0,100):0;
   const canDelete=b.cancelled && paid===0;
-  return `<article class="bill-card"><div class="bill-title"><div><h3>${esc(b.title)}</h3><small>${esc(b.provider||'Sem fornecedor')}</small></div><span class="status-chip ${st}">${statusLabel(st)}</span></div><div class="bill-amount" data-money>${money(rem)}</div><div class="bill-meta"><span>Vence<br><strong>${fmtDate(b.dueAt)}</strong></span><span>Prioridade<br><strong class="${urg==='critical'?'danger-text':''}">${urgencyLabel(urg)}</strong></span><span>Categoria<br><strong>${esc(b.category||'Outros')}</strong></span><span>Pago<br><strong data-money>${money(paid)}</strong></span></div><div class="progress ${st==='paid'?'success':st==='overdue'?'danger':'warning'}"><span data-width="${pct}"></span></div><div class="bill-actions"><button class="btn secondary" data-bill-id="${attr(b.id)}">Detalhes</button>${canDelete?`<button class="btn danger" data-delete-bill="${attr(b.id)}">Excluir</button>`:rem>0&&!b.cancelled?`<button class="btn primary" data-pay-bill="${attr(b.id)}">Pagar</button>`:''}</div></article>`;
+  return `<article class="bill-card"><div class="bill-title"><div><h3>${esc(b.title)}</h3><small>${esc(b.provider||'Sem fornecedor')}</small></div><span class="status-chip ${st}">${statusLabel(st)}</span></div><div class="bill-amount" data-money>${money(rem)}</div><div class="bill-meta"><span>Vence<br><strong>${fmtDate(billDueDateKey(b))}</strong></span><span>Prioridade<br><strong class="${urg==='critical'?'danger-text':''}">${urgencyLabel(urg)}</strong></span><span>Categoria<br><strong>${esc(b.category||'Outros')}</strong></span><span>Pago<br><strong data-money>${money(paid)}</strong></span></div><div class="progress ${st==='paid'?'success':st==='overdue'?'danger':'warning'}"><span data-width="${pct}"></span></div><div class="bill-actions"><button class="btn secondary" data-bill-id="${attr(b.id)}">Detalhes</button>${canDelete?`<button class="btn danger" data-delete-bill="${attr(b.id)}">Excluir</button>`:rem>0&&!b.cancelled?`<button class="btn primary" data-pay-bill="${attr(b.id)}">Pagar</button>`:''}</div></article>`;
 }
 
 function renderCalendar() {
@@ -112,14 +110,15 @@ function renderCalendar() {
   const cells=[]; for(let i=0;i<offset;i++) cells.push('<div class="calendar-day out"></div>');
   const today=new Date();
   for(let day=1;day<=days;day++){
-    const bills=appState.bills.filter(b=>{const d=new Date(b.dueAt);return d.getFullYear()===year&&d.getMonth()===month-1&&d.getDate()===day&&!b.archived&&!b.cancelled;});
+    const dayKey=`${year}-${pad2(month)}-${pad2(day)}`;
+    const bills=appState.bills.filter(b=>billDueDateKey(b)===dayKey&&!b.archived&&!b.cancelled);
     const overdue=bills.some(b=>billStatus(b)==='overdue');
     const cls=[today.getFullYear()===year&&today.getMonth()===month-1&&today.getDate()===day?'today':'',bills.length?(overdue?'has-overdue':'has-due'):''].join(' ');
     const total=bills.reduce((s,b)=>s+remainingForBill(b),0);
     cells.push(`<button class="calendar-day ${cls}" data-calendar-day="${day}"><span class="day-num">${day}</span>${bills.length?`<small>${bills.length} · <span data-money>${money(total)}</span></small>`:''}</button>`);
   }
   setHTML('#calendarGrid', headers+cells.join(''));
-  const monthBills=appState.bills.filter(b=>inSelectedMonth(b.dueAt)&&!b.archived&&!b.cancelled).sort((a,b)=>new Date(a.dueAt)-new Date(b.dueAt));
+  const monthBills=appState.bills.filter(b=>billInMonth(b)&&!b.archived&&!b.cancelled).sort(compareBillsByDue);
   setHTML('#calendarAgenda', monthBills.length?monthBills.map(b=>billRowHtml(b)).join(''):empty('Sem vencimentos neste mês.'));
 }
 
@@ -176,4 +175,4 @@ function renderSecurity() {
 function renderSettings() {
   $('#profileName').value=appState.settings.profileName||''; $('#currencySelect').value=appState.settings.currency||'EUR'; $('#themeSelect').value=appState.settings.theme||'light';
 }
-function updateAlertBadge(){ const n=monthNumbers(); const c=n.bills.filter(b=>remainingForBill(b)>0 && ['overdue','critical'].includes(billStatus(b)==='overdue'?'overdue':billUrgency(b))).length; $('#alertBadge').hidden=!c; }
+function updateAlertBadge(){ const n=dashboardNumbers(); const c=n.overdueCount+n.criticalCount; $('#alertBadge').hidden=!c; }
