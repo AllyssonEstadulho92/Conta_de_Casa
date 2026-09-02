@@ -1,5 +1,16 @@
 # Changelog
 
+## v39 — Faturas operacionais
+
+- área de Faturas reorganizada com pesquisa e ação de criação em primeiro nível e filtros agrupados por estado, categoria, período e ordenação;
+- desktop passa a usar tabela operacional com descrição, estado, vencimento, total, pago, em falta e ações;
+- mobile passa a usar cartões compactos com valor em falta, vencimento, progresso e ações de detalhe/pagamento;
+- vencimentos recebem sinal visual próprio sem alterar a regra financeira de estado ou urgência;
+- resumo do mês distingue Em aberto, A vencer e Em atraso usando os totais já calculados pelo motor financeiro;
+- estado vazio permite limpar filtros diretamente;
+- schema 5, fórmulas, arredondamentos, cofre, backups e protocolo de sincronização permanecem inalterados;
+- Service Worker e cache público promovidos para v39.
+
 ## v38 — hierarquia financeira do Dashboard
 
 - os indicadores principais passam a concentrar Saldo atual, Por pagar, Em atraso e Saldo projetado;

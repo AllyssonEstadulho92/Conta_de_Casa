@@ -1,4 +1,4 @@
-/* Conta de Casa v38 — design foundation and adaptive application shell */
+/* Conta de Casa v39 — design foundation and adaptive application shell */
 :root{
   color-scheme:light;
   --bg:#f5f7fa;
@@ -209,6 +209,135 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
   text-align:right;
 }
 
+
+/* Faturas v39: leitura operacional em tabela no desktop e cartões no mobile. */
+.bill-command-bar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+.bill-search-wrap{flex:1 1 auto;min-width:260px}
+.bill-search-wrap input{margin:0}
+.bill-new-btn{flex:0 0 auto;white-space:nowrap}
+.bill-filter-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr)) auto;
+  gap:10px;
+  align-items:end;
+  margin-bottom:14px;
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:var(--surface);
+}
+.bill-filter-field{
+  min-width:0;
+  display:grid;
+  gap:6px;
+  margin:0;
+}
+.bill-filter-field>span{
+  color:var(--muted);
+  font-size:.6875rem;
+  font-weight:600;
+  letter-spacing:.035em;
+  text-transform:uppercase;
+}
+.bill-filter-field input,.bill-filter-field select{margin:0;min-height:44px}
+.bill-filter-clear{white-space:nowrap}
+.bill-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:14px;
+}
+.bill-summary-item{
+  min-width:0;
+  display:grid;
+  gap:3px;
+  padding:12px 14px;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  background:var(--surface);
+}
+.bill-summary-item>span{font-size:.75rem;font-weight:600;color:var(--muted)}
+.bill-summary-item>strong{font-size:1.125rem;font-weight:600;font-variant-numeric:tabular-nums lining-nums}
+.bill-summary-item>small{font-size:.6875rem}
+.bill-summary-item.primary>strong{color:var(--primary)}
+.bill-summary-item.danger>strong{color:var(--danger)}
+.bill-results{min-width:0}
+.bill-table-shell{
+  width:100%;
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:var(--surface);
+}
+.bill-table{
+  width:100%;
+  min-width:980px;
+  border-collapse:separate;
+  border-spacing:0;
+  font-size:.8125rem;
+}
+.bill-table th{
+  padding:11px 12px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface-2);
+  color:var(--muted);
+  font-size:.6875rem;
+  font-weight:600;
+  letter-spacing:.035em;
+  text-align:left;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.bill-table td{
+  padding:12px;
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+.bill-table tbody tr:last-child td{border-bottom:0}
+.bill-table-row:hover td{background:color-mix(in srgb,var(--primary-2) 34%,var(--surface))}
+.bill-table .money-col{text-align:right;font-variant-numeric:tabular-nums lining-nums;white-space:nowrap}
+.bill-table .actions-col{width:180px}
+.bill-identity{display:grid;gap:3px;min-width:180px}
+.bill-identity strong{font-size:.875rem;font-weight:600}
+.bill-identity small{font-size:.6875rem;color:var(--muted)}
+.bill-due-cell{display:grid;gap:5px;min-width:132px}
+.bill-due-cell>strong{font-size:.8125rem}
+.bill-due-signal{
+  width:max-content;
+  max-width:100%;
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:.6875rem;
+  font-weight:600;
+  line-height:1.25;
+}
+.bill-due-signal.normal{background:var(--surface-2);color:var(--muted)}
+.bill-due-signal.success{background:var(--success-bg);color:var(--success)}
+.bill-due-signal.warning{background:var(--warning-bg);color:var(--warning)}
+.bill-due-signal.danger{background:var(--danger-bg);color:var(--danger)}
+.bill-remaining{font-weight:600}
+.bill-table-actions{display:flex;justify-content:flex-end;gap:7px}
+.bill-table-actions .btn{min-height:44px;padding:8px 11px;font-size:.75rem}
+.bill-mobile-list{display:none}
+.bill-empty-state{display:grid;justify-items:center;gap:8px}
+.bill-empty-state strong{font-size:.9375rem;color:var(--text)}
+.bill-empty-state span{font-size:.8125rem}
+.bill-empty-state .btn{margin-top:4px}
+
+@media(min-width:821px) and (max-width:1180px){
+  .bill-filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .bill-filter-clear{width:100%}
+  .bill-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
 /* Secondary navigation keeps related tools out of the main menu. */
 .section-tabs{display:flex;align-items:center;gap:4px;width:max-content;max-width:100%;margin:0 0 20px;padding:4px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2)}
 .section-tab{min-height:44px;padding:7px 13px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:.8125rem;font-weight:500;white-space:nowrap}
@@ -286,12 +415,53 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
   .mobile-nav .nav-btn:nth-child(3){visibility:visible}
   .mobile-nav .nav-btn.active{background:transparent;color:var(--primary)}
   .mobile-nav .nav-btn::before{inset:auto 30% 0;height:3px;width:auto;border-radius:4px 4px 0 0}
+  .bill-command-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-bottom:10px}
+  .bill-search-wrap{min-width:0}
+  .bill-new-btn{min-height:44px}
+  .bill-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px;margin-bottom:10px}
+  .bill-filter-clear{grid-column:1/-1;width:100%}
+  .bill-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+  .bill-summary-item{padding:10px 11px}
+  .bill-summary-item>strong{font-size:1rem}
+  .bill-table-shell{display:none}
+  .bill-mobile-list{display:grid;gap:10px}
+  .bill-mobile-card{
+    min-width:0;
+    display:grid;
+    gap:10px;
+    padding:14px;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    background:var(--surface);
+  }
+  .bill-mobile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .bill-mobile-head>div{min-width:0}
+  .bill-mobile-head h3{margin:0;font-size:.9375rem;line-height:1.3}
+  .bill-mobile-head small{display:block;margin-top:2px;font-size:.6875rem;color:var(--muted)}
+  .bill-mobile-focus{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding:10px 0;border-block:1px solid var(--border)}
+  .bill-mobile-focus>div{display:grid;gap:2px}
+  .bill-mobile-focus span,.bill-mobile-due span,.bill-mobile-finance span{font-size:.6875rem;color:var(--muted)}
+  .bill-mobile-focus strong{font-size:1.25rem;font-weight:600;font-variant-numeric:tabular-nums lining-nums}
+  .bill-mobile-due{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .bill-mobile-due strong{font-size:.8125rem}
+  .bill-mobile-finance{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .bill-mobile-finance>div{display:grid;gap:2px;min-width:0}
+  .bill-mobile-finance strong{font-size:.75rem;font-weight:600;overflow-wrap:anywhere}
+  .bill-mobile-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .bill-mobile-actions .btn{width:100%;min-height:44px}
   .section-tabs{margin-bottom:16px}
   .section-tab{min-height:44px;padding-inline:12px}
   .status-chip{font-size:.75rem}
 }
 
 @media(max-width:560px){
+  .bill-command-bar{grid-template-columns:1fr}
+  .bill-new-btn{width:100%}
+  .bill-filter-grid{grid-template-columns:1fr}
+  .bill-filter-clear{grid-column:auto}
+  .bill-summary-grid{grid-template-columns:1fr}
+  .bill-mobile-finance{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bill-mobile-finance>div:last-child{grid-column:1/-1}
   #themeToggle,#notificationsBtn{display:none}
   .page-heading .eyebrow{display:none}
   .page-heading h1{font-size:1.125rem}
