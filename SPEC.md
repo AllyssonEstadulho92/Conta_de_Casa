@@ -58,10 +58,28 @@ Estrutura reservada, mas anexos reais permanecem bloqueados até haver cifragem 
 
 ## Regras financeiras
 
-- restante = max(valor total - soma de pagamentos, 0)
-- saldo atual = saldo inicial + rendimentos - pagamentos - compras confirmadas
-- saldo projetado = saldo atual - total ainda por pagar
-- orçamento utilizado = pagamentos + compras confirmadas
+- todos os valores monetários persistidos são cêntimos inteiros;
+- restante = max(valor total - soma de pagamentos, 0);
+- por pagar = soma do restante de faturas do mês em estado Por pagar, Pago parcialmente ou Vence hoje;
+- em atraso = soma do restante de faturas do mês cuja data civil de vencimento é anterior à data civil atual;
+- obrigações do mês = por pagar + em atraso;
+- pago no mês = soma de pagamentos cuja data de pagamento pertence ao mês selecionado;
+- saldo atual = saldo inicial + rendimentos - pagamentos - compras confirmadas;
+- saldo projetado = saldo atual - obrigações do mês;
+- orçamento utilizado = pagamentos + compras confirmadas;
+- próximos 7 dias = obrigações não vencidas com diferença civil entre 0 e 7 dias, inclusive;
+- uma fatura paga tem restante zero e não entra em Por pagar, Em atraso ou Próximos 7 dias.
+
+## Regra oficial de datas
+
+- datas de vencimento são datas civis `YYYY-MM-DD`;
+- a hora limite é preservada separadamente, mas não altera a contagem de dias;
+- dias para vencer = diferença civil entre hoje e a data de vencimento;
+- 02/09/2026 → 12/09/2026 = 10 dias;
+- 02/09/2026 → 27/09/2026 = 25 dias;
+- diferença zero = “Vence hoje”; diferença um = “Vence amanhã”;
+- datas vencidas usam a diferença civil absoluta para “dias em atraso”;
+- recorrências mensais/trimestrais/semestrais/anuais preservam o dia quando possível e limitam ao último dia do mês quando necessário.
 
 ## Estados
 

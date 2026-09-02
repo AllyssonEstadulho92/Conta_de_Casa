@@ -1,8 +1,9 @@
 name: Deploy Pages
 
 on:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -16,20 +17,23 @@ concurrency:
 
 jobs:
   deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout tested revision
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
-      - name: Validate application
+      - name: Verify tested revision
         run: |
           node --check core.js
           node --check finance.js
@@ -39,12 +43,12 @@ jobs:
           node --check sync.js
           node --check sw.js
           node tests/finance.test.cjs
+          node tests/date-timezone.test.cjs
           node tests/form-regression.test.cjs
           node tests/security.test.cjs
           node tests/responsive.test.cjs
           node tests/sync.test.cjs
-          node tests/form-regression.test.cjs
-          node tests/security.test.cjs
+          node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8')); console.log('Manifest OK')"
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
