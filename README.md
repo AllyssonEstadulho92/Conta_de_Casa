@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão preparada: v42. O schema de dados permanece na versão 5; esta fase estabiliza os diálogos no iPhone/Safari durante a abertura do teclado, mantém o cabeçalho e o campo ativo dentro da área visível e permite excluir faturas com pagamentos através de uma remoção em cascata confirmada, sem criar pagamentos órfãos.
+Versão preparada: v43. O schema de dados permanece na versão 5; o Dashboard passa a tratar Saldo atual como o saldo real informado pelo utilizador a partir da conta bancária, mantendo separadamente o saldo calculado pelos registos para conciliação e usando o saldo real como base do Saldo projetado.
 
 ## Estado
 

@@ -224,10 +224,13 @@ function monthNumbers(month = selectedMonth, now = new Date()) {
     else if (['pending','partial','due-today'].includes(st)) pending = sumCents([pending,rem]);
   }
   const outstanding = sumCents([pending,overdue]);
-  const current = sumCents([profile.openingBalanceCents,incomes,-paymentTotal,-marketSpent]);
+  const ledgerCurrent = sumCents([profile.openingBalanceCents,incomes,-paymentTotal,-marketSpent]);
+  const hasAccountBalance = Number.isSafeInteger(profile.accountBalanceCents);
+  const current = hasAccountBalance ? profile.accountBalanceCents : ledgerCurrent;
+  const reconciliationDiff = hasAccountBalance ? sumCents([current,-ledgerCurrent]) : 0;
   const projected = sumCents([current,-outstanding]);
   const budgetUsed = sumCents([paymentTotal,marketSpent]);
-  return { profile, incomes, paymentTotal, marketSpent, pending, overdue, outstanding, current, projected, budgetUsed, bills };
+  return { profile, incomes, paymentTotal, marketSpent, pending, overdue, outstanding, ledgerCurrent, hasAccountBalance, reconciliationDiff, current, projected, budgetUsed, bills };
 }
 function dashboardNumbers(month = selectedMonth, now = new Date()) {
   const n = monthNumbers(month, now);

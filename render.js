@@ -97,13 +97,16 @@ function renderPage(page) {
 function renderDashboard() {
   const n = dashboardNumbers();
   const paidBills = n.paymentTotal;
+  const balanceSub=n.hasAccountBalance
+    ? `Saldo da conta · ${n.profile.accountBalanceUpdatedAt?fmtDateTime(n.profile.accountBalanceUpdatedAt):'atualizado manualmente'}`
+    : 'Estimativa pelos registos · atualize o saldo da conta';
+  const balanceCard=`<article class="kpi success account-balance-kpi"><span class="label">Saldo atual</span><strong data-money>${money(n.current)}</strong><small>${esc(balanceSub)}</small><button class="link-btn kpi-action" type="button" data-update-balance>Atualizar saldo</button></article>`;
   const kpis = [
-    ['Saldo atual',n.current,'success','Disponível registado'],
     ['Por pagar',n.pending,'primary',`${n.pendingCount} conta${n.pendingCount===1?'':'s'}`],
     ['Em atraso',n.overdue,'danger',`${n.overdueCount} conta${n.overdueCount===1?'':'s'}`],
-    ['Saldo projetado',n.projected,n.projected<0?'danger':'success','Após todas as obrigações do mês']
+    ['Saldo projetado',n.projected,n.projected<0?'danger':'success','Saldo atual menos obrigações ainda por pagar']
   ];
-  setHTML('#kpiGrid', kpis.map(([label,value,kind,sub])=>`<article class="kpi ${kind}"><span class="label">${esc(label)}</span><strong data-money>${money(value)}</strong><small>${esc(sub)}</small></article>`).join(''));
+  setHTML('#kpiGrid', balanceCard+kpis.map(([label,value,kind,sub])=>`<article class="kpi ${kind}"><span class="label">${esc(label)}</span><strong data-money>${money(value)}</strong><small>${esc(sub)}</small></article>`).join(''));
   const secondaryMetrics = [
     ['Pago no mês',paidBills,'Pagamentos confirmados'],
     ['Próximos 7 dias',n.next7,`${n.next7Count} vencimento${n.next7Count===1?'':'s'}`]
@@ -112,6 +115,8 @@ function renderDashboard() {
   const alerts = [];
   const overdueCount = n.overdueCount;
   const critical = n.criticalCount;
+  if (!n.hasAccountBalance) alerts.push(`<div class="alert warning"><span><strong>Saldo bancário ainda não confirmado.</strong> O valor mostrado é apenas uma estimativa pelos registos internos.</span><button class="link-btn" data-go="planning">Atualizar</button></div>`);
+  if (n.hasAccountBalance && n.reconciliationDiff!==0) alerts.push(`<div class="alert warning"><span><strong>Diferença de conciliação: <span data-money>${money(Math.abs(n.reconciliationDiff))}</span>.</strong> O saldo da conta difere do saldo calculado pelos movimentos registados.</span><button class="link-btn" data-go="planning">Rever</button></div>`);
   if (overdueCount) alerts.push(`<div class="alert danger"><span><strong>${overdueCount} fatura${overdueCount===1?'':'s'} em atraso</strong> — reveja os pagamentos pendentes.</span><button class="link-btn" data-go="bills">Abrir</button></div>`);
   if (critical) alerts.push(`<div class="alert warning"><span><strong>${critical} vencimento${critical===1?'':'s'} nas próximas 24 horas.</strong></span><button class="link-btn" data-go="bills">Ver</button></div>`);
   if (n.projected < 0) alerts.push(`<div class="alert danger"><span>O saldo projetado está negativo em <strong data-money>${money(Math.abs(n.projected))}</strong>.</span><button class="link-btn" data-go="planning">Planear</button></div>`);
@@ -240,8 +245,13 @@ function renderCalendar() {
 
 function renderPlanning() {
   const p=monthProfile();
+  const n=monthNumbers();
+  $('#accountBalance').value=Number.isSafeInteger(p.accountBalanceCents)?(p.accountBalanceCents/100).toFixed(2).replace('.',','):'';
   $('#openingBalance').value=(p.openingBalanceCents/100).toFixed(2).replace('.',',');
   $('#monthlyBudget').value=(p.budgetCents/100).toFixed(2).replace('.',',');
+  setHTML('#accountBalanceInfo',Number.isSafeInteger(p.accountBalanceCents)
+    ? `<div class="detail-grid"><div class="detail-item"><small>Saldo da conta</small><strong data-money>${money(p.accountBalanceCents)}</strong></div><div class="detail-item"><small>Saldo calculado pelos registos</small><strong data-money>${money(n.ledgerCurrent)}</strong></div><div class="detail-item full-detail"><small>Diferença de conciliação</small><strong class="${n.reconciliationDiff===0?'success-text':'warning-text'}" data-money>${money(n.reconciliationDiff)}</strong></div></div>`
+    : '<p class="muted">Ainda não foi registado o saldo real da conta para este mês.</p>');
   const incomes=appState.incomes.filter(i=>inSelectedMonth(i.receivedAt)).sort((a,b)=>new Date(b.receivedAt)-new Date(a.receivedAt));
   setHTML('#incomeList', incomes.length?incomes.map(i=>`<div class="list-row"><div class="list-main"><strong>${esc(i.description)}</strong><small>${fmtDate(i.receivedAt)}</small></div><div class="list-side"><strong class="success-text" data-money>+${money(i.amountCents)}</strong><br><button class="link-btn danger-text" data-delete-income="${attr(i.id)}">Eliminar</button></div></div>`).join(''):empty('Sem rendimentos registados neste mês.'));
 }

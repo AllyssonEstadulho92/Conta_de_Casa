@@ -20,6 +20,29 @@ function closeDialog() {
   lastDialogOpener = null;
   if (target?.isConnected) requestAnimationFrame(() => target.focus({preventScroll:true}));
 }
+
+function openAccountBalanceForm(){
+  const p=monthProfile();
+  const value=Number.isSafeInteger(p.accountBalanceCents)?(p.accountBalanceCents/100).toFixed(2).replace('.',','):'';
+  openDialog('Atualizar saldo da conta',`<form id="accountBalanceForm" class="form-grid">
+    <p class="muted">Introduza o saldo disponível que aparece na sua conta bancária neste momento. A aplicação não consulta o banco automaticamente.</p>
+    <label>Saldo atual da conta<input name="balance" inputmode="decimal" required value="${attr(value)}" placeholder="0,00" autocomplete="off"></label>
+    <div class="button-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary" type="submit">Guardar saldo</button></div>
+  </form>`);
+  $('#accountBalanceForm').addEventListener('submit',e=>withFormSubmissionLock(e,async form=>{
+    const balance=parseCents(new FormData(form).get('balance'));
+    if(!validCents(balance,-MAX_MONEY_CENTS)){toast('Saldo da conta inválido.');return false;}
+    const now=new Date().toISOString();
+    const profile=monthProfile();
+    profile.accountBalanceCents=balance;
+    profile.accountBalanceUpdatedAt=now;
+    profile.updatedAt=now;
+    await commit('updated','planning');
+    closeDialog();
+    toast('Saldo atual da conta atualizado.');
+    return true;
+  }));
+}
 const BILL_CATEGORIES = Object.freeze([
   'Casa',
   'Renda / Condomínio',

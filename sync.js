@@ -30,13 +30,13 @@ const SYNC_CONFLICT_FIELDS = Object.freeze({
   income:['description','amountCents','receivedAt'],
   market:['name','category','quantity','unit','estimatedCents','actualCents','purchased','purchasedAt'],
   goal:['name','targetCents','savedCents','deadline','archived'],
-  month:['openingBalanceCents','budgetCents']
+  month:['accountBalanceCents','openingBalanceCents','budgetCents']
 });
 const SYNC_CONFLICT_FIELD_LABELS = Object.freeze({
   title:'Descrição',provider:'Fornecedor',category:'Categoria',totalCents:'Valor total',dueDate:'Vencimento',dueTime:'Hora limite',issueAt:'Emissão',method:'Método',recurrence:'Recorrência',reference:'Referência',notes:'Observações',cancelled:'Cancelada',archived:'Arquivada',
-  billId:'Fatura associada',amountCents:'Valor do pagamento',paidAt:'Data do pagamento',description:'Descrição',receivedAt:'Data do rendimento',name:'Nome',quantity:'Quantidade',unit:'Unidade',estimatedCents:'Valor estimado',actualCents:'Valor real',purchased:'Comprado',purchasedAt:'Data da compra',targetCents:'Meta',savedCents:'Poupado',deadline:'Prazo',openingBalanceCents:'Saldo inicial',budgetCents:'Orçamento'
+  billId:'Fatura associada',amountCents:'Valor do pagamento',paidAt:'Data do pagamento',description:'Descrição',receivedAt:'Data do rendimento',name:'Nome',quantity:'Quantidade',unit:'Unidade',estimatedCents:'Valor estimado',actualCents:'Valor real',purchased:'Comprado',purchasedAt:'Data da compra',targetCents:'Meta',savedCents:'Poupado',deadline:'Prazo',accountBalanceCents:'Saldo atual da conta',openingBalanceCents:'Saldo inicial',budgetCents:'Orçamento'
 });
-const SYNC_CONFLICT_MONEY_FIELDS = new Set(['totalCents','amountCents','estimatedCents','actualCents','targetCents','savedCents','openingBalanceCents','budgetCents']);
+const SYNC_CONFLICT_MONEY_FIELDS = new Set(['totalCents','amountCents','estimatedCents','actualCents','targetCents','savedCents','accountBalanceCents','openingBalanceCents','budgetCents']);
 const SYNC_CONFLICT_DATE_FIELDS = new Set(['dueDate','deadline']);
 const SYNC_CONFLICT_DATETIME_FIELDS = new Set(['issueAt','paidAt','receivedAt','purchasedAt']);
 
@@ -457,7 +457,8 @@ function mergeMonths(localMonths={},remoteMonths={},conflicts=[]) {
     if(canonicalize(lp)===canonicalize(rp)) continue;
 
     const sameBusiness=Number(lp.openingBalanceCents||0)===Number(rp.openingBalanceCents||0)
-      && Number(lp.budgetCents||0)===Number(rp.budgetCents||0);
+      && Number(lp.budgetCents||0)===Number(rp.budgetCents||0)
+      && (Number.isSafeInteger(lp.accountBalanceCents)?lp.accountBalanceCents:null)===(Number.isSafeInteger(rp.accountBalanceCents)?rp.accountBalanceCents:null);
     if(sameBusiness){
       out[month]=chooseCompatibleRecord('month',lp,rp);
       continue;

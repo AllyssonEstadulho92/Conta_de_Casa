@@ -32,6 +32,7 @@ assert.match(css, /\.icon-btn\{width:44px;height:44px/);
 assert.match(css, /\.month-picker input\{width:148px;min-height:44px/);
 assert.match(css, /\.sync-header-status\{height:44px;min-width:44px/);
 assert.match(css, /\.section-tab\{min-height:44px/);
+assert.match(css, /\.account-balance-kpi \.kpi-action\{[\s\S]*min-height:44px/);
 assert.match(css, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\),select,textarea\{[\s\S]*font-size:16px/);
 assert.match(css, /\.dialog input,\.dialog select,\.dialog textarea\{scroll-margin-block:84px 24px\}/);
 assert.match(css, /html\.keyboard-open \.mobile-nav\{visibility:hidden;pointer-events:none\}/);
