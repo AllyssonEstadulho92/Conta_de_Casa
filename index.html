@@ -6,15 +6,15 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.github.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; media-src 'none'; manifest-src 'self'; worker-src 'self'" />
   <meta name="referrer" content="no-referrer" />
   <meta name="theme-color" content="#f7f9fc" />
-  <meta name="app-build" content="v39" />
+  <meta name="app-build" content="v40" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Conta de Casa" />
   <meta name="description" content="Conta de Casa — gestão privada de faturas e despesas domésticas." />
-  <link rel="manifest" href="./manifest.webmanifest?v=39" />
+  <link rel="manifest" href="./manifest.webmanifest?v=40" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=39" />
-  <link rel="stylesheet" href="./design-system.css?v=39" />
+  <link rel="stylesheet" href="./styles.css?v=40" />
+  <link rel="stylesheet" href="./design-system.css?v=40" />
   <title>Conta de Casa</title>
 </head>
 <body>
@@ -115,7 +115,22 @@
       </section>
       <section id="page-calendar" class="page"><nav class="section-tabs" aria-label="Vistas de faturas"><button class="section-tab" type="button" data-page="bills">Lista de faturas</button><button class="section-tab" type="button" data-page="calendar">Calendário</button></nav><article class="panel"><div class="panel-head"><div><h2>Vencimentos do mês</h2><p>Vencimentos e pagamentos organizados por data.</p></div></div><div id="calendarGrid" class="calendar-grid"></div><div id="calendarAgenda" class="stack-list"></div></article></section>
       <section id="page-planning" class="page"><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Planeamento mensal</h2><p>Defina saldo inicial e orçamento do período.</p></div></div><form id="monthPlanForm" class="form-grid"><label>Saldo inicial<input id="openingBalance" inputmode="decimal" placeholder="0,00" /></label><label>Orçamento do mês<input id="monthlyBudget" inputmode="decimal" placeholder="0,00" /></label><button class="btn primary" type="submit">Guardar planeamento</button></form></article><article class="panel"><div class="panel-head"><div><h2>Rendimentos</h2><p>Salários, reembolsos e outras entradas.</p></div><button id="newIncomeBtn" class="btn secondary">+ Rendimento</button></div><div id="incomeList" class="stack-list"></div></article></div></section>
-      <section id="page-market" class="page"><div class="section-toolbar"><div><h2>Mercado</h2><p class="muted">Lista → comprado, com preço previsto e real.</p></div><button id="newMarketBtn" class="btn primary">+ Adicionar item</button></div><div id="marketSummary" class="mini-summary"></div><div id="marketList" class="market-list"></div></section>
+
+      <section id="page-market" class="page">
+        <div class="market-command-bar">
+          <div class="search-wrap market-search-wrap"><label class="sr-only" for="marketSearch">Pesquisar lista de compras</label><input id="marketSearch" type="search" placeholder="Pesquisar produto ou categoria..." autocomplete="off" /></div>
+          <button id="newMarketBtn" class="btn primary market-new-btn" type="button">+ Adicionar item</button>
+        </div>
+        <div class="market-filter-grid" role="group" aria-label="Filtros e ordenação da lista de compras">
+          <label class="market-filter-field"><span>Estado</span><select id="marketStatusFilter"><option value="all">Todos</option><option value="pending">Por comprar</option><option value="purchased">Comprados</option><option value="missing-price">Comprados sem preço real</option></select></label>
+          <label class="market-filter-field"><span>Categoria</span><select id="marketCategoryFilter"><option value="all">Todas as categorias</option></select></label>
+          <label class="market-filter-field"><span>Ordenar</span><select id="marketSort"><option value="pending-first">Por comprar primeiro</option><option value="name-asc">Produto A–Z</option><option value="estimate-desc">Maior estimativa</option><option value="actual-desc">Maior gasto</option><option value="recent">Atualização recente</option></select></label>
+          <button id="marketClearFilters" class="btn secondary market-filter-clear" type="button">Limpar filtros</button>
+        </div>
+        <div id="marketSummary" class="market-summary-grid" aria-live="polite"></div>
+        <div class="market-results-head"><strong>Lista do mês</strong><span id="marketResultCount" class="muted"></span></div>
+        <div id="marketList" class="market-results" aria-live="polite"></div>
+      </section>
       <section id="page-reports" class="page"><div id="reportCards" class="kpi-grid"></div><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Por categoria</h2><p>Distribuição do mês.</p></div></div><div id="reportCategoryBars" class="bar-list"></div></article><article class="panel"><div class="panel-head"><div><h2>Últimos 6 meses</h2><p>Pagamentos e compras efetivas.</p></div></div><div id="monthlyTrend" class="trend-chart"></div></article></div></section>
       <section id="page-goals" class="page"><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav><div class="section-toolbar"><div><h2>Metas de poupança</h2><p class="muted">Objetivos acompanhados separadamente do orçamento mensal.</p></div><button id="newGoalBtn" class="btn primary">+ Novo objetivo</button></div><div id="goalList" class="goal-grid"></div></section>
       <section id="page-security" class="page"><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Estado de segurança</h2><p>Confirmações locais antes de usar dados reais.</p></div></div><div id="securityStatusGrid" class="security-grid"></div><button id="securityLockBtn" class="btn secondary">Bloquear agora</button></article><article class="panel"><h2>Backup cifrado</h2><p>Exporte apenas envelopes cifrados. O restauro valida versão, estrutura e integridade antes de substituir o cofre local.</p><div id="securityBackupInfo" class="section-gap"></div><div class="button-row"><button id="exportBackupBtn" class="btn primary">Exportar backup</button><label class="btn secondary file-btn">Restaurar backup<input id="importBackupInput" type="file" accept="application/json,.json" hidden /></label></div><p id="backupMessage" class="form-message" role="status"></p></article><article id="syncPanel" class="panel span-2">
@@ -132,7 +147,7 @@
     <div><small>Modo</small><strong id="syncHealthMode">Só local</strong></div>
   </div>
   <div class="detail-grid section-gap">
-    <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div><div class="detail-item full-detail"><small>Versão técnica</small><strong id="appBuildVersion">v39</strong></div>
+    <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div><div class="detail-item full-detail"><small>Versão técnica</small><strong id="appBuildVersion">v40</strong></div>
   </div>
   <div class="form-grid section-gap">
     <label>Credencial GitHub deste dispositivo — introduzir apenas uma vez<input id="syncToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Fine-grained token com Contents: Read and write" /><small>Ao colar, o token é primeiro guardado cifrado neste dispositivo e depois validado automaticamente.</small></label>
@@ -228,6 +243,6 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="./core.js?v=39" defer></script><script src="./finance.js?v=39" defer></script><script src="./render.js?v=39" defer></script><script src="./forms.js?v=39" defer></script><script src="./sync.js?v=39" defer></script><script src="./events.js?v=39" defer></script>
+  <script src="./core.js?v=40" defer></script><script src="./finance.js?v=40" defer></script><script src="./render.js?v=40" defer></script><script src="./forms.js?v=40" defer></script><script src="./sync.js?v=40" defer></script><script src="./events.js?v=40" defer></script>
 </body>
 </html>
