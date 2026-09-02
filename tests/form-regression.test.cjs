@@ -83,15 +83,30 @@ console.log('Civil due-date form regression tests: OK');
 
 assert.match(forms, /async function withFormSubmissionLock\(event, task\)/);
 assert.match(forms, /form\.dataset\.submitting==='true'/);
-assert.match(forms, /duplicatePaymentExists\(payment\)/);
+assert.match(forms, /duplicatePaymentExists\(payment,existing\?\.id\|\|''\)/);
 assert.match(forms, /Este pagamento já está registado/);
 assert.match(forms, /total<paidForBill\(id\)/);
 assert.match(forms, /data-delete-payment=/);
 assert.match(forms, /data-detail-duplicate=/);
 assert.match(events, /recordSyncDeletion\('payment',payment\.id\)/);
-assert.match(events, /Pagamento desfeito/);
+assert.match(events, /Pagamento eliminado/);
 assert.match(events, /Não é possível cancelar uma fatura com pagamentos/);
 assert.match(forms, /await idbPutVaultPair\(normalized\.meta,normalized\.secure\)/);
 assert.match(forms, /Restaurar este backup substitui o cofre local/);
 
 console.log('Financial mutation safety regression tests: OK');
+
+
+assert.match(forms, /data-edit-payment=/);
+assert.match(forms, /data-delete-payment=/);
+assert.match(forms, /data-remove-excess-payment=/);
+assert.match(forms, /Pagamento excedente detetado/);
+assert.match(forms, /function openPaymentForm\(id,paymentId=''\)/);
+assert.match(forms, /existing\?'Editar pagamento':'Registar pagamento'/);
+assert.match(forms, /updatedAt:now/);
+assert.match(events, /function deletePaymentRecord\(/);
+assert.match(events, /data-edit-payment/);
+assert.match(events, /data-remove-excess-payment/);
+assert.match(events, /Remover o pagamento mais recente para corrigir o valor excedente/);
+
+console.log('Payment edit and overpayment repair tests: OK');
