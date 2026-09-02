@@ -73,14 +73,14 @@ assert.doesNotMatch(css, /\bzoom\s*:/i);
 assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
 
 assert.match(index, /name="app-build" content="v41"/);
-assert.match(index, /styles\.css\?v=40/);
-assert.match(index, /design-system\.css\?v=40/);
-assert.match(index, /manifest\.webmanifest\?v=40/);
+assert.match(index, /styles\.css\?v=41/);
+assert.match(index, /design-system\.css\?v=41/);
+assert.match(index, /manifest\.webmanifest\?v=41/);
 for (const asset of ['core','finance','render','forms','sync','events']) {
-  assert.match(index,new RegExp(`${asset}\\.js\\?v=40`));
+  assert.match(index,new RegExp(`${asset}\\.js\\?v=41`));
 }
 assert.match(index, /id="appBuildVersion">v41</);
-assert.match(events, /register\('\.\/sw\.js\?v=40',\{updateViaCache:'none'\}\)/);
+assert.match(events, /register\('\.\/sw\.js\?v=41',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
 assert.match(swSource, /conta-de-casa-public-v41/);
