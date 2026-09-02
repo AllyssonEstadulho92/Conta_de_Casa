@@ -264,7 +264,7 @@ async function enterApp() {
   if ('serviceWorker' in navigator) {
     (async()=>{
       try{
-        const reg=await navigator.serviceWorker.register('./sw.js?v=27',{updateViaCache:'none'});
+        const reg=await navigator.serviceWorker.register('./sw.js?v=30',{updateViaCache:'none'});
         await reg.update().catch(()=>{});
         if(!window.__swReloadBound){
           window.__swReloadBound=true;

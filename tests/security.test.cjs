@@ -203,3 +203,12 @@ assert.doesNotMatch(sw, /cache\.put\(event\.request|cache\.put\(request/i, 'serv
   console.error(err);
   process.exitCode = 1;
 });
+
+
+assert.match(core, /event instanceof ErrorEvent/);
+assert.match(core, /ResizeObserver loop/);
+assert.match(core, /new URL\(filename,location\.href\)\.origin===location\.origin/);
+assert.match(core, /\['AbortError','NotAllowedError'\]\.includes\(name\)/);
+assert.doesNotMatch(core, /window\.addEventListener\('error', event => \{ event\.preventDefault\(\); showSafeMessage\(\); \}\)/);
+
+console.log('Runtime error guard false-positive tests: OK');

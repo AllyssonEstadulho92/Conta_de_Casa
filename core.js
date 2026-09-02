@@ -681,16 +681,46 @@ function installStorageGuards() {
 }
 function installRuntimeErrorGuards() {
   if (typeof window === 'undefined' || window.__contaDeCasaRuntimeGuarded) return;
+
+  const isBenignRuntimeMessage = value => {
+    const msg=String(value||'');
+    return /ResizeObserver loop|AbortError|The operation was aborted|Load failed/i.test(msg);
+  };
+
+  const isOwnScriptError = event => {
+    if (typeof ErrorEvent !== 'undefined' && !(event instanceof ErrorEvent)) return false;
+    const message=String(event?.message||'');
+    if (!message || isBenignRuntimeMessage(message)) return false;
+    const filename=String(event?.filename||'');
+    if (!filename) return true;
+    try { return new URL(filename,location.href).origin===location.origin; }
+    catch (_err) { return false; }
+  };
+
   const showSafeMessage = () => {
-    const msg = 'Ocorreu um erro interno. A aplicação bloqueou detalhes sensíveis.';
+    const msg = 'Ocorreu um erro interno. Os seus dados continuam protegidos.';
     if (appState && !$('#app')?.hidden) toast(msg);
     else {
       const el = $('#vaultMessage');
       if (el) { el.textContent = msg; el.className = 'form-message error'; }
     }
   };
-  window.addEventListener('error', event => { event.preventDefault(); showSafeMessage(); });
-  window.addEventListener('unhandledrejection', event => { event.preventDefault(); showSafeMessage(); });
+
+  window.addEventListener('error', event => {
+    if (!isOwnScriptError(event)) return;
+    event.preventDefault();
+    showSafeMessage();
+  });
+
+  window.addEventListener('unhandledrejection', event => {
+    const reason=event?.reason;
+    const name=String(reason?.name||'');
+    const message=String(reason?.message||reason||'');
+    if (['AbortError','NotAllowedError'].includes(name) || isBenignRuntimeMessage(message)) return;
+    event.preventDefault();
+    showSafeMessage();
+  });
+
   window.__contaDeCasaRuntimeGuarded = true;
 }
 function safeUserError(err, fallback = 'Operação não concluída por validação de segurança.') {
