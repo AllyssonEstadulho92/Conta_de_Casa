@@ -1,5 +1,16 @@
 # Changelog
 
+## v41 — correção iPhone/Safari e edição de faturas
+
+- campos editáveis no mobile passam a usar 16 px para impedir o auto-zoom do Safari ao receber foco;
+- diálogos passam a respeitar a altura real do visual viewport e mantêm scroll interno durante a abertura do teclado;
+- o campo focado dentro do diálogo é reposicionado automaticamente após a animação do teclado;
+- a navegação inferior é ocultada enquanto o teclado está aberto para não sobrepor formulários;
+- faturas passam a expor a ação Editar diretamente na lista, incluindo quando o estado já é Pago;
+- a validação financeira já existente é preservada: o valor total pode ser editado, mas nunca para um valor inferior ao total já pago;
+- schema 5, pagamentos, auditoria, cofre, backups e sincronização permanecem inalterados;
+- Service Worker e cache público promovidos para v41.
+
 ## v40 — Mercado e Compras operacionais
 
 - Mercado passa a ter pesquisa, filtros por estado/categoria e ordenação sem alterar o schema de dados;

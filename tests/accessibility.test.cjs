@@ -3,6 +3,7 @@ const fs = require('node:fs');
 
 const css = fs.readFileSync('design-system.css','utf8');
 const render = fs.readFileSync('render.js','utf8');
+const events = fs.readFileSync('events.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 
 function tokens(block) {
@@ -31,6 +32,12 @@ assert.match(css, /\.icon-btn\{width:44px;height:44px/);
 assert.match(css, /\.month-picker input\{width:148px;min-height:44px/);
 assert.match(css, /\.sync-header-status\{height:44px;min-width:44px/);
 assert.match(css, /\.section-tab\{min-height:44px/);
+assert.match(css, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\),select,textarea\{[\s\S]*font-size:16px/);
+assert.match(css, /\.dialog input,\.dialog select,\.dialog textarea\{scroll-margin-block:88px 28px\}/);
+assert.match(css, /html\.keyboard-open \.mobile-nav\{visibility:hidden;pointer-events:none\}/);
+assert.match(events, /function keepFocusedDialogFieldVisible\(delay=80\)/);
+assert.match(events, /scrollIntoView\(\{block:'center',inline:'nearest',behavior:'auto'\}\)/);
+assert.doesNotMatch(index, /maximum-scale\s*=\s*1|user-scalable\s*=\s*no/i);
 assert.match(css, /\.status-chip\{font-size:\.75rem/);
 assert.match(css, /\.sr-only\{position:absolute!important/);
 assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);

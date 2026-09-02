@@ -182,9 +182,10 @@ function billActionsHtml(b, compact=false) {
   const canDelete=b.cancelled && paid===0;
   const detailLabel=compact?'Detalhes':'Abrir';
   const detail=`<button class="btn secondary" type="button" data-bill-id="${attr(b.id)}">${detailLabel}</button>`;
-  if(canDelete) return detail+`<button class="btn danger" type="button" data-delete-bill="${attr(b.id)}">Excluir</button>`;
-  if(rem>0&&!b.cancelled) return detail+`<button class="btn primary" type="button" data-pay-bill="${attr(b.id)}">Pagar</button>`;
-  return detail;
+  const edit=`<button class="btn secondary" type="button" data-edit-bill="${attr(b.id)}">Editar</button>`;
+  if(canDelete) return detail+edit+`<button class="btn danger bill-action-delete" type="button" data-delete-bill="${attr(b.id)}">Excluir</button>`;
+  if(rem>0&&!b.cancelled) return detail+edit+`<button class="btn primary bill-action-pay" type="button" data-pay-bill="${attr(b.id)}">Pagar</button>`;
+  return detail+edit;
 }
 function billTableHtml(list) {
   return `<div class="bill-table-shell"><table class="bill-table"><thead><tr><th scope="col">Fatura</th><th scope="col">Estado</th><th scope="col">Vencimento</th><th scope="col" class="money-col">Total</th><th scope="col" class="money-col">Pago</th><th scope="col" class="money-col">Em falta</th><th scope="col" class="actions-col">Ações</th></tr></thead><tbody>${list.map(b=>billTableRowHtml(b)).join('')}</tbody></table></div>`;

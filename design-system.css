@@ -1,4 +1,4 @@
-/* Conta de Casa v40 — design foundation and adaptive application shell */
+/* Conta de Casa v41 — design foundation and adaptive application shell */
 :root{
   color-scheme:light;
   --bg:#f5f7fa;
@@ -301,7 +301,7 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
 .bill-table tbody tr:last-child td{border-bottom:0}
 .bill-table-row:hover td{background:color-mix(in srgb,var(--primary-2) 34%,var(--surface))}
 .bill-table .money-col{text-align:right;font-variant-numeric:tabular-nums lining-nums;white-space:nowrap}
-.bill-table .actions-col{width:180px}
+.bill-table .actions-col{width:230px}
 .bill-identity{display:grid;gap:3px;min-width:180px}
 .bill-identity strong{font-size:.875rem;font-weight:600}
 .bill-identity small{font-size:.6875rem;color:var(--muted)}
@@ -324,7 +324,7 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
 .bill-due-signal.warning{background:var(--warning-bg);color:var(--warning)}
 .bill-due-signal.danger{background:var(--danger-bg);color:var(--danger)}
 .bill-remaining{font-weight:600}
-.bill-table-actions{display:flex;justify-content:flex-end;gap:7px}
+.bill-table-actions{display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap}
 .bill-table-actions .btn{min-height:44px;padding:8px 11px;font-size:.75rem}
 .bill-mobile-list{display:none}
 .bill-empty-state{display:grid;justify-items:center;gap:8px}
@@ -460,6 +460,25 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
   .topbar-create-label{display:none}
   .sync-header-status{height:44px;min-width:44px}
   .page{padding-top:16px}
+  input:not([type="checkbox"]):not([type="radio"]),select,textarea{
+    font-size:16px;
+    line-height:1.35;
+  }
+  .month-picker input{font-size:16px}
+  .dialog{
+    width:calc(100vw - 12px);
+    max-width:calc(100vw - 12px);
+    max-height:var(--visual-vh);
+  }
+  .dialog-shell{
+    max-height:calc(var(--visual-vh) - 12px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:max(16px,env(safe-area-inset-bottom));
+  }
+  .dialog input,.dialog select,.dialog textarea{scroll-margin-block:88px 28px}
+  html.keyboard-open .mobile-nav{visibility:hidden;pointer-events:none}
   #page-dashboard .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .dashboard-secondary{grid-template-columns:1fr;gap:8px;margin:-2px 0 12px}
   .dashboard-secondary-card{min-height:58px;padding:10px 12px}
@@ -545,6 +564,7 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
   .bill-mobile-finance strong{font-size:.75rem;font-weight:600;overflow-wrap:anywhere}
   .bill-mobile-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   .bill-mobile-actions .btn{width:100%;min-height:44px}
+  .bill-mobile-actions .bill-action-pay,.bill-mobile-actions .bill-action-delete{grid-column:1/-1}
   .section-tabs{margin-bottom:16px}
   .section-tab{min-height:44px;padding-inline:12px}
   .status-chip{font-size:.75rem}
@@ -576,7 +596,7 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
   :root{--page-gutter:8px}
   .topbar-leading{min-width:48px}
   .page-heading{display:none}
-  .month-picker input{width:100px;font-size:.6875rem}
+  .month-picker input{width:112px;font-size:16px}
   .mobile-menu-btn,.topbar-create,.sync-header-status{width:44px;min-width:44px;height:44px;min-height:44px}
   .section-tabs{width:100%}
   .section-tab{flex:1;min-width:0;padding-inline:8px;white-space:normal}
