@@ -77,16 +77,16 @@ assert.match(events, /document\.documentElement\.classList\.add\('app-active'\)/
 console.log('Native mobile shell v8 tests: OK');
 
 
-assert.match(index, /name="app-build" content="v30"/);
+assert.match(index, /name="app-build" content="v31"/);
 assert.match(index, /styles\.css\?v=30/);
 assert.match(index, /sync\.js\?v=30/);
 assert.match(index, /events\.js\?v=30/);
-assert.match(index, /id="appBuildVersion">v30</);
+assert.match(index, /id="appBuildVersion">v31</);
 assert.match(events, /register\('\.\/sw\.js\?v=30',\{updateViaCache:'none'\}\)/);
 assert.match(events, /controllerchange/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v30/);
+assert.match(swSource, /conta-de-casa-public-v31/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 
-console.log('PWA freshness v30 tests: OK');
+console.log('PWA freshness v31 tests: OK');

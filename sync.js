@@ -739,15 +739,15 @@ async function renderSyncUi() {
   const meta=await syncDeviceMeta().catch(()=>null);
   const token=await loadSyncToken().catch(()=>null);
   const tokenStatus=await loadSyncTokenStatus().catch(()=>null);
+  const state=syncLastStatus.state;
+  const localOnly=state==='not-configured'||state==='needs-token';
   const badge=$('#syncStatusBadge');
   if(badge){
-    badge.className=`status-chip ${syncStatusClass(syncLastStatus.state)}`;
-    badge.textContent=syncStatusLabel(syncLastStatus.state);
+    badge.className=`status-chip ${syncStatusClass(state)}`;
+    badge.textContent=syncStatusLabel(state);
   }
   const header=$('#syncHeaderStatus');
   if(header){
-    const state=syncLastStatus.state;
-    const localOnly=state==='not-configured'||state==='needs-token';
     const headerClass=localOnly?'attention':syncStatusClass(state);
     header.className=`sync-header-status ${headerClass}`;
     header.title=localOnly

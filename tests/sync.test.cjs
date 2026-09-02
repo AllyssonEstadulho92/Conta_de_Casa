@@ -228,3 +228,11 @@ assert.match(tokenHelperIndex, /Only select repositories/);
 assert.match(tokenHelperIndex, /conta-de-casa-/);
 
 console.log('Prefilled fine-grained token helper tests: OK');
+
+
+const renderSyncUiSource = source.slice(source.indexOf('async function renderSyncUi()'), source.indexOf('function setSyncActionMessage'));
+assert.match(renderSyncUiSource, /const state=syncLastStatus\.state;\s*const localOnly=state==='not-configured'\|\|state==='needs-token';\s*const badge=/);
+assert.doesNotMatch(renderSyncUiSource, /if\(header\)\{\s*const state=syncLastStatus\.state;\s*const localOnly=/);
+assert.match(renderSyncUiSource, /localOnly\?'Ligação ao cofre necessária'/);
+
+console.log('Sync render scope regression tests: OK');
