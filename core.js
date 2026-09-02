@@ -3,7 +3,7 @@
 const APP_ID = 'Conta_de_Casa';
 const DB_NAME = 'conta_de_casa_secure';
 const DB_VERSION = 2;
-const STATE_VERSION = 2;
+const STATE_VERSION = 3;
 const BACKUP_FORMAT_VERSION = 2;
 const CHECK_TEXT_CURRENT = 'Conta_de_Casa::vault-check::v2';
 const CHECK_TEXT_LEGACY = 'Conta_de_Casa::vault-check::v1';
@@ -19,7 +19,7 @@ const ATTACHMENTS_REAL_FILES_ENABLED = false;
 let db;
 let vaultKey = null;
 let appState = null;
-let selectedMonth = new Date().toISOString().slice(0, 7);
+let selectedMonth = currentLocalMonthKey();
 let privacyHidden = false;
 let lockTimer = null;
 let hiddenLockTimer = null;
@@ -76,20 +76,126 @@ function esc(v = '') {
 }
 function attr(v = '') { return esc(v); }
 function parseCents(value) {
-  if (typeof value === 'number') return Math.round(value * 100);
-  let s = String(value ?? '').trim().replace(/\s|€/g, '');
+  let s = String(value ?? '').trim().replace(/[\s\u00a0€]/g, '');
   if (!s) return 0;
-  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
-  const n = Number(s);
-  return Number.isFinite(n) ? Math.round(n * 100) : NaN;
+  let sign = 1;
+  if (s.startsWith('-')) { sign = -1; s = s.slice(1); }
+  else if (s.startsWith('+')) s = s.slice(1);
+  if (!s || /[^0-9.,]/.test(s)) return NaN;
+  let whole = '', fraction = '';
+  const commas = (s.match(/,/g) || []).length;
+  const dots = (s.match(/\./g) || []).length;
+  if (commas) {
+    if (commas !== 1) return NaN;
+    const parts = s.split(',');
+    whole = parts[0] || '0'; fraction = parts[1] || '';
+    if (fraction.length > 2 || !/^\d{0,2}$/.test(fraction)) return NaN;
+    if (whole.includes('.') && !/^\d{1,3}(?:\.\d{3})*$/.test(whole)) return NaN;
+    whole = whole.replace(/\./g, '');
+  } else if (dots) {
+    if (/^\d{1,3}(?:\.\d{3})+$/.test(s)) whole = s.replace(/\./g, '');
+    else if (dots === 1) {
+      const parts = s.split('.');
+      whole = parts[0] || '0'; fraction = parts[1] || '';
+      if (fraction.length > 2 || !/^\d{0,2}$/.test(fraction)) return NaN;
+    } else return NaN;
+  } else whole = s;
+  if (!/^\d+$/.test(whole)) return NaN;
+  const cents = BigInt(whole) * 100n + BigInt((fraction + '00').slice(0, 2));
+  const signed = BigInt(sign) * cents;
+  if (signed > BigInt(Number.MAX_SAFE_INTEGER) || signed < BigInt(Number.MIN_SAFE_INTEGER)) return NaN;
+  return Number(signed);
 }
 function money(cents = 0) {
-  const currency = appState?.settings?.currency || 'EUR';
-  return new Intl.NumberFormat('pt-PT', { style: 'currency', currency }).format((cents || 0) / 100);
+  const n = Number(cents);
+  if (!Number.isSafeInteger(n)) return '—';
+  const negative = n < 0;
+  const abs = BigInt(negative ? -n : n);
+  const units = abs / 100n;
+  const fraction = String(abs % 100n).padStart(2, '0');
+  const grouped = new Intl.NumberFormat('pt-PT', { useGrouping:true, maximumFractionDigits:0 }).format(units);
+  return `${negative?'-':''}${grouped},${fraction} €`;
+}
+function pad2(value) { return String(value).padStart(2, '0'); }
+function isLeapYear(year) { return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0); }
+function daysInCivilMonth(year, month) {
+  if (month === 2) return isLeapYear(year) ? 29 : 28;
+  return [4,6,9,11].includes(month) ? 30 : 31;
+}
+function parseCivilDateKey(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || ''));
+  if (!match) return null;
+  const year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
+  if (year < 1 || month < 1 || month > 12 || day < 1 || day > daysInCivilMonth(year, month)) return null;
+  return { year, month, day };
+}
+function cleanDateKey(value) {
+  const p = parseCivilDateKey(value);
+  return p ? `${String(p.year).padStart(4,'0')}-${pad2(p.month)}-${pad2(p.day)}` : '';
+}
+function cleanTimeKey(value, fallback = '') {
+  const match = /^(\d{2}):(\d{2})$/.exec(String(value || ''));
+  if (!match) return fallback;
+  const hour = Number(match[1]), minute = Number(match[2]);
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59 ? `${pad2(hour)}:${pad2(minute)}` : fallback;
+}
+function dateKeyFromDate(date = new Date()) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+  return `${String(date.getFullYear()).padStart(4,'0')}-${pad2(date.getMonth()+1)}-${pad2(date.getDate())}`;
+}
+function dateKeyFromValue(value) {
+  const direct = cleanDateKey(value);
+  if (direct) return direct;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? '' : dateKeyFromDate(d);
+}
+function timeKeyFromValue(value) {
+  const direct = cleanTimeKey(value);
+  if (direct) return direct;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? '' : `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+function currentLocalDateKey(now = new Date()) {
+  const d = now instanceof Date ? now : new Date(now);
+  return dateKeyFromDate(d);
+}
+function currentLocalMonthKey(now = new Date()) { return currentLocalDateKey(now).slice(0,7); }
+function civilDayNumber(dateKey) {
+  const p = parseCivilDateKey(dateKey);
+  if (!p) return NaN;
+  return Math.trunc(Date.UTC(p.year, p.month - 1, p.day) / DAY_MS);
+}
+function civilDayDiff(fromDateKey, toDateKey) {
+  const a = civilDayNumber(fromDateKey), b = civilDayNumber(toDateKey);
+  return Number.isFinite(a) && Number.isFinite(b) ? b - a : NaN;
+}
+function addCivilDays(dateKey, days) {
+  const p = parseCivilDateKey(dateKey);
+  if (!p || !Number.isInteger(days)) return '';
+  const d = new Date(Date.UTC(p.year, p.month - 1, p.day + days));
+  return `${String(d.getUTCFullYear()).padStart(4,'0')}-${pad2(d.getUTCMonth()+1)}-${pad2(d.getUTCDate())}`;
+}
+function addCivilMonthsClamped(dateKey, months) {
+  const p = parseCivilDateKey(dateKey);
+  if (!p || !Number.isInteger(months)) return '';
+  const baseIndex = p.year * 12 + (p.month - 1) + months;
+  const year = Math.floor(baseIndex / 12);
+  const month = ((baseIndex % 12) + 12) % 12 + 1;
+  const day = Math.min(p.day, daysInCivilMonth(year, month));
+  return `${String(year).padStart(4,'0')}-${pad2(month)}-${pad2(day)}`;
+}
+function composeLocalDateTimeIso(dateKey, timeKey = '23:59') {
+  const p = parseCivilDateKey(dateKey);
+  const t = cleanTimeKey(timeKey, '23:59');
+  if (!p) return null;
+  const [hour, minute] = t.split(':').map(Number);
+  const d = new Date(p.year, p.month - 1, p.day, hour, minute, 0, 0);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 function fmtDate(value, opts = {}) {
   if (!value) return '—';
-  const d = new Date(value);
+  const key = cleanDateKey(value);
+  const d = key ? (()=>{const p=parseCivilDateKey(key);return new Date(p.year,p.month-1,p.day,12,0,0,0);})() : new Date(value);
   if (Number.isNaN(d.getTime())) return '—';
   return new Intl.DateTimeFormat('pt-PT', { day: '2-digit', month: '2-digit', year: opts.year === false ? undefined : 'numeric' }).format(d);
 }
@@ -101,15 +207,14 @@ function fmtDateTime(value) {
 }
 function monthOf(value) {
   if (!value) return '';
+  const key = cleanDateKey(value);
+  if (key) return key.slice(0,7);
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return '';
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  return `${y}-${m}`;
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
 }
 function localDateTimeInput(date = new Date()) {
-  const pad = n => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  return `${dateKeyFromDate(date)}T${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
 }
 function selectedMonthBounds(month = selectedMonth) {
   const [y, m] = month.split('-').map(Number);
@@ -117,9 +222,7 @@ function selectedMonthBounds(month = selectedMonth) {
   const end = new Date(y, m, 1, 0, 0, 0, 0);
   return { start, end };
 }
-function inSelectedMonth(value, month = selectedMonth) {
-  return monthOf(value) === month;
-}
+function inSelectedMonth(value, month = selectedMonth) { return monthOf(value) === month; }
 function clamp(n, min, max) { return Math.min(max, Math.max(min, n)); }
 function b64(bytes) {
   const u = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
@@ -145,8 +248,8 @@ function cleanMultiline(value, max = 1200) {
 }
 function cleanCents(value, fallback = 0, min = 0) {
   const n = Number(value);
-  if (!Number.isFinite(n)) return fallback;
-  return clamp(Math.round(n), min, 1000000000000);
+  if (!Number.isSafeInteger(n)) return fallback;
+  return clamp(n, min, 1000000000000);
 }
 function cleanIso(value, fallback = new Date().toISOString()) {
   const d = new Date(value);
@@ -196,13 +299,16 @@ function normalizeMonths(months = {}) {
 }
 function normalizeBill(b = {}) {
   const now = new Date().toISOString();
+  const dueDate = cleanDateKey(b.dueDate) || dateKeyFromValue(b.dueAt);
+  const dueTime = cleanTimeKey(b.dueTime) || timeKeyFromValue(b.dueAt) || '23:59';
+  const dueAt = dueDate ? composeLocalDateTimeIso(dueDate, dueTime) : null;
   return {
     id: cleanString(b.id || uid(), 80),
     title: cleanString(b.title, 80),
     provider: cleanString(b.provider, 80),
     category: cleanString(b.category || 'Outros', 80),
     totalCents: cleanCents(b.totalCents),
-    dueAt: cleanIso(b.dueAt, now),
+    dueDate, dueTime, dueAt,
     issueAt: optionalIso(b.issueAt),
     method: cleanString(b.method || 'Outro', 60),
     recurrence: cleanRecurrence(b.recurrence),
@@ -211,6 +317,8 @@ function normalizeBill(b = {}) {
     createdAt: cleanIso(b.createdAt, now),
     updatedAt: cleanIso(b.updatedAt, now),
     recurrenceParentId: b.recurrenceParentId ? cleanString(b.recurrenceParentId, 80) : undefined,
+    recurrenceSeriesId: b.recurrenceSeriesId ? cleanString(b.recurrenceSeriesId, 80) : undefined,
+    recurrenceKey: b.recurrenceKey ? cleanString(b.recurrenceKey, 120) : undefined,
     cancelled: Boolean(b.cancelled),
     archived: Boolean(b.archived)
   };
