@@ -69,3 +69,13 @@ assert.match(forms, /<select name="category" required>/);
 assert.doesNotMatch(forms, /list="categoryList"/);
 
 console.log('Invoice category taxonomy tests: OK');
+
+
+assert.match(forms, /billDueDateKey\(bill\)/);
+assert.match(forms, /billDueTimeKey\(bill\)/);
+assert.match(forms, /const dueDate=cleanDateKey\(fd\.get\('dueDate'\)\)/);
+assert.match(forms, /composeLocalDateTimeIso\(dueDate,dueTime\)/);
+assert.match(forms, /if\(!title\)\{toast\('Indique uma descrição para a fatura\.'/);
+assert.doesNotMatch(forms, /due\.toISOString\(\)\.slice\(0,10\)/);
+
+console.log('Civil due-date form regression tests: OK');

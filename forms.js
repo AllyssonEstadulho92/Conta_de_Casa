@@ -58,19 +58,24 @@ function billCategoryOptions(selected='Casa') {
   return categories.map(name=>`<option value="${attr(name)}"${name===current?' selected':''}>${esc(name)}</option>`).join('');
 }
 function billFormHtml(bill=null){
-  const due=bill?new Date(bill.dueAt):new Date(); if(!bill) due.setDate(due.getDate()+7);
-  const date=due.toISOString().slice(0,10); const time=`${String(due.getHours()).padStart(2,'0')}:${String(due.getMinutes()).padStart(2,'0')}`;
+  const due=bill?null:new Date(); if(due) due.setDate(due.getDate()+7);
+  const date=bill?billDueDateKey(bill):dateKeyFromDate(due);
+  const time=bill?billDueTimeKey(bill):'23:59';
   return `<form id="billForm" class="form-grid two"><input type="hidden" name="id" value="${attr(bill?.id||'')}"><label>Descrição<input name="title" required maxlength="80" value="${attr(bill?.title||'')}" autocomplete="off" spellcheck="false"></label><label>Fornecedor/entidade<input name="provider" maxlength="80" value="${attr(bill?.provider||'')}" autocomplete="off" spellcheck="false"></label><label>Categoria<select name="category" required>${billCategoryOptions(bill?.category||'Casa')}</select></label><label>Valor total<input name="amount" inputmode="decimal" required value="${bill?(bill.totalCents/100).toFixed(2).replace('.',','):''}" placeholder="0,00" autocomplete="off"></label><label>Vencimento<input name="dueDate" type="date" required value="${date}" autocomplete="off"></label><label>Hora limite<input name="dueTime" type="time" value="${time||'23:59'}" autocomplete="off"></label><label>Método<select name="method"><option>Débito automático</option><option>Transferência</option><option>Referência Multibanco</option><option>Cartão</option><option>Dinheiro</option><option>Outro</option></select></label><label>Recorrência<select name="recurrence"><option value="none">Sem recorrência</option><option value="weekly">Semanal</option><option value="monthly">Mensal</option><option value="quarterly">Trimestral</option><option value="semiannual">Semestral</option><option value="annual">Anual</option></select></label><label class="full-row">Referência<input name="reference" value="${attr(bill?.reference||'')}" autocomplete="off" spellcheck="false"></label><label class="full-row">Observações<textarea name="notes" autocomplete="off" spellcheck="false">${esc(bill?.notes||'')}</textarea></label><div class="button-row full-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button type="submit" class="btn primary">${bill?'Guardar alterações':'Criar fatura'}</button></div></form>`;
 }
 function openBillForm(bill=null){ openDialog(bill?'Editar fatura':'Nova fatura',billFormHtml(bill)); const f=$('#billForm'); if(bill){f.method.value=bill.method||'Outro';f.recurrence.value=bill.recurrence||'none';} f.addEventListener('submit',handleBillSubmit); }
 async function handleBillSubmit(e){
   e.preventDefault();
   const fd=new FormData(e.currentTarget);
+  const title=cleanString(fd.get('title'),80);
+  if(!title){toast('Indique uma descrição para a fatura.');return;}
   const total=parseCents(fd.get('amount'));
-  if(!Number.isFinite(total)||total<=0){toast('Introduza um valor superior a zero.');return;}
-  const due=new Date(`${fd.get('dueDate')}T${fd.get('dueTime')||'23:59'}`);
-  if(Number.isNaN(due.getTime())){toast('Data de vencimento inválida.');return;}
-  const data={title:cleanString(fd.get('title'),80),provider:cleanString(fd.get('provider'),80),category:cleanString(fd.get('category'),80)||'Outros',totalCents:total,dueAt:due.toISOString(),method:cleanString(fd.get('method'),60),recurrence:cleanRecurrence(String(fd.get('recurrence'))),reference:cleanString(fd.get('reference'),160),notes:cleanMultiline(fd.get('notes'),1200),updatedAt:new Date().toISOString()};
+  if(!Number.isFinite(total)||total<=0){toast('Introduza um valor monetário válido superior a zero, com no máximo 2 casas decimais.');return;}
+  const dueDate=cleanDateKey(fd.get('dueDate'));
+  const dueTime=cleanTimeKey(fd.get('dueTime'),'23:59');
+  const dueAt=composeLocalDateTimeIso(dueDate,dueTime);
+  if(!dueDate||!dueAt){toast('Data de vencimento inválida.');return;}
+  const data={title,provider:cleanString(fd.get('provider'),80),category:cleanString(fd.get('category'),80)||'Outros',totalCents:total,dueDate,dueTime,dueAt,method:cleanString(fd.get('method'),60),recurrence:cleanRecurrence(String(fd.get('recurrence'))),reference:cleanString(fd.get('reference'),160),notes:cleanMultiline(fd.get('notes'),1200),updatedAt:new Date().toISOString()};
   const id=String(fd.get('id')||'');
   if(id){const b=appState.bills.find(x=>x.id===id);if(!b)return;Object.assign(b,data);await commit('updated','bill');}
   else{appState.bills.push({id:uid(),...data,createdAt:new Date().toISOString(),cancelled:false,archived:false});await commit('created','bill');}
@@ -100,7 +105,7 @@ function openBillDetail(id){
       </div>
 
       <div class="detail-grid bill-detail-grid">
-        <div class="detail-item"><small>Vencimento</small><strong>${fmtDateTime(b.dueAt)}</strong><span class="detail-hint">${dueText(b)}</span></div>
+        <div class="detail-item"><small>Vencimento</small><strong>${fmtDate(billDueDateKey(b))} · ${esc(billDueTimeKey(b))}</strong><span class="detail-hint">${dueText(b)}</span></div>
         <div class="detail-item"><small>Urgência</small><strong class="${urg==='critical'||urg==='urgent'?'danger-text':''}">${urgencyLabel(urg)}</strong></div>
         <div class="detail-item"><small>Método</small><strong>${esc(b.method||'—')}</strong></div>
         <div class="detail-item"><small>Recorrência</small><strong>${recurrenceLabel(b.recurrence)}</strong></div>
