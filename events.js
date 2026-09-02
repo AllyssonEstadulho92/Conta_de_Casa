@@ -68,9 +68,18 @@ function keepFocusedDialogFieldVisible(delay=80) {
   const active=document.activeElement;
   if(!active?.matches?.('#formDialog input, #formDialog select, #formDialog textarea')) return;
   focusedFieldTimer=setTimeout(()=>{
-    if(active.isConnected && document.activeElement===active){
-      active.scrollIntoView({block:'center',inline:'nearest',behavior:'auto'});
-    }
+    if(!active.isConnected || document.activeElement!==active) return;
+    const shell=active.closest('.dialog-shell');
+    if(!shell) return;
+    const header=shell.querySelector('.dialog-head');
+    const shellRect=shell.getBoundingClientRect();
+    const fieldRect=active.getBoundingClientRect();
+    const safeTop=shellRect.top+(header?.offsetHeight||0)+16;
+    const safeBottom=shellRect.bottom-24;
+    let delta=0;
+    if(fieldRect.top<safeTop) delta=fieldRect.top-safeTop;
+    else if(fieldRect.bottom>safeBottom) delta=fieldRect.bottom-safeBottom;
+    if(Math.abs(delta)>2) shell.scrollBy({top:delta,behavior:'auto'});
   },delay);
 }
 
@@ -80,7 +89,11 @@ function updateViewportMetrics() {
     const root = document.documentElement;
     const vv = window.visualViewport;
     const viewportHeight = Math.max(320, Math.round(vv?.height || window.innerHeight || root.clientHeight || 0));
+    const viewportWidth = Math.max(280, Math.round(vv?.width || window.innerWidth || root.clientWidth || 0));
+    const viewportTop = Math.max(0, Math.round(vv?.offsetTop || 0));
     root.style.setProperty('--visual-vh', `${viewportHeight}px`);
+    root.style.setProperty('--visual-vw', `${viewportWidth}px`);
+    root.style.setProperty('--visual-top', `${viewportTop}px`);
 
     const narrow = window.matchMedia('(max-width: 820px)').matches;
     const layoutHeight = Math.max(root.clientHeight || 0, window.innerHeight || 0);
@@ -188,28 +201,33 @@ async function deletePaymentRecord(paymentId,billId,confirmMessage='Eliminar est
 
 async function deleteBillEnteredByMistake(id) {
   const bill=appState?.bills?.find(x=>x.id===id);
-  if(!bill) return;
+  if(!bill) return false;
 
   const scope=billDeletionScope(id);
   const payments=(appState.payments||[]).filter(p=>scope.has(String(p.billId)));
-  if(payments.length){
-    toast('Não é possível excluir uma fatura com pagamentos. Cancele-a para preservar o histórico financeiro.');
-    return;
-  }
-
   const generated=Math.max(0,scope.size-1);
-  const warning=generated
-    ? `Excluir definitivamente esta fatura e ${generated} recorrência(s) futura(s) gerada(s)? Esta ação é apenas para registos criados por engano.`
-    : 'Excluir definitivamente esta fatura? Use esta opção apenas quando o registo foi criado por engano.';
-  if(!confirm(warning)) return;
+  const paymentCount=payments.length;
+  const parts=['Excluir definitivamente esta fatura'];
+  if(generated) parts.push(`e ${generated} recorrência(s) futura(s)`);
+  if(paymentCount) parts.push(`e ${paymentCount} pagamento(s) associado(s)`);
+  const warning=`${parts.join(' ')}? Esta ação altera os totais e relatórios e não pode ser desfeita.`;
+  if(!confirm(warning)) return false;
 
+  for(const payment of payments){
+    if(typeof recordSyncDeletion==='function') recordSyncDeletion('payment',payment.id);
+  }
   for(const billId of scope){
     if(typeof recordSyncDeletion==='function') recordSyncDeletion('bill',billId);
+  }
+  if(paymentCount){
+    const paymentIds=new Set(payments.map(p=>String(p.id)));
+    appState.payments=appState.payments.filter(p=>!paymentIds.has(String(p.id)));
   }
   appState.bills=appState.bills.filter(x=>!scope.has(String(x.id)));
   await commit('deleted','bill');
   closeDialog();
-  toast(generated?'Fatura e recorrências futuras excluídas.':'Fatura excluída.');
+  toast(paymentCount||generated?'Fatura e registos associados excluídos.':'Fatura excluída.');
+  return true;
 }
 
 function wireEvents(){
@@ -442,7 +460,7 @@ async function enterApp() {
   if ('serviceWorker' in navigator) {
     (async()=>{
       try{
-        const reg=await navigator.serviceWorker.register('./sw.js?v=41',{updateViaCache:'none'});
+        const reg=await navigator.serviceWorker.register('./sw.js?v=42',{updateViaCache:'none'});
         await reg.update().catch(()=>{});
         if(!window.__swReloadBound){
           window.__swReloadBound=true;

@@ -1,5 +1,18 @@
 # Changelog
 
+## v42 — diálogo mobile estável e exclusão completa de faturas
+
+- diálogo de formulário passa a ser ancorado ao visual viewport real quando o teclado do iPhone está aberto;
+- largura, altura e posição do diálogo usam as métricas atuais do Visual Viewport, evitando que metade do formulário fique fora da área útil;
+- cabeçalho do diálogo fica sticky e continua acessível enquanto o formulário é percorrido;
+- reposicionamento do campo ativo deixa de usar scroll global/centrado e passa a deslocar somente o contentor interno o mínimo necessário;
+- ações de Editar pagamento e Eliminar pagamento ficam explícitas e com alvo táctil adequado;
+- Excluir fatura passa a funcionar mesmo quando existem pagamentos, com confirmação destrutiva e remoção em cascata da fatura, pagamentos associados e recorrências futuras geradas;
+- tombstones de sincronização são criados para cada pagamento e fatura removidos, impedindo reintrodução por outro dispositivo;
+- os totais e relatórios são recalculados após a exclusão porque os registos financeiros associados deixam de fazer parte do estado ativo;
+- schema 5, cálculos monetários, cofre, backup/restauro e protocolo cifrado de sincronização permanecem inalterados;
+- Service Worker e cache público promovidos para v42.
+
 ## v41 — correção iPhone/Safari e edição de faturas
 
 - campos editáveis no mobile passam a usar 16 px para impedir o auto-zoom do Safari ao receber foco;

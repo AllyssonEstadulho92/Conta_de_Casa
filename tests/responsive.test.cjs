@@ -8,7 +8,7 @@ const events = fs.readFileSync('events.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 const render = fs.readFileSync('render.js','utf8');
 
-assert.match(designCss, /Conta de Casa v41 — design foundation/);
+assert.match(designCss, /Conta de Casa v42 — design foundation/);
 assert.match(designCss, /--content-max:1440px/);
 assert.match(designCss, /--sidebar-expanded:248px/);
 assert.match(designCss, /--sidebar-rail:76px/);
@@ -29,6 +29,10 @@ assert.match(events, /function openMobileDrawer\(\)/);
 assert.match(events, /function closeMobileDrawer\(\)/);
 assert.match(events, /window\.visualViewport/);
 assert.match(events, /keyboard-open/);
+assert.match(events, /--visual-vw/);
+assert.match(events, /--visual-top/);
+assert.match(designCss, /html\.keyboard-open \.dialog\[open\]/);
+assert.match(designCss, /\.dialog-head\{[\s\S]*position:sticky/);
 assert.match(designCss, /prefers-reduced-motion:reduce/);
 
 assert.match(index, /id="appSidebar"/);
@@ -72,19 +76,19 @@ assert.doesNotMatch(index, /class="fab"/);
 assert.doesNotMatch(css, /\bzoom\s*:/i);
 assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
 
-assert.match(index, /name="app-build" content="v41"/);
-assert.match(index, /styles\.css\?v=41/);
-assert.match(index, /design-system\.css\?v=41/);
-assert.match(index, /manifest\.webmanifest\?v=41/);
+assert.match(index, /name="app-build" content="v42"/);
+assert.match(index, /styles\.css\?v=42/);
+assert.match(index, /design-system\.css\?v=42/);
+assert.match(index, /manifest\.webmanifest\?v=42/);
 for (const asset of ['core','finance','render','forms','sync','events']) {
-  assert.match(index,new RegExp(`${asset}\\.js\\?v=41`));
+  assert.match(index,new RegExp(`${asset}\\.js\\?v=42`));
 }
-assert.match(index, /id="appBuildVersion">v41</);
-assert.match(events, /register\('\.\/sw\.js\?v=41',\{updateViaCache:'none'\}\)/);
+assert.match(index, /id="appBuildVersion">v42</);
+assert.match(events, /register\('\.\/sw\.js\?v=42',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v41/);
+assert.match(swSource, /conta-de-casa-public-v42/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 
-console.log('Responsive shell and PWA freshness v41 tests: OK');
+console.log('Responsive shell and PWA freshness v42 tests: OK');
