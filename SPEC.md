@@ -210,6 +210,8 @@ Permitir que web ou telemóvel resolvam cada conflito real de forma explícita, 
 - o utilizador escolhe por registo “Manter deste dispositivo” ou “Usar o sincronizado”;
 - a escolha é guardada primeiro no cofre local cifrado;
 - a versão não escolhida permanece no histórico cifrado de conflitos;
+- o registo escolhido recebe um timestamp técnico cifrado de resolução, separado das datas financeiras e invisível na comparação;
+- o segundo dispositivo usa esse marcador para convergir automaticamente para a decisão já confirmada;
 - nenhuma atualização remota ocorre enquanto existir uma decisão pendente;
 - antes do envio final, SHA e revisão remotos são confirmados novamente;
 - se outro dispositivo alterar o cofre durante a revisão, a gravação é recusada e uma nova comparação é exigida;
@@ -221,6 +223,7 @@ Permitir que web ou telemóvel resolvam cada conflito real de forma explícita, 
 - um estado v33/v34 compatível continua a sincronizar sem conflito e sem escrita desnecessária;
 - uma diferença real de montante produz “Revisão necessária” e não é enviada automaticamente;
 - escolher uma das versões conclui a sincronização e avança exatamente uma revisão remota;
+- ao sincronizar depois, o outro dispositivo adota a decisão confirmada sem voltar a pedir a mesma escolha;
 - a versão rejeitada continua presente no histórico cifrado;
 - uma alteração remota concorrente bloqueia o envio da decisão antiga;
 - o cache, os assets e a versão mostrada na interface usam v35;

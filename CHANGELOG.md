@@ -7,6 +7,7 @@
 - escolha explícita por registo entre “Manter deste dispositivo” e “Usar o sincronizado”;
 - nenhuma diferença financeira é escolhida automaticamente;
 - a versão não escolhida continua preservada no histórico cifrado de conflitos;
+- o schema 5 marca tecnicamente a versão confirmada para o segundo dispositivo convergir sem repetir a mesma decisão;
 - atualização remota somente após todas as decisões, com verificação do SHA e da revisão para impedir sobrescrita concorrente;
 - o antigo ciclo de “Reconciliar novamente” foi substituído por uma resolução conclusiva.
 

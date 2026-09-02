@@ -3,7 +3,7 @@
 const APP_ID = 'Conta_de_Casa';
 const DB_NAME = 'conta_de_casa_secure';
 const DB_VERSION = 2;
-const STATE_VERSION = 4;
+const STATE_VERSION = 5;
 const BACKUP_FORMAT_VERSION = 2;
 const CHECK_TEXT_CURRENT = 'Conta_de_Casa::vault-check::v2';
 const CHECK_TEXT_LEGACY = 'Conta_de_Casa::vault-check::v1';
@@ -327,7 +327,8 @@ function normalizeMonths(months = {}) {
     out[month] = {
       openingBalanceCents: cleanCents(value.openingBalanceCents, 0, -MAX_MONEY_CENTS),
       budgetCents: cleanCents(value.budgetCents, 0, 0),
-      updatedAt: optionalIso(value.updatedAt)
+      updatedAt: optionalIso(value.updatedAt),
+      syncResolvedAt: optionalIso(value.syncResolvedAt)
     };
   }
   return out;
@@ -351,6 +352,7 @@ function normalizeBill(b = {}) {
     notes: cleanMultiline(b.notes, 1200),
     createdAt: cleanIso(b.createdAt, now),
     updatedAt: cleanIso(b.updatedAt, now),
+    syncResolvedAt: optionalIso(b.syncResolvedAt),
     recurrenceParentId: b.recurrenceParentId ? cleanString(b.recurrenceParentId, 80) : undefined,
     recurrenceSeriesId: b.recurrenceSeriesId ? cleanString(b.recurrenceSeriesId, 80) : undefined,
     recurrenceKey: b.recurrenceKey ? cleanString(b.recurrenceKey, 120) : undefined,
@@ -369,7 +371,8 @@ function normalizePayment(p = {}) {
     method: cleanString(p.method || 'Outro', 60),
     notes: cleanMultiline(p.notes, 600),
     createdAt,
-    updatedAt: cleanIso(p.updatedAt || createdAt, now)
+    updatedAt: cleanIso(p.updatedAt || createdAt, now),
+    syncResolvedAt: optionalIso(p.syncResolvedAt)
   };
 }
 function normalizeIncome(i = {}) {
@@ -379,7 +382,8 @@ function normalizeIncome(i = {}) {
     description: cleanString(i.description, 100),
     amountCents: cleanCents(i.amountCents),
     receivedAt: cleanIso(i.receivedAt, now),
-    createdAt: cleanIso(i.createdAt, now)
+    createdAt: cleanIso(i.createdAt, now),
+    syncResolvedAt: optionalIso(i.syncResolvedAt)
   };
 }
 function normalizeMarketItem(i = {}) {
@@ -395,6 +399,7 @@ function normalizeMarketItem(i = {}) {
     purchased: Boolean(i.purchased),
     createdAt: cleanIso(i.createdAt, now),
     updatedAt: cleanIso(i.updatedAt, now),
+    syncResolvedAt: optionalIso(i.syncResolvedAt),
     purchasedAt: optionalIso(i.purchasedAt)
   };
 }
@@ -408,6 +413,7 @@ function normalizeGoal(g = {}) {
     deadline: optionalIso(g.deadline),
     createdAt: cleanIso(g.createdAt, now),
     updatedAt: cleanIso(g.updatedAt || g.createdAt, now),
+    syncResolvedAt: optionalIso(g.syncResolvedAt),
     archived: Boolean(g.archived)
   };
 }

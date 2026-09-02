@@ -344,7 +344,14 @@ async function decryptRemoteState(remote) {
 }
 
 function syncItemTime(item) {
-  const candidates=[item?.updatedAt,item?.deletedAt,item?.paidAt,item?.receivedAt,item?.purchasedAt,item?.createdAt,item?.at];
+  const authoritative=[item?.updatedAt,item?.syncResolvedAt];
+  let latest=0;
+  for(const value of authoritative){
+    const t=new Date(value||0).getTime();
+    if(Number.isFinite(t)&&t>latest) latest=t;
+  }
+  if(latest) return latest;
+  const candidates=[item?.deletedAt,item?.paidAt,item?.receivedAt,item?.purchasedAt,item?.createdAt,item?.at];
   for(const value of candidates){
     const t=new Date(value||0).getTime();
     if(Number.isFinite(t)&&t>0) return t;
@@ -360,6 +367,7 @@ function syncBusinessView(entity,item) {
   const out=syncClone(item||{});
   delete out.updatedAt;
   delete out.createdAt;
+  delete out.syncResolvedAt;
   if(entity==='bill'){
     if(out.dueDate&&out.dueTime) delete out.dueAt;
     delete out.recurrenceParentId;
@@ -945,6 +953,7 @@ function renderSyncConflictList() {
 function applySyncConflictChoice(conflict,choice) {
   if(!appState||!conflict||!['local','remote'].includes(choice)) throw new Error('Decisão de conflito inválida.');
   const selected=syncClone(choice==='remote'?conflict.remote:conflict.local);
+  selected.syncResolvedAt=new Date().toISOString();
   if(conflict.entity==='month'){
     appState.months ||= {};
     appState.months[conflict.id]=selected;

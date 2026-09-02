@@ -87,6 +87,10 @@ vm.runInContext(fs.readFileSync('sync.js','utf8'),context);
     const preservedLocal=appState.syncConflicts[0]?.local?.amountCents;
     const resolutionResult=await resolveSyncConflictFromUi(0,'remote');
     const statusAfterResolution=syncLastStatus.state;
+    const resolvedState=syncClone(appState);
+    const secondDeviceMerge=mergeAppStates(localState,resolvedState);
+    const secondDeviceAmount=secondDeviceMerge.state.payments.find(item=>item.id==='p1')?.amountCents;
+    const secondDeviceResolutionMarker=secondDeviceMerge.state.payments.find(item=>item.id==='p1')?.syncResolvedAt;
 
     syncRemoteCandidate=conflictRemote;
     fetchRemoteSyncFile=async()=>({...conflictRemote,sha:'sha-changed-by-other-device',revision:22});
@@ -103,6 +107,9 @@ vm.runInContext(fs.readFileSync('sync.js','utf8'),context);
       pushedRevision,
       preservedLocal,
       statusAfterResolution,
+      secondDeviceConflicts:secondDeviceMerge.conflicts.length,
+      secondDeviceAmount,
+      secondDeviceResolutionMarker,
       raceResult,
       raceWasBlocked:pushes===pushesBeforeRace,
       finalStatus:syncLastStatus.state
@@ -118,6 +125,9 @@ vm.runInContext(fs.readFileSync('sync.js','utf8'),context);
   assert.equal(result.pushedAmount,2500,'the selected remote value must become authoritative');
   assert.equal(result.pushedRevision,22,'the confirmed upload must advance the remote revision');
   assert.equal(result.statusAfterResolution,'synced');
+  assert.equal(result.secondDeviceConflicts,0,'the second device must accept an already confirmed resolution');
+  assert.equal(result.secondDeviceAmount,2500,'the second device must converge to the confirmed financial value');
+  assert.equal(typeof result.secondDeviceResolutionMarker,'string','the encrypted state must preserve the technical resolution marker');
   assert.equal(result.raceResult,'conflict','a stale review must be rejected after a concurrent remote write');
   assert.equal(result.raceWasBlocked,true,'a stale decision must never overwrite the newer remote vault');
   assert.equal(result.finalStatus,'conflict');

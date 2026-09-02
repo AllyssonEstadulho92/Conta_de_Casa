@@ -45,7 +45,7 @@ assert.equal(audit.changes.some(x=>x.field==='totalCents'&&x.before===10000&&x.a
 assert.equal(audit.changes.some(x=>x.field==='remainingCents'&&x.before===7500&&x.after===9500),true);
 
 const migrated=vm.runInContext("ensureStateShape({version:3,bills:appState.bills,payments:appState.payments,auditTrail:appState.auditTrail})",context);
-assert.equal(migrated.version,4);
+assert.equal(migrated.version,5);
 assert.equal(migrated.auditTrail.length,1);
 
 console.log('Deterministic finance and audit trail tests: OK');

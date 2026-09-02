@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão publicada do código: v35. O schema 4 mantém cálculos monetários centralizados e histórico financeiro cifrado por fatura; a v35 acrescenta resolução assistida de conflitos reais.
+Versão publicada do código: v35. O schema 5 mantém os cálculos e o histórico cifrado da v34 e acrescenta um marcador técnico cifrado para propagar decisões de conflitos entre dispositivos.
 
 ## Estado
 
