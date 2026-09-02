@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão preparada: v37. O schema de dados permanece na versão 5; esta fase reorganiza a navegação, cria a fundação visual adaptativa e corrige a atualização imediata dos assets sem alterar cálculos, cifragem ou sincronização.
+Versão preparada: v38. O schema de dados permanece na versão 5; esta fase mantém a fundação visual adaptativa e reorganiza o Dashboard para destacar saldo, obrigações e projeção antes dos indicadores complementares, sem alterar cálculos, cifragem ou sincronização.
 
 ## Estado
 
