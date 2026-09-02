@@ -1,4 +1,4 @@
-/* Conta de Casa v42 — design foundation and adaptive application shell */
+/* Conta de Casa v43 — design foundation and adaptive application shell */
 :root{
   color-scheme:light;
   --bg:#f5f7fa;
@@ -89,6 +89,7 @@ input,select,textarea{min-height:44px;border-radius:var(--radius-sm);border-colo
 .status-chip.paid{color:var(--success);background:var(--success-bg)}
 .status-chip.partial{color:var(--primary);background:var(--primary-2)}
 .status-chip.overdue,.status-chip.critical,.status-chip.invalid{color:var(--danger);background:var(--danger-bg)}
+.warning-text{color:var(--warning)}
 .btn.danger{color:var(--danger);background:var(--danger-bg);border-color:color-mix(in srgb,var(--danger) 28%,var(--border))}
 .alert.warning{background:var(--warning-bg);border-color:color-mix(in srgb,var(--warning) 25%,var(--border))}
 .alert.danger{background:var(--danger-bg);border-color:color-mix(in srgb,var(--danger) 25%,var(--border))}
@@ -210,6 +211,23 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
   font-variant-numeric:tabular-nums lining-nums;
   text-align:right;
 }
+.account-balance-kpi{position:relative}
+.account-balance-kpi .kpi-action{
+  min-height:36px;
+  width:max-content;
+  max-width:100%;
+  margin-top:6px;
+  padding:4px 0;
+  text-align:left;
+}
+.account-balance-info{
+  margin:-4px 0 6px;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  background:var(--surface-2);
+}
+.account-balance-info .detail-grid{gap:8px}
 
 
 /* Faturas v39: leitura operacional em tabela no desktop e cartões no mobile. */
