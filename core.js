@@ -342,6 +342,8 @@ function normalizeMonths(months = {}) {
     out[month] = {
       openingBalanceCents: cleanCents(value.openingBalanceCents, 0, -MAX_MONEY_CENTS),
       budgetCents: cleanCents(value.budgetCents, 0, 0),
+      accountBalanceCents: Number.isSafeInteger(value.accountBalanceCents) ? cleanCents(value.accountBalanceCents, 0, -MAX_MONEY_CENTS) : null,
+      accountBalanceUpdatedAt: optionalIso(value.accountBalanceUpdatedAt),
       updatedAt: optionalIso(value.updatedAt),
       syncResolvedAt: optionalIso(value.syncResolvedAt)
     };
@@ -506,7 +508,7 @@ function ensureStateShape(s) {
   };
 }
 function monthProfile(month = selectedMonth) {
-  appState.months[month] ||= { openingBalanceCents: 0, budgetCents: 0, updatedAt: new Date().toISOString() };
+  appState.months[month] ||= { openingBalanceCents: 0, budgetCents: 0, accountBalanceCents:null, accountBalanceUpdatedAt:null, updatedAt: new Date().toISOString() };
   return appState.months[month];
 }
 
