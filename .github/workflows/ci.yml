@@ -49,6 +49,12 @@ jobs:
       - name: Responsive layout tests
         run: node tests/responsive.test.cjs
 
+      - name: Navigation architecture tests
+        run: node tests/navigation.test.cjs
+
+      - name: Accessibility foundation tests
+        run: node tests/accessibility.test.cjs
+
       - name: Sync safety tests
         run: node tests/sync.test.cjs
 

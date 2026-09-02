@@ -44,21 +44,36 @@ const ICONS = {
   settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1L7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3h4a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9A1.7 1.7 0 0 0 21 10v4a1.7 1.7 0 0 0-1.6 1z"/>',
   more: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
   alert: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
-  lock: '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'
+  lock: '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+  menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  close: '<path d="m6 6 12 12M18 6 6 18"/>',
+  chevron: '<path d="m9 18 6-6-6-6"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>'
 };
 
-const NAV_ITEMS = [
-  ['dashboard', 'Início', 'home'],
-  ['bills', 'Faturas', 'bill'],
-  ['calendar', 'Calendário', 'calendar'],
-  ['planning', 'Planeamento', 'plan'],
-  ['market', 'Mercado', 'market'],
-  ['reports', 'Relatórios', 'report'],
-  ['goals', 'Objetivos', 'goal'],
-  ['security', 'Segurança', 'shield'],
-  ['diagnostics', 'Diagnóstico', 'report'],
-  ['settings', 'Configurações', 'settings']
-];
+const PAGE_META = Object.freeze({
+  dashboard: { label:'Início', context:'Visão geral', icon:'home', navParent:'dashboard' },
+  bills: { label:'Faturas', context:'Finanças', icon:'bill', navParent:'bills' },
+  calendar: { label:'Calendário financeiro', context:'Finanças · Faturas', icon:'calendar', navParent:'bills' },
+  planning: { label:'Planeamento', context:'Finanças', icon:'plan', navParent:'planning' },
+  goals: { label:'Objetivos', context:'Finanças · Planeamento', icon:'goal', navParent:'planning' },
+  market: { label:'Lista de compras', context:'Compras', icon:'market', navParent:'market' },
+  reports: { label:'Relatórios', context:'Análise', icon:'report', navParent:'reports' },
+  security: { label:'Segurança e sincronização', context:'Sistema', icon:'shield', navParent:'security' },
+  diagnostics: { label:'Integridade da aplicação', context:'Sistema · Definições', icon:'report', navParent:'settings' },
+  settings: { label:'Definições', context:'Sistema', icon:'settings', navParent:'settings' }
+});
+
+const NAV_GROUPS = Object.freeze([
+  { label:'Principal', items:['dashboard'] },
+  { label:'Finanças', items:['bills','planning'] },
+  { label:'Compras', items:['market'] },
+  { label:'Análise', items:['reports'] },
+  { label:'Sistema', items:['security','settings'] }
+]);
+
+const MOBILE_NAV_ITEMS = Object.freeze(['dashboard','bills','market','reports']);
+const NAV_ITEMS = Object.entries(PAGE_META).map(([id,meta])=>[id,meta.label,meta.icon]);
 
 function icon(name, size = 19) {
   const safeSize = clamp(Number(size) || 19, 12, 28);
@@ -496,7 +511,7 @@ function monthProfile(month = selectedMonth) {
 }
 
 const ALLOWED_TAGS = new Set(['article','br','button','circle','datalist','div','em','form','h2','h3','input','label','option','p','path','rect','select','small','span','strong','svg','textarea']);
-const ALLOWED_ATTRS = new Set(['accept','aria-hidden','aria-label','checked','class','d','disabled','fill','height','hidden','id','inputmode','list','max','maxlength','method','min','minlength','name','placeholder','r','required','role','rx','selected','stroke','stroke-linecap','stroke-linejoin','stroke-width','type','value','viewbox','width','x','y']);
+const ALLOWED_ATTRS = new Set(['accept','aria-hidden','aria-label','checked','class','d','disabled','fill','height','hidden','id','inputmode','list','max','maxlength','method','min','minlength','name','placeholder','r','required','role','rx','selected','stroke','stroke-linecap','stroke-linejoin','stroke-width','title','type','value','viewbox','width','x','y']);
 function sanitizeHtmlFragment(html) {
   if (typeof document === 'undefined') return String(html ?? '');
   const template = document.createElement('template');
@@ -949,8 +964,10 @@ function lockApp(_reason = 'manual') {
   if (typeof document === 'undefined') return;
   const formDialog = $('#formDialog');
   const quickDialog = $('#quickDialog');
+  const navDrawer = $('#mobileDrawer');
   if (formDialog?.open) formDialog.close();
   if (quickDialog?.open) quickDialog.close();
+  if (navDrawer?.open) navDrawer.close();
   document.documentElement.classList.remove('app-active');
   $('#app').hidden = true;
   $('#vaultScreen').hidden = false;
