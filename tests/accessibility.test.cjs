@@ -35,7 +35,7 @@ assert.match(css, /\.section-tab\{min-height:44px/);
 assert.match(css, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\),select,textarea\{[\s\S]*font-size:16px/);
 assert.match(css, /\.dialog input,\.dialog select,\.dialog textarea\{scroll-margin-block:84px 24px\}/);
 assert.match(css, /html\.keyboard-open \.mobile-nav\{visibility:hidden;pointer-events:none\}/);
-assert.match(css, /\.payment-actions \.link-btn\{min-height:44px/);
+assert.match(css, /\.payment-actions \.btn\{min-height:44px/);
 assert.match(events, /function keepFocusedDialogFieldVisible\(delay=80\)/);
 assert.match(events, /shell\.scrollBy\(\{top:delta,behavior:'auto'\}\)/);
 assert.doesNotMatch(events, /scrollIntoView\(\{block:'center'/);
