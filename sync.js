@@ -457,7 +457,8 @@ function mergeMonths(localMonths={},remoteMonths={},conflicts=[]) {
     if(canonicalize(lp)===canonicalize(rp)) continue;
 
     const sameBusiness=Number(lp.openingBalanceCents||0)===Number(rp.openingBalanceCents||0)
-      && Number(lp.budgetCents||0)===Number(rp.budgetCents||0);
+      && Number(lp.budgetCents||0)===Number(rp.budgetCents||0)
+      && (Number.isSafeInteger(lp.accountBalanceCents)?lp.accountBalanceCents:null)===(Number.isSafeInteger(rp.accountBalanceCents)?rp.accountBalanceCents:null);
     if(sameBusiness){
       out[month]=chooseCompatibleRecord('month',lp,rp);
       continue;
