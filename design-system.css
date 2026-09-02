@@ -1,4 +1,4 @@
-/* Conta de Casa v41 — design foundation and adaptive application shell */
+/* Conta de Casa v42 — design foundation and adaptive application shell */
 :root{
   color-scheme:light;
   --bg:#f5f7fa;
@@ -74,6 +74,7 @@ input,select,textarea{min-height:44px;border-radius:var(--radius-sm);border-colo
 .btn{min-height:44px;border-radius:var(--radius-sm);padding:10px 14px;font-weight:600}
 .icon-btn{width:44px;height:44px;border-radius:var(--radius-sm);display:inline-grid;place-items:center;flex:0 0 auto}
 .link-btn{min-height:36px;font-weight:600}
+.payment-actions .link-btn{min-height:44px;padding:8px 10px;border-radius:var(--radius-sm)}
 .panel,.kpi,.bill-card,.goal-card{border-radius:var(--radius);box-shadow:none}
 .panel{padding:20px}
 .kpi{padding:16px}
@@ -466,18 +467,41 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
   }
   .month-picker input{font-size:16px}
   .dialog{
-    width:calc(100vw - 12px);
-    max-width:calc(100vw - 12px);
+    width:min(calc(100vw - 12px),calc(var(--visual-vw,100vw) - 12px));
+    max-width:min(calc(100vw - 12px),calc(var(--visual-vw,100vw) - 12px));
     max-height:var(--visual-vh);
   }
   .dialog-shell{
+    display:flex;
+    flex-direction:column;
     max-height:calc(var(--visual-vh) - 12px);
     overflow-y:auto;
     overscroll-behavior:contain;
     -webkit-overflow-scrolling:touch;
     padding-bottom:max(16px,env(safe-area-inset-bottom));
+    scroll-padding-block:84px 24px;
   }
-  .dialog input,.dialog select,.dialog textarea{scroll-margin-block:88px 28px}
+  .dialog-head{
+    position:sticky;
+    top:0;
+    z-index:5;
+    background:var(--surface);
+  }
+  .dialog input,.dialog select,.dialog textarea{scroll-margin-block:84px 24px}
+  html.keyboard-open .dialog[open]{
+    position:fixed;
+    inset:var(--visual-top,0px) auto auto 6px;
+    width:calc(var(--visual-vw,100vw) - 12px);
+    max-width:calc(var(--visual-vw,100vw) - 12px);
+    height:var(--visual-vh);
+    max-height:var(--visual-vh);
+    margin:0;
+  }
+  html.keyboard-open .dialog[open] .dialog-shell{
+    height:100%;
+    max-height:100%;
+    border-radius:16px;
+  }
   html.keyboard-open .mobile-nav{visibility:hidden;pointer-events:none}
   #page-dashboard .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .dashboard-secondary{grid-template-columns:1fr;gap:8px;margin:-2px 0 12px}
