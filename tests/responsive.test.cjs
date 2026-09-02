@@ -8,7 +8,7 @@ const events = fs.readFileSync('events.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 const render = fs.readFileSync('render.js','utf8');
 
-assert.match(designCss, /Conta de Casa v40 — design foundation/);
+assert.match(designCss, /Conta de Casa v41 — design foundation/);
 assert.match(designCss, /--content-max:1440px/);
 assert.match(designCss, /--sidebar-expanded:248px/);
 assert.match(designCss, /--sidebar-rail:76px/);
@@ -50,6 +50,8 @@ assert.match(render, /function billTableHtml\(list\)/);
 assert.match(render, /class="bill-table"/);
 assert.match(render, /class="bill-mobile-list"/);
 assert.match(render, /function billDueSignal\(/);
+assert.match(render, /data-edit-bill=/);
+assert.match(events, /dataset\.editBill/);
 assert.match(designCss, /\.bill-table-shell\{/);
 assert.match(designCss, /\.bill-mobile-list\{display:none\}/);
 assert.match(designCss, /\.bill-mobile-card\{/);
@@ -70,19 +72,19 @@ assert.doesNotMatch(index, /class="fab"/);
 assert.doesNotMatch(css, /\bzoom\s*:/i);
 assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
 
-assert.match(index, /name="app-build" content="v40"/);
+assert.match(index, /name="app-build" content="v41"/);
 assert.match(index, /styles\.css\?v=40/);
 assert.match(index, /design-system\.css\?v=40/);
 assert.match(index, /manifest\.webmanifest\?v=40/);
 for (const asset of ['core','finance','render','forms','sync','events']) {
   assert.match(index,new RegExp(`${asset}\\.js\\?v=40`));
 }
-assert.match(index, /id="appBuildVersion">v40</);
+assert.match(index, /id="appBuildVersion">v41</);
 assert.match(events, /register\('\.\/sw\.js\?v=40',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v40/);
+assert.match(swSource, /conta-de-casa-public-v41/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 
-console.log('Responsive shell and PWA freshness v40 tests: OK');
+console.log('Responsive shell and PWA freshness v41 tests: OK');
