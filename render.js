@@ -44,6 +44,7 @@ function renderPage(page) {
   if (page==='reports') renderReports();
   if (page==='goals') renderGoals();
   if (page==='security') renderSecurity();
+  if (page==='diagnostics') renderDiagnostics();
   if (page==='settings') renderSettings();
   updateAlertBadge();
 }
@@ -84,17 +85,26 @@ function renderCategoryBars(selector, entries) {
 }
 
 function renderBills() {
-  const search=$('#billSearch')?.value?.trim().toLowerCase()||'';
-  const filter=$('#billStatusFilter')?.value||'all';
   const all=appState.bills.filter(b=>billInMonth(b) && !b.archived);
-  let list=all.filter(b=>{
-    const st=billStatus(b);
-    const text=`${b.title} ${b.provider||''} ${b.category||''} ${b.reference||''}`.toLowerCase();
-    return (!search||text.includes(search)) && (filter==='all'||st===filter);
-  }).sort(compareBillsByDue);
+  const categorySelect=$('#billCategoryFilter');
+  if(categorySelect){
+    const selected=categorySelect.value||'all';
+    const categories=[...new Set(all.map(b=>b.category||'Outros'))].sort((a,b)=>a.localeCompare(b,'pt-PT'));
+    setHTML(categorySelect,`<option value="all">Todas as categorias</option>${categories.map(c=>`<option value="${attr(c)}">${esc(c)}</option>`).join('')}`);
+    categorySelect.value=categories.includes(selected)?selected:'all';
+  }
+  const criteria={
+    search:$('#billSearch')?.value||'',
+    status:$('#billStatusFilter')?.value||'all',
+    category:$('#billCategoryFilter')?.value||'all',
+    from:$('#billDateFrom')?.value||'',
+    to:$('#billDateTo')?.value||'',
+    sort:$('#billSort')?.value||'due-asc'
+  };
+  const list=filterBills(all,criteria);
   const totals=monthNumbers();
-  setHTML('#billSummary', `<span class="summary-pill">Total por pagar <strong data-money>${money(totals.pending)}</strong></span><span class="summary-pill">Em atraso <strong class="danger-text" data-money>${money(totals.overdue)}</strong></span><span class="summary-pill">Faturas <strong>${all.length}</strong></span>`);
-  setHTML('#billsList', list.length?list.map(b=>billCardHtml(b)).join(''):empty('Nenhuma fatura encontrada para este mês.'));
+  setHTML('#billSummary', `<span class="summary-pill">Total por pagar <strong data-money>${money(totals.pending)}</strong></span><span class="summary-pill">Em atraso <strong class="danger-text" data-money>${money(totals.overdue)}</strong></span><span class="summary-pill">Faturas no mês <strong>${all.length}</strong></span><span class="summary-pill">Resultados <strong>${list.length}</strong></span>`);
+  setHTML('#billsList', list.length?list.map(b=>billCardHtml(b)).join(''):empty('Nenhuma fatura corresponde aos filtros atuais.'));
 }
 function billCardHtml(b) {
   const st=billStatus(b), urg=billUrgency(b), rem=remainingForBill(b), paid=paidForBill(b.id), pct=b.totalCents?clamp(paid/b.totalCents*100,0,100):0;
@@ -170,6 +180,31 @@ function renderSecurity() {
   setHTML('#securityBackupInfo', `<div class="detail-grid"><div class="detail-item"><small>Formato</small><strong>Backup cifrado v${BACKUP_FORMAT_VERSION}</strong></div><div class="detail-item"><small>Integridade</small><strong>SHA-256 obrigatório</strong></div><div class="detail-item"><small>Último backup</small><strong>${s.lastBackupAt?fmtDateTime(s.lastBackupAt):'Ainda não exportado'}</strong></div><div class="detail-item"><small>Exportação em claro</small><strong>Bloqueada</strong></div></div>`);
   setHTML('#securityPolicyList', `<div class="stack-list compact"><div class="list-row"><div class="list-main"><strong>Rede restrita</strong><small>Sem CDNs, trackers, anúncios ou telemetria. Quando a sincronização está ativa, apenas api.github.com é autorizado e recebe somente o envelope cifrado.</small></div></div><div class="list-row"><div class="list-main"><strong>Sem dados em URL</strong><small>A navegação usa apenas secções conhecidas da aplicação.</small></div></div><div class="list-row"><div class="list-main"><strong>Sem anexos reais</strong><small>A estrutura existe, mas ficheiros continuam bloqueados até cifragem dedicada.</small></div></div></div>`);
   if (typeof renderSyncUi === 'function') renderSyncUi();
+}
+
+async function renderDiagnostics() {
+  const summary=$('#diagnosticSummary'),issuesRoot=$('#diagnosticIssues');
+  if(!summary||!issuesRoot||!appState) return;
+  const diagnostics=financialDiagnostics();
+  const syncMeta=typeof syncDeviceMeta==='function'?await syncDeviceMeta().catch(()=>null):null;
+  const restoreMeta=await idbGet('device','restore-meta').catch(()=>null);
+  const build=document.querySelector('meta[name="app-build"]')?.content||'—';
+  setHTML(summary,`
+    <div class="detail-item"><small>Versão da aplicação</small><strong>${esc(build)}</strong></div>
+    <div class="detail-item"><small>Schema de dados</small><strong>v${STATE_VERSION}</strong></div>
+    <div class="detail-item"><small>Faturas</small><strong>${diagnostics.counts.bills}</strong></div>
+    <div class="detail-item"><small>Pagamentos</small><strong>${diagnostics.counts.payments}</strong></div>
+    <div class="detail-item"><small>Armazenamento</small><strong>IndexedDB cifrado</strong></div>
+    <div class="detail-item"><small>Último backup</small><strong>${appState.security?.lastBackupAt?fmtDateTime(appState.security.lastBackupAt):'Ainda não exportado'}</strong></div>
+    <div class="detail-item"><small>Último restauro</small><strong>${restoreMeta?.lastRestoreAt?fmtDateTime(restoreMeta.lastRestoreAt):'Sem restauro registado'}</strong></div>
+    <div class="detail-item"><small>Última sincronização</small><strong>${syncMeta?.lastSyncedAt?fmtDateTime(syncMeta.lastSyncedAt):'Ainda não confirmada'}</strong></div>
+    <div class="detail-item"><small>Revisão remota</small><strong>${Number(syncMeta?.lastRevision)||0}</strong></div>
+  `);
+  if(diagnostics.ok){
+    setHTML(issuesRoot,'<div class="security-item good"><span class="security-dot"></span><div><strong>Sem inconsistências detetadas</strong><small>As invariantes financeiras verificadas estão coerentes neste cofre.</small></div></div>');
+  }else{
+    setHTML(issuesRoot,diagnostics.issues.map(issue=>`<div class="security-item ${issue.severity==='critical'?'warning':'warning'}"><span class="security-dot"></span><div><strong>${esc(issue.label)}</strong><small>${issue.count} ocorrência${issue.count===1?'':'s'} · ${esc(issue.severity)}</small></div></div>`).join(''));
+  }
 }
 
 function renderSettings() {

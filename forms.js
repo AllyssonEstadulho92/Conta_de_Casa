@@ -238,7 +238,7 @@ function openGoalContribution(id){
   }));
 }
 function openMoreMenu(){
-  openDialog('Mais secções',`<div class="quick-grid">${[['calendar','Calendário','calendar'],['market','Mercado','market'],['reports','Relatórios','report'],['goals','Objetivos','goal'],['security','Segurança','shield'],['settings','Configurações','settings']].map(([id,label,ic])=>`<button type="button" data-more-page="${id}">${icon(ic,22)}<br>${label}</button>`).join('')}</div>`);
+  openDialog('Mais secções',`<div class="quick-grid">${[['calendar','Calendário','calendar'],['market','Mercado','market'],['reports','Relatórios','report'],['goals','Objetivos','goal'],['security','Segurança','shield'],['diagnostics','Diagnóstico','report'],['settings','Configurações','settings']].map(([id,label,ic])=>`<button type="button" data-more-page="${id}">${icon(ic,22)}<br>${label}</button>`).join('')}</div>`);
 }
 
 async function exportBackup(){

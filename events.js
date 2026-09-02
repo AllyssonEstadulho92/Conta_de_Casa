@@ -159,7 +159,17 @@ function wireEvents(){
     ({bill:openBillForm,income:openIncomeForm,market:openMarketForm,goal:openGoalForm})[b.dataset.quick]?.();
   });
   $('#newBillBtn').addEventListener('click',()=>openBillForm()); $('#newIncomeBtn').addEventListener('click',openIncomeForm); $('#newMarketBtn').addEventListener('click',openMarketForm); $('#newGoalBtn').addEventListener('click',openGoalForm);
-  $('#billSearch').addEventListener('input',renderBills); $('#billStatusFilter').addEventListener('change',renderBills);
+  $('#billSearch').addEventListener('input',renderBills);
+  ['#billStatusFilter','#billCategoryFilter','#billDateFrom','#billDateTo','#billSort'].forEach(sel=>$(sel)?.addEventListener('change',renderBills));
+  $('#billClearFilters')?.addEventListener('click',()=>{
+    $('#billSearch').value='';
+    $('#billStatusFilter').value='all';
+    $('#billCategoryFilter').value='all';
+    $('#billDateFrom').value='';
+    $('#billDateTo').value='';
+    $('#billSort').value='due-asc';
+    renderBills();
+  });
   const formDialog=$('#formDialog');
   formDialog.addEventListener('click',e=>{if(e.target===formDialog)closeDialog();});
   formDialog.addEventListener('cancel',e=>{e.preventDefault();closeDialog();});

@@ -82,7 +82,18 @@
         </div>
       </section>
 
-      <section id="page-bills" class="page"><div class="section-toolbar"><div class="search-wrap"><input id="billSearch" type="search" placeholder="Pesquisar faturas..." /></div><select id="billStatusFilter" aria-label="Filtrar estado"><option value="all">Todos os estados</option><option value="pending">Por pagar</option><option value="partial">Pago parcialmente</option><option value="paid">Pago</option><option value="overdue">Em atraso</option><option value="due-today">Vence hoje</option><option value="cancelled">Cancelado</option><option value="invalid">Dados inválidos</option></select><button id="newBillBtn" class="btn primary">+ Nova fatura</button></div><div id="billSummary" class="mini-summary"></div><div id="billsList" class="cards-list"></div></section>
+      <section id="page-bills" class="page">
+        <div class="section-toolbar bill-toolbar">
+          <div class="search-wrap"><label class="sr-only" for="billSearch">Pesquisar faturas</label><input id="billSearch" type="search" placeholder="Pesquisar faturas..." /></div>
+          <select id="billStatusFilter" aria-label="Filtrar por estado"><option value="all">Todos os estados</option><option value="pending">Por pagar</option><option value="partial">Pago parcialmente</option><option value="paid">Pago</option><option value="overdue">Em atraso</option><option value="due-today">Vence hoje</option><option value="cancelled">Cancelado</option><option value="invalid">Dados inválidos</option></select>
+          <select id="billCategoryFilter" aria-label="Filtrar por categoria"><option value="all">Todas as categorias</option></select>
+          <label class="date-filter">De<input id="billDateFrom" type="date" aria-label="Data inicial" /></label>
+          <label class="date-filter">Até<input id="billDateTo" type="date" aria-label="Data final" /></label>
+          <select id="billSort" aria-label="Ordenar faturas"><option value="due-asc">Vencimento ↑</option><option value="due-desc">Vencimento ↓</option><option value="amount-desc">Valor maior</option><option value="amount-asc">Valor menor</option><option value="title-asc">Descrição A–Z</option></select>
+          <button id="billClearFilters" class="btn secondary" type="button">Limpar filtros</button>
+          <button id="newBillBtn" class="btn primary" type="button">+ Nova fatura</button>
+        </div>
+        <div id="billSummary" class="mini-summary"></div><div id="billsList" class="cards-list"></div></section>
       <section id="page-calendar" class="page"><article class="panel"><div class="panel-head"><div><h2>Calendário financeiro</h2><p>Vencimentos e pagamentos do mês.</p></div></div><div id="calendarGrid" class="calendar-grid"></div><div id="calendarAgenda" class="stack-list"></div></article></section>
       <section id="page-planning" class="page"><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Planeamento mensal</h2><p>Defina saldo inicial e orçamento do período.</p></div></div><form id="monthPlanForm" class="form-grid"><label>Saldo inicial<input id="openingBalance" inputmode="decimal" placeholder="0,00" /></label><label>Orçamento do mês<input id="monthlyBudget" inputmode="decimal" placeholder="0,00" /></label><button class="btn primary" type="submit">Guardar planeamento</button></form></article><article class="panel"><div class="panel-head"><div><h2>Rendimentos</h2><p>Salários, reembolsos e outras entradas.</p></div><button id="newIncomeBtn" class="btn secondary">+ Rendimento</button></div><div id="incomeList" class="stack-list"></div></article></div></section>
       <section id="page-market" class="page"><div class="section-toolbar"><div><h2>Mercado</h2><p class="muted">Lista → comprado, com preço previsto e real.</p></div><button id="newMarketBtn" class="btn primary">+ Adicionar item</button></div><div id="marketSummary" class="mini-summary"></div><div id="marketList" class="market-list"></div></section>
@@ -141,6 +152,12 @@
     <p id="syncMergeMessage" class="form-message" role="status"></p>
   </div>
 </article><article class="panel span-2"><div class="panel-head"><div><h2>Políticas ativas</h2><p>Regras aplicadas para impedir fuga de dados financeiros ou pessoais.</p></div></div><div id="securityPolicyList"></div></article></div></section>
+      <section id="page-diagnostics" class="page">
+        <div class="two-col">
+          <article class="panel"><div class="panel-head"><div><h2>Diagnóstico da aplicação</h2><p>Estado técnico sem expor dados financeiros detalhados.</p></div></div><div id="diagnosticSummary" class="detail-grid"></div></article>
+          <article class="panel"><div class="panel-head"><div><h2>Integridade financeira</h2><p>Verificação automática das principais invariantes.</p></div></div><div id="diagnosticIssues" class="stack-list"></div></article>
+        </div>
+      </section>
       <section id="page-settings" class="page"><article class="panel narrow"><h2>Preferências</h2><form id="settingsForm" class="form-grid"><label>Nome opcional<input id="profileName" autocomplete="name" /></label><label>Moeda<select id="currencySelect"><option value="EUR">EUR — Euro</option></select></label><label>Modo visual<select id="themeSelect"><option value="light">Claro</option><option value="dark">Escuro</option><option value="system">Sistema</option></select></label><button class="btn primary" type="submit">Guardar preferências</button></form><hr /><button id="resetDataBtn" class="btn danger">Apagar todos os dados locais</button></article></section>
     </main>
     <nav id="mobileNav" class="mobile-nav" aria-label="Navegação móvel"></nav><button id="quickAddBtn" class="fab" type="button" aria-label="Adicionar">+</button>
