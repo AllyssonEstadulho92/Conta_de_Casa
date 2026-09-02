@@ -74,7 +74,8 @@ input,select,textarea{min-height:44px;border-radius:var(--radius-sm);border-colo
 .btn{min-height:44px;border-radius:var(--radius-sm);padding:10px 14px;font-weight:600}
 .icon-btn{width:44px;height:44px;border-radius:var(--radius-sm);display:inline-grid;place-items:center;flex:0 0 auto}
 .link-btn{min-height:36px;font-weight:600}
-.payment-actions .link-btn{min-height:44px;padding:8px 10px;border-radius:var(--radius-sm)}
+.payment-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.payment-actions .btn{min-height:44px;padding:8px 10px;font-size:.75rem}
 .panel,.kpi,.bill-card,.goal-card{border-radius:var(--radius);box-shadow:none}
 .panel{padding:20px}
 .kpi{padding:16px}
@@ -488,6 +489,16 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
     background:var(--surface);
   }
   .dialog input,.dialog select,.dialog textarea{scroll-margin-block:84px 24px}
+  .detail-section .list-row{flex-wrap:wrap}
+  .detail-section .payment-actions{
+    flex:1 1 100%;
+    width:100%;
+    max-width:100%;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+  .detail-section .payment-actions .btn{width:100%}
   html.keyboard-open .dialog[open]{
     position:fixed;
     inset:var(--visual-top,0px) auto auto 6px;
