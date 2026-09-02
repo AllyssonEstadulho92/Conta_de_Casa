@@ -116,3 +116,15 @@ assert.match(events, /recordBillAudit\(bill\.id,'payment-deleted'/);
 assert.match(events, /recordBillAudit\(b\.id,'bill-cancelled'/);
 
 console.log('Payment edit and overpayment repair tests: OK');
+
+
+assert.match(forms, /function openMarketForm\(item=null\)/);
+assert.match(forms, /name="marketId"/);
+assert.match(forms, /Object\.assign\(current,patch\)/);
+assert.match(forms, /await commit\(current\?'updated':'created','market'\)/);
+assert.match(forms, /Item atualizado\./);
+assert.match(events, /data-edit-market/);
+assert.match(events, /openMarketForm\(item\)/);
+assert.match(events, /recordSyncDeletion\('market',b\.dataset\.deleteMarket\)/);
+
+console.log('Market edit and deletion regression tests: OK');
