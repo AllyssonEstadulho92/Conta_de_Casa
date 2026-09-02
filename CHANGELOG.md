@@ -1,5 +1,20 @@
 # Changelog
 
+## v43 — saldo real da conta e conciliação
+
+- Saldo atual deixa de ser apresentado como se fosse o saldo bancário calculado apenas a partir dos registos internos;
+- passa a existir Saldo atual da conta, atualizado manualmente a partir do saldo disponível mostrado pelo banco;
+- o valor calculado por saldo inicial + rendimentos − pagamentos − compras mantém-se separado como Saldo calculado pelos registos;
+- Saldo projetado passa a usar o saldo real da conta menos as obrigações ainda por pagar;
+- quando ainda não existe saldo bancário confirmado, o Dashboard identifica explicitamente o valor como estimativa pelos registos;
+- quando o saldo bancário e o saldo calculado divergem, a aplicação mostra a diferença de conciliação para detetar movimentos em falta ou saldo inicial incorreto;
+- o Dashboard ganha a ação Atualizar saldo sem obrigar a abrir o planeamento;
+- a área de Planeamento mostra saldo da conta, saldo calculado e diferença de conciliação;
+- a aplicação não afirma nem simula acesso automático ao banco;
+- sincronização considera o saldo da conta um dado financeiro do perfil mensal e preserva conflitos entre dispositivos;
+- schema 5, cálculos em cêntimos, faturas, pagamentos, cofre, backups e protocolo cifrado de sincronização permanecem compatíveis;
+- Service Worker e cache público promovidos para v43.
+
 ## v42 — diálogo mobile estável e exclusão completa de faturas
 
 - diálogo de formulário passa a ser ancorado ao visual viewport real quando o teclado do iPhone está aberto;
