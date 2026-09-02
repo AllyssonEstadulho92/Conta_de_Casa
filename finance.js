@@ -1,6 +1,28 @@
-function billPayments(billId) { return appState.payments.filter(p => p.billId === billId); }
-function paidForBill(billId) { return billPayments(billId).reduce((s,p)=>s+p.amountCents,0); }
-function remainingForBill(bill) { return Math.max(0, bill.totalCents - paidForBill(bill.id)); }
+function sumCents(values) {
+  let total = 0n;
+  for (const value of values || []) {
+    if (!Number.isSafeInteger(value)) return NaN;
+    total += BigInt(value);
+  }
+  if (total > BigInt(Number.MAX_SAFE_INTEGER) || total < BigInt(Number.MIN_SAFE_INTEGER)) return NaN;
+  return Number(total);
+}
+function billPayments(billId) { return (appState?.payments || []).filter(p => p.billId === billId); }
+function paidForBill(billId) { return sumCents(billPayments(billId).map(p => p.amountCents)); }
+function billLedger(bill) {
+  const totalCents = bill?.totalCents;
+  const paidCents = paidForBill(bill?.id);
+  const valid = Number.isSafeInteger(totalCents) && totalCents > 0 && Number.isSafeInteger(paidCents) && paidCents >= 0;
+  if (!valid) return { totalCents, paidCents, remainingCents:NaN, overpaidCents:NaN, valid:false };
+  return {
+    totalCents,
+    paidCents,
+    remainingCents:Math.max(0,totalCents-paidCents),
+    overpaidCents:Math.max(0,paidCents-totalCents),
+    valid:true
+  };
+}
+function remainingForBill(bill) { return billLedger(bill).remainingCents; }
 
 function billDueDateKey(bill) { return cleanDateKey(bill?.dueDate) || dateKeyFromValue(bill?.dueAt); }
 function billDueTimeKey(bill) { return cleanTimeKey(bill?.dueTime) || timeKeyFromValue(bill?.dueAt) || '23:59'; }
@@ -17,12 +39,14 @@ function billInMonth(bill, month = selectedMonth) {
 function billStatus(bill, now = new Date()) {
   if (bill.cancelled) return 'cancelled';
   if (bill.archived) return 'archived';
-  const rem = remainingForBill(bill);
+  const ledger = billLedger(bill);
+  if (!ledger.valid) return 'invalid';
+  const rem = ledger.remainingCents;
   if (rem <= 0) return 'paid';
   const days = billDaysUntil(bill, now);
   if (!Number.isFinite(days)) return 'invalid';
   if (days < 0) return 'overdue';
-  if (paidForBill(bill.id) > 0) return 'partial';
+  if (ledger.paidCents > 0) return 'partial';
   if (days === 0) return 'due-today';
   return 'pending';
 }
@@ -42,6 +66,54 @@ function statusLabel(st) {
 function urgencyLabel(st) { return ({normal:'Normal',attention:'Atenção',urgent:'Urgente',critical:'Crítico'})[st] || st; }
 function recurrenceLabel(value) {
   return ({none:'Sem recorrência',weekly:'Semanal',monthly:'Mensal',quarterly:'Trimestral',semiannual:'Semestral',annual:'Anual'})[value] || 'Sem recorrência';
+}
+const AUDIT_FIELD_LABELS = Object.freeze({
+  title:'Descrição',provider:'Fornecedor',category:'Categoria',totalCents:'Valor total',dueDate:'Vencimento',dueTime:'Hora limite',method:'Método',recurrence:'Recorrência',cancelled:'Estado',
+  paymentAmountCents:'Valor do pagamento',paymentPaidAt:'Data do pagamento',paymentMethod:'Método do pagamento',paidCents:'Total pago',remainingCents:'Em falta',status:'Estado financeiro'
+});
+const AUDIT_MONEY_FIELDS = new Set(['totalCents','paymentAmountCents','paidCents','remainingCents']);
+const AUDIT_ACTION_LABELS = Object.freeze({
+  'bill-created':'Fatura criada','bill-updated':'Fatura atualizada','bill-duplicated':'Fatura duplicada','bill-cancelled':'Fatura cancelada','bill-deleted':'Fatura eliminada','bill-recurring-created':'Ocorrência recorrente criada',
+  'payment-created':'Pagamento registado','payment-updated':'Pagamento atualizado','payment-deleted':'Pagamento eliminado'
+});
+function billAuditSnapshot(bill, now = new Date()) {
+  if (!bill) return {};
+  const ledger=billLedger(bill);
+  return {
+    title:bill.title||'',provider:bill.provider||'',category:bill.category||'',totalCents:bill.totalCents,
+    dueDate:billDueDateKey(bill),dueTime:billDueTimeKey(bill),method:bill.method||'',recurrence:bill.recurrence||'none',cancelled:Boolean(bill.cancelled),
+    paidCents:ledger.paidCents,remainingCents:ledger.remainingCents,status:billStatus(bill,now)
+  };
+}
+function paymentAuditSnapshot(payment) {
+  if (!payment) return {};
+  return {paymentAmountCents:payment.amountCents,paymentPaidAt:payment.paidAt||'',paymentMethod:payment.method||''};
+}
+function auditChanges(before = {}, after = {}) {
+  const fields=[...new Set([...Object.keys(before||{}),...Object.keys(after||{})])];
+  return fields.filter(field=>AUDIT_FIELD_LABELS[field] && before?.[field]!==after?.[field]).map(field=>({
+    field,before:before?.[field]??null,after:after?.[field]??null
+  })).slice(0,20);
+}
+function recordBillAudit(billId,action,before={},after={},paymentId='') {
+  if (!appState || !billId || !AUDIT_ACTION_LABELS[action]) return;
+  const changes=auditChanges(before,after);
+  appState.auditTrail ||= [];
+  appState.auditTrail.push({id:uid(),billId:String(billId),paymentId:paymentId||undefined,action,changes,at:new Date().toISOString()});
+  if (appState.auditTrail.length>2000) appState.auditTrail=appState.auditTrail.slice(-2000);
+}
+function billAuditEntries(billId) {
+  return (appState?.auditTrail||[]).filter(entry=>entry.billId===billId).sort((a,b)=>new Date(b.at)-new Date(a.at));
+}
+function auditValueHtml(field,value) {
+  if (value===null || value===undefined || value==='') return '<em>Sem valor</em>';
+  if (AUDIT_MONEY_FIELDS.has(field)) return `<span data-money>${money(value)}</span>`;
+  if (field==='status') return esc(statusLabel(value));
+  if (field==='recurrence') return esc(recurrenceLabel(value));
+  if (field==='cancelled') return value?'Cancelada':'Ativa';
+  if (field==='dueDate') return esc(fmtDate(value));
+  if (field==='paymentPaidAt') return esc(fmtDateTime(value));
+  return esc(value);
 }
 function dueText(bill, now = new Date()) {
   if (remainingForBill(bill) === 0) return 'Concluída';
@@ -112,7 +184,7 @@ async function syncRecurringBills() {
       if (!bill.recurrenceSeriesId) { bill.recurrenceSeriesId = seriesId; changed = true; }
       if (!bill.recurrenceKey) { bill.recurrenceKey = recurrenceOccurrenceKey(seriesId, currentDate); changed = true; }
       const nextTime = billDueTimeKey(bill);
-      appState.bills.push({
+      const recurringBill={
         ...bill,
         id: cleanString(`rec_${seriesId}_${nextDate}`,80),
         dueDate:nextDate,
@@ -127,7 +199,9 @@ async function syncRecurringBills() {
         recurrenceKey:occurrenceKey,
         archived:false,
         cancelled:false
-      });
+      };
+      appState.bills.push(recurringBill);
+      recordBillAudit(recurringBill.id,'bill-recurring-created',{},billAuditSnapshot(recurringBill));
       loopChanged = changed = true;
     }
     if (!loopChanged) break;
@@ -137,22 +211,22 @@ async function syncRecurringBills() {
 
 function monthNumbers(month = selectedMonth, now = new Date()) {
   const profile = monthProfile(month);
-  const incomes = appState.incomes.filter(i=>inSelectedMonth(i.receivedAt, month)).reduce((s,i)=>s+i.amountCents,0);
-  const paymentTotal = appState.payments.filter(p=>inSelectedMonth(p.paidAt, month)).reduce((s,p)=>s+p.amountCents,0);
-  const marketSpent = appState.market.filter(i=>i.purchased && inSelectedMonth(i.purchasedAt || i.updatedAt, month)).reduce((s,i)=>s+(i.actualCents || i.estimatedCents || 0),0);
+  const incomes = sumCents(appState.incomes.filter(i=>inSelectedMonth(i.receivedAt, month)).map(i=>i.amountCents));
+  const paymentTotal = sumCents(appState.payments.filter(p=>inSelectedMonth(p.paidAt, month)).map(p=>p.amountCents));
+  const marketSpent = sumCents(appState.market.filter(i=>i.purchased && inSelectedMonth(i.purchasedAt || i.updatedAt, month)).map(i=>i.actualCents || i.estimatedCents || 0));
   const bills = appState.bills.filter(b=>billInMonth(b, month) && !b.cancelled && !b.archived);
   let pending = 0;
   let overdue = 0;
   for (const bill of bills) {
     const st = billStatus(bill, now);
     const rem = remainingForBill(bill);
-    if (st === 'overdue') overdue += rem;
-    else if (['pending','partial','due-today'].includes(st)) pending += rem;
+    if (st === 'overdue') overdue = sumCents([overdue,rem]);
+    else if (['pending','partial','due-today'].includes(st)) pending = sumCents([pending,rem]);
   }
-  const outstanding = pending + overdue;
-  const current = profile.openingBalanceCents + incomes - paymentTotal - marketSpent;
-  const projected = current - outstanding;
-  const budgetUsed = paymentTotal + marketSpent;
+  const outstanding = sumCents([pending,overdue]);
+  const current = sumCents([profile.openingBalanceCents,incomes,-paymentTotal,-marketSpent]);
+  const projected = sumCents([current,-outstanding]);
+  const budgetUsed = sumCents([paymentTotal,marketSpent]);
   return { profile, incomes, paymentTotal, marketSpent, pending, overdue, outstanding, current, projected, budgetUsed, bills };
 }
 function dashboardNumbers(month = selectedMonth, now = new Date()) {
@@ -167,7 +241,7 @@ function dashboardNumbers(month = selectedMonth, now = new Date()) {
     ...n,
     pendingCount:pendingBills.length,
     overdueCount:overdueBills.length,
-    next7:next7Bills.reduce((s,b)=>s+remainingForBill(b),0),
+    next7:sumCents(next7Bills.map(b=>remainingForBill(b))),
     next7Count:next7Bills.length,
     criticalCount:pendingBills.filter(b=>billUrgency(b,now)==='critical').length
   };
@@ -177,12 +251,12 @@ function categoryTotals(month = selectedMonth) {
   const payments = appState.payments.filter(p=>inSelectedMonth(p.paidAt, month));
   for (const p of payments) {
     const bill = appState.bills.find(b=>b.id===p.billId); const cat = bill?.category || 'Outros';
-    map.set(cat,(map.get(cat)||0)+p.amountCents);
+    map.set(cat,sumCents([map.get(cat)||0,p.amountCents]));
   }
   const market = appState.market.filter(i=>i.purchased && inSelectedMonth(i.purchasedAt || i.updatedAt, month));
   for (const item of market) {
     const cat = item.category ? `Mercado · ${item.category}` : 'Mercado';
-    map.set(cat,(map.get(cat)||0)+(item.actualCents||item.estimatedCents||0));
+    map.set(cat,sumCents([map.get(cat)||0,item.actualCents||item.estimatedCents||0]));
   }
   return [...map.entries()].sort((a,b)=>b[1]-a[1]);
 }
@@ -224,7 +298,9 @@ function financialDiagnostics(month = selectedMonth, now = new Date()) {
   if(invalidBills.length) issues.push({code:'invalid-bills',severity:'critical',count:invalidBills.length,label:'Faturas com dados obrigatórios inválidos'});
   const orphanPayments=payments.filter(p=>!billIds.has(p.billId));
   if(orphanPayments.length) issues.push({code:'orphan-payments',severity:'critical',count:orphanPayments.length,label:'Pagamentos sem fatura associada'});
-  const overpaid=bills.filter(b=>paidForBill(b.id)>b.totalCents);
+  const invalidAggregates=bills.filter(b=>!billLedger(b).valid);
+  if(invalidAggregates.length) issues.push({code:'invalid-aggregates',severity:'critical',count:invalidAggregates.length,label:'Faturas com totais agregados fora do intervalo seguro'});
+  const overpaid=bills.filter(b=>billLedger(b).valid&&billLedger(b).overpaidCents>0);
   if(overpaid.length) issues.push({code:'overpaid-bills',severity:'critical',count:overpaid.length,label:'Faturas com pagamentos acima do valor total'});
   const fingerprintCounts=new Map();
   for(const p of payments){
@@ -241,10 +317,11 @@ function financialDiagnostics(month = selectedMonth, now = new Date()) {
   const duplicateRecurrences=[...recurrenceCounts.values()].filter(v=>v>1).reduce((sum,v)=>sum+(v-1),0);
   if(duplicateRecurrences) issues.push({code:'duplicate-recurrences',severity:'high',count:duplicateRecurrences,label:'Possíveis ocorrências recorrentes duplicadas'});
   const n=monthNumbers(month,now);
-  if(n.projected!==n.current-n.outstanding) issues.push({code:'projected-invariant',severity:'critical',count:1,label:'Saldo projetado não corresponde ao saldo atual menos obrigações'});
+  if(![n.incomes,n.paymentTotal,n.marketSpent,n.pending,n.overdue,n.outstanding,n.current,n.projected,n.budgetUsed].every(Number.isSafeInteger)) issues.push({code:'unsafe-month-total',severity:'critical',count:1,label:'Total mensal fora do intervalo monetário seguro'});
+  if(n.projected!==sumCents([n.current,-n.outstanding])) issues.push({code:'projected-invariant',severity:'critical',count:1,label:'Saldo projetado não corresponde ao saldo atual menos obrigações'});
   const dash=dashboardNumbers(month,now);
-  const expectedPending=n.bills.filter(b=>['pending','partial','due-today'].includes(billStatus(b,now))).reduce((sum,b)=>sum+remainingForBill(b),0);
-  const expectedOverdue=n.bills.filter(b=>billStatus(b,now)==='overdue').reduce((sum,b)=>sum+remainingForBill(b),0);
+  const expectedPending=sumCents(n.bills.filter(b=>['pending','partial','due-today'].includes(billStatus(b,now))).map(b=>remainingForBill(b)));
+  const expectedOverdue=sumCents(n.bills.filter(b=>billStatus(b,now)==='overdue').map(b=>remainingForBill(b)));
   if(n.pending!==expectedPending) issues.push({code:'pending-invariant',severity:'critical',count:1,label:'Total por pagar não corresponde às faturas pendentes'});
   if(n.overdue!==expectedOverdue) issues.push({code:'overdue-invariant',severity:'critical',count:1,label:'Total em atraso não corresponde às faturas vencidas'});
   return {

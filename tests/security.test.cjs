@@ -53,6 +53,7 @@ assert.doesNotMatch(vm.runInContext('attr(`" autofocus onfocus=alert(1)`)', cont
 vm.runInContext('installStorageGuards(); localStorage.setItem("cdc_public_theme", "light")', context);
 assert.throws(() => vm.runInContext('localStorage.setItem("bill", "Fornecedor privado")', context), /Armazenamento em claro bloqueado/);
 assert.throws(() => vm.runInContext('sessionStorage.setItem("cdc_public_note", "amountCents=123")', context), /Armazenamento em claro bloqueado/);
+assert.throws(() => vm.runInContext('localStorage.setItem("cdc_public_auditTrail", "alteração")', context), /Armazenamento em claro bloqueado/);
 
 const syncState = vm.runInContext(`ensureStateShape({
   settings:{sync:{enabled:true,owner:'AllyssonEstadulho92',repo:'conta-de-casa-',path:'sync/vault.json'}},

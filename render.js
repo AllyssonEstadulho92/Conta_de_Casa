@@ -67,7 +67,7 @@ function renderDashboard() {
   setHTML('#upcomingBills', upcoming.length ? upcoming.map(b=>billRowHtml(b)).join('') : empty('Sem faturas pendentes neste mês.'));
   renderCategoryBars('#categoryBars', categoryTotals());
   const budget = n.profile.budgetCents || 0;
-  const rem = budget - n.budgetUsed;
+  const rem = sumCents([budget,-n.budgetUsed]);
   const pct = budget ? clamp(Math.round(n.budgetUsed/budget*100),0,100) : 0;
   setHTML('#budgetPanel', budget ? `<div class="detail-grid"><div class="detail-item"><small>Orçado</small><strong data-money>${money(budget)}</strong></div><div class="detail-item"><small>Utilizado</small><strong data-money>${money(n.budgetUsed)}</strong></div></div><div class="section-gap"><div class="progress ${pct>100?'danger':pct>80?'warning':'success'}"><span data-width="${Math.min(pct,100)}"></span></div><div class="goal-values"><span>${pct}% utilizado</span><strong class="${rem<0?'danger-text':'success-text'}" data-money>${money(rem)}</strong></div></div>` : `<p class="muted">Ainda não definiu um orçamento para ${esc(selectedMonth)}.</p><button class="btn secondary" data-go="planning">Definir orçamento</button>`);
   const acts = appState.activity.slice(0,8);
@@ -124,7 +124,7 @@ function renderCalendar() {
     const bills=appState.bills.filter(b=>billDueDateKey(b)===dayKey&&!b.archived&&!b.cancelled);
     const overdue=bills.some(b=>billStatus(b)==='overdue');
     const cls=[today.getFullYear()===year&&today.getMonth()===month-1&&today.getDate()===day?'today':'',bills.length?(overdue?'has-overdue':'has-due'):''].join(' ');
-    const total=bills.reduce((s,b)=>s+remainingForBill(b),0);
+    const total=sumCents(bills.map(b=>remainingForBill(b)));
     cells.push(`<button class="calendar-day ${cls}" data-calendar-day="${day}"><span class="day-num">${day}</span>${bills.length?`<small>${bills.length} · <span data-money>${money(total)}</span></small>`:''}</button>`);
   }
   setHTML('#calendarGrid', headers+cells.join(''));
@@ -142,18 +142,19 @@ function renderPlanning() {
 
 function renderMarket() {
   const list=appState.market.filter(i=>monthOf(i.createdAt)===selectedMonth || (i.purchased&&inSelectedMonth(i.purchasedAt))).sort((a,b)=>Number(a.purchased)-Number(b.purchased));
-  const estimated=list.reduce((s,i)=>s+(i.estimatedCents||0),0); const actual=list.filter(i=>i.purchased).reduce((s,i)=>s+(i.actualCents||i.estimatedCents||0),0);
+  const estimated=sumCents(list.map(i=>i.estimatedCents||0)); const actual=sumCents(list.filter(i=>i.purchased).map(i=>i.actualCents||i.estimatedCents||0));
   setHTML('#marketSummary', `<span class="summary-pill">Estimado <strong data-money>${money(estimated)}</strong></span><span class="summary-pill">Comprado <strong data-money>${money(actual)}</strong></span><span class="summary-pill">Itens <strong>${list.length}</strong></span>`);
   setHTML('#marketList', list.length?list.map(i=>`<div class="market-row ${i.purchased?'done':''}"><input type="checkbox" data-market-toggle="${attr(i.id)}" ${i.purchased?'checked':''} aria-label="Marcar ${attr(i.name)} como comprado"><div><strong>${esc(i.name)}</strong><small>${esc(i.category||'Outros')}</small></div><div class="market-qty"><small>Qtd.</small><strong>${esc(i.quantity||'1')} ${esc(i.unit||'un')}</strong></div><div class="market-estimate"><small>Estimado</small><strong data-money>${money(i.estimatedCents||0)}</strong></div><label class="market-price">Preço real<input data-market-actual="${attr(i.id)}" inputmode="decimal" value="${i.actualCents? (i.actualCents/100).toFixed(2).replace('.',','):''}" placeholder="0,00" autocomplete="off"></label><button class="icon-btn danger-text" data-delete-market="${attr(i.id)}" aria-label="Eliminar">×</button></div>`).join(''):empty('A lista de mercado está vazia.'));
 }
 
 function renderReports() {
   const n=monthNumbers();
-  const saved=n.incomes-(n.paymentTotal+n.marketSpent);
-  setHTML('#reportCards', [['Rendimentos',n.incomes,'success'],['Despesas efetivas',n.paymentTotal+n.marketSpent,'danger'],['Resultado do mês',saved,saved<0?'danger':'success'],['Por pagar',n.pending,'primary']].map(([l,v,k])=>`<article class="kpi ${k}"><span class="label">${l}</span><strong data-money>${money(v)}</strong></article>`).join(''));
+  const expenses=sumCents([n.paymentTotal,n.marketSpent]);
+  const saved=sumCents([n.incomes,-expenses]);
+  setHTML('#reportCards', [['Rendimentos',n.incomes,'success'],['Despesas efetivas',expenses,'danger'],['Resultado do mês',saved,saved<0?'danger':'success'],['Por pagar',n.pending,'primary']].map(([l,v,k])=>`<article class="kpi ${k}"><span class="label">${l}</span><strong data-money>${money(v)}</strong></article>`).join(''));
   renderCategoryBars('#reportCategoryBars',categoryTotals());
   const [y,m]=selectedMonth.split('-').map(Number); const vals=[];
-  for(let i=5;i>=0;i--){ const d=new Date(y,m-1-i,1); const mk=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; const pay=appState.payments.filter(p=>inSelectedMonth(p.paidAt,mk)).reduce((s,p)=>s+p.amountCents,0); const market=appState.market.filter(x=>x.purchased&&inSelectedMonth(x.purchasedAt||x.updatedAt,mk)).reduce((s,x)=>s+(x.actualCents||x.estimatedCents||0),0); vals.push([mk,pay+market]); }
+  for(let i=5;i>=0;i--){ const d=new Date(y,m-1-i,1); const mk=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; const pay=sumCents(appState.payments.filter(p=>inSelectedMonth(p.paidAt,mk)).map(p=>p.amountCents)); const market=sumCents(appState.market.filter(x=>x.purchased&&inSelectedMonth(x.purchasedAt||x.updatedAt,mk)).map(x=>x.actualCents||x.estimatedCents||0)); vals.push([mk,sumCents([pay,market])]); }
   const max=Math.max(...vals.map(v=>v[1]),1);
   setHTML('#monthlyTrend', vals.map(([mk,v])=>`<div class="trend-col"><em data-money>${money(v)}</em><div class="trend-bar" data-height="${Math.max(3,v/max*165)}"></div><small>${new Intl.DateTimeFormat('pt-PT',{month:'short'}).format(new Date(`${mk}-01T12:00:00`))}</small></div>`).join(''));
 }
@@ -194,6 +195,7 @@ async function renderDiagnostics() {
     <div class="detail-item"><small>Schema de dados</small><strong>v${STATE_VERSION}</strong></div>
     <div class="detail-item"><small>Faturas</small><strong>${diagnostics.counts.bills}</strong></div>
     <div class="detail-item"><small>Pagamentos</small><strong>${diagnostics.counts.payments}</strong></div>
+    <div class="detail-item"><small>Eventos financeiros</small><strong>${appState.auditTrail?.length||0}</strong></div>
     <div class="detail-item"><small>Armazenamento</small><strong>IndexedDB cifrado</strong></div>
     <div class="detail-item"><small>Último backup</small><strong>${appState.security?.lastBackupAt?fmtDateTime(appState.security.lastBackupAt):'Ainda não exportado'}</strong></div>
     <div class="detail-item"><small>Último restauro</small><strong>${restoreMeta?.lastRestoreAt?fmtDateTime(restoreMeta.lastRestoreAt):'Sem restauro registado'}</strong></div>

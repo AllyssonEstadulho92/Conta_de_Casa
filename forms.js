@@ -93,7 +93,7 @@ async function handleBillSubmit(e){
     const title=cleanString(fd.get('title'),80);
     if(!title){toast('Indique uma descrição para a fatura.');return false;}
     const total=parseCents(fd.get('amount'));
-    if(!Number.isFinite(total)||total<=0){toast('Introduza um valor monetário válido superior a zero, com no máximo 2 casas decimais.');return false;}
+    if(!validCents(total,1)){toast('Introduza um valor monetário válido superior a zero, com no máximo 2 casas decimais.');return false;}
     const dueDate=cleanDateKey(fd.get('dueDate'));
     const dueTime=cleanTimeKey(fd.get('dueTime'),'23:59');
     const dueAt=composeLocalDateTimeIso(dueDate,dueTime);
@@ -107,10 +107,14 @@ async function handleBillSubmit(e){
     if(id){
       const b=appState.bills.find(x=>x.id===id);
       if(!b){toast('A fatura já não existe. Atualize a lista.');return false;}
+      const before=billAuditSnapshot(b);
       Object.assign(b,data);
+      recordBillAudit(b.id,'bill-updated',before,billAuditSnapshot(b));
       await commit('updated','bill');
     }else{
-      appState.bills.push({id:uid(),...data,createdAt:new Date().toISOString(),cancelled:false,archived:false});
+      const bill={id:uid(),...data,createdAt:new Date().toISOString(),cancelled:false,archived:false};
+      appState.bills.push(bill);
+      recordBillAudit(bill.id,'bill-created',{},billAuditSnapshot(bill));
       await commit('created','bill');
     }
     closeDialog();
@@ -123,6 +127,7 @@ function openBillDetail(id){
   const b=appState.bills.find(x=>x.id===id); if(!b)return;
   const paid=paidForBill(id),rem=remainingForBill(b),st=billStatus(b),urg=billUrgency(b);
   const payments=billPayments(id).sort((a,c)=>new Date(c.paidAt)-new Date(a.paidAt));
+  const audit=billAuditEntries(id);
   const paymentSummary=paid>0?`<span><small>Já pago</small><strong data-money>${money(paid)}</strong></span>`:'';
   const excess=Math.max(0,paid-b.totalCents);
   const newestPayment=payments[0]||null;
@@ -162,6 +167,11 @@ function openBillDetail(id){
         <div class="stack-list compact">${payments.length?payments.map(p=>`<div class="list-row"><div class="list-main"><strong data-money>${money(p.amountCents)}</strong><small>${fmtDateTime(p.paidAt)} · ${esc(p.method||'')}</small></div><div class="list-side payment-actions"><button class="link-btn" type="button" data-edit-payment="${attr(p.id)}" data-payment-bill="${attr(b.id)}">Editar</button><button class="link-btn danger-text" type="button" data-delete-payment="${attr(p.id)}" data-payment-bill="${attr(b.id)}">Eliminar</button></div></div>`).join(''):empty('Sem pagamentos registados.')}</div>
       </div>
 
+      <div class="detail-section">
+        <div class="detail-section-head"><h3>Histórico financeiro</h3><small>${audit.length} evento${audit.length===1?'':'s'}</small></div>
+        <div class="audit-trail">${audit.length?audit.map(entry=>`<div class="audit-entry"><span class="audit-dot" aria-hidden="true"></span><div><strong>${esc(AUDIT_ACTION_LABELS[entry.action]||'Alteração registada')}</strong><small>${fmtDateTime(entry.at)}</small>${entry.changes?.length?`<div class="audit-changes">${entry.changes.map(change=>`<p><span>${esc(AUDIT_FIELD_LABELS[change.field]||change.field)}</span>${change.before===null?auditValueHtml(change.field,change.after):`${auditValueHtml(change.field,change.before)} <em>→</em> ${auditValueHtml(change.field,change.after)}`}</p>`).join('')}</div>`:''}</div></div>`).join(''):empty('O histórico detalhado começa na v34.')}</div>
+      </div>
+
       <div class="dialog-actions detail-actions">
         ${rem>0&&!b.cancelled?`<button class="btn primary" data-detail-pay="${attr(b.id)}">Registar pagamento</button>`:''}
         <button class="btn secondary" data-detail-edit="${attr(b.id)}">Editar</button>
@@ -176,7 +186,7 @@ function openPaymentForm(id,paymentId=''){
   const b=appState.bills.find(x=>x.id===id); if(!b)return;
   const existing=paymentId?appState.payments.find(x=>x.id===paymentId&&x.billId===id):null;
   const rem=remainingForBill(b);
-  const allowed=rem+(existing?.amountCents||0);
+  const allowed=sumCents([rem,existing?.amountCents||0]);
   const amount=existing?.amountCents??rem;
   const paidAt=existing?localDateTimeInput(new Date(existing.paidAt)):localDateTimeInput();
   openDialog(existing?'Editar pagamento':'Registar pagamento',`<form id="paymentForm" class="form-grid"><input type="hidden" name="billId" value="${attr(b.id)}"><input type="hidden" name="paymentId" value="${attr(existing?.id||'')}"><p>Fatura: <strong>${esc(b.title)}</strong><br>${existing?'Máximo permitido após edição':'Restante'}: <strong data-money>${money(allowed)}</strong></p><label>Valor<input name="amount" inputmode="decimal" required value="${(amount/100).toFixed(2).replace('.',',')}" autocomplete="off"></label><label>Data e hora<input name="paidAt" type="datetime-local" required value="${paidAt}" autocomplete="off"></label><label>Método<select name="method"><option>Débito automático</option><option>Transferência</option><option>Referência Multibanco</option><option>Cartão</option><option>Dinheiro</option><option>Outro</option></select></label><label>Nota<input name="notes" value="${attr(existing?.notes||'')}" autocomplete="off" spellcheck="false"></label><div class="button-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary" type="submit">${existing?'Guardar alterações':'Guardar pagamento'}</button></div></form>`);
@@ -194,15 +204,18 @@ async function handlePaymentSubmit(e){
     const existing=paymentId?appState.payments.find(x=>x.id===paymentId&&x.billId===b.id):null;
     if(paymentId&&!existing){toast('O pagamento já não existe. Atualize a lista.');return false;}
     const amount=parseCents(fd.get('amount'));
-    const maxAllowed=remainingForBill(b)+(existing?.amountCents||0);
-    if(!Number.isFinite(amount)||amount<=0||amount>maxAllowed){toast(`O pagamento deve estar entre 0,01 e ${money(maxAllowed)}.`);return false;}
+    const maxAllowed=sumCents([remainingForBill(b),existing?.amountCents||0]);
+    if(!validCents(amount,1)||!Number.isSafeInteger(maxAllowed)||amount>maxAllowed){toast(`O pagamento deve estar entre 0,01 e ${money(maxAllowed)}.`);return false;}
     const at=new Date(fd.get('paidAt'));
     if(Number.isNaN(at.getTime())){toast('Data de pagamento inválida.');return false;}
     const now=new Date().toISOString();
     const payment={id:existing?.id||uid(),billId:b.id,amountCents:amount,paidAt:at.toISOString(),method:cleanString(fd.get('method'),60),notes:cleanMultiline(fd.get('notes'),600),createdAt:existing?.createdAt||now,updatedAt:now};
     if(duplicatePaymentExists(payment,existing?.id||'')){toast('Este pagamento já está registado com o mesmo valor, data/hora e método.');return false;}
+    const before={...billAuditSnapshot(b),...paymentAuditSnapshot(existing)};
     if(existing) Object.assign(existing,payment); else appState.payments.push(payment);
     b.updatedAt=now;
+    const after={...billAuditSnapshot(b),...paymentAuditSnapshot(payment)};
+    recordBillAudit(b.id,existing?'payment-updated':'payment-created',before,after,payment.id);
     await syncRecurringBills();
     await commit(existing?'updated':'created','payment');
     closeDialog();
@@ -216,7 +229,7 @@ function openIncomeForm(){
   $('#incomeForm').addEventListener('submit',e=>withFormSubmissionLock(e,async form=>{
     const fd=new FormData(form),description=cleanString(fd.get('description'),100),amount=parseCents(fd.get('amount')),receivedAt=new Date(fd.get('receivedAt'));
     if(!description){toast('Indique uma descrição para o rendimento.');return false;}
-    if(!Number.isFinite(amount)||amount<=0){toast('Introduza um valor monetário válido superior a zero.');return false;}
+    if(!validCents(amount,1)){toast('Introduza um valor monetário válido superior a zero.');return false;}
     if(Number.isNaN(receivedAt.getTime())){toast('Data inválida.');return false;}
     appState.incomes.push({id:uid(),description,amountCents:amount,receivedAt:receivedAt.toISOString(),createdAt:new Date().toISOString()});
     await commit('created','income');closeDialog();toast('Rendimento guardado.');return true;
@@ -227,7 +240,7 @@ function openMarketForm(){
   $('#marketForm').addEventListener('submit',e=>withFormSubmissionLock(e,async form=>{
     const fd=new FormData(form),name=cleanString(fd.get('name'),100),est=parseCents(fd.get('estimated'));
     if(!name){toast('Indique o produto.');return false;}
-    if(!Number.isFinite(est)||est<0){toast('Preço estimado inválido. Use zero ou um valor positivo.');return false;}
+    if(!validCents(est,0)){toast('Preço estimado inválido. Use zero ou um valor positivo.');return false;}
     appState.market.push({id:uid(),name,category:cleanString(fd.get('category'),80),quantity:cleanString(fd.get('quantity'),40)||'1',unit:cleanString(fd.get('unit'),20),estimatedCents:est,actualCents:0,purchased:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),purchasedAt:null});
     await commit('created','market');closeDialog();toast('Item adicionado.');return true;
   }));
@@ -237,7 +250,7 @@ function openGoalForm(){
   $('#goalForm').addEventListener('submit',e=>withFormSubmissionLock(e,async form=>{
     const fd=new FormData(form),name=cleanString(fd.get('name'),100),target=parseCents(fd.get('target')),saved=parseCents(fd.get('saved'));
     if(!name){toast('Indique o nome do objetivo.');return false;}
-    if(!Number.isFinite(target)||target<=0||!Number.isFinite(saved)||saved<0){toast('Valores inválidos.');return false;}
+    if(!validCents(target,1)||!validCents(saved,0)){toast('Valores inválidos.');return false;}
     const deadlineKey=cleanDateKey(fd.get('deadline'));
     if(fd.get('deadline')&&!deadlineKey){toast('Prazo inválido.');return false;}
     const deadline=deadlineKey?composeLocalDateTimeIso(deadlineKey,'12:00'):null;
@@ -250,8 +263,10 @@ function openGoalContribution(id){
   openDialog('Adicionar ao objetivo',`<form id="goalAddForm" class="form-grid"><p><strong>${esc(g.name)}</strong><br>Falta <span data-money>${money(Math.max(0,g.targetCents-g.savedCents))}</span></p><label>Valor<input name="amount" inputmode="decimal" required placeholder="0,00" autocomplete="off"></label><div class="button-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary">Adicionar</button></div></form>`);
   $('#goalAddForm').addEventListener('submit',e=>withFormSubmissionLock(e,async form=>{
     const amount=parseCents(new FormData(form).get('amount'));
-    if(!Number.isFinite(amount)||amount<=0){toast('Valor inválido.');return false;}
-    g.savedCents=Math.min(g.targetCents,g.savedCents+amount);g.updatedAt=new Date().toISOString();await commit('updated','goal');closeDialog();toast('Objetivo atualizado.');return true;
+    if(!validCents(amount,1)){toast('Valor inválido.');return false;}
+    const updated=sumCents([g.savedCents,amount]);
+    if(!Number.isSafeInteger(updated)){toast('O total do objetivo excede o limite monetário seguro.');return false;}
+    g.savedCents=Math.min(g.targetCents,updated);g.updatedAt=new Date().toISOString();await commit('updated','goal');closeDialog();toast('Objetivo atualizado.');return true;
   }));
 }
 function openMoreMenu(){

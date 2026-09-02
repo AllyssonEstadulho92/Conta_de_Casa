@@ -77,16 +77,21 @@ assert.match(events, /document\.documentElement\.classList\.add\('app-active'\)/
 console.log('Native mobile shell v8 tests: OK');
 
 
-assert.match(index, /name="app-build" content="v33"/);
-assert.match(index, /styles\.css\?v=33/);
-assert.match(index, /sync\.js\?v=33/);
-assert.match(index, /events\.js\?v=33/);
-assert.match(index, /id="appBuildVersion">v33</);
-assert.match(events, /register\('\.\/sw\.js\?v=33',\{updateViaCache:'none'\}\)/);
+assert.match(index, /name="app-build" content="v34"/);
+assert.match(index, /styles\.css\?v=34/);
+assert.match(index, /manifest\.webmanifest\?v=34/);
+assert.match(index, /core\.js\?v=34/);
+assert.match(index, /finance\.js\?v=34/);
+assert.match(index, /render\.js\?v=34/);
+assert.match(index, /forms\.js\?v=34/);
+assert.match(index, /sync\.js\?v=34/);
+assert.match(index, /events\.js\?v=34/);
+assert.match(index, /id="appBuildVersion">v34</);
+assert.match(events, /register\('\.\/sw\.js\?v=34',\{updateViaCache:'none'\}\)/);
 assert.match(events, /controllerchange/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v33/);
+assert.match(swSource, /conta-de-casa-public-v34/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 
-console.log('PWA freshness v33 tests: OK');
+console.log('PWA freshness v34 tests: OK');

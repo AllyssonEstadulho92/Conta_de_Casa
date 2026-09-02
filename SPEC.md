@@ -151,6 +151,47 @@ Tema claro como principal. Azul para ação, verde para concluído, âmbar para 
 - aplicação funciona offline após primeiro carregamento de assets públicos;
 - testes financeiros e de segurança passam no CI.
 
+## Prompt de Projeto — v34 Integridade financeira
+
+### Confirmado
+
+- baseline estável: v33, commit `f9bbbd29e8a0f83f11aa6d4d37d820df46a4a9e0`;
+- pagamentos parciais já existem e devem ser preservados;
+- todos os dados financeiros e o novo histórico permanecem dentro do estado cifrado;
+- nenhuma diferença de montante pode ser resolvida automaticamente pela sincronização.
+
+### Objetivo
+
+Centralizar os cálculos monetários num motor determinístico e acrescentar uma linha temporal auditável a cada fatura, sem alterar os dados existentes nem o funcionamento local-first.
+
+### Regras funcionais e técnicas
+
+- somas monetárias são feitas em cêntimos inteiros através de uma única função que usa `BigInt` durante a acumulação;
+- qualquer parcela não inteira ou total fora do intervalo seguro produz um resultado inválido explícito, nunca um arredondamento silencioso;
+- cada valor introduzido tem o limite máximo de 1 000 000 000 000 cêntimos;
+- o saldo de uma fatura é calculado por um único ledger: total, pago, restante, excedente e validade;
+- criar/editar/cancelar uma fatura e criar/editar/eliminar um pagamento gera um evento imutável no histórico da fatura;
+- cada evento guarda apenas os campos alterados, com valor anterior e posterior, data/hora e IDs técnicos;
+- o histórico detalhado é cifrado em repouso, incluído no backup cifrado e sincronizado apenas dentro do envelope cifrado;
+- eventos de auditoria são unidos por ID entre dispositivos e não provocam conflitos financeiros artificiais;
+- a interface mostra o histórico nos detalhes da fatura, com valores abrangidos pelo modo de privacidade.
+
+### Critérios de aceitação v34
+
+- pagamentos parciais continuam a reduzir o restante ao cêntimo;
+- pagamentos totais continuam a produzir o estado Pago;
+- totais mensais, por categoria, calendário e relatórios usam o acumulador monetário central;
+- entradas acima do limite monetário são rejeitadas antes da gravação;
+- totais agregados inválidos são sinalizados no diagnóstico financeiro;
+- o histórico mostra criação, alterações, cancelamento e mutações de pagamentos;
+- a v33 é migrada para o schema 4 sem perder faturas, pagamentos ou atividade;
+- o histórico é preservado por backup e por merge de sincronização;
+- todos os testes existentes e os novos testes de auditoria passam antes da publicação.
+
+### Fora do âmbito desta versão
+
+Resolução visual lado a lado de conflitos, previsões recorrentes por confirmar, orçamento avançado e anexos cifrados permanecem para versões seguintes.
+
 ## Roadmap
 
 ### v0.2

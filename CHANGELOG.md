@@ -1,5 +1,23 @@
 # Changelog
 
+## v34 — integridade financeira
+
+### Cálculos
+- acumulador monetário central com `BigInt` durante as somas e retorno apenas de inteiros seguros;
+- ledger único por fatura para total, pago, restante, excedente e validade;
+- limites monetários validados antes da gravação;
+- diagnóstico de totais agregados inválidos.
+
+### Histórico
+- linha temporal cifrada por fatura;
+- registo de criação, edição, cancelamento, duplicação e recorrência;
+- registo de criação, edição e eliminação de pagamentos com valores anterior e posterior;
+- união segura do histórico entre dispositivos por ID.
+
+### PWA
+- schema de estado 4;
+- cache e referências de assets atualizados para v34.
+
 ## 0.1.1-hardening — em proposta
 
 ### Segurança

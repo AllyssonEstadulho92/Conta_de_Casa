@@ -114,10 +114,12 @@ async function deletePaymentRecord(paymentId,billId,confirmMessage='Eliminar est
   const targetBillId=String(billId||payment?.billId||'');
   if(!payment) return false;
   if(!confirm(confirmMessage)) return false;
+  const bill=appState.bills.find(x=>x.id===targetBillId);
+  const before={...billAuditSnapshot(bill),...paymentAuditSnapshot(payment)};
   if(typeof recordSyncDeletion==='function') recordSyncDeletion('payment',payment.id);
   appState.payments=appState.payments.filter(x=>x.id!==payment.id);
-  const bill=appState.bills.find(x=>x.id===targetBillId);
   if(bill) bill.updatedAt=new Date().toISOString();
+  if(bill) recordBillAudit(bill.id,'payment-deleted',before,billAuditSnapshot(bill),payment.id);
   await commit('deleted','payment');
   if(bill) openBillDetail(bill.id); else closeDialog();
   toast('Pagamento eliminado.');
@@ -222,6 +224,7 @@ function wireEvents(){
         const now=new Date().toISOString();
         const copy={...source,id:uid(),title:cleanString(`${source.title} — cópia`,80),reference:'',recurrence:'none',recurrenceParentId:undefined,recurrenceSeriesId:undefined,recurrenceKey:undefined,createdAt:now,updatedAt:now,cancelled:false,archived:false};
         appState.bills.push(copy);
+        recordBillAudit(copy.id,'bill-duplicated',{},billAuditSnapshot(copy));
         await commit('created','bill');
         closeDialog();
         toast('Fatura duplicada. Reveja os dados da cópia antes de usar.');
@@ -240,8 +243,10 @@ function wireEvents(){
       const b=appState.bills.find(x=>x.id===cancel.dataset.detailCancel);
       if(b&&paidForBill(b.id)>0){toast('Não é possível cancelar uma fatura com pagamentos. Desfaça os pagamentos incorretos primeiro.');return;}
       if(b&&confirm('Cancelar esta fatura?')){
+        const before=billAuditSnapshot(b);
         b.cancelled=true;
         b.updatedAt=new Date().toISOString();
+        recordBillAudit(b.id,'bill-cancelled',before,billAuditSnapshot(b));
         await commit('cancelled','bill');
         closeDialog();
         toast('Fatura cancelada.');
@@ -249,9 +254,9 @@ function wireEvents(){
     }
   });
   $('#monthPicker').addEventListener('change',()=>{selectedMonth=$('#monthPicker').value||selectedMonth;monthProfile();renderCurrentPage();});
-  $('#monthPlanForm').addEventListener('submit',async e=>{e.preventDefault();const open=parseCents($('#openingBalance').value),budget=parseCents($('#monthlyBudget').value);if(!Number.isFinite(open)||!Number.isFinite(budget)||budget<0){toast('Valores de planeamento inválidos.');return;}const p=monthProfile();p.openingBalanceCents=open;p.budgetCents=budget;p.updatedAt=new Date().toISOString();await commit('updated','planning');toast('Planeamento guardado.');});
+  $('#monthPlanForm').addEventListener('submit',async e=>{e.preventDefault();const open=parseCents($('#openingBalance').value),budget=parseCents($('#monthlyBudget').value);if(!validCents(open,-MAX_MONEY_CENTS)||!validCents(budget,0)){toast('Valores de planeamento inválidos.');return;}const p=monthProfile();p.openingBalanceCents=open;p.budgetCents=budget;p.updatedAt=new Date().toISOString();await commit('updated','planning');toast('Planeamento guardado.');});
   $('#incomeList').addEventListener('click',async e=>{const b=e.target.closest('[data-delete-income]');if(b&&confirm('Eliminar este rendimento?')){if(typeof recordSyncDeletion==='function')recordSyncDeletion('income',b.dataset.deleteIncome);appState.incomes=appState.incomes.filter(x=>x.id!==b.dataset.deleteIncome);await commit('deleted','income');}});
-  $('#marketList').addEventListener('change',async e=>{const t=e.target;if(t.matches('[data-market-toggle]')){const i=appState.market.find(x=>x.id===t.dataset.marketToggle);if(!i)return;i.purchased=t.checked;i.purchasedAt=t.checked?new Date().toISOString():null;i.updatedAt=new Date().toISOString();await commit('updated','market');}if(t.matches('[data-market-actual]')){const i=appState.market.find(x=>x.id===t.dataset.marketActual),v=parseCents(t.value);if(i&&Number.isFinite(v)&&v>=0){i.actualCents=v;i.updatedAt=new Date().toISOString();await saveState();renderMarket();}}});
+  $('#marketList').addEventListener('change',async e=>{const t=e.target;if(t.matches('[data-market-toggle]')){const i=appState.market.find(x=>x.id===t.dataset.marketToggle);if(!i)return;i.purchased=t.checked;i.purchasedAt=t.checked?new Date().toISOString():null;i.updatedAt=new Date().toISOString();await commit('updated','market');}if(t.matches('[data-market-actual]')){const i=appState.market.find(x=>x.id===t.dataset.marketActual),v=parseCents(t.value);if(i&&validCents(v,0)){i.actualCents=v;i.updatedAt=new Date().toISOString();await saveState();renderMarket();}else toast('Preço real inválido.');}});
   $('#marketList').addEventListener('click',async e=>{const b=e.target.closest('[data-delete-market]');if(b&&confirm('Eliminar este item?')){if(typeof recordSyncDeletion==='function')recordSyncDeletion('market',b.dataset.deleteMarket);appState.market=appState.market.filter(x=>x.id!==b.dataset.deleteMarket);await commit('deleted','market');}});
   $('#goalList').addEventListener('click',async e=>{const add=e.target.closest('[data-goal-add]');if(add){openGoalContribution(add.dataset.goalAdd);return;}const ar=e.target.closest('[data-goal-archive]');if(ar&&confirm('Arquivar este objetivo?')){const g=appState.goals.find(x=>x.id===ar.dataset.goalArchive);if(!g)return;g.archived=true;g.updatedAt=new Date().toISOString();await commit('archived','goal');}});
   $('#settingsForm').addEventListener('submit',async e=>{e.preventDefault();appState.settings.profileName=cleanString($('#profileName').value,80);appState.settings.currency=$('#currencySelect').value;appState.settings.theme=$('#themeSelect').value;applyTheme();await commit('updated','settings');toast('Preferências guardadas.');});
@@ -319,7 +324,7 @@ async function enterApp() {
   if ('serviceWorker' in navigator) {
     (async()=>{
       try{
-        const reg=await navigator.serviceWorker.register('./sw.js?v=33',{updateViaCache:'none'});
+        const reg=await navigator.serviceWorker.register('./sw.js?v=34',{updateViaCache:'none'});
         await reg.update().catch(()=>{});
         if(!window.__swReloadBound){
           window.__swReloadBound=true;

@@ -2,6 +2,8 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
+Versão publicada do código: v34. O schema 4 acrescenta cálculos monetários centralizados e histórico financeiro cifrado por fatura.
+
 ## Estado
 
 Projeto em fase inicial com hardening de segurança. Não é versão 1.0 e não deve ser tratado como garantia de segurança absoluta.
@@ -34,6 +36,7 @@ node --check sync.js
 node --check events.js
 node --check sw.js
 node tests/finance.test.cjs
+node tests/audit.test.cjs
 node tests/form-regression.test.cjs
 node tests/security.test.cjs
 node tests/sync.test.cjs

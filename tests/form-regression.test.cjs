@@ -101,6 +101,10 @@ assert.match(forms, /data-edit-payment=/);
 assert.match(forms, /data-delete-payment=/);
 assert.match(forms, /data-remove-excess-payment=/);
 assert.match(forms, /Pagamento excedente detetado/);
+assert.match(forms, /Histórico financeiro/);
+assert.match(forms, /recordBillAudit\(b\.id,'bill-updated'/);
+assert.match(forms, /recordBillAudit\(bill\.id,'bill-created'/);
+assert.match(forms, /recordBillAudit\(b\.id,existing\?'payment-updated':'payment-created'/);
 assert.match(forms, /function openPaymentForm\(id,paymentId=''\)/);
 assert.match(forms, /existing\?'Editar pagamento':'Registar pagamento'/);
 assert.match(forms, /updatedAt:now/);
@@ -108,5 +112,7 @@ assert.match(events, /function deletePaymentRecord\(/);
 assert.match(events, /data-edit-payment/);
 assert.match(events, /data-remove-excess-payment/);
 assert.match(events, /Remover o pagamento mais recente para corrigir o valor excedente/);
+assert.match(events, /recordBillAudit\(bill\.id,'payment-deleted'/);
+assert.match(events, /recordBillAudit\(b\.id,'bill-cancelled'/);
 
 console.log('Payment edit and overpayment repair tests: OK');

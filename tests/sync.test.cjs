@@ -49,6 +49,7 @@ vm.runInContext(`
       market:s?.market||[],
       goals:s?.goals||[],
       activity:s?.activity||[],
+      auditTrail:s?.auditTrail||[],
       security:s?.security||{},
       syncTombstones:s?.syncTombstones||[],
       syncConflicts:s?.syncConflicts||[]
@@ -88,6 +89,12 @@ assert.equal(plain.state.months['2026-09'].openingBalanceCents, 10000);
 assert.equal(plain.state.incomes.length, 1);
 assert.equal(plain.state.market.length, 0);
 assert.equal(plain.conflicts.length, 0);
+
+const auditMerged = vm.runInContext(`mergeAppStates(
+  {settings:{},months:{},bills:[],payments:[],incomes:[],market:[],goals:[],activity:[],auditTrail:[{id:'a1',billId:'b1',action:'bill-created',at:'2026-09-02T10:00:00.000Z'}]},
+  {settings:{},months:{},bills:[],payments:[],incomes:[],market:[],goals:[],activity:[],auditTrail:[{id:'a2',billId:'b1',action:'payment-created',at:'2026-09-02T11:00:00.000Z'}]}
+)`, context);
+assert.deepEqual(JSON.parse(JSON.stringify(auditMerged.state.auditTrail.map(x=>x.id))),['a1','a2']);
 
 console.log('Encrypted sync tests: OK');
 

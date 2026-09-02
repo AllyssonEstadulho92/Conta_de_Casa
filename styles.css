@@ -793,6 +793,19 @@ input:-webkit-autofill:focus{
   color:var(--muted);
   font-size:.68rem;
 }
+
+/* Financial audit trail v34 */
+.audit-trail{display:grid;gap:0}
+.audit-entry{position:relative;display:grid;grid-template-columns:18px minmax(0,1fr);gap:10px;padding:10px 0}
+.audit-entry:not(:last-child)::before{content:"";position:absolute;left:6px;top:25px;bottom:-4px;width:2px;background:var(--border)}
+.audit-dot{position:relative;z-index:1;width:14px;height:14px;margin-top:3px;border:3px solid var(--primary);border-radius:50%;background:var(--surface)}
+.audit-entry>div{min-width:0;display:grid;gap:3px}
+.audit-entry>div>small{color:var(--muted)}
+.audit-changes{display:grid;gap:5px;margin-top:6px}
+.audit-changes p{display:grid;grid-template-columns:minmax(108px,.65fr) minmax(0,1fr);gap:8px;margin:0;padding:7px 9px;border-radius:9px;background:var(--surface-2);font-size:.84rem;line-height:1.35}
+.audit-changes p>span:first-child{color:var(--muted)}
+.audit-changes em{color:var(--muted);font-style:normal}
+@media(max-width:480px){.audit-changes p{grid-template-columns:minmax(0,1fr);gap:2px}}
 .dialog-actions{
   display:flex;
   gap:8px;

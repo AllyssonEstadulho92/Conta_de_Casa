@@ -396,8 +396,8 @@ function mergeById(entity,local=[],remote=[],conflicts=[]) {
     if(lt>rt){ map.set(item.id,syncClone(item)); continue; }
     if(rt>lt) continue;
 
-    // Activity history is non-financial; never block financial sync on an equal-time text normalization difference.
-    if(entity==='activity'){
+    // Append-only histories never block financial sync on an equal-time normalization difference.
+    if(entity==='activity'||entity==='audit'){
       map.set(item.id,chooseCompatibleRecord(entity,item,other));
       continue;
     }
@@ -454,6 +454,7 @@ function mergeAppStates(localState,remoteState) {
   merged.market=mergeById('market',local.market,remote.market,conflicts);
   merged.goals=mergeById('goal',local.goals,remote.goals,conflicts);
   merged.activity=mergeById('activity',local.activity,remote.activity,conflicts).sort((a,b)=>new Date(b.at)-new Date(a.at)).slice(0,300);
+  merged.auditTrail=mergeById('audit',local.auditTrail,remote.auditTrail,conflicts).sort((a,b)=>new Date(a.at)-new Date(b.at)).slice(-2000);
   merged.months=mergeMonths(local.months,remote.months,conflicts);
   merged.syncTombstones=mergeTombstones(local.syncTombstones,remote.syncTombstones);
   merged.settings={...(remote.settings||{}),...(local.settings||{})};

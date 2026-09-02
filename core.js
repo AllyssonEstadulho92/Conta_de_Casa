@@ -3,7 +3,7 @@
 const APP_ID = 'Conta_de_Casa';
 const DB_NAME = 'conta_de_casa_secure';
 const DB_VERSION = 2;
-const STATE_VERSION = 3;
+const STATE_VERSION = 4;
 const BACKUP_FORMAT_VERSION = 2;
 const CHECK_TEXT_CURRENT = 'Conta_de_Casa::vault-check::v2';
 const CHECK_TEXT_LEGACY = 'Conta_de_Casa::vault-check::v1';
@@ -14,6 +14,7 @@ const AUTO_LOCK_MINUTES = 5;
 const HIDDEN_LOCK_GRACE_MS = 60000;
 const ABSOLUTE_IDLE_MAX_MS = 30 * 60000;
 const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
+const MAX_MONEY_CENTS = 1000000000000;
 const ATTACHMENTS_REAL_FILES_ENABLED = false;
 
 let db;
@@ -116,6 +117,9 @@ function money(cents = 0) {
   const fraction = String(abs % 100n).padStart(2, '0');
   const grouped = new Intl.NumberFormat('pt-PT', { useGrouping:true, maximumFractionDigits:0 }).format(units);
   return `${negative?'-':''}${grouped},${fraction} €`;
+}
+function validCents(value, min = 0, max = MAX_MONEY_CENTS) {
+  return Number.isSafeInteger(value) && value >= min && value <= max;
 }
 function pad2(value) { return String(value).padStart(2, '0'); }
 function isLeapYear(year) { return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0); }
@@ -250,7 +254,7 @@ function cleanMultiline(value, max = 1200) {
 function cleanCents(value, fallback = 0, min = 0) {
   const n = Number(value);
   if (!Number.isSafeInteger(n)) return fallback;
-  return clamp(n, min, 1000000000000);
+  return clamp(n, min, MAX_MONEY_CENTS);
 }
 function cleanIso(value, fallback = new Date().toISOString()) {
   const d = new Date(value);
@@ -285,13 +289,43 @@ function normalizeActivityEntry(entry = {}) {
   const type = cleanActivityType(entry.type);
   return { id: cleanString(entry.id || uid(), 80), text: safeActivityText(entry.text, type), type, at: cleanIso(entry.at) };
 }
+const AUDIT_ACTIONS = new Set([
+  'bill-created','bill-updated','bill-duplicated','bill-cancelled','bill-deleted','bill-recurring-created',
+  'payment-created','payment-updated','payment-deleted'
+]);
+const AUDIT_FIELDS = new Set([
+  'title','provider','category','totalCents','dueDate','dueTime','method','recurrence','cancelled',
+  'paymentAmountCents','paymentPaidAt','paymentMethod','paidCents','remainingCents','status'
+]);
+function normalizeAuditValue(value) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return Number.isSafeInteger(value) ? value : null;
+  return cleanString(value, 180);
+}
+function normalizeAuditEntry(entry = {}) {
+  const action = cleanString(entry.action, 40);
+  const changes = Array.isArray(entry.changes) ? entry.changes.slice(0, 20).map(change => ({
+    field: cleanString(change?.field, 40),
+    before: normalizeAuditValue(change?.before),
+    after: normalizeAuditValue(change?.after)
+  })).filter(change => AUDIT_FIELDS.has(change.field) && change.before !== change.after) : [];
+  return {
+    id: cleanString(entry.id || uid(), 80),
+    billId: cleanString(entry.billId, 80),
+    paymentId: entry.paymentId ? cleanString(entry.paymentId, 80) : undefined,
+    action: AUDIT_ACTIONS.has(action) ? action : 'bill-updated',
+    changes,
+    at: cleanIso(entry.at)
+  };
+}
 function normalizeMonths(months = {}) {
   const out = {};
   if (!isPlainObject(months)) return out;
   for (const [month, value] of Object.entries(months)) {
     if (!/^\d{4}-\d{2}$/.test(month) || !isPlainObject(value)) continue;
     out[month] = {
-      openingBalanceCents: cleanCents(value.openingBalanceCents, 0, -1000000000000),
+      openingBalanceCents: cleanCents(value.openingBalanceCents, 0, -MAX_MONEY_CENTS),
       budgetCents: cleanCents(value.budgetCents, 0, 0),
       updatedAt: optionalIso(value.updatedAt)
     };
@@ -396,6 +430,7 @@ function defaultState() {
     market: [],
     goals: [],
     activity: [],
+    auditTrail: [],
     security: { lastBackupAt: null, lastRestoreAt: null },
     syncTombstones: [],
     syncConflicts: [],
@@ -429,6 +464,7 @@ function ensureStateShape(s) {
     market: Array.isArray(s?.market) ? s.market.slice(0, 5000).map(normalizeMarketItem) : [],
     goals: Array.isArray(s?.goals) ? s.goals.slice(0, 1000).map(normalizeGoal) : [],
     activity: Array.isArray(s?.activity) ? s.activity.slice(0, 300).map(normalizeActivityEntry) : [],
+    auditTrail: Array.isArray(s?.auditTrail) ? s.auditTrail.slice(-2000).map(normalizeAuditEntry).filter(entry => entry.billId) : [],
     security: {
       lastBackupAt: optionalIso(s?.security?.lastBackupAt),
       lastRestoreAt: optionalIso(s?.security?.lastRestoreAt)
@@ -776,7 +812,7 @@ async function decryptBackupState(normalized, passphrase) {
   }
 }
 
-const SENSITIVE_STORAGE_PATTERN = /(bill|fatura|invoice|payment|pagamento|income|rendimento|amount|valor|provider|fornecedor|reference|referencia|notes|observa|market|mercado|goal|objetivo|finance|vault|cofre|cipher|backup|pass|senha|pin|key|chave)/i;
+const SENSITIVE_STORAGE_PATTERN = /(bill|fatura|invoice|payment|pagamento|income|rendimento|amount|valor|provider|fornecedor|reference|referencia|notes|observa|market|mercado|goal|objetivo|finance|audit|history|hist[oó]rico|vault|cofre|cipher|backup|pass|senha|pin|key|chave)/i;
 function installStorageGuards() {
   if (typeof Storage === 'undefined' || Storage.prototype.__contaDeCasaGuarded) return;
   const originalSetItem = Storage.prototype.setItem;
