@@ -149,3 +149,16 @@ assert.match(events, /deletePaymentRecord\(/);
 assert.match(events, /Pagamento eliminado\./);
 
 console.log('Payment action visibility tests: OK');
+
+
+assert.match(forms, /function openAccountBalanceForm\(\)/);
+assert.match(forms, /Saldo atual da conta/);
+assert.match(forms, /profile\.accountBalanceCents=balance/);
+assert.match(forms, /profile\.accountBalanceUpdatedAt=now/);
+assert.match(events, /data-update-balance/);
+assert.match(events, /const balanceRaw=\$\('#accountBalance'\)\.value\.trim\(\)/);
+assert.match(events, /p\.accountBalanceCents=balance/);
+assert.match(index, /id="accountBalance"/);
+assert.match(index, /A aplicação não acede automaticamente à conta bancária/);
+
+console.log('Account balance snapshot form tests: OK');
