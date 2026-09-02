@@ -486,8 +486,10 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
     position:sticky;
     top:0;
     z-index:5;
+    flex:0 0 auto;
     background:var(--surface);
   }
+  .dialog-shell>#dialogBody{flex:0 0 auto;min-width:0}
   .dialog input,.dialog select,.dialog textarea{scroll-margin-block:84px 24px}
   .detail-section .list-row{flex-wrap:wrap}
   .detail-section .payment-actions{
