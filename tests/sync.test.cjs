@@ -334,6 +334,18 @@ const monthNoConflict = vm.runInContext(`(()=> {
 })()`, context);
 assert.equal(JSON.parse(JSON.stringify(monthNoConflict)).length,0);
 
+const monthBalanceConflict = vm.runInContext(`(()=>{
+  const conflicts=[];
+  mergeMonths(
+    {'2026-09':{openingBalanceCents:70000,budgetCents:100000,accountBalanceCents:22810,updatedAt:'2026-09-02T22:00:00.000Z'}},
+    {'2026-09':{openingBalanceCents:70000,budgetCents:100000,accountBalanceCents:26238,updatedAt:'2026-09-02T22:00:00.000Z'}},
+    conflicts
+  );
+  return conflicts;
+})()`, context);
+assert.equal(JSON.parse(JSON.stringify(monthBalanceConflict)).length,1);
+assert.match(source,/accountBalanceCents/);
+
 assert.match(source,/Cofre comum ligado · revisão necessária/);
 assert.match(source,/syncConflictRetryBtn/);
 assert.match(source,/Diferenças apenas técnicas são resolvidas automaticamente/);
