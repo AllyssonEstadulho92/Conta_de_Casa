@@ -240,7 +240,27 @@ async function enterApp() {
   installPinRecoveryUi();
   clearPassphraseInputs();
   document.documentElement.classList.add('app-active');
-  $('#vaultScreen').hidden=true; $('#app').hidden=false; $('#monthPicker').value=selectedMonth; renderNav(); applyTheme(); setPrivacy(false); wireEvents(); installSessionLockGuards(); showPage(currentPage()); recordUserActivity();
+
+  $('#vaultScreen').hidden=true;
+  $('#app').hidden=true;
+  $('#monthPicker').value=selectedMonth;
+  renderNav();
+  applyTheme();
+  setPrivacy(false);
+  wireEvents();
+  installSessionLockGuards();
+
+  let startupSyncState='not-configured';
+  if(typeof syncStartupGate==='function'){
+    try{startupSyncState=await syncStartupGate();}
+    catch(_err){startupSyncState='error';}
+  }
+
+  $('#app').hidden=false;
+  const mayShowFinancialData=['synced','offline-paired'].includes(startupSyncState);
+  showPage(mayShowFinancialData?currentPage():'security');
+  recordUserActivity();
+
   if ('serviceWorker' in navigator) {
     (async()=>{
       try{
@@ -258,7 +278,7 @@ async function enterApp() {
       }catch(_err){}
     })();
   }
-  if (typeof startSyncLifecycle === 'function') startSyncLifecycle();
+  if (typeof startSyncLifecycle === 'function') startSyncLifecycle({skipInitial:true});
 }
 async function initVaultUi() {
   installViewportMetrics();
