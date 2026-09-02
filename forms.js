@@ -164,7 +164,7 @@ function openBillDetail(id){
       ${excessWarning}
       <div class="detail-section">
         <div class="detail-section-head"><h3>Pagamentos</h3><small>${payments.length} registo${payments.length===1?'':'s'}</small></div>
-        <div class="stack-list compact">${payments.length?payments.map(p=>`<div class="list-row"><div class="list-main"><strong data-money>${money(p.amountCents)}</strong><small>${fmtDateTime(p.paidAt)} · ${esc(p.method||'')}</small></div><div class="list-side payment-actions"><button class="link-btn" type="button" data-edit-payment="${attr(p.id)}" data-payment-bill="${attr(b.id)}">Editar</button><button class="link-btn danger-text" type="button" data-delete-payment="${attr(p.id)}" data-payment-bill="${attr(b.id)}">Eliminar</button></div></div>`).join(''):empty('Sem pagamentos registados.')}</div>
+        <div class="stack-list compact">${payments.length?payments.map(p=>`<div class="list-row"><div class="list-main"><strong data-money>${money(p.amountCents)}</strong><small>${fmtDateTime(p.paidAt)} · ${esc(p.method||'')}</small></div><div class="list-side payment-actions"><button class="btn secondary" type="button" data-edit-payment="${attr(p.id)}" data-payment-bill="${attr(b.id)}">Editar pagamento</button><button class="btn danger" type="button" data-delete-payment="${attr(p.id)}" data-payment-bill="${attr(b.id)}">Eliminar pagamento</button></div></div>`).join(''):empty('Sem pagamentos registados.')}</div>
       </div>
 
       <div class="detail-section">
@@ -178,7 +178,7 @@ function openBillDetail(id){
         <button class="btn secondary" data-detail-duplicate="${attr(b.id)}">Duplicar</button>
         ${!b.cancelled?`<button class="btn danger" data-detail-cancel="${attr(b.id)}">Cancelar fatura</button>`:''}
         <button class="btn secondary" type="button" data-close-dialog>Fechar</button>
-        <button class="btn danger detail-delete" type="button" data-detail-delete="${attr(b.id)}">Excluir fatura</button>
+        <button class="btn danger detail-delete" type="button" data-detail-delete="${attr(b.id)}">${payments.length?'Excluir fatura e pagamentos':'Excluir fatura'}</button>
       </div>
     </div>`, 'detail');
 }
