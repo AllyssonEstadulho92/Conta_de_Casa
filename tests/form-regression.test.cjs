@@ -128,3 +128,12 @@ assert.match(events, /openMarketForm\(item\)/);
 assert.match(events, /recordSyncDeletion\('market',b\.dataset\.deleteMarket\)/);
 
 console.log('Market edit and deletion regression tests: OK');
+
+
+assert.match(render, /const edit=`<button class="btn secondary" type="button" data-edit-bill=/);
+assert.match(events, /const edit=e\.target\.closest\('\[data-edit-bill\]'\)/);
+assert.match(events, /if\(bill\) openBillForm\(bill\)/);
+assert.match(forms, /if\(id && total<paidForBill\(id\)\)/);
+assert.match(forms, /O valor total não pode ficar abaixo do montante já pago/);
+
+console.log('Paid invoice direct edit regression tests: OK');
