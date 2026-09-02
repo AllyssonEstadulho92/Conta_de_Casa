@@ -60,7 +60,19 @@ function installPinRecoveryUi() {
 }
 let viewportMetricsWired = false;
 let viewportRaf = 0;
+let focusedFieldTimer = 0;
 let sidebarPreference = null;
+
+function keepFocusedDialogFieldVisible(delay=80) {
+  clearTimeout(focusedFieldTimer);
+  const active=document.activeElement;
+  if(!active?.matches?.('#formDialog input, #formDialog select, #formDialog textarea')) return;
+  focusedFieldTimer=setTimeout(()=>{
+    if(active.isConnected && document.activeElement===active){
+      active.scrollIntoView({block:'center',inline:'nearest',behavior:'auto'});
+    }
+  },delay);
+}
 
 function updateViewportMetrics() {
   cancelAnimationFrame(viewportRaf);
@@ -89,9 +101,21 @@ function installViewportMetrics() {
   updateViewportMetrics();
   window.addEventListener('resize',()=>{updateViewportMetrics();updateAdaptiveNavigation();},{passive:true});
   window.addEventListener('orientationchange',()=>{updateViewportMetrics();updateAdaptiveNavigation();},{passive:true});
+  document.addEventListener('focusin',e=>{
+    if(!e.target?.matches?.('#formDialog input, #formDialog select, #formDialog textarea')) return;
+    updateViewportMetrics();
+    keepFocusedDialogFieldVisible(80);
+    keepFocusedDialogFieldVisible(320);
+  });
   if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', updateViewportMetrics, { passive:true });
-    window.visualViewport.addEventListener('scroll', updateViewportMetrics, { passive:true });
+    window.visualViewport.addEventListener('resize',()=>{
+      updateViewportMetrics();
+      keepFocusedDialogFieldVisible(120);
+    },{passive:true});
+    window.visualViewport.addEventListener('scroll',()=>{
+      updateViewportMetrics();
+      keepFocusedDialogFieldVisible(60);
+    },{passive:true});
   }
 }
 
@@ -241,6 +265,12 @@ function wireEvents(){
   $('#billsList').addEventListener('click',async e=>{
     const clear=e.target.closest('[data-clear-bill-filters]');
     if(clear){clearBillFilters();return;}
+    const edit=e.target.closest('[data-edit-bill]');
+    if(edit){
+      const bill=appState.bills.find(x=>x.id===edit.dataset.editBill);
+      if(bill) openBillForm(bill);
+      return;
+    }
     const pay=e.target.closest('[data-pay-bill]');
     if(pay){openPaymentForm(pay.dataset.payBill);return;}
     const del=e.target.closest('[data-delete-bill]');
@@ -413,7 +443,7 @@ async function enterApp() {
   if ('serviceWorker' in navigator) {
     (async()=>{
       try{
-        const reg=await navigator.serviceWorker.register('./sw.js?v=40',{updateViaCache:'none'});
+        const reg=await navigator.serviceWorker.register('./sw.js?v=41',{updateViaCache:'none'});
         await reg.update().catch(()=>{});
         if(!window.__swReloadBound){
           window.__swReloadBound=true;
