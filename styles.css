@@ -1086,3 +1086,9 @@ html.keyboard-open .fab{
   .payment-integrity-alert .btn{width:100%}
   .payment-actions{justify-content:flex-start}
 }
+
+
+.sync-conflict-review{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;border:1px solid var(--border);border-radius:16px;background:var(--warning-bg)}
+.sync-conflict-review h3{margin:0 0 6px}
+.sync-conflict-review p{margin:0}
+@media(max-width:820px){.sync-conflict-review{align-items:stretch;flex-direction:column}.sync-conflict-review .btn{width:100%}}

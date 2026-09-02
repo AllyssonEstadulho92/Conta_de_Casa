@@ -236,3 +236,43 @@ assert.doesNotMatch(renderSyncUiSource, /if\(header\)\{\s*const state=syncLastSt
 assert.match(renderSyncUiSource, /localOnly\?'Ligação ao cofre necessária'/);
 
 console.log('Sync render scope regression tests: OK');
+
+
+const safeConflict = vm.runInContext(`(()=> {
+  const conflicts=[];
+  const merged=mergeById('bill',
+    [{id:'b1',title:'Luz',totalCents:4096,dueDate:'2026-09-08',dueTime:'13:17',dueAt:'2026-09-08T12:17:00.000Z',updatedAt:'2026-09-01T10:00:00.000Z'}],
+    [{id:'b1',title:'Luz',totalCents:4096,dueDate:'2026-09-08',dueTime:'13:17',dueAt:'2026-09-08T13:17:00.000Z',updatedAt:'2026-09-01T10:00:00.000Z'}],
+    conflicts
+  );
+  return {conflicts,merged};
+})()`, context);
+assert.equal(JSON.parse(JSON.stringify(safeConflict)).conflicts.length,0);
+
+const trueConflict = vm.runInContext(`(()=> {
+  const conflicts=[];
+  mergeById('payment',
+    [{id:'p1',billId:'b1',amountCents:4096,paidAt:'2026-09-02T01:00:00.000Z',method:'Cartão',updatedAt:'2026-09-02T02:00:00.000Z'}],
+    [{id:'p1',billId:'b1',amountCents:5000,paidAt:'2026-09-02T01:00:00.000Z',method:'Cartão',updatedAt:'2026-09-02T02:00:00.000Z'}],
+    conflicts
+  );
+  return conflicts;
+})()`, context);
+assert.equal(JSON.parse(JSON.stringify(trueConflict)).length,1);
+
+const monthNoConflict = vm.runInContext(`(()=> {
+  const conflicts=[];
+  mergeMonths(
+    {'2026-09':{openingBalanceCents:70000,budgetCents:100000,updatedAt:null}},
+    {'2026-09':{openingBalanceCents:70000,budgetCents:100000,updatedAt:'2026-09-02T01:00:00.000Z'}},
+    conflicts
+  );
+  return conflicts;
+})()`, context);
+assert.equal(JSON.parse(JSON.stringify(monthNoConflict)).length,0);
+
+assert.match(source,/Cofre comum ligado · revisão necessária/);
+assert.match(source,/syncConflictRetryBtn/);
+assert.match(source,/Diferenças apenas técnicas são resolvidas automaticamente/);
+
+console.log('Safe conflict auto-reconciliation tests: OK');

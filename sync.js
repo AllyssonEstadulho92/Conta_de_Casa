@@ -17,6 +17,7 @@ let syncLifecycleInstalled = false;
 let syncControlsWired = false;
 let syncLastStatus = { state:'not-configured', message:'Sincronização não configurada.', at:null };
 let syncRemoteCandidate = null;
+let syncActiveConflicts = [];
 let syncPending = false;
 let syncRetryTimer = null;
 let syncRetryAttempt = 0;
@@ -106,7 +107,7 @@ function syncStatusLabel(state) {
     'syncing':'A sincronizar',
     'synced':'Sincronizado',
     'offline':'Offline',
-    'conflict':'Conflito',
+    'conflict':'Revisão necessária',
     'vault-mismatch':'Cofre remoto diferente',
     'error':'Erro'
   })[state] || 'Estado desconhecido';
@@ -115,8 +116,8 @@ function syncStatusLabel(state) {
 function syncStatusClass(state) {
   if (state === 'synced') return 'paid';
   if (state === 'syncing') return 'partial';
-  if (state === 'offline') return 'attention';
-  if (state === 'conflict' || state === 'vault-mismatch' || state === 'error') return 'overdue';
+  if (state === 'offline' || state === 'conflict') return 'attention';
+  if (state === 'vault-mismatch' || state === 'error') return 'overdue';
   return 'normal';
 }
 
@@ -326,7 +327,7 @@ async function decryptRemoteState(remote) {
 }
 
 function syncItemTime(item) {
-  const candidates=[item?.updatedAt,item?.deletedAt,item?.paidAt,item?.receivedAt,item?.purchasedAt,item?.createdAt];
+  const candidates=[item?.updatedAt,item?.deletedAt,item?.paidAt,item?.receivedAt,item?.purchasedAt,item?.createdAt,item?.at];
   for(const value of candidates){
     const t=new Date(value||0).getTime();
     if(Number.isFinite(t)&&t>0) return t;
@@ -336,6 +337,33 @@ function syncItemTime(item) {
 
 function syncClone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function syncBusinessView(entity,item) {
+  const out=syncClone(item||{});
+  delete out.updatedAt;
+  delete out.createdAt;
+  if(entity==='bill' && out.dueDate && out.dueTime) delete out.dueAt;
+  if(entity==='activity') return {id:out.id||'',text:out.text||'',type:out.type||'',at:out.at||''};
+  return out;
+}
+
+function syncRecordsEquivalent(entity,a,b) {
+  return canonicalize(syncBusinessView(entity,a))===canonicalize(syncBusinessView(entity,b));
+}
+
+function syncRecordCompleteness(item) {
+  return Object.values(item||{}).reduce((score,value)=>score+(value!==undefined&&value!==null&&value!==''?1:0),0);
+}
+
+function chooseCompatibleRecord(entity,a,b) {
+  const at=syncItemTime(a), bt=syncItemTime(b);
+  if(at>bt) return syncClone(a);
+  if(bt>at) return syncClone(b);
+  const as=syncRecordCompleteness(a), bs=syncRecordCompleteness(b);
+  if(as>bs) return syncClone(a);
+  if(bs>as) return syncClone(b);
+  return canonicalize(a)>=canonicalize(b)?syncClone(a):syncClone(b);
 }
 
 function mergeTombstones(a=[],b=[]) {
@@ -357,9 +385,23 @@ function mergeById(entity,local=[],remote=[],conflicts=[]) {
     const other=map.get(item.id);
     if(!other){ map.set(item.id,syncClone(item)); continue; }
     if(canonicalize(item)===canonicalize(other)) continue;
+
+    // Schema/metadata-only differences are safe to reconcile automatically.
+    if(syncRecordsEquivalent(entity,item,other)){
+      map.set(item.id,chooseCompatibleRecord(entity,item,other));
+      continue;
+    }
+
     const lt=syncItemTime(item), rt=syncItemTime(other);
     if(lt>rt){ map.set(item.id,syncClone(item)); continue; }
     if(rt>lt) continue;
+
+    // Activity history is non-financial; never block financial sync on an equal-time text normalization difference.
+    if(entity==='activity'){
+      map.set(item.id,chooseCompatibleRecord(entity,item,other));
+      continue;
+    }
+
     conflicts.push({entity,id:item.id,at:new Date().toISOString(),local:syncClone(item),remote:syncClone(other)});
     map.set(item.id,syncClone(item));
   }
@@ -383,6 +425,14 @@ function mergeMonths(localMonths={},remoteMonths={},conflicts=[]) {
     const rp=out[month];
     if(!rp){out[month]=syncClone(lp);continue;}
     if(canonicalize(lp)===canonicalize(rp)) continue;
+
+    const sameBusiness=Number(lp.openingBalanceCents||0)===Number(rp.openingBalanceCents||0)
+      && Number(lp.budgetCents||0)===Number(rp.budgetCents||0);
+    if(sameBusiness){
+      out[month]=chooseCompatibleRecord('month',lp,rp);
+      continue;
+    }
+
     const lt=new Date(lp.updatedAt||0).getTime()||0;
     const rt=new Date(rp.updatedAt||0).getTime()||0;
     if(lt>rt){out[month]=syncClone(lp);continue;}
@@ -409,8 +459,13 @@ function mergeAppStates(localState,remoteState) {
   merged.settings={...(remote.settings||{}),...(local.settings||{})};
   merged.settings.sync={...(remote.settings?.sync||{}),...(local.settings?.sync||{})};
   merged.security={...(remote.security||{}),...(local.security||{})};
-  const previous=[...(remote.syncConflicts||[]),...(local.syncConflicts||[])];
-  merged.syncConflicts=[...previous,...conflicts].slice(-50);
+  const historyMap=new Map();
+  for(const entry of [...(remote.syncConflicts||[]),...(local.syncConflicts||[]),...conflicts]){
+    if(!entry?.entity||!entry?.id) continue;
+    const key=`${entry.entity}:${entry.id}:${entry.at||''}`;
+    if(!historyMap.has(key)) historyMap.set(key,syncClone(entry));
+  }
+  merged.syncConflicts=[...historyMap.values()].slice(-50);
   applyTombstones(merged);
   return {state:ensureStateShape(merged),conflicts};
 }
@@ -600,14 +655,15 @@ async function syncNow(reason='manual') {
     const mergedDigest=await syncDigest(merged.state);
 
     if(merged.conflicts.length){
+      syncActiveConflicts=merged.conflicts;
       syncSuppressAuto=true;
       try{
         appState=merged.state;
         await saveState();
       } finally { syncSuppressAuto=false; }
-      await saveSyncDeviceMeta({lastRemoteSha:remote.sha,lastRevision:remote.revision,lastSyncedAt:new Date().toISOString()});
+      await saveSyncDeviceMeta({lastRemoteSha:remote.sha,lastRevision:remote.revision,lastConflictAt:new Date().toISOString()});
       clearSyncRetry();
-      syncSetStatus('conflict',`${merged.conflicts.length} conflito(s) preservado(s). Nenhuma versão foi apagada silenciosamente.`);
+      syncSetStatus('conflict',`${merged.conflicts.length} alteração(ões) simultânea(s) precisa(m) de revisão. Os dois dispositivos continuam no mesmo cofre e nenhum dado foi apagado.`);
       return 'conflict';
     }
 
@@ -636,6 +692,7 @@ async function syncNow(reason='manual') {
     }
 
     syncRemoteCandidate=null;
+    syncActiveConflicts=[];
     clearSyncRetry();
     syncSetStatus('synced','Web e móvel estão alinhados com o cofre cifrado remoto.');
     return 'synced';
@@ -778,14 +835,30 @@ async function renderSyncUi() {
   if($('#syncHealthLocal')) $('#syncHealthLocal').textContent='Protegido neste dispositivo';
   if($('#syncHealthRemote')) $('#syncHealthRemote').textContent=
     syncLastStatus.state==='synced'?'Cofre remoto alinhado':
+    syncLastStatus.state==='conflict'?'Cofre comum ligado · revisão necessária':
     mismatch?'Cofre remoto encontrado — união necessária':
     token?'Credencial pronta; a verificar remoto':'Ainda não ligado ao remoto';
   const paired=Boolean(meta?.pairedAt && meta?.lastRemoteSha);
   if($('#syncHealthMode')) $('#syncHealthMode').textContent=
     syncLastStatus.state==='synced'?'Automático · cofre comum':
+    syncLastStatus.state==='conflict'?'Automático · dados preservados':
     syncLastStatus.state==='offline'&&paired?'Offline · última cópia confirmada':
     localOnly?'Ligação ao cofre necessária':
     syncStatusLabel(syncLastStatus.state);
+
+  const conflictBox=$('#syncConflictBox');
+  if(conflictBox){
+    const active=syncLastStatus.state==='conflict';
+    conflictBox.hidden=!active;
+    if(active){
+      const labels={bill:'fatura',payment:'pagamento',income:'rendimento',market:'mercado',goal:'objetivo',month:'planeamento'};
+      const names=[...new Set(syncActiveConflicts.map(c=>labels[c.entity]||'registo'))];
+      const summary=$('#syncConflictSummary');
+      if(summary) summary.textContent=syncActiveConflicts.length
+        ? `${syncActiveConflicts.length} alteração(ões) simultânea(s) em ${names.join(', ')}. Diferenças apenas técnicas são resolvidas automaticamente; só diferenças reais ficam para revisão.`
+        : 'Foi detetada uma alteração simultânea. Os dados continuam preservados.';
+    }
+  }
 }
 
 function setSyncActionMessage(message,type='') {
@@ -916,6 +989,7 @@ function wireSyncControls() {
   $('#syncToken')?.addEventListener('paste',()=>setTimeout(scheduleCredentialAutoSetup,0));
   $('#syncToken')?.addEventListener('blur',scheduleCredentialAutoSetup);
   $('#syncNowBtn')?.addEventListener('click',manualSyncFromUi);
+  $('#syncConflictRetryBtn')?.addEventListener('click',manualSyncFromUi);
   $('#syncResolveBtn')?.addEventListener('click',async()=>{
     const btn=$('#syncResolveBtn');
     const pin=$('#syncResolvePin');
