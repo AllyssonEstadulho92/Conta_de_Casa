@@ -18,9 +18,11 @@ Aplicação financeira doméstica pessoal, mensal e local-first, para saber quan
 
 ## Navegação
 
-Desktop: Início, Faturas, Calendário, Planeamento, Mercado, Relatórios, Objetivos, Segurança, Configurações.
+Desktop: sidebar agrupada e recolhível. Destinos principais: Início; Finanças — Faturas e Planeamento; Compras — Lista de compras; Análise — Relatórios; Sistema — Segurança e sincronização e Definições.
 
-Mobile: Início, Faturas, botão +, Planeamento, Mais.
+Calendário é uma vista de Faturas, Objetivos é uma vista de Planeamento e Integridade é uma vista de Definições.
+
+Mobile: drawer com a navegação completa e acesso rápido a Início, Faturas, Compras e Relatórios.
 
 ## Entidades v1
 
@@ -228,6 +230,42 @@ Permitir que web ou telemóvel resolvam cada conflito real de forma explícita, 
 - uma alteração remota concorrente bloqueia o envio da decisão antiga;
 - o cache, os assets e a versão mostrada na interface usam v35;
 - todos os testes anteriores e o novo teste de execução da sincronização passam antes da publicação.
+
+## Prompt de Projeto — v36 Redesign estrutural, fase 1
+
+### Problema confirmado
+
+- dez destinos no mesmo nível tornam difícil perceber a estrutura da aplicação;
+- Calendário, Objetivos e Diagnóstico competem com tarefas financeiras principais;
+- a sidebar não pode ser recolhida e o mobile usa um modal “Mais” em vez de um drawer;
+- estilos responsivos acumulados não constituem um sistema visual único.
+
+### Objetivo
+
+Criar a fundação de navegação e design responsivo aprovada na auditoria, preservando integralmente os dados, cálculos, segurança e sincronização da v35.
+
+### Regras funcionais e técnicas
+
+- agrupar a navegação em Principal, Finanças, Compras, Análise e Sistema;
+- manter no menu apenas destinos que já funcionam;
+- tratar Calendário, Objetivos e Integridade como vistas secundárias das respetivas áreas;
+- permitir recolher a sidebar para uma rail com tooltips nativos;
+- usar drawer modal no mobile, com Escape, backdrop, foco e rótulos acessíveis;
+- manter quatro destinos frequentes na navegação inferior mobile;
+- centralizar os novos tokens e regras do shell em `design-system.css`;
+- garantir contraste WCAG AA para texto secundário e estados semânticos;
+- não alterar `STATE_VERSION`, entidades financeiras, cifragem, backup ou protocolo de sincronização.
+
+### Critérios de aceitação v36 fase 1
+
+- todas as páginas existentes continuam acessíveis;
+- a rota ativa atualiza título, contexto, tabs e `aria-current`;
+- sidebar expandida, rail, drawer e navegação inferior funcionam sem duplicar IDs;
+- controlos principais possuem alvo mínimo de 44 px;
+- estados semânticos cumprem contraste mínimo de 4,5:1 nos dois temas;
+- o cache e todas as referências de assets usam v36;
+- testes financeiros, segurança, sincronização e regressão anteriores continuam a passar;
+- CI inclui validações próprias de arquitetura da informação e acessibilidade.
 
 ## Roadmap
 

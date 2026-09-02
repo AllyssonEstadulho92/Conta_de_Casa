@@ -1,5 +1,29 @@
 # Changelog
 
+## v36 — fundação visual e navegação adaptativa
+
+### Arquitetura da informação
+- navegação principal agrupada em Principal, Finanças, Compras, Análise e Sistema;
+- Calendário passa a ser uma vista de Faturas;
+- Objetivos passa a ser uma vista de Planeamento;
+- Integridade passa a ser uma vista de Definições;
+- remoção do antigo modal móvel “Mais”.
+
+### Navegação e sistema visual
+- sidebar de 248 px recolhível para navigation rail de 76 px;
+- rail automático em ecrãs intermédios;
+- drawer completo no mobile e acesso rápido com quatro destinos;
+- ação Adicionar colocada na app bar;
+- contexto e título de página separados;
+- tokens de superfície, tipografia, espaçamento, radius, contraste e tema escuro reunidos em `design-system.css`;
+- `aria-current`, tabs acessíveis, foco e redução de movimento preservados.
+
+### Segurança e compatibilidade
+- schema financeiro e formato do cofre continuam na versão 5;
+- nenhuma alteração no motor financeiro ou protocolo de sincronização;
+- novo cache público v36 inclui a fundação visual;
+- testes específicos de navegação e contraste adicionados ao CI.
+
 ## v35 — resolução de conflitos de sincronização
 
 ### Reconciliação assistida

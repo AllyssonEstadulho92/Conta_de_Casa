@@ -60,6 +60,7 @@ function installPinRecoveryUi() {
 }
 let viewportMetricsWired = false;
 let viewportRaf = 0;
+let sidebarPreference = null;
 
 function updateViewportMetrics() {
   cancelAnimationFrame(viewportRaf);
@@ -86,12 +87,48 @@ function installViewportMetrics() {
   if (viewportMetricsWired) return;
   viewportMetricsWired = true;
   updateViewportMetrics();
-  window.addEventListener('resize', updateViewportMetrics, { passive:true });
-  window.addEventListener('orientationchange', updateViewportMetrics, { passive:true });
+  window.addEventListener('resize',()=>{updateViewportMetrics();updateAdaptiveNavigation();},{passive:true});
+  window.addEventListener('orientationchange',()=>{updateViewportMetrics();updateAdaptiveNavigation();},{passive:true});
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', updateViewportMetrics, { passive:true });
     window.visualViewport.addEventListener('scroll', updateViewportMetrics, { passive:true });
   }
+}
+
+function setSidebarCollapsed(collapsed) {
+  const value=Boolean(collapsed);
+  document.documentElement.classList.toggle('sidebar-collapsed',value);
+  const button=$('#sidebarToggle');
+  if(button){
+    button.setAttribute('aria-expanded',String(!value));
+    button.setAttribute('aria-label',value?'Expandir menu lateral':'Recolher menu lateral');
+    button.title=value?'Expandir menu lateral':'Recolher menu lateral';
+  }
+}
+
+function updateAdaptiveNavigation() {
+  const mobile=window.matchMedia('(max-width: 820px)').matches;
+  const compact=window.matchMedia('(min-width: 821px) and (max-width: 1180px)').matches;
+  if(!mobile)setSidebarCollapsed(sidebarPreference===null?compact:sidebarPreference);
+  const drawer=$('#mobileDrawer');
+  if(!mobile&&drawer?.open)drawer.close();
+}
+
+function openMobileDrawer() {
+  const drawer=$('#mobileDrawer');
+  if(!drawer||drawer.open)return;
+  drawer.showModal();
+  $('#mobileMenuBtn')?.setAttribute('aria-expanded','true');
+  requestAnimationFrame(()=>drawer.classList.add('open'));
+}
+
+function closeMobileDrawer() {
+  const drawer=$('#mobileDrawer');
+  if(!drawer?.open)return;
+  drawer.classList.remove('open');
+  drawer.close();
+  $('#mobileMenuBtn')?.setAttribute('aria-expanded','false');
+  $('#mobileMenuBtn')?.focus({preventScroll:true});
 }
 
 function billDeletionScope(rootId) {
@@ -156,17 +193,30 @@ function wireEvents(){
   if (eventsWired) return;
   eventsWired = true;
   $('#desktopNav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)showPage(b.dataset.page);});
-  $('#mobileNav').addEventListener('click',e=>{const b=e.target.closest('[data-mobile]');if(!b)return;if(b.dataset.mobile==='add')$('#quickDialog').showModal();else if(b.dataset.mobile==='more')openMoreMenu();else showPage(b.dataset.mobile);});
+  $('#drawerNav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)showPage(b.dataset.page);});
+  $('#mobileNav').addEventListener('click',e=>{const b=e.target.closest('[data-mobile]');if(b)showPage(b.dataset.mobile);});
+  $('#sidebarToggle').addEventListener('click',()=>{
+    sidebarPreference=!document.documentElement.classList.contains('sidebar-collapsed');
+    setSidebarCollapsed(sidebarPreference);
+  });
+  $('#mobileMenuBtn').addEventListener('click',openMobileDrawer);
+  $('#drawerCloseBtn').addEventListener('click',closeMobileDrawer);
+  $('#mobileDrawer').addEventListener('click',e=>{if(e.target===$('#mobileDrawer'))closeMobileDrawer();});
+  $('#mobileDrawer').addEventListener('cancel',e=>{e.preventDefault();closeMobileDrawer();});
+  $('#mobileDrawer').addEventListener('close',()=>{
+    $('#mobileDrawer').classList.remove('open');
+    $('#mobileMenuBtn')?.setAttribute('aria-expanded','false');
+  });
   $('#quickAddBtn').addEventListener('click',()=>$('#quickDialog').showModal());
   document.addEventListener('click',e=>{
     const go=e.target.closest('[data-go]');
     if(go) showPage(go.dataset.go);
+    const tab=e.target.closest('.section-tab[data-page]');
+    if(tab)showPage(tab.dataset.page);
     const close=e.target.closest('[data-close-dialog]');
     if(close){e.preventDefault();closeDialog();return;}
     const closeQuick=e.target.closest('[data-close-quick-dialog]');
     if(closeQuick){e.preventDefault();const q=$('#quickDialog');if(q?.open)q.close();return;}
-    const more=e.target.closest('[data-more-page]');
-    if(more){closeDialog();showPage(more.dataset.morePage);}
   });
   $('#quickDialog').addEventListener('click',e=>{
     if(e.target===$('#quickDialog')){$('#quickDialog').close();return;}
@@ -288,7 +338,8 @@ function wireEvents(){
   }
   $('#themeToggle').addEventListener('click',async()=>{appState.settings.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';applyTheme();$('#themeSelect').value=appState.settings.theme;await saveState();});
   $('#privacyToggle').addEventListener('click',()=>setPrivacy(!privacyHidden));
-  $('#lockBtn').addEventListener('click',()=>lockApp('manual')); $('#securityLockBtn').addEventListener('click',()=>lockApp('manual'));
+  $('#drawerPrivacyToggle').addEventListener('click',()=>setPrivacy(!privacyHidden));
+  $('#lockBtn').addEventListener('click',()=>lockApp('manual')); $('#drawerLockBtn').addEventListener('click',()=>lockApp('manual')); $('#securityLockBtn').addEventListener('click',()=>lockApp('manual'));
   $('#exportBackupBtn').addEventListener('click',exportBackup); $('#importBackupInput').addEventListener('change',async e=>{try{if(e.target.files[0])await importBackup(e.target.files[0]);}catch(err){$('#backupMessage').textContent=safeUserError(err);$('#backupMessage').className='form-message error';}finally{e.target.value='';}});
   $('#resetDataBtn').addEventListener('click',async()=>{if(confirm('ATENÇÃO: isto apaga definitivamente o cofre e todos os dados deste dispositivo. Continuar?')){await idbClearAll();location.reload();}});
   $('#notificationsBtn').addEventListener('click',()=>{showPage('dashboard');toast('Os alertas importantes aparecem no topo do Início.');});
@@ -305,6 +356,7 @@ async function enterApp() {
   $('#app').hidden=true;
   $('#monthPicker').value=selectedMonth;
   renderNav();
+  updateAdaptiveNavigation();
   applyTheme();
   setPrivacy(false);
   wireEvents();
@@ -324,7 +376,7 @@ async function enterApp() {
   if ('serviceWorker' in navigator) {
     (async()=>{
       try{
-        const reg=await navigator.serviceWorker.register('./sw.js?v=35',{updateViaCache:'none'});
+        const reg=await navigator.serviceWorker.register('./sw.js?v=36',{updateViaCache:'none'});
         await reg.update().catch(()=>{});
         if(!window.__swReloadBound){
           window.__swReloadBound=true;

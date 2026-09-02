@@ -6,14 +6,15 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.github.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; media-src 'none'; manifest-src 'self'; worker-src 'self'" />
   <meta name="referrer" content="no-referrer" />
   <meta name="theme-color" content="#f7f9fc" />
-  <meta name="app-build" content="v35" />
+  <meta name="app-build" content="v36" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Conta de Casa" />
   <meta name="description" content="Conta de Casa — gestão privada de faturas e despesas domésticas." />
-  <link rel="manifest" href="./manifest.webmanifest?v=35" />
+  <link rel="manifest" href="./manifest.webmanifest?v=36" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=35" />
+  <link rel="stylesheet" href="./styles.css?v=36" />
+  <link rel="stylesheet" href="./design-system.css?v=36" />
   <title>Conta de Casa</title>
 </head>
 <body>
@@ -52,23 +53,34 @@
   </div>
 
   <div id="app" class="app-shell" hidden>
-    <aside class="sidebar">
-      <div class="brand"><span class="brand-mark">⌂</span><div><strong>Conta de Casa</strong><small>Finanças pessoais</small></div></div>
+    <aside id="appSidebar" class="sidebar" aria-label="Navegação da aplicação">
+      <div class="sidebar-head">
+        <div class="brand"><span class="brand-mark">⌂</span><div class="brand-copy"><strong>Conta de Casa</strong><small>Finanças pessoais</small></div></div>
+        <button id="sidebarToggle" class="icon-btn sidebar-toggle" type="button" aria-label="Recolher menu lateral" aria-controls="appSidebar" aria-expanded="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
       <nav id="desktopNav" class="nav-list" aria-label="Navegação principal"></nav>
       <div class="sidebar-footer">
-        <button id="privacyToggle" class="icon-text-btn" type="button">◉ <span>Ocultar valores</span></button>
-        <button id="lockBtn" class="icon-text-btn" type="button">⌁ <span>Bloquear</span></button>
+        <button id="privacyToggle" class="icon-text-btn" type="button" aria-label="Ocultar valores"><span class="footer-icon" aria-hidden="true">◉</span><span class="action-label">Ocultar valores</span></button>
+        <button id="lockBtn" class="icon-text-btn" type="button"><span class="footer-icon" aria-hidden="true">⌁</span><span class="action-label">Bloquear</span></button>
       </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
-        <div><p class="eyebrow">Conta de Casa</p><h1 id="pageTitle">Início</h1></div>
+        <div class="topbar-leading">
+          <button id="mobileMenuBtn" class="icon-btn mobile-menu-btn" type="button" aria-label="Abrir menu" aria-controls="mobileDrawer" aria-expanded="false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+          <div class="page-heading"><p id="pageContext" class="eyebrow">Visão geral</p><h1 id="pageTitle">Início</h1></div>
+        </div>
         <div class="topbar-actions">
-          <label class="month-picker" aria-label="Mês em análise"><input id="monthPicker" type="month" /></label>
+          <label class="month-picker"><span class="sr-only">Mês em análise</span><input id="monthPicker" type="month" aria-label="Mês em análise" /></label>
           <button id="syncHeaderStatus" class="sync-header-status normal" type="button" aria-label="Estado da sincronização" title="Sincronização não configurada"><span class="sync-dot" aria-hidden="true"></span><span class="sync-header-text">Local</span></button>
+          <button id="quickAddBtn" class="btn primary topbar-create" type="button" aria-label="Adicionar registo"><span aria-hidden="true">+</span><span class="topbar-create-label">Adicionar</span></button>
           <button id="themeToggle" class="icon-btn" type="button" aria-label="Alternar tema">☼</button>
-          <button id="notificationsBtn" class="icon-btn" type="button" aria-label="Alertas">♢<span id="alertBadge" class="badge-dot" hidden></span></button>
+          <button id="notificationsBtn" class="icon-btn" type="button" aria-label="Ver alertas no Início" title="Ver alertas no Início"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span id="alertBadge" class="badge-dot" hidden></span></button>
         </div>
       </header>
 
@@ -83,6 +95,7 @@
       </section>
 
       <section id="page-bills" class="page">
+        <nav class="section-tabs" aria-label="Vistas de faturas"><button class="section-tab" type="button" data-page="bills">Lista de faturas</button><button class="section-tab" type="button" data-page="calendar">Calendário</button></nav>
         <div class="section-toolbar bill-toolbar">
           <div class="search-wrap"><label class="sr-only" for="billSearch">Pesquisar faturas</label><input id="billSearch" type="search" placeholder="Pesquisar faturas..." /></div>
           <select id="billStatusFilter" aria-label="Filtrar por estado"><option value="all">Todos os estados</option><option value="pending">Por pagar</option><option value="partial">Pago parcialmente</option><option value="paid">Pago</option><option value="overdue">Em atraso</option><option value="due-today">Vence hoje</option><option value="cancelled">Cancelado</option><option value="invalid">Dados inválidos</option></select>
@@ -94,11 +107,11 @@
           <button id="newBillBtn" class="btn primary" type="button">+ Nova fatura</button>
         </div>
         <div id="billSummary" class="mini-summary"></div><div id="billsList" class="cards-list"></div></section>
-      <section id="page-calendar" class="page"><article class="panel"><div class="panel-head"><div><h2>Calendário financeiro</h2><p>Vencimentos e pagamentos do mês.</p></div></div><div id="calendarGrid" class="calendar-grid"></div><div id="calendarAgenda" class="stack-list"></div></article></section>
-      <section id="page-planning" class="page"><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Planeamento mensal</h2><p>Defina saldo inicial e orçamento do período.</p></div></div><form id="monthPlanForm" class="form-grid"><label>Saldo inicial<input id="openingBalance" inputmode="decimal" placeholder="0,00" /></label><label>Orçamento do mês<input id="monthlyBudget" inputmode="decimal" placeholder="0,00" /></label><button class="btn primary" type="submit">Guardar planeamento</button></form></article><article class="panel"><div class="panel-head"><div><h2>Rendimentos</h2><p>Salários, reembolsos e outras entradas.</p></div><button id="newIncomeBtn" class="btn secondary">+ Rendimento</button></div><div id="incomeList" class="stack-list"></div></article></div></section>
+      <section id="page-calendar" class="page"><nav class="section-tabs" aria-label="Vistas de faturas"><button class="section-tab" type="button" data-page="bills">Lista de faturas</button><button class="section-tab" type="button" data-page="calendar">Calendário</button></nav><article class="panel"><div class="panel-head"><div><h2>Vencimentos do mês</h2><p>Vencimentos e pagamentos organizados por data.</p></div></div><div id="calendarGrid" class="calendar-grid"></div><div id="calendarAgenda" class="stack-list"></div></article></section>
+      <section id="page-planning" class="page"><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Planeamento mensal</h2><p>Defina saldo inicial e orçamento do período.</p></div></div><form id="monthPlanForm" class="form-grid"><label>Saldo inicial<input id="openingBalance" inputmode="decimal" placeholder="0,00" /></label><label>Orçamento do mês<input id="monthlyBudget" inputmode="decimal" placeholder="0,00" /></label><button class="btn primary" type="submit">Guardar planeamento</button></form></article><article class="panel"><div class="panel-head"><div><h2>Rendimentos</h2><p>Salários, reembolsos e outras entradas.</p></div><button id="newIncomeBtn" class="btn secondary">+ Rendimento</button></div><div id="incomeList" class="stack-list"></div></article></div></section>
       <section id="page-market" class="page"><div class="section-toolbar"><div><h2>Mercado</h2><p class="muted">Lista → comprado, com preço previsto e real.</p></div><button id="newMarketBtn" class="btn primary">+ Adicionar item</button></div><div id="marketSummary" class="mini-summary"></div><div id="marketList" class="market-list"></div></section>
       <section id="page-reports" class="page"><div id="reportCards" class="kpi-grid"></div><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Por categoria</h2><p>Distribuição do mês.</p></div></div><div id="reportCategoryBars" class="bar-list"></div></article><article class="panel"><div class="panel-head"><div><h2>Últimos 6 meses</h2><p>Pagamentos e compras efetivas.</p></div></div><div id="monthlyTrend" class="trend-chart"></div></article></div></section>
-      <section id="page-goals" class="page"><div class="section-toolbar"><div><h2>Objetivos</h2><p class="muted">Metas de poupança acompanhadas separadamente.</p></div><button id="newGoalBtn" class="btn primary">+ Novo objetivo</button></div><div id="goalList" class="goal-grid"></div></section>
+      <section id="page-goals" class="page"><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav><div class="section-toolbar"><div><h2>Metas de poupança</h2><p class="muted">Objetivos acompanhados separadamente do orçamento mensal.</p></div><button id="newGoalBtn" class="btn primary">+ Novo objetivo</button></div><div id="goalList" class="goal-grid"></div></section>
       <section id="page-security" class="page"><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Estado de segurança</h2><p>Confirmações locais antes de usar dados reais.</p></div></div><div id="securityStatusGrid" class="security-grid"></div><button id="securityLockBtn" class="btn secondary">Bloquear agora</button></article><article class="panel"><h2>Backup cifrado</h2><p>Exporte apenas envelopes cifrados. O restauro valida versão, estrutura e integridade antes de substituir o cofre local.</p><div id="securityBackupInfo" class="section-gap"></div><div class="button-row"><button id="exportBackupBtn" class="btn primary">Exportar backup</button><label class="btn secondary file-btn">Restaurar backup<input id="importBackupInput" type="file" accept="application/json,.json" hidden /></label></div><p id="backupMessage" class="form-message" role="status"></p></article><article id="syncPanel" class="panel span-2">
   <div class="panel-head"><div><h2>Sincronização automática cifrada</h2><p>Web e móvel usam o mesmo cofre cifrado através de um repositório GitHub privado.</p></div><span id="syncStatusBadge" class="status-chip normal">Não configurado</span></div>
   <div class="detail-grid">
@@ -113,7 +126,7 @@
     <div><small>Modo</small><strong id="syncHealthMode">Só local</strong></div>
   </div>
   <div class="detail-grid section-gap">
-    <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div><div class="detail-item full-detail"><small>Versão técnica</small><strong id="appBuildVersion">v35</strong></div>
+    <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div><div class="detail-item full-detail"><small>Versão técnica</small><strong id="appBuildVersion">v36</strong></div>
   </div>
   <div class="form-grid section-gap">
     <label>Credencial GitHub deste dispositivo — introduzir apenas uma vez<input id="syncToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Fine-grained token com Contents: Read and write" /><small>Ao colar, o token é primeiro guardado cifrado neste dispositivo e depois validado automaticamente.</small></label>
@@ -162,15 +175,32 @@
   </div>
 </article><article class="panel span-2"><div class="panel-head"><div><h2>Políticas ativas</h2><p>Regras aplicadas para impedir fuga de dados financeiros ou pessoais.</p></div></div><div id="securityPolicyList"></div></article></div></section>
       <section id="page-diagnostics" class="page">
+        <nav class="section-tabs" aria-label="Vistas de definições"><button class="section-tab" type="button" data-page="settings">Preferências</button><button class="section-tab" type="button" data-page="diagnostics">Integridade</button></nav>
         <div class="two-col">
           <article class="panel"><div class="panel-head"><div><h2>Diagnóstico da aplicação</h2><p>Estado técnico sem expor dados financeiros detalhados.</p></div></div><div id="diagnosticSummary" class="detail-grid"></div></article>
           <article class="panel"><div class="panel-head"><div><h2>Integridade financeira</h2><p>Verificação automática das principais invariantes.</p></div></div><div id="diagnosticIssues" class="stack-list"></div></article>
         </div>
       </section>
-      <section id="page-settings" class="page"><article class="panel narrow"><h2>Preferências</h2><form id="settingsForm" class="form-grid"><label>Nome opcional<input id="profileName" autocomplete="name" /></label><label>Moeda<select id="currencySelect"><option value="EUR">EUR — Euro</option></select></label><label>Modo visual<select id="themeSelect"><option value="light">Claro</option><option value="dark">Escuro</option><option value="system">Sistema</option></select></label><button class="btn primary" type="submit">Guardar preferências</button></form><hr /><button id="resetDataBtn" class="btn danger">Apagar todos os dados locais</button></article></section>
+      <section id="page-settings" class="page"><nav class="section-tabs" aria-label="Vistas de definições"><button class="section-tab" type="button" data-page="settings">Preferências</button><button class="section-tab" type="button" data-page="diagnostics">Integridade</button></nav><article class="panel narrow"><h2>Preferências</h2><form id="settingsForm" class="form-grid"><label>Nome opcional<input id="profileName" autocomplete="name" /></label><label>Moeda<select id="currencySelect"><option value="EUR">EUR — Euro</option></select></label><label>Modo visual<select id="themeSelect"><option value="light">Claro</option><option value="dark">Escuro</option><option value="system">Sistema</option></select></label><button class="btn primary" type="submit">Guardar preferências</button></form><hr /><button id="resetDataBtn" class="btn danger">Apagar todos os dados locais</button></article></section>
     </main>
-    <nav id="mobileNav" class="mobile-nav" aria-label="Navegação móvel"></nav><button id="quickAddBtn" class="fab" type="button" aria-label="Adicionar">+</button>
+    <nav id="mobileNav" class="mobile-nav" aria-label="Acesso rápido"></nav>
   </div>
+
+  <dialog id="mobileDrawer" class="nav-drawer" aria-labelledby="drawerTitle">
+    <div class="nav-drawer-shell">
+      <div class="drawer-head">
+        <div class="brand"><span class="brand-mark">⌂</span><div><strong id="drawerTitle">Conta de Casa</strong><small>Navegação</small></div></div>
+        <button id="drawerCloseBtn" class="icon-btn" type="button" aria-label="Fechar menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <nav id="drawerNav" class="nav-list drawer-nav" aria-label="Navegação completa"></nav>
+      <div class="drawer-footer">
+        <button id="drawerPrivacyToggle" class="icon-text-btn" type="button"><span class="footer-icon" aria-hidden="true">◉</span><span class="action-label">Ocultar valores</span></button>
+        <button id="drawerLockBtn" class="icon-text-btn" type="button"><span class="footer-icon" aria-hidden="true">⌁</span><span class="action-label">Bloquear</span></button>
+      </div>
+    </div>
+  </dialog>
 
   <dialog id="formDialog" class="dialog" aria-labelledby="dialogTitle">
     <div class="dialog-shell" id="dialogShell">
@@ -192,6 +222,6 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="./core.js?v=35" defer></script><script src="./finance.js?v=35" defer></script><script src="./render.js?v=35" defer></script><script src="./forms.js?v=35" defer></script><script src="./sync.js?v=35" defer></script><script src="./events.js?v=35" defer></script>
+  <script src="./core.js?v=36" defer></script><script src="./finance.js?v=36" defer></script><script src="./render.js?v=36" defer></script><script src="./forms.js?v=36" defer></script><script src="./sync.js?v=36" defer></script><script src="./events.js?v=36" defer></script>
 </body>
 </html>

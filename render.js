@@ -2,12 +2,23 @@ function applyTheme() {
   const pref = appState?.settings?.theme || 'light';
   const dark = pref === 'dark' || (pref === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  $('#themeToggle').textContent = dark ? '☾' : '☼';
+  const toggle=$('#themeToggle');
+  toggle.textContent = dark ? '☾' : '☼';
+  toggle.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro');
+  toggle.title=dark?'Ativar tema claro':'Ativar tema escuro';
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#0f1722':'#f5f7fa');
 }
 function setPrivacy(hidden) {
   privacyHidden = hidden;
   $('#app').classList.toggle('money-hidden', hidden);
-  $('#privacyToggle span').textContent = hidden ? 'Mostrar valores' : 'Ocultar valores';
+  const label=hidden?'Mostrar valores':'Ocultar valores';
+  ['#privacyToggle','#drawerPrivacyToggle'].forEach(selector=>{
+    const button=$(selector);
+    if(!button)return;
+    const text=button.querySelector('.action-label');
+    if(text)text.textContent=label;
+    button.setAttribute('aria-label',label);
+  });
 }
 function toast(message) {
   const el = $('#toast'); el.textContent = message; el.classList.add('show');
@@ -15,24 +26,58 @@ function toast(message) {
 }
 function empty(text) { return `<div class="empty">${esc(text)}</div>`; }
 
+function navigationGroupsHtml() {
+  return NAV_GROUPS.map(group=>`<div class="nav-group">
+    <p class="nav-group-label">${esc(group.label)}</p>
+    <div class="nav-group-items">${group.items.map(id=>{
+      const meta=PAGE_META[id];
+      return `<button class="nav-btn" type="button" data-page="${attr(id)}" aria-label="${attr(meta.label)}" title="${attr(meta.label)}">${icon(meta.icon)}<span class="nav-label">${esc(meta.label)}</span></button>`;
+    }).join('')}</div>
+  </div>`).join('');
+}
+
 function renderNav() {
-  setHTML('#desktopNav', NAV_ITEMS.map(([id,label,ic])=>`<button class="nav-btn" data-page="${id}">${icon(ic)}<span>${label}</span></button>`).join(''));
-  const mobile = [['dashboard','Início','home'],['bills','Faturas','bill'],['add','Adicionar','more'],['planning','Planeamento','plan'],['more','Mais','more']];
-  setHTML('#mobileNav', mobile.map(([id,label,ic])=>`<button class="nav-btn" data-mobile="${id}">${icon(ic)}<span>${label}</span></button>`).join(''));
+  const groups=navigationGroupsHtml();
+  setHTML('#desktopNav',groups);
+  setHTML('#drawerNav',groups);
+  setHTML('#mobileNav',MOBILE_NAV_ITEMS.map(id=>{
+    const meta=PAGE_META[id];
+    return `<button class="nav-btn" type="button" data-mobile="${attr(id)}" aria-label="${attr(meta.label)}">${icon(meta.icon)}<span>${esc(meta.label.replace('Lista de ',''))}</span></button>`;
+  }).join(''));
 }
 function showPage(page) {
-  const known = NAV_ITEMS.some(x=>x[0]===page) ? page : 'dashboard';
+  const known = PAGE_META[page] ? page : 'dashboard';
+  const meta = PAGE_META[known];
+  const navParent = meta.navParent || known;
   $$('.page').forEach(p=>p.classList.toggle('active', p.id===`page-${known}`));
-  $$('.nav-btn[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===known));
-  $$('.nav-btn[data-mobile]').forEach(b=>b.classList.toggle('active',b.dataset.mobile===known));
-  $('#pageTitle').textContent = NAV_ITEMS.find(x=>x[0]===known)?.[1] || 'Início';
+  $$('.nav-btn[data-page]').forEach(b=>{
+    const active=b.dataset.page===navParent;
+    b.classList.toggle('active',active);
+    if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+  });
+  $$('.nav-btn[data-mobile]').forEach(b=>{
+    const active=b.dataset.mobile===navParent;
+    b.classList.toggle('active',active);
+    if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+  });
+  $$('.section-tab[data-page]').forEach(b=>{
+    const active=b.dataset.page===known;
+    b.classList.toggle('active',active);
+    if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+  });
+  $('#pageTitle').textContent = meta.label;
+  $('#pageContext').textContent = meta.context;
+  document.title=`${meta.label} · Conta de Casa`;
   history.replaceState(null,'',`#${known}`);
   renderPage(known);
+  const drawer=$('#mobileDrawer');
+  if(drawer?.open)drawer.close();
   const mobileScroller=window.matchMedia('(max-width: 820px)').matches?$('.main'):null;
-  if(mobileScroller) mobileScroller.scrollTo({top:0,behavior:'smooth'});
-  else window.scrollTo({top:0,behavior:'smooth'});
+  const behavior=window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
+  if(mobileScroller) mobileScroller.scrollTo({top:0,behavior});
+  else window.scrollTo({top:0,behavior});
 }
-function currentPage() { return NAV_ITEMS.some(x=>x[0]===location.hash.replace('#','')) ? location.hash.replace('#','') : 'dashboard'; }
+function currentPage() { return PAGE_META[location.hash.replace('#','')] ? location.hash.replace('#','') : 'dashboard'; }
 function renderCurrentPage() { renderPage(currentPage()); }
 function renderPage(page) {
   if (!appState) return;

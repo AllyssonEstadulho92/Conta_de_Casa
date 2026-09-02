@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão publicada do código: v35. O schema 5 mantém os cálculos e o histórico cifrado da v34 e acrescenta um marcador técnico cifrado para propagar decisões de conflitos entre dispositivos.
+Versão preparada: v36. O schema de dados permanece na versão 5; esta fase reorganiza a navegação e cria a fundação visual adaptativa sem alterar cálculos, cifragem ou sincronização.
 
 ## Estado
 
