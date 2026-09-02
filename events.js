@@ -179,12 +179,41 @@ function wireEvents(){
     if(pay){openPaymentForm(pay.dataset.detailPay);return;}
     const edit=e.target.closest('[data-detail-edit]');
     if(edit){const b=appState.bills.find(x=>x.id===edit.dataset.detailEdit);openBillForm(b);return;}
+    const duplicate=e.target.closest('[data-detail-duplicate]');
+    if(duplicate){
+      const source=appState.bills.find(x=>x.id===duplicate.dataset.detailDuplicate);
+      if(source){
+        const now=new Date().toISOString();
+        const copy={...source,id:uid(),title:cleanString(`${source.title} — cópia`,80),reference:'',recurrence:'none',recurrenceParentId:undefined,recurrenceSeriesId:undefined,recurrenceKey:undefined,createdAt:now,updatedAt:now,cancelled:false,archived:false};
+        appState.bills.push(copy);
+        await commit('created','bill');
+        closeDialog();
+        toast('Fatura duplicada. Reveja os dados da cópia antes de usar.');
+      }
+      return;
+    }
+    const undo=e.target.closest('[data-delete-payment]');
+    if(undo){
+      const payment=appState.payments.find(x=>x.id===undo.dataset.deletePayment);
+      const billId=undo.dataset.paymentBill||payment?.billId;
+      if(payment&&confirm('Desfazer este pagamento? O valor volta a ficar pendente na fatura.')){
+        if(typeof recordSyncDeletion==='function') recordSyncDeletion('payment',payment.id);
+        appState.payments=appState.payments.filter(x=>x.id!==payment.id);
+        const bill=appState.bills.find(x=>x.id===billId);
+        if(bill) bill.updatedAt=new Date().toISOString();
+        await commit('deleted','payment');
+        if(bill) openBillDetail(bill.id); else closeDialog();
+        toast('Pagamento desfeito.');
+      }
+      return;
+    }
     const del=e.target.closest('[data-detail-delete]');
     if(del){await deleteBillEnteredByMistake(del.dataset.detailDelete);return;}
     const cancel=e.target.closest('[data-detail-cancel]');
     if(cancel){
       const b=appState.bills.find(x=>x.id===cancel.dataset.detailCancel);
-      if(b&&confirm('Cancelar esta fatura? O histórico de pagamentos será preservado.')){
+      if(b&&paidForBill(b.id)>0){toast('Não é possível cancelar uma fatura com pagamentos. Desfaça os pagamentos incorretos primeiro.');return;}
+      if(b&&confirm('Cancelar esta fatura?')){
         b.cancelled=true;
         b.updatedAt=new Date().toISOString();
         await commit('cancelled','bill');

@@ -79,3 +79,19 @@ assert.match(forms, /if\(!title\)\{toast\('Indique uma descrição para a fatura
 assert.doesNotMatch(forms, /due\.toISOString\(\)\.slice\(0,10\)/);
 
 console.log('Civil due-date form regression tests: OK');
+
+
+assert.match(forms, /async function withFormSubmissionLock\(event, task\)/);
+assert.match(forms, /form\.dataset\.submitting==='true'/);
+assert.match(forms, /duplicatePaymentExists\(payment\)/);
+assert.match(forms, /Este pagamento já está registado/);
+assert.match(forms, /total<paidForBill\(id\)/);
+assert.match(forms, /data-delete-payment=/);
+assert.match(forms, /data-detail-duplicate=/);
+assert.match(events, /recordSyncDeletion\('payment',payment\.id\)/);
+assert.match(events, /Pagamento desfeito/);
+assert.match(events, /Não é possível cancelar uma fatura com pagamentos/);
+assert.match(forms, /await idbPutVaultPair\(normalized\.meta,normalized\.secure\)/);
+assert.match(forms, /Restaurar este backup substitui o cofre local/);
+
+console.log('Financial mutation safety regression tests: OK');

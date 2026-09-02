@@ -57,6 +57,29 @@ function billCategoryOptions(selected='Casa') {
   if(!categories.includes(current)) categories.splice(categories.length-1,0,current);
   return categories.map(name=>`<option value="${attr(name)}"${name===current?' selected':''}>${esc(name)}</option>`).join('');
 }
+async function withFormSubmissionLock(event, task) {
+  event.preventDefault();
+  const form=event.currentTarget;
+  if(!form || form.dataset.submitting==='true') return false;
+  form.dataset.submitting='true';
+  const buttons=[...form.querySelectorAll('button[type="submit"],button:not([type])')];
+  buttons.forEach(btn=>btn.disabled=true);
+  try{return await task(form);}
+  finally{
+    if(form?.isConnected){
+      delete form.dataset.submitting;
+      buttons.forEach(btn=>btn.disabled=false);
+    }
+  }
+}
+function paymentFingerprint(payment) {
+  return [payment.billId,payment.amountCents,payment.paidAt,payment.method].join('|');
+}
+function duplicatePaymentExists(payment) {
+  const key=paymentFingerprint(payment);
+  return (appState?.payments||[]).some(existing=>paymentFingerprint(existing)===key);
+}
+
 function billFormHtml(bill=null){
   const due=bill?null:new Date(); if(due) due.setDate(due.getDate()+7);
   const date=bill?billDueDateKey(bill):dateKeyFromDate(due);
@@ -65,21 +88,35 @@ function billFormHtml(bill=null){
 }
 function openBillForm(bill=null){ openDialog(bill?'Editar fatura':'Nova fatura',billFormHtml(bill)); const f=$('#billForm'); if(bill){f.method.value=bill.method||'Outro';f.recurrence.value=bill.recurrence||'none';} f.addEventListener('submit',handleBillSubmit); }
 async function handleBillSubmit(e){
-  e.preventDefault();
-  const fd=new FormData(e.currentTarget);
-  const title=cleanString(fd.get('title'),80);
-  if(!title){toast('Indique uma descrição para a fatura.');return;}
-  const total=parseCents(fd.get('amount'));
-  if(!Number.isFinite(total)||total<=0){toast('Introduza um valor monetário válido superior a zero, com no máximo 2 casas decimais.');return;}
-  const dueDate=cleanDateKey(fd.get('dueDate'));
-  const dueTime=cleanTimeKey(fd.get('dueTime'),'23:59');
-  const dueAt=composeLocalDateTimeIso(dueDate,dueTime);
-  if(!dueDate||!dueAt){toast('Data de vencimento inválida.');return;}
-  const data={title,provider:cleanString(fd.get('provider'),80),category:cleanString(fd.get('category'),80)||'Outros',totalCents:total,dueDate,dueTime,dueAt,method:cleanString(fd.get('method'),60),recurrence:cleanRecurrence(String(fd.get('recurrence'))),reference:cleanString(fd.get('reference'),160),notes:cleanMultiline(fd.get('notes'),1200),updatedAt:new Date().toISOString()};
-  const id=String(fd.get('id')||'');
-  if(id){const b=appState.bills.find(x=>x.id===id);if(!b)return;Object.assign(b,data);await commit('updated','bill');}
-  else{appState.bills.push({id:uid(),...data,createdAt:new Date().toISOString(),cancelled:false,archived:false});await commit('created','bill');}
-  closeDialog(); toast('Fatura guardada.');
+  return withFormSubmissionLock(e,async form=>{
+    const fd=new FormData(form);
+    const title=cleanString(fd.get('title'),80);
+    if(!title){toast('Indique uma descrição para a fatura.');return false;}
+    const total=parseCents(fd.get('amount'));
+    if(!Number.isFinite(total)||total<=0){toast('Introduza um valor monetário válido superior a zero, com no máximo 2 casas decimais.');return false;}
+    const dueDate=cleanDateKey(fd.get('dueDate'));
+    const dueTime=cleanTimeKey(fd.get('dueTime'),'23:59');
+    const dueAt=composeLocalDateTimeIso(dueDate,dueTime);
+    if(!dueDate||!dueAt){toast('Data de vencimento inválida.');return false;}
+    const id=String(fd.get('id')||'');
+    if(id && total<paidForBill(id)){
+      toast(`O valor total não pode ficar abaixo do montante já pago (${money(paidForBill(id))}). Desfaça primeiro o pagamento incorreto.`);
+      return false;
+    }
+    const data={title,provider:cleanString(fd.get('provider'),80),category:cleanString(fd.get('category'),80)||'Outros',totalCents:total,dueDate,dueTime,dueAt,method:cleanString(fd.get('method'),60),recurrence:cleanRecurrence(String(fd.get('recurrence'))),reference:cleanString(fd.get('reference'),160),notes:cleanMultiline(fd.get('notes'),1200),updatedAt:new Date().toISOString()};
+    if(id){
+      const b=appState.bills.find(x=>x.id===id);
+      if(!b){toast('A fatura já não existe. Atualize a lista.');return false;}
+      Object.assign(b,data);
+      await commit('updated','bill');
+    }else{
+      appState.bills.push({id:uid(),...data,createdAt:new Date().toISOString(),cancelled:false,archived:false});
+      await commit('created','bill');
+    }
+    closeDialog();
+    toast('Fatura guardada.');
+    return true;
+  });
 }
 
 function openBillDetail(id){
@@ -115,12 +152,13 @@ function openBillDetail(id){
 
       <div class="detail-section">
         <div class="detail-section-head"><h3>Pagamentos</h3><small>${payments.length} registo${payments.length===1?'':'s'}</small></div>
-        <div class="stack-list compact">${payments.length?payments.map(p=>`<div class="list-row"><div class="list-main"><strong data-money>${money(p.amountCents)}</strong><small>${fmtDateTime(p.paidAt)} · ${esc(p.method||'')}</small></div></div>`).join(''):empty('Sem pagamentos registados.')}</div>
+        <div class="stack-list compact">${payments.length?payments.map(p=>`<div class="list-row"><div class="list-main"><strong data-money>${money(p.amountCents)}</strong><small>${fmtDateTime(p.paidAt)} · ${esc(p.method||'')}</small></div><div class="list-side"><button class="link-btn danger-text" type="button" data-delete-payment="${attr(p.id)}" data-payment-bill="${attr(b.id)}">Desfazer</button></div></div>`).join(''):empty('Sem pagamentos registados.')}</div>
       </div>
 
       <div class="dialog-actions detail-actions">
         ${rem>0&&!b.cancelled?`<button class="btn primary" data-detail-pay="${attr(b.id)}">Registar pagamento</button>`:''}
         <button class="btn secondary" data-detail-edit="${attr(b.id)}">Editar</button>
+        <button class="btn secondary" data-detail-duplicate="${attr(b.id)}">Duplicar</button>
         ${!b.cancelled?`<button class="btn danger" data-detail-cancel="${attr(b.id)}">Cancelar fatura</button>`:''}
         <button class="btn secondary" type="button" data-close-dialog>Fechar</button>
         <button class="btn danger detail-delete" type="button" data-detail-delete="${attr(b.id)}">Excluir fatura</button>
@@ -134,57 +172,70 @@ function openPaymentForm(id){
   $('#paymentForm').addEventListener('submit',handlePaymentSubmit);
 }
 async function handlePaymentSubmit(e){
-  e.preventDefault();
-  const fd=new FormData(e.currentTarget);
-  const b=appState.bills.find(x=>x.id===fd.get('billId'));if(!b)return;
-  const amount=parseCents(fd.get('amount'));const rem=remainingForBill(b);
-  if(!Number.isFinite(amount)||amount<=0||amount>rem){toast(`O pagamento deve estar entre 0,01 e ${money(rem)}.`);return;}
-  const at=new Date(fd.get('paidAt'));if(Number.isNaN(at.getTime())){toast('Data de pagamento inválida.');return;}
-  appState.payments.push({id:uid(),billId:b.id,amountCents:amount,paidAt:at.toISOString(),method:cleanString(fd.get('method'),60),notes:cleanMultiline(fd.get('notes'),600),createdAt:new Date().toISOString()});
-  await syncRecurringBills();await commit('created','payment');closeDialog();toast('Pagamento registado.');
+  return withFormSubmissionLock(e,async form=>{
+    const fd=new FormData(form);
+    const b=appState.bills.find(x=>x.id===fd.get('billId'));
+    if(!b){toast('A fatura já não existe. Atualize a lista.');return false;}
+    if(b.cancelled||b.archived){toast('Não é possível pagar uma fatura cancelada ou arquivada.');return false;}
+    const amount=parseCents(fd.get('amount'));
+    const rem=remainingForBill(b);
+    if(!Number.isFinite(amount)||amount<=0||amount>rem){toast(`O pagamento deve estar entre 0,01 e ${money(rem)}.`);return false;}
+    const at=new Date(fd.get('paidAt'));
+    if(Number.isNaN(at.getTime())){toast('Data de pagamento inválida.');return false;}
+    const payment={id:uid(),billId:b.id,amountCents:amount,paidAt:at.toISOString(),method:cleanString(fd.get('method'),60),notes:cleanMultiline(fd.get('notes'),600),createdAt:new Date().toISOString()};
+    if(duplicatePaymentExists(payment)){toast('Este pagamento já está registado com o mesmo valor, data/hora e método.');return false;}
+    appState.payments.push(payment);
+    b.updatedAt=new Date().toISOString();
+    await syncRecurringBills();
+    await commit('created','payment');
+    closeDialog();
+    toast('Pagamento registado.');
+    return true;
+  });
 }
 
 function openIncomeForm(){
   openDialog('Novo rendimento',`<form id="incomeForm" class="form-grid"><label>Descrição<input name="description" required placeholder="Ex.: Salário" autocomplete="off" spellcheck="false"></label><label>Valor<input name="amount" inputmode="decimal" required placeholder="0,00" autocomplete="off"></label><label>Data<input name="receivedAt" type="datetime-local" required value="${localDateTimeInput()}" autocomplete="off"></label><div class="button-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary">Guardar</button></div></form>`);
-  $('#incomeForm').addEventListener('submit',async e=>{
-    e.preventDefault();
-    const fd=new FormData(e.currentTarget);const amount=parseCents(fd.get('amount'));const receivedAt=new Date(fd.get('receivedAt'));
-    if(!Number.isFinite(amount)||amount<=0){toast('Valor inválido.');return;}
-    if(Number.isNaN(receivedAt.getTime())){toast('Data inválida.');return;}
-    appState.incomes.push({id:uid(),description:cleanString(fd.get('description'),100),amountCents:amount,receivedAt:receivedAt.toISOString(),createdAt:new Date().toISOString()});
-    await commit('created','income');closeDialog();toast('Rendimento guardado.');
-  });
+  $('#incomeForm').addEventListener('submit',e=>withFormSubmissionLock(e,async form=>{
+    const fd=new FormData(form),description=cleanString(fd.get('description'),100),amount=parseCents(fd.get('amount')),receivedAt=new Date(fd.get('receivedAt'));
+    if(!description){toast('Indique uma descrição para o rendimento.');return false;}
+    if(!Number.isFinite(amount)||amount<=0){toast('Introduza um valor monetário válido superior a zero.');return false;}
+    if(Number.isNaN(receivedAt.getTime())){toast('Data inválida.');return false;}
+    appState.incomes.push({id:uid(),description,amountCents:amount,receivedAt:receivedAt.toISOString(),createdAt:new Date().toISOString()});
+    await commit('created','income');closeDialog();toast('Rendimento guardado.');return true;
+  }));
 }
 function openMarketForm(){
   openDialog('Adicionar ao mercado',`<form id="marketForm" class="form-grid two"><label>Produto<input name="name" required autocomplete="off" spellcheck="false"></label><label>Categoria<input name="category" placeholder="Frutas, limpeza..." autocomplete="off" spellcheck="false"></label><label>Quantidade<input name="quantity" value="1" autocomplete="off"></label><label>Unidade<select name="unit"><option>un</option><option>kg</option><option>g</option><option>L</option><option>ml</option></select></label><label class="full-row">Preço estimado<input name="estimated" inputmode="decimal" placeholder="0,00" autocomplete="off"></label><div class="button-row full-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary">Adicionar</button></div></form>`);
-  $('#marketForm').addEventListener('submit',async e=>{
-    e.preventDefault();
-    const fd=new FormData(e.currentTarget),est=parseCents(fd.get('estimated'));
-    appState.market.push({id:uid(),name:cleanString(fd.get('name'),100),category:cleanString(fd.get('category'),80),quantity:cleanString(fd.get('quantity'),40)||'1',unit:cleanString(fd.get('unit'),20),estimatedCents:Number.isFinite(est)&&est>=0?est:0,actualCents:0,purchased:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),purchasedAt:null});
-    await commit('created','market');closeDialog();toast('Item adicionado.');
-  });
+  $('#marketForm').addEventListener('submit',e=>withFormSubmissionLock(e,async form=>{
+    const fd=new FormData(form),name=cleanString(fd.get('name'),100),est=parseCents(fd.get('estimated'));
+    if(!name){toast('Indique o produto.');return false;}
+    if(!Number.isFinite(est)||est<0){toast('Preço estimado inválido. Use zero ou um valor positivo.');return false;}
+    appState.market.push({id:uid(),name,category:cleanString(fd.get('category'),80),quantity:cleanString(fd.get('quantity'),40)||'1',unit:cleanString(fd.get('unit'),20),estimatedCents:est,actualCents:0,purchased:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),purchasedAt:null});
+    await commit('created','market');closeDialog();toast('Item adicionado.');return true;
+  }));
 }
 function openGoalForm(){
   openDialog('Novo objetivo',`<form id="goalForm" class="form-grid"><label>Objetivo<input name="name" required placeholder="Ex.: Fundo de emergência" autocomplete="off" spellcheck="false"></label><label>Meta<input name="target" inputmode="decimal" required placeholder="0,00" autocomplete="off"></label><label>Já poupado<input name="saved" inputmode="decimal" value="0,00" autocomplete="off"></label><label>Prazo opcional<input name="deadline" type="date" autocomplete="off"></label><div class="button-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary">Criar objetivo</button></div></form>`);
-  $('#goalForm').addEventListener('submit',async e=>{
-    e.preventDefault();
-    const fd=new FormData(e.currentTarget),target=parseCents(fd.get('target')),saved=parseCents(fd.get('saved'));
-    if(!Number.isFinite(target)||target<=0||!Number.isFinite(saved)||saved<0){toast('Valores inválidos.');return;}
-    const deadline=fd.get('deadline')?new Date(`${fd.get('deadline')}T12:00:00`):null;
-    if(deadline&&Number.isNaN(deadline.getTime())){toast('Prazo inválido.');return;}
-    appState.goals.push({id:uid(),name:cleanString(fd.get('name'),100),targetCents:target,savedCents:Math.min(saved,target),deadline:deadline?deadline.toISOString():null,createdAt:new Date().toISOString(),archived:false});
-    await commit('created','goal');closeDialog();toast('Objetivo criado.');
-  });
+  $('#goalForm').addEventListener('submit',e=>withFormSubmissionLock(e,async form=>{
+    const fd=new FormData(form),name=cleanString(fd.get('name'),100),target=parseCents(fd.get('target')),saved=parseCents(fd.get('saved'));
+    if(!name){toast('Indique o nome do objetivo.');return false;}
+    if(!Number.isFinite(target)||target<=0||!Number.isFinite(saved)||saved<0){toast('Valores inválidos.');return false;}
+    const deadlineKey=cleanDateKey(fd.get('deadline'));
+    if(fd.get('deadline')&&!deadlineKey){toast('Prazo inválido.');return false;}
+    const deadline=deadlineKey?composeLocalDateTimeIso(deadlineKey,'12:00'):null;
+    appState.goals.push({id:uid(),name,targetCents:target,savedCents:Math.min(saved,target),deadline,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),archived:false});
+    await commit('created','goal');closeDialog();toast('Objetivo criado.');return true;
+  }));
 }
 function openGoalContribution(id){
   const g=appState.goals.find(x=>x.id===id);if(!g)return;
   openDialog('Adicionar ao objetivo',`<form id="goalAddForm" class="form-grid"><p><strong>${esc(g.name)}</strong><br>Falta <span data-money>${money(Math.max(0,g.targetCents-g.savedCents))}</span></p><label>Valor<input name="amount" inputmode="decimal" required placeholder="0,00" autocomplete="off"></label><div class="button-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary">Adicionar</button></div></form>`);
-  $('#goalAddForm').addEventListener('submit',async e=>{
-    e.preventDefault();
-    const amount=parseCents(new FormData(e.currentTarget).get('amount'));
-    if(!Number.isFinite(amount)||amount<=0){toast('Valor inválido.');return;}
-    g.savedCents=Math.min(g.targetCents,g.savedCents+amount);g.updatedAt=new Date().toISOString();await commit('updated','goal');closeDialog();toast('Objetivo atualizado.');
-  });
+  $('#goalAddForm').addEventListener('submit',e=>withFormSubmissionLock(e,async form=>{
+    const amount=parseCents(new FormData(form).get('amount'));
+    if(!Number.isFinite(amount)||amount<=0){toast('Valor inválido.');return false;}
+    g.savedCents=Math.min(g.targetCents,g.savedCents+amount);g.updatedAt=new Date().toISOString();await commit('updated','goal');closeDialog();toast('Objetivo atualizado.');return true;
+  }));
 }
 function openMoreMenu(){
   openDialog('Mais secções',`<div class="quick-grid">${[['calendar','Calendário','calendar'],['market','Mercado','market'],['reports','Relatórios','report'],['goals','Objetivos','goal'],['security','Segurança','shield'],['settings','Configurações','settings']].map(([id,label,ic])=>`<button type="button" data-more-page="${id}">${icon(ic,22)}<br>${label}</button>`).join('')}</div>`);
@@ -222,8 +273,10 @@ async function importBackup(file){
   if(!file) return;
   if(file.size>MAX_IMPORT_BYTES)throw new Error('Ficheiro de backup demasiado grande.');
   const normalized=await parseBackupText(await file.text());
-  await idbPut('meta',normalized.meta);
-  await idbPut('secure',normalized.secure);
+  const existing=await idbGet('meta','vault');
+  if(existing && !confirm('Restaurar este backup substitui o cofre local deste dispositivo. Confirma que já preservou o cofre atual ou pretende continuar?')) return false;
+  await idbPutVaultPair(normalized.meta,normalized.secure);
+  await idbPut('device',{key:'restore-meta',lastRestoreAt:new Date().toISOString()});
   lockApp('restore');
   const vaultMsg=$('#vaultMessage');
   if(vaultMsg){
