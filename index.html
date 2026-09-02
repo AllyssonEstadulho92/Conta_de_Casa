@@ -6,15 +6,15 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.github.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; media-src 'none'; manifest-src 'self'; worker-src 'self'" />
   <meta name="referrer" content="no-referrer" />
   <meta name="theme-color" content="#f7f9fc" />
-  <meta name="app-build" content="v38" />
+  <meta name="app-build" content="v39" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Conta de Casa" />
   <meta name="description" content="Conta de Casa — gestão privada de faturas e despesas domésticas." />
-  <link rel="manifest" href="./manifest.webmanifest?v=38" />
+  <link rel="manifest" href="./manifest.webmanifest?v=39" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=38" />
-  <link rel="stylesheet" href="./design-system.css?v=38" />
+  <link rel="stylesheet" href="./styles.css?v=39" />
+  <link rel="stylesheet" href="./design-system.css?v=39" />
   <title>Conta de Casa</title>
 </head>
 <body>
@@ -98,17 +98,21 @@
 
       <section id="page-bills" class="page">
         <nav class="section-tabs" aria-label="Vistas de faturas"><button class="section-tab" type="button" data-page="bills">Lista de faturas</button><button class="section-tab" type="button" data-page="calendar">Calendário</button></nav>
-        <div class="section-toolbar bill-toolbar">
-          <div class="search-wrap"><label class="sr-only" for="billSearch">Pesquisar faturas</label><input id="billSearch" type="search" placeholder="Pesquisar faturas..." /></div>
-          <select id="billStatusFilter" aria-label="Filtrar por estado"><option value="all">Todos os estados</option><option value="pending">Por pagar</option><option value="partial">Pago parcialmente</option><option value="paid">Pago</option><option value="overdue">Em atraso</option><option value="due-today">Vence hoje</option><option value="cancelled">Cancelado</option><option value="invalid">Dados inválidos</option></select>
-          <select id="billCategoryFilter" aria-label="Filtrar por categoria"><option value="all">Todas as categorias</option></select>
-          <label class="date-filter">De<input id="billDateFrom" type="date" aria-label="Data inicial" /></label>
-          <label class="date-filter">Até<input id="billDateTo" type="date" aria-label="Data final" /></label>
-          <select id="billSort" aria-label="Ordenar faturas"><option value="due-asc">Vencimento ↑</option><option value="due-desc">Vencimento ↓</option><option value="amount-desc">Valor maior</option><option value="amount-asc">Valor menor</option><option value="title-asc">Descrição A–Z</option></select>
-          <button id="billClearFilters" class="btn secondary" type="button">Limpar filtros</button>
-          <button id="newBillBtn" class="btn primary" type="button">+ Nova fatura</button>
+        <div class="bill-command-bar">
+          <div class="search-wrap bill-search-wrap"><label class="sr-only" for="billSearch">Pesquisar faturas</label><input id="billSearch" type="search" placeholder="Pesquisar por descrição, fornecedor ou referência..." autocomplete="off" /></div>
+          <button id="newBillBtn" class="btn primary bill-new-btn" type="button">+ Nova fatura</button>
         </div>
-        <div id="billSummary" class="mini-summary"></div><div id="billsList" class="cards-list"></div></section>
+        <div class="bill-filter-grid" role="group" aria-label="Filtros e ordenação de faturas">
+          <label class="bill-filter-field"><span>Estado</span><select id="billStatusFilter"><option value="all">Todos os estados</option><option value="pending">Por pagar</option><option value="partial">Pago parcialmente</option><option value="paid">Pago</option><option value="overdue">Em atraso</option><option value="due-today">Vence hoje</option><option value="cancelled">Cancelado</option><option value="invalid">Dados inválidos</option></select></label>
+          <label class="bill-filter-field"><span>Categoria</span><select id="billCategoryFilter"><option value="all">Todas as categorias</option></select></label>
+          <label class="bill-filter-field"><span>De</span><input id="billDateFrom" type="date" /></label>
+          <label class="bill-filter-field"><span>Até</span><input id="billDateTo" type="date" /></label>
+          <label class="bill-filter-field"><span>Ordenar</span><select id="billSort"><option value="due-asc">Vencimento mais próximo</option><option value="due-desc">Vencimento mais distante</option><option value="amount-desc">Maior valor</option><option value="amount-asc">Menor valor</option><option value="title-asc">Descrição A–Z</option></select></label>
+          <button id="billClearFilters" class="btn secondary bill-filter-clear" type="button">Limpar filtros</button>
+        </div>
+        <div id="billSummary" class="bill-summary-grid" aria-live="polite"></div>
+        <div id="billsList" class="bill-results" aria-live="polite"></div>
+      </section>
       <section id="page-calendar" class="page"><nav class="section-tabs" aria-label="Vistas de faturas"><button class="section-tab" type="button" data-page="bills">Lista de faturas</button><button class="section-tab" type="button" data-page="calendar">Calendário</button></nav><article class="panel"><div class="panel-head"><div><h2>Vencimentos do mês</h2><p>Vencimentos e pagamentos organizados por data.</p></div></div><div id="calendarGrid" class="calendar-grid"></div><div id="calendarAgenda" class="stack-list"></div></article></section>
       <section id="page-planning" class="page"><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Planeamento mensal</h2><p>Defina saldo inicial e orçamento do período.</p></div></div><form id="monthPlanForm" class="form-grid"><label>Saldo inicial<input id="openingBalance" inputmode="decimal" placeholder="0,00" /></label><label>Orçamento do mês<input id="monthlyBudget" inputmode="decimal" placeholder="0,00" /></label><button class="btn primary" type="submit">Guardar planeamento</button></form></article><article class="panel"><div class="panel-head"><div><h2>Rendimentos</h2><p>Salários, reembolsos e outras entradas.</p></div><button id="newIncomeBtn" class="btn secondary">+ Rendimento</button></div><div id="incomeList" class="stack-list"></div></article></div></section>
       <section id="page-market" class="page"><div class="section-toolbar"><div><h2>Mercado</h2><p class="muted">Lista → comprado, com preço previsto e real.</p></div><button id="newMarketBtn" class="btn primary">+ Adicionar item</button></div><div id="marketSummary" class="mini-summary"></div><div id="marketList" class="market-list"></div></section>
@@ -128,7 +132,7 @@
     <div><small>Modo</small><strong id="syncHealthMode">Só local</strong></div>
   </div>
   <div class="detail-grid section-gap">
-    <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div><div class="detail-item full-detail"><small>Versão técnica</small><strong id="appBuildVersion">v38</strong></div>
+    <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div><div class="detail-item full-detail"><small>Versão técnica</small><strong id="appBuildVersion">v39</strong></div>
   </div>
   <div class="form-grid section-gap">
     <label>Credencial GitHub deste dispositivo — introduzir apenas uma vez<input id="syncToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Fine-grained token com Contents: Read and write" /><small>Ao colar, o token é primeiro guardado cifrado neste dispositivo e depois validado automaticamente.</small></label>
@@ -224,6 +228,6 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="./core.js?v=38" defer></script><script src="./finance.js?v=38" defer></script><script src="./render.js?v=38" defer></script><script src="./forms.js?v=38" defer></script><script src="./sync.js?v=38" defer></script><script src="./events.js?v=38" defer></script>
+  <script src="./core.js?v=39" defer></script><script src="./finance.js?v=39" defer></script><script src="./render.js?v=39" defer></script><script src="./forms.js?v=39" defer></script><script src="./sync.js?v=39" defer></script><script src="./events.js?v=39" defer></script>
 </body>
 </html>
