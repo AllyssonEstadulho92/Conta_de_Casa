@@ -55,6 +55,7 @@ const NAV_ITEMS = [
   ['reports', 'Relatórios', 'report'],
   ['goals', 'Objetivos', 'goal'],
   ['security', 'Segurança', 'shield'],
+  ['diagnostics', 'Diagnóstico', 'report'],
   ['settings', 'Configurações', 'settings']
 ];
 
