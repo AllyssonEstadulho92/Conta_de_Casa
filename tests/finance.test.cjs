@@ -71,3 +71,34 @@ assert.equal(d.next7Count,2);
 assert.equal(vm.runInContext("dateKeyFromValue(nextDueAt(composeLocalDateTimeIso('2024-01-31','12:00'),'monthly','2024-01-31','12:00'))",context),'2024-02-29');
 assert.equal(vm.runInContext("dateKeyFromValue(nextDueAt(composeLocalDateTimeIso('2024-02-29','12:00'),'annual','2024-02-29','12:00'))",context),'2025-02-28');
 console.log('Finance and civil-date tests: OK');
+
+
+const filteredDue=vm.runInContext("filterBills(appState.bills,{status:'overdue'})",context);
+assert.equal(filteredDue.length,1);
+assert.equal(filteredDue[0].id,'b3');
+const filteredCategory=vm.runInContext("filterBills(appState.bills,{category:'Energia'})",context);
+assert.equal(filteredCategory.length,1);
+assert.equal(filteredCategory[0].id,'b1');
+const filteredRange=vm.runInContext("filterBills(appState.bills,{from:'2026-09-09',to:'2026-09-20',sort:'due-desc'})",context);
+assert.deepEqual(JSON.parse(JSON.stringify(filteredRange.map(x=>x.id))),['b1','b6','b5']);
+
+const originalB2=vm.runInContext("appState.bills.find(b=>b.id==='b2').totalCents",context);
+vm.runInContext("appState.bills.find(b=>b.id==='b2').totalCents=6000",context);
+assert.equal(vm.runInContext("remainingForBill(appState.bills.find(b=>b.id==='b2'))",context),6000);
+vm.runInContext(`appState.bills.find(b=>b.id==='b2').totalCents=${originalB2}`,context);
+
+const beforeUndo=vm.runInContext("remainingForBill(appState.bills.find(b=>b.id==='b1'))",context);
+assert.equal(beforeUndo,15000);
+vm.runInContext("appState.payments=appState.payments.filter(p=>p.id!=='p1')",context);
+assert.equal(vm.runInContext("remainingForBill(appState.bills.find(b=>b.id==='b1'))",context),20000);
+vm.runInContext("appState.payments.push({id:'p1',billId:'b1',amountCents:5000,paidAt:'2026-09-05T12:00:00.000Z',method:'Transferência'})",context);
+
+const beforeDelete=vm.runInContext(`monthNumbers('2026-09',${now}).pending`,context);
+vm.runInContext("appState.bills=appState.bills.filter(b=>b.id!=='b2')",context);
+assert.equal(vm.runInContext(`monthNumbers('2026-09',${now}).pending`,context),beforeDelete-5000);
+
+const diagnostic=vm.runInContext(`financialDiagnostics('2026-09',${now})`,context);
+assert.equal(diagnostic.ok,true);
+assert.equal(diagnostic.issues.length,0);
+
+console.log('Filter, mutation and financial invariant tests: OK');

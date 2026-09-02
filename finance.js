@@ -186,3 +186,71 @@ function categoryTotals(month = selectedMonth) {
   }
   return [...map.entries()].sort((a,b)=>b[1]-a[1]);
 }
+
+
+function filterBills(bills, criteria = {}) {
+  const search=cleanString(criteria.search||'',160).toLocaleLowerCase('pt-PT');
+  const status=cleanString(criteria.status||'all',30);
+  const category=cleanString(criteria.category||'all',80);
+  const from=cleanDateKey(criteria.from);
+  const to=cleanDateKey(criteria.to);
+  const sort=cleanString(criteria.sort||'due-asc',30);
+  let list=(bills||[]).filter(bill=>{
+    const due=billDueDateKey(bill);
+    const text=`${bill.title||''} ${bill.provider||''} ${bill.category||''} ${bill.reference||''}`.toLocaleLowerCase('pt-PT');
+    if(search&&!text.includes(search)) return false;
+    if(status!=='all'&&billStatus(bill)!==status) return false;
+    if(category!=='all'&&(bill.category||'Outros')!==category) return false;
+    if(from&&(!due||due<from)) return false;
+    if(to&&(!due||due>to)) return false;
+    return true;
+  });
+  const sorters={
+    'due-asc':compareBillsByDue,
+    'due-desc':(a,b)=>compareBillsByDue(b,a),
+    'amount-desc':(a,b)=>remainingForBill(b)-remainingForBill(a),
+    'amount-asc':(a,b)=>remainingForBill(a)-remainingForBill(b),
+    'title-asc':(a,b)=>String(a.title||'').localeCompare(String(b.title||''),'pt-PT')
+  };
+  return list.sort(sorters[sort]||sorters['due-asc']);
+}
+
+function financialDiagnostics(month = selectedMonth, now = new Date()) {
+  const issues=[];
+  const bills=appState?.bills||[];
+  const payments=appState?.payments||[];
+  const billIds=new Set(bills.map(b=>b.id));
+  const invalidBills=bills.filter(b=>!cleanString(b.title,80)||!Number.isSafeInteger(b.totalCents)||b.totalCents<=0||!billDueDateKey(b));
+  if(invalidBills.length) issues.push({code:'invalid-bills',severity:'critical',count:invalidBills.length,label:'Faturas com dados obrigatórios inválidos'});
+  const orphanPayments=payments.filter(p=>!billIds.has(p.billId));
+  if(orphanPayments.length) issues.push({code:'orphan-payments',severity:'critical',count:orphanPayments.length,label:'Pagamentos sem fatura associada'});
+  const overpaid=bills.filter(b=>paidForBill(b.id)>b.totalCents);
+  if(overpaid.length) issues.push({code:'overpaid-bills',severity:'critical',count:overpaid.length,label:'Faturas com pagamentos acima do valor total'});
+  const fingerprintCounts=new Map();
+  for(const p of payments){
+    const key=[p.billId,p.amountCents,p.paidAt,p.method].join('|');
+    fingerprintCounts.set(key,(fingerprintCounts.get(key)||0)+1);
+  }
+  const duplicatePayments=[...fingerprintCounts.values()].filter(v=>v>1).reduce((sum,v)=>sum+(v-1),0);
+  if(duplicatePayments) issues.push({code:'duplicate-payments',severity:'high',count:duplicatePayments,label:'Possíveis pagamentos duplicados'});
+  const recurrenceCounts=new Map();
+  for(const b of bills){
+    if(!b.recurrenceKey) continue;
+    recurrenceCounts.set(b.recurrenceKey,(recurrenceCounts.get(b.recurrenceKey)||0)+1);
+  }
+  const duplicateRecurrences=[...recurrenceCounts.values()].filter(v=>v>1).reduce((sum,v)=>sum+(v-1),0);
+  if(duplicateRecurrences) issues.push({code:'duplicate-recurrences',severity:'high',count:duplicateRecurrences,label:'Possíveis ocorrências recorrentes duplicadas'});
+  const n=monthNumbers(month,now);
+  if(n.projected!==n.current-n.outstanding) issues.push({code:'projected-invariant',severity:'critical',count:1,label:'Saldo projetado não corresponde ao saldo atual menos obrigações'});
+  const dash=dashboardNumbers(month,now);
+  const expectedPending=n.bills.filter(b=>['pending','partial','due-today'].includes(billStatus(b,now))).reduce((sum,b)=>sum+remainingForBill(b),0);
+  const expectedOverdue=n.bills.filter(b=>billStatus(b,now)==='overdue').reduce((sum,b)=>sum+remainingForBill(b),0);
+  if(n.pending!==expectedPending) issues.push({code:'pending-invariant',severity:'critical',count:1,label:'Total por pagar não corresponde às faturas pendentes'});
+  if(n.overdue!==expectedOverdue) issues.push({code:'overdue-invariant',severity:'critical',count:1,label:'Total em atraso não corresponde às faturas vencidas'});
+  return {
+    issues,
+    ok:issues.length===0,
+    counts:{bills:bills.length,payments:payments.length,pending:dash.pendingCount,overdue:dash.overdueCount},
+    totals:{current:n.current,pending:n.pending,overdue:n.overdue,outstanding:n.outstanding,projected:n.projected}
+  };
+}
