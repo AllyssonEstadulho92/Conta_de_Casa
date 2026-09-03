@@ -1,5 +1,17 @@
 # Changelog
 
+## v46 — auditoria de contagens e invariantes financeiras
+
+- reforçada a auditoria interna de totais e contagens sem alterar as fórmulas existentes;
+- verificação explícita de Por pagar, Em atraso, Em aberto, Próximos 7 dias, Saldo calculado, Saldo atual, Saldo projetado e Despesa contabilizada;
+- verificação de que o total por categorias coincide exatamente com pagamentos mais compras efetivas;
+- contagens de faturas pendentes e em atraso são comparadas com os próprios estados financeiros das faturas;
+- nova suite determinística cobre fatura paga, parcial, vencida, vencida parcialmente, vence hoje, pendente, cancelada e arquivada;
+- testes validam também o efeito imediato de registar e remover pagamentos nas contagens e totais;
+- todos os valores continuam calculados em cêntimos inteiros, sem aritmética de ponto flutuante para dinheiro;
+- schema 5, IndexedDB, cofre cifrado, backups e sincronização permanecem inalterados;
+- Service Worker e assets públicos promovidos para v46.
+
 ## v45 — ajuste real no iPhone e entrada PIN
 
 - corrigido o corte horizontal observado em Mercado e Faturas no iPhone;
