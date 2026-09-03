@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão preparada: v49. O schema de dados permanece na versão 5; esta fase mantém a aplicação em GitHub Pages, preserva o isolamento por utilizador e refina o cabeçalho móvel e os controlos de toque sem alterar dados, cálculos ou persistência.
+Versão preparada: v50. O schema de dados permanece na versão 5; esta fase mantém a aplicação em GitHub Pages e uniformiza os controlos de ação no mobile, com botões de adicionar compactos e estado de sincronização em formato pill, sem alterar dados, cálculos ou persistência.
 
 ## Estado
 
