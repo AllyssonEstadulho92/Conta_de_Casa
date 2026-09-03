@@ -8,6 +8,7 @@ const index = fs.readFileSync('index.html','utf8');
 const installJs = fs.readFileSync('mobile-install.js','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
 const workflow = fs.readFileSync('.github/workflows/mobile-assets.yml','utf8');
+const pagesWorkflow = fs.readFileSync('.github/workflows/pages.yml','utf8');
 const gitignore = fs.readFileSync('.gitignore','utf8');
 
 assert.equal(pkg.private,true);
@@ -53,6 +54,9 @@ assert.match(workflow,/apksigner.*verify/);
 assert.match(workflow,/gh release upload/);
 assert.match(workflow,/if: \$\{\{ github\.event_name == 'workflow_dispatch' \|\| \(github\.event_name == 'workflow_run'/);
 assert.match(workflow,/android-release:[\s\S]*github\.event_name == 'workflow_dispatch'[\s\S]*github\.event_name == 'workflow_run'/);
+assert.match(pagesWorkflow,/Prepare public site allowlist/);
+assert.match(pagesWorkflow,/path: dist/);
+assert.doesNotMatch(pagesWorkflow,/path: \./);
 
 for (const pattern of ['*.jks','*.keystore','*.p12','*.mobileprovision','android/','ios/','dist/']) {
   assert.ok(gitignore.includes(pattern),pattern);
