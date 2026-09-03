@@ -28,7 +28,7 @@ assert.equal(cap.android.allowMixedContent,false);
 assert.match(index,/id="androidApkDownload"/);
 assert.match(index,/id="iosIpaDownload"/);
 assert.match(index,/id="installPwaBtn"/);
-assert.match(index,/APK/IPA usa um armazenamento local separado/);
+assert.ok(index.includes('APK/IPA usa um armazenamento local separado'));
 assert.match(index,/mobile-install\.js\?v=47/);
 assert.match(index,/name="app-build" content="v47"/);
 
