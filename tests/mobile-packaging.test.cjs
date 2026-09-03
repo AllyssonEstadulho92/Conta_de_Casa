@@ -37,6 +37,8 @@ assert.match(installJs,/releases\/latest/);
 assert.match(installJs,/\.apk\$\/i/);
 assert.match(installJs,/\.ipa\$\/i/);
 assert.doesNotMatch(installJs,/appState|vaultKey|indexedDB|localStorage|sessionStorage/);
+assert.match(installJs,/url\.hostname === 'github\.com'/);
+assert.match(installJs,/AllyssonEstadulho92\/Conta_de_Casa\/releases\/download/);
 
 assert.match(sw,/conta-de-casa-public-v47/);
 assert.match(sw,/'\.\/mobile-install\.js'/);
@@ -50,7 +52,7 @@ assert.match(workflow,/ANDROID_KEY_PASSWORD/);
 assert.match(workflow,/apksigner.*verify/);
 assert.match(workflow,/gh release upload/);
 assert.match(workflow,/if: \$\{\{ github\.event_name == 'workflow_dispatch' \|\| \(github\.event_name == 'workflow_run'/);
-assert.doesNotMatch(workflow,/gh release upload[\s\S]*pull_request/);
+assert.match(workflow,/android-release:[\s\S]*github\.event_name == 'workflow_dispatch'[\s\S]*github\.event_name == 'workflow_run'/);
 
 for (const pattern of ['*.jks','*.keystore','*.p12','*.mobileprovision','android/','ios/','dist/']) {
   assert.ok(gitignore.includes(pattern),pattern);
