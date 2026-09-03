@@ -1,4 +1,4 @@
-/* Conta de Casa v44 — prototype-aligned responsive design system */
+/* Conta de Casa v45 — mobile fit and secure PIN presentation */
 :root{
   color-scheme:light;
   --bg:#f7f9fc;
@@ -946,4 +946,205 @@ html.sidebar-collapsed .icon-text-btn{justify-content:center;padding-inline:8px}
   :root{--page-gutter:8px}
   .topbar{column-gap:4px}
   .month-picker input{width:132px}
+}
+
+
+/* v45 — mobile-fit corrections from real iPhone screenshots */
+.vault-unlock-intro{display:grid;justify-items:center;gap:4px;text-align:center}
+.vault-lock-badge{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  border:1px solid color-mix(in srgb,var(--primary) 18%,var(--border));
+  border-radius:50%;
+  background:var(--primary-2);
+  color:var(--primary);
+}
+.vault-unlock-intro h1{margin:4px 0 0}
+.vault-unlock-intro p{margin:0;color:var(--muted)}
+.vault-pin-pad{margin-top:4px}
+.vault-keypad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.vault-key{
+  min-height:54px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:0;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:var(--surface);
+  color:var(--text);
+  box-shadow:0 1px 2px rgba(20,35,60,.025);
+  touch-action:manipulation;
+}
+.vault-key strong{font-size:1.05rem;font-weight:500;line-height:1.15}
+.vault-key small{min-height:10px;font-size:.52rem;line-height:1;color:var(--muted);letter-spacing:.08em}
+.vault-key:active{background:var(--primary-2);transform:translateY(1px)}
+.vault-key-delete{color:var(--muted)}
+.vault-key-spacer{min-height:54px}
+.vault-keyboard-toggle{margin-top:8px}
+.pin-entry-mode .vault-unlock-input-label{
+  justify-items:center;
+  margin:4px 0 2px;
+  font-size:0;
+  color:transparent;
+}
+.pin-entry-mode #unlockPassphrase{
+  width:min(250px,100%);
+  min-height:42px;
+  margin:0 auto;
+  padding:0 0 0 .28em;
+  border:0;
+  background:transparent;
+  box-shadow:none;
+  color:var(--text);
+  caret-color:transparent;
+  text-align:center;
+  font-size:1.55rem;
+  font-weight:500;
+  letter-spacing:.28em;
+}
+.pin-entry-mode #unlockPassphrase::placeholder{
+  color:#aab3bf;
+  opacity:1;
+  letter-spacing:.06em;
+}
+.pin-entry-mode #unlockPassphrase:focus{border:0;box-shadow:none;outline:none}
+.text-entry-mode #vaultPinPad{display:none}
+.text-entry-mode .vault-unlock-input-label{margin:8px 0 0}
+.text-entry-mode #unlockPassphrase{letter-spacing:normal;text-align:left}
+.pin-entry-mode .vault-action-row{display:none}
+.vault-enter-btn{margin-top:10px}
+
+@media(max-width:820px){
+  .main,.page{min-width:0}
+  .page{overflow-x:clip}
+
+  /* No horizontal carousel on financial filters/summaries: every element fits the viewport. */
+  .bill-filter-grid,.market-filter-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+    overflow:visible;
+    padding:0 0 10px;
+    border:0;
+    background:transparent;
+    scroll-snap-type:none;
+  }
+  .bill-filter-field,.market-filter-field{
+    min-width:0;
+    width:auto;
+    flex:none;
+  }
+  .bill-filter-field>span,.market-filter-field>span{display:none}
+  .bill-filter-field input,.bill-filter-field select,.market-filter-field select{
+    width:100%;
+    min-width:0;
+    min-height:42px;
+    height:42px;
+    padding:7px 11px;
+    border-radius:12px;
+  }
+  .bill-filter-field:nth-of-type(5),
+  .market-filter-field:nth-of-type(3),
+  .bill-filter-clear,
+  .market-filter-clear{grid-column:1/-1;width:100%}
+  .bill-filter-clear,.market-filter-clear{min-height:42px;height:42px;border-radius:12px}
+
+  .bill-summary-grid,.market-summary-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+    overflow:visible;
+    padding:0;
+    margin-bottom:12px;
+  }
+  .bill-summary-item,.market-summary-item{
+    min-width:0;
+    width:auto;
+    min-height:112px;
+    padding:11px 12px;
+    overflow:hidden;
+    flex:none;
+  }
+  .bill-summary-item>span,.market-summary-item>span{overflow-wrap:anywhere}
+  .bill-summary-item>strong,.market-summary-item>strong{font-size:1.02rem}
+  .bill-summary-item>small,.market-summary-item>small{font-size:.72rem;line-height:1.35}
+  .market-results-head,.bill-results-head{min-width:0}
+
+  /* Secure entry: compact, centered and usable without invoking the iOS keyboard. */
+  .vault-screen{
+    min-height:100svh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    overflow-y:auto;
+    padding:max(14px,env(safe-area-inset-top)) 12px max(18px,env(safe-area-inset-bottom));
+  }
+  .vault-card{
+    width:min(100%,390px);
+    max-width:390px;
+    min-height:0;
+    margin:0 auto;
+    padding:20px 18px;
+    border-radius:22px;
+    box-shadow:0 16px 48px rgba(20,35,60,.09);
+  }
+  .vault-card .brand{
+    flex-direction:column;
+    justify-content:center;
+    gap:7px;
+    margin-bottom:16px;
+    text-align:center;
+  }
+  .vault-card .brand>div{text-align:center}
+  .vault-card .brand-mark{
+    width:54px;
+    height:54px;
+    border-radius:16px;
+    font-size:1.45rem;
+  }
+  .brand-large strong{font-size:1.22rem}
+  .brand-large small{font-size:.74rem}
+  #vaultUnlock{display:grid;gap:8px}
+  #vaultUnlock[hidden]{display:none!important}
+  .vault-unlock-intro h1{font-size:1.08rem;line-height:1.25}
+  .vault-unlock-intro p{font-size:.72rem;line-height:1.35}
+  .vault-keypad{gap:8px}
+  .vault-key{min-height:50px;border-radius:12px}
+  .vault-key-spacer{min-height:50px}
+  .vault-enter-btn{min-height:48px!important;margin-top:4px!important}
+  .vault-keyboard-toggle{min-height:44px!important;margin-top:0!important}
+  .pin-recovery-actions{margin-top:0}
+  .pin-recovery-actions #pinHelpToggle{
+    display:block;
+    width:max-content;
+    max-width:100%;
+    min-height:40px;
+    margin:2px auto 0;
+    padding:6px 10px;
+  }
+  .vault-transfer{margin-top:8px}
+  .vault-disclosure{padding:10px 12px;border-radius:13px}
+  .vault-disclosure strong{font-size:.78rem}
+  .vault-disclosure small{font-size:.66rem}
+  .vault-card .privacy-note{margin-top:10px;font-size:.65rem}
+  .vault-card .form-message{margin:2px 0 0;font-size:.7rem}
+}
+
+@media(max-width:430px){
+  .bill-summary-grid,.market-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bill-summary-item,.market-summary-item{min-height:106px}
+  .vault-card{padding:18px 16px}
+  .vault-keypad{gap:7px}
+  .vault-key,.vault-key-spacer{min-height:48px}
+}
+
+@media(max-width:359px){
+  .bill-filter-grid,.market-filter-grid,
+  .bill-summary-grid,.market-summary-grid{grid-template-columns:1fr}
+  .bill-summary-item,.market-summary-item{min-height:92px}
+  .vault-card{padding:16px 12px}
+  .vault-key,.vault-key-spacer{min-height:46px}
 }
