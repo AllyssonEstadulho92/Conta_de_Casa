@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão preparada: v45. O schema de dados permanece na versão 5; esta fase corrige cortes horizontais reais observados no iPhone e aproxima a entrada segura do protótipo com teclado PIN visual, mantendo a mesma palavra-passe/PIN, a mesma função de desbloqueio e a mesma criptografia.
+Versão preparada: v46. O schema de dados permanece na versão 5; esta fase reforça a exatidão das contagens e totais com invariantes financeiras adicionais e uma suite determinística dedicada, sem alterar fórmulas de negócio ou estruturas persistentes.
 
 ## Estado
 

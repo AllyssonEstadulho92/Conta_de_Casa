@@ -320,13 +320,33 @@ function financialDiagnostics(month = selectedMonth, now = new Date()) {
   const duplicateRecurrences=[...recurrenceCounts.values()].filter(v=>v>1).reduce((sum,v)=>sum+(v-1),0);
   if(duplicateRecurrences) issues.push({code:'duplicate-recurrences',severity:'high',count:duplicateRecurrences,label:'Possíveis ocorrências recorrentes duplicadas'});
   const n=monthNumbers(month,now);
-  if(![n.incomes,n.paymentTotal,n.marketSpent,n.pending,n.overdue,n.outstanding,n.current,n.projected,n.budgetUsed].every(Number.isSafeInteger)) issues.push({code:'unsafe-month-total',severity:'critical',count:1,label:'Total mensal fora do intervalo monetário seguro'});
+  if(![n.incomes,n.paymentTotal,n.marketSpent,n.pending,n.overdue,n.outstanding,n.ledgerCurrent,n.current,n.reconciliationDiff,n.projected,n.budgetUsed].every(Number.isSafeInteger)) issues.push({code:'unsafe-month-total',severity:'critical',count:1,label:'Total mensal fora do intervalo monetário seguro'});
   if(n.projected!==sumCents([n.current,-n.outstanding])) issues.push({code:'projected-invariant',severity:'critical',count:1,label:'Saldo projetado não corresponde ao saldo atual menos obrigações'});
   const dash=dashboardNumbers(month,now);
-  const expectedPending=sumCents(n.bills.filter(b=>['pending','partial','due-today'].includes(billStatus(b,now))).map(b=>remainingForBill(b)));
-  const expectedOverdue=sumCents(n.bills.filter(b=>billStatus(b,now)==='overdue').map(b=>remainingForBill(b)));
+  const pendingBills=n.bills.filter(b=>['pending','partial','due-today'].includes(billStatus(b,now)));
+  const overdueBills=n.bills.filter(b=>billStatus(b,now)==='overdue');
+  const next7Bills=pendingBills.filter(b=>{
+    const days=billDaysUntil(b,now);
+    return Number.isFinite(days)&&days>=0&&days<=7;
+  });
+  const expectedPending=sumCents(pendingBills.map(b=>remainingForBill(b)));
+  const expectedOverdue=sumCents(overdueBills.map(b=>remainingForBill(b)));
+  const expectedOutstanding=sumCents([expectedPending,expectedOverdue]);
+  const expectedBudgetUsed=sumCents([n.paymentTotal,n.marketSpent]);
+  const expectedLedgerCurrent=sumCents([n.profile.openingBalanceCents,n.incomes,-n.paymentTotal,-n.marketSpent]);
+  const expectedCurrent=n.hasAccountBalance?n.profile.accountBalanceCents:expectedLedgerCurrent;
+  const expectedNext7=sumCents(next7Bills.map(b=>remainingForBill(b)));
+  const categoryTotal=sumCents(categoryTotals(month).map(([,value])=>value));
   if(n.pending!==expectedPending) issues.push({code:'pending-invariant',severity:'critical',count:1,label:'Total por pagar não corresponde às faturas pendentes'});
   if(n.overdue!==expectedOverdue) issues.push({code:'overdue-invariant',severity:'critical',count:1,label:'Total em atraso não corresponde às faturas vencidas'});
+  if(n.outstanding!==expectedOutstanding) issues.push({code:'outstanding-invariant',severity:'critical',count:1,label:'Total em aberto não corresponde a por pagar mais atrasos'});
+  if(n.budgetUsed!==expectedBudgetUsed) issues.push({code:'budget-used-invariant',severity:'critical',count:1,label:'Despesa contabilizada não corresponde a pagamentos mais compras'});
+  if(n.ledgerCurrent!==expectedLedgerCurrent) issues.push({code:'ledger-current-invariant',severity:'critical',count:1,label:'Saldo calculado não corresponde aos movimentos registados'});
+  if(n.current!==expectedCurrent) issues.push({code:'current-balance-invariant',severity:'critical',count:1,label:'Saldo atual não corresponde ao saldo bancário confirmado ou ao saldo calculado'});
+  if(dash.pendingCount!==pendingBills.length) issues.push({code:'pending-count-invariant',severity:'critical',count:1,label:'Contagem por pagar não corresponde ao número de faturas pendentes'});
+  if(dash.overdueCount!==overdueBills.length) issues.push({code:'overdue-count-invariant',severity:'critical',count:1,label:'Contagem em atraso não corresponde ao número de faturas vencidas'});
+  if(dash.next7!==expectedNext7||dash.next7Count!==next7Bills.length) issues.push({code:'next7-invariant',severity:'critical',count:1,label:'Próximos 7 dias não correspondem aos vencimentos do período'});
+  if(categoryTotal!==expectedBudgetUsed) issues.push({code:'category-total-invariant',severity:'critical',count:1,label:'Total por categorias não corresponde às despesas efetivas do mês'});
   return {
     issues,
     ok:issues.length===0,
