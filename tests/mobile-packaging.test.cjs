@@ -79,9 +79,10 @@ assert.match(pagesWorkflow,/Prepare public site allowlist/);
 assert.match(pagesWorkflow,/path: dist/);
 assert.doesNotMatch(pagesWorkflow,/path: \./);
 
-for (const pattern of ['*.jks','*.keystore','*.p12','*.mobileprovision','android/','ios/','dist/']) {
+for (const pattern of ['*.jks','*.keystore','*.p12','*.mobileprovision','/android/','/ios/','/dist/','/mobile-release/']) {
   assert.ok(gitignore.includes(pattern),pattern);
 }
+assert.doesNotMatch(gitignore,/^android\/$/m,'downloads/android must not be ignored');
 
 execFileSync(process.execPath,['scripts/prepare-mobile.cjs'],{stdio:'pipe'});
 const expected = [
