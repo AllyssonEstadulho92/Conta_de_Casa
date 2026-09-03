@@ -37,7 +37,7 @@ jobs:
           java-version: "21"
 
       - name: Install pinned mobile dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm install --no-audit --no-fund
 
       - name: Prepare public web bundle
         run: npm run mobile:prepare
@@ -103,7 +103,7 @@ jobs:
         run: xcodebuild -version
 
       - name: Install pinned mobile dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm install --no-audit --no-fund
 
       - name: Prepare public web bundle
         run: npm run mobile:prepare
@@ -187,7 +187,7 @@ jobs:
 
       - name: Install pinned mobile dependencies
         if: steps.signing.outputs.ready == 'true'
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm install --no-audit --no-fund
 
       - name: Prepare public web bundle
         if: steps.signing.outputs.ready == 'true'
