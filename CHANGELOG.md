@@ -1,5 +1,21 @@
 # Changelog
 
+## v47 — distribuição móvel, APK e instalação PWA
+
+- adicionada fundação Capacitor para Android e iOS com dependências fixadas;
+- criado bundle móvel por allowlist, impedindo inclusão acidental de documentação, testes, Git metadata, chaves ou dados privados;
+- CI passa a gerar APK Android de verificação com package id isolado e a compilar a app iOS para simulador sem assinatura;
+- APK de produção só é criado e publicado quando as secrets de assinatura Android estão configuradas;
+- assinatura Android usa chave estável fora do repositório, `zipalign`, `apksigner verify` e checksum SHA-256;
+- GitHub Release `v47` recebe automaticamente APK + checksum quando a assinatura de produção está disponível;
+- Definições ganha a secção Aplicação móvel com instalação PWA, descoberta automática de APK/IPA nos Releases e instruções iPhone/iPad;
+- botão de download nunca aponta para um APK de teste nem para um ficheiro inexistente;
+- aviso explícito informa que APK/IPA têm armazenamento local separado do Safari/Chrome e exige backup cifrado ou sincronização para migração;
+- ícones e splash nativos são gerados a partir do asset público `icon.svg`;
+- nenhuma chave Android/Apple, keystore, certificado ou provisioning profile é guardado no repositório;
+- schema 5, DB_VERSION 2, IndexedDB cifrado, cálculos, backup e sincronização permanecem inalterados;
+- Service Worker e assets públicos promovidos para v47.
+
 ## v46 — auditoria de contagens e invariantes financeiras
 
 - reforçada a auditoria interna de totais e contagens sem alterar as fórmulas existentes;
