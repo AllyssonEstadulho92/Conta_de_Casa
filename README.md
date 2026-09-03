@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão preparada: v46. O schema de dados permanece na versão 5; esta fase reforça a exatidão das contagens e totais com invariantes financeiras adicionais e uma suite determinística dedicada, sem alterar fórmulas de negócio ou estruturas persistentes.
+Versão preparada: v47. O schema de dados permanece na versão 5; esta fase acrescenta uma fundação de distribuição móvel com Capacitor, instalação PWA, validação Android/iOS em CI e publicação segura de APK apenas quando existir assinatura estável, sem alterar os dados ou o motor financeiro.
 
 ## Estado
 
@@ -35,8 +35,11 @@ node --check forms.js
 node --check sync.js
 node --check events.js
 node --check sw.js
+node --check mobile-install.js
 node tests/finance.test.cjs
 node tests/audit.test.cjs
+node tests/counting-invariants.test.cjs
+node tests/mobile-packaging.test.cjs
 node tests/form-regression.test.cjs
 node tests/security.test.cjs
 node tests/sync.test.cjs
@@ -56,3 +59,14 @@ A sincronização automática é opcional e usa o repositório privado `Allysson
 - conflitos reais são comparados campo a campo e exigem escolha explícita entre a versão deste dispositivo e a versão sincronizada;
 - o resultado escolhido só é enviado depois de todas as decisões, com proteção contra gravações concorrentes;
 - eliminações são propagadas através de tombstones cifrados.
+
+
+## Aplicação móvel
+
+A v47 prepara a mesma aplicação para PWA, Android e iOS através de Capacitor. Consulte `MOBILE_DISTRIBUTION.md`.
+
+- a PWA pode ser instalada diretamente a partir de Definições > Aplicação móvel;
+- o APK de produção só aparece no botão de download quando existe um GitHub Release com APK assinado;
+- builds Android de verificação usam package id separado e não são apresentados como versão de produção;
+- o iOS é validado em Xcode para simulador, mas um IPA real exige credenciais Apple próprias;
+- ao passar do navegador para APK/IPA, use backup cifrado ou sincronização porque o armazenamento local do contentor nativo é separado.
