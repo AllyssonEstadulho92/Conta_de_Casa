@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const source = fs.readFileSync('sync.js','utf8');
 new Function(source);
 
-assert.match(source, /const SYNC_DEFAULT_PATH = 'sync\\/vault\\.json'/);
+assert.ok(source.includes("const SYNC_DEFAULT_PATH = 'sync/vault.json';"));
 assert.doesNotMatch(source, /SYNC_DEFAULT_OWNER|SYNC_DEFAULT_REPO/);
 assert.match(source, /data\.private !== true/);
 assert.match(source, /Contents: Read and write/);
