@@ -1,5 +1,17 @@
 # Changelog
 
+## v45 — ajuste real no iPhone e entrada PIN
+
+- corrigido o corte horizontal observado em Mercado e Faturas no iPhone;
+- filtros deixam de usar carrossel horizontal no mobile e passam a grelha adaptativa de duas colunas;
+- cartões-resumo deixam de ficar parcialmente fora do ecrã e passam a grelha 2×2, com uma coluna apenas em telefones muito estreitos;
+- ecrã de desbloqueio passa a usar hierarquia próxima do protótipo: marca central, instrução curta, PIN mascarado, teclado numérico e ação Entrar;
+- teclado PIN escreve no mesmo campo `unlockPassphrase` e continua a chamar exatamente `unlockVault()`, sem migração de credenciais nem alteração criptográfica;
+- utilizadores com palavra-passe alfanumérica continuam a poder alternar para `Usar palavra-passe`;
+- o PIN existente continua sujeito às regras de segurança atuais; não foi reduzido o mínimo de 8 caracteres usado na criação/alteração do cofre;
+- Face ID real não foi simulado nem falsamente ativado: continua fora desta alteração porque exige arquitetura WebAuthn/biometria separada;
+- Service Worker e cache público promovidos para v45.
+
 ## v44 — redesign visual e estrutural do layout
 
 - interface alinhada ao protótipo aprovado, mantendo os dados reais como única fonte de conteúdo;

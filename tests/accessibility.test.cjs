@@ -48,5 +48,9 @@ assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
 assert.match(render, /setAttribute\('aria-current','page'\)/);
 assert.match(index, /aria-labelledby="drawerTitle"/);
 assert.match(index, /aria-expanded="false"/);
+assert.match(index, /aria-label="Teclado numérico do PIN"/);
+assert.match(index, /aria-label="Apagar último dígito"/);
+assert.match(css, /\.vault-key\{[\s\S]*min-height:54px/);
+assert.match(css, /\.vault-keyboard-toggle\{/);
 
 console.log('Accessibility foundation tests: OK');

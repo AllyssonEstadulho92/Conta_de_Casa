@@ -162,3 +162,14 @@ assert.match(index, /id="accountBalance"/);
 assert.match(index, /A aplicação não acede automaticamente à conta bancária/);
 
 console.log('Account balance snapshot form tests: OK');
+
+
+assert.match(index, /id="unlockPassphrase"[^>]*type="password"/);
+assert.match(index, /id="vaultPinPad"/);
+assert.match(index, /id="vaultKeyboardModeToggle"/);
+assert.match(events, /digit\.dataset\.pinKey/);
+assert.match(events, /input\.value=input\.value\.slice\(0,-1\)/);
+assert.match(events, /setVaultEntryMode\(vaultPinMedia\.matches\?'pin':'text'\)/);
+assert.match(events, /await unlockVault\(\$\('#unlockPassphrase'\)\.value\)/);
+
+console.log('PIN keypad preserves existing vault unlock regression tests: OK');

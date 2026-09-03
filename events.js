@@ -10,6 +10,58 @@ function ensureDialogShellIsContainer() {
   shell.replaceWith(div);
 }
 
+let vaultPinPadWired = false;
+let vaultPinMedia = null;
+
+function setVaultEntryMode(mode = 'pin') {
+  const box=$('#vaultUnlock');
+  const input=$('#unlockPassphrase');
+  const toggle=$('#vaultKeyboardModeToggle');
+  if(!box||!input||!toggle) return;
+  const pinMode=mode==='pin';
+  box.classList.toggle('pin-entry-mode',pinMode);
+  box.classList.toggle('text-entry-mode',!pinMode);
+  input.readOnly=pinMode;
+  input.setAttribute('inputmode',pinMode?'none':'text');
+  toggle.textContent=pinMode?'Usar palavra-passe':'Usar teclado PIN';
+  toggle.setAttribute('aria-pressed',String(!pinMode));
+  if(!pinMode) requestAnimationFrame(()=>input.focus({preventScroll:true}));
+}
+
+function wireVaultPinPad() {
+  if(vaultPinPadWired) return;
+  const pad=$('#vaultPinPad');
+  const input=$('#unlockPassphrase');
+  const toggle=$('#vaultKeyboardModeToggle');
+  const unlock=$('#vaultUnlock');
+  if(!pad||!input||!toggle||!unlock) return;
+  vaultPinPadWired=true;
+
+  pad.addEventListener('click',e=>{
+    const digit=e.target.closest('[data-pin-key]');
+    const del=e.target.closest('[data-pin-delete]');
+    if(!unlock.classList.contains('pin-entry-mode')) return;
+    if(digit){
+      if(input.value.length<128) input.value+=digit.dataset.pinKey||'';
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+      return;
+    }
+    if(del){
+      input.value=input.value.slice(0,-1);
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+  });
+
+  toggle.addEventListener('click',()=>{
+    setVaultEntryMode(unlock.classList.contains('pin-entry-mode')?'text':'pin');
+  });
+
+  vaultPinMedia=window.matchMedia('(max-width: 820px)');
+  const applyMode=()=>setVaultEntryMode(vaultPinMedia.matches?'pin':'text');
+  applyMode();
+  if(typeof vaultPinMedia.addEventListener==='function') vaultPinMedia.addEventListener('change',applyMode);
+}
+
 function installPinRecoveryUi() {
   const unlockBox = $('#vaultUnlock');
   if (unlockBox && !$('#pinHelpToggle')) {
@@ -475,7 +527,7 @@ async function enterApp() {
   if ('serviceWorker' in navigator) {
     (async()=>{
       try{
-        const reg=await navigator.serviceWorker.register('./sw.js?v=44',{updateViaCache:'none'});
+        const reg=await navigator.serviceWorker.register('./sw.js?v=45',{updateViaCache:'none'});
         await reg.update().catch(()=>{});
         if(!window.__swReloadBound){
           window.__swReloadBound=true;
@@ -496,6 +548,7 @@ async function initVaultUi() {
   installStorageGuards();
   installRuntimeErrorGuards();
   installPinRecoveryUi();
+  wireVaultPinPad();
   await openDb();
   const meta=await idbGet('meta','vault'); $('#vaultCreate').hidden=!!meta; $('#vaultUnlock').hidden=!meta;
 
