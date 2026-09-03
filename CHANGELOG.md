@@ -1,5 +1,16 @@
 # Changelog
 
+## v50 — hierarquia unificada dos controlos móveis
+
+- botões “+” do cabeçalho, Faturas e Mercado passam a usar a mesma geometria: alvo táctil de 44 px e superfície visível de 36 px;
+- substituída a bola circular dominante por um controlo arredondado de 12 px, mais discreto e coerente com o restante design system;
+- símbolo “+” reduzido para 1,25 rem e centrado geometricamente;
+- estado de sincronização passa a um pill compacto de 36 px, com ponto de estado de 7 px sem halo ou barra visual;
+- alinhamento à direita preservado entre o botão de adicionar e o estado de sincronização;
+- em ecrãs muito estreitos, o pill de sincronização reduz-se ao ponto de estado mantendo o alvo utilizável;
+- alteração exclusivamente visual/responsiva; dados, cálculos, criptografia, IndexedDB e sincronização funcional permanecem inalterados;
+- Service Worker e assets públicos promovidos para v50.
+
 ## v49 — cabeçalho móvel e controlos de toque
 
 - aumentado o espaço seguro no topo do cabeçalho móvel, incluindo `safe-area-inset-top`, para afastar o menu hambúrguer da zona superior do iPhone;
