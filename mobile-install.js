@@ -145,7 +145,18 @@
       }
     });
 
+    const releaseCheck = $m('#checkMobileReleaseBtn');
+    releaseCheck?.addEventListener('click', async () => {
+      releaseCheck.disabled = true;
+      setStatus('A verificar pacotes publicados…');
+      try {
+        await loadReleaseAssets();
+        setStatus('Verificação concluída.', 'success');
+      } finally {
+        releaseCheck.disabled = false;
+      }
+    });
+
     updateInstallUi();
-    loadReleaseAssets();
   });
 })();
