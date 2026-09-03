@@ -8,7 +8,7 @@ const events = fs.readFileSync('events.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 const render = fs.readFileSync('render.js','utf8');
 
-assert.match(designCss, /Conta de Casa v48 — GitHub Pages and per-user vault isolation/);
+assert.match(designCss, /Conta de Casa v49 — refined mobile header and touch controls/);
 assert.match(designCss, /--content-max:1480px/);
 assert.match(designCss, /--sidebar-expanded:232px/);
 assert.match(designCss, /--sidebar-rail:72px/);
@@ -16,6 +16,11 @@ assert.match(designCss, /html\.sidebar-collapsed/);
 assert.match(designCss, /@media\(min-width:821px\) and \(max-width:1180px\)/);
 assert.match(designCss, /@media\(max-width:820px\)/);
 assert.match(designCss, /@media\(max-width:359px\)/);
+assert.match(designCss, /--mobile-top-safe:max\(12px,env\(safe-area-inset-top\)\)/);
+assert.match(designCss, /\.mobile-menu-btn\{[\s\S]*width:48px;[\s\S]*height:48px;[\s\S]*touch-action:manipulation/);
+assert.match(designCss, /\.btn\.primary\.topbar-create\{[\s\S]*width:48px;[\s\S]*background:transparent;[\s\S]*place-items:center/);
+assert.match(designCss, /\.btn\.primary\.topbar-create>span:first-child\{[\s\S]*width:40px;[\s\S]*height:40px;[\s\S]*font-size:1\.55rem/);
+assert.match(designCss, /\.btn\.primary\.bill-new-btn::before,[\s\S]*\.btn\.primary\.market-new-btn::before\{[\s\S]*width:40px;[\s\S]*height:40px/);
 
 assert.match(designCss, /\.main\{[\s\S]*margin-left:var\(--sidebar-current\)/);
 assert.match(designCss, /\.mobile-nav\{[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
@@ -101,19 +106,19 @@ assert.doesNotMatch(legacyCss, /\.bill-card\b/);
 assert.doesNotMatch(css, /\bzoom\s*:/i);
 assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
 
-assert.match(index, /name="app-build" content="v48"/);
+assert.match(index, /name="app-build" content="v49"/);
 assert.match(index, /styles\.css\?v=48/);
 assert.match(index, /design-system\.css\?v=48/);
 assert.match(index, /manifest\.webmanifest\?v=48/);
 for (const asset of ['core','finance','render','forms','sync','events']) {
   assert.match(index,new RegExp(`${asset}\\.js\\?v=48`));
 }
-assert.match(index, /id="appBuildVersion">v48</);
+assert.match(index, /id="appBuildVersion">v49</);
 assert.match(events, /register\('\.\/sw\.js\?v=48',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v48/);
+assert.match(swSource, /conta-de-casa-public-v49/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 
-console.log('Responsive mobile-fit shell, PIN entry and GitHub Pages freshness v48 tests: OK');
+console.log('Responsive mobile-fit shell, PIN entry, touch controls and GitHub Pages freshness v49 tests: OK');
