@@ -87,7 +87,7 @@ assert.match(index, /Content-Security-Policy/);
 assert.match(index, /script-src 'self'/);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
 assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline event handlers');
-assert.doesNotMatch(index, /AllyssonEstadulho92|conta-de-casa-/);
+assert.doesNotMatch(index, /target_name=|Destino automático/);
 
 const sw = fs.readFileSync('sw.js','utf8');
 assert.match(sw, /PUBLIC_ASSET_SET/);
