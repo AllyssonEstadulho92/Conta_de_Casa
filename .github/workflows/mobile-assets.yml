@@ -90,15 +90,16 @@ jobs:
 
       - name: Stage verification APK
         run: |
-          mkdir -p mobile-release
-          cp android/app/build/outputs/apk/debug/app-debug.apk mobile-release/Conta-de-Casa-Android-verification.apk
-          sha256sum mobile-release/Conta-de-Casa-Android-verification.apk > mobile-release/Conta-de-Casa-Android-verification.sha256
+          APK_DIR="mobile-release/android/v47/verification"
+          mkdir -p "$APK_DIR"
+          cp android/app/build/outputs/apk/debug/app-debug.apk "$APK_DIR/Conta-de-Casa-v47-Android-verification.apk"
+          sha256sum "$APK_DIR/Conta-de-Casa-v47-Android-verification.apk" > "$APK_DIR/Conta-de-Casa-v47-Android-verification.sha256"
 
       - name: Upload Android verification artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Conta-de-Casa-Android-verification
-          path: mobile-release/
+          name: Conta-de-Casa-Android-v47-verification
+          path: mobile-release/android/v47/verification/
           if-no-files-found: error
           retention-days: 7
 
@@ -260,18 +261,19 @@ jobs:
           BUILD_TOOLS="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
           test -x "$BUILD_TOOLS/zipalign"
           test -x "$BUILD_TOOLS/apksigner"
-          mkdir -p mobile-release
+          APK_DIR="mobile-release/android/v47/production"
+          mkdir -p "$APK_DIR"
           "$BUILD_TOOLS/zipalign" -p -f 4 android/app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/Conta-de-Casa-aligned.apk"
-          "$BUILD_TOOLS/apksigner" sign             --ks "$RUNNER_TEMP/conta-de-casa-release.jks"             --ks-key-alias "$KEY_ALIAS"             --ks-pass "pass:$STORE_PASSWORD"             --key-pass "pass:$KEY_PASSWORD"             --out mobile-release/Conta-de-Casa-v47-Android.apk             "$RUNNER_TEMP/Conta-de-Casa-aligned.apk"
-          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs mobile-release/Conta-de-Casa-v47-Android.apk
-          sha256sum mobile-release/Conta-de-Casa-v47-Android.apk > mobile-release/Conta-de-Casa-v47-Android.sha256
+          "$BUILD_TOOLS/apksigner" sign             --ks "$RUNNER_TEMP/conta-de-casa-release.jks"             --ks-key-alias "$KEY_ALIAS"             --ks-pass "pass:$STORE_PASSWORD"             --key-pass "pass:$KEY_PASSWORD"             --out "$APK_DIR/Conta-de-Casa-v47-Android.apk"             "$RUNNER_TEMP/Conta-de-Casa-aligned.apk"
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK_DIR/Conta-de-Casa-v47-Android.apk"
+          sha256sum "$APK_DIR/Conta-de-Casa-v47-Android.apk" > "$APK_DIR/Conta-de-Casa-v47-Android.sha256"
 
       - name: Upload signed Android artifact
         if: steps.signing.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: Conta-de-Casa-v47-Android-signed
-          path: mobile-release/
+          path: mobile-release/android/v47/production/
           if-no-files-found: error
           retention-days: 30
 
@@ -285,4 +287,4 @@ jobs:
           if ! gh release view "$VERSION" >/dev/null 2>&1; then
             gh release create "$VERSION" --target "$TARGET_SHA" --title "Conta de Casa $VERSION" --notes "Pacote Android assinado da Conta de Casa. Verifique o ficheiro SHA-256 antes de instalar."
           fi
-          gh release upload "$VERSION" mobile-release/Conta-de-Casa-v47-Android.apk mobile-release/Conta-de-Casa-v47-Android.sha256 --clobber
+          gh release upload "$VERSION" mobile-release/android/v47/production/Conta-de-Casa-v47-Android.apk mobile-release/android/v47/production/Conta-de-Casa-v47-Android.sha256 --clobber
