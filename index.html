@@ -6,15 +6,15 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.github.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; media-src 'none'; manifest-src 'self'; worker-src 'self'" />
   <meta name="referrer" content="no-referrer" />
   <meta name="theme-color" content="#f7f9fc" />
-  <meta name="app-build" content="v46" />
+  <meta name="app-build" content="v47" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Conta de Casa" />
   <meta name="description" content="Conta de Casa — gestão privada de faturas e despesas domésticas." />
-  <link rel="manifest" href="./manifest.webmanifest?v=46" />
+  <link rel="manifest" href="./manifest.webmanifest?v=47" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=46" />
-  <link rel="stylesheet" href="./design-system.css?v=46" />
+  <link rel="stylesheet" href="./styles.css?v=47" />
+  <link rel="stylesheet" href="./design-system.css?v=47" />
   <title>Conta de Casa</title>
 </head>
 <body>
@@ -173,7 +173,7 @@
     <div><small>Modo</small><strong id="syncHealthMode">Só local</strong></div>
   </div>
   <div class="detail-grid section-gap">
-    <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div><div class="detail-item full-detail"><small>Versão técnica</small><strong id="appBuildVersion">v46</strong></div>
+    <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div><div class="detail-item full-detail"><small>Versão técnica</small><strong id="appBuildVersion">v47</strong></div>
   </div>
   <div class="form-grid section-gap">
     <label>Credencial GitHub deste dispositivo — introduzir apenas uma vez<input id="syncToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Fine-grained token com Contents: Read and write" /><small>Ao colar, o token é primeiro guardado cifrado neste dispositivo e depois validado automaticamente.</small></label>
@@ -228,7 +228,49 @@
           <article class="panel"><div class="panel-head"><div><h2>Integridade financeira</h2><p>Verificação automática das principais invariantes.</p></div></div><div id="diagnosticIssues" class="stack-list"></div></article>
         </div>
       </section>
-      <section id="page-settings" class="page"><nav class="section-tabs" aria-label="Vistas de definições"><button class="section-tab" type="button" data-page="settings">Preferências</button><button class="section-tab" type="button" data-page="diagnostics">Integridade</button></nav><article class="panel narrow"><h2>Preferências</h2><form id="settingsForm" class="form-grid"><label>Nome opcional<input id="profileName" autocomplete="name" /></label><label>Moeda<select id="currencySelect"><option value="EUR">EUR — Euro</option></select></label><label>Modo visual<select id="themeSelect"><option value="light">Claro</option><option value="dark">Escuro</option><option value="system">Sistema</option></select></label><button class="btn primary" type="submit">Guardar preferências</button></form><hr /><button id="resetDataBtn" class="btn danger">Apagar todos os dados locais</button></article></section>
+      <section id="page-settings" class="page">
+        <nav class="section-tabs" aria-label="Vistas de definições"><button class="section-tab" type="button" data-page="settings">Preferências</button><button class="section-tab" type="button" data-page="diagnostics">Integridade</button></nav>
+        <div class="settings-grid">
+          <article class="panel">
+            <h2>Preferências</h2>
+            <form id="settingsForm" class="form-grid">
+              <label>Nome opcional<input id="profileName" autocomplete="name" /></label>
+              <label>Moeda<select id="currencySelect"><option value="EUR">EUR — Euro</option></select></label>
+              <label>Modo visual<select id="themeSelect"><option value="light">Claro</option><option value="dark">Escuro</option><option value="system">Sistema</option></select></label>
+              <button class="btn primary" type="submit">Guardar preferências</button>
+            </form>
+            <hr />
+            <button id="resetDataBtn" class="btn danger">Apagar todos os dados locais</button>
+          </article>
+          <article class="panel mobile-distribution-panel">
+            <div class="panel-head"><div><h2>Aplicação móvel</h2><p>Instale a Conta de Casa ou descarregue um pacote nativo assinado quando estiver disponível.</p></div><span class="status-chip normal">v47</span></div>
+            <div class="app-download-grid">
+              <section class="app-download-card">
+                <div class="app-download-icon" aria-hidden="true">A</div>
+                <div><strong>Android</strong><small>APK nativo via Capacitor. O APK público só é ativado quando existir uma assinatura estável e verificada.</small></div>
+                <a id="androidApkDownload" class="btn primary disabled" aria-disabled="true">APK assinado ainda não publicado</a>
+              </section>
+              <section class="app-download-card">
+                <div class="app-download-icon" aria-hidden="true">◎</div>
+                <div><strong>Instalar Web App</strong><small id="installPwaHint">Instale a PWA diretamente a partir do navegador.</small></div>
+                <button id="installPwaBtn" class="btn secondary" type="button">Como instalar</button>
+              </section>
+              <section class="app-download-card">
+                <div class="app-download-icon" aria-hidden="true">i</div>
+                <div><strong>iPhone / iPad</strong><small>Instalação imediata pela PWA. Um IPA nativo exige assinatura Apple e não será disponibilizado sem credenciais próprias.</small></div>
+                <a id="iosIpaDownload" class="btn secondary disabled" aria-disabled="true">IPA assinado ainda não publicado</a>
+              </section>
+            </div>
+            <p id="mobileReleaseMeta" class="muted section-gap">A verificar pacotes móveis publicados…</p>
+            <p id="mobileInstallStatus" class="form-message mobile-install-status" role="status" aria-live="polite"></p>
+            <div class="mobile-migration-note">
+              <strong>Dados existentes</strong>
+              <p>O APK/IPA usa um armazenamento local separado do Safari/Chrome. Antes de mudar para a versão nativa, exporte um backup cifrado ou configure a sincronização cifrada. Nunca copie ficheiros de dados em claro.</p>
+            </div>
+            <a class="link-btn mobile-release-link" href="https://github.com/AllyssonEstadulho92/Conta_de_Casa/releases" target="_blank" rel="noopener noreferrer">Ver releases no GitHub</a>
+          </article>
+        </div>
+      </section>
     </main>
     <nav id="mobileNav" class="mobile-nav" aria-label="Acesso rápido"></nav>
   </div>
@@ -269,6 +311,6 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="./core.js?v=46" defer></script><script src="./finance.js?v=46" defer></script><script src="./render.js?v=46" defer></script><script src="./forms.js?v=46" defer></script><script src="./sync.js?v=46" defer></script><script src="./events.js?v=46" defer></script>
+  <script src="./core.js?v=47" defer></script><script src="./finance.js?v=47" defer></script><script src="./render.js?v=47" defer></script><script src="./forms.js?v=47" defer></script><script src="./sync.js?v=47" defer></script><script src="./events.js?v=47" defer></script><script src="./mobile-install.js?v=47" defer></script>
 </body>
 </html>
