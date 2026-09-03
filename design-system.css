@@ -79,7 +79,7 @@ input:focus,select:focus,textarea:focus{border-color:color-mix(in srgb,var(--pri
 .link-btn{min-height:36px;font-weight:600}
 .payment-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 .payment-actions .btn{min-height:44px;padding:8px 10px;font-size:.75rem}
-.panel,.kpi,.bill-card,.goal-card{border-radius:var(--radius);box-shadow:var(--shadow-card);border:1px solid color-mix(in srgb,var(--border) 92%,transparent);background:var(--surface)}
+.panel,.kpi,.goal-card{border-radius:var(--radius);box-shadow:var(--shadow-card);border:1px solid color-mix(in srgb,var(--border) 92%,transparent);background:var(--surface)}
 .panel{padding:22px}
 .kpi{padding:18px}
 .kpi .label{font-size:.8125rem;font-weight:500;color:var(--muted)}
@@ -103,7 +103,7 @@ input:focus,select:focus,textarea:focus{border-color:color-mix(in srgb,var(--pri
 .sync-conflict-columns strong,.sync-conflict-row>*{font-size:.75rem;line-height:1.45}
 .calendar-day .day-num,.status-good,.quick-grid button,.sync-conflict-head small{font-weight:600}
 .trend-bar{background:var(--primary)}
-.bill-actions .btn,.market-row input,.vault-action-row .link-btn{min-height:44px}
+.vault-action-row .link-btn{min-height:44px}
 
 /* Adaptive sidebar */
 .sidebar{
