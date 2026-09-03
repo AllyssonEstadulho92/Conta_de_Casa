@@ -6,15 +6,15 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.github.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; media-src 'none'; manifest-src 'self'; worker-src 'self'" />
   <meta name="referrer" content="no-referrer" />
   <meta name="theme-color" content="#f7f9fc" />
-  <meta name="app-build" content="v44" />
+  <meta name="app-build" content="v45" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Conta de Casa" />
   <meta name="description" content="Conta de Casa — gestão privada de faturas e despesas domésticas." />
-  <link rel="manifest" href="./manifest.webmanifest?v=44" />
+  <link rel="manifest" href="./manifest.webmanifest?v=45" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=44" />
-  <link rel="stylesheet" href="./design-system.css?v=44" />
+  <link rel="stylesheet" href="./styles.css?v=45" />
+  <link rel="stylesheet" href="./design-system.css?v=45" />
   <title>Conta de Casa</title>
 </head>
 <body>
@@ -29,10 +29,36 @@
         <button id="createVaultBtn" class="btn primary full">Criar cofre e entrar</button>
       </div>
       <div id="vaultUnlock" hidden>
-        <h1>Desbloquear</h1>
-        <p>Introduza a palavra-passe/PIN do seu cofre local.</p>
-        <label>Palavra-passe/PIN<input id="unlockPassphrase" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" /></label>
-        <button id="unlockVaultBtn" class="btn primary full">Entrar</button>
+        <div class="vault-unlock-intro">
+          <span class="vault-lock-badge" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          </span>
+          <h1>Introduza o seu PIN</h1>
+          <p>Acesso protegido e cifrado neste dispositivo.</p>
+        </div>
+        <label class="vault-unlock-input-label">Palavra-passe/PIN
+          <input id="unlockPassphrase" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="○ ○ ○ ○ ○ ○ ○ ○" />
+        </label>
+        <div id="vaultPinPad" class="vault-pin-pad" aria-label="Teclado numérico do PIN">
+          <div class="vault-keypad">
+            <button class="vault-key" type="button" data-pin-key="1"><strong>1</strong><small></small></button>
+            <button class="vault-key" type="button" data-pin-key="2"><strong>2</strong><small>ABC</small></button>
+            <button class="vault-key" type="button" data-pin-key="3"><strong>3</strong><small>DEF</small></button>
+            <button class="vault-key" type="button" data-pin-key="4"><strong>4</strong><small>GHI</small></button>
+            <button class="vault-key" type="button" data-pin-key="5"><strong>5</strong><small>JKL</small></button>
+            <button class="vault-key" type="button" data-pin-key="6"><strong>6</strong><small>MNO</small></button>
+            <button class="vault-key" type="button" data-pin-key="7"><strong>7</strong><small>PQRS</small></button>
+            <button class="vault-key" type="button" data-pin-key="8"><strong>8</strong><small>TUV</small></button>
+            <button class="vault-key" type="button" data-pin-key="9"><strong>9</strong><small>WXYZ</small></button>
+            <span class="vault-key-spacer" aria-hidden="true"></span>
+            <button class="vault-key" type="button" data-pin-key="0"><strong>0</strong><small></small></button>
+            <button class="vault-key vault-key-delete" type="button" data-pin-delete aria-label="Apagar último dígito">
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 4-7 16H4l-3-8 3-8z"/><path d="m9 9 6 6m0-6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+        <button id="unlockVaultBtn" class="btn primary full vault-enter-btn">Entrar</button>
+        <button id="vaultKeyboardModeToggle" class="btn secondary full vault-keyboard-toggle" type="button">Usar palavra-passe</button>
       </div>
 
       <div class="vault-transfer">
@@ -147,7 +173,7 @@
     <div><small>Modo</small><strong id="syncHealthMode">Só local</strong></div>
   </div>
   <div class="detail-grid section-gap">
-    <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div><div class="detail-item full-detail"><small>Versão técnica</small><strong id="appBuildVersion">v44</strong></div>
+    <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div><div class="detail-item full-detail"><small>Versão técnica</small><strong id="appBuildVersion">v45</strong></div>
   </div>
   <div class="form-grid section-gap">
     <label>Credencial GitHub deste dispositivo — introduzir apenas uma vez<input id="syncToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Fine-grained token com Contents: Read and write" /><small>Ao colar, o token é primeiro guardado cifrado neste dispositivo e depois validado automaticamente.</small></label>
@@ -243,6 +269,6 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="./core.js?v=44" defer></script><script src="./finance.js?v=44" defer></script><script src="./render.js?v=44" defer></script><script src="./forms.js?v=44" defer></script><script src="./sync.js?v=44" defer></script><script src="./events.js?v=44" defer></script>
+  <script src="./core.js?v=45" defer></script><script src="./finance.js?v=45" defer></script><script src="./render.js?v=45" defer></script><script src="./forms.js?v=45" defer></script><script src="./sync.js?v=45" defer></script><script src="./events.js?v=45" defer></script>
 </body>
 </html>
