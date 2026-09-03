@@ -54,7 +54,7 @@ assert.match(workflow,/minSdkVersion/);
 assert.match(workflow,/compileSdkVersion/);
 assert.match(workflow,/targetSdkVersion/);
 assert.match(workflow,/MARKETING_VERSION=47\.0\.0 CURRENT_PROJECT_VERSION=47/);
-assert.match(workflow,/CODE_SIGNING_ALLOWED=NO build/);
+assert.match(workflow,/CODE_SIGNING_ALLOWED=NO[\s\S]*MARKETING_VERSION=47\.0\.0[\s\S]*CURRENT_PROJECT_VERSION=47[\s\S]*build/);
 assert.match(workflow,/ANDROID_KEYSTORE_BASE64/);
 assert.match(workflow,/ANDROID_KEY_ALIAS/);
 assert.match(workflow,/ANDROID_KEYSTORE_PASSWORD/);
