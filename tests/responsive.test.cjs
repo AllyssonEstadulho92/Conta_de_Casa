@@ -8,7 +8,7 @@ const events = fs.readFileSync('events.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 const render = fs.readFileSync('render.js','utf8');
 
-assert.match(designCss, /Conta de Casa v46 — mobile fit and exact financial counting/);
+assert.match(designCss, /Conta de Casa v47 — mobile distribution and native packaging foundation/);
 assert.match(designCss, /--content-max:1480px/);
 assert.match(designCss, /--sidebar-expanded:232px/);
 assert.match(designCss, /--sidebar-rail:72px/);
@@ -101,19 +101,22 @@ assert.doesNotMatch(legacyCss, /\.bill-card\b/);
 assert.doesNotMatch(css, /\bzoom\s*:/i);
 assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
 
-assert.match(index, /name="app-build" content="v46"/);
+assert.match(index, /name="app-build" content="v47"/);
 assert.match(index, /styles\.css\?v=46/);
 assert.match(index, /design-system\.css\?v=46/);
 assert.match(index, /manifest\.webmanifest\?v=46/);
 for (const asset of ['core','finance','render','forms','sync','events']) {
   assert.match(index,new RegExp(`${asset}\\.js\\?v=46`));
 }
-assert.match(index, /id="appBuildVersion">v46</);
+assert.match(index, /id="appBuildVersion">v47</);
+assert.match(index, /id="androidApkDownload"/);
+assert.match(index, /id="installPwaBtn"/);
+assert.match(index, /mobile-install\.js\?v=47/);
 assert.match(events, /register\('\.\/sw\.js\?v=46',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v46/);
+assert.match(swSource, /conta-de-casa-public-v47/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 
-console.log('Responsive mobile-fit shell, PIN entry and PWA freshness v46 tests: OK');
+console.log('Responsive mobile-fit shell, PIN entry and PWA freshness v47 tests: OK');
