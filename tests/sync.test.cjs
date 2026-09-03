@@ -5,7 +5,8 @@ const vm = require('node:vm');
 const source = fs.readFileSync('sync.js','utf8');
 new Function(source);
 
-assert.match(source, /SYNC_DEFAULT_REPO = 'conta-de-casa-'/);
+assert.match(source, /const SYNC_DEFAULT_PATH = 'sync\\/vault\\.json'/);
+assert.doesNotMatch(source, /SYNC_DEFAULT_OWNER|SYNC_DEFAULT_REPO/);
 assert.match(source, /data\.private !== true/);
 assert.match(source, /Contents: Read and write/);
 assert.doesNotMatch(source, /github_pat_[A-Za-z0-9_]+/);
@@ -154,14 +155,13 @@ assert.match(source, /syncHeaderStatus/);
 console.log('Automatic bidirectional sync queue tests: OK');
 
 
-assert.match(source, /cfg\.enabled = !cfg\.disabledByUser/);
-assert.match(source, /cfg\.owner = SYNC_DEFAULT_OWNER/);
-assert.match(source, /cfg\.repo = SYNC_DEFAULT_REPO/);
-assert.match(source, /cfg\.path = SYNC_DEFAULT_PATH/);
+assert.match(source, /cfg\.owner = cleanString\(cfg\.owner \|\| '', 80\)/);
+assert.match(source, /cfg\.repo = cleanString\(cfg\.repo \|\| '', 100\)/);
+assert.match(source, /cfg\.enabled = Boolean\(cfg\.enabled\)[\s\S]*Boolean\(cfg\.owner && cfg\.repo\)/);
 assert.match(source, /cfg\.disabledByUser=false/);
 assert.match(source, /cfg\.disabledByUser=true;[\s\S]*cfg\.enabled=false/);
 
-console.log('Sync auto-enable migration tests: OK');
+console.log('Sync opt-in and user-owned destination tests: OK');
 
 
 assert.match(source, /const localOnly=state==='not-configured'\|\|state==='needs-token'/);
@@ -200,22 +200,20 @@ assert.match(indexSource, /Juntar dados sem apagar/);
 console.log('Encrypted cross-device merge tests: OK');
 
 
-assert.match(source, /cfg\.owner = SYNC_DEFAULT_OWNER/);
-assert.match(source, /cfg\.repo = SYNC_DEFAULT_REPO/);
-assert.match(source, /cfg\.path = SYNC_DEFAULT_PATH/);
-assert.doesNotMatch(source, /\$\('#syncOwner'\)/);
-assert.doesNotMatch(source, /\$\('#syncRepo'\)/);
-assert.doesNotMatch(source, /\$\('#syncPath'\)/);
+assert.match(source, /cfg\.owner=safeRepoPart\(\$\('#syncOwner'\)\?\.value,''\)/);
+assert.match(source, /cfg\.repo=safeRepoPart\(\$\('#syncRepo'\)\?\.value,''\)/);
+assert.match(source, /cfg\.path=safeSyncPath\(\$\('#syncPath'\)\?\.value\|\|SYNC_DEFAULT_PATH\)/);
 assert.match(source, /function syncUserError\(/);
 
 const syncIndex=fs.readFileSync('index.html','utf8');
 assert.match(syncIndex, /id="syncDestination"/);
-assert.doesNotMatch(syncIndex, /id="syncOwner"/);
-assert.doesNotMatch(syncIndex, /id="syncRepo"/);
-assert.doesNotMatch(syncIndex, /id="syncPath"/);
+assert.match(syncIndex, /id="syncOwner"/);
+assert.match(syncIndex, /id="syncRepo"/);
+assert.match(syncIndex, /id="syncPath"/);
 assert.match(syncIndex, /Ligar sincronização automática/);
+assert.doesNotMatch(syncIndex, /AllyssonEstadulho92|conta-de-casa-/);
 
-console.log('Automatic fixed sync destination tests: OK');
+console.log('User-owned optional sync destination tests: OK');
 
 
 assert.match(source, /async function decryptRemoteWithPassphrase\(remote,passphrase\)/);
@@ -273,13 +271,10 @@ console.log('Fine-grained token scope diagnostic tests: OK');
 
 
 const tokenHelperIndex=fs.readFileSync('index.html','utf8');
-assert.match(tokenHelperIndex, /personal-access-tokens\/new\?/);
-assert.match(tokenHelperIndex, /target_name=AllyssonEstadulho92/);
-assert.match(tokenHelperIndex, /contents=write/);
-assert.match(tokenHelperIndex, /Only select repositories/);
-assert.match(tokenHelperIndex, /conta-de-casa-/);
+assert.doesNotMatch(tokenHelperIndex, /target_name=|AllyssonEstadulho92|conta-de-casa-/);
+assert.match(tokenHelperIndex, /Use um token limitado ao seu repositório privado/);
 
-console.log('Prefilled fine-grained token helper tests: OK');
+console.log('Generic fine-grained token guidance tests: OK');
 
 
 const renderSyncUiSource = source.slice(source.indexOf('async function renderSyncUi()'), source.indexOf('function setSyncActionMessage'));
