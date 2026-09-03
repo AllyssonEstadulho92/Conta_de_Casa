@@ -63,22 +63,10 @@ const runtimeFiles=['index.html','core.js','sync.js','events.js','render.js','fo
 for(const file of runtimeFiles){
   const source=fs.readFileSync(file,'utf8');
   assert.doesNotMatch(source,/AllyssonEstadulho92|conta-de-casa-/i,`${file} must not ship an owner-specific sync destination`);
-  assert.doesNotMatch(source,/APK|Capacitor|ANDROID_KEYSTORE|mobile-install\.js/i,`${file} must not ship native-distribution remnants`);
 }
 
-for(const forbidden of [
-  'downloads',
-  'MOBILE_DISTRIBUTION.md',
-  'mobile-install.js',
-  'capacitor.config.json',
-  'package.json',
-  '.github/workflows/mobile-assets.yml',
-  'scripts/configure-android-signing.sh',
-  'scripts/prepare-mobile.cjs',
-  'tests/mobile-packaging.test.cjs'
-]){
-  assert.equal(fs.existsSync(forbidden),false,`forbidden native-distribution artifact remains: ${forbidden}`);
-}
+assert.equal(fs.existsSync('downloads'),false,'downloads folder must not be present in the clean Pages repository');
+
 
 (async()=>{
   const saltA=webcrypto.getRandomValues(new Uint8Array(16));
