@@ -788,17 +788,17 @@ async function adoptRemoteSyncedVault() {
 async function configureSyncFromUi() {
   if(!appState||!vaultKey) return 'not-ready';
   const cfg=syncConfig();
-  cfg.owner=safeRepoPart($('#syncOwner')?.value,'');
-  cfg.repo=safeRepoPart($('#syncRepo')?.value,'');
-  cfg.path=safeSyncPath($('#syncPath')?.value||SYNC_DEFAULT_PATH);
-  cfg.disabledByUser=false;
-  cfg.enabled=true;
+  const candidate={
+    owner:safeRepoPart($('#syncOwner')?.value,''),
+    repo:safeRepoPart($('#syncRepo')?.value,''),
+    path:safeSyncPath($('#syncPath')?.value||SYNC_DEFAULT_PATH)
+  };
 
   const token=await persistEnteredSyncToken();
   if(!token) throw new Error('Introduza um token GitHub de acesso ao seu repositório privado.');
 
   try{
-    await verifyPrivateSyncRepo(token,cfg);
+    await verifyPrivateSyncRepo(token,candidate);
     await saveSyncTokenStatus({valid:true,lastError:''});
   }catch(err){
     await saveSyncTokenStatus({valid:false,lastError:syncUserError(err)});
@@ -806,6 +806,11 @@ async function configureSyncFromUi() {
     throw err;
   }
 
+  cfg.owner=candidate.owner;
+  cfg.repo=candidate.repo;
+  cfg.path=candidate.path;
+  cfg.disabledByUser=false;
+  cfg.enabled=true;
   syncSuppressAuto=true;
   try{await saveState();}finally{syncSuppressAuto=false;}
   syncSetStatus('syncing','Credencial guardada e validada. A sincronização automática está a iniciar...');
