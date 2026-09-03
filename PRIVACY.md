@@ -41,15 +41,17 @@ Faça backups cifrados regularmente e guarde-os fora do GitHub. Use uma palavra-
 
 ## Repositório privado de sincronização
 
-A sincronização automática usa, opcionalmente, o repositório privado `AllyssonEstadulho92/conta-de-casa-`.
+A sincronização automática é opcional, começa desativada e só usa o repositório privado que o próprio utilizador configurar.
 
-Esse repositório pode conter somente `sync/vault.json`, que é um envelope cifrado da aplicação. Não deve conter dados financeiros em texto legível, PIN, palavra-passe, token GitHub ou chave de cifragem.
+O repositório configurado pode conter somente o envelope cifrado da aplicação no caminho escolhido pelo utilizador. Não deve conter dados financeiros em texto legível, PIN, palavra-passe, token GitHub ou chave de cifragem.
 
 O token de acesso não é enviado para o repositório; fica cifrado localmente em cada dispositivo. A aplicação valida que o repositório é privado antes de ativar a sincronização.
 
 
-## Aplicação nativa
+## Separação entre utilizadores
 
-Android/iOS mantêm o modelo local-first. O APK/IPA tem um armazenamento local próprio e não recebe automaticamente o IndexedDB do Safari/Chrome.
+Uma instalação nova da GitHub Page não contém dados financeiros pessoais do autor do projeto. O estado inicial é vazio.
 
-A migração entre PWA e aplicação nativa deve ser feita por backup cifrado ou sincronização cifrada. GitHub Releases contém apenas binários públicos da aplicação e checksums, nunca dados financeiros, PINs, tokens ou backups pessoais. A consulta de disponibilidade de APK/IPA só ocorre quando o utilizador escolhe verificá-la.
+Os dados são guardados no IndexedDB da origem, dentro do perfil do navegador que abriu a aplicação. Outro dispositivo ou outro perfil de navegador recebe um armazenamento independente. O PIN/palavra-passe não é guardado; apenas metadados criptográficos e o payload cifrado permanecem localmente.
+
+Se várias pessoas utilizarem exatamente o mesmo perfil de navegador e a mesma origem, irão apontar para o mesmo cofre local. Para contas separadas no mesmo dispositivo, utilize perfis de navegador distintos.
