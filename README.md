@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão preparada: v47. O schema de dados permanece na versão 5; esta fase acrescenta uma fundação de distribuição móvel com Capacitor, instalação PWA, validação Android/iOS em CI e publicação segura de APK apenas quando existir assinatura estável, sem alterar os dados ou o motor financeiro.
+Versão preparada: v48. O schema de dados permanece na versão 5; esta fase concentra a aplicação em GitHub Pages e reforça o isolamento entre utilizadores: cada cofre novo começa vazio, sem destino de sincronização pré-configurado e com dados cifrados apenas no navegador do utilizador.
 
 ## Estado
 
@@ -35,11 +35,10 @@ node --check forms.js
 node --check sync.js
 node --check events.js
 node --check sw.js
-node --check mobile-install.js
 node tests/finance.test.cjs
 node tests/audit.test.cjs
 node tests/counting-invariants.test.cjs
-node tests/mobile-packaging.test.cjs
+node tests/isolation.test.cjs
 node tests/form-regression.test.cjs
 node tests/security.test.cjs
 node tests/sync.test.cjs
@@ -49,7 +48,7 @@ node tests/sync-runtime.test.cjs
 
 ## Sincronização entre dispositivos
 
-A sincronização automática é opcional e usa o repositório privado `AllyssonEstadulho92/conta-de-casa-` apenas como transporte de um envelope cifrado.
+A sincronização automática é opcional, começa desativada em cofres novos e, quando utilizada, exige que cada utilizador indique o seu próprio repositório GitHub privado.
 
 - o conteúdo financeiro é cifrado antes do envio;
 - o PIN/palavra-passe nunca é enviado;
@@ -61,12 +60,11 @@ A sincronização automática é opcional e usa o repositório privado `Allysson
 - eliminações são propagadas através de tombstones cifrados.
 
 
-## Aplicação móvel
+## Isolamento por utilizador
 
-A v47 prepara a mesma aplicação para PWA, Android e iOS através de Capacitor. Consulte `MOBILE_DISTRIBUTION.md`.
-
-- a PWA pode ser instalada diretamente a partir de Definições > Aplicação móvel;
-- o APK de produção só aparece no botão de download quando existe um GitHub Release com APK assinado;
-- builds Android de verificação usam package id separado e não são apresentados como versão de produção;
-- o iOS é validado em Xcode para simulador, mas um IPA real exige credenciais Apple próprias;
-- ao passar do navegador para APK/IPA, use backup cifrado ou sincronização porque o armazenamento local do contentor nativo é separado.
+- um cofre novo começa sem faturas, pagamentos, rendimentos, compras, objetivos, histórico ou saldo;
+- o PIN/palavra-passe não é guardado no repositório nem no IndexedDB;
+- cada cofre recebe um salt aleatório próprio e deriva uma chave AES-GCM não exportável através de PBKDF2-SHA-256;
+- o estado financeiro completo é cifrado antes de ser escrito no IndexedDB;
+- a sincronização começa desligada e não contém proprietário/repositório pré-definido;
+- abrir a mesma GitHub Page noutro navegador/dispositivo cria outro armazenamento local independente até existir importação ou sincronização explícita.
