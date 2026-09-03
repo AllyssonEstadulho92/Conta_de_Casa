@@ -1,5 +1,19 @@
 # Changelog
 
+## v44 — redesign visual e estrutural do layout
+
+- interface alinhada ao protótipo aprovado, mantendo os dados reais como única fonte de conteúdo;
+- nova hierarquia visual com superfícies mais leves, tipografia Inter/SF system stack, espaçamento consistente e cartões financeiros com maior legibilidade;
+- Dashboard mobile passa a destacar o Saldo atual em largura total, seguido por Por pagar, Em atraso e Saldo projetado;
+- cabeçalho mobile reorganizado em duas linhas para evitar sobreposição entre menu, título, mês, sincronização e ação rápida;
+- Faturas e Mercado recebem pesquisa, filtros e resumos compactos adaptados ao espaço disponível, preservando todos os controlos existentes;
+- desktop mantém sidebar recolhível, agora mais compacta e com estado ativo mais claro;
+- Relatórios, Planeamento, Segurança, Definições e Diagnóstico recebem superfícies e grids coerentes com o novo design system;
+- ecrã do cofre recebe composição visual mais moderna sem alterar o fluxo de PIN/palavra-passe nem a criptografia;
+- removidos estilos comprovadamente sem utilização da interface antiga: FAB antigo, cartões antigos de faturas, linha antiga de Mercado e mini-summary legado;
+- nenhum campo persistente, ID, fórmula, função financeira, estrutura IndexedDB, backup, API ou protocolo de sincronização foi alterado;
+- Service Worker e cache público promovidos para v44.
+
 ## v43 — saldo real da conta e conciliação
 
 - Saldo atual deixa de ser apresentado como se fosse o saldo bancário calculado apenas a partir dos registos internos;
