@@ -69,3 +69,18 @@ Riscos residuais adicionais:
 - um token comprometido pode permitir substituir ou apagar o ficheiro cifrado remoto;
 - conflitos simultâneos podem exigir intervenção manual;
 - a segurança continua dependente da conta GitHub, do dispositivo e do navegador.
+
+
+## Distribuição Android/iOS
+
+A versão nativa usa o mesmo código local-first dentro de um contentor Capacitor. O empacotamento não autoriza dados financeiros em GitHub Releases nem dentro do repositório.
+
+Regras adicionais:
+
+- APK de produção só pode ser publicado com uma chave de assinatura Android estável guardada em GitHub Actions Secrets;
+- keystores, ficheiros `.jks`, `.keystore`, certificados `.p12` e perfis `.mobileprovision` são proibidos no repositório;
+- o workflow gera checksum SHA-256 e verifica a assinatura antes de publicar o APK;
+- builds de verificação usam package id com sufixo `.verify` para não poderem substituir a app de produção;
+- IPA/iOS de produção não é publicado sem credenciais Apple próprias e processo de assinatura válido;
+- o IndexedDB do contentor nativo é separado do armazenamento do navegador; a migração deve usar apenas backup cifrado ou sincronização cifrada;
+- o campo de download consulta apenas a API pública de Releases do próprio repositório e não envia dados financeiros.
