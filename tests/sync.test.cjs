@@ -200,9 +200,11 @@ assert.match(indexSource, /Juntar dados sem apagar/);
 console.log('Encrypted cross-device merge tests: OK');
 
 
-assert.match(source, /cfg\.owner=safeRepoPart\(\$\('#syncOwner'\)\?\.value,''\)/);
-assert.match(source, /cfg\.repo=safeRepoPart\(\$\('#syncRepo'\)\?\.value,''\)/);
-assert.match(source, /cfg\.path=safeSyncPath\(\$\('#syncPath'\)\?\.value\|\|SYNC_DEFAULT_PATH\)/);
+assert.match(source, /owner:safeRepoPart\(\$\('#syncOwner'\)\?\.value,''\)/);
+assert.match(source, /repo:safeRepoPart\(\$\('#syncRepo'\)\?\.value,''\)/);
+assert.match(source, /path:safeSyncPath\(\$\('#syncPath'\)\?\.value\|\|SYNC_DEFAULT_PATH\)/);
+assert.match(source, /await verifyPrivateSyncRepo\(token,candidate\)/);
+assert.match(source, /cfg\.owner=candidate\.owner;[\s\S]*cfg\.enabled=true/);
 assert.match(source, /function syncUserError\(/);
 
 const syncIndex=fs.readFileSync('index.html','utf8');
