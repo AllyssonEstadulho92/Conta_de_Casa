@@ -8,7 +8,7 @@ const events = fs.readFileSync('events.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 const render = fs.readFileSync('render.js','utf8');
 
-assert.match(designCss, /Conta de Casa v44 — prototype-aligned responsive design system/);
+assert.match(designCss, /Conta de Casa v45 — mobile fit and secure PIN presentation/);
 assert.match(designCss, /--content-max:1480px/);
 assert.match(designCss, /--sidebar-expanded:232px/);
 assert.match(designCss, /--sidebar-rail:72px/);
@@ -41,6 +41,13 @@ assert.match(index, /id="mobileMenuBtn"/);
 assert.match(index, /id="mobileDrawer"/);
 assert.match(index, /id="drawerNav"/);
 assert.match(index, /id="mobileNav" class="mobile-nav"/);
+assert.match(index, /id="vaultPinPad"/);
+assert.match(index, /data-pin-key="1"/);
+assert.match(index, /id="vaultKeyboardModeToggle"/);
+assert.match(events, /function wireVaultPinPad\(\)/);
+assert.match(events, /input\.readOnly=pinMode/);
+assert.match(events, /input\.setAttribute\('inputmode',pinMode\?'none':'text'\)/);
+assert.match(designCss, /\.vault-keypad\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
 assert.match(index, /id="kpiGrid" class="kpi-grid dashboard-kpis"/);
 assert.match(index, /id="dashboardSecondary" class="dashboard-secondary"/);
 assert.match(designCss, /#page-dashboard \.kpi-grid\{grid-template-columns:1\.45fr repeat\(3,minmax\(0,1fr\)\);gap:14px\}/);
@@ -48,7 +55,9 @@ assert.match(designCss, /\.dashboard-secondary-card\{/);
 assert.match(designCss, /\.vault-card\{[\s\S]*width:min\(960px,calc\(100vw - 48px\)\)/);
 assert.match(designCss, /\.topbar\{[\s\S]*grid-template-rows:56px 44px/);
 assert.match(designCss, /#page-dashboard \.account-balance-kpi\{grid-column:1\/-1/);
-assert.match(designCss, /\.bill-filter-grid,\.market-filter-grid\{[\s\S]*overflow-x:auto/);
+assert.match(designCss, /\.bill-filter-grid,\.market-filter-grid\{[\s\S]*display:grid;[\s\S]*overflow:visible/);
+assert.match(designCss, /\.bill-summary-grid,\.market-summary-grid\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\);[\s\S]*overflow:visible/);
+assert.doesNotMatch(designCss, /\.bill-summary-grid,\.market-summary-grid\{display:flex;overflow-x:auto/);
 assert.match(render, /\['Pago no mês',paidBills,'Pagamentos confirmados'\]/);
 assert.match(render, /setHTML\('#dashboardSecondary'/);
 assert.match(render, /data-update-balance/);
@@ -90,19 +99,19 @@ assert.doesNotMatch(legacyCss, /\.bill-card\b/);
 assert.doesNotMatch(css, /\bzoom\s*:/i);
 assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
 
-assert.match(index, /name="app-build" content="v44"/);
+assert.match(index, /name="app-build" content="v45"/);
 assert.match(index, /styles\.css\?v=44/);
 assert.match(index, /design-system\.css\?v=44/);
 assert.match(index, /manifest\.webmanifest\?v=44/);
 for (const asset of ['core','finance','render','forms','sync','events']) {
   assert.match(index,new RegExp(`${asset}\\.js\\?v=44`));
 }
-assert.match(index, /id="appBuildVersion">v44</);
+assert.match(index, /id="appBuildVersion">v45</);
 assert.match(events, /register\('\.\/sw\.js\?v=44',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v44/);
+assert.match(swSource, /conta-de-casa-public-v45/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 
-console.log('Responsive prototype-aligned shell and PWA freshness v44 tests: OK');
+console.log('Responsive mobile-fit shell, PIN entry and PWA freshness v45 tests: OK');
