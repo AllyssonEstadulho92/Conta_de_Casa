@@ -57,7 +57,9 @@ assert.match(designCss, /\.topbar\{[\s\S]*grid-template-rows:56px 44px/);
 assert.match(designCss, /#page-dashboard \.account-balance-kpi\{grid-column:1\/-1/);
 assert.match(designCss, /\.bill-filter-grid,\.market-filter-grid\{[\s\S]*display:grid;[\s\S]*overflow:visible/);
 assert.match(designCss, /\.bill-summary-grid,\.market-summary-grid\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\);[\s\S]*overflow:visible/);
-assert.doesNotMatch(designCss, /\.bill-summary-grid,\.market-summary-grid\{display:flex;overflow-x:auto/);
+const legacySummaryScroller=designCss.indexOf('.bill-summary-grid,.market-summary-grid{display:flex;overflow-x:auto');
+const finalSummaryGrid=designCss.lastIndexOf('.bill-summary-grid,.market-summary-grid{');
+assert.ok(finalSummaryGrid>legacySummaryScroller,'final mobile summary rules must override the old horizontal scroller');
 assert.match(render, /\['Pago no mês',paidBills,'Pagamentos confirmados'\]/);
 assert.match(render, /setHTML\('#dashboardSecondary'/);
 assert.match(render, /data-update-balance/);
@@ -100,14 +102,14 @@ assert.doesNotMatch(css, /\bzoom\s*:/i);
 assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
 
 assert.match(index, /name="app-build" content="v45"/);
-assert.match(index, /styles\.css\?v=44/);
-assert.match(index, /design-system\.css\?v=44/);
-assert.match(index, /manifest\.webmanifest\?v=44/);
+assert.match(index, /styles\.css\?v=45/);
+assert.match(index, /design-system\.css\?v=45/);
+assert.match(index, /manifest\.webmanifest\?v=45/);
 for (const asset of ['core','finance','render','forms','sync','events']) {
-  assert.match(index,new RegExp(`${asset}\\.js\\?v=44`));
+  assert.match(index,new RegExp(`${asset}\\.js\\?v=45`));
 }
 assert.match(index, /id="appBuildVersion">v45</);
-assert.match(events, /register\('\.\/sw\.js\?v=44',\{updateViaCache:'none'\}\)/);
+assert.match(events, /register\('\.\/sw\.js\?v=45',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
 assert.match(swSource, /conta-de-casa-public-v45/);
