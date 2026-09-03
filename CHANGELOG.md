@@ -1,5 +1,15 @@
 # Changelog
 
+## v49 — cabeçalho móvel e controlos de toque
+
+- aumentado o espaço seguro no topo do cabeçalho móvel, incluindo `safe-area-inset-top`, para afastar o menu hambúrguer da zona superior do iPhone;
+- alvo táctil do menu passa a 48 × 48 px no mobile, com ícone de 24 px;
+- botão global de adicionar mantém alvo táctil de 48 × 48 px, mas reduz a superfície circular visível para 40 × 40 px;
+- símbolo “+” aumentado e centrado com grid;
+- botões de adicionar de Faturas e Mercado usam a mesma geometria visual e táctil;
+- alteração exclusivamente visual/responsiva; schema 5, dados, cálculos, cofre, backup e sincronização permanecem inalterados;
+- Service Worker e assets públicos promovidos para v49.
+
 ## v48 — GitHub Pages e isolamento por utilizador
 
 - distribuição pública concentrada novamente em GitHub Pages;
