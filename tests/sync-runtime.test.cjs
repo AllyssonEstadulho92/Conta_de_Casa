@@ -53,7 +53,7 @@ vm.runInContext(fs.readFileSync('sync.js','utf8'),context);
 
     const base={
       version:3,
-      settings:{currency:'EUR',sync:{enabled:true,disabledByUser:false}},
+      settings:{currency:'EUR',sync:{enabled:true,disabledByUser:false,owner:'example-user',repo:'private-vault',path:'sync/vault.json'}},
       months:{},
       bills:[{id:'b1',title:'Luz',provider:'Energia',category:'Casa',totalCents:5000,dueDate:'2026-09-20',dueTime:'23:59',method:'Transferência',createdAt:'2026-09-01T10:00:00.000Z',updatedAt:'2026-09-01T10:00:00.000Z'}],
       payments:[],incomes:[],market:[],goals:[],activity:[],security:{},syncTombstones:[],syncConflicts:[]
