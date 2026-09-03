@@ -1,6 +1,8 @@
 name: Mobile Assets
 
 on:
+  pull_request:
+    branches: [main]
   workflow_run:
     workflows: ["CI"]
     types: [completed]
@@ -15,7 +17,7 @@ concurrency:
 
 jobs:
   android-verify:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout tested revision
@@ -84,7 +86,7 @@ jobs:
           retention-days: 7
 
   ios-verify:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: macos-latest
     steps:
       - name: Checkout tested revision
@@ -147,7 +149,7 @@ jobs:
           retention-days: 7
 
   android-release:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout tested revision
