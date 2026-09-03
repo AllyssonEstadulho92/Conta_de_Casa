@@ -1,6 +1,6 @@
 # Privacidade - Conta de Casa
 
-A Conta de Casa é local-first: os dados financeiros ficam no navegador/dispositivo onde a aplicação é aberta ou instalada. Não existe conta online, backend próprio, publicidade, analytics, telemetria financeira ou sincronização em cloud nesta fase.
+A Conta de Casa é local-first: os dados financeiros ficam no navegador/dispositivo onde a aplicação é aberta ou instalada. Não existe conta online, backend próprio, publicidade, analytics ou telemetria financeira. A sincronização opcional usa apenas um envelope cifrado no repositório privado configurado.
 
 ## Dados que não devem sair do dispositivo
 
@@ -46,3 +46,10 @@ A sincronização automática usa, opcionalmente, o repositório privado `Allyss
 Esse repositório pode conter somente `sync/vault.json`, que é um envelope cifrado da aplicação. Não deve conter dados financeiros em texto legível, PIN, palavra-passe, token GitHub ou chave de cifragem.
 
 O token de acesso não é enviado para o repositório; fica cifrado localmente em cada dispositivo. A aplicação valida que o repositório é privado antes de ativar a sincronização.
+
+
+## Aplicação nativa
+
+Android/iOS mantêm o modelo local-first. O APK/IPA tem um armazenamento local próprio e não recebe automaticamente o IndexedDB do Safari/Chrome.
+
+A migração entre PWA e aplicação nativa deve ser feita por backup cifrado ou sincronização cifrada. GitHub Releases contém apenas binários públicos da aplicação e checksums, nunca dados financeiros, PINs, tokens ou backups pessoais. A consulta de disponibilidade de APK/IPA só ocorre quando o utilizador escolhe verificá-la.
