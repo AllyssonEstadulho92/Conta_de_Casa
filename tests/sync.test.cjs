@@ -213,7 +213,7 @@ assert.match(syncIndex, /id="syncOwner"/);
 assert.match(syncIndex, /id="syncRepo"/);
 assert.match(syncIndex, /id="syncPath"/);
 assert.match(syncIndex, /Ligar sincronização automática/);
-assert.doesNotMatch(syncIndex, /AllyssonEstadulho92|conta-de-casa-/);
+assert.doesNotMatch(syncIndex, /target_name=|Destino automático/);
 
 console.log('User-owned optional sync destination tests: OK');
 
@@ -273,7 +273,7 @@ console.log('Fine-grained token scope diagnostic tests: OK');
 
 
 const tokenHelperIndex=fs.readFileSync('index.html','utf8');
-assert.doesNotMatch(tokenHelperIndex, /target_name=|AllyssonEstadulho92|conta-de-casa-/);
+assert.doesNotMatch(tokenHelperIndex, /target_name=|Only select repositories/);
 assert.match(tokenHelperIndex, /Use um token limitado ao seu repositório privado/);
 
 console.log('Generic fine-grained token guidance tests: OK');
