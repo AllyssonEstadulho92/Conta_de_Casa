@@ -29,11 +29,14 @@ assert.equal(cap.android.allowMixedContent,false);
 assert.match(index,/id="androidApkDownload"/);
 assert.match(index,/id="iosIpaDownload"/);
 assert.match(index,/id="installPwaBtn"/);
+assert.match(index,/id="checkMobileReleaseBtn"/);
 assert.ok(index.includes('APK/IPA usa um armazenamento local separado'));
 assert.match(index,/mobile-install\.js\?v=47/);
 assert.match(index,/name="app-build" content="v47"/);
 
 assert.match(installJs,/beforeinstallprompt/);
+assert.match(installJs,/releaseCheck\?\.addEventListener\('click'/);
+assert.doesNotMatch(installJs,/updateInstallUi\(\);\s*loadReleaseAssets\(\)/);
 assert.match(installJs,/releases\/latest/);
 assert.match(installJs,/\.apk\$\/i/);
 assert.match(installJs,/\.ipa\$\/i/);
