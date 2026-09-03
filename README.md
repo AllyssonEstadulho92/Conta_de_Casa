@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão preparada: v43. O schema de dados permanece na versão 5; o Dashboard passa a tratar Saldo atual como o saldo real informado pelo utilizador a partir da conta bancária, mantendo separadamente o saldo calculado pelos registos para conciliação e usando o saldo real como base do Saldo projetado.
+Versão preparada: v44. O schema de dados permanece na versão 5; esta fase é exclusivamente de apresentação e reorganiza Dashboard, Faturas, Mercado, Relatórios, Planeamento, Segurança, navegação, formulários e ecrã do cofre de acordo com o protótipo aprovado, sem alterar dados, cálculos, persistência, autenticação ou sincronização.
 
 ## Estado
 
