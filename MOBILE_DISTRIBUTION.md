@@ -79,3 +79,26 @@ Produção:
 `io.github.allyssonestadulho92.contadecasa`
 
 Builds de verificação em CI usam um sufixo `.verify` para não poderem substituir acidentalmente uma instalação de produção.
+
+
+## Configuração das GitHub Actions Secrets
+
+Para evitar copiar uma chave privada ou passwords para comandos que possam ficar no histórico do terminal, o repositório inclui:
+
+`scripts/configure-android-signing.sh`
+
+Uso local:
+
+```bash
+bash scripts/configure-android-signing.sh /caminho/para/conta-de-casa-release-v47.jks
+```
+
+O script:
+
+1. exige uma sessão autenticada do GitHub CLI (`gh auth login`);
+2. valida o keystore e o alias com `keytool`, quando disponível;
+3. codifica o keystore em Base64 apenas em memória;
+4. cria/atualiza as quatro Actions Secrets necessárias;
+5. não escreve passwords, Base64 ou keystore no repositório.
+
+Nunca execute o script com um keystore obtido de fonte não confiável.
