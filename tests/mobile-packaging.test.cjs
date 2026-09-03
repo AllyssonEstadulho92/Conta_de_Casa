@@ -48,7 +48,10 @@ assert.match(installJs,/AllyssonEstadulho92\/Conta_de_Casa\/releases\/download/)
 assert.match(sw,/conta-de-casa-public-v47/);
 assert.match(sw,/'\.\/mobile-install\.js'/);
 
-assert.match(workflow,/Conta-de-Casa-Android-verification\.apk/);
+assert.match(workflow,/mobile-release\/android\/v47\/verification/);
+assert.match(workflow,/Conta-de-Casa-v47-Android-verification\.apk/);
+assert.match(workflow,/mobile-release\/android\/v47\/production/);
+assert.match(workflow,/Conta-de-Casa-v47-Android\.apk/);
 assert.ok(workflow.includes("versionCode 47"));
 assert.ok(workflow.includes('versionName "47.0.0"'));
 assert.match(workflow,/minSdkVersion/);
