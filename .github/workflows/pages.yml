@@ -58,13 +58,16 @@ jobs:
           node tests/sync-runtime.test.cjs
           node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8')); console.log('Manifest OK')"
 
+      - name: Prepare public site allowlist
+        run: node scripts/prepare-mobile.cjs
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
-          path: .
+          path: dist
 
       - name: Deploy to GitHub Pages
         id: deployment
