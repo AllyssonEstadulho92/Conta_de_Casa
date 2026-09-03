@@ -37,6 +37,9 @@ jobs:
       - name: Financial audit tests
         run: node tests/audit.test.cjs
 
+      - name: Exact counting invariants
+        run: node tests/counting-invariants.test.cjs
+
       - name: Civil date timezone tests
         run: node tests/date-timezone.test.cjs
 
