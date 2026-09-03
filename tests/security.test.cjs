@@ -11,8 +11,8 @@ class StorageMock {
   clear() { this.data.clear(); }
 }
 
-const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','styles.css','sw.js','manifest.webmanifest'];
-const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','sw.js'];
+const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','mobile-install.js','styles.css','sw.js','manifest.webmanifest'];
+const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','mobile-install.js','sw.js'];
 const context = vm.createContext({
   crypto: webcrypto,
   TextEncoder,
