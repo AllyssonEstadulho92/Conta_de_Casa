@@ -56,6 +56,23 @@ jobs:
       - name: Create Android wrapper
         run: npx cap add android
 
+      - name: Set Android v47 version metadata
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const path='android/app/build.gradle';
+          let text=fs.readFileSync(path,'utf8');
+          text=text.replace(/versionCode\s+\d+/, 'versionCode 47');
+          text=text.replace(/versionName\s+"[^"]+"/, 'versionName "47.0.0"');
+          if(!/versionCode\s+47/.test(text) || !/versionName\s+"47\.0\.0"/.test(text)) throw new Error('Android version metadata was not applied');
+          fs.writeFileSync(path,text);
+          const vars=fs.readFileSync('android/variables.gradle','utf8');
+          const min=Number(vars.match(/minSdkVersion\s*=\s*(\d+)/)?.[1]);
+          const compile=Number(vars.match(/compileSdkVersion\s*=\s*(\d+)/)?.[1]);
+          const target=Number(vars.match(/targetSdkVersion\s*=\s*(\d+)/)?.[1]);
+          if(!(min>=24 && compile>=36 && target>=36)) throw new Error(`Unexpected Android SDK levels: min=${min}, compile=${compile}, target=${target}`);
+          NODE
+
       - name: Generate Android icons and splash assets
         run: |
           mkdir -p assets
@@ -136,7 +153,7 @@ jobs:
 
       - name: Build iOS simulator app without signing
         run: |
-          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -derivedDataPath build/ios-simulator CODE_SIGNING_ALLOWED=NO build
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -derivedDataPath build/ios-simulator CODE_SIGNING_ALLOWED=NO MARKETING_VERSION=47.0.0 CURRENT_PROJECT_VERSION=47 build
 
       - name: Upload iOS verification project
         uses: actions/upload-artifact@v4
@@ -196,6 +213,19 @@ jobs:
       - name: Create Android production wrapper
         if: steps.signing.outputs.ready == 'true'
         run: npx cap add android
+
+      - name: Set production Android v47 metadata
+        if: steps.signing.outputs.ready == 'true'
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const path='android/app/build.gradle';
+          let text=fs.readFileSync(path,'utf8');
+          text=text.replace(/versionCode\s+\d+/, 'versionCode 47');
+          text=text.replace(/versionName\s+"[^"]+"/, 'versionName "47.0.0"');
+          if(!/versionCode\s+47/.test(text) || !/versionName\s+"47\.0\.0"/.test(text)) throw new Error('Android production version metadata was not applied');
+          fs.writeFileSync(path,text);
+          NODE
 
       - name: Generate production Android assets
         if: steps.signing.outputs.ready == 'true'
