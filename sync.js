@@ -1,8 +1,6 @@
 'use strict';
 
 const SYNC_API_ROOT = 'https://api.github.com';
-const SYNC_DEFAULT_OWNER = 'AllyssonEstadulho92';
-const SYNC_DEFAULT_REPO = 'conta-de-casa-';
 const SYNC_DEFAULT_PATH = 'sync/vault.json';
 const SYNC_FORMAT_VERSION = 1;
 const SYNC_INTERVAL_MS = 60000;
@@ -46,10 +44,10 @@ function syncConfig() {
   appState.settings.sync ||= {};
   const cfg = appState.settings.sync;
   cfg.disabledByUser = Boolean(cfg.disabledByUser);
-  cfg.enabled = !cfg.disabledByUser;
-  cfg.owner = SYNC_DEFAULT_OWNER;
-  cfg.repo = SYNC_DEFAULT_REPO;
-  cfg.path = SYNC_DEFAULT_PATH;
+  cfg.owner = cleanString(cfg.owner || '', 80);
+  cfg.repo = cleanString(cfg.repo || '', 100);
+  cfg.path = cleanString(cfg.path || SYNC_DEFAULT_PATH, 180);
+  cfg.enabled = Boolean(cfg.enabled) && !cfg.disabledByUser && Boolean(cfg.owner && cfg.repo);
   return cfg;
 }
 
@@ -237,8 +235,8 @@ async function syncDeviceMeta() {
 }
 
 async function verifyPrivateSyncRepo(token,cfg) {
-  const owner=safeRepoPart(cfg.owner,SYNC_DEFAULT_OWNER);
-  const repo=safeRepoPart(cfg.repo,SYNC_DEFAULT_REPO);
+  const owner=safeRepoPart(cfg.owner,'');
+  const repo=safeRepoPart(cfg.repo,'');
   const res=await fetch(`${SYNC_API_ROOT}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,{
     method:'GET',headers:githubHeaders(token),cache:'no-store',referrerPolicy:'no-referrer'
   });
@@ -253,8 +251,8 @@ async function verifyPrivateSyncRepo(token,cfg) {
 }
 
 async function fetchRemoteSyncFile(token,cfg) {
-  const owner=safeRepoPart(cfg.owner,SYNC_DEFAULT_OWNER);
-  const repo=safeRepoPart(cfg.repo,SYNC_DEFAULT_REPO);
+  const owner=safeRepoPart(cfg.owner,'');
+  const repo=safeRepoPart(cfg.repo,'');
   const path=safeSyncPath(cfg.path);
   const url=`${SYNC_API_ROOT}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${githubPath(path)}?ref=main`;
   const res=await fetch(url,{method:'GET',headers:githubHeaders(token),cache:'no-store',referrerPolicy:'no-referrer'});
@@ -285,8 +283,8 @@ async function fetchRemoteSyncFile(token,cfg) {
 }
 
 async function putRemoteSyncFile(token,cfg,wrapper,sha=null) {
-  const owner=safeRepoPart(cfg.owner,SYNC_DEFAULT_OWNER);
-  const repo=safeRepoPart(cfg.repo,SYNC_DEFAULT_REPO);
+  const owner=safeRepoPart(cfg.owner,'');
+  const repo=safeRepoPart(cfg.repo,'');
   const path=safeSyncPath(cfg.path);
   const url=`${SYNC_API_ROOT}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${githubPath(path)}`;
   const body={
@@ -728,7 +726,7 @@ async function syncNow(reason='manual') {
     syncRemoteCandidate=null;
     syncActiveConflicts=[];
     clearSyncRetry();
-    syncSetStatus('synced','Web e móvel estão alinhados com o cofre cifrado remoto.');
+    syncSetStatus('synced','Os dispositivos configurados estão alinhados com o cofre cifrado remoto.');
     return 'synced';
   }catch(err){
     if(err?.message==='REMOTE_VAULT_MISMATCH'){
@@ -789,9 +787,15 @@ async function adoptRemoteSyncedVault() {
 
 async function configureSyncFromUi() {
   if(!appState||!vaultKey) return 'not-ready';
-  const token=await persistEnteredSyncToken();
-  if(!token) throw new Error('Introduza um token GitHub de acesso ao repositório privado.');
   const cfg=syncConfig();
+  cfg.owner=safeRepoPart($('#syncOwner')?.value,'');
+  cfg.repo=safeRepoPart($('#syncRepo')?.value,'');
+  cfg.path=safeSyncPath($('#syncPath')?.value||SYNC_DEFAULT_PATH);
+  cfg.disabledByUser=false;
+  cfg.enabled=true;
+
+  const token=await persistEnteredSyncToken();
+  if(!token) throw new Error('Introduza um token GitHub de acesso ao seu repositório privado.');
 
   try{
     await verifyPrivateSyncRepo(token,cfg);
@@ -802,8 +806,6 @@ async function configureSyncFromUi() {
     throw err;
   }
 
-  cfg.disabledByUser=false;
-  cfg.enabled=true;
   syncSuppressAuto=true;
   try{await saveState();}finally{syncSuppressAuto=false;}
   syncSetStatus('syncing','Credencial guardada e validada. A sincronização automática está a iniciar...');
@@ -856,7 +858,13 @@ async function renderSyncUi() {
   }
   if($('#syncStatusText')) $('#syncStatusText').textContent=syncLastStatus.message;
   if($('#syncLastAt')) $('#syncLastAt').textContent=meta?.lastSyncedAt?fmtDateTime(meta.lastSyncedAt):'Ainda não sincronizado';
-  if($('#syncDestination')) $('#syncDestination').textContent=`${SYNC_DEFAULT_OWNER}/${SYNC_DEFAULT_REPO} · ${SYNC_DEFAULT_PATH}`;
+  if($('#syncDestination')) $('#syncDestination').textContent=cfg.owner&&cfg.repo?`${cfg.owner}/${cfg.repo} · ${cfg.path||SYNC_DEFAULT_PATH}`:'Não configurado';
+  const ownerInput=$('#syncOwner');
+  const repoInput=$('#syncRepo');
+  const pathInput=$('#syncPath');
+  if(ownerInput&&document.activeElement!==ownerInput) ownerInput.value=cfg.owner||'';
+  if(repoInput&&document.activeElement!==repoInput) repoInput.value=cfg.repo||'';
+  if(pathInput&&document.activeElement!==pathInput) pathInput.value=cfg.path||SYNC_DEFAULT_PATH;
   if($('#syncTokenState')) $('#syncTokenState').textContent=
     !token?'Token ainda não guardado':
     tokenStatus?.valid?'Token guardado e validado':
@@ -988,7 +996,7 @@ async function finishSyncConflictResolution() {
     syncRemoteCandidate=null;
     syncActiveConflicts=[];
     clearSyncRetry();
-    syncSetStatus('synced','Revisão concluída. Web e móvel estão alinhados com as decisões confirmadas.');
+    syncSetStatus('synced','Revisão concluída. Os dispositivos configurados estão alinhados com as decisões confirmadas.');
     renderCurrentPage();
     return 'synced';
   }catch(err){
@@ -1037,7 +1045,7 @@ function showSyncSetupOutcome(state,msg) {
     msg.textContent='Sincronização confirmada: o cofre remoto foi gravado e relido com sucesso. A partir de agora funciona automaticamente.';
     msg.className='form-message success';
   }else if(state==='vault-mismatch'){
-    msg.textContent='Cofre remoto encontrado. Para não perder dados, use “Unir web e telemóvel sem perder dados”.';
+    msg.textContent='Cofre remoto encontrado. Para não perder dados, use “Unir dados sem perder”.';
     msg.className='form-message error';
   }else if(state==='conflict'){
     msg.textContent='Foi detetado um conflito. Os dados foram preservados; reveja a sincronização antes de continuar.';
@@ -1052,7 +1060,9 @@ function scheduleCredentialAutoSetup() {
   clearTimeout(syncCredentialTimer);
   const input=$('#syncToken');
   const value=String(input?.value||'').trim();
-  if(value.length<20) return;
+  const owner=String($('#syncOwner')?.value||'').trim();
+  const repo=String($('#syncRepo')?.value||'').trim();
+  if(value.length<20||!owner||!repo) return;
   syncCredentialTimer=setTimeout(async()=>{
     if(syncBusy) return;
     const btn=$('#syncConfigureBtn');
@@ -1110,7 +1120,7 @@ async function manualSyncFromUi() {
 
     const state=syncLastStatus.state;
     if(state==='synced'){
-      setSyncActionMessage('Sincronização concluída. Web e telemóvel estão alinhados com o cofre cifrado.','success');
+      setSyncActionMessage('Sincronização concluída. Os dispositivos configurados estão alinhados com o cofre cifrado.','success');
     }else if(state==='vault-mismatch'){
       setSyncActionMessage('Foi encontrado um cofre diferente. Use “Adotar dados sincronizados neste dispositivo” apenas se pretende usar esse cofre aqui.','error');
     }else if(state==='conflict'){
@@ -1147,6 +1157,9 @@ function wireSyncControls() {
       if(msg){msg.textContent=syncUserError(err,'Não foi possível configurar a sincronização. Os dados locais foram preservados.');msg.className='form-message error';}
     }finally{$('#syncConfigureBtn').disabled=false;renderSyncUi();}
   });
+  $('#syncOwner')?.addEventListener('change',()=>renderSyncUi());
+  $('#syncRepo')?.addEventListener('change',()=>renderSyncUi());
+  $('#syncPath')?.addEventListener('change',()=>renderSyncUi());
   $('#syncToken')?.addEventListener('input',scheduleCredentialAutoSetup);
   $('#syncToken')?.addEventListener('change',scheduleCredentialAutoSetup);
   $('#syncToken')?.addEventListener('paste',()=>setTimeout(scheduleCredentialAutoSetup,0));
@@ -1242,7 +1255,7 @@ async function syncStartupGate() {
 
   const token=await loadSyncToken().catch(()=>null);
   if(!token){
-    syncSetStatus('needs-token','Ligue este dispositivo ao cofre privado comum antes de utilizar os registos financeiros.');
+    syncSetStatus('needs-token','Introduza a credencial apenas se quiser ativar a sincronização opcional neste dispositivo.');
     return 'needs-token';
   }
 
