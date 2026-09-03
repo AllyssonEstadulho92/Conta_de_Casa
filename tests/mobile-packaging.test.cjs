@@ -50,6 +50,9 @@ assert.match(sw,/'\.\/mobile-install\.js'/);
 
 assert.match(workflow,/mobile-release\/android\/v47\/verification/);
 assert.match(workflow,/Conta-de-Casa-v47-Android-verification\.apk/);
+assert.match(workflow,/Store installable APK in repository folder/);
+assert.match(workflow,/downloads\/android\/v47/);
+assert.match(workflow,/git push origin HEAD:main/);
 assert.match(workflow,/mobile-release\/android\/v47\/production/);
 assert.match(workflow,/Conta-de-Casa-v47-Android\.apk/);
 assert.ok(workflow.includes("versionCode 47"));
