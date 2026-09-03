@@ -103,6 +103,26 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+      - name: Store installable APK in repository folder
+        if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
+        run: |
+          DOWNLOAD_DIR="downloads/android/v47"
+          mkdir -p "$DOWNLOAD_DIR"
+          cp mobile-release/android/v47/verification/Conta-de-Casa-v47-Android-verification.apk "$DOWNLOAD_DIR/Conta-de-Casa-v47-Android-verification.apk"
+          cp mobile-release/android/v47/verification/Conta-de-Casa-v47-Android-verification.sha256 "$DOWNLOAD_DIR/Conta-de-Casa-v47-Android-verification.sha256"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DOWNLOAD_DIR/Conta-de-Casa-v47-Android-verification.apk" "$DOWNLOAD_DIR/Conta-de-Casa-v47-Android-verification.sha256"
+
+          if git diff --cached --quiet; then
+            echo "APK already stored at the current version."
+            exit 0
+          fi
+
+          git commit -m "build(android): store installable v47 verification APK"
+          git push origin HEAD:main
+
   ios-verify:
     if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: macos-latest
