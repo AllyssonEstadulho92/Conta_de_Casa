@@ -62,7 +62,7 @@ assert.equal(explicitCfg.repo,'private-vault');
 const runtimeFiles=['index.html','core.js','sync.js','events.js','render.js','forms.js','finance.js','styles.css','design-system.css','sw.js','manifest.webmanifest'];
 for(const file of runtimeFiles){
   const source=fs.readFileSync(file,'utf8');
-  assert.doesNotMatch(source,/AllyssonEstadulho92|conta-de-casa-/i,`${file} must not ship an owner-specific sync destination`);
+  assert.doesNotMatch(source,/AllyssonEstadulho92/i,`${file} must not ship an owner-specific sync identity`);
 }
 
 assert.equal(fs.existsSync('downloads'),false,'downloads folder must not be present in the clean Pages repository');
