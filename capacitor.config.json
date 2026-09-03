@@ -1,0 +1,13 @@
+{
+  "appId": "io.github.allyssonestadulho92.contadecasa",
+  "appName": "Conta de Casa",
+  "webDir": "dist",
+  "loggingBehavior": "none",
+  "server": {
+    "hostname": "localhost",
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
