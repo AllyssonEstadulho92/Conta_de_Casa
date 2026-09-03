@@ -8,7 +8,7 @@ const events = fs.readFileSync('events.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 const render = fs.readFileSync('render.js','utf8');
 
-assert.match(designCss, /Conta de Casa v44 — design foundation/);
+assert.match(designCss, /Conta de Casa v44 — prototype-aligned responsive design system/);
 assert.match(designCss, /--content-max:1480px/);
 assert.match(designCss, /--sidebar-expanded:232px/);
 assert.match(designCss, /--sidebar-rail:72px/);
@@ -91,14 +91,14 @@ assert.doesNotMatch(css, /\bzoom\s*:/i);
 assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
 
 assert.match(index, /name="app-build" content="v44"/);
-assert.match(index, /styles\.css\?v=43/);
-assert.match(index, /design-system\.css\?v=43/);
-assert.match(index, /manifest\.webmanifest\?v=43/);
+assert.match(index, /styles\.css\?v=44/);
+assert.match(index, /design-system\.css\?v=44/);
+assert.match(index, /manifest\.webmanifest\?v=44/);
 for (const asset of ['core','finance','render','forms','sync','events']) {
-  assert.match(index,new RegExp(`${asset}\\.js\\?v=43`));
+  assert.match(index,new RegExp(`${asset}\\.js\\?v=44`));
 }
 assert.match(index, /id="appBuildVersion">v44</);
-assert.match(events, /register\('\.\/sw\.js\?v=43',\{updateViaCache:'none'\}\)/);
+assert.match(events, /register\('\.\/sw\.js\?v=44',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
 assert.match(swSource, /conta-de-casa-public-v44/);
