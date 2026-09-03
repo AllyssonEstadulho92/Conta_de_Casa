@@ -30,6 +30,8 @@ jobs:
           node --check events.js
           node --check sync.js
           node --check sw.js
+          node --check mobile-install.js
+          node --check scripts/prepare-mobile.cjs
 
       - name: Finance tests
         run: node tests/finance.test.cjs
@@ -39,6 +41,9 @@ jobs:
 
       - name: Exact counting invariants
         run: node tests/counting-invariants.test.cjs
+
+      - name: Mobile packaging safety tests
+        run: node tests/mobile-packaging.test.cjs
 
       - name: Civil date timezone tests
         run: node tests/date-timezone.test.cjs
