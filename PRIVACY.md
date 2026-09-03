@@ -52,4 +52,4 @@ O token de acesso não é enviado para o repositório; fica cifrado localmente e
 
 Android/iOS mantêm o modelo local-first. O APK/IPA tem um armazenamento local próprio e não recebe automaticamente o IndexedDB do Safari/Chrome.
 
-A migração entre PWA e aplicação nativa deve ser feita por backup cifrado ou sincronização cifrada. GitHub Releases contém apenas binários públicos da aplicação e checksums, nunca dados financeiros, PINs, tokens ou backups pessoais.
+A migração entre PWA e aplicação nativa deve ser feita por backup cifrado ou sincronização cifrada. GitHub Releases contém apenas binários públicos da aplicação e checksums, nunca dados financeiros, PINs, tokens ou backups pessoais. A consulta de disponibilidade de APK/IPA só ocorre quando o utilizador escolhe verificá-la.
