@@ -8,10 +8,10 @@ const events = fs.readFileSync('events.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 const render = fs.readFileSync('render.js','utf8');
 
-assert.match(designCss, /Conta de Casa v43 — design foundation/);
-assert.match(designCss, /--content-max:1440px/);
-assert.match(designCss, /--sidebar-expanded:248px/);
-assert.match(designCss, /--sidebar-rail:76px/);
+assert.match(designCss, /Conta de Casa v44 — prototype-aligned responsive design system/);
+assert.match(designCss, /--content-max:1480px/);
+assert.match(designCss, /--sidebar-expanded:232px/);
+assert.match(designCss, /--sidebar-rail:72px/);
 assert.match(designCss, /html\.sidebar-collapsed/);
 assert.match(designCss, /@media\(min-width:821px\) and \(max-width:1180px\)/);
 assert.match(designCss, /@media\(max-width:820px\)/);
@@ -43,8 +43,12 @@ assert.match(index, /id="drawerNav"/);
 assert.match(index, /id="mobileNav" class="mobile-nav"/);
 assert.match(index, /id="kpiGrid" class="kpi-grid dashboard-kpis"/);
 assert.match(index, /id="dashboardSecondary" class="dashboard-secondary"/);
-assert.match(designCss, /#page-dashboard \.kpi-grid\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)\}/);
+assert.match(designCss, /#page-dashboard \.kpi-grid\{grid-template-columns:1\.45fr repeat\(3,minmax\(0,1fr\)\);gap:14px\}/);
 assert.match(designCss, /\.dashboard-secondary-card\{/);
+assert.match(designCss, /\.vault-card\{[\s\S]*width:min\(960px,calc\(100vw - 48px\)\)/);
+assert.match(designCss, /\.topbar\{[\s\S]*grid-template-rows:56px 44px/);
+assert.match(designCss, /#page-dashboard \.account-balance-kpi\{grid-column:1\/-1/);
+assert.match(designCss, /\.bill-filter-grid,\.market-filter-grid\{[\s\S]*overflow-x:auto/);
 assert.match(render, /\['Pago no mês',paidBills,'Pagamentos confirmados'\]/);
 assert.match(render, /setHTML\('#dashboardSecondary'/);
 assert.match(render, /data-update-balance/);
@@ -79,23 +83,26 @@ assert.match(designCss, /\.market-mobile-list\{display:none\}/);
 assert.match(designCss, /\.market-mobile-card\{/);
 assert.match(designCss, /\.market-table-shell\{display:none\}/);
 assert.doesNotMatch(index, /class="fab"/);
+assert.doesNotMatch(legacyCss, /\.fab\b/);
+assert.doesNotMatch(legacyCss, /\.market-row\b/);
+assert.doesNotMatch(legacyCss, /\.bill-card\b/);
 
 assert.doesNotMatch(css, /\bzoom\s*:/i);
 assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
 
-assert.match(index, /name="app-build" content="v43"/);
-assert.match(index, /styles\.css\?v=43/);
-assert.match(index, /design-system\.css\?v=43/);
-assert.match(index, /manifest\.webmanifest\?v=43/);
+assert.match(index, /name="app-build" content="v44"/);
+assert.match(index, /styles\.css\?v=44/);
+assert.match(index, /design-system\.css\?v=44/);
+assert.match(index, /manifest\.webmanifest\?v=44/);
 for (const asset of ['core','finance','render','forms','sync','events']) {
-  assert.match(index,new RegExp(`${asset}\\.js\\?v=43`));
+  assert.match(index,new RegExp(`${asset}\\.js\\?v=44`));
 }
-assert.match(index, /id="appBuildVersion">v43</);
-assert.match(events, /register\('\.\/sw\.js\?v=43',\{updateViaCache:'none'\}\)/);
+assert.match(index, /id="appBuildVersion">v44</);
+assert.match(events, /register\('\.\/sw\.js\?v=44',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v43/);
+assert.match(swSource, /conta-de-casa-public-v44/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 
-console.log('Responsive shell and PWA freshness v43 tests: OK');
+console.log('Responsive prototype-aligned shell and PWA freshness v44 tests: OK');

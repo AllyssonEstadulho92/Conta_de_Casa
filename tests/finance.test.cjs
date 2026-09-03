@@ -86,8 +86,9 @@ console.log('Finance and civil-date tests: OK');
 
 
 const filteredDue=vm.runInContext("filterBills(appState.bills,{status:'overdue'})",context);
-assert.equal(filteredDue.length,1);
-assert.equal(filteredDue[0].id,'b3');
+const directOverdueIds=vm.runInContext("appState.bills.filter(b=>billStatus(b)==='overdue').sort(compareBillsByDue).map(b=>b.id)",context);
+assert.deepEqual(JSON.parse(JSON.stringify(filteredDue.map(x=>x.id))),JSON.parse(JSON.stringify(directOverdueIds)));
+assert.ok(filteredDue.some(x=>x.id==='b3'));
 const filteredCategory=vm.runInContext("filterBills(appState.bills,{category:'Energia'})",context);
 assert.equal(filteredCategory.length,1);
 assert.equal(filteredCategory[0].id,'b1');

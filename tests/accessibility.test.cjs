@@ -27,9 +27,10 @@ for (const palette of [light,dark]) {
   assert.ok(contrast(palette.muted,palette.surface)>=4.5,'secondary text must meet WCAG AA contrast');
 }
 
+assert.match(css, /font-family:Inter,"SF Pro Text","SF Pro Display"/);
 assert.match(css, /\.btn\{min-height:44px/);
 assert.match(css, /\.icon-btn\{width:44px;height:44px/);
-assert.match(css, /\.month-picker input\{width:148px;min-height:44px/);
+assert.match(css, /\.month-picker input\{width:154px;min-height:44px/);
 assert.match(css, /\.sync-header-status\{height:44px;min-width:44px/);
 assert.match(css, /\.section-tab\{min-height:44px/);
 assert.match(css, /\.account-balance-kpi \.kpi-action\{[\s\S]*min-height:44px/);
