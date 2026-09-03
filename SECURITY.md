@@ -83,4 +83,4 @@ Regras adicionais:
 - builds de verificação usam package id com sufixo `.verify` para não poderem substituir a app de produção;
 - IPA/iOS de produção não é publicado sem credenciais Apple próprias e processo de assinatura válido;
 - o IndexedDB do contentor nativo é separado do armazenamento do navegador; a migração deve usar apenas backup cifrado ou sincronização cifrada;
-- o campo de download consulta apenas a API pública de Releases do próprio repositório e não envia dados financeiros.
+- o campo de download consulta apenas a API pública de Releases do próprio repositório, somente após ação explícita do utilizador, e não envia dados financeiros.
