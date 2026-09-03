@@ -1,9 +1,9 @@
 node_modules/
-dist/
-android/
-ios/
+/dist/
+/android/
+/ios/
 *.jks
 *.keystore
 *.p12
 *.mobileprovision
-mobile-release/
+/mobile-release/
