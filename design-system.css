@@ -84,8 +84,7 @@ input:focus,select:focus,textarea:focus{border-color:color-mix(in srgb,var(--pri
 .kpi{padding:18px}
 .kpi .label{font-size:.8125rem;font-weight:500;color:var(--muted)}
 .kpi strong{font-size:1.5rem;font-weight:600;letter-spacing:-.025em;font-variant-numeric:tabular-nums lining-nums}
-.kpi small,.list-main small,.security-item small,.goal-card .goal-values,.bill-meta{font-size:.8125rem}
-.bill-amount{font-weight:600;font-variant-numeric:tabular-nums lining-nums}
+.kpi small,.list-main small,.security-item small,.goal-card .goal-values{font-size:.8125rem}
 .status-chip{font-size:.75rem;font-weight:600;padding:4px 9px}
 .status-chip.pending,.status-chip.attention,.status-chip.due-today{color:var(--warning);background:var(--warning-bg)}
 .status-chip.urgent{color:var(--warning);background:var(--warning-bg)}
