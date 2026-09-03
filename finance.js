@@ -320,7 +320,7 @@ function financialDiagnostics(month = selectedMonth, now = new Date()) {
   const duplicateRecurrences=[...recurrenceCounts.values()].filter(v=>v>1).reduce((sum,v)=>sum+(v-1),0);
   if(duplicateRecurrences) issues.push({code:'duplicate-recurrences',severity:'high',count:duplicateRecurrences,label:'Possíveis ocorrências recorrentes duplicadas'});
   const n=monthNumbers(month,now);
-  if(![n.incomes,n.paymentTotal,n.marketSpent,n.pending,n.overdue,n.outstanding,n.current,n.projected,n.budgetUsed].every(Number.isSafeInteger)) issues.push({code:'unsafe-month-total',severity:'critical',count:1,label:'Total mensal fora do intervalo monetário seguro'});
+  if(![n.incomes,n.paymentTotal,n.marketSpent,n.pending,n.overdue,n.outstanding,n.ledgerCurrent,n.current,n.reconciliationDiff,n.projected,n.budgetUsed].every(Number.isSafeInteger)) issues.push({code:'unsafe-month-total',severity:'critical',count:1,label:'Total mensal fora do intervalo monetário seguro'});
   if(n.projected!==sumCents([n.current,-n.outstanding])) issues.push({code:'projected-invariant',severity:'critical',count:1,label:'Saldo projetado não corresponde ao saldo atual menos obrigações'});
   const dash=dashboardNumbers(month,now);
   const pendingBills=n.bills.filter(b=>['pending','partial','due-today'].includes(billStatus(b,now)));
