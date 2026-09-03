@@ -48,6 +48,12 @@ assert.match(sw,/conta-de-casa-public-v47/);
 assert.match(sw,/'\.\/mobile-install\.js'/);
 
 assert.match(workflow,/Conta-de-Casa-Android-verification\.apk/);
+assert.match(workflow,/versionCode\\s\+\\d\+\/,[\s\S]*versionCode 47/);
+assert.match(workflow,/versionName 47\.0\.0/);
+assert.match(workflow,/minSdkVersion/);
+assert.match(workflow,/compileSdkVersion/);
+assert.match(workflow,/targetSdkVersion/);
+assert.match(workflow,/MARKETING_VERSION=47\.0\.0 CURRENT_PROJECT_VERSION=47/);
 assert.match(workflow,/CODE_SIGNING_ALLOWED=NO build/);
 assert.match(workflow,/ANDROID_KEYSTORE_BASE64/);
 assert.match(workflow,/ANDROID_KEY_ALIAS/);
