@@ -8,7 +8,7 @@ const events = fs.readFileSync('events.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 const render = fs.readFileSync('render.js','utf8');
 
-assert.match(designCss, /Conta de Casa v46 — mobile fit and secure PIN presentation/);
+assert.match(designCss, /Conta de Casa v46 — mobile fit and exact financial counting/);
 assert.match(designCss, /--content-max:1480px/);
 assert.match(designCss, /--sidebar-expanded:232px/);
 assert.match(designCss, /--sidebar-rail:72px/);
