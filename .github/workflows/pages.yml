@@ -42,12 +42,11 @@ jobs:
           node --check events.js
           node --check sync.js
           node --check sw.js
-          node --check mobile-install.js
-          node --check scripts/prepare-mobile.cjs
+          node --check scripts/prepare-pages.cjs
           node tests/finance.test.cjs
           node tests/audit.test.cjs
           node tests/counting-invariants.test.cjs
-          node tests/mobile-packaging.test.cjs
+          node tests/isolation.test.cjs
           node tests/date-timezone.test.cjs
           node tests/form-regression.test.cjs
           node tests/security.test.cjs
@@ -59,7 +58,7 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8')); console.log('Manifest OK')"
 
       - name: Prepare public site allowlist
-        run: node scripts/prepare-mobile.cjs
+        run: node scripts/prepare-pages.cjs
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
