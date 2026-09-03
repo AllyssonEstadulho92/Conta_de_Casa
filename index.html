@@ -6,15 +6,15 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.github.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; media-src 'none'; manifest-src 'self'; worker-src 'self'" />
   <meta name="referrer" content="no-referrer" />
   <meta name="theme-color" content="#f7f9fc" />
-  <meta name="app-build" content="v47" />
+  <meta name="app-build" content="v48" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Conta de Casa" />
   <meta name="description" content="Conta de Casa — gestão privada de faturas e despesas domésticas." />
-  <link rel="manifest" href="./manifest.webmanifest?v=47" />
+  <link rel="manifest" href="./manifest.webmanifest?v=48" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=47" />
-  <link rel="stylesheet" href="./design-system.css?v=47" />
+  <link rel="stylesheet" href="./styles.css?v=48" />
+  <link rel="stylesheet" href="./design-system.css?v=48" />
   <title>Conta de Casa</title>
 </head>
 <body>
@@ -160,7 +160,7 @@
       <section id="page-reports" class="page"><div id="reportCards" class="kpi-grid"></div><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Por categoria</h2><p>Distribuição do mês.</p></div></div><div id="reportCategoryBars" class="bar-list"></div></article><article class="panel"><div class="panel-head"><div><h2>Últimos 6 meses</h2><p>Pagamentos e compras efetivas.</p></div></div><div id="monthlyTrend" class="trend-chart"></div></article></div></section>
       <section id="page-goals" class="page"><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav><div class="section-toolbar"><div><h2>Metas de poupança</h2><p class="muted">Objetivos acompanhados separadamente do orçamento mensal.</p></div><button id="newGoalBtn" class="btn primary">+ Novo objetivo</button></div><div id="goalList" class="goal-grid"></div></section>
       <section id="page-security" class="page"><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Estado de segurança</h2><p>Confirmações locais antes de usar dados reais.</p></div></div><div id="securityStatusGrid" class="security-grid"></div><button id="securityLockBtn" class="btn secondary">Bloquear agora</button></article><article class="panel"><h2>Backup cifrado</h2><p>Exporte apenas envelopes cifrados. O restauro valida versão, estrutura e integridade antes de substituir o cofre local.</p><div id="securityBackupInfo" class="section-gap"></div><div class="button-row"><button id="exportBackupBtn" class="btn primary">Exportar backup</button><label class="btn secondary file-btn">Restaurar backup<input id="importBackupInput" type="file" accept="application/json,.json" hidden /></label></div><p id="backupMessage" class="form-message" role="status"></p></article><article id="syncPanel" class="panel span-2">
-  <div class="panel-head"><div><h2>Sincronização automática cifrada</h2><p>Web e móvel usam o mesmo cofre cifrado através de um repositório GitHub privado.</p></div><span id="syncStatusBadge" class="status-chip normal">Não configurado</span></div>
+  <div class="panel-head"><div><h2>Sincronização opcional cifrada</h2><p>Por padrão, cada navegador mantém apenas o seu cofre local. Se quiser sincronizar dispositivos, configure um repositório GitHub privado seu.</p></div><span id="syncStatusBadge" class="status-chip normal">Não configurado</span></div>
   <div class="detail-grid">
     <div class="detail-item"><small>Estado</small><strong id="syncStatusText">Sincronização não configurada.</strong></div>
     <div class="detail-item"><small>Última sincronização</small><strong id="syncLastAt">Ainda não sincronizado</strong></div>
@@ -173,17 +173,15 @@
     <div><small>Modo</small><strong id="syncHealthMode">Só local</strong></div>
   </div>
   <div class="detail-grid section-gap">
-    <div class="detail-item full-detail"><small>Destino automático</small><strong id="syncDestination">AllyssonEstadulho92/conta-de-casa- · sync/vault.json</strong></div><div class="detail-item full-detail"><small>Versão técnica</small><strong id="appBuildVersion">v47</strong></div>
+    <div class="detail-item full-detail"><small>Destino remoto</small><strong id="syncDestination">Não configurado</strong></div><div class="detail-item full-detail"><small>Versão técnica</small><strong id="appBuildVersion">v48</strong></div>
   </div>
-  <div class="form-grid section-gap">
-    <label>Credencial GitHub deste dispositivo — introduzir apenas uma vez<input id="syncToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Fine-grained token com Contents: Read and write" /><small>Ao colar, o token é primeiro guardado cifrado neste dispositivo e depois validado automaticamente.</small></label>
+  <div class="form-grid two section-gap">
+    <label>Proprietário GitHub<input id="syncOwner" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="seu-utilizador" /></label>
+    <label>Repositório privado<input id="syncRepo" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="cofre-conta-de-casa" /></label>
+    <label class="full-row">Caminho do cofre cifrado<input id="syncPath" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" value="sync/vault.json" /></label>
+    <label class="full-row">Credencial GitHub deste dispositivo<input id="syncToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Fine-grained token com Contents: Read and write" /><small>O token fica cifrado apenas neste navegador. Use um token limitado ao seu repositório privado.</small></label>
   </div>
-  <p class="muted">Conta, repositório e caminho são definidos automaticamente e não podem ser alterados pela interface. Depois de validar a credencial uma vez, a sincronização passa a funcionar automaticamente neste dispositivo.</p>
-  <div class="sync-token-help section-gap">
-    <strong>Corrigir ou criar a credencial correta</strong>
-    <p class="muted">O GitHub abre com o proprietário <b>AllyssonEstadulho92</b> e a permissão <b>Contents: Read and write</b> já preparadas. No GitHub, escolha <b>Only select repositories</b> e selecione apenas <b>conta-de-casa-</b>; depois gere o token e cole-o acima.</p>
-    <a class="btn secondary" href="https://github.com/settings/personal-access-tokens/new?name=Conta+de+Casa+Sync&description=Sincronizacao+cifrada+do+Conta+de+Casa&target_name=AllyssonEstadulho92&expires_in=366&contents=write" target="_blank" rel="noopener noreferrer">Criar token correto no GitHub</a>
-  </div>
+  <p class="muted">A sincronização é opcional e começa desativada em cofres novos. Nenhum utilizador recebe o destino GitHub de outro utilizador.</p>
   <div class="button-row">
     <button id="syncConfigureBtn" class="btn primary" type="button">Ligar sincronização automática</button>
     <button id="syncNowBtn" class="btn secondary" type="button">Verificar agora</button>
@@ -201,7 +199,7 @@
     <div class="button-row"><button id="syncConflictRetryBtn" class="btn secondary" type="button">Comparar novamente</button></div>
   </div>
   <div id="syncResolveBox" class="sync-resolve section-gap" hidden>
-    <h3>Unir web e telemóvel sem perder dados</h3>
+    <h3>Unir dados sem perder</h3>
     <p class="muted">Foi encontrado um cofre remoto diferente. Introduza o PIN do dispositivo que iniciou a sincronização. A aplicação junta os dois conjuntos de dados, mantém o cofre remoto como identidade comum e alinha este dispositivo automaticamente.</p>
     <label>PIN do cofre sincronizado<input id="syncResolvePin" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" /></label>
     <button id="syncResolveBtn" class="btn primary" type="button">Unir dados e alinhar este dispositivo</button>
@@ -210,7 +208,7 @@
   <div class="section-gap">
     <hr />
     <h3>Juntar dados de outro dispositivo</h3>
-    <p class="muted">Use isto antes da primeira sincronização quando computador e telemóvel já têm dados diferentes. O backup é decifrado apenas neste dispositivo, os registos são unidos e o cofre atual não é substituído.</p>
+    <p class="muted">Use isto antes da primeira sincronização quando dois dispositivos já têm dados diferentes. O backup é decifrado apenas neste dispositivo, os registos são unidos e o cofre atual não é substituído.</p>
     <div class="form-grid two">
       <label class="full-row">Backup cifrado do outro dispositivo<input id="syncMergeBackupInput" type="file" accept="application/json,.json" /></label>
       <label class="full-row">PIN do backup de origem<input id="syncMergeBackupPin" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" /></label>
@@ -230,46 +228,17 @@
       </section>
       <section id="page-settings" class="page">
         <nav class="section-tabs" aria-label="Vistas de definições"><button class="section-tab" type="button" data-page="settings">Preferências</button><button class="section-tab" type="button" data-page="diagnostics">Integridade</button></nav>
-        <div class="settings-grid">
-          <article class="panel">
-            <h2>Preferências</h2>
-            <form id="settingsForm" class="form-grid">
-              <label>Nome opcional<input id="profileName" autocomplete="name" /></label>
-              <label>Moeda<select id="currencySelect"><option value="EUR">EUR — Euro</option></select></label>
-              <label>Modo visual<select id="themeSelect"><option value="light">Claro</option><option value="dark">Escuro</option><option value="system">Sistema</option></select></label>
-              <button class="btn primary" type="submit">Guardar preferências</button>
-            </form>
-            <hr />
-            <button id="resetDataBtn" class="btn danger">Apagar todos os dados locais</button>
-          </article>
-          <article class="panel mobile-distribution-panel">
-            <div class="panel-head"><div><h2>Aplicação móvel</h2><p>Instale a Conta de Casa ou descarregue um pacote nativo assinado quando estiver disponível.</p></div><span class="status-chip normal">v47</span></div>
-            <div class="app-download-grid">
-              <section class="app-download-card">
-                <div class="app-download-icon" aria-hidden="true">A</div>
-                <div><strong>Android</strong><small>APK nativo via Capacitor. O APK público só é ativado quando existir uma assinatura estável e verificada.</small></div>
-                <a id="androidApkDownload" class="btn primary disabled" aria-disabled="true">APK assinado ainda não publicado</a>
-              </section>
-              <section class="app-download-card">
-                <div class="app-download-icon" aria-hidden="true">◎</div>
-                <div><strong>Instalar Web App</strong><small id="installPwaHint">Instale a PWA diretamente a partir do navegador.</small></div>
-                <button id="installPwaBtn" class="btn secondary" type="button">Como instalar</button>
-              </section>
-              <section class="app-download-card">
-                <div class="app-download-icon" aria-hidden="true">i</div>
-                <div><strong>iPhone / iPad</strong><small>Instalação imediata pela PWA. Um IPA nativo exige assinatura Apple e não será disponibilizado sem credenciais próprias.</small></div>
-                <a id="iosIpaDownload" class="btn secondary disabled" aria-disabled="true">IPA assinado ainda não publicado</a>
-              </section>
-            </div>
-            <div class="button-row section-gap"><button id="checkMobileReleaseBtn" class="btn secondary" type="button">Verificar APK/IPA disponível</button></div>
-            <p id="mobileReleaseMeta" class="muted section-gap">A verificação de pacotes só é feita quando solicitar.</p>
-            <p id="mobileInstallStatus" class="form-message mobile-install-status" role="status" aria-live="polite"></p>
-            <div class="mobile-migration-note">
-              <strong>Dados existentes</strong>
-              <p>O APK/IPA usa um armazenamento local separado do Safari/Chrome. Antes de mudar para a versão nativa, exporte um backup cifrado ou configure a sincronização cifrada. Nunca copie ficheiros de dados em claro.</p>
-            </div>
-          </article>
-        </div>
+        <article class="panel narrow">
+          <h2>Preferências</h2>
+          <form id="settingsForm" class="form-grid">
+            <label>Nome opcional<input id="profileName" autocomplete="name" /></label>
+            <label>Moeda<select id="currencySelect"><option value="EUR">EUR — Euro</option></select></label>
+            <label>Modo visual<select id="themeSelect"><option value="light">Claro</option><option value="dark">Escuro</option><option value="system">Sistema</option></select></label>
+            <button class="btn primary" type="submit">Guardar preferências</button>
+          </form>
+          <hr />
+          <button id="resetDataBtn" class="btn danger">Apagar todos os dados locais</button>
+        </article>
       </section>
     </main>
     <nav id="mobileNav" class="mobile-nav" aria-label="Acesso rápido"></nav>
@@ -311,6 +280,6 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="./core.js?v=47" defer></script><script src="./finance.js?v=47" defer></script><script src="./render.js?v=47" defer></script><script src="./forms.js?v=47" defer></script><script src="./sync.js?v=47" defer></script><script src="./events.js?v=47" defer></script><script src="./mobile-install.js?v=47" defer></script>
+  <script src="./core.js?v=48" defer></script><script src="./finance.js?v=48" defer></script><script src="./render.js?v=48" defer></script><script src="./forms.js?v=48" defer></script><script src="./sync.js?v=48" defer></script><script src="./events.js?v=48" defer></script>
 </body>
 </html>
