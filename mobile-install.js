@@ -17,10 +17,22 @@
     el.className = `form-message mobile-install-status ${kind}`.trim();
   }
 
+  function trustedReleaseAssetUrl(asset) {
+    if (!asset?.browser_download_url) return '';
+    try {
+      const url = new URL(asset.browser_download_url);
+      const prefix = '/AllyssonEstadulho92/Conta_de_Casa/releases/download/';
+      return url.protocol === 'https:' && url.hostname === 'github.com' && url.pathname.startsWith(prefix) ? url.href : '';
+    } catch (_err) {
+      return '';
+    }
+  }
+
   function setDownload(anchor, asset, fallbackLabel) {
     if (!anchor) return;
-    if (asset?.browser_download_url) {
-      anchor.href = asset.browser_download_url;
+    const trustedUrl = trustedReleaseAssetUrl(asset);
+    if (trustedUrl) {
+      anchor.href = trustedUrl;
       anchor.removeAttribute('aria-disabled');
       anchor.classList.remove('disabled');
       anchor.textContent = `Baixar ${asset.name}`;
