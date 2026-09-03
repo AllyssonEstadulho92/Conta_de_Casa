@@ -296,7 +296,7 @@ Apenas após QA funcional, segurança, acessibilidade, persistência, PWA, anexo
 
 ## Sincronização automática
 
-Transporte remoto: repositório privado `AllyssonEstadulho92/conta-de-casa-`, caminho `sync/vault.json`.
+Transporte remoto opcional: repositório GitHub privado configurado pelo próprio utilizador, sem proprietário/repositório pré-definidos; caminho padrão `sync/vault.json`.
 
 Regras:
 - GitHub Pages continua a hospedar apenas o código público;

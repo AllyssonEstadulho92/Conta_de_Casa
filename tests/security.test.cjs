@@ -11,8 +11,8 @@ class StorageMock {
   clear() { this.data.clear(); }
 }
 
-const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','mobile-install.js','styles.css','sw.js','manifest.webmanifest'];
-const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','mobile-install.js','sw.js'];
+const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','styles.css','sw.js','manifest.webmanifest'];
+const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','sw.js'];
 const context = vm.createContext({
   crypto: webcrypto,
   TextEncoder,
@@ -56,13 +56,13 @@ assert.throws(() => vm.runInContext('sessionStorage.setItem("cdc_public_note", "
 assert.throws(() => vm.runInContext('localStorage.setItem("cdc_public_auditTrail", "alteração")', context), /Armazenamento em claro bloqueado/);
 
 const syncState = vm.runInContext(`ensureStateShape({
-  settings:{sync:{enabled:true,owner:'AllyssonEstadulho92',repo:'conta-de-casa-',path:'sync/vault.json'}},
+  settings:{sync:{enabled:true,owner:'example-user',repo:'private-vault',path:'sync/vault.json'}},
   months:{'2026-09':{openingBalanceCents:12345,budgetCents:9999,updatedAt:'2026-09-01T12:00:00.000Z'}},
   syncTombstones:[{entity:'market',id:'m1',deletedAt:'2026-09-01T13:00:00.000Z'}],
   syncConflicts:[{entity:'bill',id:'b1',at:'2026-09-01T14:00:00.000Z',local:{id:'b1'},remote:{id:'b1'}}]
 })`, context);
 assert.equal(syncState.settings.sync.enabled, true);
-assert.equal(syncState.settings.sync.repo, 'conta-de-casa-');
+assert.equal(syncState.settings.sync.repo, 'private-vault');
 assert.equal(syncState.months['2026-09'].updatedAt, '2026-09-01T12:00:00.000Z');
 assert.equal(syncState.syncTombstones.length, 1);
 assert.equal(syncState.syncConflicts.length, 1);
@@ -74,12 +74,7 @@ for (const file of appFiles) {
     const normalizedUrl = url.replace(/[;,]+$/g, '');
     const parsed = new URL(normalizedUrl);
     const approvedApi = parsed.origin === 'https://api.github.com';
-    const approvedTokenSetup = file === 'index.html'
-      && parsed.origin === 'https://github.com'
-      && parsed.pathname === '/settings/personal-access-tokens/new'
-      && parsed.searchParams.get('target_name') === 'AllyssonEstadulho92'
-      && parsed.searchParams.get('contents') === 'write';
-    assert.equal(approvedApi || approvedTokenSetup, true, `${file} may only reference the approved GitHub API or the fixed token-setup page`);
+    assert.equal(approvedApi, true, `${file} may only reference the approved GitHub API`);
   }
   assert.doesNotMatch(content, /\b(sendBeacon|XMLHttpRequest|gtag|analytics)\b|cdn\.jsdelivr|cdnjs|unpkg/i, `${file} must not include telemetry or CDN hooks`);
 }
@@ -92,6 +87,7 @@ assert.match(index, /Content-Security-Policy/);
 assert.match(index, /script-src 'self'/);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
 assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline event handlers');
+assert.doesNotMatch(index, /target_name=|Destino automático/);
 
 const sw = fs.readFileSync('sw.js','utf8');
 assert.match(sw, /PUBLIC_ASSET_SET/);

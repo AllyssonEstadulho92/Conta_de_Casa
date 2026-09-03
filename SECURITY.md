@@ -26,6 +26,16 @@ Nenhum dado financeiro, pessoal, fatura, referência, comprovativo, anexo, hist�
 - estrutura reservada para anexos cifrados, com anexos reais bloqueados até a cifragem de ficheiros estar concluída;
 - testes para senha errada, payload adulterado, backup inválido/corrompido, XSS, persistência cifrada e cálculos financeiros.
 
+## Isolamento entre utilizadores
+
+Um novo navegador/origem sem cofre existente inicia com estado financeiro vazio. Não existe perfil, fatura, pagamento, saldo, compra ou histórico pré-carregado.
+
+O PIN/palavra-passe não é armazenado. A aplicação gera um salt aleatório de 16 bytes para cada cofre e deriva uma chave AES-GCM 256 através de PBKDF2-SHA-256 com 250 000 iterações. A chave derivada é não exportável. Cada gravação cifrada usa um IV aleatório de 12 bytes.
+
+O IndexedDB pertence à origem e ao perfil do navegador. Utilizadores em dispositivos ou perfis de navegador diferentes não partilham automaticamente dados. Num mesmo perfil de navegador e na mesma origem existe um único cofre local; para separar pessoas no mesmo dispositivo, use perfis de navegador diferentes.
+
+A sincronização começa desativada e sem destino pré-configurado. Só depois de o utilizador indicar explicitamente o seu próprio repositório privado e credencial é permitido enviar um envelope cifrado.
+
 ## Limites do modelo
 
 A proteção cobre principalmente dados em repouso no navegador e redução de exposição acidental. Ela não substitui segurança do sistema operativo, gestão de dispositivos, backups protegidos, antivírus, extensões confiáveis e higiene de palavra-passe.
@@ -69,18 +79,3 @@ Riscos residuais adicionais:
 - um token comprometido pode permitir substituir ou apagar o ficheiro cifrado remoto;
 - conflitos simultâneos podem exigir intervenção manual;
 - a segurança continua dependente da conta GitHub, do dispositivo e do navegador.
-
-
-## Distribuição Android/iOS
-
-A versão nativa usa o mesmo código local-first dentro de um contentor Capacitor. O empacotamento não autoriza dados financeiros em GitHub Releases nem dentro do repositório.
-
-Regras adicionais:
-
-- APK de produção só pode ser publicado com uma chave de assinatura Android estável guardada em GitHub Actions Secrets;
-- keystores, ficheiros `.jks`, `.keystore`, certificados `.p12` e perfis `.mobileprovision` são proibidos no repositório;
-- o workflow gera checksum SHA-256 e verifica a assinatura antes de publicar o APK;
-- builds de verificação usam package id com sufixo `.verify` para não poderem substituir a app de produção;
-- IPA/iOS de produção não é publicado sem credenciais Apple próprias e processo de assinatura válido;
-- o IndexedDB do contentor nativo é separado do armazenamento do navegador; a migração deve usar apenas backup cifrado ou sincronização cifrada;
-- o campo de download consulta apenas a API pública de Releases do próprio repositório, somente após ação explícita do utilizador, e não envia dados financeiros.

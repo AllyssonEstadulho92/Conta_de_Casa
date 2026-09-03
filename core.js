@@ -444,7 +444,7 @@ function defaultState() {
       theme: 'light',
       lockMinutes: AUTO_LOCK_MINUTES,
       lockOnHidden: true,
-      sync: { enabled:true, disabledByUser:false, owner:'AllyssonEstadulho92', repo:'conta-de-casa-', path:'sync/vault.json' }
+      sync: { enabled:false, disabledByUser:false, owner:'', repo:'', path:'sync/vault.json' }
     },
     months: {},
     bills: [],
@@ -473,10 +473,10 @@ function ensureStateShape(s) {
       lockMinutes: clamp(Number(settings.lockMinutes) || AUTO_LOCK_MINUTES, 1, 30),
       lockOnHidden: settings.lockOnHidden !== false,
       sync: {
-        enabled: settings.sync?.disabledByUser ? false : true,
+        enabled: Boolean(settings.sync?.enabled) && !Boolean(settings.sync?.disabledByUser),
         disabledByUser: Boolean(settings.sync?.disabledByUser),
-        owner: cleanString(settings.sync?.owner || 'AllyssonEstadulho92', 80),
-        repo: cleanString(settings.sync?.repo || 'conta-de-casa-', 100),
+        owner: cleanString(settings.sync?.owner || '', 80),
+        repo: cleanString(settings.sync?.repo || '', 100),
         path: cleanString(settings.sync?.path || 'sync/vault.json', 180)
       }
     },

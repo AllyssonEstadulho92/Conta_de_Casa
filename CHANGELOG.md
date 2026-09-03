@@ -1,20 +1,17 @@
 # Changelog
 
-## v47 — distribuição móvel, APK e instalação PWA
+## v48 — GitHub Pages e isolamento por utilizador
 
-- adicionada fundação Capacitor para Android e iOS com dependências fixadas;
-- criado bundle móvel por allowlist, impedindo inclusão acidental de documentação, testes, Git metadata, chaves ou dados privados;
-- CI passa a gerar APK Android de verificação com package id isolado e a compilar a app iOS para simulador sem assinatura;
-- APK de produção só é criado e publicado quando as secrets de assinatura Android estão configuradas;
-- assinatura Android usa chave estável fora do repositório, `zipalign`, `apksigner verify` e checksum SHA-256;
-- GitHub Release `v47` recebe automaticamente APK + checksum quando a assinatura de produção está disponível;
-- Definições ganha a secção Aplicação móvel com instalação PWA, descoberta automática de APK/IPA nos Releases e instruções iPhone/iPad;
-- botão de download nunca aponta para um APK de teste nem para um ficheiro inexistente;
-- aviso explícito informa que APK/IPA têm armazenamento local separado do Safari/Chrome e exige backup cifrado ou sincronização para migração;
-- ícones e splash nativos são gerados a partir do asset público `icon.svg`;
-- nenhuma chave Android/Apple, keystore, certificado ou provisioning profile é guardado no repositório;
-- schema 5, DB_VERSION 2, IndexedDB cifrado, cálculos, backup e sincronização permanecem inalterados;
-- Service Worker e assets públicos promovidos para v47.
+- distribuição pública concentrada novamente em GitHub Pages;
+- cada novo cofre começa completamente vazio e sem dados de outro utilizador;
+- sincronização passa a ser opcional e desativada por padrão, sem proprietário ou repositório pré-configurados;
+- utilizadores que ativem sincronização devem indicar o seu próprio repositório GitHub privado;
+- PIN/palavra-passe continua sem ser armazenado: serve apenas para derivar a chave criptográfica do cofre;
+- cada cofre usa salt aleatório próprio, PBKDF2-SHA-256 e AES-GCM 256 para cifrar o estado no IndexedDB;
+- adicionados testes específicos de isolamento para impedir regressões que introduzam destinos privados de outro utilizador ou dados iniciais;
+- publicação Pages continua limitada por allowlist apenas aos ficheiros públicos necessários;
+- schema 5, cálculos financeiros, backups cifrados e dados existentes permanecem compatíveis;
+- Service Worker e assets públicos promovidos para v48.
 
 ## v46 — auditoria de contagens e invariantes financeiras
 
