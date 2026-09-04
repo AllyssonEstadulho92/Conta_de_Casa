@@ -49,6 +49,7 @@ jobs:
           node tests/isolation.test.cjs
           node tests/date-timezone.test.cjs
           node tests/form-regression.test.cjs
+          node tests/market-categories.test.cjs
           node tests/security.test.cjs
           node tests/responsive.test.cjs
           node tests/navigation.test.cjs
