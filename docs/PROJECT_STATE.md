@@ -3,6 +3,7 @@
 Atualizado: 5 de setembro de 2026
 Build funcional: v51
 Distribuição: GitHub Pages
+Commit principal validado: `d55328871cbef61d78bbb747e75b3d7b6bd1d06a`
 
 ## Estado atual
 
@@ -36,7 +37,19 @@ Mantém-se a correção do defeito de layout reproduzido em iPhone/Safari: o she
 - texto da nova camada visual mantido em 12 px ou superior;
 - build público atualizado para v51;
 - Service Worker e allowlist do GitHub Pages incluem os dois novos assets;
-- criado `tests/market-experience.test.cjs` e acrescentado ao CI.
+- criado `tests/market-experience.test.cjs` e acrescentado ao CI;
+- corrigida a semântica da pesquisa do comparador para não colocar um botão dentro de `label`;
+- garantido o restauro do botão de fechar do diálogo comum ao sair do comparador;
+- testes responsivos e de regressão mobile atualizados para a build v51.
+
+## Validação técnica concluída
+
+- Pull Request #22 integrado em `main`.
+- CI da revisão principal concluído com sucesso.
+- Testes financeiros, auditoria, isolamento, datas, formulários, categorias de Mercado, segurança, responsividade, viewport mobile, navegação, acessibilidade e sincronização concluídos com sucesso no GitHub Actions.
+- `tests/market-experience.test.cjs` concluído com sucesso, incluindo verificação de ausência de pedidos externos, preços apenas de demonstração, safe areas, breakpoints e texto mínimo de 12 px na nova camada.
+- workflow **Deploy Pages** concluído com sucesso para o mesmo commit principal.
+- publicação do GitHub Pages concluída com sucesso pelo workflow de deployment.
 
 ## Impacto funcional
 
@@ -44,10 +57,13 @@ Nenhuma alteração foi feita a cálculos financeiros, PIN/palavra-passe, PBKDF2
 
 A única nova ação funcional é a criação de um item da lista a partir do comparador; utiliza os mesmos campos persistentes já suportados pelo projeto e não grava os preços fictícios do protótipo.
 
+## Limitação de validação
+
+A validação automática e o deployment estão concluídos, mas **não foi realizada nesta revisão uma inspeção física em iPhone/Safari nem uma auditoria visual manual em todos os tamanhos 320/375/390/430, tablet e desktop**. Esses testes continuam necessários antes de considerar a equivalência visual do protótipo totalmente confirmada em hardware/browser real.
+
 ## Próximo passo
 
-1. Confirmar CI e publicação do GitHub Pages da build v51.
-2. Validar fisicamente no iPhone/Safari o ecrã **Adicionar produto**, incluindo 320/375/390/430 px, scroll, teclado, safe areas e navegação de retorno.
-3. Validar tablet e desktop em browser real, procurando scroll horizontal, cortes e sobreposições.
-4. Definir uma arquitetura de preços reais apenas depois de identificar fontes verificadas para cada mercado e uma camada de backend/proxy adequada a CORS, disponibilidade, termos de utilização, cache e auditoria de origem/data do preço.
-5. Consolidar progressivamente regras mobile duplicadas de `styles.css` e `design-system.css`, sem alterar comportamento.
+1. Validar fisicamente no iPhone/Safari o ecrã **Adicionar produto**, incluindo 320/375/390/430 px, scroll, teclado, safe areas e navegação de retorno.
+2. Validar tablet e desktop em browser real, procurando scroll horizontal, cortes e sobreposições.
+3. Definir uma arquitetura de preços reais apenas depois de identificar fontes verificadas para cada mercado e uma camada de backend/proxy adequada a CORS, disponibilidade, termos de utilização, cache e auditoria de origem/data do preço.
+4. Consolidar progressivamente regras mobile duplicadas de `styles.css` e `design-system.css`, sem alterar comportamento.
