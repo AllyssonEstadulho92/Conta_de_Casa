@@ -9,6 +9,7 @@ const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
   'design-system.css',
+  'mobile-layout.css',
   'core.js',
   'finance.js',
   'render.js',
