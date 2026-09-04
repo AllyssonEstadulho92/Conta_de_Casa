@@ -59,6 +59,9 @@ jobs:
       - name: Responsive layout tests
         run: node tests/responsive.test.cjs
 
+      - name: Mobile viewport regression tests
+        run: node tests/mobile-layout-regression.test.cjs
+
       - name: Navigation architecture tests
         run: node tests/navigation.test.cjs
 
