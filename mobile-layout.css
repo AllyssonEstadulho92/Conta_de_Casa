@@ -1,0 +1,73 @@
+/* Conta de Casa v50 — mobile viewport stability and compact market cards
+   Compatibility layer loaded after design-system.css.
+   Keeps VisualViewport metrics for dialogs/keyboard handling, but the permanent
+   application shell follows CSS dynamic viewport units instead of transient JS height. */
+
+@media(max-width:820px){
+  html.app-active .app-shell{
+    height:100dvh;
+    min-height:100svh;
+    max-height:100dvh;
+    overflow:hidden;
+  }
+
+  html.app-active .main{
+    height:100dvh;
+    min-height:100svh;
+    max-height:100dvh;
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:contain;
+    scroll-padding-top:var(--header-height);
+    scroll-padding-bottom:calc(var(--mobile-nav-height) + max(env(safe-area-inset-bottom),8px) + 18px);
+  }
+
+  .topbar{
+    position:sticky;
+    top:0;
+    z-index:30;
+  }
+}
+
+/* Typical phones: keep the purchase card informative without making each item
+   occupy most of the viewport. Very narrow devices retain the stacked layout. */
+@media(min-width:360px) and (max-width:560px){
+  .market-mobile-card{
+    gap:8px;
+    padding:12px;
+  }
+
+  .market-mobile-head{
+    grid-template-columns:44px minmax(0,1fr) auto;
+    gap:8px;
+    align-items:center;
+  }
+
+  .market-mobile-head>.status-chip{
+    grid-column:auto;
+    justify-self:end;
+  }
+
+  .market-mobile-money{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:6px;
+    padding:8px 0;
+  }
+
+  .market-mobile-money>div:last-child{
+    grid-column:auto;
+  }
+
+  .market-mobile-real{
+    gap:4px 8px;
+  }
+
+  .market-mobile-real .market-real-field input{
+    width:112px;
+  }
+
+  .market-mobile-actions{
+    gap:7px;
+  }
+}
