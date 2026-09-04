@@ -50,6 +50,9 @@ jobs:
       - name: Invoice form regression tests
         run: node tests/form-regression.test.cjs
 
+      - name: Market category tests
+        run: node tests/market-categories.test.cjs
+
       - name: Security hardening tests
         run: node tests/security.test.cjs
 
