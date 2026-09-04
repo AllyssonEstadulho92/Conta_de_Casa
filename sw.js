@@ -6,6 +6,7 @@ const PUBLIC_ASSETS = [
   './index.html',
   './styles.css',
   './design-system.css',
+  './mobile-layout.css',
   './core.js',
   './finance.js',
   './render.js',
