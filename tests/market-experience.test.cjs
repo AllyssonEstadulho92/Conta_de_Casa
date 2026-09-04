@@ -23,6 +23,8 @@ assert.ok(js.includes("data-market-price-mode=\"demo\""), 'prototype prices must
 assert.ok(js.includes('não são preços em tempo real'), 'the UI must not present prototype values as live prices');
 assert.ok(js.includes('estimatedCents:0'), 'demo prices must never be persisted as financial estimates');
 assert.ok(!/\bfetch\s*\(/.test(js), 'prototype market layer must not introduce unverified external network calls');
+assert.ok(!js.includes('<label class="market-browser-search"'), 'search must not nest an interactive button inside a label');
+assert.ok(js.includes("if(close){\n      close.textContent='×';"), 'shared dialog close control must be restored after leaving market browser');
 
 for (const marker of ['@media(max-width:820px)','@media(max-width:430px)','@media(max-width:359px)','@media(min-width:821px) and (max-width:1180px)','@media(min-width:1181px)']) {
   assert.ok(css.includes(marker), `missing responsive rule ${marker}`);
