@@ -29,6 +29,7 @@ jobs:
           node --check forms.js
           node --check events.js
           node --check sync.js
+          node --check market-experience.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
 
@@ -52,6 +53,9 @@ jobs:
 
       - name: Market category tests
         run: node tests/market-categories.test.cjs
+
+      - name: Market prototype tests
+        run: node tests/market-experience.test.cjs
 
       - name: Security hardening tests
         run: node tests/security.test.cjs

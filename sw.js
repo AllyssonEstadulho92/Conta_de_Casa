@@ -1,18 +1,20 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v50';
+const CACHE = 'conta-de-casa-public-v51';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
   './styles.css',
   './design-system.css',
   './mobile-layout.css',
+  './market-experience.css',
   './core.js',
   './finance.js',
   './render.js',
   './forms.js',
   './sync.js',
   './events.js',
+  './market-experience.js',
   './manifest.webmanifest',
   './icon.svg'
 ];

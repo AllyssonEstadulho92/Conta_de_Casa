@@ -50,3 +50,47 @@ Entre 360 px e 560 px, o estado volta à linha do produto e os três indicadores
 ### Motivo
 
 O layout anterior fazia cada item ocupar uma fração excessiva do ecrã em iPhones comuns. A alteração preserva legibilidade e os alvos tácteis de 44 px, mas melhora a quantidade de informação visível por ecrã.
+
+## D-004 — Implementar o protótipo Mercado numa camada isolada
+
+Data: 5 de setembro de 2026
+Estado: aceite
+
+### Contexto
+
+O protótipo aprovado altera significativamente a apresentação da Lista de compras e introduz um ecrã de descoberta/comparação de produtos, mas o projeto já possui lógica madura de criação, edição, cálculo, cifragem e sincronização.
+
+### Decisão
+
+Criar `market-experience.css` e `market-experience.js` como camada final e contextual. A nova camada só modifica a apresentação de `page-market` e o modo `market-browser` do diálogo comum.
+
+O botão de novo item e a ação rápida Mercado passam pelo novo comparador. A edição de registos existentes continua a usar o formulário anterior.
+
+### Motivo
+
+A abordagem reproduz o protótipo com risco reduzido, evita reescrever componentes financeiros e permite remoção/reversão direta se a validação física revelar regressões.
+
+### Consequência
+
+Os dois novos assets passam a integrar `index.html`, Service Worker, bundle de Pages e CI. A consolidação futura no design system principal só deve ocorrer depois da validação visual em dispositivos reais.
+
+## D-005 — Não apresentar dados de demonstração como preços reais
+
+Data: 5 de setembro de 2026
+Estado: aceite
+
+### Contexto
+
+O protótipo visual contém comparações de Pingo Doce, Continente e Mercadona. O projeto atual é uma PWA estática sem backend e a CSP só permite ligações à própria origem e à API GitHub. Não foi confirmada uma fonte única, estável e verificável para preços em tempo real dos três mercados.
+
+### Decisão
+
+A build v51 mantém os preços do protótipo apenas como **dados de demonstração explicitamente identificados**. `market-experience.js` não faz pedidos externos e, ao adicionar um produto à lista, grava `estimatedCents: 0` em vez do valor de demonstração.
+
+### Motivo
+
+Gravar ou apresentar um valor fictício como preço real contaminaria cálculos financeiros e reduziria a fiabilidade da aplicação. Adicionar scraping direto a partir do browser também introduziria problemas de CORS, disponibilidade, segurança, termos de utilização e rastreabilidade da origem.
+
+### Próxima decisão necessária
+
+Antes de preços reais, definir um subsistema próprio de recolha/normalização com fontes verificadas por mercado, backend/proxy, EAN/GTIN, timestamp, região/loja, promoções, cache, caducidade e indicação de origem.
