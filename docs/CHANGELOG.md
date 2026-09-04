@@ -1,5 +1,49 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-05 — Mercado v51 alinhado com o protótipo aprovado
+
+### Objetivo
+
+Reproduzir na aplicação real a apresentação aprovada para **Lista de compras** e **Adicionar produto**, mantendo dados, cálculos, cifragem, sincronização, rotas e edição dos registos existentes.
+
+### Alterações visuais
+
+- criado `market-experience.css` como última camada visual e apenas para Mercado;
+- refinados pesquisa, botão `+`, filtros, cartões de resumo, cabeçalho de resultados e estado vazio;
+- novo ecrã responsivo `market-browser` para **Adicionar produto**;
+- pesquisa inicial por “Leite meio gordo” para reproduzir o cenário do protótipo;
+- tabs Mercados / Produtos / Categorias;
+- seleção visual de Pingo Doce, Continente e Mercadona;
+- cartões de produto com comparação dos três mercados e estado de promoção;
+- alvos tácteis do novo fluxo entre 44 e 52 px;
+- tipografia da nova camada nunca inferior a 12 px;
+- breakpoints específicos para 320/359, 430, 820, 1180 px e desktop;
+- safe areas superior e inferior aplicadas ao diálogo móvel.
+
+### Alterações funcionais controladas
+
+- `market-experience.js` interceta apenas a criação de um novo item e a ação rápida Mercado;
+- editar um item já guardado continua a usar `openMarketForm()` sem alterações;
+- um produto escolhido no comparador é criado no mesmo `appState.market` e com o mesmo schema existente;
+- os preços apresentados no comparador são valores de demonstração, identificados na UI;
+- os valores de demonstração **não são persistidos**: o novo item é criado com `estimatedCents: 0`;
+- não foram adicionados `fetch`, APIs externas, scraping ou alterações à CSP.
+
+### Distribuição e testes
+
+- build pública atualizada de v50 para v51;
+- `market-experience.css` e `market-experience.js` adicionados a `index.html`;
+- Service Worker atualizado para cache `conta-de-casa-public-v51`;
+- os novos assets foram adicionados à allowlist de `scripts/prepare-pages.cjs`;
+- criado `tests/market-experience.test.cjs` para wiring, cache, segurança dos dados de demonstração, breakpoints, safe areas, tamanhos tipográficos e ausência de pedidos externos;
+- CI passa a executar `node --check market-experience.js` e o novo teste.
+
+### Segurança e dados
+
+Sem alteração de schema, cálculos financeiros, IndexedDB, PBKDF2, AES-GCM, PIN/palavra-passe, backups, sincronização ou dados existentes.
+
+A integração de preços reais fica deliberadamente separada até existir uma fonte verificada para os três mercados e uma arquitetura de backend/proxy adequada.
+
 ## 2026-09-04 — correção de corte do viewport mobile
 
 ### Problema
