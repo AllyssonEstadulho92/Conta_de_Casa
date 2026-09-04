@@ -2,8 +2,8 @@
 
 ## P0 — validação imediata
 
-- [ ] Confirmar CI da build v51 com `market-experience.css` e `market-experience.js`.
-- [ ] Confirmar publicação do GitHub Pages após CI.
+- [x] Confirmar CI da build v51 com `market-experience.css` e `market-experience.js`.
+- [x] Confirmar publicação do GitHub Pages após CI.
 - [ ] Validar no iPhone/Safari que Compras percorre todos os cartões sem corte ou grande área vazia.
 - [ ] Validar o novo ecrã **Adicionar produto** em 320, 375, 390 e 430 px: header, pesquisa, tabs, mercados, cartões, comparação, botões e scroll.
 - [ ] Confirmar que notch/Dynamic Island e home indicator não tapam o ecrã `market-browser`.
