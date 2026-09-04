@@ -52,6 +52,7 @@ jobs:
           node tests/market-categories.test.cjs
           node tests/security.test.cjs
           node tests/responsive.test.cjs
+          node tests/mobile-layout-regression.test.cjs
           node tests/navigation.test.cjs
           node tests/accessibility.test.cjs
           node tests/sync.test.cjs
