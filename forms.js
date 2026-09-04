@@ -258,11 +258,42 @@ function openIncomeForm(){
     await commit('created','income');closeDialog();toast('Rendimento guardado.');return true;
   }));
 }
+
+const MARKET_CATEGORIES = Object.freeze([
+  'Frutas e legumes',
+  'Carne e peixe',
+  'Lacticínios e ovos',
+  'Padaria e pastelaria',
+  'Mercearia / Despensa',
+  'Congelados',
+  'Bebidas',
+  'Snacks e doces',
+  'Higiene pessoal',
+  'Limpeza',
+  'Casa e cozinha',
+  'Bebé',
+  'Animais',
+  'Saúde / Farmácia',
+  'Outros'
+]);
+
+function marketCategoryOptions(selected='') {
+  const current=cleanString(selected,80);
+  const existing=[...new Set((appState?.market||[]).map(item=>cleanString(item?.category,80)).filter(Boolean))];
+  const categories=[...MARKET_CATEGORIES];
+  for(const name of existing){
+    if(!categories.includes(name)) categories.splice(categories.length-1,0,name);
+  }
+  if(current&&!categories.includes(current)) categories.splice(categories.length-1,0,current);
+  const placeholder=current?'':'<option value="" selected disabled>Selecionar categoria</option>';
+  return placeholder+categories.map(name=>`<option value="${attr(name)}"${name===current?' selected':''}>${esc(name)}</option>`).join('');
+}
+
 function openMarketForm(item=null){
   const existing=item?.id?appState.market.find(x=>x.id===item.id):null;
   const estimatedValue=existing?.estimatedCents>0?(existing.estimatedCents/100).toFixed(2).replace('.',','):'';
   const units=['un','kg','g','L','ml'];
-  openDialog(existing?'Editar item do mercado':'Adicionar ao mercado',`<form id="marketForm" class="form-grid two"><input type="hidden" name="marketId" value="${attr(existing?.id||'')}"><label>Produto<input name="name" required value="${attr(existing?.name||'')}" autocomplete="off" spellcheck="false"></label><label>Categoria<input name="category" value="${attr(existing?.category||'')}" placeholder="Frutas, limpeza..." autocomplete="off" spellcheck="false"></label><label>Quantidade<input name="quantity" value="${attr(existing?.quantity||'1')}" autocomplete="off"></label><label>Unidade<select name="unit">${units.map(unit=>`<option value="${attr(unit)}" ${unit===(existing?.unit||'un')?'selected':''}>${esc(unit)}</option>`).join('')}</select></label><label class="full-row">Preço estimado<input name="estimated" inputmode="decimal" value="${attr(estimatedValue)}" placeholder="0,00" autocomplete="off"></label><div class="button-row full-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary" type="submit">${existing?'Guardar alterações':'Adicionar'}</button></div></form>`);
+  openDialog(existing?'Editar item do mercado':'Adicionar ao mercado',`<form id="marketForm" class="form-grid two"><input type="hidden" name="marketId" value="${attr(existing?.id||'')}"><label>Produto<input name="name" required value="${attr(existing?.name||'')}" autocomplete="off" spellcheck="false"></label><label>Categoria<select name="category" required>${marketCategoryOptions(existing?.category||'')}</select><small>Escolha uma categoria para organizar a lista e os relatórios.</small></label><label>Quantidade<input name="quantity" value="${attr(existing?.quantity||'1')}" autocomplete="off"></label><label>Unidade<select name="unit">${units.map(unit=>`<option value="${attr(unit)}" ${unit===(existing?.unit||'un')?'selected':''}>${esc(unit)}</option>`).join('')}</select></label><label class="full-row">Preço estimado<input name="estimated" inputmode="decimal" value="${attr(estimatedValue)}" placeholder="0,00" autocomplete="off"></label><div class="button-row full-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary" type="submit">${existing?'Guardar alterações':'Adicionar'}</button></div></form>`);
   $('#marketForm').addEventListener('submit',e=>withFormSubmissionLock(e,async form=>{
     const fd=new FormData(form);
     const marketId=cleanString(fd.get('marketId'),80);
@@ -271,8 +302,10 @@ function openMarketForm(item=null){
     const name=cleanString(fd.get('name'),100),est=parseCents(fd.get('estimated'));
     if(!name){toast('Indique o produto.');return false;}
     if(!validCents(est,0)){toast('Preço estimado inválido. Use zero ou um valor positivo.');return false;}
+    const category=cleanString(fd.get('category'),80);
+    if(!category){toast('Selecione uma categoria.');return false;}
     const now=new Date().toISOString();
-    const patch={name,category:cleanString(fd.get('category'),80)||'Outros',quantity:cleanString(fd.get('quantity'),40)||'1',unit:cleanString(fd.get('unit'),20)||'un',estimatedCents:est,updatedAt:now};
+    const patch={name,category,quantity:cleanString(fd.get('quantity'),40)||'1',unit:cleanString(fd.get('unit'),20)||'un',estimatedCents:est,updatedAt:now};
     if(current){
       Object.assign(current,patch);
     }else{
