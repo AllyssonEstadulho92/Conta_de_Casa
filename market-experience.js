@@ -105,7 +105,7 @@
   function browserShellHtml(){
     return `<div class="market-browser" data-market-price-mode="demo">
       <div class="market-browser-search-row">
-        <label class="market-browser-search" for="marketCatalogSearch">${svgIcon('search',24)}<input id="marketCatalogSearch" type="search" value="${attr(query)}" placeholder="Pesquisar produto" autocomplete="off" aria-label="Pesquisar produto no comparador"><button class="market-search-clear" type="button" data-market-search-clear aria-label="Limpar pesquisa">${svgIcon('close',22)}</button></label>
+        <div class="market-browser-search">${svgIcon('search',24)}<input id="marketCatalogSearch" type="search" value="${attr(query)}" placeholder="Pesquisar produto" autocomplete="off" aria-label="Pesquisar produto no comparador"><button class="market-search-clear" type="button" data-market-search-clear aria-label="Limpar pesquisa">${svgIcon('close',22)}</button></div>
       </div>
       ${tabsHtml()}
       <div id="marketBrowserTabPanel" class="market-browser-tab-panel" role="tabpanel"></div>
@@ -229,7 +229,7 @@
     const eyebrow=dialog.querySelector('.dialog-head .eyebrow');
     if(eyebrow)eyebrow.hidden=false;
     const close=dialog.querySelector('[data-close-dialog]');
-    if(close&&dialog.dataset.mode!==MARKET_BROWSER_MODE){
+    if(close){
       close.textContent='×';
       close.setAttribute('aria-label','Fechar janela');
     }
