@@ -59,6 +59,7 @@ jobs:
           node tests/market-categories.test.cjs
           node tests/market-experience.test.cjs
           node tests/market-product-images.test.cjs
+          node tests/market-image-resolver.test.cjs
           node tests/market-barcode.test.cjs
           node tests/market-live-accounting.test.cjs
           node tests/ui-icons.test.cjs
