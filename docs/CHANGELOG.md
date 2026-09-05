@@ -1,5 +1,36 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-05 — Hierarquia mobile do protótipo e auditoria transversal de ícones v55
+
+### Motivo
+
+A validação física da página **Lista de compras** em iPhone/Safari confirmou que a adoção de Lucide resolveu a inconsistência da família de ícones, mas a composição real ainda se afastava do protótipo aprovado. Em particular, o botão secundário junto da pesquisa continuava visualmente semelhante a outro `+`, os cartões financeiros tinham pouca diferenciação semântica e os cartões de produto mantinham uma hierarquia mais técnica do que a referência visual.
+
+### Alterações
+
+- o cabeçalho da página Compras passa a apresentar um carrinho vetorial junto de **Lista de compras**;
+- o `+` azul do cabeçalho permanece como ação primária de criação;
+- o controlo secundário junto da pesquisa passa a usar linguagem visual de **scanner**, mantendo exatamente o fluxo existente de adicionar/pesquisar produto;
+- o estado Sync mantém iconografia semântica e recebe um chevron discreto para indicar que é interativo;
+- os quatro cartões de resumo recebem ícones vetoriais e cores de apoio coerentes com estimativa, gasto, pendentes e diferença;
+- os cartões mobile dos produtos passam a usar um avatar vetorial neutro, estado, quantidade e valores numa hierarquia mais próxima do protótipo;
+- não foram adicionadas fotografias de produtos, porque o schema atual não possui imagem e a aplicação não deve inventar ou persistir dados visuais sem uma decisão própria;
+- o campo de preço real fica visualmente oculto enquanto o item ainda está por comprar e permanece disponível quando o item é comprado;
+- editar e eliminar continuam funcionais, mas aparecem como ações iconográficas compactas no mobile;
+- a navegação inferior recebe uma métrica uniforme de ícones e sublinhado do destino ativo;
+- SVG contextuais dos módulos antigos recebem a mesma métrica visual de 2 px, terminais arredondados e rendering geométrico da linguagem Lucide;
+- cache do Service Worker atualizado para `conta-de-casa-public-v55-prototype` para impedir reutilização da camada visual anterior em Safari/iOS.
+
+### Arquitetura, segurança e dados
+
+A revisão permanece na camada final `ui-icons.css`, carregada depois de `market-experience.css`, e não altera `render.js`, `core.js`, eventos de negócio ou persistência. Não foram modificados schema, IndexedDB, PBKDF2, AES-GCM, PIN, cálculos financeiros, preços, backups, sincronização, CSP ou endpoints externos. Também não foram adicionadas fontes, CDNs, pacotes ou imagens remotas.
+
+A auditoria transversal confirmou quatro origens históricas de iconografia: `ICONS`/`icon()`, subset Lucide, SVG locais de módulos contextuais e fallbacks Unicode/decoração nativa do browser. Lucide permanece a fonte visual oficial; a remoção física dos fallbacks e a migração dos pequenos geradores SVG ficam separadas para depois da validação física v55.
+
+### Testes
+
+`tests/ui-icons.test.cjs`, `tests/market-experience.test.cjs` e `tests/responsive.test.cjs` foram atualizados para validar a hierarquia do protótipo, a ação de scanner, os cartões-resumo, a lista mobile, a navegação inferior, a métrica dos SVG contextuais e o novo namespace de cache, sem relaxar as suites financeiras, de segurança, acessibilidade e sincronização.
+
 ## 2026-09-05 — Lucide como sistema visual oficial de ícones
 
 ### Motivo
