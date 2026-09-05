@@ -11,8 +11,8 @@ class StorageMock {
   clear() { this.data.clear(); }
 }
 
-const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','market-experience.js','market-barcode.js','styles.css','sw.js','manifest.webmanifest'];
-const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','market-barcode.js','sw.js'];
+const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','market-experience.js','market-image-resolver.js','market-barcode.js','styles.css','sw.js','manifest.webmanifest'];
+const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','market-image-resolver.js','market-barcode.js','sw.js'];
 const context = vm.createContext({
   crypto: webcrypto,
   TextEncoder,
@@ -72,13 +72,19 @@ const approvedExternalOrigins = new Set([
   'https://cesta.pt',
   'https://world.openfoodfacts.org',
   'https://images.openfoodfacts.org',
+  'https://www.continente.pt',
+  'https://static.pingodoce.pt',
+  'https://www.pingodoce.pt',
   'https://unpkg.com'
 ]);
 const approvedOriginFiles = new Map([
   ['https://api.github.com',new Set(['index.html','sync.js'])],
-  ['https://cesta.pt',new Set(['index.html','market-experience.js'])],
-  ['https://world.openfoodfacts.org',new Set(['index.html','market-experience.js','market-barcode.js'])],
+  ['https://cesta.pt',new Set(['index.html','market-experience.js','market-image-resolver.js'])],
+  ['https://world.openfoodfacts.org',new Set(['index.html','market-experience.js','market-image-resolver.js','market-barcode.js'])],
   ['https://images.openfoodfacts.org',new Set(['index.html'])],
+  ['https://www.continente.pt',new Set(['index.html'])],
+  ['https://static.pingodoce.pt',new Set(['index.html'])],
+  ['https://www.pingodoce.pt',new Set(['index.html'])],
   ['https://unpkg.com',new Set(['index.html','market-barcode.js'])]
 ]);
 for (const file of appFiles) {
@@ -103,9 +109,16 @@ assert.match(index, /script-src 'self' https:\/\/unpkg\.com/);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
 assert.match(index, /https:\/\/cesta\.pt/);
 assert.match(index, /https:\/\/world\.openfoodfacts\.org/);
-assert.match(index, /img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org;/);
+assert.match(index, /img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org https:\/\/www\.continente\.pt https:\/\/static\.pingodoce\.pt https:\/\/www\.pingodoce\.pt;/);
 assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline event handlers');
 assert.doesNotMatch(index, /target_name=|Destino automático/);
+
+const imageResolver=fs.readFileSync('market-image-resolver.js','utf8');
+assert.match(imageResolver,/safeOfficialImageUrl/);
+assert.match(imageResolver,/\['www\.continente\.pt','continente\.pt'\]/);
+assert.match(imageResolver,/\['static\.pingodoce\.pt','www\.pingodoce\.pt','pingodoce\.pt'\]/);
+assert.match(imageResolver,/path\.includes\('\/on\/demandware\.static\/'\)/);
+assert.doesNotMatch(imageResolver,/localStorage|sessionStorage/);
 
 const barcode = fs.readFileSync('market-barcode.js','utf8');
 assert.match(barcode, /https:\/\/unpkg\.com\/@zxing\/browser@0\.2\.0\/umd\/zxing-browser\.min\.js/);
