@@ -1,4 +1,4 @@
-/* Conta de Casa v54 — Lucide icon system and control normalization. */
+/* Conta de Casa v55 — Lucide icon system and refined add controls. */
 .ui-icon-svg{
   display:block;
   flex:0 0 auto;
@@ -60,7 +60,7 @@ button[data-ui-iconized="true"]:not(.quick-grid button){
 #newMarketBtn[data-ui-iconized="true"],
 #newGoalBtn[data-ui-iconized="true"]{align-items:center;justify-content:center;gap:8px}
 
-/* Remove os antigos '+' criados por CSS. Eles causavam o botão duplo mostrado no iPhone. */
+/* O antigo '+' de pseudo-elemento fica desativado: existe apenas o Plus Lucide real. */
 .btn.primary.bill-new-btn[data-ui-iconized="true"]::before,
 .btn.primary.market-new-btn[data-ui-iconized="true"]::before,
 .bill-new-btn[data-ui-iconized="true"]::before,
@@ -146,13 +146,69 @@ input[type="search"]::-webkit-search-decoration{-webkit-appearance:none;appearan
 .sync-header-status.partial .sync-dot .ui-icon-svg{animation:ui-icon-spin 1.15s linear infinite}
 #alertBadge:not([hidden]){animation:ui-alert-pulse 1.8s ease-in-out infinite}
 
-/* Botões compactos continuam com área tátil >=44px, mas mostram só um símbolo. */
+/*
+ * Adicionar no mobile: uma única linguagem visual para o botão global,
+ * Nova fatura e Mercado. A área tátil continua >=44px; o desenho visível
+ * é um quadrado arredondado compacto, sem círculo/pseudo-elemento concorrente.
+ */
 @media(max-width:820px){
+  .btn.primary.topbar-create,
+  .btn.primary.bill-new-btn[data-ui-iconized="true"],
+  .btn.primary.market-new-btn[data-ui-iconized="true"]{
+    width:46px!important;
+    min-width:46px!important;
+    height:46px!important;
+    min-height:46px!important;
+    padding:0!important;
+    border:1px solid color-mix(in srgb,var(--primary) 76%,#fff)!important;
+    border-radius:14px!important;
+    background:linear-gradient(145deg,color-mix(in srgb,var(--primary) 86%,#fff),var(--primary))!important;
+    color:#fff!important;
+    box-shadow:0 7px 18px color-mix(in srgb,var(--primary) 24%,transparent),inset 0 1px 0 rgba(255,255,255,.28)!important;
+    display:grid!important;
+    place-items:center!important;
+    justify-self:end;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn.primary.topbar-create>span:first-child{
+    width:100%!important;
+    height:100%!important;
+    display:grid!important;
+    place-items:center!important;
+    border-radius:inherit!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  .btn.primary.topbar-create .ui-icon-svg,
+  .bill-new-btn[data-ui-iconized="true"] .ui-icon-svg,
+  .market-new-btn[data-ui-iconized="true"] .ui-icon-svg{
+    width:20px!important;
+    height:20px!important;
+    color:#fff!important;
+    margin:0!important;
+  }
   .bill-new-btn[data-ui-iconized="true"] .ui-icon-label,
   .market-new-btn[data-ui-iconized="true"] .ui-icon-label{display:none!important}
-  .bill-new-btn[data-ui-iconized="true"] .ui-icon-svg,
-  .market-new-btn[data-ui-iconized="true"] .ui-icon-svg{width:22px!important;height:22px!important}
+  .btn.primary.topbar-create:active,
+  .btn.primary.bill-new-btn[data-ui-iconized="true"]:active,
+  .btn.primary.market-new-btn[data-ui-iconized="true"]:active{
+    filter:brightness(.94);
+    box-shadow:0 4px 12px color-mix(in srgb,var(--primary) 20%,transparent),inset 0 1px 0 rgba(255,255,255,.2)!important;
+  }
   .mobile-menu-btn .ui-icon-svg{width:23px!important;height:23px!important}
+}
+
+@media(max-width:359px){
+  .btn.primary.topbar-create,
+  .btn.primary.bill-new-btn[data-ui-iconized="true"],
+  .btn.primary.market-new-btn[data-ui-iconized="true"]{
+    width:44px!important;
+    min-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+    border-radius:13px!important;
+  }
 }
 
 @media(hover:hover) and (pointer:fine){
@@ -161,6 +217,11 @@ input[type="search"]::-webkit-search-decoration{-webkit-appearance:none;appearan
   .market-barcode-open:hover .ui-icon-svg,
   button[data-ui-iconized="true"]:hover>.ui-icon-svg{
     transform:translateY(-1px);
+  }
+  .btn.primary.topbar-create:hover,
+  .btn.primary.bill-new-btn[data-ui-iconized="true"]:hover,
+  .btn.primary.market-new-btn[data-ui-iconized="true"]:hover{
+    box-shadow:0 9px 22px color-mix(in srgb,var(--primary) 28%,transparent),inset 0 1px 0 rgba(255,255,255,.3)!important;
   }
 }
 
