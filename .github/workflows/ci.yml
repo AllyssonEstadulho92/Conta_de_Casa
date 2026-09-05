@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: "24"
 
+      - name: Probe live market sources
+        run: node scripts/probe-market-sources.cjs
+
       - name: Syntax check
         run: |
           node --check core.js
