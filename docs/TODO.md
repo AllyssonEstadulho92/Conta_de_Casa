@@ -17,6 +17,17 @@
 - [ ] Repetir a validação em 320, 375, 390 e 430 px, retrato e paisagem.
 - [ ] Confirmar tema escuro e `prefers-reduced-motion` em hardware/browser real.
 
+## P0 — validação do cofre v56
+
+- [x] Redesenhar visualmente o ecrã de desbloqueio com cartão moderno, teclado circular e hierarquia clara.
+- [x] Preservar o PIN/palavra-passe e todos os eventos de desbloqueio existentes.
+- [x] Não apresentar passkey/biometria enquanto não existir implementação real e auditada.
+- [x] Preservar safe areas, tema escuro e `prefers-reduced-motion`.
+- [x] Atualizar cache do Service Worker e testes de regressão visual/estrutural.
+- [ ] Validar em iPhone/Safari físico nas larguras 320, 375, 390 e 430 px.
+- [ ] Confirmar que teclado, Enter, apagar, palavra-passe e recuperação continuam acessíveis sem corte pelas barras do Safari.
+- [ ] Validar Android/Chrome e desktop, incluindo tema escuro e orientação paisagem.
+
 ## P0 — validação Lucide e faturas
 
 - [x] Auditar as fontes de ícones usadas pela aplicação e identificar mistura de SVG, glifos Unicode, controlos nativos e módulos contextuais.

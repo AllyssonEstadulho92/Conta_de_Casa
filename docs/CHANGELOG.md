@@ -31,6 +31,31 @@ A auditoria transversal confirmou quatro origens históricas de iconografia: `IC
 
 `tests/ui-icons.test.cjs`, `tests/market-experience.test.cjs` e `tests/responsive.test.cjs` foram atualizados para validar a hierarquia do protótipo, a ação de scanner, os cartões-resumo, a lista mobile, a navegação inferior, a métrica dos SVG contextuais e o novo namespace de cache, sem relaxar as suites financeiras, de segurança, acessibilidade e sincronização.
 
+## 2026-09-05 — Cofre de acesso v56 mais moderno e elegante
+
+### Objetivo
+
+Aproximar o ecrã de PIN do nível visual da referência de iPhone enviada, mantendo a identidade **Conta de Casa** e sem alterar o modelo de segurança já implementado.
+
+### Alterações
+
+- fundo do cofre com profundidade subtil e gradientes derivados dos tokens existentes;
+- cartão principal com maior raio, transparência controlada e sombra mais natural;
+- marca Conta de Casa compacta, com ícone Lucide e subtítulo de cofre privado;
+- badge de segurança e hierarquia tipográfica revistos;
+- texto de sessão esclarece que o cofre é local e encriptado;
+- campo de PIN transformado numa cápsula focável, mantendo o input real existente;
+- teclado numérico passa a usar teclas circulares e proporções específicas para desktop, iPhone comum e ecrãs muito estreitos;
+- botão Entrar recebe maior contraste e prioridade visual;
+- alternativa por palavra-passe, transferência de cofre, recuperação e notas de privacidade continuam disponíveis;
+- tema escuro, safe areas e `prefers-reduced-motion` preservados;
+- não foi introduzido botão de passkey/biometria por não existir ainda uma implementação real e auditada;
+- cache público atualizado para `conta-de-casa-public-v56-vault-modern`.
+
+### Segurança e dados
+
+Sem alterações a PBKDF2, AES-GCM, PIN/palavra-passe, IndexedDB, backups, sincronização, schema financeiro ou dados existentes. A revisão é visual e não adiciona endpoints nem dependências externas.
+
 ## 2026-09-05 — Lucide como sistema visual oficial de ícones
 
 ### Motivo

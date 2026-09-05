@@ -1,15 +1,34 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 5 de setembro de 2026
-Build funcional: v53 com revisão visual Lucide v54 integrada; hierarquia do protótipo v55 em validação
+Build funcional: v53 com revisão visual Lucide v54 integrada; hierarquia Compras v55 integrada; cofre visual v56 em validação
 Distribuição: GitHub Pages
-Estado da revisão: protótipo aprovado da **Lista de compras** aplicado como camada visual contextual, sem alteração de schema, cálculos, persistência ou eventos de negócio
+Estado da revisão: ecrã de desbloqueio do cofre redesenhado visualmente para iPhone/Android/desktop, sem alterar PIN/palavra-passe, cifragem, persistência ou eventos de autenticação
 
 ## Estado atual
 
 A aplicação continua local-first: cofre cifrado no navegador, dados financeiros no IndexedDB e sincronização GitHub opcional. O schema financeiro permanece na versão 5. Faturas, Planeamento, Mercado, Relatórios, Segurança, Definições, leitura de códigos de barras e captura QR de faturas mantêm os fluxos existentes.
 
 A revisão Lucide anterior já está integrada na `main`. Uma nova captura real de iPhone/Safari da página **Lista de compras** mostrou que a família de ícones estava coerente, mas a composição ainda não reproduzia totalmente o protótipo aprovado.
+
+## Revisão v56 — cofre de acesso moderno
+
+A captura de referência enviada em iPhone mostrou uma direção visual mais premium para a entrada por PIN. A v56 aplica essa hierarquia ao **Conta de Casa** sem copiar funcionalidades inexistentes: mantém o PIN/palavra-passe atual, não introduz passkey/biometria falsa e não altera a derivação criptográfica.
+
+Alterações principais:
+
+- fundo com profundidade subtil e safe areas completas;
+- cartão do cofre mais limpo, arredondado e centrado;
+- marca **Conta de Casa** compacta e coerente com Lucide;
+- badge de segurança, título e mensagem de sessão com hierarquia reforçada;
+- campo de PIN em cápsula legível e focável;
+- teclado circular com proporções equilibradas e estados tácteis;
+- ação **Entrar** com maior destaque e alternativa **Usar palavra-passe** preservada;
+- transferência de cofre e notas de privacidade mantidas, mas visualmente secundárias;
+- tema escuro e `prefers-reduced-motion` preservados;
+- cache público passa a `conta-de-casa-public-v56-vault-modern` para evitar CSS antigo no Safari/iOS.
+
+Não foi adicionado botão de passkey/biometria porque o projeto não possui esse mecanismo implementado e testado.
 
 ## Revisão v55 — hierarquia do protótipo aprovado
 
@@ -80,9 +99,9 @@ Os glifos Unicode que ainda existem como fallback estático no código não são
 
 ## Próximo passo
 
-1. concluir CI da branch `ui/prototype-hierarchy-v55`;
+1. concluir CI da branch `ui/vault-modern-v56`;
 2. integrar apenas se todas as suites passarem;
 3. publicar pela pipeline normal de GitHub Pages;
-4. validar no iPhone/Safari a mesma página da captura: carrinho no título, um único `+` principal, scanner ao lado da pesquisa, quatro cartões com ícones e lista sem sobreposição;
-5. repetir em 320, 375, 390 e 430 px, claro/escuro, retrato/paisagem;
-6. depois da validação física, iniciar a remoção gradual de fallbacks Unicode e dos pequenos geradores SVG duplicados.
+4. validar no iPhone/Safari o cofre em 320, 375, 390 e 430 px, confirmando safe areas, ausência de corte, teclado circular, botão Entrar e acesso por palavra-passe;
+5. validar tema claro/escuro e `prefers-reduced-motion`;
+6. só avaliar passkey/biometria numa decisão separada, com suporte real WebAuthn/biométrico e modelo de recuperação definido.
