@@ -26,7 +26,8 @@ const PUBLIC_FILES = Object.freeze([
   'invoice-capture.js',
   'sw.js',
   'manifest.webmanifest',
-  'icon.svg'
+  'icon.svg',
+  'LUCIDE_LICENSE.txt'
 ]);
 
 fs.rmSync(DIST,{recursive:true,force:true});
