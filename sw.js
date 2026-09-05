@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v53-ui-invoice';
+const CACHE = 'conta-de-casa-public-v54-lucide';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -22,7 +22,8 @@ const PUBLIC_ASSETS = [
   './ui-icons.js',
   './invoice-capture.js',
   './manifest.webmanifest',
-  './icon.svg'
+  './icon.svg',
+  './LUCIDE_LICENSE.txt'
 ];
 const PUBLIC_ASSET_SET = new Set(PUBLIC_ASSETS);
 

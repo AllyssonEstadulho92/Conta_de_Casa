@@ -167,7 +167,7 @@ Open Food Facts é uma base comunitária e pode não reconhecer todos os código
 ## D-008 — Um único sistema vetorial local para os ícones funcionais
 
 Data: 5 de setembro de 2026
-Estado: aceite
+Estado: aceite; especificado posteriormente por D-010
 
 ### Contexto
 
@@ -219,3 +219,43 @@ O QR fiscal é determinístico e auditável para os campos que contém. OCR de u
 ### Limitação aceite
 
 O QR não deve ser usado para inferir nome comercial do fornecedor, categoria ou data de vencimento. Estes campos continuam sob responsabilidade do utilizador. O NIF do emitente pode ser colocado como identificação provisória do fornecedor, claramente sujeito a confirmação.
+
+## D-010 — Lucide como biblioteca visual oficial, vendorizada localmente
+
+Data: 5 de setembro de 2026
+Estado: aceite
+
+### Contexto
+
+Depois da primeira normalização de SVG, uma captura real de iPhone/Safari na página **Faturas** mostrou que a interface ainda misturava três comportamentos visuais: lupa nativa do browser, setas nativas dos `select` e um botão de criação com dois símbolos, provocado pelo `+` em pseudo-elemento legado e pelo SVG injetado pela camada de ícones.
+
+Foram consideradas as famílias sugeridas: Google Material Symbols, Font Awesome, Bootstrap Icons, Lucide/Feather, Flaticon e Iconfinder.
+
+### Decisão
+
+Adotar **Lucide Icons** como biblioteca visual oficial para os ícones funcionais. A aplicação não carrega o pacote Lucide, uma Web Font ou CDN em runtime. Apenas o subset necessário de SVG é incorporado em `ui-icons.js`, referenciado ao snapshot:
+
+`94e4cb9d9db5907053ebf3636a97c45529cf776b`
+
+A licença é preservada em `LUCIDE_LICENSE.txt` e distribuída com o bundle público.
+
+A implementação deve também normalizar os controlos cuja iconografia é normalmente desenhada pelo browser:
+
+- `input[type="search"]`: remover a decoração WebKit/Safari e apresentar `Search` Lucide;
+- `select`: aplicar `appearance:none` e sobrepor `ChevronDown` Lucide sem substituir o elemento nativo;
+- botões compactos de criação: desativar o `::before` legado quando o botão já contém `Plus` Lucide;
+- sincronização: usar símbolos cloud/refresh/offline/warning em vez de depender apenas de um ponto colorido;
+- ações recorrentes: mapear editar, apagar, duplicar, pagar, filtrar, importar/exportar e bloquear para símbolos semânticos da mesma família.
+
+### Motivo
+
+Lucide encaixa no design atual por usar desenho linear, geometria 24×24, caps/joins arredondados e boa leitura em tamanhos pequenos. A integração local preserva offline/PWA, não expande a CSP, evita tracking ou falhas de CDN e permite fixar exatamente a versão visual entregue ao utilizador.
+
+Material Symbols e Font Awesome são tecnicamente válidos, mas uma integração por fonte/pacote runtime acrescentaria dependência e maior superfície de distribuição sem benefício funcional para esta PWA estática. Bootstrap Icons também seria válido, mas a linguagem visual Lucide é mais próxima do estilo minimalista já pretendido. Flaticon e Iconfinder são catálogos úteis, mas misturar conjuntos/licenças dificultaria a coerência e a auditoria.
+
+### Riscos e controlo
+
+- o subset local não recebe atualizações automáticas; qualquer atualização deve fixar novo commit de origem e passar por revisão/CI;
+- controlos nativos mantêm a semântica e interação original; a camada Lucide muda apenas a apresentação do símbolo;
+- glifos Unicode que ainda permanecem como fallback estático no HTML/JS só devem ser removidos depois da validação física, para evitar alterações estruturais simultâneas desnecessárias;
+- a validação final exige iPhone/Safari e Android/Chrome reais, sobretudo pesquisa, selects, botões compactos, tema, sincronização e diálogos.

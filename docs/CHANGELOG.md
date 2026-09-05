@@ -1,5 +1,35 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-05 — Lucide como sistema visual oficial de ícones
+
+### Motivo
+
+Uma captura real de iPhone/Safari na página **Faturas** mostrou que a primeira normalização SVG ainda deixava elementos com aparência inconsistente: lupa nativa do Safari, setas nativas dos `select` e um botão compacto de nova fatura com símbolos duplicados devido à combinação de `::before` legado e SVG.
+
+### Alterações
+
+- selecionado **Lucide Icons** como conjunto visual oficial dos ícones funcionais;
+- subset necessário incorporado localmente em `ui-icons.js`, sem icon font, pacote ou CDN de ícones em runtime;
+- snapshot de origem fixado em `94e4cb9d9db5907053ebf3636a97c45529cf776b`;
+- licença Lucide ISC e aviso MIT dos glifos derivados de Feather adicionados em `LUCIDE_LICENSE.txt` e incluídos no bundle público;
+- `stroke-width` normalizado para 2 px, geometria 24×24, `currentColor`, caps/joins arredondados e tamanhos explícitos;
+- navegação, marca, privacidade, bloqueio, tema, notificações, criação, edição, eliminação, filtros, pagamentos, sincronização, Mercado, QR e câmara passam a partilhar a mesma família visual;
+- pesquisa comum recebe lupa Lucide e a decoração `::-webkit-search-decoration` do Safari é removida;
+- `select` mantém o controlo nativo funcional, mas usa `appearance:none` e um único `ChevronDown` Lucide para apresentação consistente;
+- o `+` pseudo-elemento legado de `bill-new-btn`/`market-new-btn` é desativado quando o botão já está iconizado, eliminando o botão duplo observado no iPhone;
+- o antigo ponto de sincronização passa a funcionar como slot para cloud/check, refresh, offline ou warning conforme o estado;
+- ações dinâmicas de editar, apagar, duplicar, pagar e limpar filtros são normalizadas pelo mesmo `MutationObserver` visual;
+- `prefers-reduced-motion` continua a impedir animações não essenciais;
+- cache do Service Worker alterado para `conta-de-casa-public-v54-lucide` para invalidar a camada visual anterior nos dispositivos.
+
+### Segurança e compatibilidade
+
+Sem alteração de schema, IndexedDB, PBKDF2, AES-GCM, PIN/palavra-passe, cálculos financeiros, backups, sincronização, fontes de preços ou captura QR. A revisão Lucide não adiciona qualquer origem à CSP nem efetua pedidos externos em runtime.
+
+### Testes
+
+`tests/ui-icons.test.cjs` passa a validar o snapshot Lucide, licença, conjunto semântico, ausência de CDN/runtime externo, lupa Safari, selects, prevenção de `+` duplicado, iconografia de sincronização, distribuição e política de movimento reduzido.
+
 ## 2026-09-05 — Auditoria global de ícones e leitura QR de faturas
 
 ### Ícones e consistência visual
@@ -113,7 +143,7 @@ Reproduzir na aplicação real a apresentação aprovada para **Lista de compras
 ### Alterações funcionais controladas
 
 - `market-experience.js` interceta apenas a criação de um novo item e a ação rápida Mercado;
-- editar um item já guardado continua a usar `openMarketForm()` sem alterações;
+- editar um item já guardado continua a usar o formulário anterior;
 - um produto escolhido no comparador é criado no mesmo `appState.market` e com o mesmo schema existente;
 - os preços apresentados no comparador são valores de demonstração, identificados na UI;
 - os valores de demonstração **não são persistidos**: o novo item é criado com `estimatedCents: 0`;
