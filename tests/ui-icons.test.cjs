@@ -12,7 +12,7 @@ assert.match(js,/Object\.assign\(ICONS,LUCIDE_ICONS\)/,'Lucide registry must ext
 assert.match(js,/globalThis\.CDCIcons/,'shared icon renderer must remain available to contextual modules');
 assert.match(js,/source:'Lucide'/);
 assert.match(js,/stroke-width="2"/,'Lucide stroke weight must remain consistent');
-for(const name of ['home','bill','calendar','plan','market','report','goal','shield','settings','search','eye','eyeOff','sun','moon','camera','qr','receipt','close','plus','edit','trash','filter','cloudCheck','cloudOff']){
+for(const name of ['home','bill','calendar','plan','market','report','goal','shield','settings','search','eye','eyeOff','sun','moon','camera','qr','receipt','close','plus','edit','trash','filter','scan','cloudCheck','cloudOff']){
   assert.match(js,new RegExp(`\\b${name}:`),`missing Lucide semantic icon ${name}`);
 }
 
@@ -26,12 +26,20 @@ assert.match(js,/MutationObserver/,'dynamic dialogs and rendered lists must be h
 assert.doesNotMatch(js,/https?:\/\//,'runtime icon code must remain local and add no icon CDN/font dependency');
 assert.doesNotMatch(js,/[⌂◉⌁☼☾×]/,'icon runtime must not depend on legacy Unicode glyphs');
 
+assert.match(css,/Conta de Casa v55/,'prototype hierarchy must be versioned in the icon layer');
 assert.match(css,/\.ui-icon-svg[\s\S]*height:20px!important/,'icon height must explicitly override legacy svg height:auto');
 assert.match(css,/\.market-browser-search>\.ui-icon-svg[\s\S]*height:22px!important/,'market search icon must keep a fixed Safari-safe box');
 assert.match(css,/input\[type="search"\]::\-webkit-search-decoration/,'Safari native search glyph must be suppressed');
 assert.match(css,/\.ui-select-control>select[\s\S]*appearance:none!important/,'platform-specific select arrows must be suppressed');
 assert.match(css,/bill-new-btn\[data-ui-iconized="true"\]::before[\s\S]*content:none!important/,'legacy CSS plus must not duplicate the Lucide add icon');
 assert.match(css,/\.sync-header-status \.sync-dot[\s\S]*width:18px!important/,'sync dot slot must become a proper icon slot');
+assert.match(css,/html\.market-prototype-active \.page-heading h1::before/,'market heading must carry the shopping icon hierarchy from the approved prototype');
+assert.match(css,/#page-market #newMarketBtn\[data-ui-iconized="true"\]::after/,'secondary market action must be represented as a scan control');
+assert.match(css,/#page-market \.market-summary-item::before/,'market summary cards must receive semantic icon anchors');
+assert.match(css,/#page-market \.market-mobile-head::before/,'market mobile cards must receive a neutral vector product avatar without inventing product imagery');
+assert.match(css,/market-mobile-card:not\(\.purchased\) \.market-mobile-real\{display:none!important\}/,'pending items must not expose unnecessary real-price controls');
+assert.match(css,/\.mobile-nav \.nav-btn\.active::after/,'bottom navigation must keep a consistent active underline');
+assert.match(css,/market-browser \.svg-icon[\s\S]*stroke-width:2/,'legacy contextual SVGs must visually align to the Lucide metric');
 assert.match(css,/vector-effect:non-scaling-stroke/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/ui-icon-spin/);
@@ -43,6 +51,6 @@ assert.match(license,/The MIT License \(MIT\)/);
 assert.match(license,/Cole Bemis/);
 assert.match(pages,/LUCIDE_LICENSE\.txt/,'Pages distribution must include the Lucide notice');
 assert.match(sw,/LUCIDE_LICENSE\.txt/,'offline/public asset allowlist must include the Lucide notice');
-assert.match(sw,/conta-de-casa-public-v54-lucide/,'service worker cache must refresh after icon replacement');
+assert.match(sw,/conta-de-casa-public-v55-prototype/,'service worker cache must refresh after the approved prototype hierarchy');
 
-console.log('Lucide UI icon tests: OK');
+console.log('Lucide UI icon and approved prototype hierarchy tests: OK');
