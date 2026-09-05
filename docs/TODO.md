@@ -1,36 +1,31 @@
 # TODO — Conta de Casa
 
-## P0 — validação imediata
+## P0 — validação v52
 
-- [x] Confirmar CI da build v51 com `market-experience.css` e `market-experience.js`.
-- [x] Confirmar publicação do GitHub Pages após CI.
-- [ ] Validar no iPhone/Safari que Compras percorre todos os cartões sem corte ou grande área vazia.
-- [ ] Validar o novo ecrã **Adicionar produto** em 320, 375, 390 e 430 px: header, pesquisa, tabs, mercados, cartões, comparação, botões e scroll.
-- [ ] Confirmar que notch/Dynamic Island e home indicator não tapam o ecrã `market-browser`.
-- [ ] Abrir e fechar o teclado na pesquisa e confirmar que o diálogo recupera a altura corretamente.
-- [ ] Validar Faturas, Início, Relatórios e definições para confirmar ausência de regressões visuais fora de Mercado.
-- [ ] Testar rotação retrato/paisagem e regresso a retrato.
+- [ ] Validar **Adicionar produto** em iPhone/Safari nas larguras 320, 375, 390 e 430 px.
+- [ ] Testar pesquisas reais no Continente, Pingo Doce e Mercadona, incluindo resultados inexistentes.
+- [ ] Confirmar teclado, safe areas, scroll e rotação retrato/paisagem.
+- [ ] Testar rede lenta, offline, timeout e falha apenas de uma das fontes.
+- [ ] Confirmar que adicionar um resultado preenche apenas `estimatedCents` e não altera `actualCents`.
+- [ ] Confirmar que editar/eliminar itens antigos continua sem regressões.
 
-## P1 — robustez de UI
+## P1 — qualidade das fontes
 
-- [ ] Validar o protótipo em tablet e desktop, incluindo redimensionamento e ausência de scroll horizontal.
+- [ ] Monitorizar disponibilidade e contrato CORS de `cesta.pt/mcp`.
+- [ ] Monitorizar alterações de formato da ferramenta `search_products`.
+- [ ] Monitorizar cobertura e idade das observações Mercadona Portugal no Open Prices.
+- [ ] Investigar uma fonte oficial Mercadona Portugal se vier a existir; preferi-la à fonte comunitária depois de auditoria.
 - [ ] Criar testes de browser real para Safari/iOS quando existir infraestrutura adequada.
-- [ ] Consolidar regras mobile duplicadas existentes em `styles.css` e `design-system.css` depois da validação física.
-- [ ] Rever a aplicação inteira para localizar texto legado abaixo de 12 px sem alterar páginas de forma não validada.
-- [ ] Confirmar contraste, foco, navegação por teclado e alvos tácteis em todos os controlos após consolidação CSS.
 
-## P1 — preços reais de mercados
+## P1 — UI e acessibilidade
 
-- [ ] Confirmar fontes verificadas para Pingo Doce, Continente e Mercadona; não ativar valores automáticos enquanto uma cadeia não tiver origem fiável.
-- [ ] Definir backend/proxy de preços separado da PWA estática.
-- [ ] Definir modelo de produto por EAN/GTIN, embalagem, unidade, quantidade e equivalências.
-- [ ] Guardar origem, mercado, região/loja, data/hora do preço, preço normal, promoção e validade/cache.
-- [ ] Definir comportamento quando um ou mais mercados estiverem indisponíveis.
-- [ ] Rever CORS, CSP, segurança, privacidade e termos de utilização antes de permitir chamadas externas.
-- [ ] Só depois substituir os dados de demonstração do `market-browser` por dados reais auditáveis.
+- [ ] Validar tablet e desktop, incluindo ausência de scroll horizontal.
+- [ ] Confirmar foco, navegação por teclado e leitores de ecrã no fluxo de pesquisa.
+- [ ] Consolidar regras mobile duplicadas de `styles.css` e `design-system.css` após validação física.
+- [ ] Rever texto legado abaixo de 12 px sem alterar páginas não validadas.
 
 ## P2 — manutenção
 
-- [ ] Avaliar remoção gradual de blocos CSS antigos que já estejam totalmente substituídos pelo design system.
-- [ ] Depois da validação do protótipo, decidir se `market-experience.css` deve continuar isolado ou ser consolidado no design system.
-- [ ] Manter documentação de arquitetura, decisões e estado atualizada a cada alteração importante.
+- [ ] Avaliar remoção gradual de CSS antigo já substituído pelo design system.
+- [ ] Avaliar se `market-experience.css` deve permanecer isolado ou ser consolidado no design system.
+- [ ] Manter PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG atualizados após mudanças relevantes.
