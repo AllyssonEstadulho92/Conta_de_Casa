@@ -78,19 +78,19 @@ assert.equal(
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/products/123/front.jpg'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://images.openfoodfacts.org/images/products/123/front.jpg'),'');
 
-assert.match(sw,/conta-de-casa-public-v59-product-images/);
+assert.match(sw,/conta-de-casa-public-v60-official-retailer-images/);
 for(const asset of ['market-image-audit.css','market-image-audit.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(prepare.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
 }
-assert.match(prepare,/const BUILD = 'v59'/);
+assert.match(prepare,/const BUILD = 'v60'/);
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-image-audit\.css\?v=59/);
-  assert.match(index,/market-image-audit\.js\?v=59/);
+  assert.match(index,/market-image-audit\.css\?v=60/);
+  assert.match(index,/market-image-audit\.js\?v=60/);
   assert.match(index,/https:\/\/\*\.openbeautyfacts\.org/);
   assert.match(index,/https:\/\/\*\.openproductsfacts\.org/);
   assert.match(index,/https:\/\/\*\.openpetfoodfacts\.org/);
