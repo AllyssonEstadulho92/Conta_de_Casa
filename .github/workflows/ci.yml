@@ -36,11 +36,13 @@ jobs:
           node --check events.js
           node --check sync.js
           node --check market-experience.js
+          node --check market-image-resolver.js
           node --check market-barcode.js
           node --check ui-icons.js
           node --check invoice-capture.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
+          node --check scripts/build-market-image-index.cjs
           node --check scripts/probe-retailer-images.cjs
           node --check scripts/probe-cesta-detail.cjs
 
@@ -73,6 +75,9 @@ jobs:
 
       - name: Market real product image tests
         run: node tests/market-product-images.test.cjs
+
+      - name: Market image resolver tests
+        run: node tests/market-image-resolver.test.cjs
 
       - name: Market barcode scanner tests
         run: node tests/market-barcode.test.cjs
