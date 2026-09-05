@@ -3,7 +3,9 @@
 Atualizado: 5 de setembro de 2026
 Build funcional: v52
 Distribuição: GitHub Pages
-Estado da revisão: candidato v52 validado em branch; promoção para `main`/Pages pendente da verificação final do histórico
+Estado da revisão: v52 integrada em `main`, CI concluído e GitHub Pages publicado com sucesso
+Revisão funcional promovida: `b7a1119e82c32f93e13f8272e43353c9a97de0c7`
+Deployment confirmado: GitHub Actions `Deploy Pages` run `33933922714`
 
 ## Estado atual
 
@@ -61,20 +63,20 @@ Os dados do cofre, faturas, PIN e restante informação financeira não são env
 
 A revisão v52 passou no GitHub Actions a validação das fontes externas, sintaxe e a suite completa de regressão: finanças, auditoria, contagens, isolamento criptográfico, datas, formulários, categorias, pesquisa de Mercado, contabilização de preços, segurança, responsividade, viewport mobile, navegação, acessibilidade, sincronização e manifest.
 
-Foi confirmada pesquisa real de Continente/Pingo Doce através de `search_products` do cesta.pt e leitura CORS de observações Mercadona Portugal no Open Prices com loja, data, preço e comprovativo.
+O CI final da revisão promovida em `main` terminou com sucesso no run `33933902054`. O workflow de deployment voltou a executar os testes específicos de Mercado antes de preparar o bundle público e terminou com sucesso no run `33933922714`.
 
-Os workflows de CI e de deployment foram também atualizados para repetir os testes específicos da v52 antes da publicação.
+Foi confirmada pesquisa real de Continente/Pingo Doce através de `search_products` do cesta.pt e leitura CORS de observações Mercadona Portugal no Open Prices com loja, data, preço e comprovativo.
 
 ## Limitações conhecidas
 
 Não é tecnicamente correto prometer que uma fonte externa nunca ficará indisponível ou nunca alterará o seu contrato. A regra da aplicação é falhar de forma explícita: se não existir preço verificável, não inventar nem reutilizar silenciosamente um valor fictício.
 
-A validação automatizada está concluída, mas continua pendente validação física/visual em iPhone/Safari e outros browsers/dispositivos reais.
+A validação automatizada e a publicação estão concluídas. Continua pendente validação física/visual em iPhone/Safari e outros browsers/dispositivos reais.
 
 ## Próximo passo
 
-1. Promover a revisão v52 validada para `main` e confirmar o deployment do GitHub Pages.
-2. Validar visualmente em iPhone/Safari, Android, tablet e desktop com pesquisas reais variadas.
-3. Confirmar em hardware real o comportamento com teclado, rotação e condições de rede adversas.
-4. Monitorizar alterações de contrato/CORS das duas fontes externas.
-5. Substituir a fonte comunitária da Mercadona se a Mercadona Portugal vier a disponibilizar uma API/catálogo oficial de preços.
+1. Validar visualmente a v52 publicada em iPhone/Safari, Android, tablet e desktop com pesquisas reais variadas.
+2. Confirmar em hardware real o comportamento com teclado, rotação e condições de rede adversas.
+3. Monitorizar alterações de contrato/CORS das duas fontes externas.
+4. Substituir a fonte comunitária da Mercadona se a Mercadona Portugal vier a disponibilizar uma API/catálogo oficial de preços.
+5. Continuar a consolidação gradual dos estilos mobile legados sem alterar comportamento.
