@@ -5,7 +5,8 @@
  *
  * O browser nunca faz scraping das páginas do Continente/Pingo Doce. O build público
  * gera um índice same-origin a partir dos sitemaps oficiais publicados pelos próprios
- * retalhistas. Em runtime é descarregado apenas o pequeno shard correspondente ao PID.
+ * retalhistas. Em runtime é descarregado apenas o pequeno shard correspondente ao PID
+ * ou, para itens antigos sem PID, ao nome exato e não ambíguo do produto.
  * Open Facts continua disponível como fallback através da camada v59.
  */
 (function installOfficialRetailerImages(root){
@@ -22,6 +23,14 @@
     .replace(/\s+/g,' ')
     .trim()
     .slice(0,max);
+
+  const normalizedName=value=>clean(value,180)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .toLocaleLowerCase('pt-PT')
+    .replace(/[^a-z0-9]+/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
 
   function safeOfficialImageUrl(value){
     if(!value)return '';
@@ -56,7 +65,8 @@
     }catch(_error){return '';}
   }
 
-  // Mantém a normalização do cofre coerente depois de a camada v59 ter sido carregada.
+  // A v59 alarga o sanitizador a Open Facts; a v60 acrescenta apenas os dois hosts
+  // oficiais validados, mantendo essa mesma função para gravação no cofre.
   try{safeProductImageUrl=safeCombinedProductImageUrl;}catch(_error){}
   try{root.safeProductImageUrl=safeCombinedProductImageUrl;}catch(_error){}
 
@@ -71,45 +81,75 @@
   }
 
   function shardPrefix(pid){return String(pid).padStart(2,'0').slice(0,2);}
-  function shardKey(marketId,pid){return `${marketId}:${shardPrefix(pid)}`;}
+  function namePrefix(name){return (normalizedName(name).replace(/\s/g,'').slice(0,2)||'__').padEnd(2,'_');}
 
-  async function loadShard(marketId,pid){
+  async function loadJsonShard(cacheKey,url,market,field){
+    if(shardCache.has(cacheKey))return shardCache.get(cacheKey);
+    if(inFlight.has(cacheKey))return inFlight.get(cacheKey);
+    const promise=fetch(url,{method:'GET',credentials:'same-origin',cache:'force-cache',headers:{Accept:'application/json'}})
+      .then(async response=>{
+        if(response.status===404)return null;
+        if(!response.ok)throw new Error(`official-image-index-${response.status}`);
+        const payload=await response.json();
+        if(payload?.v!==1||payload?.r!==market||!payload?.[field]||typeof payload[field]!=='object')throw new Error('official-image-index-invalid');
+        return payload[field];
+      })
+      .catch(()=>null)
+      .then(data=>{shardCache.set(cacheKey,data);return data;})
+      .finally(()=>inFlight.delete(cacheKey));
+    inFlight.set(cacheKey,promise);
+    return promise;
+  }
+
+  async function loadPidShard(marketId,pid){
     const market=normalizedMarketId(marketId);
     const productId=normalizedPid(pid);
     if(!market||!productId)return null;
-    const key=shardKey(market,productId);
-    if(shardCache.has(key))return shardCache.get(key);
-    if(inFlight.has(key))return inFlight.get(key);
     const prefix=shardPrefix(productId);
-    const promise=fetch(`${INDEX_BASE}/${market}/${prefix}.json?v=${BUILD}`,{
-      method:'GET',credentials:'same-origin',cache:'force-cache',headers:{Accept:'application/json'}
-    }).then(async response=>{
-      if(response.status===404)return null;
-      if(!response.ok)throw new Error(`official-image-index-${response.status}`);
-      const payload=await response.json();
-      if(payload?.v!==1||payload?.r!==market||!payload?.p||typeof payload.p!=='object')throw new Error('official-image-index-invalid');
-      return payload.p;
-    }).catch(()=>null).then(products=>{
-      shardCache.set(key,products);
-      return products;
-    }).finally(()=>inFlight.delete(key));
-    inFlight.set(key,promise);
-    return promise;
+    return loadJsonShard(`pid:${market}:${prefix}`,`${INDEX_BASE}/${market}/${prefix}.json?v=${BUILD}`,market,'p');
+  }
+
+  async function loadNameShard(marketId,name){
+    const market=normalizedMarketId(marketId);
+    const key=normalizedName(name);
+    if(!market||!key)return null;
+    const prefix=namePrefix(key);
+    return loadJsonShard(`name:${market}:${prefix}`,`${INDEX_BASE}/names/${market}/${prefix}.json?v=${BUILD}`,market,'n');
+  }
+
+  function officialResult(market,pid,image){
+    const safe=safeOfficialImageUrl(image);
+    if(!safe)return null;
+    return {
+      imageUrl:safe,
+      imageSource:market==='continente'?'Continente — imagem oficial':'Pingo Doce — imagem oficial',
+      marketId:market,
+      retailerProductId:pid
+    };
   }
 
   async function officialImageFor(marketId,pid){
     const market=normalizedMarketId(marketId);
     const productId=normalizedPid(pid);
     if(!market||!productId)return null;
-    const products=await loadShard(market,productId);
-    const image=safeOfficialImageUrl(products?.[productId]||'');
-    if(!image)return null;
-    return {
-      imageUrl:image,
-      imageSource:market==='continente'?'Continente — imagem oficial':'Pingo Doce — imagem oficial',
-      marketId:market,
-      retailerProductId:productId
-    };
+    const products=await loadPidShard(market,productId);
+    return officialResult(market,productId,products?.[productId]||'');
+  }
+
+  async function officialImageByExactName(name){
+    const key=normalizedName(name);
+    if(key.length<2)return null;
+    const markets=['continente','pingo-doce'];
+    const matches=[];
+    const shards=await Promise.all(markets.map(market=>loadNameShard(market,key)));
+    shards.forEach((names,index)=>{
+      const entry=Array.isArray(names?.[key])?names[key]:null;
+      if(!entry)return;
+      const result=officialResult(markets[index],normalizedPid(entry[0]),entry[1]);
+      if(result)matches.push(result);
+    });
+    // Não adivinhar quando o mesmo nome exato existe nos dois retalhistas.
+    return matches.length===1?matches[0]:null;
   }
 
   function iconClose(size=22){
@@ -184,10 +224,7 @@
     const raw=clean(card?.dataset?.marketProductCard||'',100);
     const match=/^cesta-(continente|pingo-doce)-(\d{2,32})$/.exec(raw);
     if(!match)return null;
-    return {
-      marketId:match[1],retailerProductId:match[2],
-      name:clean(card.querySelector('.market-product-copy h3')?.textContent||'',130)
-    };
+    return {marketId:match[1],retailerProductId:match[2],name:clean(card.querySelector('.market-product-copy h3')?.textContent||'',130)};
   }
 
   function fallbackToV59(node){
@@ -198,13 +235,11 @@
 
   function auditBrowserCards(){
     document.querySelectorAll('#marketCatalogResults [data-market-product-card]').forEach(card=>{
-      if(card.dataset.marketOfficialImage==='done'||card.dataset.marketOfficialImage==='resolving'||card.dataset.marketOfficialImage==='none')return;
+      if(['done','resolving','none'].includes(card.dataset.marketOfficialImage))return;
       const target=browserTarget(card);
-      if(!target)return;
       const photo=card.querySelector('.market-product-photo');
-      if(!photo)return;
+      if(!target||!photo)return;
       card.dataset.marketOfficialImage='resolving';
-      // Reserva a resolução por PID para impedir que o fallback textual ganhe a corrida.
       card.dataset.marketImageAudit='done';
       officialImageFor(target.marketId,target.retailerProductId).then(result=>{
         if(result&&card.isConnected){
@@ -216,10 +251,7 @@
           card.dataset.marketOfficialImage='none';
           fallbackToV59(card);
         }
-      }).catch(()=>{
-        card.dataset.marketOfficialImage='none';
-        fallbackToV59(card);
-      });
+      }).catch(()=>{card.dataset.marketOfficialImage='none';fallbackToV59(card);});
     });
   }
 
@@ -232,14 +264,22 @@
 
   function schedulePersist(){
     clearTimeout(persistTimer);
-    persistTimer=setTimeout(()=>{
-      if(typeof saveState==='function')Promise.resolve(saveState()).catch(()=>{});
-    },500);
+    persistTimer=setTimeout(()=>{if(typeof saveState==='function')Promise.resolve(saveState()).catch(()=>{});},500);
+  }
+
+  function applyResultToItem(item,row,result){
+    if(!result||!item)return false;
+    if(row?.isConnected)makeOfficialPhoto(row.querySelector('.market-product-photo'),{...result,name:item.name});
+    item.imageUrl=result.imageUrl;
+    item.imageSource=result.imageSource;
+    item.imageMatchedAt=new Date().toISOString();
+    schedulePersist();
+    return true;
   }
 
   function auditSavedRows(){
     document.querySelectorAll('#marketList .market-mobile-card,#marketList .market-table-row').forEach(row=>{
-      if(row.dataset.marketOfficialImage==='done'||row.dataset.marketOfficialImage==='resolving'||row.dataset.marketOfficialImage==='none')return;
+      if(['done','resolving','none'].includes(row.dataset.marketOfficialImage))return;
       const item=marketItemFromRow(row);
       const photo=row.querySelector('.market-product-photo');
       if(!item||!photo)return;
@@ -249,40 +289,63 @@
         row.dataset.marketOfficialImage='done';
         return;
       }
-      const marketId=normalizedMarketId(item.retailerMarketId||'');
-      const retailerProductId=normalizedPid(item.retailerProductId||'');
-      if(!marketId||!retailerProductId){row.dataset.marketOfficialImage='none';return;}
       row.dataset.marketOfficialImage='resolving';
       row.dataset.marketImageAudit='done';
-      officialImageFor(marketId,retailerProductId).then(result=>{
+      const marketId=normalizedMarketId(item.retailerMarketId||'');
+      const retailerProductId=normalizedPid(item.retailerProductId||'');
+      const resolution=marketId&&retailerProductId?officialImageFor(marketId,retailerProductId):officialImageByExactName(item.name);
+      resolution.then(result=>{
         if(result&&row.isConnected){
-          makeOfficialPhoto(row.querySelector('.market-product-photo'),{...result,name:item.name});
+          applyResultToItem(item,row,result);
           row.dataset.marketOfficialImage='done';
-          if(item.imageUrl!==result.imageUrl||item.imageSource!==result.imageSource){
-            item.imageUrl=result.imageUrl;
-            item.imageSource=result.imageSource;
-            item.imageMatchedAt=new Date().toISOString();
-            schedulePersist();
-          }
         }else{
           row.dataset.marketOfficialImage='none';
           fallbackToV59(row);
         }
-      }).catch(()=>{
-        row.dataset.marketOfficialImage='none';
-        fallbackToV59(row);
-      });
+      }).catch(()=>{row.dataset.marketOfficialImage='none';fallbackToV59(row);});
     });
+  }
+
+  function waitForNewMarketItem(name,startedAt,result,attempt=0){
+    if(!result||attempt>24)return;
+    let items=[];
+    try{items=(typeof appState!=='undefined'&&Array.isArray(appState?.market))?appState.market:[];}catch(_error){}
+    const wanted=normalizedName(name);
+    const candidates=items.filter(item=>normalizedName(item?.name)===wanted&&Date.parse(item?.createdAt||0)>=startedAt-1500)
+      .sort((a,b)=>Date.parse(b.createdAt||0)-Date.parse(a.createdAt||0));
+    const item=candidates[0];
+    if(item){
+      item.imageUrl=result.imageUrl;
+      item.imageSource=result.imageSource;
+      item.imageMatchedAt=new Date().toISOString();
+      Promise.resolve(typeof saveState==='function'?saveState():null).catch(()=>{}).finally(()=>{
+        if(typeof renderCurrentPage==='function')renderCurrentPage();
+        scheduleAudit();
+      });
+      return;
+    }
+    setTimeout(()=>waitForNewMarketItem(name,startedAt,result,attempt+1),100);
+  }
+
+  function captureAddedProduct(addButton){
+    const card=addButton?.closest?.('[data-market-product-card]');
+    const target=browserTarget(card);
+    if(!target)return;
+    const startedAt=Date.now();
+    const existing=safeOfficialImageUrl(card.dataset.marketOfficialImageUrl||'');
+    const promised=existing?Promise.resolve({
+      imageUrl:existing,
+      imageSource:clean(card.dataset.marketOfficialImageSource||'',100)||(target.marketId==='continente'?'Continente — imagem oficial':'Pingo Doce — imagem oficial'),
+      marketId:target.marketId,
+      retailerProductId:target.retailerProductId
+    }):officialImageFor(target.marketId,target.retailerProductId);
+    promised.then(result=>{if(result)waitForNewMarketItem(target.name,startedAt,result);}).catch(()=>{});
   }
 
   function scheduleAudit(){
     if(auditQueued)return;
     auditQueued=true;
-    requestAnimationFrame(()=>{
-      auditQueued=false;
-      auditBrowserCards();
-      auditSavedRows();
-    });
+    requestAnimationFrame(()=>{auditQueued=false;auditBrowserCards();auditSavedRows();});
   }
 
   function installObserver(){
@@ -294,11 +357,15 @@
   }
 
   document.addEventListener('click',event=>{
-    const button=event.target.closest?.('[data-market-official-image-open]');
-    if(!button)return;
-    event.preventDefault();
-    event.stopPropagation();
-    openViewer(button);
+    const officialButton=event.target.closest?.('[data-market-official-image-open]');
+    if(officialButton){
+      event.preventDefault();
+      event.stopPropagation();
+      openViewer(officialButton);
+      return;
+    }
+    const add=event.target.closest?.('[data-market-add-product]');
+    if(add)captureAddedProduct(add);
   },true);
 
   const start=()=>{installObserver();scheduleAudit();};
@@ -309,6 +376,7 @@
     safeImageUrl:safeOfficialImageUrl,
     safeProductImageUrl:safeCombinedProductImageUrl,
     resolve:officialImageFor,
+    resolveExactName:officialImageByExactName,
     audit:scheduleAudit,
     version:'v60'
   });
