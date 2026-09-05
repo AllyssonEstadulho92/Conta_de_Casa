@@ -8,6 +8,7 @@ const PUBLIC_ASSETS = [
   './design-system.css',
   './mobile-layout.css',
   './market-experience.css',
+  './market-barcode.css',
   './core.js',
   './finance.js',
   './render.js',
@@ -15,6 +16,7 @@ const PUBLIC_ASSETS = [
   './sync.js',
   './events.js',
   './market-experience.js',
+  './market-barcode.js',
   './manifest.webmanifest',
   './icon.svg'
 ];
