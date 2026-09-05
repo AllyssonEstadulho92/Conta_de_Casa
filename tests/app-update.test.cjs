@@ -18,6 +18,8 @@ assert.match(updateJs, /Atualizações Automáticas/);
 assert.match(updateJs, /Atualizações Beta/);
 assert.match(updateJs, /Mais detalhes/);
 assert.match(updateJs, /APP_RELEASE_NOTES/);
+assert.match(updateJs, /version:'v59'/);
+assert.match(updateJs, /Imagens de produto e ampliação/);
 assert.match(updateJs, /navigator\.serviceWorker\.getRegistration/);
 assert.match(updateJs, /registration\.update\(\)/);
 assert.match(updateJs, /SKIP_WAITING/);
@@ -29,28 +31,34 @@ assert.match(updateCss, /safe-area-inset-bottom/);
 assert.match(updateCss, /html\[data-theme="dark"\]/);
 assert.match(updateCss, /prefers-reduced-motion/);
 
-assert.match(sw, /conta-de-casa-public-v58-software-update/);
+assert.match(sw, /conta-de-casa-public-v59-product-images/);
 assert.match(sw, /\.\/app-update\.css/);
 assert.match(sw, /\.\/app-update\.js/);
 assert.match(sw, /SKIP_WAITING/);
 
-assert.match(prepare, /const BUILD = 'v58'/);
+assert.match(prepare, /const BUILD = 'v59'/);
 assert.match(prepare, /'app-update\.css'/);
 assert.match(prepare, /'app-update\.js'/);
+assert.match(prepare, /'market-image-audit\.css'/);
+assert.match(prepare, /'market-image-audit\.js'/);
 
 const dist = path.join(ROOT, 'dist');
 try {
   execFileSync(process.execPath, ['scripts/prepare-pages.cjs'], { cwd: ROOT, stdio: 'pipe' });
   const index = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
   const events = fs.readFileSync(path.join(dist, 'events.js'), 'utf8');
-  assert.match(index, /<meta name="app-build" content="v58"/);
-  assert.match(index, /app-update\.css\?v=58/);
-  assert.match(index, /app-update\.js\?v=58/);
+  assert.match(index, /<meta name="app-build" content="v59"/);
+  assert.match(index, /app-update\.css\?v=59/);
+  assert.match(index, /app-update\.js\?v=59/);
+  assert.match(index, /market-image-audit\.css\?v=59/);
+  assert.match(index, /market-image-audit\.js\?v=59/);
   assert.doesNotMatch(index, /\?v=53/);
-  assert.match(index, /id="appBuildVersion">v58</);
-  assert.match(events, /\.\/sw\.js\?v=58/);
+  assert.match(index, /id="appBuildVersion">v59</);
+  assert.match(events, /\.\/sw\.js\?v=59/);
   assert.ok(fs.existsSync(path.join(dist, 'app-update.css')));
   assert.ok(fs.existsSync(path.join(dist, 'app-update.js')));
+  assert.ok(fs.existsSync(path.join(dist, 'market-image-audit.css')));
+  assert.ok(fs.existsSync(path.join(dist, 'market-image-audit.js')));
 } finally {
   fs.rmSync(dist, { recursive: true, force: true });
 }
