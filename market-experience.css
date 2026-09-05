@@ -1,9 +1,8 @@
-/* Conta de Casa v52 — Mercado: pesquisa real e responsiva. */
+/* Conta de Casa v53 — Mercado: Pingo Doce + Continente e quantidade automática. */
 :root{
   --market-prototype-blue:#0b63e5;
   --market-prototype-green:#13833f;
   --market-prototype-red:#e41f2b;
-  --market-prototype-orange:#f28a16;
   --market-prototype-card-radius:18px;
   --market-prototype-control-radius:14px;
 }
@@ -165,7 +164,7 @@
 .market-browser-tab{min-width:0;min-height:44px;padding:8px 10px;border:0;border-radius:11px;background:transparent;color:var(--muted);font-size:.875rem;font-weight:500}
 .market-browser-tab.active{background:var(--primary);color:#fff;box-shadow:0 6px 14px rgba(11,99,229,.16)}
 .market-browser-tab-panel{min-width:0}
-.market-source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.market-source-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .market-source-card{
   position:relative;
   min-width:0;
@@ -185,12 +184,15 @@
 .market-source-name{min-width:0;max-width:100%;font-size:.8125rem;font-weight:600;text-align:center;overflow-wrap:anywhere}
 .market-source-check{position:absolute;left:9px;bottom:9px;width:20px;height:20px;display:grid;place-items:center;border-radius:6px;background:var(--primary);color:#fff}
 .market-source-card:not(.selected) .market-source-check{background:var(--surface-2);border:1px solid var(--border)}
-.market-brand-mark{display:grid;place-items:center;border-radius:999px;color:#fff;font-weight:700;letter-spacing:-.04em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),0 2px 8px rgba(20,35,60,.08)}
-.market-brand-mark.large{width:54px;height:54px;font-size:.8rem}
-.market-brand-mark.small{width:28px;height:28px;font-size:.75rem}
-.market-brand-mark.green{background:linear-gradient(145deg,#108039,#075b28)}
-.market-brand-mark.red{background:linear-gradient(145deg,#f32a37,#c40013)}
-.market-brand-mark.orange{background:linear-gradient(145deg,#ff9f27,#ed7605)}
+.market-brand-mark{display:grid;place-items:center;min-width:0;color:var(--text);font-weight:700;box-shadow:none}
+.market-brand-mark.large{width:min(132px,100%);height:54px;font-size:.8rem}
+.market-brand-mark.small{width:78px;height:30px;font-size:.75rem}
+.market-brand-mark.green,.market-brand-mark.red{background:transparent}
+.market-brand-logo>span{max-width:100%}
+.market-logo-pingo{width:100%;height:100%;display:grid;place-items:center;align-content:center;gap:0;border-radius:13px;background:#087638;color:#fff;border:3px solid #fff;box-shadow:0 0 0 1px #087638;font-size:.92rem;line-height:.95;letter-spacing:-.03em}
+.market-logo-pingo b:last-child{color:#fff6d7}
+.market-logo-continente{width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:13px;background:#fff;border:1px solid color-mix(in srgb,#e30613 35%,var(--border));color:#d90b1c;font-size:.75rem;letter-spacing:.035em}
+.market-logo-continente i{width:31px;height:31px;display:grid;place-items:center;border-radius:999px;background:#e30613;color:#fff;font-style:normal;font-size:1.05rem;letter-spacing:-.08em}
 .market-browser-chip-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .market-browser-chip{min-width:0;min-height:48px;display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);text-align:left}
 .market-browser-chip span{min-width:0;overflow-wrap:anywhere}
@@ -334,3 +336,10 @@
   #page-market .market-filter-grid{grid-template-columns:repeat(3,minmax(0,1fr)) auto}
   #page-market .market-summary-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
+
+/* Mercado v53 — editor de quantidade */
+#formDialog .market-quantity-stepper{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;gap:8px;align-items:center}
+#formDialog .market-quantity-stepper input{min-width:0;text-align:center;font-variant-numeric:tabular-nums}
+#formDialog .market-qty-btn{width:48px;height:48px;display:grid;place-items:center;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--primary);font-size:1.35rem;font-weight:600;touch-action:manipulation}
+#formDialog .market-qty-btn:active{background:var(--primary-2)}
+#formDialog .market-total-preview{display:block;margin-top:7px;color:var(--primary);font-weight:600}

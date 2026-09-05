@@ -8,30 +8,25 @@ const sw = fs.readFileSync('sw.js','utf8');
 const pages = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const events = fs.readFileSync('events.js','utf8');
 
-assert.match(index, /<meta name="app-build" content="v52"/);
-assert.match(index, /market-experience\.css\?v=52/);
-assert.match(index, /market-experience\.js\?v=52/);
-assert.match(index, /id="appBuildVersion">v52</);
-assert.match(index, /connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt https:\/\/prices\.openfoodfacts\.org;/);
-assert.match(events, /register\('\.\/sw\.js\?v=52',\{updateViaCache:'none'\}\)/);
-assert.match(sw, /conta-de-casa-public-v52/);
+assert.match(index, /<meta name="app-build" content="v53"/);
+assert.match(index, /market-experience\.css\?v=53/);
+assert.match(index, /market-experience\.js\?v=53/);
+assert.match(index, /id="appBuildVersion">v53</);
+assert.match(index, /connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt;/);
+assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
+assert.match(sw, /conta-de-casa-public-v53/);
 
 for (const asset of ['market-experience.css','market-experience.js']) {
   assert.ok(sw.includes(`'./${asset}'`), `${asset} must be cached by the service worker`);
   assert.ok(pages.includes(`'${asset}'`), `${asset} must be included in the Pages bundle`);
 }
 
-for (const market of ['Pingo Doce','Continente','Mercadona']) assert.ok(js.includes(market));
+for (const market of ['Pingo Doce','Continente']) assert.ok(js.includes(market));
+assert.doesNotMatch(js,/Mercadona|openfoodfacts|Open Prices/i);
 assert.ok(js.includes("data-market-price-mode=\"live\""), 'market browser must explicitly use live/verified data mode');
 assert.ok(js.includes("https://cesta.pt/mcp"), 'Continente/Pingo Doce provider must be explicit');
-assert.ok(js.includes("https://prices.openfoodfacts.org/api/v1"), 'Mercadona verified-observation provider must be explicit');
 assert.ok(js.includes("name:'search_products'"), 'cesta MCP search tool must be used');
-assert.ok(js.includes("osm_name__like:'Mercadona'"), 'Mercadona location filtering must be explicit');
-assert.ok(js.includes("osm_address_country__like:'Portugal'"), 'Mercadona observations must be restricted to Portugal');
-assert.ok(js.includes("item?.proof_id||item?.proof?.id"), 'Mercadona results must require proof evidence');
-assert.ok(js.includes("observedDate"), 'Mercadona observation date must be carried to the UI');
-assert.ok(js.includes("pode já ter mudado"), 'old observations must not be presented as current');
-assert.ok(js.includes("A pesquisa é enviada apenas às fontes necessárias"), 'remote-search privacy disclosure must be visible');
+assert.ok(js.includes("a pesquisa é enviada apenas à fonte necessária"), 'remote-search privacy disclosure must be visible');
 assert.match(js, /estimatedCents:product\.priceCents/);
 assert.match(js, /sourceUrl=safeRetailerUrl/);
 assert.match(js, /data-market-source-url=/);
@@ -63,3 +58,6 @@ assert.ok(remSizes.every(size => size >= 0.75), `market live UI contains text sm
 for (const target of ['44px','48px','52px']) assert.ok(css.includes(target));
 
 console.log('Market live-source, verification, privacy and responsive invariants: OK');
+assert.match(css,/market-logo-pingo/);
+assert.match(css,/market-logo-continente/);
+assert.match(css,/market-quantity-stepper/);

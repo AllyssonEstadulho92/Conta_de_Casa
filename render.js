@@ -256,17 +256,23 @@ function renderPlanning() {
   setHTML('#incomeList', incomes.length?incomes.map(i=>`<div class="list-row"><div class="list-main"><strong>${esc(i.description)}</strong><small>${fmtDate(i.receivedAt)}</small></div><div class="list-side"><strong class="success-text" data-money>+${money(i.amountCents)}</strong><br><button class="link-btn danger-text" data-delete-income="${attr(i.id)}">Eliminar</button></div></div>`).join(''):empty('Sem rendimentos registados neste mês.'));
 }
 
+function marketItemEstimatedCents(item) {
+  return marketLineCents(item?.estimatedCents||0,item?.quantity||'1');
+}
+function marketItemActualCents(item) {
+  return marketLineCents(item?.actualCents||0,item?.quantity||'1');
+}
 function marketItemEffectiveCents(item) {
   if(!item?.purchased) return 0;
-  return item.actualCents || item.estimatedCents || 0;
+  return item.actualCents>0?marketItemActualCents(item):marketItemEstimatedCents(item);
 }
 function marketMetrics(items) {
   const purchased=items.filter(i=>i.purchased);
   const pending=items.filter(i=>!i.purchased);
-  const estimatedTotal=sumCents(items.map(i=>i.estimatedCents||0));
+  const estimatedTotal=sumCents(items.map(marketItemEstimatedCents));
   const accounted=sumCents(purchased.map(marketItemEffectiveCents));
-  const pendingEstimated=sumCents(pending.map(i=>i.estimatedCents||0));
-  const purchasedEstimated=sumCents(purchased.map(i=>i.estimatedCents||0));
+  const pendingEstimated=sumCents(pending.map(marketItemEstimatedCents));
+  const purchasedEstimated=sumCents(purchased.map(marketItemEstimatedCents));
   const variance=sumCents([accounted,-purchasedEstimated]);
   const missingReal=purchased.filter(i=>!(i.actualCents>0)).length;
   return {estimatedTotal,accounted,pendingEstimated,purchasedEstimated,variance,missingReal,purchasedCount:purchased.length,pendingCount:pending.length};
@@ -296,7 +302,7 @@ function marketFilteredItems(items) {
 }
 function marketVarianceHtml(item) {
   if(!item.purchased||!(item.actualCents>0)) return '<span class="muted">—</span>';
-  const diff=sumCents([item.actualCents,-(item.estimatedCents||0)]);
+  const diff=sumCents([marketItemActualCents(item),-marketItemEstimatedCents(item)]);
   if(!Number.isSafeInteger(diff)) return '<span class="danger-text">Inválido</span>';
   const cls=diff>0?'danger-text':diff<0?'success-text':'muted';
   const prefix=diff>0?'+':'';
@@ -319,7 +325,7 @@ function marketTableRowHtml(item) {
     <td><label class="market-check"><input type="checkbox" data-market-toggle="${attr(item.id)}" ${item.purchased?'checked':''}><span class="sr-only">Marcar ${esc(item.name)} como comprado</span></label></td>
     <td><div class="market-identity"><strong>${esc(item.name)}</strong><small>${esc(item.category||'Outros')}</small></div></td>
     <td><span class="market-quantity">${esc(item.quantity||'1')} ${esc(item.unit||'un')}</span></td>
-    <td class="money-col" data-money>${money(item.estimatedCents||0)}</td>
+    <td class="money-col" data-money>${money(marketItemEstimatedCents(item))}</td>
     <td class="market-real-cell">${marketActualInputHtml(item)}</td>
     <td class="money-col">${marketVarianceHtml(item)}</td>
     <td>${marketStatusHtml(item)}</td>
@@ -330,8 +336,8 @@ function marketMobileCardHtml(item) {
   const effective=marketItemEffectiveCents(item);
   return `<article class="market-mobile-card ${item.purchased?'purchased':''}">
     <div class="market-mobile-head"><label class="market-check"><input type="checkbox" data-market-toggle="${attr(item.id)}" ${item.purchased?'checked':''}><span class="sr-only">Marcar ${esc(item.name)} como comprado</span></label><div><h3>${esc(item.name)}</h3><small>${esc(item.category||'Outros')} · ${esc(item.quantity||'1')} ${esc(item.unit||'un')}</small></div>${marketStatusHtml(item)}</div>
-    <div class="market-mobile-money"><div><span>Estimado</span><strong data-money>${money(item.estimatedCents||0)}</strong></div><div><span>${item.purchased?'Contabilizado':'Previsto'}</span><strong data-money>${money(item.purchased?effective:(item.estimatedCents||0))}</strong></div><div><span>Diferença</span>${marketVarianceHtml(item)}</div></div>
-    <div class="market-mobile-real"><span>Preço real</span>${marketActualInputHtml(item)}<small>${item.purchased&&!(item.actualCents>0)?'Enquanto faltar o preço real, os relatórios usam o valor estimado.':'Guardado automaticamente ao sair do campo.'}</small></div>
+    <div class="market-mobile-money"><div><span>Estimado</span><strong data-money>${money(marketItemEstimatedCents(item))}</strong></div><div><span>${item.purchased?'Contabilizado':'Previsto'}</span><strong data-money>${money(item.purchased?effective:marketItemEstimatedCents(item))}</strong></div><div><span>Diferença</span>${marketVarianceHtml(item)}</div></div>
+    <div class="market-mobile-real"><span>Preço real / unidade</span>${marketActualInputHtml(item)}<small>${item.purchased&&!(item.actualCents>0)?'Enquanto faltar o preço real, os relatórios usam o valor estimado.':'Guardado automaticamente ao sair do campo.'}</small></div>
     <div class="market-mobile-actions"><button class="btn secondary" type="button" data-edit-market="${attr(item.id)}">Editar</button><button class="btn danger" type="button" data-delete-market="${attr(item.id)}">Eliminar</button></div>
   </article>`;
 }

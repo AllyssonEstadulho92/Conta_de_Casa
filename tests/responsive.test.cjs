@@ -108,25 +108,25 @@ assert.doesNotMatch(legacyCss, /\.bill-card\b/);
 assert.doesNotMatch(css, /\bzoom\s*:/i);
 assert.doesNotMatch(css, /transform\s*:\s*scale\(/i);
 
-assert.match(index, /name="app-build" content="v52"/);
-assert.match(index, /styles\.css\?v=52/);
-assert.match(index, /design-system\.css\?v=52/);
-assert.match(index, /market-experience\.css\?v=52/);
-assert.match(index, /manifest\.webmanifest\?v=52/);
+assert.match(index, /name="app-build" content="v53"/);
+assert.match(index, /styles\.css\?v=53/);
+assert.match(index, /design-system\.css\?v=53/);
+assert.match(index, /market-experience\.css\?v=53/);
+assert.match(index, /manifest\.webmanifest\?v=53/);
 for (const asset of ['core','finance','render','forms','sync','events']) {
-  assert.match(index,new RegExp(`${asset}\\.js\\?v=52`));
+  assert.match(index,new RegExp(`${asset}\\.js\\?v=53`));
 }
-assert.match(index, /market-experience\.js\?v=52/);
-assert.match(index, /id="appBuildVersion">v52</);
+assert.match(index, /market-experience\.js\?v=53/);
+assert.match(index, /id="appBuildVersion">v53</);
 // The service worker URL remains stable at v50; updateViaCache:none still forces content checks,
-// while the service worker's internal cache namespace is versioned to v52 below.
-assert.match(events, /register\('\.\/sw\.js\?v=52',\{updateViaCache:'none'\}\)/);
+// while the service worker's internal cache namespace is versioned to v53 below.
+assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v52/);
+assert.match(swSource, /conta-de-casa-public-v53/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /'\.\/market-experience\.css'/);
 assert.match(swSource, /'\.\/market-experience\.js'/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 
-console.log('Responsive mobile-fit shell, PIN entry, unified action controls and GitHub Pages freshness v52 tests: OK');
+console.log('Responsive mobile-fit shell, PIN entry, unified action controls and GitHub Pages freshness v53 tests: OK');

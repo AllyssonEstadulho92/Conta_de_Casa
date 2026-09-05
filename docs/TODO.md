@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-## P0 — validação v52
+## P0 — validação v53
 
 - [ ] Validar **Adicionar produto** em iPhone/Safari nas larguras 320, 375, 390 e 430 px em hardware/browser real.
 - [x] Testar pesquisas reais no Continente, Pingo Doce e Mercadona, incluindo resposta sem preço verificável.
@@ -16,8 +16,7 @@
 
 - [ ] Monitorizar disponibilidade e contrato CORS de `cesta.pt/mcp`.
 - [ ] Monitorizar alterações de formato da ferramenta `search_products`.
-- [ ] Monitorizar cobertura e idade das observações Mercadona Portugal no Open Prices.
-- [ ] Investigar uma fonte oficial Mercadona Portugal se vier a existir; preferi-la à fonte comunitária depois de auditoria.
+- [ ] Reavaliar Mercadona apenas se surgir uma fonte oficial portuguesa de catálogo/preços.
 - [ ] Criar testes de browser real para Safari/iOS quando existir infraestrutura adequada.
 
 ## P1 — UI e acessibilidade
@@ -33,3 +32,5 @@
 - [ ] Avaliar remoção gradual de CSS antigo já substituído pelo design system.
 - [ ] Avaliar se `market-experience.css` deve permanecer isolado ou ser consolidado no design system.
 - [ ] Manter PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG atualizados após mudanças relevantes.
+
+- [ ] Validar em dispositivo real o stepper −/+ e o subtotal automático para quantidades inteiras e decimais.

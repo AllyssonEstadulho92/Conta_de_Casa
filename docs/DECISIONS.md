@@ -118,3 +118,14 @@ Esta separação permite que o total da lista reflita imediatamente o preço rea
 ### Limitação
 
 A disponibilidade, cobertura e atualidade dependem das fontes externas. Em particular, Mercadona é uma observação comunitária com data, não uma API oficial em tempo real. Quando não existe evidência adequada, a aplicação deve mostrar ausência de preço em vez de fabricar um valor.
+
+
+## 2026-09-05 — Mercado v53: dois retalhistas e quantidade automática
+
+### Decisão
+
+Retirar Mercadona da pesquisa de produção enquanto não existir uma fonte oficial portuguesa suficientemente completa e verificável. Manter Pingo Doce e Continente através de `cesta.pt`. Interpretar `estimatedCents` e `actualCents` como preço por unidade e calcular automaticamente o subtotal pela quantidade.
+
+### Motivo
+
+Evita uma falsa sensação de cobertura na Mercadona e corrige a inconsistência em que alterar a quantidade não alterava os totais da lista.

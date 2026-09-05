@@ -1,23 +1,21 @@
 'use strict';
 
 /*
- * Conta de Casa — pesquisa de preços reais (v52)
+ * Conta de Casa — pesquisa de preços reais (v53)
  * Continente/Pingo Doce: consulta atual através de cesta.pt, com URL oficial do produto.
- * Mercadona Portugal: observações públicas com comprovativo através de Open Prices.
+ * Mercados ativos: Pingo Doce e Continente.
  * Nenhum preço fictício ou imagem de produto é usado nesta camada.
  */
 (function marketLiveExperience(){
   const MARKET_BROWSER_MODE='market-browser';
   const CESTA_MCP_URL='https://cesta.pt/mcp';
-  const OPEN_PRICES_API='https://prices.openfoodfacts.org/api/v1';
   const SEARCH_DEBOUNCE_MS=450;
   const SEARCH_TIMEOUT_MS=12000;
   const MAX_REMOTE_RESULTS=20;
-  const MARKET_IDS=['pingo-doce','continente','mercadona'];
+  const MARKET_IDS=['pingo-doce','continente'];
   const MARKET_DEFINITIONS=Object.freeze([
     {id:'pingo-doce',name:'Pingo Doce',short:'PD',tone:'green',provider:'cesta',providerId:'pingodoce'},
-    {id:'continente',name:'Continente',short:'C',tone:'red',provider:'cesta',providerId:'continente'},
-    {id:'mercadona',name:'Mercadona',short:'M',tone:'orange',provider:'open-prices',providerId:'mercadona'}
+    {id:'continente',name:'Continente',short:'C',tone:'red',provider:'cesta',providerId:'continente'}
   ]);
   const PRODUCT_SUGGESTIONS=Object.freeze(['Leite meio gordo','Ovos','Arroz','Azeite','Café','Detergente','Papel higiénico','Água']);
   const CATEGORY_SUGGESTIONS=Object.freeze([
@@ -33,7 +31,6 @@
   let searchGeneration=0;
   let activeSearchController=null;
   let resultById=new Map();
-  let mercadonaLocationIds=null;
 
   const marketById=id=>MARKET_DEFINITIONS.find(m=>m.id===id)||MARKET_DEFINITIONS[0];
   const normalized=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-PT').trim();
@@ -55,7 +52,10 @@
 
   function marketMark(market,size='large'){
     const m=typeof market==='string'?marketById(market):market;
-    return `<span class="market-brand-mark ${attr(m.tone)} ${attr(size)}" aria-hidden="true"><span>${esc(m.short)}</span></span>`;
+    const logo=m.id==='pingo-doce'
+      ? '<span class="market-logo-pingo"><b>Pingo</b><b>Doce</b></span>'
+      : '<span class="market-logo-continente"><i aria-hidden="true">C</i><b>CONTINENTE</b></span>';
+    return `<span class="market-brand-mark ${attr(m.tone)} ${attr(size)} market-brand-logo" aria-hidden="true">${logo}</span>`;
   }
 
   function parseEuroCents(value){
@@ -80,12 +80,6 @@
   function formatObservedDate(value){
     const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value||''));
     return match?`${match[3]}/${match[2]}/${match[1]}`:'';
-  }
-
-  function observationAgeDays(value){
-    const date=Date.parse(`${value}T00:00:00Z`);
-    if(!Number.isFinite(date))return Infinity;
-    return Math.max(0,Math.floor((Date.now()-date)/86400000));
   }
 
   function inferCategory(name){
@@ -132,7 +126,7 @@
       </div>
       ${tabsHtml()}
       <div id="marketBrowserTabPanel" class="market-browser-tab-panel" role="tabpanel"></div>
-      <div class="market-source-notice" role="note">${svgIcon('info',21)}<p><strong>Fontes verificáveis.</strong> Continente e Pingo Doce são consultados no momento através de cesta.pt e os resultados incluem ligação ao produto oficial. Mercadona usa observações de lojas em Portugal com comprovativo no Open Prices; a data é sempre indicada. Não são usados preços fictícios. A pesquisa é enviada apenas às fontes necessárias.</p></div>
+      <div class="market-source-notice" role="note">${svgIcon('info',21)}<p><strong>Pesquisa em dois mercados.</strong> Pingo Doce e Continente são consultados no momento através de cesta.pt. Os resultados incluem preço e, quando disponível, ligação para o produto oficial. Não são usados preços fictícios e a pesquisa é enviada apenas à fonte necessária.</p></div>
       <div class="market-browser-results-head"><h3>Resultados</h3><span id="marketResultsMeta">Escreva pelo menos 2 caracteres</span></div>
       <div id="marketCatalogResults" class="market-catalog-results" aria-live="polite"></div>
     </div>`;
@@ -239,100 +233,24 @@
   async function searchCestaProducts(term,marketIds,signal){
     const stores=marketIds.map(id=>marketById(id).providerId).filter(Boolean);
     if(!stores.length)return [];
-    await cestaRpc({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Conta de Casa',version:'52'}}},signal);
+    await cestaRpc({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Conta de Casa',version:'53'}}},signal);
     await cestaRpc({jsonrpc:'2.0',method:'notifications/initialized'},signal);
     const event=await cestaRpc({jsonrpc:'2.0',id:2,method:'tools/call',params:{name:'search_products',arguments:{query:term,stores,limit:8}}},signal);
     const text=event?.result?.content?.find(item=>item?.type==='text')?.text||'';
     return parseCestaResults(text).filter(result=>marketIds.includes(result.marketId));
   }
 
-  async function fetchOpenPricesJson(path,signal){
-    const response=await fetchWithTimeout(`${OPEN_PRICES_API}${path}`,{headers:{'Accept':'application/json'}},signal);
-    if(!response.ok)throw new Error(`open-prices-http-${response.status}`);
-    const data=await response.json();
-    return data&&typeof data==='object'?data:{};
-  }
-
-  async function getMercadonaLocationIds(signal){
-    if(Array.isArray(mercadonaLocationIds)&&mercadonaLocationIds.length)return mercadonaLocationIds;
-    const params=new URLSearchParams({osm_name__like:'Mercadona',osm_address_country__like:'Portugal',price_count__gte:'1',size:'100'});
-    const data=await fetchOpenPricesJson(`/locations?${params}`,signal);
-    mercadonaLocationIds=(Array.isArray(data.items)?data.items:[])
-      .filter(item=>normalized(item?.osm_name||item?.osm_brand).includes('mercadona')&&(item?.osm_address_country_code==='PT'||normalized(item?.osm_address_country)==='portugal'))
-      .map(item=>Number(item.id)).filter(Number.isSafeInteger);
-    return mercadonaLocationIds;
-  }
-
-  function matchesSearchTerms(product,term){
-    const words=normalized(term).split(/\s+/).filter(word=>word.length>=2);
-    const haystack=normalized([product?.product_name,product?.brands,product?.quantity].filter(Boolean).join(' '));
-    return words.length?words.every(word=>haystack.includes(word)):false;
-  }
-
-  function openPriceToResult(item){
-    const product=item?.product||{};
-    const location=item?.location||{};
-    const observedDate=String(item?.date||item?.proof?.date||'');
-    const ageDays=observationAgeDays(observedDate);
-    const priceCents=Math.round(Number(item?.price)*100);
-    const productName=cleanRemoteText(product?.product_name||item?.product_name||`Produto ${product?.code||item?.product_code||''}`,120);
-    const brand=cleanRemoteText(product?.brands||'',70);
-    const quantity=cleanRemoteText(product?.quantity||[product?.product_quantity,product?.product_quantity_unit].filter(Boolean).join(' '),70);
-    const city=cleanRemoteText(location?.osm_address_city||'',70);
-    return {
-      id:`open-prices-mercadona-${item?.id||product?.id||product?.code||'unknown'}`,
-      provider:'open-prices',marketId:'mercadona',name:productName,pack:[quantity,brand].filter(Boolean).join(' · '),
-      priceCents:Number.isSafeInteger(priceCents)&&priceCents>0?priceCents:0,oldPriceCents:0,discount:'',promotionUntil:'',unitPrice:'',
-      sourceUrl:'',sourceLabel:item?.proof_id||item?.proof?.id?'Open Prices · com comprovativo':'Open Prices',
-      freshness:ageDays<=30?'recent':ageDays<=90?'dated':'old',observedDate,ageDays,city
-    };
-  }
-
-  async function searchMercadonaProducts(term,signal){
-    const locationIds=await getMercadonaLocationIds(signal);
-    if(!locationIds.length)return [];
-    const productParams=new URLSearchParams({product_name__like:term,price_count__gte:'1',size:'50'});
-    const productData=await fetchOpenPricesJson(`/products?${productParams}`,signal);
-    const products=(Array.isArray(productData.items)?productData.items:[]).filter(product=>matchesSearchTerms(product,term));
-    const productIds=products.map(product=>Number(product.id)).filter(Number.isSafeInteger);
-    if(!productIds.length)return [];
-    const priceParams=new URLSearchParams({
-      location_id__in:locationIds.join(','),product_id__in:productIds.join(','),currency:'EUR',order_by:'-date',size:'100'
-    });
-    const priceData=await fetchOpenPricesJson(`/prices?${priceParams}`,signal);
-    const raw=(Array.isArray(priceData.items)?priceData.items:[])
-      .filter(item=>Number(item?.price)>0&&(item?.proof_id||item?.proof?.id))
-      .filter(item=>normalized(item?.location?.osm_name||item?.location?.osm_brand).includes('mercadona'))
-      .map(openPriceToResult).filter(item=>item.priceCents>0&&item.name);
-    raw.sort((a,b)=>String(b.observedDate).localeCompare(String(a.observedDate))||a.priceCents-b.priceCents);
-    const unique=[];
-    const seen=new Set();
-    for(const item of raw){
-      const key=normalized(`${item.name}|${item.pack}`);
-      if(seen.has(key))continue;
-      seen.add(key);unique.push(item);
-      if(unique.length>=8)break;
-    }
-    return unique;
-  }
-
   function resultStatusHtml(product){
-    if(product.provider==='cesta'){
-      if(product.discount||product.promotionUntil){
-        const detail=[product.discount,product.promotionUntil?`até ${formatObservedDate(product.promotionUntil)}`:''].filter(Boolean).join(' · ');
-        return `<span class="market-result-chip promo">Promoção${detail?` · ${esc(detail)}`:''}</span>`;
-      }
-      return '<span class="market-result-chip current">Consultado agora</span>';
+    if(product.discount||product.promotionUntil){
+      const detail=[product.discount,product.promotionUntil?`até ${formatObservedDate(product.promotionUntil)}`:''].filter(Boolean).join(' · ');
+      return `<span class="market-result-chip promo">Promoção${detail?` · ${esc(detail)}`:''}</span>`;
     }
-    const date=formatObservedDate(product.observedDate);
-    if(product.freshness==='recent')return `<span class="market-result-chip current">Observado ${esc(date)} · recente</span>`;
-    if(product.freshness==='dated')return `<span class="market-result-chip dated">Observado ${esc(date)}</span>`;
-    return `<span class="market-result-chip old">Observado ${esc(date)} · pode já ter mudado</span>`;
+    return '<span class="market-result-chip current">Consultado agora</span>';
   }
 
   function productCardHtml(product){
     const market=marketById(product.marketId);
-    const subtitle=[product.pack,market.name,product.city,product.provider==='open-prices'&&product.observedDate?`observado ${formatObservedDate(product.observedDate)}`:''].filter(Boolean).join(' · ');
+    const subtitle=[product.pack,market.name].filter(Boolean).join(' · ');
     const oldPrice=product.oldPriceCents>product.priceCents?`<span class="market-result-old-price">antes ${money(product.oldPriceCents)}</span>`:'';
     const sourceLink=product.sourceUrl?`<button class="market-result-source" type="button" data-market-source-url="${attr(product.id)}" aria-label="Abrir produto oficial">${svgIcon('external',15)}<span>${esc(product.sourceLabel)}</span></button>`:`<span class="market-result-source text-only">${esc(product.sourceLabel)}</span>`;
     return `<article class="market-catalog-card" data-market-product-card="${attr(product.id)}">
@@ -387,8 +305,7 @@
     renderLoading();
     const cestaMarkets=['pingo-doce','continente'].filter(id=>selectedMarkets.has(id));
     const tasks=[];
-    if(cestaMarkets.length)tasks.push({label:'Continente/Pingo Doce',promise:searchCestaProducts(term,cestaMarkets,controller.signal)});
-    if(selectedMarkets.has('mercadona'))tasks.push({label:'Mercadona',promise:searchMercadonaProducts(term,controller.signal)});
+    if(cestaMarkets.length)tasks.push({label:'Pingo Doce/Continente',promise:searchCestaProducts(term,cestaMarkets,controller.signal)});
     const settled=await Promise.allSettled(tasks.map(task=>task.promise));
     if(controller.signal.aborted||generation!==searchGeneration)return;
     const results=[];
@@ -441,8 +358,7 @@
     await commit('created','market');
     closeDialog();
     showPage('market');
-    const sourceText=product.provider==='open-prices'&&product.observedDate?` observado em ${formatObservedDate(product.observedDate)}`:' consultado agora';
-    toast(`${product.name} adicionado com ${money(product.priceCents)} como preço estimado (${marketById(product.marketId).name},${sourceText}).`);
+    toast(`${product.name} adicionado com ${money(product.priceCents)} por unidade (${marketById(product.marketId).name}). O subtotal será atualizado automaticamente pela quantidade.`);
   }
 
   function restoreDialogHeader(){

@@ -213,7 +213,7 @@ function monthNumbers(month = selectedMonth, now = new Date()) {
   const profile = monthProfile(month);
   const incomes = sumCents(appState.incomes.filter(i=>inSelectedMonth(i.receivedAt, month)).map(i=>i.amountCents));
   const paymentTotal = sumCents(appState.payments.filter(p=>inSelectedMonth(p.paidAt, month)).map(p=>p.amountCents));
-  const marketSpent = sumCents(appState.market.filter(i=>i.purchased && inSelectedMonth(i.purchasedAt || i.updatedAt, month)).map(i=>i.actualCents || i.estimatedCents || 0));
+  const marketSpent = sumCents(appState.market.filter(i=>i.purchased && inSelectedMonth(i.purchasedAt || i.updatedAt, month)).map(i=>marketLineCents(i.actualCents || i.estimatedCents || 0,i.quantity)));
   const bills = appState.bills.filter(b=>billInMonth(b, month) && !b.cancelled && !b.archived);
   let pending = 0;
   let overdue = 0;
@@ -259,7 +259,7 @@ function categoryTotals(month = selectedMonth) {
   const market = appState.market.filter(i=>i.purchased && inSelectedMonth(i.purchasedAt || i.updatedAt, month));
   for (const item of market) {
     const cat = item.category ? `Mercado · ${item.category}` : 'Mercado';
-    map.set(cat,sumCents([map.get(cat)||0,item.actualCents||item.estimatedCents||0]));
+    map.set(cat,sumCents([map.get(cat)||0,marketLineCents(item.actualCents||item.estimatedCents||0,item.quantity)]));
   }
   return [...map.entries()].sort((a,b)=>b[1]-a[1]);
 }

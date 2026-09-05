@@ -67,7 +67,7 @@ assert.equal(syncState.months['2026-09'].updatedAt, '2026-09-01T12:00:00.000Z');
 assert.equal(syncState.syncTombstones.length, 1);
 assert.equal(syncState.syncConflicts.length, 1);
 
-const approvedExternalOrigins = new Set(['https://api.github.com','https://cesta.pt','https://prices.openfoodfacts.org']);
+const approvedExternalOrigins = new Set(['https://api.github.com','https://cesta.pt']);
 for (const file of appFiles) {
   const content = fs.readFileSync(file, 'utf8');
   const externalUrls = content.match(/https?:\/\/[^\s"'\`<>)]+/gi) || [];
@@ -88,7 +88,6 @@ assert.match(index, /Content-Security-Policy/);
 assert.match(index, /script-src 'self'/);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
 assert.match(index, /https:\/\/cesta\.pt/);
-assert.match(index, /https:\/\/prices\.openfoodfacts\.org/);
 assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline event handlers');
 assert.doesNotMatch(index, /target_name=|Destino automático/);
 

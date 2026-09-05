@@ -136,6 +136,25 @@ function money(cents = 0) {
 function validCents(value, min = 0, max = MAX_MONEY_CENTS) {
   return Number.isSafeInteger(value) && value >= min && value <= max;
 }
+function marketQuantityMilli(value = '1') {
+  const raw=String(value ?? '').trim().replace(',', '.');
+  if(!/^\d{1,5}(?:\.\d{1,3})?$/.test(raw)) return 1000;
+  const [whole,fraction='']=raw.split('.');
+  const milli=Number(whole)*1000+Number((fraction+'000').slice(0,3));
+  return Number.isSafeInteger(milli)&&milli>0&&milli<=100000000?milli:1000;
+}
+function marketLineCents(unitCents = 0, quantity = '1') {
+  if(!Number.isSafeInteger(unitCents)||unitCents<0) return NaN;
+  const milli=marketQuantityMilli(quantity);
+  const total=(BigInt(unitCents)*BigInt(milli)+500n)/1000n;
+  return total<=BigInt(Number.MAX_SAFE_INTEGER)?Number(total):NaN;
+}
+function canonicalMarketQuantity(value = '1') {
+  const milli=marketQuantityMilli(value);
+  const whole=Math.floor(milli/1000);
+  const fraction=String(milli%1000).padStart(3,'0').replace(/0+$/,'');
+  return fraction?`${whole},${fraction}`:String(whole);
+}
 function pad2(value) { return String(value).padStart(2, '0'); }
 function isLeapYear(year) { return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0); }
 function daysInCivilMonth(year, month) {

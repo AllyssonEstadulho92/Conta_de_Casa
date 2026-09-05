@@ -1,5 +1,17 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-05 — Mercado v53: quantidade automática e dois mercados
+
+- Mercadona removida da UI, runtime, CSP e pipeline de validação por ausência de uma fonte oficial portuguesa de catálogo/preços adequada;
+- permanecem Pingo Doce e Continente;
+- seletor dos mercados passa a mostrar identificação visual própria de cada marca;
+- quantidade passa a multiplicar automaticamente o preço por unidade nos totais da lista;
+- editor recebe controlos −/+ e subtotal automático;
+- preços estimado e real são tratados como valores por unidade;
+- resumos, orçamento e relatórios contabilizam quantidade × preço unitário;
+- build/cache atualizados para v53.
+
+
 ## 2026-09-05 — Mercado v52 com preços reais e contabilização da lista
 
 ### Alterações

@@ -31,7 +31,7 @@ Ordem CSS pública:
 - `events.js`: eventos, navegação, viewport e interação.
 - `market-experience.js`: pesquisa de preços externos e criação de itens a partir dos resultados.
 
-## Mercado v52 — fluxo de pesquisa
+## Mercado v53 — fluxo de pesquisa
 
 1. O utilizador abre **Adicionar produto**.
 2. O campo inicia vazio; não existem resultados ou preços pré-carregados.
@@ -60,25 +60,10 @@ A resposta é textual e é convertida para campos internos: cadeia, nome, embala
 
 A integração não utiliza criação de carrinhos, autenticação nem credenciais de retalhistas.
 
-### Mercadona Portugal — Open Prices
-
-Base utilizada: `https://prices.openfoodfacts.org/api/v1`.
-
-Fluxo:
-
-1. `/locations` localiza apenas Mercadona em Portugal com registos de preço;
-2. `/products` procura produtos pelo nome;
-3. `/prices` cruza IDs de produto e de localização;
-4. resultados sem `proof_id`/comprovativo são rejeitados;
-5. é apresentada a data da observação e a localidade da loja;
-6. a idade do registo determina o estado visual: recente, datado ou antigo.
-
-Esta fonte é baseada em observações públicas com comprovativos e não deve ser confundida com uma API oficial da Mercadona. Cobertura e atualidade podem ser incompletas.
 
 ## Política de veracidade dos preços
 
 - nunca usar dados de demonstração como se fossem reais;
-- nunca substituir Mercadona Portugal por preços da Mercadona Espanha;
 - não apresentar um preço observado antigo como “atual”;
 - ausência de fonte verificável resulta em estado “sem preço verificado”, não em fallback fictício;
 - preço externo é sempre uma estimativa até o utilizador confirmar o valor efetivamente pago.
@@ -86,7 +71,7 @@ Esta fonte é baseada em observações públicas com comprovativos e não deve s
 ## Segurança de conteúdo remoto
 
 - nenhuma API key ou segredo é necessário para as integrações atuais;
-- CSP `connect-src` restringe chamadas a `self`, GitHub API, `cesta.pt` e `prices.openfoodfacts.org`;
+- CSP `connect-src` restringe chamadas a `self`, GitHub API e `cesta.pt`;
 - strings remotas são normalizadas, limitadas e escapadas antes de entrar no DOM;
 - URLs remotas do cesta.pt passam por allowlist de domínio e protocolo;
 - pedidos têm timeout e podem ser abortados quando a pesquisa muda;
@@ -107,3 +92,7 @@ O shell permanente usa `100dvh`/`100svh`. `VisualViewport` permanece limitado a 
 ## Regra de manutenção
 
 Qualquer alteração futura às fontes de preços deve ser auditada quanto a: origem, território, CORS, termos de utilização, privacidade, atualização, evidência/prova, erros parciais e possibilidade de alteração silenciosa do formato de resposta.
+
+## Quantidades e preços unitários
+
+`estimatedCents` e `actualCents` continuam campos inteiros em cêntimos e são tratados como preços por unidade. `quantity` permanece compatível com o schema existente e aceita até três casas decimais; `marketLineCents()` calcula o subtotal monetário com arredondamento seguro. Resumos, relatórios e orçamento utilizam o subtotal, não apenas o preço unitário.

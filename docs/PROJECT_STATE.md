@@ -1,7 +1,7 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 5 de setembro de 2026
-Build funcional: v52
+Build funcional: v53
 Distribuição: GitHub Pages
 Estado da revisão: v52 integrada em `main`, CI concluído e GitHub Pages publicado com sucesso
 Revisão funcional promovida: `b7a1119e82c32f93e13f8272e43353c9a97de0c7`
@@ -21,20 +21,13 @@ A pesquisa é realizada através do endpoint MCP público de `cesta.pt`, que con
 
 A aplicação não recebe nem guarda credenciais das lojas. O termo pesquisado é enviado a `cesta.pt` apenas quando a pesquisa envolve Continente e/ou Pingo Doce.
 
-### Mercadona Portugal
-
-Não foi encontrada uma fonte oficial pública da Mercadona Portugal que disponibilize um catálogo de preços atuais para consumo direto pela PWA. Para não usar preços espanhóis, inventados ou não auditáveis, a aplicação consulta **Open Prices** e restringe os resultados a lojas Mercadona localizadas em Portugal.
-
-Só são aceites registos com comprovativo associado. Cada resultado apresenta a data da observação. Registos antigos são marcados explicitamente como podendo já ter mudado e nunca são descritos como preço atual.
-
-A cobertura da Mercadona depende das contribuições existentes no Open Prices e pode ser incompleta. Quando não existe um preço verificável para a pesquisa, a aplicação apresenta essa ausência em vez de fabricar um valor.
 
 ## Interface
 
 - removidas as ilustrações/imagens de embalagem dos cartões de produto;
 - cada resultado mantém título, subtítulo, preço, origem/estado de verificação e botão de adicionar;
 - pesquisa inicia vazia e consulta produtos reais depois de pelo menos 2 caracteres;
-- seleção Pingo Doce / Continente / Mercadona continua disponível;
+- seleção Pingo Doce / Continente continua disponível;
 - sugestões de produtos e categorias apenas preenchem a pesquisa; não contêm preços hardcoded;
 - safe areas, scroll e breakpoints mobile/tablet/desktop foram preservados.
 
@@ -53,7 +46,7 @@ Não foram alterados o schema persistido, PBKDF2, AES-GCM, PIN/palavra-passe, In
 
 ## Segurança e privacidade
 
-A CSP permite apenas as duas novas origens necessárias para pesquisa de preços: `https://cesta.pt` e `https://prices.openfoodfacts.org`, além da API GitHub já existente. Não existem API keys, tokens ou credenciais de terceiros no código.
+A CSP permite apenas `https://cesta.pt` para a pesquisa de preços, além da API GitHub já existente. Não existem API keys, tokens ou credenciais de terceiros no código.
 
 Conteúdo remoto é tratado como não confiável: texto é limitado/normalizado e escapado; a ligação oficial de produto só é aberta depois de recuperar o URL validado da memória da pesquisa, verificar protocolo/host e existir clique explícito do utilizador.
 
@@ -65,7 +58,7 @@ A revisão v52 passou no GitHub Actions a validação das fontes externas, sinta
 
 O CI final da revisão promovida em `main` terminou com sucesso no run `33933902054`. O workflow de deployment voltou a executar os testes específicos de Mercado antes de preparar o bundle público e terminou com sucesso no run `33933922714`.
 
-Foi confirmada pesquisa real de Continente/Pingo Doce através de `search_products` do cesta.pt e leitura CORS de observações Mercadona Portugal no Open Prices com loja, data, preço e comprovativo.
+Foi confirmada pesquisa real de Continente/Pingo Doce através de `search_products` do cesta.pt.
 
 ## Limitações conhecidas
 
@@ -78,5 +71,11 @@ A validação automatizada e a publicação estão concluídas. Continua pendent
 1. Validar visualmente a v52 publicada em iPhone/Safari, Android, tablet e desktop com pesquisas reais variadas.
 2. Confirmar em hardware real o comportamento com teclado, rotação e condições de rede adversas.
 3. Monitorizar alterações de contrato/CORS das duas fontes externas.
-4. Substituir a fonte comunitária da Mercadona se a Mercadona Portugal vier a disponibilizar uma API/catálogo oficial de preços.
+4. Reavaliar a Mercadona apenas se vier a existir uma fonte oficial portuguesa com catálogo e preços verificáveis.
 5. Continuar a consolidação gradual dos estilos mobile legados sem alterar comportamento.
+
+## Quantidade automática v53
+
+O preço estimado e o preço real do Mercado passam a representar valor por unidade. O subtotal de cada linha é calculado automaticamente por quantidade × preço unitário. O editor inclui controlos −/+ e pré-visualização do subtotal; os totais e relatórios usam o subtotal calculado.
+
+A Mercadona foi retirada do seletor e da rede de produção por não existir uma fonte oficial portuguesa de catálogo/preços suficientemente completa para este fluxo. Permanecem apenas Pingo Doce e Continente.

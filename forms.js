@@ -293,8 +293,30 @@ function openMarketForm(item=null){
   const existing=item?.id?appState.market.find(x=>x.id===item.id):null;
   const estimatedValue=existing?.estimatedCents>0?(existing.estimatedCents/100).toFixed(2).replace('.',','):'';
   const units=['un','kg','g','L','ml'];
-  openDialog(existing?'Editar item do mercado':'Adicionar ao mercado',`<form id="marketForm" class="form-grid two"><input type="hidden" name="marketId" value="${attr(existing?.id||'')}"><label>Produto<input name="name" required value="${attr(existing?.name||'')}" autocomplete="off" spellcheck="false"></label><label>Categoria<select name="category" required>${marketCategoryOptions(existing?.category||'')}</select><small>Escolha uma categoria para organizar a lista e os relatórios.</small></label><label>Quantidade<input name="quantity" value="${attr(existing?.quantity||'1')}" autocomplete="off"></label><label>Unidade<select name="unit">${units.map(unit=>`<option value="${attr(unit)}" ${unit===(existing?.unit||'un')?'selected':''}>${esc(unit)}</option>`).join('')}</select></label><label class="full-row">Preço estimado<input name="estimated" inputmode="decimal" value="${attr(estimatedValue)}" placeholder="0,00" autocomplete="off"></label><div class="button-row full-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary" type="submit">${existing?'Guardar alterações':'Adicionar'}</button></div></form>`);
-  $('#marketForm').addEventListener('submit',e=>withFormSubmissionLock(e,async form=>{
+  const quantityValue=canonicalMarketQuantity(existing?.quantity||'1');
+  openDialog(existing?'Editar item do mercado':'Adicionar ao mercado',`<form id="marketForm" class="form-grid two"><input type="hidden" name="marketId" value="${attr(existing?.id||'')}"><label>Produto<input name="name" required value="${attr(existing?.name||'')}" autocomplete="off" spellcheck="false"></label><label>Categoria<select name="category" required>${marketCategoryOptions(existing?.category||'')}</select><small>Escolha uma categoria para organizar a lista e os relatórios.</small></label><label>Quantidade<div class="market-quantity-stepper"><button type="button" class="market-qty-btn" data-market-qty-step="-1" aria-label="Diminuir quantidade">−</button><input name="quantity" inputmode="decimal" value="${attr(quantityValue)}" autocomplete="off" aria-label="Quantidade"><button type="button" class="market-qty-btn" data-market-qty-step="1" aria-label="Aumentar quantidade">+</button></div><small>Use + ou − para ajustar. O total é recalculado automaticamente.</small></label><label>Unidade<select name="unit">${units.map(unit=>`<option value="${attr(unit)}" ${unit===(existing?.unit||'un')?'selected':''}>${esc(unit)}</option>`).join('')}</select></label><label class="full-row">Preço estimado por unidade<input name="estimated" inputmode="decimal" value="${attr(estimatedValue)}" placeholder="0,00" autocomplete="off"><small id="marketEstimatedTotalPreview" class="market-total-preview" aria-live="polite"></small></label><div class="button-row full-row"><button type="button" class="btn secondary" data-close-dialog>Cancelar</button><button class="btn primary" type="submit">${existing?'Guardar alterações':'Adicionar'}</button></div></form>`);
+  const form=$('#marketForm');
+  const quantityInput=form.elements.quantity;
+  const estimatedInput=form.elements.estimated;
+  const preview=$('#marketEstimatedTotalPreview');
+  const refreshPreview=()=>{
+    const cents=parseCents(estimatedInput.value);
+    if(!validCents(cents,0)){preview.textContent='Subtotal inválido';return;}
+    const total=marketLineCents(cents,quantityInput.value);
+    preview.textContent=`Subtotal automático: ${money(total)}`;
+  };
+  form.addEventListener('click',event=>{
+    const button=event.target.closest('[data-market-qty-step]');
+    if(!button)return;
+    const step=Number(button.dataset.marketQtyStep)||0;
+    const current=marketQuantityMilli(quantityInput.value);
+    const next=Math.max(1000,current+step*1000);
+    quantityInput.value=canonicalMarketQuantity(String(next/1000).replace('.',','));
+    quantityInput.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  form.addEventListener('input',event=>{if(event.target===quantityInput||event.target===estimatedInput)refreshPreview();});
+  refreshPreview();
+  form.addEventListener('submit',e=>withFormSubmissionLock(e,async form=>{
     const fd=new FormData(form);
     const marketId=cleanString(fd.get('marketId'),80);
     const current=marketId?appState.market.find(x=>x.id===marketId):null;
@@ -302,10 +324,13 @@ function openMarketForm(item=null){
     const name=cleanString(fd.get('name'),100),est=parseCents(fd.get('estimated'));
     if(!name){toast('Indique o produto.');return false;}
     if(!validCents(est,0)){toast('Preço estimado inválido. Use zero ou um valor positivo.');return false;}
+    const rawQuantity=String(fd.get('quantity')||'').trim();
+    if(!/^\d{1,5}(?:[.,]\d{1,3})?$/.test(rawQuantity)||marketQuantityMilli(rawQuantity)<=0){toast('Quantidade inválida. Use um número superior a zero.');return false;}
+    const quantity=canonicalMarketQuantity(rawQuantity);
     const category=cleanString(fd.get('category'),80);
     if(!category){toast('Selecione uma categoria.');return false;}
     const now=new Date().toISOString();
-    const patch={name,category,quantity:cleanString(fd.get('quantity'),40)||'1',unit:cleanString(fd.get('unit'),20)||'un',estimatedCents:est,updatedAt:now};
+    const patch={name,category,quantity,unit:cleanString(fd.get('unit'),20)||'un',estimatedCents:est,updatedAt:now};
     if(current){
       Object.assign(current,patch);
     }else{
