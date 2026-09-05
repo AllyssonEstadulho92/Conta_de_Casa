@@ -36,7 +36,13 @@ jobs:
           new="updated, count = re.subn(pattern, lambda _m: repl, text, count=1, flags=flags)"
           if old not in text:
               raise SystemExit('regex_once implementation not found')
-          p.write_text(text.replace(old,new,1),encoding='utf-8')
+          text=text.replace(old,new,1)
+          bad='text=text.replace("(item.estimatedCents||0))","marketItemEstimatedCents(item)))")'
+          good='text=text.replace("money(item.purchased?effective:(item.estimatedCents||0))","money(item.purchased?effective:marketItemEstimatedCents(item))")'
+          if bad not in text:
+              raise SystemExit('quantity render replacement not found')
+          text=text.replace(bad,good,1)
+          p.write_text(text,encoding='utf-8')
           PY
 
       - name: Apply v53 patch
