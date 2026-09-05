@@ -1,5 +1,25 @@
 # TODO — Conta de Casa
 
+## P0 — Centro de Atualização de Software v58
+
+- [x] Criar uma entrada **Atualização de Software** em Definições sem alterar o schema do cofre.
+- [x] Reproduzir a hierarquia funcional da referência iPhone: voltar, Atualizações Automáticas, Atualizações Beta, estado da versão e Mais detalhes.
+- [x] Manter **Atualizações Automáticas — Ativado** ligado ao Service Worker real já usado pela aplicação.
+- [x] Manter **Atualizações Beta — Desativado** enquanto não existir uma pipeline beta separada e auditada.
+- [x] Implementar **Verificar atualizações** com `ServiceWorkerRegistration.update()` e `SKIP_WAITING` same-origin.
+- [x] Centralizar as notas visíveis de cada versão em `APP_RELEASE_NOTES`.
+- [x] Adicionar `app-update.js` e `app-update.css` à allowlist pública e ao cache offline.
+- [x] Carimbar o bundle público `dist/` com versão v58 sem fazer uma substituição estrutural desnecessária do HTML fonte.
+- [x] Garantir que a verificação de atualização não envia dados do cofre e não introduz endpoint externo.
+- [x] Adicionar testes dedicados de atualização e alinhar os testes antigos com o cache v58.
+- [x] Passar a suite CI completa na branch de implementação.
+- [ ] Validar fisicamente em iPhone/Safari a entrada Definições → Atualização de Software em tema claro e escuro.
+- [ ] Validar largura 320, 375, 390 e 430 px, incluindo safe areas e barras do Safari.
+- [ ] Validar **Verificar atualizações** com rede disponível, offline e após regressar de background.
+- [ ] Validar o fluxo numa PWA instalada no ecrã principal e numa aba normal do Safari.
+- [ ] Confirmar uma transição pública real v58 → v59: deteção, instalação, `controllerchange`, reload e versão apresentada.
+- [ ] A partir da próxima release, acrescentar sempre as mudanças relevantes a `APP_RELEASE_NOTES` antes do deploy.
+
 ## P0 — protótipo aprovado / hierarquia mobile v55
 
 - [x] Comparar a captura real de **Lista de compras** no iPhone com o protótipo aprovado.
@@ -8,7 +28,7 @@
 - [x] Adicionar ícone de carrinho à hierarquia do título da página Compras.
 - [x] Adicionar âncoras iconográficas aos quatro cartões financeiros sem alterar os valores/cálculos.
 - [x] Refinar cartões mobile da lista com avatar vetorial neutro, estado, informação financeira e ações compactas.
-- [x] Não inventar fotografias de produtos: o schema atual não possui imagem persistida.
+- [x] Não inventar fotografias de produtos na revisão v55; a v57 passou depois a admitir fotografia real validada.
 - [x] Ocultar o campo de preço real enquanto o item ainda está por comprar; manter o campo quando comprado.
 - [x] Normalizar a navegação inferior e o indicador ativo.
 - [x] Renovar o cache do Service Worker para obrigar Safari/iOS a receber a revisão visual.
@@ -64,6 +84,15 @@
 - [ ] Confirmar botão de lanterna apenas em hardware que realmente exponha suporte.
 - [ ] Confirmar que um código reconhecido nunca adiciona automaticamente o primeiro produto/preço sem confirmação do utilizador.
 
+## P0 — validação v57 imagens reais
+
+- [x] Remover o avatar vetorial que simulava fotografia na Lista de compras.
+- [x] Mostrar fotografia real nos resultados e nos itens guardados quando há correspondência forte.
+- [x] Restringir imagens a `images.openfoodfacts.org` e manter `credentials: omit` / `referrerPolicy: no-referrer`.
+- [x] Persistir apenas URL/metadados; não guardar binários da fotografia no cofre.
+- [ ] Validar em iPhone/Safari uma amostra de produtos embalados com fotografia e produtos sem correspondência.
+- [ ] Confirmar visualmente 320, 375, 390 e 430 px sem deformação/corte da fotografia.
+
 ## P1 — qualidade das fontes
 
 - [ ] Monitorizar disponibilidade e contrato CORS de `cesta.pt/mcp`.
@@ -91,16 +120,8 @@
 - [ ] Remover progressivamente os glifos Unicode de fallback que ainda permanecem no HTML/JS estático depois de a revisão Lucide estar validada fisicamente, sem alterar o contrato dos controlos.
 - [ ] Migrar gradualmente os pequenos SVG locais de módulos contextuais para `CDCIcons.markup`, reduzindo duplicação de paths sem misturar esta refatoração com a validação v55.
 - [ ] Avaliar remoção gradual de CSS antigo já substituído pelo design system.
-- [ ] Avaliar se `market-experience.css`, `market-barcode.css`, `ui-icons.css` e `invoice-capture.css` devem permanecer isolados ou ser consolidados no design system após validação física.
+- [ ] Avaliar se `market-experience.css`, `market-barcode.css`, `ui-icons.css`, `invoice-capture.css` e `app-update.css` devem permanecer isolados ou ser consolidados no design system após validação física.
 - [ ] Avaliar OCR/PDF de faturas apenas com uma estratégia de validação explícita que não grave valores financeiros probabilísticos sem confirmação.
 - [ ] Manter PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG atualizados após mudanças relevantes.
 - [ ] Validar em dispositivo real o stepper −/+ e o subtotal automático para quantidades inteiras e decimais.
-
-## P0 — validação v57 imagens reais
-
-- [x] Remover o avatar vetorial que simulava fotografia na Lista de compras.
-- [x] Mostrar fotografia real nos resultados e nos itens guardados quando há correspondência forte.
-- [x] Restringir imagens a images.openfoodfacts.org e manter credentials omit/referrer no-referrer.
-- [x] Persistir apenas URL/metadados; não guardar binários da fotografia no cofre.
-- [ ] Validar em iPhone/Safari uma amostra de produtos embalados com fotografia e produtos sem correspondência.
-- [ ] Confirmar visualmente 320, 375, 390 e 430 px sem deformação/corte da fotografia.
+- [ ] Avaliar, depois da primeira transição real v58 → v59, se a carimbagem de versão deve passar de `prepare-pages.cjs` para uma fonte única de versão sem aumentar o risco de regressão.
