@@ -1,359 +1,178 @@
 # Decisões Técnicas — Conta de Casa
 
-## D-001 — Separar altura do shell e VisualViewport
+Atualizado: 5 de setembro de 2026
 
-Data: 4 de setembro de 2026
-Estado: aceite
+Este ficheiro mantém as decisões arquiteturais vigentes e o respetivo fundamento. O histórico detalhado permanece no Git; aqui fica a versão consolidada necessária para continuidade do projeto.
 
-### Contexto
+## D-001 — Separar altura estrutural do VisualViewport
 
-O shell mobile estava dimensionado diretamente com `--visual-vh`, valor calculado a partir de `window.visualViewport.height`. Em Safari/iPhone esta medida é transitória e pode mudar com teclado e barras do browser, provocando corte do contentor principal.
+Data: 4 de setembro de 2026 · Estado: aceite
 
-### Decisão
+**Decisão:** `.app-shell`/`.main` usam `100dvh` com `100svh` como mínimo. `VisualViewport` fica reservado a teclado e diálogos.
 
-O shell permanente (`.app-shell` e `.main`) passa a usar `100dvh`, com `100svh` como mínimo. As métricas de `VisualViewport` permanecem no projeto apenas para comportamento transitório de teclado e diálogos.
-
-### Motivo
-
-O CSS dinâmico do viewport é a fonte adequada para a dimensão estrutural da aplicação. O Visual Viewport é útil para reposicionar interfaces durante o teclado, mas não deve definir a altura persistente de toda a aplicação.
-
-### Risco controlado
-
-Browsers sem suporte a `dvh` ignoram a nova declaração e mantêm as regras anteriores. Não foram alterados dados nem lógica de negócio.
+**Motivo:** Safari/iPhone altera a altura visual com barras/teclado; usar essa medida como altura permanente causava cortes.
 
 ## D-002 — Camada de compatibilidade móvel dedicada
 
-Data: 4 de setembro de 2026
-Estado: aceite
+Data: 4 de setembro de 2026 · Estado: aceite
 
-### Decisão
+**Decisão:** manter `mobile-layout.css` como camada final de compatibilidade em vez de reescrever de imediato CSS legado.
 
-Criar `mobile-layout.css` e carregá-lo depois de `design-system.css`, em vez de reescrever imediatamente os dois ficheiros CSS existentes.
-
-### Motivo
-
-Existem várias gerações de regras responsivas em `styles.css` e `design-system.css`. Uma refatoração total durante a correção aumentaria o risco de regressão. A camada final torna o override explícito, pequeno, testável e reversível.
-
-### Consequência
-
-A consolidação dos estilos duplicados fica como trabalho posterior, depois de validação física em iPhone.
+**Motivo:** reduz risco de regressão enquanto o layout é validado em hardware real.
 
 ## D-003 — Reduzir densidade vertical dos cartões de Compras
 
-Data: 4 de setembro de 2026
-Estado: aceite
+Data: 4 de setembro de 2026 · Estado: aceite
 
-### Decisão
+**Decisão:** entre 360 e 560 px, estado e métricas dos itens são compactados; abaixo de 360 px o layout volta a empilhar.
 
-Entre 360 px e 560 px, o estado volta à linha do produto e os três indicadores financeiros são apresentados numa única grelha de três colunas. Dispositivos abaixo de 360 px mantêm o layout empilhado.
+**Motivo:** aumentar informação útil por ecrã sem reduzir legibilidade/alvos tácteis.
 
-### Motivo
+## D-004 — Mercado implementado como camada isolada
 
-O layout anterior fazia cada item ocupar uma fração excessiva do ecrã em iPhones comuns. A alteração preserva legibilidade e os alvos tácteis de 44 px, mas melhora a quantidade de informação visível por ecrã.
+Data: 5 de setembro de 2026 · Estado: aceite
 
-## D-004 — Implementar o protótipo Mercado numa camada isolada
+**Decisão:** `market-experience.js/.css` alteram apenas descoberta/apresentação do Mercado; edição e regras financeiras existentes permanecem nos módulos anteriores.
 
-Data: 5 de setembro de 2026
-Estado: aceite
+**Motivo:** reproduzir o protótipo sem reescrever lógica madura de estado, cifragem e cálculos.
+
+## D-005 — Não apresentar demonstração como preço real
+
+Data: 5 de setembro de 2026 · Estado: aceite
+
+**Decisão:** nenhum valor fictício pode alimentar cálculos como preço real.
+
+**Motivo:** impedir contaminação dos totais e falsas garantias de atualidade.
+
+## D-006 — Preço pesquisado é estimativa; preço pago permanece separado
+
+Data: 5 de setembro de 2026 · Estado: aceite
+
+**Decisão:** Continente/Pingo Doce são consultados através de `cesta.pt/mcp`; o valor selecionado entra em `estimatedCents`; `actualCents` fica reservado ao valor efetivamente pago.
+
+**Motivo:** uma consulta de catálogo não prova o montante final de compra.
+
+## D-007 — Código de barras identifica produto; preço continua separado
+
+Data: 5 de setembro de 2026 · Estado: aceite
+
+**Decisão:** ZXing lê o GTIN localmente; uma base de produto identifica nome/marca; `cesta.pt` continua responsável pelo preço. O utilizador confirma o resultado antes de adicionar.
+
+**Motivo:** EAN/UPC/GTIN não contém o preço atual do retalhista.
+
+## D-008 / D-010 — Lucide como sistema vetorial oficial
+
+Data: 5 de setembro de 2026 · Estado: aceite
+
+**Decisão:** Lucide é a linguagem de ícones funcional, vendorizada localmente em `ui-icons.js`, sem icon font/CDN. Snapshot: `94e4cb9d9db5907053ebf3636a97c45529cf776b`.
+
+**Motivo:** consistência iOS/Android/desktop, funcionamento offline, CSP mínima e dimensões controladas.
+
+## D-009 — QR fiscal como preenchimento assistido, não OCR automático
+
+Data: 5 de setembro de 2026 · Estado: aceite
+
+**Decisão:** `invoice-capture.js/.css` lê QR fiscal localmente, mostra pré-visualização e só transfere campos após ação explícita. Imagens/PDFs não são persistidos.
+
+**Motivo:** os campos QR são estruturados; OCR geral introduziria incerteza em valores e datas sem política de confiança adequada.
+
+## D-011 — Protótipo aprovado define a hierarquia da Lista de compras
+
+Data: 5 de setembro de 2026 · Estado: aceite
+
+**Decisão:** título com carrinho, `+` principal preservado, ação secundária visual de scanner, cartões-resumo com ícones, ações compactas e navegação inferior uniforme.
+
+**Motivo:** alinhar o produto real ao protótipo sem mexer em schema/cálculos.
+
+## D-011B — Modernizar o cofre sem simular biometria/passkey
+
+Data: 5 de setembro de 2026 · Estado: aceite
+
+**Decisão:** adotar linguagem visual moderna de PIN/teclado circular sem mostrar passkey/biometria enquanto não existir implementação WebAuthn/recuperação real.
+
+**Motivo:** qualidade visual não deve criar uma capacidade de segurança inexistente.
+
+## D-012 — Fotografia é referência visual, não prova de preço/origem comercial
+
+Data: 5 de setembro de 2026 · Estado: aceite; expandida por D-014
+
+**Decisão:** uma fotografia pode ser mostrada quando há correspondência suficientemente forte ou GTIN, mas não é tratada como origem do preço nem automaticamente como imagem oficial do retalhista.
+
+**Motivo:** imagem e preço têm proveniência independente; uma imagem errada é pior do que um placeholder.
+
+## D-013 — Atualização usa Service Worker same-origin e canal estável
+
+Data: 5 de setembro de 2026 · Estado: aceite
+
+**Decisão:** `app-update.js/.css` usa `ServiceWorkerRegistration.update()`, `SKIP_WAITING`, `controllerchange` e `APP_RELEASE_NOTES`. Beta permanece desativado sem pipeline própria.
+
+**Motivo:** reutilizar o mecanismo nativo da PWA sem backend de versões ou novo endpoint externo.
+
+## D-014 — Auditar imagens por SKU sem introduzir proxy de scraping
+
+Data: 5 de setembro de 2026 · Estado: aceite
 
 ### Contexto
 
-O protótipo aprovado altera significativamente a apresentação da Lista de compras e introduz um ecrã de descoberta/comparação de produtos, mas o projeto já possui lógica madura de criação, edição, cálculo, cifragem e sincronização.
+A captura real de **Adicionar produto** mostrou vários resultados de Pingo Doce/Continente com placeholder, mesmo para artigos que possuem fotografias nas páginas das lojas. A v57 usava uma única pesquisa textual ampla no Open Food Facts e um conjunto pequeno de candidatos; isto era insuficiente em termos genéricos como “café”. As miniaturas existentes também eram estáticas.
+
+A aplicação é uma PWA estática. Ler diretamente o HTML das páginas de Continente/Pingo Doce no browser não é uma API estável: depende de CORS, estrutura do retalhista, cookies/anti-bot e alterações de front-end. A alternativa de um proxy genérico acrescentaria uma entidade externa com quotas, privacidade e disponibilidade próprias.
 
 ### Decisão
 
-Criar `market-experience.css` e `market-experience.js` como camada final e contextual. A nova camada só modifica a apresentação de `page-market` e o modo `market-browser` do diálogo comum.
+Criar `market-image-audit.js` e `market-image-audit.css` como camada progressiva v59.
 
-O botão de novo item e a ação rápida Mercado passam pelo novo comparador. A edição de registos existentes continua a usar o formulário anterior.
+Para cada produto sem imagem:
+
+1. auditar individualmente, em vez de depender apenas da pesquisa ampla inicial;
+2. usar `productCode`/GTIN quando já existe;
+3. para resultados Continente com `pid`, consultar `cesta.pt/get_product` para tentar obter EAN exato;
+4. pesquisar por código nas bases Open Facts quando disponível;
+5. sem código, pesquisar nome + embalagem e calcular score por nome, marca, tokens e quantidade;
+6. aceitar apenas `score >= 0.74`;
+7. limitar a três resoluções concorrentes;
+8. manter placeholder se não existir correspondência segura.
+
+Bases autorizadas:
+
+- Open Food Facts;
+- Open Beauty Facts;
+- Open Products Facts;
+- Open Pet Food Facts.
+
+A seleção é orientada pelo tipo/categoria do produto, com fallback entre bases.
+
+### Ampliação
+
+Qualquer fotografia real torna-se um botão acessível. O toque/clique abre um `<dialog>` fullscreen/responsivo com imagem ampliada, nome, origem, fecho por botão/Esc/backdrop, safe areas, dark mode e redução de movimento.
+
+### Persistência
+
+Quando uma imagem é resolvida para um item já guardado, persistir apenas:
+
+- `productCode` comprovável, se em falta;
+- `imageUrl`;
+- `imageSource`;
+- `imageMatchedAt`.
+
+Não guardar binários.
+
+### Segurança e privacidade
+
+- sem proxy genérico (Microlink/Jina/AllOrigins/CORS proxy ou equivalente);
+- sem API key/Authorization;
+- `credentials:'omit'` e `referrerPolicy:'no-referrer'`;
+- CSP limitada às quatro famílias Open Facts e ao `cesta.pt` já existente;
+- nenhum valor financeiro, PIN, token GitHub ou conteúdo do cofre é enviado para resolver imagens.
 
 ### Motivo
 
-A abordagem reproduz o protótipo com risco reduzido, evita reescrever componentes financeiros e permite remoção/reversão direta se a validação física revelar regressões.
+Esta abordagem aumenta a cobertura e a precisão sem transformar a PWA num scraper de páginas de lojas nem acrescentar um backend apenas para imagens. EAN/GTIN exato é preferido sempre que possível. Quando isso não existe, o score textual reduz a probabilidade de variante errada.
+
+### Limitação aceite
+
+Não se promete 100% de cobertura. Alguns SKUs não têm fotografia pública ou não têm identificador suficiente para uma correspondência segura. Nesses casos o placeholder é o resultado correto.
 
 ### Consequência
 
-Os dois novos assets passam a integrar `index.html`, Service Worker, bundle de Pages e CI. A consolidação futura no design system principal só deve ocorrer depois da validação visual em dispositivos reais.
-
-## D-005 — Não apresentar dados de demonstração como preços reais
-
-Data: 5 de setembro de 2026
-Estado: aceite
-
-### Contexto
-
-O protótipo visual contém comparações de Pingo Doce, Continente e Mercadona. O projeto atual é uma PWA estática sem backend e a CSP só permite ligações à própria origem e à API GitHub. Não foi confirmada uma fonte única, estável e verificável para preços em tempo real dos três mercados.
-
-### Decisão
-
-A build v51 mantém os preços do protótipo apenas como **dados de demonstração explicitamente identificados**. `market-experience.js` não faz pedidos externos e, ao adicionar um produto à lista, grava `estimatedCents: 0` em vez do valor de demonstração.
-
-### Motivo
-
-Gravar ou apresentar um valor fictício como preço real contaminaria cálculos financeiros e reduziria a fiabilidade da aplicação. Adicionar scraping direto a partir do browser também introduziria problemas de CORS, disponibilidade, segurança, termos de utilização e rastreabilidade da origem.
-
-### Próxima decisão necessária
-
-Antes de preços reais, definir um subsistema próprio de recolha/normalização com fontes verificadas por mercado, backend/proxy, EAN/GTIN, timestamp, região/loja, promoções, cache, caducidade e indicação de origem.
-
-## D-006 — Preços reais pesquisados entram como estimativa auditável
-
-Data: 5 de setembro de 2026
-Estado: aceite; componente Mercadona posteriormente substituída pela decisão v53
-
-### Contexto
-
-O utilizador pediu que a Lista de compras use preços reais pesquisados e que o valor selecionado seja contabilizado na lista, sem manter dados fictícios. A aplicação continua estática/local-first e não deve tratar uma consulta de preço como prova do montante efetivamente pago.
-
-### Decisão
-
-A decisão original introduziu fontes externas verificáveis e separou `estimatedCents` de `actualCents`. Na revisão v53, a parte relativa à Mercadona/Open Prices foi retirada. A regra atualmente válida é: Continente e Pingo Doce são pesquisados através do endpoint público `cesta.pt/mcp`; o preço escolhido é guardado em `estimatedCents`; `actualCents` permanece reservado ao valor efetivamente pago. Ao marcar o item como comprado, o cálculo contabilizado usa `actualCents` quando existe e, caso contrário, usa a estimativa pesquisada.
-
-### Motivo
-
-Esta separação permite que o total da lista reflita imediatamente o preço real consultado sem afirmar que esse foi necessariamente o preço de compra. Também mantém rastreabilidade, evita preços inventados e preserva a lógica financeira existente.
-
-### Limitação
-
-A disponibilidade, cobertura e atualidade dependem da fonte externa. Quando não existe evidência adequada, a aplicação deve mostrar ausência de preço em vez de fabricar um valor.
-
-## 2026-09-05 — Mercado v53: dois retalhistas e quantidade automática
-
-### Decisão
-
-Retirar Mercadona da pesquisa de produção enquanto não existir uma fonte oficial portuguesa suficientemente completa e verificável. Manter Pingo Doce e Continente através de `cesta.pt`. Interpretar `estimatedCents` e `actualCents` como preço por unidade e calcular automaticamente o subtotal pela quantidade.
-
-### Motivo
-
-Evita uma falsa sensação de cobertura na Mercadona e corrige a inconsistência em que alterar a quantidade não alterava os totais da lista.
-
-## D-007 — Código de barras identifica o produto; preço continua separado
-
-Data: 5 de setembro de 2026
-Estado: aceite
-
-### Contexto
-
-Foi pedido um leitor de código de barras no ecrã **Adicionar produto**, usando a câmara, que permita reconhecer o artigo e chegar ao nome e ao valor praticado no mercado.
-
-Um EAN/UPC/GTIN identifica o produto, mas não transporta o preço atual de uma cadeia. Misturar as duas responsabilidades criaria a falsa impressão de que o preço vem do código de barras.
-
-### Decisão
-
-Implementar uma cadeia de três responsabilidades independentes:
-
-1. **Leitura local:** usar a câmara com `getUserMedia` e `@zxing/browser@0.2.0`, carregado sob pedido, para descodificar o código.
-2. **Identificação:** validar checksum GTIN e consultar Open Food Facts apenas para obter nome, marca e quantidade quando disponíveis.
-3. **Preço:** reutilizar o campo e o evento de pesquisa de `market-experience.js`, que continua a consultar `cesta.pt` para Pingo Doce e Continente.
-
-Apenas GTIN-8, GTIN-12/UPC, GTIN-13/EAN e GTIN-14 válidos avançam. O scanner não adiciona itens diretamente e não escreve no estado financeiro.
-
-### Motivo
-
-A separação mantém a arquitetura auditável: a câmara resolve o código, a base de produtos resolve a identidade e a fonte de mercado resolve o preço. Também preserva todo o fluxo já testado de criação, quantidade, estimativa e preço efetivamente pago.
-
-### Segurança e privacidade
-
-- o vídeo é processado no dispositivo e não é enviado nem guardado;
-- o GTIN é o único dado enviado ao Open Food Facts;
-- pedidos de identificação usam `credentials: 'omit'`, `referrerPolicy: 'no-referrer'`, timeout e cancelamento;
-- a biblioteca ZXing usa URL com versão fixa, nunca `latest`;
-- a câmara é parada ao concluir, cancelar, fechar, ocultar ou abandonar a página;
-- a CSP é alargada apenas às origens necessárias para o fluxo.
-
-### Limitação aceite
-
-Open Food Facts é uma base comunitária e pode não reconhecer todos os códigos. `cesta.pt` pode encontrar uma variante diferente ou nenhum produto para o nome identificado. Por isso, a interface não adiciona automaticamente o primeiro resultado: o utilizador continua a confirmar explicitamente o produto e o preço.
-
-## D-008 — Um único sistema vetorial local para os ícones funcionais
-
-Data: 5 de setembro de 2026
-Estado: aceite; especificado posteriormente por D-010
-
-### Contexto
-
-A aplicação acumulou SVGs do registo `ICONS`, SVGs locais de módulos e caracteres Unicode como `⌂`, `◉`, `⌁`, `☼`, `⌄` e `×`. Em Safari/iPhone foi observada uma lupa parcialmente cortada no campo de pesquisa do Mercado. O CSS base também contém uma regra global `svg { height:auto }`, adequada a conteúdo responsivo mas inadequada a ícones com caixa fixa.
-
-### Decisão
-
-Criar `ui-icons.js` e `ui-icons.css` como camada de compatibilidade visual, sem reestruturar as páginas. O módulo estende o `ICONS` existente, mantém o contrato `icon()`, converte os glifos estáticos em SVG local e normaliza ícones criados por componentes dinâmicos.
-
-Não será introduzida uma icon font remota. Todos os ícones funcionais devem usar SVG local com geometria 24×24, `currentColor`, espessura coerente e dimensões CSS explícitas.
-
-### Motivo
-
-Esta solução evita fallback tipográfico e diferenças de emoji entre plataformas, funciona offline, não adiciona pedidos ou tracking de terceiros e ataca diretamente a causa dimensional observada sem alterar rotas, dados ou regras de negócio.
-
-### Movimento
-
-Animação fica reservada a estados com significado: sincronização ativa, alerta, expansão e linha de leitura. Hover só é aplicado com pointer fino. `prefers-reduced-motion` desativa movimento não essencial.
-
-## D-009 — QR fiscal de fatura como preenchimento assistido, não OCR automático
-
-Data: 5 de setembro de 2026
-Estado: aceite
-
-### Contexto
-
-Foi pedido um leitor mais adequado a faturas e a possibilidade de submeter a fatura correta. O projeto tem `attachments` desativados e não deve começar a persistir fotografias/PDFs sem uma decisão de armazenamento, cifragem, sincronização e limites.
-
-As faturas portuguesas emitidas por software certificado incluem Código QR com campos definidos pela Autoridade Tributária, oferecendo uma fonte estruturada para NIF do emitente, data/identificação do documento, ATCUD, impostos e total.
-
-### Decisão
-
-Adicionar `invoice-capture.js`/`.css` como camada progressiva apenas no formulário **Nova fatura**:
-
-1. permitir leitura do QR pela câmara;
-2. permitir selecionar uma imagem local da fatura;
-3. descodificar localmente o QR com o mesmo ZXing já usado na aplicação;
-4. validar estrutura mínima e formatos;
-5. mostrar pré-visualização;
-6. transferir campos apenas após confirmação explícita do utilizador;
-7. manter `handleBillSubmit()` como única via de gravação da fatura.
-
-A imagem não é persistida nem enviada. PDFs e OCR textual geral ficam fora desta decisão.
-
-### Motivo
-
-O QR fiscal é determinístico e auditável para os campos que contém. OCR de uma fotografia/PDF introduziria probabilidade de erro em montantes, datas e referências e exigiria uma política adicional de confiança. A pré-visualização e o clique **Preencher campos** preservam a revisão humana antes de qualquer dado financeiro ser guardado.
-
-### Limitação aceite
-
-O QR não deve ser usado para inferir nome comercial do fornecedor, categoria ou data de vencimento. Estes campos continuam sob responsabilidade do utilizador. O NIF do emitente pode ser colocado como identificação provisória do fornecedor, claramente sujeito a confirmação.
-
-## D-010 — Lucide como biblioteca visual oficial, vendorizada localmente
-
-Data: 5 de setembro de 2026
-Estado: aceite
-
-### Contexto
-
-Depois da primeira normalização de SVG, uma captura real de iPhone/Safari na página **Faturas** mostrou que a interface ainda misturava três comportamentos visuais: lupa nativa do browser, setas nativas dos `select` e um botão de criação com dois símbolos, provocado pelo `+` em pseudo-elemento legado e pelo SVG injetado pela camada de ícones.
-
-Foram consideradas as famílias sugeridas: Google Material Symbols, Font Awesome, Bootstrap Icons, Lucide/Feather, Flaticon e Iconfinder.
-
-### Decisão
-
-Adotar **Lucide Icons** como biblioteca visual oficial para os ícones funcionais. A aplicação não carrega o pacote Lucide, uma Web Font ou CDN em runtime. Apenas o subset necessário de SVG é incorporado em `ui-icons.js`, referenciado ao snapshot:
-
-`94e4cb9d9db5907053ebf3636a97c45529cf776b`
-
-A licença é preservada em `LUCIDE_LICENSE.txt` e distribuída com o bundle público.
-
-A implementação deve também normalizar os controlos cuja iconografia é normalmente desenhada pelo browser:
-
-- `input[type="search"]`: remover a decoração WebKit/Safari e apresentar `Search` Lucide;
-- `select`: aplicar `appearance:none` e sobrepor `ChevronDown` Lucide sem substituir o elemento nativo;
-- botões compactos de criação: desativar o `::before` legado quando o botão já contém `Plus` Lucide;
-- sincronização: usar símbolos cloud/refresh/offline/warning em vez de depender apenas de um ponto colorido;
-- ações recorrentes: mapear editar, apagar, duplicar, pagar, filtrar, importar/exportar e bloquear para símbolos semânticos da mesma família.
-
-### Motivo
-
-Lucide encaixa no design atual por usar desenho linear, geometria 24×24, caps/joins arredondados e boa leitura em tamanhos pequenos. A integração local preserva offline/PWA, não expande a CSP, evita tracking ou falhas de CDN e permite fixar exatamente a versão visual entregue ao utilizador.
-
-Material Symbols e Font Awesome são tecnicamente válidos, mas uma integração por fonte/pacote runtime acrescentaria dependência e maior superfície de distribuição sem benefício funcional para esta PWA estática. Bootstrap Icons também seria válido, mas a linguagem visual Lucide é mais próxima do estilo minimalista já pretendido. Flaticon e Iconfinder são catálogos úteis, mas misturar conjuntos/licenças dificultaria a coerência e a auditoria.
-
-### Riscos e controlo
-
-- o subset local não recebe atualizações automáticas; qualquer atualização deve fixar novo commit de origem e passar por revisão/CI;
-- controlos nativos mantêm a semântica e interação original; a camada Lucide muda apenas a apresentação do símbolo;
-- glifos Unicode que ainda permanecem como fallback estático no HTML/JS só devem ser removidos depois da validação física, para evitar alterações estruturais simultâneas desnecessárias;
-- a validação final exige iPhone/Safari e Android/Chrome reais, sobretudo pesquisa, selects, botões compactos, tema, sincronização e diálogos.
-
-## D-011 — O protótipo aprovado define a hierarquia visual da Lista de compras
-
-Data: 5 de setembro de 2026
-Estado: aceite
-
-### Contexto
-
-A validação física em iPhone mostrou que a revisão Lucide corrigiu a família de ícones, mas a página **Lista de compras** ainda não reproduzia integralmente a hierarquia do protótipo aprovado. O segundo botão `+` junto da pesquisa era visualmente ambíguo, os cartões-resumo não tinham âncoras visuais e a lista de produtos continuava mais técnica do que o protótipo.
-
-### Decisão
-
-Usar o protótipo aprovado como referência de composição para a camada mobile do Mercado, sem alterar o schema nem a lógica financeira:
-
-- título da página recebe um ícone de carrinho alinhado com o nome;
-- o `+` principal permanece a ação de criação rápida no topo;
-- o controlo secundário junto da pesquisa passa a ter linguagem visual de **scanner**, mantendo o fluxo existente de adicionar/pesquisar produto;
-- o estado Sync mantém ícone semântico e recebe indicação direcional discreta;
-- os quatro cartões financeiros recebem ícones vetoriais e cores de apoio consistentes com o significado;
-- cartões de produtos ganham avatar vetorial neutro, porque o schema não guarda fotografia de produto e não devem ser inventadas imagens;
-- preço real fica oculto em itens ainda não comprados e continua disponível quando passa a ser relevante;
-- ações editar/eliminar mantêm a funcionalidade, mas tornam-se compactas e iconográficas em mobile;
-- navegação inferior usa a mesma métrica de ícones e um sublinhado ativo consistente.
-
-### Arquitetura
-
-A alteração permanece na última camada `ui-icons.css`, carregada depois de `market-experience.css`. Isto permite reproduzir o protótipo com overrides contextuais e reversíveis, sem alterar `render.js`, `core.js`, dados persistidos ou eventos de negócio.
-
-### Auditoria de ícones
-
-A revisão global confirmou quatro origens históricas de iconografia: `ICONS`/`icon()`, SVG locais em módulos, glifos Unicode de fallback e decoração nativa do browser. Lucide continua a ser a fonte visual oficial. SVG contextuais antigos recebem por CSS a mesma métrica de traço 2 px enquanto a remoção física dos fallbacks estáticos permanece uma tarefa separada, a executar apenas depois de validação física para não combinar refatoração estrutural com mudança visual.
-
-### Segurança e acessibilidade
-
-Não são adicionadas dependências, fontes, CDNs, endpoints ou dados. Os ícones decorativos não substituem os nomes acessíveis dos controlos. Áreas tácteis permanecem adequadas e `prefers-reduced-motion` continua a retirar movimento não essencial.
-
-## D-011 — Modernizar o cofre sem simular biometria/passkey
-
-Data: 5 de setembro de 2026
-Estado: aceite
-
-### Contexto
-
-Foi fornecida uma referência visual de iPhone com cartão branco, teclado PIN circular, grande hierarquia tipográfica e uma ação de passkey/biometria. O Conta de Casa já possui desbloqueio local por PIN/palavra-passe, mas não possui WebAuthn/passkeys/biometria implementados.
-
-### Decisão
-
-Adotar a linguagem visual da referência no ecrã do cofre — profundidade subtil, cartão arredondado, marca central, badge de segurança, campo de PIN e teclado circular — sem criar uma ação de passkey/biometria que não tenha backend/credencial e fluxo de recuperação reais.
-
-A alteração permanece em `ui-icons.css` como camada final de apresentação e mantém `index.html`, `core.js` e `events.js` funcionalmente compatíveis. O cache do Service Worker avança para `conta-de-casa-public-v56-vault-modern`.
-
-### Motivo
-
-Melhora a perceção de qualidade e legibilidade no iPhone sem reduzir a segurança nem induzir o utilizador a acreditar que existe um método de autenticação ainda não implementado.
-
-### Segurança
-
-Não são alterados PBKDF2, AES-GCM, IndexedDB, duração da chave em memória, PIN/palavra-passe, recuperação, backups ou sincronização. A revisão não adiciona endpoints, bibliotecas, telemetry ou novos dados persistidos.
-
-## D-012 — Fotografia real é referência visual, não prova de identidade comercial
-
-Data: 5 de setembro de 2026
-Estado: aceite
-
-A aplicação pode apresentar uma fotografia real do Open Food Facts quando o emparelhamento textual é forte ou quando existe GTIN. A fotografia não é tratada como imagem oficial do Pingo Doce/Continente e não altera o preço. Se a correspondência não atingir o limiar definido, mantém-se placeholder neutro em vez de mostrar uma imagem possivelmente errada.
-
-## D-013 — Atualizações da aplicação usam o Service Worker same-origin e um canal estável explícito
-
-Data: 5 de setembro de 2026
-Estado: aceite
-
-### Contexto
-
-Foi pedida uma área de **Atualização de Software** com hierarquia semelhante ao iPhone, para que as modificações futuras da aplicação fiquem concentradas num ponto visível. A aplicação é uma PWA estática em GitHub Pages e já possui um Service Worker que verifica novas versões no arranque.
-
-### Decisão
-
-Criar `app-update.js` e `app-update.css` como camada isolada, acessível em **Definições → Atualização de Software**. O módulo não cria um backend de versões nem consulta um endpoint externo: usa `ServiceWorkerRegistration.update()` sobre o registo same-origin já existente.
-
-O canal estável fica apresentado como **Atualizações Automáticas — Ativado**, porque `events.js` já regista/atualiza o Service Worker e o ciclo `skipWaiting → clients.claim → controllerchange → reload` aplica a nova versão. **Atualizações Beta** fica explicitamente **Desativado** enquanto não existir uma pipeline beta real e auditada.
-
-As alterações visíveis de cada release passam a ser registadas em `APP_RELEASE_NOTES`, mostradas em **Mais detalhes**. `scripts/prepare-pages.cjs` compõe o bundle público, inclui os novos assets e carimba a versão publicada; o Service Worker v58 usa o cache `conta-de-casa-public-v58-software-update`.
-
-### Motivo
-
-A solução reutiliza o mecanismo nativo já existente, reduz superfície de ataque e dependências, preserva a arquitetura estática/local-first e evita apresentar um simulacro de loja de aplicações ou de canal beta. Também cria um local claro para explicar ao utilizador o que mudou em cada versão.
-
-### Segurança e privacidade
-
-- nenhum dado do cofre é usado na verificação;
-- nenhum token, password ou chave é transmitido;
-- não há endpoint adicional na CSP;
-- a mensagem `SKIP_WAITING` aceita apenas o comando fixo necessário ao lifecycle do worker;
-- os novos assets continuam sujeitos à allowlist de GitHub Pages e do Service Worker.
-
-### Consequência de manutenção
-
-Cada release pública deve atualizar `APP_RELEASE_NOTES`, o build público e o namespace de cache de forma coerente, com CI verde antes do deploy. A primeira transição real v58 → v59 deve ser validada em iPhone/Safari e PWA instalada antes de se considerar o fluxo completamente validado em hardware.
+A v59 acrescenta duas novas camadas públicas, novas origens CSP explicitamente permitidas, um teste dedicado (`tests/market-image-audit.test.cjs`) e cache `conta-de-casa-public-v59-product-images`. A validação final exige iPhone/Safari com amostras reais, incluindo produtos com e sem correspondência.
