@@ -34,7 +34,7 @@ assert.ok(js.includes("pode já ter mudado"), 'old observations must not be pres
 assert.ok(js.includes("A pesquisa é enviada apenas às fontes necessárias"), 'remote-search privacy disclosure must be visible');
 assert.match(js, /estimatedCents:product\.priceCents/);
 assert.match(js, /sourceUrl=safeRetailerUrl/);
-assert.match(js, /rel="noopener noreferrer"/);
+assert.match(js, /rel=\"noopener noreferrer\"/);
 assert.match(js, /cleanRemoteText/);
 assert.match(js, /esc\(product\.name\)/);
 
