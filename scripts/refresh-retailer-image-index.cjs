@@ -14,14 +14,12 @@ const RETAILERS=Object.freeze({
   continente:Object.freeze({
     id:'continente',
     index:'https://www.continente.pt/sitemap_index.xml',
-    child:url=>/sitemap-custom_sitemap_\d+-image\.xml(?:$|\?)/i.test(url),
-    imageHost:'www.continente.pt'
+    child:url=>/sitemap-custom_sitemap_\d+-image\.xml(?:$|\?)/i.test(url)
   }),
   'pingo-doce':Object.freeze({
     id:'pingo-doce',
     index:'https://www.pingodoce.pt/home/sitemap_index.xml',
-    child:url=>/\/home\/sitemap_\d+-product\.xml(?:$|\?)/i.test(url),
-    imageHost:'static.pingodoce.pt'
+    child:url=>/\/home\/sitemap_\d+-product\.xml(?:$|\?)/i.test(url)
   })
 });
 
@@ -36,6 +34,17 @@ function decodeXml(value=''){
 
 function xmlLocs(xml){
   return [...String(xml).matchAll(/<loc>([^<]+)<\/loc>/gi)].map(match=>decodeXml(match[1].trim()));
+}
+
+function normalizedName(value=''){
+  return decodeXml(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .toLocaleLowerCase('pt-PT')
+    .replace(/[^a-z0-9]+/g,' ')
+    .replace(/\s+/g,' ')
+    .trim()
+    .slice(0,180);
 }
 
 function productIdFromUrl(value){
@@ -81,7 +90,9 @@ function parseProductImages(retailerId,xml){
     if(!pageMatch||!imageMatch)continue;
     const pid=productIdFromUrl(decodeXml(pageMatch[1]));
     const image=officialImageUrl(retailerId,imageMatch[1]);
-    if(pid&&image&&!products.has(pid))products.set(pid,image);
+    const titleMatch=block.match(/<image:title>([^<]+)<\/image:title>/i)||block.match(/<image:caption>([^<]+)<\/image:caption>/i);
+    const title=normalizedName(titleMatch?.[1]||'');
+    if(pid&&image&&!products.has(pid))products.set(pid,{image,title});
   }
   return products;
 }
@@ -127,31 +138,58 @@ async function buildRetailer(retailer){
   const maps=await mapLimit(children,3,async url=>({url,products:parseProductImages(retailer.id,await fetchText(url))}));
   const merged=new Map();
   for(const map of maps){
-    for(const [pid,image] of map.products){if(!merged.has(pid))merged.set(pid,image);}
+    for(const [pid,product] of map.products){if(!merged.has(pid))merged.set(pid,product);}
   }
   if(merged.size<MIN_EXPECTED_PRODUCTS)throw new Error(`${retailer.id}: catálogo oficial incompleto (${merged.size} produtos)`);
   return {retailer,children,products:merged};
 }
 
 function shardPrefix(pid){return String(pid).padStart(2,'0').slice(0,2);}
+function namePrefix(name){return (normalizedName(name).replace(/\s/g,'').slice(0,2)||'__').padEnd(2,'_');}
 
 function writeRetailerShards(result,generatedAt){
   const retailerDir=path.join(OUTPUT_DIR,result.retailer.id);
   fs.mkdirSync(retailerDir,{recursive:true});
   const shards=new Map();
-  for(const [pid,image] of result.products){
+  for(const [pid,product] of result.products){
     const prefix=shardPrefix(pid);
     if(!shards.has(prefix))shards.set(prefix,{});
-    shards.get(prefix)[pid]=image;
+    shards.get(prefix)[pid]=product.image;
   }
-  const names=[...shards.keys()].sort();
-  for(const prefix of names){
+  const shardNames=[...shards.keys()].sort();
+  for(const prefix of shardNames){
     const products=shards.get(prefix);
     const ordered={};
     for(const pid of Object.keys(products).sort((a,b)=>Number(a)-Number(b)))ordered[pid]=products[pid];
     fs.writeFileSync(path.join(retailerDir,`${prefix}.json`),JSON.stringify({v:1,r:result.retailer.id,g:generatedAt,p:ordered}));
   }
-  return names;
+
+  const nameDir=path.join(OUTPUT_DIR,'names',result.retailer.id);
+  fs.mkdirSync(nameDir,{recursive:true});
+  const exact=new Map();
+  for(const [pid,product] of result.products){
+    if(!product.title)continue;
+    const previous=exact.get(product.title);
+    if(!previous)exact.set(product.title,{pid,image:product.image});
+    else if(previous.pid!==pid)exact.set(product.title,null);
+  }
+  const nameShards=new Map();
+  let uniqueNames=0;
+  for(const [name,entry] of exact){
+    if(!entry)continue;
+    const prefix=namePrefix(name);
+    if(!nameShards.has(prefix))nameShards.set(prefix,{});
+    nameShards.get(prefix)[name]=[entry.pid,entry.image];
+    uniqueNames+=1;
+  }
+  const nameShardNames=[...nameShards.keys()].sort();
+  for(const prefix of nameShardNames){
+    const names=nameShards.get(prefix);
+    const ordered={};
+    for(const name of Object.keys(names).sort())ordered[name]=names[name];
+    fs.writeFileSync(path.join(nameDir,`${prefix}.json`),JSON.stringify({v:1,r:result.retailer.id,g:generatedAt,n:ordered}));
+  }
+  return {shards:shardNames,nameShards:nameShardNames,uniqueNames};
 }
 
 async function main(){
@@ -168,11 +206,17 @@ async function main(){
   fs.mkdirSync(OUTPUT_DIR,{recursive:true});
   const meta={version:1,generatedAt,retailers:{}};
   for(const result of results){
-    const shards=writeRetailerShards(result,generatedAt);
-    meta.retailers[result.retailer.id]={count:result.products.size,shards,sitemaps:result.children.length};
+    const written=writeRetailerShards(result,generatedAt);
+    meta.retailers[result.retailer.id]={
+      count:result.products.size,
+      shards:written.shards,
+      nameShards:written.nameShards,
+      uniqueNames:written.uniqueNames,
+      sitemaps:result.children.length
+    };
   }
   fs.writeFileSync(path.join(OUTPUT_DIR,'index.json'),JSON.stringify(meta));
-  console.log(`Official image index: Continente ${continente.size} produtos; Pingo Doce ${pingo.size} produtos; ${Object.values(meta.retailers).reduce((n,r)=>n+r.shards.length,0)} shards.`);
+  console.log(`Official image index: Continente ${continente.size} produtos; Pingo Doce ${pingo.size} produtos; nomes únicos ${Object.values(meta.retailers).reduce((n,r)=>n+r.uniqueNames,0)}.`);
 }
 
 main().catch(error=>{
