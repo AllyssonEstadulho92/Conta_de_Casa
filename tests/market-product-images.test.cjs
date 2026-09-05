@@ -38,6 +38,6 @@ assert.match(css,/object-fit:contain/);
 assert.match(css,/market-mobile-head::before\{content:none!important/);
 
 assert.match(index,/img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org;/);
-assert.match(sw,/conta-de-casa-public-v57-real-images/);
+assert.match(sw,/conta-de-casa-public-v58-software-update/);
 
 console.log('Market real product image tests: OK');
