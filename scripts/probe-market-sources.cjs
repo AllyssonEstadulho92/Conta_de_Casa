@@ -1,11 +1,13 @@
 'use strict';
 
 const ORIGIN = 'https://allyssonestadulho92.github.io';
+const TIMEOUT_MS = 12000;
 
 async function probe(name, url, init = {}) {
   try {
     const response = await fetch(url, {
       redirect: 'follow',
+      signal: AbortSignal.timeout(TIMEOUT_MS),
       ...init,
       headers: {
         Origin: ORIGIN,
@@ -24,7 +26,7 @@ async function probe(name, url, init = {}) {
     console.log('body:', text.slice(0, 1200).replace(/\s+/g, ' '));
   } catch (error) {
     console.log(`\n=== ${name} ===`);
-    console.log('ERROR:', error?.stack || error);
+    console.log('ERROR:', error?.name, error?.message);
   }
 }
 
