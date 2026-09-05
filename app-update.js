@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Conta de Casa — Centro de Atualização de Software (v58)
+ * Conta de Casa — Centro de Atualização de Software (v59)
  *
  * Esta camada não altera dados financeiros nem o cofre. O estado de atualização
  * é obtido exclusivamente do Service Worker same-origin distribuído por GitHub Pages.
@@ -11,6 +11,18 @@
  */
 (function installSoftwareUpdateCenter(root){
   const APP_RELEASE_NOTES=Object.freeze([
+    Object.freeze({
+      version:'v59',
+      date:'5 de setembro de 2026',
+      title:'Imagens de produto e ampliação',
+      items:Object.freeze([
+        'As miniaturas de produto passam a abrir uma visualização ampliada ao toque ou clique.',
+        'Produtos sem fotografia entram numa auditoria automática por nome, embalagem e, quando existe, código de barras.',
+        'A pesquisa de imagem passa a abranger Open Food Facts, Open Beauty Facts, Open Products Facts e Open Pet Food Facts, mantendo correspondência mínima antes de mostrar uma fotografia.',
+        'Imagens resolvidas para itens guardados passam a ser persistidas como URL e origem, sem guardar ficheiros binários no cofre.',
+        'Quando não existe correspondência suficientemente segura, a aplicação mantém o placeholder em vez de apresentar uma fotografia errada.'
+      ])
+    }),
     Object.freeze({
       version:'v58',
       date:'5 de setembro de 2026',
@@ -194,7 +206,7 @@
       try{
         let registration=await navigator.serviceWorker.getRegistration();
         if(!registration){
-          registration=await navigator.serviceWorker.register('./sw.js?v=58',{updateViaCache:'none'});
+          registration=await navigator.serviceWorker.register('./sw.js?v=59',{updateViaCache:'none'});
         }
         let updateFound=false;
         const onUpdateFound=()=>{updateFound=true;updateStatus='updating';renderDialog();};
