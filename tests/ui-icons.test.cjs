@@ -32,6 +32,9 @@ assert.match(css,/input\[type="search"\]::\-webkit-search-decoration/,'Safari na
 assert.match(css,/\.ui-select-control>select[\s\S]*appearance:none!important/,'platform-specific select arrows must be suppressed');
 assert.match(css,/bill-new-btn\[data-ui-iconized="true"\]::before[\s\S]*content:none!important/,'legacy CSS plus must not duplicate the Lucide add icon');
 assert.match(css,/\.sync-header-status \.sync-dot[\s\S]*width:18px!important/,'sync dot slot must become a proper icon slot');
+assert.match(css,/\.btn\.primary\.topbar-create,[\s\S]*\.btn\.primary\.bill-new-btn\[data-ui-iconized="true"\],[\s\S]*\.btn\.primary\.market-new-btn\[data-ui-iconized="true"\][\s\S]*width:46px!important;[\s\S]*height:46px!important;[\s\S]*border-radius:14px!important;[\s\S]*linear-gradient/,'mobile add controls must share one compact rounded-square surface');
+assert.match(css,/\.btn\.primary\.topbar-create>span:first-child[\s\S]*width:100%!important;[\s\S]*background:transparent!important/,'topbar add icon must use the same outer surface instead of a nested competing tile');
+assert.match(css,/\.btn\.primary\.topbar-create \.ui-icon-svg,[\s\S]*\.bill-new-btn\[data-ui-iconized="true"\] \.ui-icon-svg,[\s\S]*width:20px!important;[\s\S]*color:#fff!important/,'the visible Plus must remain centered and visually restrained');
 assert.match(css,/vector-effect:non-scaling-stroke/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/ui-icon-spin/);
@@ -43,6 +46,6 @@ assert.match(license,/The MIT License \(MIT\)/);
 assert.match(license,/Cole Bemis/);
 assert.match(pages,/LUCIDE_LICENSE\.txt/,'Pages distribution must include the Lucide notice');
 assert.match(sw,/LUCIDE_LICENSE\.txt/,'offline/public asset allowlist must include the Lucide notice');
-assert.match(sw,/conta-de-casa-public-v54-lucide/,'service worker cache must refresh after icon replacement');
+assert.match(sw,/conta-de-casa-public-v55-add-control/,'service worker cache must refresh after the add-control refinement');
 
-console.log('Lucide UI icon tests: OK');
+console.log('Lucide UI icon and refined add-control tests: OK');
