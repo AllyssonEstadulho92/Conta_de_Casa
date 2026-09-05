@@ -118,15 +118,15 @@ for (const asset of ['core','finance','render','forms','sync','events']) {
 }
 assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
-// The service worker URL remains stable at v50; updateViaCache:none still forces content checks,
-// while the service worker's internal cache namespace is versioned to v53 below.
+// The public app build remains v53; the icon revision deliberately advances only
+// the service worker cache namespace so Safari/iOS cannot reuse the old visual layer.
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v53/);
+assert.match(swSource, /conta-de-casa-public-v54-lucide/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /'\.\/market-experience\.css'/);
 assert.match(swSource, /'\.\/market-experience\.js'/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 
-console.log('Responsive mobile-fit shell, PIN entry, unified action controls and GitHub Pages freshness v53 tests: OK');
+console.log('Responsive mobile-fit shell, PIN entry, unified action controls and GitHub Pages freshness tests: OK');
