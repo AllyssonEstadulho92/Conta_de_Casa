@@ -1,5 +1,5 @@
 name: Finalize Market v52
-# Finalization trigger 4
+# Finalization trigger 5
 
 on:
   push:
@@ -29,6 +29,7 @@ jobs:
         run: |
           python3 scripts/finalize-market-v52.py
           sed -i 's/v=51/v=52/g' index.html
+          sed -i 's/v=51/v=52/g; s/v=50/v=52/g; s/v51/v52/g' tests/responsive.test.cjs tests/mobile-layout-regression.test.cjs
           python3 - <<'PY'
           from pathlib import Path
           p = Path('tests/security.test.cjs')
