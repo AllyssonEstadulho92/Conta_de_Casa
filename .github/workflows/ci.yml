@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: "24"
 
+      - name: Build official retailer image index
+        run: node scripts/refresh-retailer-image-index.cjs
+
       - name: Probe live market sources
         run: node scripts/probe-market-sources.cjs
 
@@ -38,7 +41,9 @@ jobs:
           node --check invoice-capture.js
           node --check app-update.js
           node --check market-image-audit.js
+          node --check market-official-images.js
           node --check sw.js
+          node --check scripts/refresh-retailer-image-index.cjs
           node --check scripts/prepare-pages.cjs
 
       - name: Finance tests
@@ -73,6 +78,9 @@ jobs:
 
       - name: Market image audit and zoom tests
         run: node tests/market-image-audit.test.cjs
+
+      - name: Official retailer image tests
+        run: node tests/market-official-images.test.cjs
 
       - name: Market barcode scanner tests
         run: node tests/market-barcode.test.cjs
