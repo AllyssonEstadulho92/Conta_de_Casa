@@ -1,0 +1,77 @@
+name: Apply vault modern v56
+
+on:
+  push:
+    branches: [ui/vault-modern-v56]
+    paths:
+      - scripts/apply-vault-modern.py
+      - .github/workflows/apply-vault-modern.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: ui/vault-modern-v56
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Apply modern vault revision
+        run: python3 scripts/apply-vault-modern.py
+
+      - name: Validate syntax and regression suite
+        run: |
+          node --check core.js
+          node --check finance.js
+          node --check render.js
+          node --check forms.js
+          node --check events.js
+          node --check sync.js
+          node --check market-experience.js
+          node --check market-barcode.js
+          node --check ui-icons.js
+          node --check invoice-capture.js
+          node --check sw.js
+          node --check scripts/prepare-pages.cjs
+          node tests/finance.test.cjs
+          node tests/audit.test.cjs
+          node tests/counting-invariants.test.cjs
+          node tests/isolation.test.cjs
+          node tests/date-timezone.test.cjs
+          node tests/form-regression.test.cjs
+          node tests/invoice-capture.test.cjs
+          node tests/market-categories.test.cjs
+          node tests/market-experience.test.cjs
+          node tests/market-barcode.test.cjs
+          node tests/market-live-accounting.test.cjs
+          node tests/ui-icons.test.cjs
+          node tests/security.test.cjs
+          node tests/responsive.test.cjs
+          node tests/mobile-layout-regression.test.cjs
+          node tests/navigation.test.cjs
+          node tests/accessibility.test.cjs
+          node tests/sync.test.cjs
+          node tests/sync-runtime.test.cjs
+          node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('Manifest OK')"
+          node scripts/prepare-pages.cjs
+
+      - name: Remove temporary application helpers
+        run: rm -f scripts/apply-vault-modern.py .github/workflows/apply-vault-modern.yml
+
+      - name: Commit validated revision
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "feat: modernizar ecrã de acesso ao cofre"
+          git push origin HEAD:ui/vault-modern-v56
