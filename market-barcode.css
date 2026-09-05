@@ -1,4 +1,5 @@
 /* Conta de Casa — leitor de código de barras do Mercado. */
+#formDialog[data-mode="market-browser"] .dialog-shell{position:relative}
 #formDialog[data-mode="market-browser"] .market-browser-search.has-barcode-action{
   grid-template-columns:30px minmax(0,1fr) 44px 44px;
 }
