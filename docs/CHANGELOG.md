@@ -1,5 +1,30 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-05 — Leitura de código de barras no Mercado
+
+### Alterações
+
+- adicionado botão de câmara ao campo **Pesquisar produto real** no fluxo **Adicionar produto**;
+- criado `market-barcode.js` para leitura de EAN/UPC/GTIN, validação de checksum e ciclo de vida da câmara;
+- criado `market-barcode.css` para overlay responsivo, moldura de leitura, estados, lanterna opcional, safe areas e redução de movimento;
+- leitor baseado em `@zxing/browser@0.2.0`, carregado apenas quando o utilizador abre a câmara;
+- identificação do código através de `world.openfoodfacts.org`, limitada a nome, marca e quantidade;
+- produto identificado é transferido para o campo de pesquisa já existente, que continua a obter preços reais através de `cesta.pt` para Pingo Doce e Continente;
+- o scanner não adiciona automaticamente o item e não altera `estimatedCents`, `actualCents`, quantidade ou schema diretamente;
+- códigos GTIN-8, GTIN-12/UPC, GTIN-13/EAN e GTIN-14 só avançam quando o checksum é válido;
+- câmara traseira é preferida; áudio desativado; tracks são terminadas ao concluir, cancelar, fechar, ocultar ou abandonar a página;
+- CSP ampliada apenas para `unpkg.com` (script do leitor) e `world.openfoodfacts.org` (identificação), mantendo a allowlist existente de `cesta.pt` e GitHub;
+- novos assets adicionados ao Service Worker e à allowlist de GitHub Pages;
+- CI e verificação pré-deploy passam a executar `node --check market-barcode.js` e `tests/market-barcode.test.cjs`.
+
+### Privacidade e veracidade
+
+O vídeo da câmara é processado localmente e não é guardado nem enviado. Apenas o número do código de barras é enviado ao Open Food Facts para identificação. O preço continua separado da identificação e vem da pesquisa do Mercado; um código lido não é tratado como prova de preço.
+
+### Compatibilidade preservada
+
+Sem alteração do schema financeiro, IndexedDB, PBKDF2, AES-GCM, PIN/palavra-passe, backups, sincronização, edição dos itens existentes ou cálculo de quantidade × preço unitário.
+
 ## 2026-09-05 — Mercado v53: quantidade automática e dois mercados
 
 - Mercadona removida da UI, runtime, CSP e pipeline de validação por ausência de uma fonte oficial portuguesa de catálogo/preços adequada;
@@ -10,7 +35,6 @@
 - preços estimado e real são tratados como valores por unidade;
 - resumos, orçamento e relatórios contabilizam quantidade × preço unitário;
 - build/cache atualizados para v53.
-
 
 ## 2026-09-05 — Mercado v52 com preços reais e contabilização da lista
 
@@ -31,7 +55,6 @@
 ### Segurança e privacidade
 
 Sem credenciais de supermercado, API keys ou tokens de terceiros. O conteúdo remoto é tratado como não confiável e escapado antes de apresentação. A pesquisa envia apenas o termo pesquisado às fontes selecionadas; o cofre financeiro permanece local/cifrado.
-
 
 ## 2026-09-05 — Mercado v51 alinhado com o protótipo aprovado
 
