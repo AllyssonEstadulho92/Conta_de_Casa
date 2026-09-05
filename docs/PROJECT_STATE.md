@@ -3,15 +3,42 @@
 Atualizado: 5 de setembro de 2026
 Build funcional: v53
 Distribuição: GitHub Pages
-Estado da revisão: v53 com pesquisa real de Mercado e leitura de código de barras pela câmara; alterações protegidas por CI e pipeline de Pages
+Estado da revisão: auditoria global de ícones e captura QR de faturas implementadas sobre a v53; suite automatizada da branch concluída com sucesso
 
 ## Estado atual
 
 A aplicação mantém a arquitetura local-first: cofre cifrado no navegador, dados financeiros no IndexedDB e sincronização GitHub opcional. O schema financeiro permanece na versão 5.
 
-A área **Lista de compras / Mercado** pesquisa preços verificáveis em tempo de utilização e mantém apenas dois retalhistas ativos: **Pingo Doce** e **Continente**. A Mercadona permanece fora da interface, runtime e pesquisa de preços porque não existe uma fonte oficial portuguesa de catálogo/preços suficientemente completa e fiável para este fluxo.
+A área **Lista de compras / Mercado** continua com pesquisa verificável em Pingo Doce e Continente e leitura de EAN/UPC/GTIN pela câmara. A nova revisão não altera este fluxo financeiro; normaliza apenas a sua apresentação de ícones e reaproveita a infraestrutura de leitura QR para faturas.
 
-O diálogo **Adicionar produto** passou também a disponibilizar leitura de **EAN / UPC / GTIN pela câmara**. A leitura serve para identificar o artigo; o preço não é retirado do código de barras. Depois da identificação, a aplicação reutiliza a pesquisa real já existente para consultar Pingo Doce e Continente.
+## Auditoria global de ícones
+
+Foi identificada uma mistura histórica de três fontes visuais: o registo SVG `ICONS` de `core.js`, SVGs definidos localmente em módulos e glifos Unicode no HTML. A evidência visível mais clara era a lupa de **Pesquisar produto real**, parcialmente cortada em Safari/iPhone.
+
+A revisão cria `ui-icons.js` e `ui-icons.css` como camada de compatibilidade sem mudar a estrutura da aplicação:
+
+- ícones funcionais passam a usar uma linguagem SVG local única;
+- dimensões de interface ficam explicitamente fixadas, sobrepondo a regra legada `svg { height:auto }` onde esta não é adequada;
+- marca, navegação, privacidade, bloqueio, tema, notificações, atalhos, ações, Mercado e scanners são normalizados;
+- não é carregada qualquer icon font/CDN adicional;
+- gráficos, estatísticas e barras de progresso permanecem inalterados;
+- sincronização ativa, alertas e scanners podem usar animação discreta;
+- `prefers-reduced-motion` desativa animações não essenciais.
+
+A auditoria detalhada está registada em `docs/UI_ICON_AUDIT.md`.
+
+## Captura de faturas por Código QR
+
+O formulário **Nova fatura** passa a receber, de forma progressiva, o bloco **Ler dados da fatura**. O utilizador pode:
+
+1. abrir a câmara e apontar para o QR fiscal da fatura; ou
+2. selecionar uma imagem da fatura no dispositivo.
+
+A leitura usa `BrowserQRCodeReader` do `@zxing/browser@0.2.0`, já autorizado pela CSP. O parser interpreta o formato técnico do Código QR de faturação da Autoridade Tributária e recolhe apenas campos estruturados compatíveis: NIF do emitente/adquirente, tipo e estado do documento, data, identificação única, ATCUD, total de impostos, total do documento, hash e certificado quando disponíveis.
+
+A leitura não grava imediatamente os dados. É apresentada uma pré-visualização e o utilizador tem de escolher **Preencher campos**. Só depois são preenchidos campos vazios compatíveis no formulário: total, identificação/referência e NIF do emitente. O nome comercial do fornecedor, categoria, vencimento e método continuam a exigir confirmação humana.
+
+A imagem selecionada é temporária: não é persistida, não entra em `attachments`, não é sincronizada e não é enviada para um serviço externo. O `ObjectURL` é revogado após a leitura. PDFs/OCR geral não foram ativados nesta revisão para não introduzir extração probabilística de valores financeiros sem uma política de validação própria.
 
 ## Pesquisa e preços do Mercado v53
 
@@ -19,93 +46,67 @@ A pesquisa de preços continua a ser realizada através do endpoint MCP público
 
 A aplicação não recebe nem guarda credenciais das lojas. O termo pesquisado é enviado a `cesta.pt` apenas durante a pesquisa do Mercado. Não existem preços fictícios de fallback.
 
-## Leitura de código de barras
+## Leitura de código de barras de produtos
 
-Fluxo implementado:
+O fluxo existente permanece:
 
 1. o utilizador abre **Adicionar produto** e toca no botão de câmara junto à pesquisa;
 2. a aplicação pede autorização da câmara e dá preferência à câmara traseira;
-3. o vídeo é processado localmente pelo leitor ZXing Browser `0.2.0` carregado apenas quando necessário;
-4. apenas sequências GTIN de 8, 12, 13 ou 14 dígitos com checksum válido avançam;
-5. o GTIN é consultado no Open Food Facts apenas para obter identificação básica do produto (nome, marca e quantidade quando disponíveis);
-6. nome/marca são colocados no campo de pesquisa existente e disparam o fluxo normal de `cesta.pt`;
-7. o utilizador continua a escolher explicitamente o resultado/preço e só depois o item é adicionado à lista.
+3. o vídeo é processado localmente pelo ZXing Browser;
+4. apenas GTIN-8, GTIN-12/UPC, GTIN-13/EAN ou GTIN-14 com checksum válido avançam;
+5. o GTIN é consultado no Open Food Facts apenas para identificação básica;
+6. nome/marca são passados à pesquisa `cesta.pt`;
+7. o utilizador escolhe explicitamente o produto/preço antes da criação do item.
 
-O scanner não escreve diretamente em `appState.market`, não altera o schema e não transforma o valor consultado em preço efetivamente pago. Se o código for válido mas não existir na base de identificação, a aplicação mantém o fluxo manual disponível.
-
-A interface do scanner inclui moldura de leitura, estado da câmara, cancelamento, lanterna quando a implementação da câmara a disponibiliza, safe areas e respeito por `prefers-reduced-motion`.
-
-## Interface
-
-- permanecem apenas Pingo Doce e Continente no seletor de mercados;
-- cada mercado tem identificação visual própria na interface;
-- não são apresentadas imagens de produto;
-- cada resultado mantém título, subtítulo, preço, estado da consulta e botão de adicionar;
-- pesquisa inicia vazia e consulta produtos reais depois de pelo menos 2 caracteres;
-- o botão de câmara foi integrado na própria caixa de pesquisa de **Adicionar produto** sem remover a pesquisa manual;
-- safe areas, scroll e breakpoints mobile/tablet/desktop foram preservados;
-- a versão pequena da identificação dos mercados respeita o mínimo tipográfico de 12 px.
+O scanner não escreve diretamente em `appState.market` e não transforma identificação em prova de preço.
 
 ## Quantidade e contabilização automática
 
-`estimatedCents` e `actualCents` continuam a ser guardados como inteiros em cêntimos, mas representam **preço por unidade**. O subtotal financeiro do item é calculado por `quantidade × preço unitário`.
+`estimatedCents` e `actualCents` continuam inteiros em cêntimos e representam preço por unidade. O subtotal financeiro continua calculado por `quantidade × preço unitário`.
 
-O editor de um item do Mercado inclui controlos **− / +**, mantém edição manual da quantidade e apresenta a pré-visualização **Subtotal automático**. A quantidade aceita valores positivos com até três casas decimais, preservando compatibilidade com o campo `quantity` existente.
-
-Consequências verificadas por teste:
-
-- 4 unidades a 1,15 € resultam em subtotal de 4,60 €;
-- 1,5 unidades a 2,50 € resultam em subtotal de 3,75 €;
-- **Estimado total** soma os subtotais dos itens;
-- **Por comprar** soma quantidade × preço estimado dos itens pendentes;
-- **Gasto contabilizado** usa quantidade × preço real quando este existe;
-- se um item comprado ainda não tiver preço real, usa quantidade × preço estimado sem substituir o campo de preço efetivamente pago;
-- orçamento, categorias e relatórios usam o subtotal calculado.
-
-Não foram alterados o schema persistido, PBKDF2, AES-GCM, PIN/palavra-passe, IndexedDB, backups ou sincronização GitHub.
+Não foram alterados o schema persistido, PBKDF2, AES-GCM, PIN/palavra-passe, IndexedDB, backups, sincronização GitHub, cálculos financeiros ou regras de quantidade.
 
 ## Segurança e privacidade
 
-A política de conteúdo mantém uma allowlist explícita. Para o novo fluxo foram acrescentados apenas:
+A CSP continua com allowlist explícita. Não foi criada nova origem de dados para a captura de faturas. O ZXing continua carregado da versão fixa já autorizada em `unpkg.com`; a imagem da fatura e o payload QR ficam no cliente.
 
-- `https://unpkg.com` em `script-src`, para a versão fixa do ZXing Browser carregada sob pedido;
-- `https://world.openfoodfacts.org` em `connect-src`, para identificação pelo GTIN;
-- `media-src 'self' blob:` para o contexto de vídeo local.
+`invoice-capture.js` não usa `fetch`, `XMLHttpRequest`, `localStorage`, `sessionStorage`, IndexedDB, `appState`, `saveState()` ou `commit()`. A gravação continua exclusivamente através do formulário de fatura existente depois da confirmação do utilizador.
 
-`https://cesta.pt` continua autorizado para pesquisa de preços, além da API GitHub já existente.
+O sistema de ícones também não adiciona origem remota: todos os vetores são locais e usam `currentColor`.
 
-A câmara é usada localmente: o vídeo e os fotogramas não são enviados nem guardados. Apenas o número do código de barras é enviado ao Open Food Facts para identificação. Depois, o termo de pesquisa derivado do nome/marca é enviado a `cesta.pt` para obter os preços. PIN, palavra-passe, conteúdo do cofre, faturas e restantes dados financeiros não entram neste fluxo.
+## Validação técnica concluída na revisão
 
-Conteúdo remoto continua tratado como não confiável: o texto obtido para nome/marca/quantidade é normalizado e limitado antes de ser reutilizado. Pedidos externos usam `credentials: 'omit'`, timeout/abort e não são persistidos pelo scanner.
+A CI da branch executou e concluiu com sucesso:
 
-## Validação técnica
+- verificação de sintaxe dos módulos existentes e de `ui-icons.js` / `invoice-capture.js`;
+- testes financeiros e auditoria financeira;
+- invariantes de contagem e isolamento;
+- datas e regressão do formulário de faturas;
+- parser e privacidade do QR de faturas;
+- categorias, pesquisa, scanner e contabilização do Mercado;
+- auditoria do sistema unificado de ícones;
+- segurança;
+- responsividade e viewport mobile;
+- navegação e acessibilidade;
+- sincronização e manifest.
 
-A suite existente continua a cobrir finanças, auditoria, isolamento, formulários, Mercado, segurança, responsividade, navegação, acessibilidade e sincronização. Foi acrescentado `tests/market-barcode.test.cjs`, executado em CI e novamente antes da publicação de Pages, para verificar:
-
-- wiring dos novos assets;
-- CSP/allowlists;
-- utilização preferencial da câmara traseira;
-- versão fixa da dependência ZXing;
-- origem de identificação Open Food Facts;
-- validação de checksum GTIN;
-- encerramento das tracks da câmara;
-- ausência de persistência direta pelo scanner;
-- passagem do produto identificado ao fluxo de pesquisa existente;
-- safe areas, alvo tátil e redução de movimento.
+Os novos assets também foram adicionados à allowlist de GitHub Pages e ao Service Worker.
 
 ## Limitações conhecidas
 
-Uma fonte externa pode ficar indisponível ou alterar o seu contrato. Nessa situação, a aplicação deve mostrar a falha de consulta e não inventar produtos ou preços.
+A correção da lupa e a consistência dos ícones estão cobertas por regras e testes automatizados, mas o rendering final deve ser confirmado num iPhone/Safari físico, sobretudo nas larguras 320, 375, 390 e 430 px.
 
-A identificação por código de barras depende da cobertura comunitária do Open Food Facts; um GTIN válido pode não ter nome/marca registados. O preço continua a depender da correspondência que `cesta.pt` encontrar nos catálogos públicos de Pingo Doce e Continente e deve ser confirmado no retalhista.
+A leitura QR de faturas depende da legibilidade do código, permissão de câmara e qualidade da fotografia. Não é OCR geral: uma fatura sem QR legível continua a exigir introdução manual dos dados.
 
-A leitura da câmara exige HTTPS, permissão do utilizador e suporte de `getUserMedia`. A validação automatizada não substitui teste físico da focagem, exposição, lanterna e permissões em iPhone/Safari e Android/Chrome.
+O QR fiscal não contém informação suficiente para preencher com segurança todos os campos operacionais da aplicação, em particular o vencimento. Estes campos não são inventados.
+
+As limitações anteriores das fontes externas de Mercado e da identificação GTIN permanecem.
 
 ## Próximo passo
 
-1. Validar o scanner num iPhone/Safari físico com EAN-13 e EAN-8, incluindo permitir/recusar câmara, cancelar, reabrir e usar rotação.
-2. Validar num Android/Chrome e confirmar a seleção da câmara traseira e, quando suportada, lanterna.
-3. Confirmar códigos reais de produtos portugueses que existam e que não existam no Open Food Facts.
-4. Confirmar que, após identificação, os resultados e preços do Pingo Doce/Continente correspondem ao artigo pretendido e não a uma variante diferente.
-5. Continuar a validar controlos −/+, subtotal, teclado, safe areas, rede lenta e offline.
-6. Monitorizar alterações de contrato/CORS de `cesta.pt`, Open Food Facts e da dependência ZXing.
+1. Validar no iPhone/Safari físico a lupa do Mercado e os restantes ícones principais em claro/escuro.
+2. Ler uma fatura portuguesa real com QR pela câmara e confirmar total, documento, ATCUD e NIF antes de preencher.
+3. Testar a mesma fatura através de uma fotografia da galeria e confirmar que o ficheiro não fica persistido.
+4. Repetir em Android/Chrome, incluindo permissão, autofocus, rotação e lanterna quando suportada.
+5. Confirmar leitores de ecrã e `prefers-reduced-motion` nos novos controlos.
+6. Só depois avaliar OCR/PDF, caso seja necessário, com validação explícita dos valores extraídos.
