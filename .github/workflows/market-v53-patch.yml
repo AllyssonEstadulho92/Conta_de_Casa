@@ -48,10 +48,12 @@ jobs:
       - name: Apply v53 patch
         run: python3 scripts/patch-market-v53.py
 
-      - name: Align v53 cache assertions
+      - name: Align v53 public asset versions and assertions
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          index=Path('index.html')
+          index.write_text(index.read_text(encoding='utf-8').replace('v=52','v=53'),encoding='utf-8')
           for name in ['tests/market-experience.test.cjs','tests/responsive.test.cjs','tests/mobile-layout-regression.test.cjs']:
               p=Path(name)
               text=p.read_text(encoding='utf-8').replace('v=52','v=53').replace('public-v52','public-v53')
