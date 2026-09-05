@@ -1,0 +1,75 @@
+name: Apply Market v53
+
+on:
+  push:
+    branches:
+      - feature/market-quantity-v53
+    paths:
+      - .github/workflows/market-v53-patch.yml
+      - scripts/patch-market-v53.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/market-quantity-v53
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Apply v53 patch
+        run: python3 scripts/patch-market-v53.py
+
+      - name: Syntax checks
+        run: |
+          node --check core.js
+          node --check finance.js
+          node --check render.js
+          node --check forms.js
+          node --check events.js
+          node --check market-experience.js
+          node --check sw.js
+
+      - name: Focused market tests
+        run: |
+          node tests/market-experience.test.cjs
+          node tests/market-live-accounting.test.cjs
+          node tests/security.test.cjs
+          node tests/responsive.test.cjs
+          node tests/mobile-layout-regression.test.cjs
+
+      - name: Full regression suite
+        run: |
+          node tests/finance.test.cjs
+          node tests/audit.test.cjs
+          node tests/counting-invariants.test.cjs
+          node tests/isolation.test.cjs
+          node tests/date-timezone.test.cjs
+          node tests/form-regression.test.cjs
+          node tests/market-categories.test.cjs
+          node tests/navigation.test.cjs
+          node tests/accessibility.test.cjs
+          node tests/sync.test.cjs
+          node tests/sync-runtime.test.cjs
+          node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('Manifest OK')"
+
+      - name: Commit validated changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add core.js finance.js render.js forms.js events.js market-experience.js market-experience.css index.html sw.js tests docs
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Mercado v53 — quantidade automática e Pingo Doce/Continente"
+            git push origin HEAD:feature/market-quantity-v53
+          fi
