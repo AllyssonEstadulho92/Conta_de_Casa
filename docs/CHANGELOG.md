@@ -244,3 +244,13 @@ O contentor permanente da aplicação estava limitado por uma variável CSS (`--
 ### Segurança e dados
 
 Sem alteração de schema, cálculos financeiros, IndexedDB, PBKDF2, AES-GCM, PIN/palavra-passe, backups ou sincronização.
+
+## 2026-09-05 — Mercado v57 com fotografias reais
+
+- substituído o avatar vetorial dos cartões por fotografia real quando existe correspondência verificada;
+- pesquisa de preços continua em cesta.pt e a imagem de referência é resolvida separadamente no Open Food Facts;
+- resultados do comparador também passam a mostrar fotografia real quando disponível;
+- GTIN passa a pedir a fotografia frontal exata no mesmo lookup do produto;
+- metadados de imagem são opcionais e normalizados sem alterar a versão do schema financeiro;
+- CSP permite imagens apenas de images.openfoodfacts.org;
+- cache PWA atualizado para conta-de-casa-public-v57-real-images.

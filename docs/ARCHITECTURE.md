@@ -222,3 +222,7 @@ O Service Worker usa cache `conta-de-casa-public-v55-prototype` para invalidar a
 - qualquer atualização de Lucide deve fixar novo commit de origem, rever licença e executar a suite completa;
 - não adicionar fotografias de produtos ao schema sem decisão própria de origem, armazenamento, privacidade, cache e sincronização;
 - alterações a scanners e controlos nativos devem continuar a ser validadas em iPhone/Safari e Android/Chrome físicos.
+
+## Mercado — camada de fotografia real (v57)
+
+A pesquisa continua a usar cesta.pt para preço e ligação oficial. Em paralelo, uma única consulta textual ao Open Food Facts procura candidatos de fotografia. O emparelhamento usa nome, embalagem e quantidade e só aceita resultados acima do limiar de confiança. A imagem é carregada diretamente de images.openfoodfacts.org, domínio explicitamente limitado pela CSP. O scanner por GTIN pede também a fotografia frontal exata quando disponível.

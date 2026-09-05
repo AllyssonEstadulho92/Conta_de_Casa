@@ -64,6 +64,6 @@ assert.match(license,/The MIT License \(MIT\)/);
 assert.match(license,/Cole Bemis/);
 assert.match(pages,/LUCIDE_LICENSE\.txt/,'Pages distribution must include the Lucide notice');
 assert.match(sw,/LUCIDE_LICENSE\.txt/,'offline/public asset allowlist must include the Lucide notice');
-assert.match(sw,/conta-de-casa-public-v56-vault-modern/,'service worker cache must refresh after the approved prototype hierarchy');
+assert.match(sw,/conta-de-casa-public-v57-real-images/,'service worker cache must refresh after the approved prototype hierarchy');
 
 console.log('Lucide UI icon and approved prototype hierarchy tests: OK');

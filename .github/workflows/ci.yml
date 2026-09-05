@@ -66,6 +66,9 @@ jobs:
       - name: Market live-source tests
         run: node tests/market-experience.test.cjs
 
+      - name: Market real product image tests
+        run: node tests/market-product-images.test.cjs
+
       - name: Market barcode scanner tests
         run: node tests/market-barcode.test.cjs
 

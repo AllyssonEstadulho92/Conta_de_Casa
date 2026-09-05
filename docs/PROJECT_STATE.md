@@ -105,3 +105,9 @@ Os glifos Unicode que ainda existem como fallback estático no código não são
 4. validar no iPhone/Safari o cofre em 320, 375, 390 e 430 px, confirmando safe areas, ausência de corte, teclado circular, botão Entrar e acesso por palavra-passe;
 5. validar tema claro/escuro e `prefers-reduced-motion`;
 6. só avaliar passkey/biometria numa decisão separada, com suporte real WebAuthn/biométrico e modelo de recuperação definido.
+
+## 2026-09-05 — Mercado v57: fotografias reais de referência
+
+A Lista de compras passa a apresentar fotografia real quando existe correspondência suficientemente forte no Open Food Facts. A imagem deixa de ser simulada por um avatar vetorial. O nome, preço e ligação oficial do retalhista continuam separados da fotografia: preço e página oficial permanecem provenientes do fluxo cesta.pt; a fotografia é apenas referência visual e a origem fica registada no item.
+
+Apenas URLs HTTPS de images.openfoodfacts.org são aceites. Itens sem correspondência forte mantêm um placeholder neutro; a aplicação não inventa nem força uma fotografia aproximada. Os metadados opcionais productCode, imageUrl, imageSource e imageMatchedAt são normalizados dentro do schema existente, sem migração do IndexedDB.

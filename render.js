@@ -317,13 +317,18 @@ function marketActualInputHtml(item) {
   const value=item.actualCents>0?(item.actualCents/100).toFixed(2).replace('.',','):'';
   return `<label class="market-real-field"><span class="sr-only">Preço real de ${esc(item.name)}</span><input data-market-actual="${attr(item.id)}" inputmode="decimal" value="${attr(value)}" placeholder="0,00" autocomplete="off" aria-label="Preço real de ${attr(item.name)}"></label>`;
 }
+function marketProductImageHtml(item,size='mobile') {
+  const image=safeProductImageUrl(item?.imageUrl);
+  if(!image)return '<span class="market-product-photo is-empty" aria-hidden="true"></span>';
+  return `<span class="market-product-photo ${attr(size)}"><img src="${attr(image)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>`;
+}
 function marketTableHtml(list) {
   return `<div class="market-table-shell"><table class="market-table"><thead><tr><th scope="col" class="check-col">Comprado</th><th scope="col">Produto</th><th scope="col">Qtd.</th><th scope="col" class="money-col">Estimado</th><th scope="col" class="money-col">Preço real</th><th scope="col" class="money-col">Diferença</th><th scope="col">Estado</th><th scope="col" class="actions-col">Ações</th></tr></thead><tbody>${list.map(marketTableRowHtml).join('')}</tbody></table></div>`;
 }
 function marketTableRowHtml(item) {
   return `<tr class="market-table-row ${item.purchased?'purchased':''}">
     <td><label class="market-check"><input type="checkbox" data-market-toggle="${attr(item.id)}" ${item.purchased?'checked':''}><span class="sr-only">Marcar ${esc(item.name)} como comprado</span></label></td>
-    <td><div class="market-identity"><strong>${esc(item.name)}</strong><small>${esc(item.category||'Outros')}</small></div></td>
+    <td><div class="market-identity market-identity-with-photo">${marketProductImageHtml(item,'table')}<span><strong>${esc(item.name)}</strong><small>${esc(item.category||'Outros')}</small></span></div></td>
     <td><span class="market-quantity">${esc(item.quantity||'1')} ${esc(item.unit||'un')}</span></td>
     <td class="money-col" data-money>${money(marketItemEstimatedCents(item))}</td>
     <td class="market-real-cell">${marketActualInputHtml(item)}</td>
@@ -335,7 +340,7 @@ function marketTableRowHtml(item) {
 function marketMobileCardHtml(item) {
   const effective=marketItemEffectiveCents(item);
   return `<article class="market-mobile-card ${item.purchased?'purchased':''}">
-    <div class="market-mobile-head"><label class="market-check"><input type="checkbox" data-market-toggle="${attr(item.id)}" ${item.purchased?'checked':''}><span class="sr-only">Marcar ${esc(item.name)} como comprado</span></label><div><h3>${esc(item.name)}</h3><small>${esc(item.category||'Outros')} · ${esc(item.quantity||'1')} ${esc(item.unit||'un')}</small></div>${marketStatusHtml(item)}</div>
+    <div class="market-mobile-head"><label class="market-check"><input type="checkbox" data-market-toggle="${attr(item.id)}" ${item.purchased?'checked':''}><span class="sr-only">Marcar ${esc(item.name)} como comprado</span></label>${marketProductImageHtml(item)}<div><h3>${esc(item.name)}</h3><small>${esc(item.category||'Outros')} · ${esc(item.quantity||'1')} ${esc(item.unit||'un')}</small></div>${marketStatusHtml(item)}</div>
     <div class="market-mobile-money"><div><span>Estimado</span><strong data-money>${money(marketItemEstimatedCents(item))}</strong></div><div><span>${item.purchased?'Contabilizado':'Previsto'}</span><strong data-money>${money(item.purchased?effective:marketItemEstimatedCents(item))}</strong></div><div><span>Diferença</span>${marketVarianceHtml(item)}</div></div>
     <div class="market-mobile-real"><span>Preço real / unidade</span>${marketActualInputHtml(item)}<small>${item.purchased&&!(item.actualCents>0)?'Enquanto faltar o preço real, os relatórios usam o valor estimado.':'Guardado automaticamente ao sair do campo.'}</small></div>
     <div class="market-mobile-actions"><button class="btn secondary" type="button" data-edit-market="${attr(item.id)}">Editar</button><button class="btn danger" type="button" data-delete-market="${attr(item.id)}">Eliminar</button></div>

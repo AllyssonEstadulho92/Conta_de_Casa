@@ -95,3 +95,12 @@
 - [ ] Avaliar OCR/PDF de faturas apenas com uma estratégia de validação explícita que não grave valores financeiros probabilísticos sem confirmação.
 - [ ] Manter PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG atualizados após mudanças relevantes.
 - [ ] Validar em dispositivo real o stepper −/+ e o subtotal automático para quantidades inteiras e decimais.
+
+## P0 — validação v57 imagens reais
+
+- [x] Remover o avatar vetorial que simulava fotografia na Lista de compras.
+- [x] Mostrar fotografia real nos resultados e nos itens guardados quando há correspondência forte.
+- [x] Restringir imagens a images.openfoodfacts.org e manter credentials omit/referrer no-referrer.
+- [x] Persistir apenas URL/metadados; não guardar binários da fotografia no cofre.
+- [ ] Validar em iPhone/Safari uma amostra de produtos embalados com fotografia e produtos sem correspondência.
+- [ ] Confirmar visualmente 320, 375, 390 e 430 px sem deformação/corte da fotografia.

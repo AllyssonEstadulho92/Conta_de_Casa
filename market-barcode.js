@@ -182,7 +182,7 @@
 
   async function lookupBarcodeProduct(code,signal){
     const url=new URL(`${OFF_PRODUCT_URL}${encodeURIComponent(code)}.json`);
-    url.searchParams.set('fields','code,product_name,product_name_pt,brands,quantity');
+    url.searchParams.set('fields','code,product_name,product_name_pt,brands,quantity,image_front_small_url,image_front_url');
     const controller=new AbortController();
     const abort=()=>controller.abort();
     if(signal){
@@ -200,8 +200,9 @@
       const name=cleanText(product.product_name_pt||product.product_name,100);
       const brand=cleanText(product.brands,70).split(',')[0].trim();
       const quantity=cleanText(product.quantity,40);
+      const imageUrl=typeof safeProductImageUrl==='function'?safeProductImageUrl(product.image_front_small_url||product.image_front_url||''):'';
       if(!name&&!brand)return null;
-      return {code,name,brand,quantity};
+      return {code,name,brand,quantity,imageUrl};
     }finally{
       clearTimeout(timer);
       signal?.removeEventListener?.('abort',abort);
