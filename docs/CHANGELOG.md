@@ -1,128 +1,115 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-05 — Auditoria e ampliação de imagens de produto v59
+## 2026-09-05 — Fotografias oficiais Continente/Pingo Doce v60
 
-### Problema observado
+### Problema
 
-Na pesquisa **Adicionar produto** em iPhone, vários resultados de Pingo Doce/Continente apareciam com o placeholder diagonal apesar de existirem fotografias públicas do artigo. As miniaturas que existiam também eram estáticas: tocar nelas não abria uma imagem maior.
+A v59 melhorou o fallback de fotografias e permitiu ampliação, mas vários resultados continuavam com placeholder porque o preço/página oficial vinham de `cesta.pt` e a fotografia vinha de bases Open Facts independentes.
 
-A causa principal era a estratégia v57: uma única pesquisa ampla no Open Food Facts para todo o termo, com poucos candidatos, seguida de matching para vários resultados. Em pesquisas genéricas como “café”, isso não cobria todos os SKUs devolvidos pelo retalhista.
+Uma auditoria confirmou que ler as páginas HTML dos retalhistas diretamente no browser não é uma solução estável devido a CORS/redirecionamentos, mas **Continente e Pingo Doce publicam sitemaps XML com URL de produto e `image:loc` oficial**.
 
 ### Alterações
 
-- criado `market-image-audit.js` para auditar cada resultado sem imagem individualmente;
-- criado `market-image-audit.css` para miniaturas tácteis e visualizador fullscreen/responsivo;
-- resultados existentes com fotografia passam a poder ser tocados/clicados para ampliar;
-- novo `<dialog id="marketProductImageViewer">` mostra imagem ampliada, nome e origem;
-- fecho por botão, Esc e backdrop;
-- safe areas, dark mode, foco visível e `prefers-reduced-motion` suportados;
-- resolução de imagem passa a preferir GTIN/EAN exato quando disponível;
-- para resultados Continente, o `pid` já devolvido pelo fluxo `cesta.pt` é usado para tentar obter EAN via `get_product`;
-- sem código exato, cada artigo é pesquisado por nome + embalagem;
-- matching textual considera cobertura de tokens, precisão, nome, marca e quantidade;
-- resultados abaixo de `0.74` são rejeitados;
-- auditoria limitada a três produtos simultâneos para evitar rajadas de rede;
-- uma imagem resolvida durante a pesquisa é reutilizável pelo mesmo nome quando o produto é adicionado;
-- itens já guardados sem imagem também são auditados progressivamente;
-- imagens resolvidas para itens guardados persistem `imageUrl`, `imageSource`, `imageMatchedAt` e `productCode` quando comprovável;
-- binários da fotografia continuam fora do cofre.
+- criado `scripts/refresh-retailer-image-index.cjs`;
+- o build passa a ler os sitemaps oficiais do Continente e Pingo Doce;
+- PID/SKU é extraído da URL oficial do produto;
+- URL da fotografia é extraída de `image:loc` e validada contra os hosts/catálogos oficiais;
+- criados shards JSON por prefixo de PID para evitar descarregar o catálogo completo no telemóvel;
+- criados shards de nome exato para reparar itens antigos sem PID, apenas quando o nome é único;
+- criado `market-official-images.js`;
+- resultados de `cesta.pt` passam a resolver fotografia por `retalhista + pid` antes do fallback Open Facts;
+- imagens oficiais ficam identificadas como **Continente — imagem oficial** ou **Pingo Doce — imagem oficial**;
+- ao adicionar um resultado, a fotografia oficial é associada ao novo item e persistida nos campos de imagem já existentes;
+- itens antigos podem ser reparados por nome apenas com correspondência exata, única e não ambígua;
+- miniaturas oficiais continuam ampliáveis por toque/clique;
+- `market-image-audit.js` v59 permanece como fallback quando o sitemap oficial não contém uma imagem;
+- build público passa para `v60`;
+- Service Worker passa para `conta-de-casa-public-v60-official-retailer-images`;
+- shards são cacheados apenas quando pedidos;
+- `APP_RELEASE_NOTES` recebe a entrada v60.
 
-### Fontes de imagem
+### Segurança
 
-A cobertura deixa de depender exclusivamente do Open Food Facts e passa a usar, conforme o tipo de artigo:
+- nenhum scraping das páginas dos supermercados ocorre no browser;
+- nenhum proxy genérico ou serviço de scraping de terceiros foi introduzido;
+- nenhum API key/token/Authorization é necessário;
+- `connect-src` não é alargado para Continente/Pingo Doce;
+- `img-src` é alargado apenas a `www.continente.pt` e `static.pingodoce.pt`;
+- os índices são recursos same-origin do GitHub Pages;
+- fotografias não são copiadas para o cofre; apenas URL/origem/data são persistidos;
+- nenhuma alteração a PIN, cifragem, IndexedDB, preços, quantidade, faturas ou sincronização.
 
-- Open Food Facts;
-- Open Beauty Facts;
-- Open Products Facts;
-- Open Pet Food Facts.
+### Validação
 
-O preço e a ligação oficial continuam exclusivamente no fluxo existente de Pingo Doce/Continente via `cesta.pt`. A fotografia é uma referência visual independente.
+A CI de referência `33996921108` terminou com `success`.
 
-### Segurança e privacidade
+O gerador produziu:
 
-- nenhum proxy genérico de scraping foi introduzido;
-- nenhum Microlink/Jina/AllOrigins/CORS proxy em runtime;
-- sem API key, Authorization ou credenciais externas;
-- pedidos usam `credentials:'omit'` e `referrerPolicy:'no-referrer'`;
-- nenhuma fatura, montante, PIN, chave do cofre ou token GitHub é enviado para resolver fotografias;
-- a CSP pública é alargada apenas às famílias Open Facts necessárias;
-- `cesta.pt` é reutilizado somente para detalhe de produto já dentro da arquitetura do Mercado.
+- **100 474** produtos Continente com fotografia oficial;
+- **16 018** produtos Pingo Doce com fotografia oficial;
+- **101 558** nomes oficiais exatos únicos para reparação segura de itens antigos.
 
-### Build e atualização
+SKUs de controlo obrigatórios:
 
-- build público passa a `v59`;
-- cache do Service Worker passa a `conta-de-casa-public-v59-product-images`;
-- `market-image-audit.css` e `market-image-audit.js` entram na allowlist do Service Worker e de `prepare-pages.cjs`;
-- `APP_RELEASE_NOTES` recebe a entrada **v59 — Imagens de produto e ampliação**;
-- a composição `dist/` injeta os novos assets e a CSP v59;
-- `dist/events.js` é carimbado para `./sw.js?v=59`.
+- Continente `8167440` — imagem oficial encontrada;
+- Pingo Doce `739490` — imagem oficial encontrada.
 
-### Testes
+Foi criado `tests/market-official-images.test.cjs` e passaram também as suites de finanças, segurança, Mercado, imagens v59, código de barras, QR, responsividade, acessibilidade, ícones, atualização, sincronização e manifest.
 
-- criado `tests/market-image-audit.test.cjs`;
-- CI passa a verificar sintaxe do novo módulo e o novo teste;
-- workflow Pages repete a mesma validação antes do deploy;
-- testes existentes de Mercado, imagens, ícones, responsividade e update center foram alinhados com o cache/build v59;
-- workflow de branch `33995086764` terminou com `success` antes da atualização documental.
+### Estado
 
-### Limitação aceite
+Branch `feature/official-product-images-v60` pronta para integração após CI verde. A validação física em iPhone/Safari continua necessária depois do deploy para confirmar carregamento efetivo dos dois hosts oficiais e comportamento do visualizador.
 
-Não se promete 100% de cobertura visual. Quando um SKU não tem fotografia pública identificável ou a correspondência é insuficiente, mantém-se o placeholder. Esta decisão evita apresentar imagens de variantes erradas só para preencher a interface.
+## 2026-09-05 — Auditoria e ampliação de imagens de produto v59
+
+- criado `market-image-audit.js/.css`;
+- produtos sem fotografia passam a ser auditados individualmente;
+- GTIN/EAN é privilegiado quando disponível;
+- Open Food/Beauty/Products/Pet Facts são usados como fontes de referência;
+- matching textual exige score mínimo `0.74`;
+- miniaturas passam a abrir visualizador ampliado;
+- imagens resolvidas podem ser persistidas como URL/origem/data;
+- sem proxy genérico, credenciais ou binários no cofre;
+- build/cache avançaram para v59;
+- PR #31 integrado e GitHub Pages publicado com sucesso.
 
 ## 2026-09-05 — Centro de Atualização de Software v58
 
-- criado `app-update.js`/`.css`;
+- criado `app-update.js/.css`;
 - adicionada **Definições → Atualização de Software**;
-- estado de atualizações automáticas ligado ao Service Worker real;
-- Beta mantido desativado sem pipeline própria;
 - verificação manual usa `ServiceWorkerRegistration.update()` e `SKIP_WAITING`;
-- `APP_RELEASE_NOTES` passa a concentrar novidades de cada versão;
-- bundle Pages passou a ser carimbado como v58;
-- cache `conta-de-casa-public-v58-software-update`;
-- PR #29, CI de `main` e Deploy Pages concluídos com sucesso.
+- canal estável reflete o Service Worker real;
+- Beta mantido desativado sem pipeline própria;
+- `APP_RELEASE_NOTES` centraliza novidades;
+- Pages passou a carimbar a versão pública durante o build.
 
-## 2026-09-05 — Fotografias reais v57
+## 2026-09-05 — Fotografias reais de referência v57
 
-- removido o avatar que simulava fotografia;
-- introduzidos `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt`;
-- primeira pesquisa de fotografia real via Open Food Facts;
-- apenas correspondências fortes eram apresentadas;
-- imagem permanecia separada do preço e da ligação oficial;
-- apenas URL/metadados eram persistidos, sem binários.
+- Mercado ganhou `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` opcionais;
+- fotografia Open Food Facts passou a aparecer quando havia correspondência segura;
+- imagem deixou de ser simulada por avatar vetorial;
+- apenas URLs/metadados são guardados.
 
-## 2026-09-05 — Cofre moderno v56
+## 2026-09-05 — Cofre visual moderno v56
 
-- ecrã de PIN redesenhado com cartão moderno, teclado circular e safe areas;
-- PIN/palavra-passe, PBKDF2, AES-GCM e IndexedDB preservados;
-- não foi apresentada biometria/passkey inexistente;
-- dark mode e redução de movimento mantidos.
+- ecrã de desbloqueio redesenhado com cartão moderno e teclado PIN circular;
+- safe areas, dark mode e redução de movimento preservados;
+- sem alteração do modelo criptográfico;
+- não foi apresentada biometria/passkey inexistente.
 
-## 2026-09-05 — Hierarquia mobile e Lucide v55/v54
+## 2026-09-05 — Protótipo Compras e sistema de ícones v55/v54
 
-- Lucide adotado como sistema visual oficial local;
-- pesquisa Safari e setas de `select` normalizadas;
-- removido `+` visual duplicado em botões compactos;
-- página Lista de compras aproximada do protótipo aprovado;
-- título com carrinho, scanner como ação secundária, cartões-resumo e navegação inferior normalizados;
-- sem alterações aos cálculos financeiros.
+- Lucide definido como conjunto funcional oficial e local;
+- pesquisa/selects/botões compactos normalizados em iOS/Android/desktop;
+- corrigidos ícones cortados e `+` duplicado;
+- Lista de compras aproximada do protótipo aprovado;
+- título, scanner, cartões-resumo, ações e navegação inferior normalizados.
 
-## 2026-09-05 — QR de faturas e scanner de produtos
+## 2026-09-05 — Mercado real, scanner e faturas v53
 
-- leitura QR de faturação portuguesa por câmara/imagem, com pré-visualização antes de preencher;
-- imagens de faturas não persistidas;
-- scanner EAN/UPC/GTIN com ZXing fixo;
-- GTIN identifica o artigo e não é tratado como preço;
-- câmara processada localmente e encerrada em todos os fluxos relevantes.
-
-## 2026-09-05 — Mercado v53/v52
-
-- Pingo Doce e Continente passam a fornecer preços atuais através de `cesta.pt/mcp`;
-- Mercadona removida por ausência de fonte portuguesa suficientemente verificável;
-- `estimatedCents` passa a representar preço pesquisado por unidade;
-- `actualCents` continua separado para preço efetivamente pago;
-- quantidade multiplica automaticamente o preço por unidade nos totais;
-- criação, edição, filtros e cálculos financeiros mantêm invariantes testadas.
-
-## Histórico anterior
-
-As revisões anteriores a v52 permanecem preservadas no histórico Git do repositório. Este changelog foi consolidado na v59 para manter as decisões e alterações que continuam materialmente relevantes para a arquitetura atual.
+- preços Continente/Pingo Doce integrados através de `cesta.pt/mcp`;
+- preço pesquisado mantido separado do preço efetivamente pago;
+- quantidade passou a participar corretamente no subtotal;
+- leitor EAN/UPC/GTIN criado com câmara;
+- QR fiscal de faturas criado como preenchimento assistido;
+- Mercadona retirada da produção enquanto não existir fonte portuguesa verificável.
