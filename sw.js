@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v59-product-images';
+const CACHE = 'conta-de-casa-public-v60-official-retailer-images';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -25,11 +25,13 @@ const PUBLIC_ASSETS = [
   './invoice-capture.js',
   './app-update.js',
   './market-image-audit.js',
+  './market-official-images.js',
   './manifest.webmanifest',
   './icon.svg',
   './LUCIDE_LICENSE.txt'
 ];
 const PUBLIC_ASSET_SET = new Set(PUBLIC_ASSETS);
+const RETAILER_IMAGE_INDEX_RE = /^\.\/retailer-images\/(?:index\.json|(?:names\/)?(?:continente|pingo-doce)\/[a-z0-9_]{2}\.json)$/;
 
 function publicAssetKey(requestUrl) {
   const url = new URL(requestUrl);
@@ -65,7 +67,9 @@ self.addEventListener('fetch', event => {
   }
 
   const key = publicAssetKey(event.request.url);
-  if (!key || !PUBLIC_ASSET_SET.has(key)) return;
+  const isStatic=Boolean(key&&PUBLIC_ASSET_SET.has(key));
+  const isRetailerIndex=Boolean(key&&RETAILER_IMAGE_INDEX_RE.test(key));
+  if(!isStatic&&!isRetailerIndex)return;
   event.respondWith(
     fetch(event.request).then(response => {
       if (response && response.ok) {
