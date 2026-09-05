@@ -1,5 +1,29 @@
 # TODO — Conta de Casa
 
+## P0 — auditoria e ampliação de imagens v59
+
+- [x] Auditar cada resultado de produto individualmente quando a miniatura estiver em falta.
+- [x] Priorizar GTIN/EAN exato quando já existe no item.
+- [x] Para resultados Continente, tentar resolver EAN através do `pid`/`get_product` do mesmo fluxo cesta.pt.
+- [x] Expandir a pesquisa de fotografia para Open Food Facts, Open Beauty Facts, Open Products Facts e Open Pet Food Facts.
+- [x] Manter limiar mínimo de correspondência e placeholder quando não existir fotografia segura.
+- [x] Limitar resoluções concorrentes para evitar rajadas de pedidos em pesquisas grandes.
+- [x] Tornar miniaturas reais tácteis/clicáveis e abrir imagem ampliada em `<dialog>`.
+- [x] Implementar fecho por botão, Esc e backdrop, com safe areas, dark mode e `prefers-reduced-motion`.
+- [x] Persistir `imageUrl`, `imageSource`, `imageMatchedAt` e código comprovável para itens guardados, sem binários.
+- [x] Não introduzir proxy genérico de scraping nem credenciais externas.
+- [x] Atualizar CSP pública, allowlist Pages, Service Worker, cache v59 e `APP_RELEASE_NOTES`.
+- [x] Adicionar `tests/market-image-audit.test.cjs` e executar a suite CI completa com sucesso.
+- [ ] Integrar a branch v59 em `main` e confirmar CI principal verde.
+- [ ] Confirmar Deploy Pages v59 com sucesso.
+- [ ] No iPhone/Safari, pesquisar café e outros termos amplos e confirmar que produtos antes vazios são auditados individualmente.
+- [ ] Validar toque na miniatura → imagem ampliada → fechar nas larguras 320, 375, 390 e 430 px.
+- [ ] Confirmar tema claro/escuro e orientação retrato/paisagem no visualizador.
+- [ ] Testar o exemplo Continente de compressas e confirmar que uma eventual fotografia corresponde ao SKU, sem aceitar variante errada.
+- [ ] Testar o exemplo Pingo Doce de arroz Carolino Cigala e confirmar correspondência visual correta ou placeholder se não existir prova suficiente.
+- [ ] Confirmar que produtos sem registo público seguro permanecem com placeholder em vez de receber uma fotografia aproximada.
+- [ ] Validar a transição pública v58 → v59 no Centro de Atualização.
+
 ## P0 — Centro de Atualização de Software v58
 
 - [x] Criar uma entrada **Atualização de Software** em Definições sem alterar o schema do cofre.
@@ -18,7 +42,7 @@
 - [ ] Validar **Verificar atualizações** com rede disponível, offline e após regressar de background.
 - [ ] Validar o fluxo numa PWA instalada no ecrã principal e numa aba normal do Safari.
 - [ ] Confirmar uma transição pública real v58 → v59: deteção, instalação, `controllerchange`, reload e versão apresentada.
-- [ ] A partir da próxima release, acrescentar sempre as mudanças relevantes a `APP_RELEASE_NOTES` antes do deploy.
+- [x] Acrescentar as mudanças relevantes da v59 a `APP_RELEASE_NOTES` antes do deploy.
 
 ## P0 — protótipo aprovado / hierarquia mobile v55
 
@@ -88,7 +112,7 @@
 
 - [x] Remover o avatar vetorial que simulava fotografia na Lista de compras.
 - [x] Mostrar fotografia real nos resultados e nos itens guardados quando há correspondência forte.
-- [x] Restringir imagens a `images.openfoodfacts.org` e manter `credentials: omit` / `referrerPolicy: no-referrer`.
+- [x] Restringir inicialmente imagens a `images.openfoodfacts.org`; a v59 alarga apenas à família Open Facts através de allowlist explícita.
 - [x] Persistir apenas URL/metadados; não guardar binários da fotografia no cofre.
 - [ ] Validar em iPhone/Safari uma amostra de produtos embalados com fotografia e produtos sem correspondência.
 - [ ] Confirmar visualmente 320, 375, 390 e 430 px sem deformação/corte da fotografia.
@@ -96,10 +120,10 @@
 ## P1 — qualidade das fontes
 
 - [ ] Monitorizar disponibilidade e contrato CORS de `cesta.pt/mcp`.
-- [ ] Monitorizar alterações de formato da ferramenta `search_products`.
-- [ ] Monitorizar disponibilidade/contrato do endpoint de leitura do Open Food Facts usado para identificação GTIN.
-- [ ] Testar uma amostra de GTIN portugueses conhecidos, desconhecidos e com dados incompletos no Open Food Facts.
-- [ ] Confirmar em amostra real que a pesquisa derivada de marca + nome não seleciona silenciosamente uma variante diferente no retalhista.
+- [ ] Monitorizar alterações de formato das ferramentas `search_products` e `get_product`.
+- [ ] Monitorizar disponibilidade/contrato dos endpoints Open Facts usados para identificação/imagens.
+- [ ] Testar uma amostra de GTIN portugueses conhecidos, desconhecidos e com dados incompletos.
+- [ ] Confirmar em amostra real que a pesquisa derivada de marca + nome não seleciona silenciosamente uma variante diferente.
 - [ ] Monitorizar a versão fixa do `@zxing/browser` e rever segurança/compatibilidade antes de qualquer atualização.
 - [ ] Reavaliar Mercadona apenas se surgir uma fonte oficial portuguesa de catálogo/preços.
 - [ ] Criar testes de browser real para Safari/iOS quando existir infraestrutura adequada.
@@ -108,7 +132,7 @@
 
 - [ ] Validar tablet e desktop em browser real, incluindo ausência de scroll horizontal.
 - [x] Confirmar por testes automatizados a fundação de foco, acessibilidade e navegação do fluxo sem regressões globais.
-- [ ] Confirmar leitores de ecrã em browser/dispositivo real no fluxo de pesquisa e no estado do scanner.
+- [ ] Confirmar leitores de ecrã em browser/dispositivo real no fluxo de pesquisa, scanner e visualizador de imagem.
 - [ ] Confirmar leitores de ecrã no bloco **Ler dados da fatura**, incluindo estado, pré-visualização e botões.
 - [ ] Confirmar que ícones decorativos permanecem `aria-hidden` e que botões icon-only mantêm `aria-label` inteligível.
 - [ ] Confirmar `prefers-reduced-motion` em dispositivo/browser real.
@@ -118,10 +142,10 @@
 ## P2 — manutenção
 
 - [ ] Remover progressivamente os glifos Unicode de fallback que ainda permanecem no HTML/JS estático depois de a revisão Lucide estar validada fisicamente, sem alterar o contrato dos controlos.
-- [ ] Migrar gradualmente os pequenos SVG locais de módulos contextuais para `CDCIcons.markup`, reduzindo duplicação de paths sem misturar esta refatoração com a validação v55.
+- [ ] Migrar gradualmente os pequenos SVG locais de módulos contextuais para `CDCIcons.markup`.
 - [ ] Avaliar remoção gradual de CSS antigo já substituído pelo design system.
-- [ ] Avaliar se `market-experience.css`, `market-barcode.css`, `ui-icons.css`, `invoice-capture.css` e `app-update.css` devem permanecer isolados ou ser consolidados no design system após validação física.
-- [ ] Avaliar OCR/PDF de faturas apenas com uma estratégia de validação explícita que não grave valores financeiros probabilísticos sem confirmação.
-- [ ] Manter PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG atualizados após mudanças relevantes.
+- [ ] Avaliar se as camadas contextuais (`market-experience`, `market-barcode`, `ui-icons`, `invoice-capture`, `app-update`, `market-image-audit`) devem permanecer isoladas ou ser consolidadas após validação física.
+- [ ] Avaliar OCR/PDF de faturas apenas com estratégia explícita de confiança/validação.
+- [x] Manter PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG atualizados para a revisão v59.
 - [ ] Validar em dispositivo real o stepper −/+ e o subtotal automático para quantidades inteiras e decimais.
-- [ ] Avaliar, depois da primeira transição real v58 → v59, se a carimbagem de versão deve passar de `prepare-pages.cjs` para uma fonte única de versão sem aumentar o risco de regressão.
+- [ ] Avaliar, depois da primeira transição real v58 → v59, se a carimbagem de versão deve passar de `prepare-pages.cjs` para uma fonte única de versão.
