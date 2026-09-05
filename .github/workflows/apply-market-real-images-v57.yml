@@ -5,6 +5,7 @@ on:
     branches: [ui/market-real-images-v57]
     paths:
       - scripts/apply-market-real-images-v57.cjs
+      - scripts/fix-apply-market-real-images-v57.cjs
       - .github/workflows/apply-market-real-images-v57.yml
   workflow_dispatch:
 
@@ -25,6 +26,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
+
+      - name: Align patch with current cache
+        run: node scripts/fix-apply-market-real-images-v57.cjs
 
       - name: Apply audited v57 patch
         run: node scripts/apply-market-real-images-v57.cjs
