@@ -123,7 +123,7 @@ assert.match(index, /id="appBuildVersion">v53</);
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v55-prototype/);
+assert.match(swSource, /conta-de-casa-public-v56-vault-modern/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /'\.\/market-experience\.css'/);
 assert.match(swSource, /'\.\/market-experience\.js'/);

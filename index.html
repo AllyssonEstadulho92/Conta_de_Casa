@@ -26,7 +26,7 @@
 <body>
   <div id="vaultScreen" class="vault-screen">
     <div class="vault-card">
-      <div class="brand brand-large"><span class="brand-mark">⌂</span><div><strong>Conta de Casa</strong><small>O seu controlo financeiro privado</small></div></div>
+      <div class="brand brand-large vault-brand"><span class="brand-mark">⌂</span><div><strong>Conta de Casa</strong><small>Finanças pessoais · cofre privado</small></div></div>
       <div id="vaultCreate">
         <h1>Criar cofre local</h1>
         <p>Este cofre começa vazio. Defina uma palavra-passe ou PIN com pelo menos 8 caracteres. A credencial não é guardada; serve apenas para derivar a chave que cifra os dados neste navegador.</p>
@@ -39,11 +39,12 @@
           <span class="vault-lock-badge" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
           </span>
+          <p class="vault-eyebrow">Acesso seguro</p>
           <h1>Introduza o seu PIN</h1>
-          <p>Acesso protegido e cifrado neste dispositivo.</p>
+          <p id="vaultUnlockHint">Cofre local encriptado. A chave permanece apenas durante esta sessão.</p>
         </div>
         <label class="vault-unlock-input-label">Palavra-passe/PIN
-          <input id="unlockPassphrase" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="○ ○ ○ ○ ○ ○ ○ ○" />
+          <input id="unlockPassphrase" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" aria-describedby="vaultUnlockHint" placeholder="○ ○ ○ ○ ○ ○ ○ ○" />
         </label>
         <div id="vaultPinPad" class="vault-pin-pad" aria-label="Teclado numérico do PIN">
           <div class="vault-keypad">

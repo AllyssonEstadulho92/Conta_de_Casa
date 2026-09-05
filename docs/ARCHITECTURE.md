@@ -64,6 +64,21 @@ O schema `normalizeMarketItem()` não possui campo de imagem. Por isso, a interf
 
 O campo `actualCents` continua existente no modelo, mas em mobile o controlo de introdução de preço real fica oculto enquanto o item ainda está por comprar. Quando o item é marcado como comprado, o controlo volta a ficar disponível. Isto reduz ruído visual sem alterar a regra financeira.
 
+## Cofre de acesso — apresentação v56
+
+O ecrã `#vaultScreen` continua a usar a estrutura existente em `index.html`, os eventos de `events.js` e o modelo criptográfico de `core.js`. A v56 é uma camada estritamente visual aplicada no final de `ui-icons.css`, para sobrepor as regras mobile v45 sem reestruturar autenticação.
+
+Princípios:
+
+- `100svh`/`100dvh` e `env(safe-area-inset-*)` para iPhone/Safari;
+- cartão responsivo máximo de 500 px e teclado centrado;
+- teclas circulares com 70 px no desktop e 58 px no mobile comum, preservando alvos tácteis adequados;
+- campo `#unlockPassphrase` real permanece o único input de credencial;
+- `wireVaultPinPad()` continua responsável por modo PIN versus palavra-passe;
+- nenhum botão de passkey/biometria é apresentado enquanto não existir implementação WebAuthn/biométrica real;
+- sem novas fontes, endpoints, armazenamento, scripts externos ou alterações à CSP;
+- tema escuro e redução de movimento são tratados na mesma camada visual.
+
 ## Sistema visual de ícones — Lucide
 
 ### Biblioteca oficial

@@ -294,3 +294,26 @@ A revisão global confirmou quatro origens históricas de iconografia: `ICONS`/`
 ### Segurança e acessibilidade
 
 Não são adicionadas dependências, fontes, CDNs, endpoints ou dados. Os ícones decorativos não substituem os nomes acessíveis dos controlos. Áreas tácteis permanecem adequadas e `prefers-reduced-motion` continua a retirar movimento não essencial.
+
+## D-011 — Modernizar o cofre sem simular biometria/passkey
+
+Data: 5 de setembro de 2026
+Estado: aceite
+
+### Contexto
+
+Foi fornecida uma referência visual de iPhone com cartão branco, teclado PIN circular, grande hierarquia tipográfica e uma ação de passkey/biometria. O Conta de Casa já possui desbloqueio local por PIN/palavra-passe, mas não possui WebAuthn/passkeys/biometria implementados.
+
+### Decisão
+
+Adotar a linguagem visual da referência no ecrã do cofre — profundidade subtil, cartão arredondado, marca central, badge de segurança, campo de PIN e teclado circular — sem criar uma ação de passkey/biometria que não tenha backend/credencial e fluxo de recuperação reais.
+
+A alteração permanece em `ui-icons.css` como camada final de apresentação e mantém `index.html`, `core.js` e `events.js` funcionalmente compatíveis. O cache do Service Worker avança para `conta-de-casa-public-v56-vault-modern`.
+
+### Motivo
+
+Melhora a perceção de qualidade e legibilidade no iPhone sem reduzir a segurança nem induzir o utilizador a acreditar que existe um método de autenticação ainda não implementado.
+
+### Segurança
+
+Não são alterados PBKDF2, AES-GCM, IndexedDB, duração da chave em memória, PIN/palavra-passe, recuperação, backups ou sincronização. A revisão não adiciona endpoints, bibliotecas, telemetry ou novos dados persistidos.
