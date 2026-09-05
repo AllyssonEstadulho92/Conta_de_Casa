@@ -9,6 +9,7 @@ const css=fs.readFileSync('ui-icons.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const imageAudit=fs.readFileSync('market-image-audit.js','utf8');
+const official=fs.readFileSync('market-official-images.js','utf8');
 
 assert.match(core,/function safeProductImageUrl/);
 assert.match(core,/url\.hostname\.toLowerCase\(\) !== 'images\.openfoodfacts\.org'/);
@@ -31,8 +32,10 @@ assert.match(market,/referrerPolicy:'no-referrer'/);
 assert.match(imageAudit,/openbeautyfacts/);
 assert.match(imageAudit,/openproductsfacts/);
 assert.match(imageAudit,/openpetfoodfacts/);
-assert.match(imageAudit,/safeProductImageUrl=safeImageUrl/,'v59 runtime must extend the image sanitizer before newly resolved images are persisted');
-assert.match(imageAudit,/data-market-image-open/,'product images must be interactive in v59');
+assert.match(imageAudit,/safeProductImageUrl=safeImageUrl/,'v59 fallback must extend the Open Facts sanitizer');
+assert.match(imageAudit,/data-market-image-open/,'fallback product images must remain interactive');
+assert.match(official,/safeProductImageUrl=safeCombinedProductImageUrl/,'v60 must extend persistence to official retailer images');
+assert.match(official,/data-market-official-image-open/);
 
 assert.match(barcode,/image_front_small_url,image_front_url/);
 assert.match(barcode,/safeProductImageUrl\(product\.image_front_small_url\|\|product\.image_front_url/);
@@ -44,8 +47,8 @@ assert.match(css,/\.market-product-photo img/);
 assert.match(css,/object-fit:contain/);
 assert.match(css,/market-mobile-head::before\{content:none!important/);
 
-// index.html is the stable source template; the Pages build expands the CSP for v59.
+// index.html is the stable source template; the Pages build expands the CSP in v60.
 assert.match(index,/img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org;/);
-assert.match(sw,/conta-de-casa-public-v59-product-images/);
+assert.match(sw,/conta-de-casa-public-v60-official-retailer-images/);
 
 console.log('Market real product image tests: OK');
