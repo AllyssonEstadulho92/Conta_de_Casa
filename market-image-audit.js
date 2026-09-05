@@ -8,6 +8,8 @@
  * - tentar resolver automaticamente miniaturas em falta por produto, nunca por uma
  *   imagem genérica inventada;
  * - priorizar correspondência por código de barras quando o item já o possui;
+ * - para resultados Continente, tentar obter o EAN exato através do mesmo serviço
+ *   cesta.pt já usado pelo Mercado antes de recorrer à correspondência textual;
  * - usar apenas bases públicas da família Open Facts, sem proxy de páginas de lojas,
  *   sem cookies, credenciais ou dados financeiros.
  *
@@ -19,6 +21,7 @@
   const MAX_RESULTS=14;
   const MAX_CONCURRENT_RESOLUTIONS=3;
   const MIN_MATCH_SCORE=.74;
+  const CESTA_MCP_URL='https://cesta.pt/mcp';
   const IMAGE_HOST_SUFFIXES=Object.freeze([
     '.openfoodfacts.org',
     '.openbeautyfacts.org',
@@ -33,12 +36,14 @@
   });
 
   const resolutionCache=new Map();
+  const resolutionByName=new Map();
   const inFlight=new Map();
   const queue=[];
   let activeResolvers=0;
   let auditQueued=false;
   let observer=null;
   let persistTimer=0;
+  let cestaReadyPromise=null;
 
   const clean=(value,max=180)=>String(value??'')
     .replace(/[\u0000-\u001f\u007f]/g,' ')
@@ -49,9 +54,6 @@
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g,'')
     .toLocaleLowerCase('pt-PT');
-  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  })[char]);
 
   function safeImageUrl(value){
     if(!value)return '';
@@ -84,6 +86,69 @@
     }).finally(()=>clearTimeout(timer));
   }
 
+  function parseSseEvents(text){
+    const events=[];
+    for(const block of String(text||'').split(/\n\n+/)){
+      const data=block.split('\n').filter(line=>line.startsWith('data:')).map(line=>line.slice(5).trim()).join('\n');
+      if(!data)continue;
+      try{events.push(JSON.parse(data));}catch(_error){}
+    }
+    return events;
+  }
+
+  async function cestaRpc(payload){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),REQUEST_TIMEOUT_MS);
+    try{
+      const response=await fetch(CESTA_MCP_URL,{
+        method:'POST',
+        headers:{'Accept':'application/json, text/event-stream','Content-Type':'application/json','MCP-Protocol-Version':'2025-06-18'},
+        credentials:'omit',
+        referrerPolicy:'no-referrer',
+        cache:'no-store',
+        body:JSON.stringify(payload),
+        signal:controller.signal
+      });
+      if(!response.ok)throw new Error(`cesta-image-http-${response.status}`);
+      const text=await response.text();
+      if(!text.trim())return null;
+      const event=parseSseEvents(text)[0]||null;
+      if(event?.error)throw new Error('cesta-image-rpc-error');
+      return event;
+    }finally{clearTimeout(timer);}
+  }
+
+  function ensureCestaReady(){
+    if(cestaReadyPromise)return cestaReadyPromise;
+    cestaReadyPromise=(async()=>{
+      await cestaRpc({jsonrpc:'2.0',id:901,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Conta de Casa image audit',version:'59'}}});
+      await cestaRpc({jsonrpc:'2.0',method:'notifications/initialized'}).catch(()=>null);
+      return true;
+    })().catch(error=>{cestaReadyPromise=null;throw error;});
+    return cestaReadyPromise;
+  }
+
+  function extractProductCode(text){
+    const raw=String(text||'');
+    const labelled=raw.match(/\b(?:EAN|GTIN|c[oó]digo\s+de\s+barras)\D{0,18}(\d{8,14})\b/i);
+    if(labelled)return labelled[1];
+    const standalone=raw.match(/\b(\d{13})\b/);
+    return standalone?.[1]||'';
+  }
+
+  async function retailerProductCode(target){
+    if(target.marketId!=='continente'||!/^\d{4,32}$/.test(String(target.retailerProductId||'')))return '';
+    try{
+      await ensureCestaReady();
+      const event=await cestaRpc({
+        jsonrpc:'2.0',id:902,method:'tools/call',
+        params:{name:'get_product',arguments:{store:'continente',pid:String(target.retailerProductId)}}
+      });
+      const text=event?.result?.content?.find(item=>item?.type==='text')?.text||'';
+      return clean(extractProductCode(text),32);
+    }catch(_error){return '';}
+  }
+
   function tokenSet(value){
     const stop=new Set(['de','da','do','das','dos','e','a','o','com','sem','em','para','pack','emb','embalagem','un','unid','unidade','kg','g','gr','ml','cl','lt','l']);
     return new Set(normalized(value).split(/[^a-z0-9]+/).filter(token=>token.length>1&&!stop.has(token)));
@@ -111,22 +176,22 @@
     const offeredNumbers=numericTokens(`${candidate.name} ${candidate.quantity||''}`);
     if(wantedNumbers.size&&offeredNumbers.size){
       const numberMatch=[...wantedNumbers].some(value=>offeredNumbers.has(value));
-      score+=numberMatch?.08:-.28;
+      score+=numberMatch ? .08 : -.28;
     }
 
     const brandTokens=tokenSet(candidate.brands||'');
     if(brandTokens.size){
       const brandMatch=[...brandTokens].some(token=>wanted.has(token));
-      score+=brandMatch?.08:-.08;
+      score+=brandMatch ? .08 : -.08;
     }
     return Math.max(0,Math.min(1,score));
   }
 
   function sourceOrder(target){
     const text=normalized(`${target.name} ${target.category||''}`);
-    if(/\b(cao|cão|gato|racao|ração|animal|pet)\b/.test(text))return [SOURCES.pet,SOURCES.food,SOURCES.products];
-    if(/\b(champo|champô|shampoo|dentifrico|dentífrico|pasta de dentes|desodorizante|sabonete|gel de banho|creme corporal|higiene pessoal|cosmet)\b/.test(text))return [SOURCES.beauty,SOURCES.products,SOURCES.food];
-    if(/\b(detergente|limpeza|compressa|penso|algodao|algodão|papel higienico|papel higiénico|saco|esponja|fita adesiva|guardanapo|cozinha|casa)\b/.test(text))return [SOURCES.products,SOURCES.food,SOURCES.beauty];
+    if(/\b(cao|gato|racao|animal|pet)\b/.test(text))return [SOURCES.pet,SOURCES.food,SOURCES.products];
+    if(/\b(champo|shampoo|dentifrico|pasta de dentes|desodorizante|sabonete|gel de banho|creme corporal|higiene pessoal|cosmet)\b/.test(text))return [SOURCES.beauty,SOURCES.products,SOURCES.food];
+    if(/\b(detergente|limpeza|compressa|penso|algodao|papel higienico|saco|esponja|fita adesiva|guardanapo|cozinha|casa)\b/.test(text))return [SOURCES.products,SOURCES.food,SOURCES.beauty];
     return [SOURCES.food,SOURCES.products,SOURCES.beauty];
   }
 
@@ -189,12 +254,15 @@
   }
 
   function resolutionKey(target){
-    return normalized([target.code||'',target.name||'',target.pack||'',target.category||''].join('|'));
+    return normalized([target.code||'',target.marketId||'',target.retailerProductId||'',target.name||'',target.pack||'',target.category||''].join('|'));
   }
+
+  function nameKey(target){return normalized(target.name||'');}
 
   async function resolveImageUnqueued(target){
     const ordered=sourceOrder(target);
-    const code=clean(target.code||'',32);
+    let code=clean(target.code||'',32);
+    if(!/^\d{8,14}$/.test(code))code=await retailerProductCode(target);
     if(/^\d{8,14}$/.test(code)){
       for(const source of ordered){
         const exact=await exactByCode(source,code);
@@ -216,11 +284,15 @@
 
   function resolveImage(target){
     const key=resolutionKey(target);
+    const nKey=nameKey(target);
     if(resolutionCache.has(key))return Promise.resolve(resolutionCache.get(key));
+    if(nKey&&resolutionByName.has(nKey))return Promise.resolve(resolutionByName.get(nKey));
     if(inFlight.has(key))return inFlight.get(key);
     const promise=queued(()=>resolveImageUnqueued(target)).then(result=>{
-      resolutionCache.set(key,result||null);
-      return result||null;
+      const safeResult=result||null;
+      resolutionCache.set(key,safeResult);
+      if(nKey&&safeResult)resolutionByName.set(nKey,safeResult);
+      return safeResult;
     }).finally(()=>inFlight.delete(key));
     inFlight.set(key,promise);
     return promise;
@@ -301,7 +373,13 @@
     const name=clean(card.querySelector('.market-product-copy h3')?.textContent||'',130);
     const rawPack=clean(card.querySelector('.market-product-copy>p')?.textContent||'',100);
     const pack=rawPack.replace(/\s*·\s*(Pingo Doce|Continente)\s*$/i,'').trim();
-    return {name,pack,category:'',code:''};
+    const id=clean(card.dataset.marketProductCard||'',100);
+    const idMatch=/^cesta-(continente|pingo-doce)-(.+)$/.exec(id);
+    return {
+      name,pack,category:'',code:'',
+      marketId:idMatch?.[1]||'',
+      retailerProductId:clean(idMatch?.[2]||'',32)
+    };
   }
 
   function auditBrowserCards(){
@@ -348,7 +426,8 @@
         name:clean(item.name,130),
         pack:clean(`${item.quantity||''} ${item.unit||''}`,60),
         category:clean(item.category||'',80),
-        code:clean(item.productCode||'',32)
+        code:clean(item.productCode||'',32),
+        marketId:'',retailerProductId:''
       };
       const existing=safeImageUrl(item.imageUrl||photo.querySelector('img')?.src||'');
       if(existing){
@@ -364,6 +443,7 @@
             item.imageUrl=result.imageUrl;
             item.imageSource=result.source;
             item.imageMatchedAt=new Date().toISOString();
+            if(result.code&&!item.productCode)item.productCode=clean(result.code,32);
             schedulePersist();
           }
         }
@@ -408,7 +488,9 @@
       name:clean(target?.name||'',130),
       pack:clean(target?.pack||'',70),
       category:clean(target?.category||'',80),
-      code:clean(target?.code||'',32)
+      code:clean(target?.code||'',32),
+      marketId:clean(target?.marketId||'',20),
+      retailerProductId:clean(target?.retailerProductId||'',32)
     }),
     audit:scheduleAudit
   });
