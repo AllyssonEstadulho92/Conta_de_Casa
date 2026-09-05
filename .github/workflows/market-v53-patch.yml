@@ -60,6 +60,10 @@ jobs:
           market_text=market_text.replace(' * Mercadona Portugal: observações públicas com comprovativo através de Open Prices.\n',' * Mercados ativos: Pingo Doce e Continente.\n')
           market.write_text(market_text,encoding='utf-8')
 
+          css=Path('market-experience.css')
+          css_text=css.read_text(encoding='utf-8').replace('font-size:.65rem','font-size:.75rem').replace('font-size:.72rem','font-size:.75rem')
+          css.write_text(css_text,encoding='utf-8')
+
           for name in ['tests/market-experience.test.cjs','tests/responsive.test.cjs','tests/mobile-layout-regression.test.cjs']:
               p=Path(name)
               text=p.read_text(encoding='utf-8').replace('v=52','v=53').replace('public-v52','public-v53')
