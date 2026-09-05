@@ -14,7 +14,7 @@ assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt https:\/\/world\.openfoodfacts\.org;/);
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
-assert.match(sw, /conta-de-casa-public-v56-vault-modern/);
+assert.match(sw, /conta-de-casa-public-v57-real-images/);
 
 for (const asset of ['market-experience.css','market-experience.js']) {
   assert.ok(sw.includes(`'./${asset}'`), `${asset} must be cached by the service worker`);
@@ -22,11 +22,12 @@ for (const asset of ['market-experience.css','market-experience.js']) {
 }
 
 for (const market of ['Pingo Doce','Continente']) assert.ok(js.includes(market));
-assert.doesNotMatch(js,/Mercadona|openfoodfacts|Open Prices/i);
+assert.doesNotMatch(js,/Mercadona|Open Prices/i);
+assert.match(js,/https:\/\/world\.openfoodfacts\.org\/cgi\/search\.pl/,'Open Food Facts is allowed only as the product-image reference lookup');
 assert.ok(js.includes("data-market-price-mode=\"live\""), 'market browser must explicitly use live/verified data mode');
 assert.ok(js.includes("https://cesta.pt/mcp"), 'Continente/Pingo Doce provider must be explicit');
 assert.ok(js.includes("name:'search_products'"), 'cesta MCP search tool must be used');
-assert.ok(js.includes("a pesquisa é enviada apenas à fonte necessária"), 'remote-search privacy disclosure must be visible');
+assert.ok(js.includes("fotografia real de referência") && js.includes("Open Food Facts"), 'remote image-source privacy disclosure must be visible');
 assert.match(js, /estimatedCents:product\.priceCents/);
 assert.match(js, /sourceUrl=safeRetailerUrl/);
 assert.match(js, /data-market-source-url=/);

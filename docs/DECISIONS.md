@@ -317,3 +317,10 @@ Melhora a perceção de qualidade e legibilidade no iPhone sem reduzir a seguran
 ### Segurança
 
 Não são alterados PBKDF2, AES-GCM, IndexedDB, duração da chave em memória, PIN/palavra-passe, recuperação, backups ou sincronização. A revisão não adiciona endpoints, bibliotecas, telemetry ou novos dados persistidos.
+
+## D-012 — Fotografia real é referência visual, não prova de identidade comercial
+
+Data: 5 de setembro de 2026
+Estado: aceite
+
+A aplicação pode apresentar uma fotografia real do Open Food Facts quando o emparelhamento textual é forte ou quando existe GTIN. A fotografia não é tratada como imagem oficial do Pingo Doce/Continente e não altera o preço. Se a correspondência não atingir o limiar definido, mantém-se placeholder neutro em vez de mostrar uma imagem possivelmente errada.

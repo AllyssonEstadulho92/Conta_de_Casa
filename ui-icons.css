@@ -238,26 +238,14 @@ html.market-prototype-active .sync-header-status::after{
   background-position:center;
 }
 
-/* Cartões mobile: hierarquia igual ao protótipo sem inventar fotografias de produtos.
-   O avatar usa um ícone vetorial neutro porque o schema atual não guarda imagem. */
+/* Cartões mobile: hierarquia do protótipo com fotografia real de referência quando verificada. */
 #page-market .market-mobile-card{border-radius:22px!important;box-shadow:0 4px 18px rgba(20,35,60,.045)!important}
 #page-market .market-mobile-head{
   grid-template-columns:44px 48px minmax(0,1fr) auto!important;
   gap:10px!important;
   align-items:center!important;
 }
-#page-market .market-mobile-head::before{
-  content:"";
-  grid-column:2;
-  width:48px;
-  height:48px;
-  border-radius:14px;
-  background-color:color-mix(in srgb,var(--primary) 8%,var(--surface));
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%230b63e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4ZM3 6h18M16 10a4 4 0 0 1-8 0'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:center;
-  background-size:24px 24px;
-}
+#page-market .market-mobile-head::before{content:none!important;display:none!important}
 #page-market .market-mobile-head>.market-check{grid-column:1;grid-row:1}
 #page-market .market-mobile-head>div{grid-column:3;grid-row:1;min-width:0}
 #page-market .market-mobile-head>.status-chip{grid-column:4;grid-row:1;white-space:nowrap}
@@ -595,4 +583,43 @@ html.market-prototype-active .sync-header-status::after{
 @media(prefers-reduced-motion:reduce){
   .vault-key,.vault-enter-btn{transition:none!important}
   .vault-key:hover,.vault-key:active{transform:none!important}
+}
+
+/* v57 — fotografias reais de referência no Mercado. */
+.market-product-photo{
+  width:58px;
+  height:58px;
+  flex:0 0 58px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--border) 86%,transparent);
+  border-radius:16px;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--surface-2) 78%,var(--surface)),var(--surface));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55);
+}
+.market-product-photo img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+  background:#fff;
+}
+.market-product-photo.is-empty{
+  background:
+    linear-gradient(135deg,transparent 46%,color-mix(in srgb,var(--border) 58%,transparent) 47% 53%,transparent 54%),
+    color-mix(in srgb,var(--surface-2) 82%,var(--surface));
+}
+.market-product-photo.table{width:42px;height:42px;flex-basis:42px;border-radius:12px}
+.market-identity-with-photo{display:flex;align-items:center;gap:10px;min-width:0}
+.market-identity-with-photo>span:last-child{display:grid;min-width:0}
+.market-catalog-main{grid-template-columns:64px minmax(0,1fr) auto!important;align-items:center!important}
+.market-catalog-main>.market-product-photo{grid-column:1;width:58px;height:58px}
+.market-catalog-main>.market-product-copy{grid-column:2;min-width:0}
+.market-catalog-main>.market-add-product{grid-column:3}
+#page-market .market-mobile-head>.market-product-photo{grid-column:2;grid-row:1;width:48px;height:48px;flex-basis:48px;border-radius:14px}
+@media(max-width:430px){
+  #page-market .market-mobile-head{grid-template-columns:42px 52px minmax(0,1fr) auto!important;gap:9px!important}
+  #page-market .market-mobile-head>.market-product-photo{width:52px;height:52px;flex-basis:52px}
 }

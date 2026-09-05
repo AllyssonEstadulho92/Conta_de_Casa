@@ -285,6 +285,14 @@ function cleanString(value, max = 160) {
 function cleanMultiline(value, max = 1200) {
   return String(value ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, ' ').trim().slice(0, max);
 }
+function safeProductImageUrl(value) {
+  if (!value) return '';
+  try {
+    const url = new URL(String(value));
+    if (url.protocol !== 'https:' || url.hostname.toLowerCase() !== 'images.openfoodfacts.org') return '';
+    return url.href.slice(0, 700);
+  } catch (_error) { return ''; }
+}
 function cleanCents(value, fallback = 0, min = 0) {
   const n = Number(value);
   if (!Number.isSafeInteger(n)) return fallback;
@@ -433,6 +441,10 @@ function normalizeMarketItem(i = {}) {
     estimatedCents: cleanCents(i.estimatedCents),
     actualCents: cleanCents(i.actualCents),
     purchased: Boolean(i.purchased),
+    productCode: cleanString(i.productCode, 32),
+    imageUrl: safeProductImageUrl(i.imageUrl),
+    imageSource: cleanString(i.imageSource, 60),
+    imageMatchedAt: optionalIso(i.imageMatchedAt),
     createdAt: cleanIso(i.createdAt, now),
     updatedAt: cleanIso(i.updatedAt, now),
     syncResolvedAt: optionalIso(i.syncResolvedAt),
@@ -531,8 +543,8 @@ function monthProfile(month = selectedMonth) {
   return appState.months[month];
 }
 
-const ALLOWED_TAGS = new Set(['article','br','button','circle','datalist','div','em','form','h2','h3','input','label','option','p','path','rect','select','small','span','strong','svg','textarea']);
-const ALLOWED_ATTRS = new Set(['accept','aria-hidden','aria-label','checked','class','d','disabled','fill','height','hidden','id','inputmode','list','max','maxlength','method','min','minlength','name','placeholder','r','required','role','rx','selected','stroke','stroke-linecap','stroke-linejoin','stroke-width','title','type','value','viewbox','width','x','y']);
+const ALLOWED_TAGS = new Set(['article','br','button','circle','datalist','div','em','form','h2','h3','img','input','label','option','p','path','rect','select','small','span','strong','svg','textarea']);
+const ALLOWED_ATTRS = new Set(['accept','alt','aria-hidden','aria-label','checked','class','d','decoding','disabled','fill','height','hidden','id','inputmode','list','loading','max','maxlength','method','min','minlength','name','placeholder','r','referrerpolicy','required','role','rx','selected','src','stroke','stroke-linecap','stroke-linejoin','stroke-width','title','type','value','viewbox','width','x','y']);
 function sanitizeHtmlFragment(html) {
   if (typeof document === 'undefined') return String(html ?? '');
   const template = document.createElement('template');
@@ -550,6 +562,7 @@ function sanitizeHtmlFragment(html) {
         const allowed = ALLOWED_ATTRS.has(name) || name.startsWith('data-') || name.startsWith('aria-');
         if (!allowed || name.startsWith('on') || /javascript:/i.test(value)) node.removeAttribute(a.name);
       }
+      if (tag === 'img' && !safeProductImageUrl(node.getAttribute('src'))) node.removeAttribute('src');
     }
     for (const child of [...node.childNodes]) walk(child);
   };

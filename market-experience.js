@@ -4,11 +4,12 @@
  * Conta de Casa — pesquisa de preços reais (v53)
  * Continente/Pingo Doce: consulta atual através de cesta.pt, com URL oficial do produto.
  * Mercados ativos: Pingo Doce e Continente.
- * Nenhum preço fictício ou imagem de produto é usado nesta camada.
+ * Nenhum preço fictício é usado; fotografias reais de referência são opcionais e validadas separadamente.
  */
 (function marketLiveExperience(){
   const MARKET_BROWSER_MODE='market-browser';
   const CESTA_MCP_URL='https://cesta.pt/mcp';
+  const OFF_IMAGE_SEARCH_URL='https://world.openfoodfacts.org/cgi/search.pl';
   const SEARCH_DEBOUNCE_MS=450;
   const SEARCH_TIMEOUT_MS=12000;
   const MAX_REMOTE_RESULTS=20;
@@ -126,7 +127,7 @@
       </div>
       ${tabsHtml()}
       <div id="marketBrowserTabPanel" class="market-browser-tab-panel" role="tabpanel"></div>
-      <div class="market-source-notice" role="note">${svgIcon('info',21)}<p><strong>Pesquisa em dois mercados.</strong> Pingo Doce e Continente são consultados no momento através de cesta.pt. Os resultados incluem preço e, quando disponível, ligação para o produto oficial. Não são usados preços fictícios e a pesquisa é enviada apenas à fonte necessária.</p></div>
+      <div class="market-source-notice" role="note">${svgIcon('info',21)}<p><strong>Pesquisa em dois mercados.</strong> Pingo Doce e Continente são consultados no momento através de cesta.pt. Para mostrar uma fotografia real de referência, o termo pesquisado pode também ser consultado no Open Food Facts. A fotografia só é usada quando existe correspondência forte; não são inventadas imagens nem preços.</p></div>
       <div class="market-browser-results-head"><h3>Resultados</h3><span id="marketResultsMeta">Escreva pelo menos 2 caracteres</span></div>
       <div id="marketCatalogResults" class="market-catalog-results" aria-live="polite"></div>
     </div>`;
@@ -240,6 +241,62 @@
     return parseCestaResults(text).filter(result=>marketIds.includes(result.marketId));
   }
 
+  function tokenSet(value){
+    return new Set(normalized(value).split(/[^a-z0-9]+/).filter(token=>token.length>1));
+  }
+
+  function imageCandidateScore(product,candidate){
+    const wanted=tokenSet(`${product.name} ${product.pack||''}`);
+    const offered=tokenSet(`${candidate.name} ${candidate.brands||''} ${candidate.quantity||''}`);
+    if(!wanted.size||!offered.size)return 0;
+    let common=0;
+    wanted.forEach(token=>{if(offered.has(token))common+=1;});
+    let score=common/Math.max(1,Math.min(wanted.size,offered.size));
+    const a=normalized(product.name),b=normalized(candidate.name);
+    if(a&&b&&(a===b||a.includes(b)||b.includes(a)))score=Math.max(score,.82);
+    if(product.pack&&candidate.quantity&&normalized(product.pack)===normalized(candidate.quantity))score=Math.min(1,score+.12);
+    return score;
+  }
+
+  async function searchProductImages(term,signal){
+    const url=new URL(OFF_IMAGE_SEARCH_URL);
+    url.searchParams.set('search_terms',term);
+    url.searchParams.set('search_simple','1');
+    url.searchParams.set('action','process');
+    url.searchParams.set('json','1');
+    url.searchParams.set('page_size','12');
+    url.searchParams.set('fields','code,product_name,product_name_pt,brands,quantity,image_front_small_url,image_front_url');
+    const response=await fetchWithTimeout(url.href,{method:'GET',headers:{Accept:'application/json'},credentials:'omit',referrerPolicy:'no-referrer'},signal);
+    if(!response.ok)throw new Error(`off-image-http-${response.status}`);
+    const payload=await response.json();
+    const products=Array.isArray(payload?.products)?payload.products:[];
+    return products.map(item=>({
+      code:cleanRemoteText(item?.code||'',32),
+      name:cleanRemoteText(item?.product_name_pt||item?.product_name||'',120),
+      brands:cleanRemoteText(item?.brands||'',90),
+      quantity:cleanRemoteText(item?.quantity||'',50),
+      imageUrl:safeProductImageUrl(item?.image_front_small_url||item?.image_front_url||'')
+    })).filter(item=>item.name&&item.imageUrl);
+  }
+
+  function enrichResultsWithImages(results,candidates){
+    return results.map(product=>{
+      let best=null,bestScore=0;
+      for(const candidate of candidates){
+        const score=imageCandidateScore(product,candidate);
+        if(score>bestScore){best=candidate;bestScore=score;}
+      }
+      if(!best||bestScore<.72)return product;
+      return {...product,productCode:best.code,imageUrl:best.imageUrl,imageSource:'Open Food Facts',imageMatchedAt:new Date().toISOString()};
+    });
+  }
+
+  function productImageHtml(product){
+    const image=safeProductImageUrl(product?.imageUrl);
+    if(!image)return '<span class="market-product-photo is-empty" aria-hidden="true"></span>';
+    return `<span class="market-product-photo"><img src="${attr(image)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>`;
+  }
+
   function resultStatusHtml(product){
     if(product.discount||product.promotionUntil){
       const detail=[product.discount,product.promotionUntil?`até ${formatObservedDate(product.promotionUntil)}`:''].filter(Boolean).join(' · ');
@@ -255,6 +312,7 @@
     const sourceLink=product.sourceUrl?`<button class="market-result-source" type="button" data-market-source-url="${attr(product.id)}" aria-label="Abrir produto oficial">${svgIcon('external',15)}<span>${esc(product.sourceLabel)}</span></button>`:`<span class="market-result-source text-only">${esc(product.sourceLabel)}</span>`;
     return `<article class="market-catalog-card" data-market-product-card="${attr(product.id)}">
       <div class="market-catalog-main">
+        ${productImageHtml(product)}
         <div class="market-product-copy">
           <h3>${esc(product.name)}</h3>
           <p>${esc(subtitle||market.name)}</p>
@@ -306,7 +364,9 @@
     const cestaMarkets=['pingo-doce','continente'].filter(id=>selectedMarkets.has(id));
     const tasks=[];
     if(cestaMarkets.length)tasks.push({label:'Pingo Doce/Continente',promise:searchCestaProducts(term,cestaMarkets,controller.signal)});
+    const imagePromise=searchProductImages(term,controller.signal);
     const settled=await Promise.allSettled(tasks.map(task=>task.promise));
+    const imageSettled=await Promise.allSettled([imagePromise]);
     if(controller.signal.aborted||generation!==searchGeneration)return;
     const results=[];
     const warnings=[];
@@ -314,9 +374,11 @@
       if(entry.status==='fulfilled')results.push(...entry.value);
       else if(entry.reason?.name!=='AbortError')warnings.push(`${tasks[index].label}: fonte temporariamente indisponível.`);
     });
+    const imageCandidates=imageSettled[0]?.status==='fulfilled'?imageSettled[0].value:[];
+    const enriched=enrichResultsWithImages(results,imageCandidates);
     const order=new Map(MARKET_IDS.map((id,index)=>[id,index]));
-    results.sort((a,b)=>(order.get(a.marketId)??9)-(order.get(b.marketId)??9)||(a.provider==='open-prices'?String(b.observedDate).localeCompare(String(a.observedDate)):a.priceCents-b.priceCents));
-    renderRemoteResults(results.slice(0,MAX_REMOTE_RESULTS),warnings);
+    enriched.sort((a,b)=>(order.get(a.marketId)??9)-(order.get(b.marketId)??9)||(a.provider==='open-prices'?String(b.observedDate).localeCompare(String(a.observedDate)):a.priceCents-b.priceCents));
+    renderRemoteResults(enriched.slice(0,MAX_REMOTE_RESULTS),warnings);
   }
 
   function scheduleSearch(delay=SEARCH_DEBOUNCE_MS){
@@ -353,6 +415,8 @@
     appState.market.push({
       id:uid(),name:cleanRemoteText(product.name,80),category:inferCategory(product.name),quantity:'1',unit:'un',
       estimatedCents:product.priceCents,actualCents:0,purchased:false,
+      productCode:cleanRemoteText(product.productCode||'',32),imageUrl:safeProductImageUrl(product.imageUrl),
+      imageSource:product.imageUrl?'Open Food Facts':'',imageMatchedAt:product.imageUrl?(product.imageMatchedAt||now):null,
       createdAt:now,updatedAt:now,purchasedAt:null
     });
     await commit('created','market');

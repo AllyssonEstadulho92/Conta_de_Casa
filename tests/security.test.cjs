@@ -71,12 +71,14 @@ const approvedExternalOrigins = new Set([
   'https://api.github.com',
   'https://cesta.pt',
   'https://world.openfoodfacts.org',
+  'https://images.openfoodfacts.org',
   'https://unpkg.com'
 ]);
 const approvedOriginFiles = new Map([
   ['https://api.github.com',new Set(['index.html','sync.js'])],
   ['https://cesta.pt',new Set(['index.html','market-experience.js'])],
-  ['https://world.openfoodfacts.org',new Set(['index.html','market-barcode.js'])],
+  ['https://world.openfoodfacts.org',new Set(['index.html','market-experience.js','market-barcode.js'])],
+  ['https://images.openfoodfacts.org',new Set(['index.html'])],
   ['https://unpkg.com',new Set(['index.html','market-barcode.js'])]
 ]);
 for (const file of appFiles) {
@@ -101,6 +103,7 @@ assert.match(index, /script-src 'self' https:\/\/unpkg\.com/);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
 assert.match(index, /https:\/\/cesta\.pt/);
 assert.match(index, /https:\/\/world\.openfoodfacts\.org/);
+assert.match(index, /img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org;/);
 assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline event handlers');
 assert.doesNotMatch(index, /target_name=|Destino automático/);
 
