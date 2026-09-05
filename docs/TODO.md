@@ -1,18 +1,22 @@
 # TODO — Conta de Casa
 
-## P0 — validação da auditoria visual e faturas
+## P0 — validação Lucide e faturas
 
-- [x] Auditar as fontes de ícones usadas pela aplicação e identificar mistura de SVG, glifos Unicode e módulos contextuais.
-- [x] Criar registo SVG local único e dimensões explícitas para ícones de interface.
-- [x] Adicionar teste dedicado para impedir regressão do ícone de pesquisa cortado por `svg { height:auto }`.
-- [x] Adicionar leitor local do Código QR português de faturação por câmara e por imagem selecionada.
-- [x] Validar parser com o exemplo técnico publicado pela Autoridade Tributária.
-- [x] Impedir persistência/upload automático da imagem e alterações diretas ao estado financeiro.
-- [ ] Confirmar fisicamente no iPhone/Safari que a lupa de **Pesquisar produto real** aparece completa e centrada nas larguras 320, 375, 390 e 430 px.
+- [x] Auditar as fontes de ícones usadas pela aplicação e identificar mistura de SVG, glifos Unicode, controlos nativos e módulos contextuais.
+- [x] Selecionar **Lucide Icons** como linguagem visual oficial da aplicação e fixar um snapshot de origem auditável.
+- [x] Manter os SVG necessários localmente, sem icon font ou CDN de ícones em runtime.
+- [x] Substituir a lupa nativa do Safari pela lupa Lucide com caixa fixa.
+- [x] Substituir as setas nativas dos `select` por um único `ChevronDown` Lucide em iOS, Android e desktop.
+- [x] Eliminar o `+` duplicado nos botões compactos de Faturas e Mercado causado por CSS legado + SVG.
+- [x] Normalizar navegação, criação, edição, eliminação, privacidade, bloqueio, tema, sincronização, filtros, diálogos e scanners com ícones semânticos coerentes.
+- [x] Distribuir o aviso de licença Lucide/Feather com a aplicação.
+- [x] Adicionar cobertura automatizada para snapshot, licença, pesquisa, selects, botão `+`, sincronização e ausência de dependência remota de ícones.
+- [ ] Confirmar fisicamente no iPhone/Safari a página **Faturas** da captura de referência: uma única lupa, um único botão `+`, uma única seta por seletor e ausência de ícones soltos/cortados.
+- [ ] Confirmar a mesma página nas larguras 320, 375, 390 e 430 px, em retrato e paisagem.
+- [ ] Confirmar visualmente tema claro/escuro, privacidade, bloqueio, atalhos, navegação, ações financeiras e diálogos em iPhone/Android/desktop.
+- [ ] Confirmar que `prefers-reduced-motion` elimina rotação/pulsação não essencial em hardware/browser real.
 - [ ] Confirmar em iPhone/Safari a leitura de QR de uma fatura portuguesa real, incluindo permissão da câmara, autofocus e fecho das tracks.
 - [ ] Confirmar em Android/Chrome a leitura de QR por câmara e por imagem da galeria.
-- [ ] Confirmar visualmente tema claro/escuro, privacidade, bloqueio, atalhos, navegação e diálogos após a normalização de ícones.
-- [ ] Confirmar que `prefers-reduced-motion` elimina as animações não essenciais em hardware/browser real.
 
 ## P0 — validação v53
 
@@ -48,13 +52,15 @@
 - [ ] Validar tablet e desktop em browser real, incluindo ausência de scroll horizontal.
 - [x] Confirmar por testes automatizados a fundação de foco, acessibilidade e navegação do fluxo sem regressões globais.
 - [ ] Confirmar leitores de ecrã em browser/dispositivo real no fluxo de pesquisa e no estado do scanner.
-- [ ] Confirmar leitores de ecrã no novo bloco **Ler dados da fatura**, incluindo estado, pré-visualização e botões.
+- [ ] Confirmar leitores de ecrã no bloco **Ler dados da fatura**, incluindo estado, pré-visualização e botões.
+- [ ] Confirmar que ícones decorativos permanecem `aria-hidden` e que botões icon-only mantêm `aria-label` inteligível.
 - [ ] Confirmar `prefers-reduced-motion` em dispositivo/browser real.
 - [ ] Consolidar regras mobile duplicadas de `styles.css` e `design-system.css` após validação física.
 - [ ] Rever texto legado abaixo de 12 px sem alterar páginas não validadas.
 
 ## P2 — manutenção
 
+- [ ] Remover progressivamente os glifos Unicode de fallback que ainda permanecem no HTML/JS estático depois de a revisão Lucide estar validada fisicamente, sem alterar o contrato dos controlos.
 - [ ] Avaliar remoção gradual de CSS antigo já substituído pelo design system.
 - [ ] Avaliar se `market-experience.css`, `market-barcode.css`, `ui-icons.css` e `invoice-capture.css` devem permanecer isolados ou ser consolidados no design system após validação física.
 - [ ] Avaliar OCR/PDF de faturas apenas com uma estratégia de validação explícita que não grave valores financeiros probabilísticos sem confirmação.
