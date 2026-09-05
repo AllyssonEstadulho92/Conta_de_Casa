@@ -1,229 +1,232 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 5 de setembro de 2026
-Build em validação: v59
+Build em validação: v60
 
 ## Visão geral
 
-**Conta de Casa** é uma aplicação web estática/PWA distribuída por GitHub Pages, sem backend próprio. A arquitetura é local-first: estado financeiro, regras de negócio, formulários, cifragem e persistência executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
+**Conta de Casa** é uma PWA estática distribuída por GitHub Pages. Estado financeiro, cifragem, persistência, formulários e regras de negócio permanecem local-first. Não existe backend próprio da aplicação.
 
-A distribuição pública é composta por `scripts/prepare-pages.cjs`, validada em CI e publicada pelo workflow Pages. O Service Worker gere cache, funcionamento offline e atualização da própria aplicação.
+A distribuição pública é composta por `scripts/prepare-pages.cjs`, validada em CI e publicada pelo workflow Pages. A v60 acrescenta um **pipeline de catálogo visual no build** para obter fotografias publicadas pelo Continente e Pingo Doce sem transformar o browser num scraper.
 
 ## Camadas principais
 
-### Estrutura e apresentação
+### Interface
 
-- `index.html` — estrutura semântica, CSP base, páginas, navegação e diálogos.
+- `index.html` — estrutura semântica, CSP base, páginas e diálogos.
 - `styles.css` — estilos base/legados.
-- `design-system.css` — tokens, componentes e responsividade principal.
-- `mobile-layout.css` — estabilidade do viewport móvel/Safari.
-- `market-experience.css` — descoberta e comparação de produtos.
+- `design-system.css` — tokens e componentes principais.
+- `mobile-layout.css` — estabilidade do viewport/Safari.
+- `market-experience.css` — descoberta/comparação de produtos.
 - `market-barcode.css` — scanner EAN/UPC/GTIN.
-- `ui-icons.css` — sistema visual Lucide e overrides finais de interface.
-- `invoice-capture.css` — leitor QR de faturas.
-- `app-update.css` — Centro de Atualização de Software.
-- `market-image-audit.css` — miniaturas tácteis e visualizador ampliado v59.
+- `ui-icons.css` — sistema Lucide e normalização visual.
+- `invoice-capture.css` — captura QR de faturas.
+- `app-update.css` — Centro de Atualização.
+- `market-image-audit.css` — miniaturas tácteis e visualizador de imagens.
 
-### JavaScript
+### Runtime JavaScript
 
-- `core.js` — estado, normalização, cifragem, IndexedDB, segurança e utilitários.
-- `finance.js` — cálculos financeiros.
-- `render.js` — renderização de páginas/listas.
+- `core.js` — estado, normalização, cifragem, IndexedDB e utilitários.
+- `finance.js` — regras financeiras.
+- `render.js` — renderização.
 - `forms.js` — formulários e validação.
-- `sync.js` — sincronização cifrada opcional via GitHub.
-- `ui-icons.js` — subset Lucide local e hidratação de controlos.
-- `events.js` — eventos, navegação, viewport, cofre e Service Worker.
-- `market-experience.js` — preços Pingo Doce/Continente via `cesta.pt` e criação confirmada de itens.
+- `sync.js` — sincronização cifrada opcional.
+- `events.js` — eventos, navegação, cofre, viewport e Service Worker.
+- `ui-icons.js` — subset Lucide local.
+- `market-experience.js` — pesquisa de preços via `cesta.pt`, resultados e criação confirmada de itens.
 - `market-barcode.js` — leitura GTIN e identificação assistida.
-- `invoice-capture.js` — leitura local do QR fiscal.
-- `app-update.js` — Atualização de Software, notas de release e `registration.update()`.
-- `market-image-audit.js` — resolução individual de imagens, enriquecimento de itens e lightbox v59.
+- `invoice-capture.js` — QR fiscal.
+- `app-update.js` — notas da versão e atualização da PWA.
+- `market-image-audit.js` — fallback v59 através das bases Open Facts e zoom genérico.
+- `market-official-images.js` — prioridade v60 para fotografia oficial de Continente/Pingo Doce.
 
-## Modelo de dados e segurança
+### Build/CI
 
-O schema financeiro permanece em `STATE_VERSION = 5`. Valores monetários são inteiros em cêntimos. O Mercado mantém `estimatedCents` separado de `actualCents` e quantidade separada do preço unitário.
+- `scripts/refresh-retailer-image-index.cjs` — lê os sitemaps oficiais e gera índices JSON fragmentados.
+- `scripts/prepare-pages.cjs` — constrói `dist/`, carimba versão, injeta CSP/assets e copia os índices oficiais.
+- `.github/workflows/ci.yml` — regenera o catálogo visual e executa todas as suites.
+- `.github/workflows/pages.yml` — regenera novamente o catálogo da revisão testada antes do deploy.
 
-O cofre usa IndexedDB com envelope cifrado. A credencial não é persistida em claro. O modelo de acesso continua baseado em PBKDF2-SHA-256 + AES-GCM; a v59 não altera autenticação, chaves, backups ou sincronização.
+## Modelo de dados
 
-Metadados opcionais de fotografia no item de Mercado:
+O schema financeiro permanece `STATE_VERSION = 5`. Não existe migração v60.
+
+Um item de Mercado continua a usar os metadados opcionais já introduzidos anteriormente:
 
 - `productCode`;
 - `imageUrl`;
 - `imageSource`;
 - `imageMatchedAt`.
 
-Apenas URL/metadados são guardados. Não são persistidos binários de imagem.
+A v60 não adiciona binários ao cofre. A fotografia continua fora do IndexedDB; apenas a URL e proveniência são guardadas.
 
-## Mercado — separação de responsabilidades
+## Mercado — fluxo de produto
 
-O fluxo de produto mantém responsabilidades distintas:
+As responsabilidades continuam separadas:
 
-1. **Preço e ligação oficial:** `market-experience.js` consulta `cesta.pt/mcp` para Pingo Doce e Continente.
-2. **Código de barras:** `market-barcode.js` lê GTIN localmente e pode identificar o produto.
-3. **Fotografia:** `market-image-audit.js` resolve uma referência visual sem alterar a origem do preço.
-4. **Persistência:** apenas depois de ação explícita do utilizador o produto entra em `appState.market`.
+1. **Pesquisa/preço:** `market-experience.js` → `cesta.pt/mcp`.
+2. **Identidade do resultado:** nome + retalhista + `pid` do SKU devolvido por `cesta.pt`.
+3. **Imagem oficial:** `market-official-images.js` → shard same-origin `retailer-images/<retalhista>/<prefixo>.json` → URL oficial.
+4. **Fallback:** `market-image-audit.js` → Open Facts apenas quando a imagem oficial não existe.
+5. **Persistência:** só após ação explícita de adicionar; a v60 acompanha a criação para associar a imagem oficial ao item criado.
+6. **Preço efetivo:** `actualCents` continua independente da fotografia e do preço pesquisado.
 
-Um GTIN identifica o SKU, mas não prova o preço. Uma fotografia identifica visualmente um produto, mas não é tratada como prova do preço nem como imagem oficial do retalhista.
+## Pipeline oficial de imagens v60
 
-## Auditoria de imagens — v59
+### Fonte Continente
 
-### Problema corrigido
+Índice raiz:
 
-A v57 fazia uma pesquisa ampla no Open Food Facts para o termo inteiro. Como o número de candidatos era limitado, muitos resultados específicos de uma pesquisa ampla como “café” ficavam com placeholder mesmo quando existia uma fotografia pública noutro registo.
+`https://www.continente.pt/sitemap_index.xml`
 
-A v59 audita **cada produto individualmente** e transforma qualquer fotografia disponível numa ação de ampliação.
+O gerador seleciona exclusivamente children compatíveis com:
 
-### Fluxo de resolução
+`sitemap-custom_sitemap_<n>-image.xml`
 
-Para cada cartão de pesquisa ou item guardado sem fotografia:
+Em cada `<url>` são extraídos:
 
-1. determinar nome, embalagem/categoria e códigos disponíveis;
-2. se existir GTIN, tentar correspondência exata;
-3. para resultados Continente, usar o `pid` já devolvido pelo fluxo cesta.pt para consultar `get_product` e extrair EAN quando disponível;
-4. consultar a base Open Facts mais adequada ao tipo de produto;
-5. sem código, pesquisar nome + embalagem;
-6. pontuar candidatos por cobertura de palavras, precisão, nome, marca e quantidade;
-7. aceitar apenas pontuação >= `0.74`;
-8. manter placeholder se não existir correspondência segura.
+- `<loc>` — URL do produto, da qual é obtido o PID final `-<pid>.html`;
+- `<image:loc>` — fotografia publicada no sitemap;
+- `<image:title>`/caption — usado apenas para índice de recuperação exata de itens antigos.
 
-A resolução limita-se a três produtos em simultâneo (`MAX_CONCURRENT_RESOLUTIONS=3`) para evitar sobrecarga de rede.
+A URL de imagem só é aceite se pertencer ao catálogo oficial `Sites-col-master-catalog` e ao caminho de imagens de produto. O host runtime é normalizado para `www.continente.pt`.
 
-### Fontes de imagem autorizadas
+### Fonte Pingo Doce
 
-- `world.openfoodfacts.org` / hosts de imagens Open Food Facts;
-- `world.openbeautyfacts.org` / hosts de imagens Open Beauty Facts;
-- `world.openproductsfacts.org` / hosts de imagens Open Products Facts;
-- `world.openpetfoodfacts.org` / hosts de imagens Open Pet Food Facts.
+Índice raiz:
 
-Seleção aproximada:
+`https://www.pingodoce.pt/home/sitemap_index.xml`
 
-- alimentação/bebidas → Food;
-- higiene/cosmética → Beauty;
-- limpeza/casa/parafarmácia/produtos gerais → Products;
-- alimentação animal → Pet Food.
+O gerador seleciona:
 
-Existe fallback entre bases quando necessário.
+`/home/sitemap_<n>-product.xml`
 
-### Porque não fazer scraping direto das páginas Continente/Pingo Doce
+A imagem só é aceite se vier de `static.pingodoce.pt` e do catálogo `Sites-pingo-doce-master`.
 
-A aplicação é uma PWA estática no browser. As páginas dos retalhistas não constituem uma API CORS estável para a PWA extrair HTML/imagens diretamente. Forçar essa recolha exigiria um backend/proxy externo, introduzindo disponibilidade, quotas, privacidade, termos de utilização e uma nova superfície de segurança.
+### Invariantes do gerador
 
-Decisão v59: **não introduzir proxy genérico**. Quando `cesta.pt` fornece um identificador Continente capaz de resolver EAN, esse identificador é usado para aumentar a precisão; a imagem continua a vir de uma base de produto permitida. Sem correspondência pública suficientemente segura, o placeholder é o comportamento correto.
+- timeout de rede e uma repetição controlada;
+- limite de tamanho por XML;
+- mínimo de 5 000 produtos por retalhista;
+- SKU Continente `8167440` obrigatório;
+- SKU Pingo Doce `739490` obrigatório;
+- falha fechada: se a fonte oficial deixar de cumprir o contrato, o build falha.
 
-### Persistência de enriquecimento
+A CI de referência v60 gerou 100 474 mapeamentos Continente, 16 018 Pingo Doce e 101 558 nomes exatos únicos.
 
-Se a auditoria encontrar uma imagem para um item guardado, atualiza os metadados do item e chama `saveState()` de forma debounced. Isto não cria uma transação financeira nem altera `updatedAt` do item apenas para efeitos de preço; é enriquecimento visual do registo existente.
+## Sharding e desempenho
 
-### Ampliação
+O catálogo completo não é descarregado no iPhone.
 
-`market-image-audit.js` converte a superfície `.market-product-photo` com imagem real num botão acessível e abre `#marketProductImageViewer`.
+O build gera:
 
-O visualizador:
+- `retailer-images/continente/<2 dígitos>.json`;
+- `retailer-images/pingo-doce/<2 dígitos>.json`;
+- `retailer-images/names/continente/<2 chars>.json`;
+- `retailer-images/names/pingo-doce/<2 chars>.json`;
+- `retailer-images/index.json`.
 
-- usa `<dialog>`;
-- apresenta imagem em `object-fit: contain`;
-- suporta toque/clique, Esc, backdrop e botão Fechar;
-- respeita `100dvh`, `100svh` e `env(safe-area-inset-*)`;
-- suporta dark mode e `prefers-reduced-motion`;
-- mantém `referrerPolicy='no-referrer'`.
+Um resultado novo já possui PID, portanto o runtime calcula o prefixo e carrega apenas o shard correspondente. A cache em memória impede pedidos repetidos durante a sessão.
 
-## CSP v59
+Os shards de nome destinam-se apenas a itens antigos sem PID. Só são incluídos nomes que são únicos dentro de cada retalhista. No runtime, se um mesmo nome exato produzir correspondência em mais de um retalhista, é rejeitado como ambíguo.
 
-O template fonte continua conservador. Na composição pública, `prepare-pages.cjs` expande apenas as origens necessárias à v59:
+## Imagem oficial versus fallback
 
-`img-src`:
+Ordem de confiança:
 
-- `https://*.openfoodfacts.org`
-- `https://*.openbeautyfacts.org`
-- `https://*.openproductsfacts.org`
-- `https://*.openpetfoodfacts.org`
+1. **PID exato + sitemap oficial** — `imageSource = Continente/Pingo Doce — imagem oficial`;
+2. **nome oficial exato, único e não ambíguo** — apenas para reparar item antigo;
+3. **Open Facts** — fotografia de referência, nunca rotulada como oficial;
+4. **placeholder** — quando não existe correspondência segura.
 
-`connect-src` mantém as origens já usadas e acrescenta apenas:
+Não existe matching aproximado para atribuir o rótulo “imagem oficial”.
 
-- `https://world.openbeautyfacts.org`
-- `https://world.openproductsfacts.org`
-- `https://world.openpetfoodfacts.org`
+## Visualizador
 
-`cesta.pt` já era permitido pelo Mercado. Não existe `connect-src *`, proxy genérico ou endpoint próprio novo.
+A fotografia oficial é transformada num controlo focável/táctil. O toque abre `<dialog>` com:
 
-## Privacidade de rede
+- imagem ampliada;
+- nome do produto;
+- indicação de origem oficial;
+- botão Fechar;
+- Esc e backdrop;
+- safe areas;
+- tema escuro e foco visível.
 
-Pedidos de imagem/detalhe usam:
+O visualizador reutiliza a linguagem de `market-image-audit.css`, sem duplicar uma segunda folha visual.
 
-- `credentials:'omit'`;
-- `referrerPolicy:'no-referrer'`;
-- timeout/AbortController;
-- sem Authorization/API key.
+## CSP e fronteiras de rede
 
-A resolução envia apenas identificadores/nomes necessários do produto. Não envia faturas, montantes financeiros, PIN, chave do cofre, token GitHub ou perfil pessoal.
+A CSP pública v60 diferencia leitura de dados e apresentação de imagens.
 
-## Centro de Atualização — v58/v59
+### `connect-src`
 
-`app-update.js` acrescenta **Definições → Atualização de Software**. A verificação é same-origin e usa o Service Worker:
+Mantém apenas as origens necessárias a APIs já aprovadas:
 
-1. obter o registo;
-2. `registration.update()`;
-3. observar `installing/waiting`;
-4. enviar `SKIP_WAITING` quando necessário;
-5. `controllerchange` provoca reload através do listener existente.
+- `'self'`;
+- `https://api.github.com`;
+- `https://cesta.pt`;
+- APIs Open Facts previstas.
 
-`APP_RELEASE_NOTES` é a fonte visível de “Mais detalhes”. A v59 acrescenta as alterações de imagem e ampliação.
+**Continente e Pingo Doce não entram em `connect-src`.** Assim o runtime não pode começar a fazer scraping/fetch arbitrário dos sites dos retalhistas.
 
-## Bundle público v59
+### `img-src`
 
-`scripts/prepare-pages.cjs`:
+Acrescenta exclusivamente:
 
-1. gera `dist/` por allowlist;
-2. copia apenas assets permitidos;
-3. carimba `app-build=v59` e query strings `?v=59`;
-4. injeta `app-update.*` e `market-image-audit.*`;
-5. aplica a CSP pública v59;
-6. carimba `dist/events.js` para `./sw.js?v=59`.
+- `https://www.continente.pt`;
+- `https://static.pingodoce.pt`;
 
-O Service Worker usa:
+além das origens Open Facts já utilizadas.
 
-`conta-de-casa-public-v59-product-images`
+O navegador pode apresentar `<img>` cross-origin sem o CORS necessário para ler o corpo do recurso. O conteúdo da imagem não é exposto ao JavaScript.
 
-Novos assets offline:
+## Service Worker v60
 
-- `./market-image-audit.css`
-- `./market-image-audit.js`
+Cache:
 
-## Faturas e QR
+`conta-de-casa-public-v60-official-retailer-images`
 
-`invoice-capture.js` continua a atuar apenas como preenchimento assistido. Vídeo/imagem são processados localmente e não persistidos. O QR fiscal preenche apenas campos comprováveis e mantém revisão explícita antes de guardar.
+Os assets estáticos essenciais são precached. Os shards oficiais são tratados por uma regex estrita e entram em cache apenas quando pedidos. Não se precacheiam mais de 100 mil registos no dispositivo.
 
-## Ícones e UI
+A chave pública só aceita same-origin e query de versão `?v=`; caminhos fora da allowlist/regex não são tratados pelo worker.
 
-Lucide permanece a linguagem visual oficial, vendorizada localmente em `ui-icons.js`. Snapshot de origem:
+## Segurança e privacidade
 
-`94e4cb9d9db5907053ebf3636a97c45529cf776b`
+- sem backend adicional;
+- sem proxy genérico de scraping;
+- sem API keys, cookies de retalhistas ou Authorization;
+- nenhum dado do cofre é enviado para os sitemaps no runtime — os sitemaps são processados no GitHub Actions;
+- nenhum ficheiro de imagem é copiado para o repositório/cofre; apenas URLs oficiais entram no bundle JSON;
+- o preço não é inferido da imagem;
+- imagem não altera `estimatedCents`, `actualCents`, quantidade ou estado de compra;
+- o fallback v59 continua com `credentials:'omit'`/`referrerPolicy:'no-referrer'`.
 
-Não há icon font/CDN em runtime. Controlos mantêm semântica nativa; ícones decorativos são `aria-hidden`; botões icon-only têm nomes acessíveis.
+## Build público v60
 
-## Viewport e acessibilidade
+`prepare-pages.cjs`:
 
-- shell estrutural: `100dvh` / `100svh`;
-- `VisualViewport`: apenas comportamento transitório de teclado/diálogos;
-- safe areas mantidas em navegação, scanners, cofre, update center e visualizador de imagem;
-- foco visível e alvos tácteis >= 44/48 px conforme componente;
-- `prefers-reduced-motion` remove movimento não essencial.
+1. exige o índice oficial ou chama o gerador;
+2. copia a allowlist estática;
+3. copia `retailer-images/` para `dist/`;
+4. carimba `app-build=v60` e `?v=60`;
+5. injeta `market-official-images.js?v=60`;
+6. injeta CSP v60;
+7. carimba o registo do SW para `./sw.js?v=60`.
 
-## CI e deploy
+## Testes
 
-`.github/workflows/ci.yml` valida sintaxe e suites de regressão. A v59 acrescenta `tests/market-image-audit.test.cjs`.
+`tests/market-official-images.test.cjs` protege especificamente:
 
-`.github/workflows/pages.yml` repete a validação antes de executar `prepare-pages.cjs` e publicar apenas `dist/`.
+- origens dos sitemaps;
+- dimensão mínima do catálogo;
+- mapeamentos dos SKUs de controlo;
+- ausência de proxy genérico;
+- resolução por PID e nome exato;
+- rejeição de ambiguidades;
+- CSP mínima;
+- ausência de hosts dos retalhistas em `connect-src`;
+- presença de shards no `dist/`;
+- Service Worker v60.
 
-A branch v59 obteve CI `33995086764` com conclusão `success` antes da atualização documental.
-
-## Regras de manutenção
-
-- não apresentar uma imagem aproximada quando o score ficar abaixo do limiar;
-- preferir GTIN/EAN exato sempre que disponível;
-- preço e fotografia devem permanecer fontes independentes;
-- não introduzir proxy de scraping sem decisão arquitetural própria e análise de privacidade/segurança/termos;
-- novas origens de imagem/API exigem allowlist CSP explícita, teste e documentação;
-- novos assets públicos exigem entrada explícita em `prepare-pages.cjs` e `sw.js`;
-- cada release deve atualizar `APP_RELEASE_NOTES`, BUILD, cache e testes de freshness;
-- validar em iPhone/Safari e Android/Chrome qualquer alteração que envolva `<dialog>`, câmara, safe areas ou interação tátil.
+As suites anteriores continuam a validar finanças, isolamento, segurança, Mercado, fallback Open Facts, scanners, ícones, responsividade, navegação, acessibilidade, atualização e sincronização.
