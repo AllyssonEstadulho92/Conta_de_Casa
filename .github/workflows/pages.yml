@@ -33,6 +33,9 @@ jobs:
         with:
           node-version: "24"
 
+      - name: Build official retailer image index
+        run: node scripts/refresh-retailer-image-index.cjs
+
       - name: Verify tested revision
         run: |
           node --check core.js
@@ -47,7 +50,9 @@ jobs:
           node --check invoice-capture.js
           node --check app-update.js
           node --check market-image-audit.js
+          node --check market-official-images.js
           node --check sw.js
+          node --check scripts/refresh-retailer-image-index.cjs
           node --check scripts/prepare-pages.cjs
           node tests/finance.test.cjs
           node tests/audit.test.cjs
@@ -60,6 +65,7 @@ jobs:
           node tests/market-experience.test.cjs
           node tests/market-product-images.test.cjs
           node tests/market-image-audit.test.cjs
+          node tests/market-official-images.test.cjs
           node tests/market-barcode.test.cjs
           node tests/market-live-accounting.test.cjs
           node tests/ui-icons.test.cjs
