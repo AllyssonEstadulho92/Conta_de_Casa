@@ -1,53 +1,43 @@
 'use strict';
 
 /*
- * Conta de Casa — Market prototype experience (v51)
- * Visual prototype layer only. Product/store prices below are demonstration values,
- * not live retailer data. The existing encrypted market data model is preserved.
+ * Conta de Casa — pesquisa de preços reais (v52)
+ * Continente/Pingo Doce: consulta atual através de cesta.pt, com URL oficial do produto.
+ * Mercadona Portugal: observações públicas com comprovativo através de Open Prices.
+ * Nenhum preço fictício ou imagem de produto é usado nesta camada.
  */
-(function marketPrototypeExperience(){
+(function marketLiveExperience(){
   const MARKET_BROWSER_MODE='market-browser';
+  const CESTA_MCP_URL='https://cesta.pt/mcp';
+  const OPEN_PRICES_API='https://prices.openfoodfacts.org/api/v1';
+  const SEARCH_DEBOUNCE_MS=450;
+  const SEARCH_TIMEOUT_MS=12000;
+  const MAX_REMOTE_RESULTS=20;
   const MARKET_IDS=['pingo-doce','continente','mercadona'];
   const MARKET_DEFINITIONS=Object.freeze([
-    {id:'pingo-doce',name:'Pingo Doce',short:'PD',tone:'green'},
-    {id:'continente',name:'Continente',short:'C',tone:'red'},
-    {id:'mercadona',name:'Mercadona',short:'M',tone:'orange'}
+    {id:'pingo-doce',name:'Pingo Doce',short:'PD',tone:'green',provider:'cesta',providerId:'pingodoce'},
+    {id:'continente',name:'Continente',short:'C',tone:'red',provider:'cesta',providerId:'continente'},
+    {id:'mercadona',name:'Mercadona',short:'M',tone:'orange',provider:'open-prices',providerId:'mercadona'}
   ]);
-  const DEMO_PRODUCTS=Object.freeze([
-    {
-      id:'demo-milk-pingo',name:'Leite Meio Gordo',pack:'1 L',category:'Laticínios',unit:'un',primaryMarket:'pingo-doce',promotion:true,
-      offers:{'pingo-doce':76,'continente':79,'mercadona':75}
-    },
-    {
-      id:'demo-milk-continente',name:'Leite Meio Gordo',pack:'1 L',category:'Laticínios',unit:'un',primaryMarket:'continente',promotion:false,
-      offers:{'pingo-doce':76,'continente':79,'mercadona':75}
-    },
-    {
-      id:'demo-milk-mercadona',name:'Leite Meio Gordo',pack:'1 L · Hacendado',category:'Laticínios',unit:'un',primaryMarket:'mercadona',promotion:false,
-      offers:{'pingo-doce':76,'continente':79,'mercadona':75}
-    },
-    {
-      id:'demo-eggs',name:'Ovos Classe M/L',pack:'12 un',category:'Mercearia',unit:'un',primaryMarket:'pingo-doce',promotion:false,
-      offers:{'pingo-doce':239,'continente':249,'mercadona':235}
-    },
-    {
-      id:'demo-rice',name:'Arroz Agulha',pack:'1 kg',category:'Mercearia',unit:'un',primaryMarket:'continente',promotion:true,
-      offers:{'pingo-doce':139,'continente':129,'mercadona':135}
-    },
-    {
-      id:'demo-olive-oil',name:'Azeite Virgem Extra',pack:'750 ml',category:'Mercearia',unit:'un',primaryMarket:'mercadona',promotion:false,
-      offers:{'pingo-doce':699,'continente':719,'mercadona':689}
-    }
+  const PRODUCT_SUGGESTIONS=Object.freeze(['Leite meio gordo','Ovos','Arroz','Azeite','Café','Detergente','Papel higiénico','Água']);
+  const CATEGORY_SUGGESTIONS=Object.freeze([
+    ['Lacticínios e ovos','leite'],['Mercearia / Despensa','arroz'],['Bebidas','água'],['Limpeza','detergente'],
+    ['Higiene pessoal','champô'],['Frutas e legumes','banana'],['Carne e peixe','frango'],['Snacks e doces','chocolate']
   ]);
 
   let selectedMarkets=new Set(MARKET_IDS);
   let activeTab='markets';
-  let query='Leite meio gordo';
+  let query='';
   let observer=null;
+  let searchTimer=0;
+  let searchGeneration=0;
+  let activeSearchController=null;
+  let resultById=new Map();
+  let mercadonaLocationIds=null;
 
   const marketById=id=>MARKET_DEFINITIONS.find(m=>m.id===id)||MARKET_DEFINITIONS[0];
-  const productById=id=>DEMO_PRODUCTS.find(p=>p.id===id)||null;
   const normalized=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-PT').trim();
+  const cleanRemoteText=(value,max=180)=>String(value??'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,max);
 
   function svgIcon(name,size=24){
     const paths={
@@ -57,10 +47,10 @@
       info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
       plus:'<path d="M12 5v14M5 12h14"/>',
       check:'<path d="m5 12 4 4L19 6"/>',
-      package:'<path d="M5 7.5 12 4l7 3.5v9L12 20l-7-3.5z"/><path d="M5 7.5 12 11l7-3.5M12 11v9"/>',
-      chevron:'<path d="m9 18 6-6-6-6"/>'
+      external:'<path d="M14 5h5v5M19 5l-8 8"/><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+      refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/>'
     };
-    return `<svg class="svg-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.package}</svg>`;
+    return `<svg class="svg-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.search}</svg>`;
   }
 
   function marketMark(market,size='large'){
@@ -68,25 +58,58 @@
     return `<span class="market-brand-mark ${attr(m.tone)} ${attr(size)}" aria-hidden="true"><span>${esc(m.short)}</span></span>`;
   }
 
-  function cartonArt(marketId){
-    const market=marketById(marketId);
-    return `<span class="market-product-art ${attr(market.tone)}" aria-hidden="true">
-      <span class="carton-cap"></span><span class="carton-brand">${esc(market.short)}</span><span class="carton-label">LEITE</span><span class="carton-volume">1 L</span>
-    </span>`;
+  function parseEuroCents(value){
+    const match=String(value||'').match(/(\d{1,7}(?:[.,]\d{1,2})?)\s*€/);
+    if(!match)return 0;
+    const amount=Number(match[1].replace(',','.'));
+    const cents=Math.round(amount*100);
+    return Number.isSafeInteger(cents)&&cents>0&&cents<=100000000?cents:0;
   }
 
-  function offerEntries(product){
-    return MARKET_DEFINITIONS.map(m=>({market:m,priceCents:Number(product.offers?.[m.id]||0)})).filter(entry=>entry.priceCents>0);
+  function safeRetailerUrl(value,marketId){
+    if(!value)return '';
+    try{
+      const url=new URL(String(value));
+      if(url.protocol!=='https:')return '';
+      const allowed=marketId==='continente'?new Set(['continente.pt','www.continente.pt']):
+        marketId==='pingo-doce'?new Set(['pingodoce.pt','www.pingodoce.pt']):new Set();
+      return allowed.has(url.hostname.toLowerCase())?url.href:'';
+    }catch(_error){return '';}
   }
 
-  function selectedOffer(product){
-    const entries=offerEntries(product).filter(entry=>selectedMarkets.has(entry.market.id));
-    const candidates=entries.length?entries:offerEntries(product);
-    return candidates.sort((a,b)=>a.priceCents-b.priceCents)[0]||null;
+  function formatObservedDate(value){
+    const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value||''));
+    return match?`${match[3]}/${match[2]}/${match[1]}`:'';
+  }
+
+  function observationAgeDays(value){
+    const date=Date.parse(`${value}T00:00:00Z`);
+    if(!Number.isFinite(date))return Infinity;
+    return Math.max(0,Math.floor((Date.now()-date)/86400000));
+  }
+
+  function inferCategory(name){
+    const value=normalized(name);
+    const rules=[
+      [['leite','queijo','iogurte','manteiga','natas','ovo'],'Lacticínios e ovos'],
+      [['banana','maca','maçã','laranja','tomate','alface','batata','cebola'],'Frutas e legumes'],
+      [['frango','peru','porco','vaca','carne','peixe','pescada','salmao','salmão','atum'],'Carne e peixe'],
+      [['pao','pão','croissant','bolo','pastel'],'Padaria e pastelaria'],
+      [['arroz','massa','azeite','oleo','óleo','farinha','acucar','açúcar','cafe','café','feijao','feijão'],'Mercearia / Despensa'],
+      [['congelado','gelado','pizza'],'Congelados'],
+      [['agua','água','sumo','refrigerante','cerveja','vinho'],'Bebidas'],
+      [['chocolate','bolacha','biscoito','snack','doce'],'Snacks e doces'],
+      [['champô','shampoo','gel','sabonete','dentifrico','dentífrico','desodorizante'],'Higiene pessoal'],
+      [['detergente','lixivia','lixívia','limpa','amaciante'],'Limpeza'],
+      [['fralda','bebe','bebé'],'Bebé'],
+      [['cao','cão','gato','ração','racao'],'Animais']
+    ];
+    for(const [terms,category] of rules){if(terms.some(term=>value.includes(normalized(term))))return category;}
+    return 'Outros';
   }
 
   function marketSelectorHtml(){
-    return `<div class="market-source-grid" role="group" aria-label="Mercados a comparar">${MARKET_DEFINITIONS.map(m=>{
+    return `<div class="market-source-grid" role="group" aria-label="Mercados a pesquisar">${MARKET_DEFINITIONS.map(m=>{
       const selected=selectedMarkets.has(m.id);
       return `<button class="market-source-card${selected?' selected':''}" type="button" data-market-source="${attr(m.id)}" aria-pressed="${selected}">
         ${marketMark(m)}
@@ -103,16 +126,15 @@
   }
 
   function browserShellHtml(){
-    return `<div class="market-browser" data-market-price-mode="demo">
+    return `<div class="market-browser" data-market-price-mode="live">
       <div class="market-browser-search-row">
-        <div class="market-browser-search">${svgIcon('search',24)}<input id="marketCatalogSearch" type="search" value="${attr(query)}" placeholder="Pesquisar produto" autocomplete="off" aria-label="Pesquisar produto no comparador"><button class="market-search-clear" type="button" data-market-search-clear aria-label="Limpar pesquisa">${svgIcon('close',22)}</button></div>
+        <div class="market-browser-search">${svgIcon('search',24)}<input id="marketCatalogSearch" type="search" value="" placeholder="Pesquisar produto real" autocomplete="off" aria-label="Pesquisar produto nos mercados"><button class="market-search-clear" type="button" data-market-search-clear aria-label="Limpar pesquisa">${svgIcon('close',22)}</button></div>
       </div>
       ${tabsHtml()}
       <div id="marketBrowserTabPanel" class="market-browser-tab-panel" role="tabpanel"></div>
-      <div class="market-price-notice" role="note">${svgIcon('info',22)}<p><strong>Protótipo visual.</strong> Os preços apresentados são valores de demonstração e não são preços em tempo real. Uma integração automática só deve ser ativada quando existir uma fonte verificada para cada mercado.</p></div>
-      <div class="market-browser-results-head"><h3>Resultados encontrados</h3><button type="button" class="link-btn" data-market-see-all>Ver todos</button></div>
+      <div class="market-source-notice" role="note">${svgIcon('info',21)}<p><strong>Fontes verificáveis.</strong> Continente e Pingo Doce são consultados no momento através de cesta.pt e os resultados incluem ligação ao produto oficial. Mercadona usa observações de lojas em Portugal com comprovativo no Open Prices; a data é sempre indicada. Não são usados preços fictícios. A pesquisa é enviada apenas às fontes necessárias.</p></div>
+      <div class="market-browser-results-head"><h3>Resultados</h3><span id="marketResultsMeta">Escreva pelo menos 2 caracteres</span></div>
       <div id="marketCatalogResults" class="market-catalog-results" aria-live="polite"></div>
-      <button class="market-more-results" type="button" data-market-see-all>${svgIcon('search',21)}<span>Ver mais resultados</span>${svgIcon('chevron',20)}</button>
     </div>`;
   }
 
@@ -124,54 +146,10 @@
       return;
     }
     if(activeTab==='products'){
-      const products=[...new Set(DEMO_PRODUCTS.map(p=>p.name))].sort((a,b)=>a.localeCompare(b,'pt-PT'));
-      setHTML(root,`<div class="market-browser-chip-grid" aria-label="Produtos de demonstração">${products.map(name=>`<button type="button" class="market-browser-chip" data-market-chip-query="${attr(name)}">${svgIcon('package',18)}<span>${esc(name)}</span></button>`).join('')}</div>`);
+      setHTML(root,`<div class="market-browser-chip-grid" aria-label="Sugestões de pesquisa">${PRODUCT_SUGGESTIONS.map(name=>`<button type="button" class="market-browser-chip" data-market-chip-query="${attr(name)}"><span>${esc(name)}</span></button>`).join('')}</div>`);
       return;
     }
-    const categories=[...new Set(DEMO_PRODUCTS.map(p=>p.category))].sort((a,b)=>a.localeCompare(b,'pt-PT'));
-    setHTML(root,`<div class="market-browser-chip-grid" aria-label="Categorias de demonstração">${categories.map(name=>`<button type="button" class="market-browser-chip" data-market-chip-query="${attr(name)}"><span>${esc(name)}</span></button>`).join('')}</div>`);
-  }
-
-  function comparisonHtml(product){
-    return `<div class="market-comparison-row" aria-label="Comparação de preços de demonstração">${MARKET_DEFINITIONS.map(m=>{
-      const value=Number(product.offers?.[m.id]||0);
-      return `<div class="market-comparison-cell">${marketMark(m,'small')}<span>${esc(m.name)}</span><strong data-money>${value>0?money(value):'—'}</strong></div>`;
-    }).join('')}</div>`;
-  }
-
-  function productCardHtml(product){
-    const primary=marketById(product.primaryMarket);
-    const primaryPrice=Number(product.offers?.[primary.id]||0);
-    const choice=selectedOffer(product);
-    return `<article class="market-catalog-card" data-market-product-card="${attr(product.id)}">
-      <div class="market-catalog-main">
-        <div class="market-art-shell">${cartonArt(product.primaryMarket)}</div>
-        <div class="market-product-copy">
-          <h4>${esc(product.name)}</h4>
-          <p>${esc(product.pack)} · ${esc(primary.name)}</p>
-          ${product.promotion?'<span class="market-promo-chip">Em promoção</span>':''}
-          <strong class="market-product-price" data-money>${money(primaryPrice)}</strong>
-          ${choice&&choice.market.id!==primary.id?`<small>Melhor valor selecionado: ${esc(choice.market.name)} · <span data-money>${money(choice.priceCents)}</span></small>`:''}
-        </div>
-        <button class="market-add-product" type="button" data-market-add-product="${attr(product.id)}" aria-label="Adicionar ${attr(product.name)} à lista">${svgIcon('plus',24)}</button>
-      </div>
-      ${comparisonHtml(product)}
-    </article>`;
-  }
-
-  function renderResults(){
-    const root=$('#marketCatalogResults');
-    if(!root)return;
-    const needle=normalized(query);
-    const list=DEMO_PRODUCTS.filter(product=>{
-      if(!needle)return true;
-      return normalized([product.name,product.pack,product.category,marketById(product.primaryMarket).name].join(' ')).includes(needle);
-    });
-    if(!list.length){
-      setHTML(root,`<div class="market-browser-empty"><span class="market-browser-empty-icon">${svgIcon('search',26)}</span><strong>Sem resultados de demonstração</strong><p>Não existe um produto de exemplo correspondente a “${esc(query)}”. Pode continuar a usar o formulário normal da aplicação.</p><button class="btn secondary" type="button" data-market-manual>Adicionar manualmente</button></div>`);
-      return;
-    }
-    setHTML(root,list.map(productCardHtml).join(''));
+    setHTML(root,`<div class="market-browser-chip-grid" aria-label="Categorias de pesquisa">${CATEGORY_SUGGESTIONS.map(([label,term])=>`<button type="button" class="market-browser-chip" data-market-chip-query="${attr(term)}"><span>${esc(label)}</span></button>`).join('')}</div>`);
   }
 
   function updateTabs(){
@@ -183,10 +161,260 @@
     updateTabPanel();
   }
 
+  function parseSseEvents(text){
+    const events=[];
+    for(const block of String(text||'').split(/\n\n+/)){
+      const data=block.split('\n').filter(line=>line.startsWith('data:')).map(line=>line.slice(5).trim()).join('\n');
+      if(!data)continue;
+      try{events.push(JSON.parse(data));}catch(_error){}
+    }
+    return events;
+  }
+
+  async function fetchWithTimeout(url,options,externalSignal){
+    const controller=new AbortController();
+    const onAbort=()=>controller.abort();
+    if(externalSignal){
+      if(externalSignal.aborted)controller.abort();
+      else externalSignal.addEventListener('abort',onAbort,{once:true});
+    }
+    const timer=setTimeout(()=>controller.abort(),SEARCH_TIMEOUT_MS);
+    try{return await fetch(url,{...options,signal:controller.signal,cache:'no-store'});}
+    finally{
+      clearTimeout(timer);
+      externalSignal?.removeEventListener?.('abort',onAbort);
+    }
+  }
+
+  async function cestaRpc(payload,signal){
+    const response=await fetchWithTimeout(CESTA_MCP_URL,{
+      method:'POST',
+      headers:{'Accept':'application/json, text/event-stream','Content-Type':'application/json','MCP-Protocol-Version':'2025-06-18'},
+      body:JSON.stringify(payload)
+    },signal);
+    if(!response.ok)throw new Error(`cesta-http-${response.status}`);
+    const text=await response.text();
+    if(!text.trim())return null;
+    const event=parseSseEvents(text)[0]||null;
+    if(event?.error)throw new Error('cesta-rpc-error');
+    return event;
+  }
+
+  function parseCestaResults(text){
+    const lines=String(text||'').split('\n');
+    const results=[];
+    for(let index=0;index<lines.length;index+=1){
+      const line=lines[index].trim();
+      if(!line.startsWith('- '))continue;
+      const parts=line.slice(2).split(' · ').map(part=>part.trim()).filter(Boolean);
+      if(parts.length<4)continue;
+      const marketName=parts[0];
+      const marketId=marketName==='Continente'?'continente':marketName==='Pingo Doce'?'pingo-doce':'';
+      if(!marketId)continue;
+      const name=cleanRemoteText(parts[1],120);
+      const pack=cleanRemoteText(parts[2],100);
+      const pricePart=parts[3]||'';
+      const priceCents=parseEuroCents(pricePart);
+      if(!name||!priceCents)continue;
+      const oldMatch=pricePart.match(/antes\s+(\d{1,7}(?:[.,]\d{1,2})?)\s*€/i);
+      const oldPriceCents=oldMatch?parseEuroCents(`${oldMatch[1]}€`):0;
+      const discountMatch=pricePart.match(/(-\d{1,3}%)/);
+      const promoMatch=line.match(/promo\s+até\s+(\d{4}-\d{2}-\d{2})/i);
+      const pidMatch=line.match(/\bpid\s+([^·\s]+)/i);
+      const unitPrice=cleanRemoteText(parts.find((part,partIndex)=>partIndex>3&&/€\s*\//.test(part))||'',60);
+      const possibleUrl=(lines[index+1]||'').trim();
+      const sourceUrl=safeRetailerUrl(possibleUrl,marketId);
+      if(sourceUrl)index+=1;
+      const pid=cleanRemoteText(pidMatch?.[1]||'',40);
+      results.push({
+        id:`cesta-${marketId}-${pid||results.length}`,
+        provider:'cesta',marketId,name,pack,priceCents,oldPriceCents,
+        discount:cleanRemoteText(discountMatch?.[1]||'',12),promotionUntil:promoMatch?.[1]||'',unitPrice,
+        sourceUrl,sourceLabel:'Produto oficial',freshness:'current',observedDate:''
+      });
+    }
+    return results;
+  }
+
+  async function searchCestaProducts(term,marketIds,signal){
+    const stores=marketIds.map(id=>marketById(id).providerId).filter(Boolean);
+    if(!stores.length)return [];
+    await cestaRpc({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Conta de Casa',version:'52'}}},signal);
+    await cestaRpc({jsonrpc:'2.0',method:'notifications/initialized'},signal);
+    const event=await cestaRpc({jsonrpc:'2.0',id:2,method:'tools/call',params:{name:'search_products',arguments:{query:term,stores,limit:8}}},signal);
+    const text=event?.result?.content?.find(item=>item?.type==='text')?.text||'';
+    return parseCestaResults(text).filter(result=>marketIds.includes(result.marketId));
+  }
+
+  async function fetchOpenPricesJson(path,signal){
+    const response=await fetchWithTimeout(`${OPEN_PRICES_API}${path}`,{headers:{'Accept':'application/json'}},signal);
+    if(!response.ok)throw new Error(`open-prices-http-${response.status}`);
+    const data=await response.json();
+    return data&&typeof data==='object'?data:{};
+  }
+
+  async function getMercadonaLocationIds(signal){
+    if(Array.isArray(mercadonaLocationIds)&&mercadonaLocationIds.length)return mercadonaLocationIds;
+    const params=new URLSearchParams({osm_name__like:'Mercadona',osm_address_country__like:'Portugal',price_count__gte:'1',size:'100'});
+    const data=await fetchOpenPricesJson(`/locations?${params}`,signal);
+    mercadonaLocationIds=(Array.isArray(data.items)?data.items:[])
+      .filter(item=>normalized(item?.osm_name||item?.osm_brand).includes('mercadona')&&(item?.osm_address_country_code==='PT'||normalized(item?.osm_address_country)==='portugal'))
+      .map(item=>Number(item.id)).filter(Number.isSafeInteger);
+    return mercadonaLocationIds;
+  }
+
+  function matchesSearchTerms(product,term){
+    const words=normalized(term).split(/\s+/).filter(word=>word.length>=2);
+    const haystack=normalized([product?.product_name,product?.brands,product?.quantity].filter(Boolean).join(' '));
+    return words.length?words.every(word=>haystack.includes(word)):false;
+  }
+
+  function openPriceToResult(item){
+    const product=item?.product||{};
+    const location=item?.location||{};
+    const observedDate=String(item?.date||item?.proof?.date||'');
+    const ageDays=observationAgeDays(observedDate);
+    const priceCents=Math.round(Number(item?.price)*100);
+    const productName=cleanRemoteText(product?.product_name||item?.product_name||`Produto ${product?.code||item?.product_code||''}`,120);
+    const brand=cleanRemoteText(product?.brands||'',70);
+    const quantity=cleanRemoteText(product?.quantity||[product?.product_quantity,product?.product_quantity_unit].filter(Boolean).join(' '),70);
+    const city=cleanRemoteText(location?.osm_address_city||'',70);
+    return {
+      id:`open-prices-mercadona-${item?.id||product?.id||product?.code||'unknown'}`,
+      provider:'open-prices',marketId:'mercadona',name:productName,pack:[quantity,brand].filter(Boolean).join(' · '),
+      priceCents:Number.isSafeInteger(priceCents)&&priceCents>0?priceCents:0,oldPriceCents:0,discount:'',promotionUntil:'',unitPrice:'',
+      sourceUrl:'',sourceLabel:item?.proof_id||item?.proof?.id?'Open Prices · com comprovativo':'Open Prices',
+      freshness:ageDays<=30?'recent':ageDays<=90?'dated':'old',observedDate,ageDays,city
+    };
+  }
+
+  async function searchMercadonaProducts(term,signal){
+    const locationIds=await getMercadonaLocationIds(signal);
+    if(!locationIds.length)return [];
+    const productParams=new URLSearchParams({product_name__like:term,price_count__gte:'1',size:'50'});
+    const productData=await fetchOpenPricesJson(`/products?${productParams}`,signal);
+    const products=(Array.isArray(productData.items)?productData.items:[]).filter(product=>matchesSearchTerms(product,term));
+    const productIds=products.map(product=>Number(product.id)).filter(Number.isSafeInteger);
+    if(!productIds.length)return [];
+    const priceParams=new URLSearchParams({
+      location_id__in:locationIds.join(','),product_id__in:productIds.join(','),currency:'EUR',order_by:'-date',size:'100'
+    });
+    const priceData=await fetchOpenPricesJson(`/prices?${priceParams}`,signal);
+    const raw=(Array.isArray(priceData.items)?priceData.items:[])
+      .filter(item=>Number(item?.price)>0&&(item?.proof_id||item?.proof?.id))
+      .filter(item=>normalized(item?.location?.osm_name||item?.location?.osm_brand).includes('mercadona'))
+      .map(openPriceToResult).filter(item=>item.priceCents>0&&item.name);
+    raw.sort((a,b)=>String(b.observedDate).localeCompare(String(a.observedDate))||a.priceCents-b.priceCents);
+    const unique=[];
+    const seen=new Set();
+    for(const item of raw){
+      const key=normalized(`${item.name}|${item.pack}`);
+      if(seen.has(key))continue;
+      seen.add(key);unique.push(item);
+      if(unique.length>=8)break;
+    }
+    return unique;
+  }
+
+  function resultStatusHtml(product){
+    if(product.provider==='cesta'){
+      if(product.discount||product.promotionUntil){
+        const detail=[product.discount,product.promotionUntil?`até ${formatObservedDate(product.promotionUntil)}`:''].filter(Boolean).join(' · ');
+        return `<span class="market-result-chip promo">Promoção${detail?` · ${esc(detail)}`:''}</span>`;
+      }
+      return '<span class="market-result-chip current">Consultado agora</span>';
+    }
+    const date=formatObservedDate(product.observedDate);
+    if(product.freshness==='recent')return `<span class="market-result-chip current">Observado ${esc(date)} · recente</span>`;
+    if(product.freshness==='dated')return `<span class="market-result-chip dated">Observado ${esc(date)}</span>`;
+    return `<span class="market-result-chip old">Observado ${esc(date)} · pode já ter mudado</span>`;
+  }
+
+  function productCardHtml(product){
+    const market=marketById(product.marketId);
+    const subtitle=[product.pack,market.name,product.city,product.provider==='open-prices'&&product.observedDate?`observado ${formatObservedDate(product.observedDate)}`:''].filter(Boolean).join(' · ');
+    const oldPrice=product.oldPriceCents>product.priceCents?`<span class="market-result-old-price">antes ${money(product.oldPriceCents)}</span>`:'';
+    const sourceLink=product.sourceUrl?`<a class="market-result-source" href="${attr(product.sourceUrl)}" target="_blank" rel="noopener noreferrer">${svgIcon('external',15)}<span>${esc(product.sourceLabel)}</span></a>`:`<span class="market-result-source text-only">${esc(product.sourceLabel)}</span>`;
+    return `<article class="market-catalog-card" data-market-product-card="${attr(product.id)}">
+      <div class="market-catalog-main">
+        <div class="market-product-copy">
+          <h4>${esc(product.name)}</h4>
+          <p>${esc(subtitle||market.name)}</p>
+          <div class="market-result-meta">${resultStatusHtml(product)}${sourceLink}</div>
+          <div class="market-result-price-row"><strong class="market-product-price" data-money>${money(product.priceCents)}</strong>${oldPrice}${product.unitPrice?`<small>${esc(product.unitPrice)}</small>`:''}</div>
+        </div>
+        <button class="market-add-product" type="button" data-market-add-product="${attr(product.id)}" aria-label="Adicionar ${attr(product.name)} à lista">${svgIcon('plus',24)}</button>
+      </div>
+    </article>`;
+  }
+
+  function renderSearchIntro(){
+    resultById=new Map();
+    const meta=$('#marketResultsMeta');
+    if(meta)meta.textContent='Escreva pelo menos 2 caracteres';
+    const root=$('#marketCatalogResults');
+    if(root)setHTML(root,`<div class="market-browser-empty"><span class="market-browser-empty-icon">${svgIcon('search',26)}</span><strong>Pesquise um produto</strong><p>A pesquisa consulta produtos reais nas fontes selecionadas. Pode escrever, por exemplo, “leite meio gordo”, “arroz” ou “detergente”.</p></div>`);
+  }
+
+  function renderLoading(){
+    const meta=$('#marketResultsMeta');
+    if(meta)meta.textContent='A consultar fontes…';
+    const root=$('#marketCatalogResults');
+    if(root)setHTML(root,`<div class="market-browser-loading" role="status"><span class="market-loading-spinner" aria-hidden="true"></span><div><strong>A pesquisar preços</strong><p>A consultar apenas as fontes selecionadas.</p></div></div>`);
+  }
+
+  function renderRemoteResults(results,warnings=[]){
+    const root=$('#marketCatalogResults');
+    if(!root)return;
+    resultById=new Map(results.map(item=>[item.id,item]));
+    const meta=$('#marketResultsMeta');
+    if(meta)meta.textContent=`${results.length} resultado${results.length===1?'':'s'}`;
+    const warningHtml=warnings.length?`<div class="market-provider-warning" role="status">${svgIcon('info',19)}<p>${warnings.map(esc).join(' ')}</p></div>`:'';
+    if(!results.length){
+      setHTML(root,`${warningHtml}<div class="market-browser-empty"><span class="market-browser-empty-icon">${svgIcon('search',26)}</span><strong>Sem preço verificado para esta pesquisa</strong><p>Não foi encontrado um resultado verificável nas fontes selecionadas. Pode alterar a pesquisa ou adicionar o produto manualmente.</p><button class="btn secondary" type="button" data-market-manual>Adicionar manualmente</button></div>`);
+      return;
+    }
+    setHTML(root,`${warningHtml}${results.map(productCardHtml).join('')}`);
+  }
+
+  async function executeSearch(){
+    const term=cleanRemoteText(query,80);
+    if(term.length<2){activeSearchController?.abort();renderSearchIntro();return;}
+    const generation=++searchGeneration;
+    activeSearchController?.abort();
+    const controller=new AbortController();
+    activeSearchController=controller;
+    renderLoading();
+    const cestaMarkets=['pingo-doce','continente'].filter(id=>selectedMarkets.has(id));
+    const tasks=[];
+    if(cestaMarkets.length)tasks.push({label:'Continente/Pingo Doce',promise:searchCestaProducts(term,cestaMarkets,controller.signal)});
+    if(selectedMarkets.has('mercadona'))tasks.push({label:'Mercadona',promise:searchMercadonaProducts(term,controller.signal)});
+    const settled=await Promise.allSettled(tasks.map(task=>task.promise));
+    if(controller.signal.aborted||generation!==searchGeneration)return;
+    const results=[];
+    const warnings=[];
+    settled.forEach((entry,index)=>{
+      if(entry.status==='fulfilled')results.push(...entry.value);
+      else if(entry.reason?.name!=='AbortError')warnings.push(`${tasks[index].label}: fonte temporariamente indisponível.`);
+    });
+    const order=new Map(MARKET_IDS.map((id,index)=>[id,index]));
+    results.sort((a,b)=>(order.get(a.marketId)??9)-(order.get(b.marketId)??9)||(a.provider==='open-prices'?String(b.observedDate).localeCompare(String(a.observedDate)):a.priceCents-b.priceCents));
+    renderRemoteResults(results.slice(0,MAX_REMOTE_RESULTS),warnings);
+  }
+
+  function scheduleSearch(delay=SEARCH_DEBOUNCE_MS){
+    clearTimeout(searchTimer);
+    searchTimer=setTimeout(()=>executeSearch().catch(error=>{
+      if(error?.name==='AbortError')return;
+      renderRemoteResults([],['Não foi possível concluir a pesquisa neste momento.']);
+    }),delay);
+  }
+
   function openMarketBrowser(){
     selectedMarkets=new Set(MARKET_IDS);
     activeTab='markets';
-    query='Leite meio gordo';
+    query='';
+    resultById=new Map();
     openDialog('Adicionar produto',browserShellHtml(),MARKET_BROWSER_MODE);
     const dialog=$('#formDialog');
     dialog?.classList.add('market-browser-dialog');
@@ -197,42 +425,36 @@
     const close=dialog?.querySelector('[data-close-dialog]');
     if(close){close.innerHTML=svgIcon('back',25);close.setAttribute('aria-label','Voltar');}
     updateTabPanel();
-    renderResults();
+    renderSearchIntro();
     requestAnimationFrame(()=>$('#marketCatalogSearch')?.focus({preventScroll:true}));
   }
 
-  async function addProduct(productId){
-    const product=productById(productId);
+  async function addProduct(resultId){
+    const product=resultById.get(resultId);
     if(!product||!appState)return;
-    const offer=selectedOffer(product);
-    if(!offer){toast('Selecione pelo menos um mercado com preço disponível.');return;}
     const now=new Date().toISOString();
-    const quantityMatch=/^(\d+(?:[.,]\d+)?)\s*(kg|g|ml|l|un)?/i.exec(product.pack||'');
-    const quantity=quantityMatch?.[1]||'1';
-    const detectedUnit=(quantityMatch?.[2]||product.unit||'un').toLowerCase();
-    const unit=detectedUnit==='l'?'L':detectedUnit;
     appState.market.push({
-      id:uid(),name:product.name,category:product.category,quantity,unit,
-      estimatedCents:0,actualCents:0,purchased:false,
+      id:uid(),name:cleanRemoteText(product.name,80),category:inferCategory(product.name),quantity:'1',unit:'un',
+      estimatedCents:product.priceCents,actualCents:0,purchased:false,
       createdAt:now,updatedAt:now,purchasedAt:null
     });
     await commit('created','market');
     closeDialog();
     showPage('market');
-    toast(`${product.name} adicionado. Os preços de demonstração não foram guardados.`);
+    const sourceText=product.provider==='open-prices'&&product.observedDate?` observado em ${formatObservedDate(product.observedDate)}`:' consultado agora';
+    toast(`${product.name} adicionado com ${money(product.priceCents)} como preço estimado (${marketById(product.marketId).name},${sourceText}).`);
   }
 
   function restoreDialogHeader(){
+    activeSearchController?.abort();
+    clearTimeout(searchTimer);
     const dialog=$('#formDialog');
     if(!dialog)return;
     dialog.classList.remove('market-browser-dialog');
     const eyebrow=dialog.querySelector('.dialog-head .eyebrow');
     if(eyebrow)eyebrow.hidden=false;
     const close=dialog.querySelector('[data-close-dialog]');
-    if(close){
-      close.textContent='×';
-      close.setAttribute('aria-label','Fechar janela');
-    }
+    if(close){close.textContent='×';close.setAttribute('aria-label','Fechar janela');}
   }
 
   function isMarketEntryTarget(target){
@@ -249,6 +471,13 @@
     openMarketBrowser();
   }
 
+  function applyQuery(value){
+    query=cleanRemoteText(value,80);
+    const input=$('#marketCatalogSearch');
+    if(input&&input.value!==query)input.value=query;
+    scheduleSearch(0);
+  }
+
   function handleBrowserClick(event){
     const dialog=event.target.closest?.('#formDialog[data-mode="market-browser"]');
     if(!dialog)return;
@@ -259,26 +488,24 @@
         if(selectedMarkets.size===1){toast('Mantenha pelo menos um mercado selecionado.');return;}
         selectedMarkets.delete(id);
       }else selectedMarkets.add(id);
-      updateTabPanel();renderResults();return;
+      updateTabPanel();scheduleSearch(0);return;
     }
     const tab=event.target.closest('[data-market-browser-tab]');
     if(tab){activeTab=tab.dataset.marketBrowserTab;updateTabs();return;}
     const clear=event.target.closest('[data-market-search-clear]');
-    if(clear){query='';const input=$('#marketCatalogSearch');if(input)input.value='';renderResults();input?.focus();return;}
-    const seeAll=event.target.closest('[data-market-see-all]');
-    if(seeAll){query='';const input=$('#marketCatalogSearch');if(input)input.value='';renderResults();input?.focus();return;}
+    if(clear){applyQuery('');$('#marketCatalogSearch')?.focus();return;}
     const chip=event.target.closest('[data-market-chip-query]');
-    if(chip){query=chip.dataset.marketChipQuery||'';const input=$('#marketCatalogSearch');if(input)input.value=query;renderResults();return;}
+    if(chip){applyQuery(chip.dataset.marketChipQuery||'');$('#marketCatalogSearch')?.focus();return;}
     const add=event.target.closest('[data-market-add-product]');
-    if(add){addProduct(add.dataset.marketAddProduct);return;}
+    if(add){addProduct(add.dataset.marketAddProduct).catch(()=>toast('Não foi possível adicionar o produto.'));return;}
     const manual=event.target.closest('[data-market-manual]');
     if(manual){closeDialog();requestAnimationFrame(()=>openMarketForm());}
   }
 
   function handleBrowserInput(event){
     if(!event.target.matches?.('#formDialog[data-mode="market-browser"] #marketCatalogSearch'))return;
-    query=event.target.value||'';
-    renderResults();
+    query=cleanRemoteText(event.target.value,80);
+    scheduleSearch();
   }
 
   function syncMarketShellClass(){
