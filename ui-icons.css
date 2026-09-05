@@ -1,0 +1,73 @@
+/* Conta de Casa — normalização de ícones em todas as plataformas. */
+.ui-icon-svg{
+  display:block;
+  flex:0 0 auto;
+  max-width:none!important;
+  height:20px!important;
+  width:20px!important;
+  overflow:visible;
+  shape-rendering:geometricPrecision;
+  pointer-events:none;
+}
+.ui-icon-svg.ui-icon-xs{width:16px!important;height:16px!important}
+.ui-icon-svg.ui-icon-sm{width:20px!important;height:20px!important}
+.ui-icon-svg.ui-icon-md{width:24px!important;height:24px!important}
+.ui-icon-svg.ui-icon-lg{width:28px!important;height:28px!important}
+
+.brand-mark .ui-icon-svg{width:22px!important;height:22px!important}
+.footer-icon{display:grid;place-items:center;width:20px;height:20px}
+.footer-icon .ui-icon-svg{width:19px!important;height:19px!important}
+.vault-disclosure-icon{display:grid;place-items:center;width:24px;height:24px;transition:transform .18s ease}
+#vaultTransferToggle[aria-expanded="true"] .vault-disclosure-icon{transform:rotate(180deg)}
+.icon-btn .ui-icon-svg,.market-search-clear .ui-icon-svg,.market-barcode-open .ui-icon-svg,.market-barcode-close .ui-icon-svg{margin:auto}
+.topbar-create>span:first-child{display:grid;place-items:center;width:20px;height:20px}
+
+.quick-grid button[data-ui-iconized="true"]{
+  min-height:88px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:9px;
+  text-align:center;
+}
+.quick-grid button[data-ui-iconized="true"] .ui-icon-svg{width:22px!important;height:22px!important;color:var(--primary)}
+.ui-icon-label{min-width:0;overflow-wrap:anywhere}
+
+#newBillBtn[data-ui-iconized="true"],
+#newIncomeBtn[data-ui-iconized="true"],
+#newMarketBtn[data-ui-iconized="true"],
+#newGoalBtn[data-ui-iconized="true"]{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+
+/* Corrige o rendering observado no ícone de pesquisa em Safari/iOS.
+   A regra global antiga svg{height:auto} deixa de controlar estes SVGs. */
+.market-browser-search>.ui-icon-svg{
+  width:22px!important;
+  height:22px!important;
+  justify-self:center;
+  align-self:center;
+  overflow:visible;
+  color:var(--muted);
+}
+.market-browser-search>.ui-icon-svg circle,
+.market-browser-search>.ui-icon-svg path{vector-effect:non-scaling-stroke}
+
+.icon-btn,.market-search-clear,.market-barcode-open,.market-barcode-close{
+  -webkit-tap-highlight-color:transparent;
+}
+@media(hover:hover) and (pointer:fine){
+  .icon-btn:hover .ui-icon-svg,
+  .market-search-clear:hover .ui-icon-svg,
+  .market-barcode-open:hover .ui-icon-svg{
+    transform:translateY(-1px);
+  }
+}
+
+.sync-header-status.partial .sync-dot{animation:ui-sync-pulse 1.1s ease-in-out infinite}
+#alertBadge:not([hidden]){animation:ui-alert-pulse 1.8s ease-in-out infinite}
+@keyframes ui-sync-pulse{0%,100%{transform:scale(.8);opacity:.55}50%{transform:scale(1.2);opacity:1}}
+@keyframes ui-alert-pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--danger) 28%,transparent)}50%{box-shadow:0 0 0 5px transparent}}
+
+@media(prefers-reduced-motion:reduce){
+  .vault-disclosure-icon,.icon-btn .ui-icon-svg,.market-search-clear .ui-icon-svg,.market-barcode-open .ui-icon-svg{transition:none!important}
+  .sync-header-status.partial .sync-dot,#alertBadge:not([hidden]){animation:none!important}
+}

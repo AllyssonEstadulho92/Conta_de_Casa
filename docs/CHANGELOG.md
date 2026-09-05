@@ -1,5 +1,39 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-05 — Auditoria global de ícones e leitura QR de faturas
+
+### Ícones e consistência visual
+
+- criada a camada `ui-icons.js` com um registo SVG local e único para os ícones funcionais da aplicação;
+- criada `ui-icons.css` para normalizar largura, altura, alinhamento, espessura e comportamento dos SVGs em iOS, Android e desktop;
+- corrigida especificamente a superfície que permitia o ícone de pesquisa aparecer cortado em Safari/iPhone, sobrepondo a regra global legada `svg { height:auto }` com dimensões explícitas para ícones de interface;
+- elementos legados baseados em glifos Unicode passam a ser substituídos em runtime por ícones vetoriais consistentes, incluindo casa, privacidade, bloqueio, tema, fecho, expansão, atalhos e ações principais;
+- navegação, Mercado, leitor de código de barras, diálogos e ações rápidas passam a partilhar a mesma linguagem visual;
+- estatísticas, gráficos e barras de progresso foram preservados como componentes de dados;
+- animação adicionada apenas a estados úteis: sincronização ativa, badge de alerta, expansão e linhas de leitura; `prefers-reduced-motion` desativa movimento não essencial;
+- não foi adicionada fonte/CDN externa de ícones: a solução continua local, offline e sem nova superfície de tracking.
+
+### Faturas
+
+- criado `invoice-capture.js` para leitura do Código QR português de faturação diretamente pela câmara ou por uma imagem selecionada pelo utilizador;
+- parser baseado nos campos técnicos definidos pela Autoridade Tributária: NIF do emitente, tipo/estado do documento, data, identificação do documento, ATCUD, impostos e total;
+- leitura da imagem acontece localmente; a imagem não é persistida, não entra no cofre e não é enviada para serviços externos;
+- o ficheiro selecionado é limitado a imagem e a 15 MB e o `ObjectURL` temporário é revogado após a leitura;
+- a câmara usa a lente traseira preferencialmente, sem áudio, com encerramento das tracks ao concluir, cancelar, ocultar ou abandonar a página;
+- após leitura válida é apresentada uma pré-visualização e só um clique explícito em **Preencher campos** transfere dados compatíveis para a nova fatura;
+- são preenchidos apenas campos comprováveis pelo QR: total, identificação/referência do documento, ATCUD e NIF do emitente; fornecedor comercial, categoria, vencimento e método continuam a exigir confirmação do utilizador;
+- PDFs e OCR geral de faturas não foram introduzidos nesta revisão para evitar leitura probabilística de valores financeiros sem validação adequada;
+- `invoice-capture.css` adiciona overlay responsivo, safe areas e estados de leitura sem alterar a estrutura dos formulários existentes.
+
+### Segurança, testes e distribuição
+
+- nenhuma alteração ao schema financeiro, IndexedDB, PBKDF2, AES-GCM, PIN/palavra-passe, backups ou sincronização;
+- criados `tests/ui-icons.test.cjs` e `tests/invoice-capture.test.cjs`;
+- CI passa a verificar sintaxe dos novos módulos e a executar os dois testes dedicados;
+- workflow de Pages repete as verificações antes do deploy;
+- os quatro novos assets foram adicionados à allowlist pública e ao Service Worker;
+- auditoria detalhada registada em `docs/UI_ICON_AUDIT.md`.
+
 ## 2026-09-05 — Leitura de código de barras no Mercado
 
 ### Alterações

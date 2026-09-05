@@ -43,6 +43,8 @@ jobs:
           node --check sync.js
           node --check market-experience.js
           node --check market-barcode.js
+          node --check ui-icons.js
+          node --check invoice-capture.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
           node tests/finance.test.cjs
@@ -51,10 +53,12 @@ jobs:
           node tests/isolation.test.cjs
           node tests/date-timezone.test.cjs
           node tests/form-regression.test.cjs
+          node tests/invoice-capture.test.cjs
           node tests/market-categories.test.cjs
           node tests/market-experience.test.cjs
           node tests/market-barcode.test.cjs
           node tests/market-live-accounting.test.cjs
+          node tests/ui-icons.test.cjs
           node tests/security.test.cjs
           node tests/responsive.test.cjs
           node tests/mobile-layout-regression.test.cjs

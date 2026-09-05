@@ -163,3 +163,59 @@ A separação mantém a arquitetura auditável: a câmara resolve o código, a b
 ### Limitação aceite
 
 Open Food Facts é uma base comunitária e pode não reconhecer todos os códigos. `cesta.pt` pode encontrar uma variante diferente ou nenhum produto para o nome identificado. Por isso, a interface não adiciona automaticamente o primeiro resultado: o utilizador continua a confirmar explicitamente o produto e o preço.
+
+## D-008 — Um único sistema vetorial local para os ícones funcionais
+
+Data: 5 de setembro de 2026
+Estado: aceite
+
+### Contexto
+
+A aplicação acumulou SVGs do registo `ICONS`, SVGs locais de módulos e caracteres Unicode como `⌂`, `◉`, `⌁`, `☼`, `⌄` e `×`. Em Safari/iPhone foi observada uma lupa parcialmente cortada no campo de pesquisa do Mercado. O CSS base também contém uma regra global `svg { height:auto }`, adequada a conteúdo responsivo mas inadequada a ícones com caixa fixa.
+
+### Decisão
+
+Criar `ui-icons.js` e `ui-icons.css` como camada de compatibilidade visual, sem reestruturar as páginas. O módulo estende o `ICONS` existente, mantém o contrato `icon()`, converte os glifos estáticos em SVG local e normaliza ícones criados por componentes dinâmicos.
+
+Não será introduzida uma icon font remota. Todos os ícones funcionais devem usar SVG local com geometria 24×24, `currentColor`, espessura coerente e dimensões CSS explícitas.
+
+### Motivo
+
+Esta solução evita fallback tipográfico e diferenças de emoji entre plataformas, funciona offline, não adiciona pedidos ou tracking de terceiros e ataca diretamente a causa dimensional observada sem alterar rotas, dados ou regras de negócio.
+
+### Movimento
+
+Animação fica reservada a estados com significado: sincronização ativa, alerta, expansão e linha de leitura. Hover só é aplicado com pointer fino. `prefers-reduced-motion` desativa movimento não essencial.
+
+## D-009 — QR fiscal de fatura como preenchimento assistido, não OCR automático
+
+Data: 5 de setembro de 2026
+Estado: aceite
+
+### Contexto
+
+Foi pedido um leitor mais adequado a faturas e a possibilidade de submeter a fatura correta. O projeto tem `attachments` desativados e não deve começar a persistir fotografias/PDFs sem uma decisão de armazenamento, cifragem, sincronização e limites.
+
+As faturas portuguesas emitidas por software certificado incluem Código QR com campos definidos pela Autoridade Tributária, oferecendo uma fonte estruturada para NIF do emitente, data/identificação do documento, ATCUD, impostos e total.
+
+### Decisão
+
+Adicionar `invoice-capture.js`/`.css` como camada progressiva apenas no formulário **Nova fatura**:
+
+1. permitir leitura do QR pela câmara;
+2. permitir selecionar uma imagem local da fatura;
+3. descodificar localmente o QR com o mesmo ZXing já usado na aplicação;
+4. validar estrutura mínima e formatos;
+5. mostrar pré-visualização;
+6. transferir campos apenas após confirmação explícita do utilizador;
+7. manter `handleBillSubmit()` como única via de gravação da fatura.
+
+A imagem não é persistida nem enviada. PDFs e OCR textual geral ficam fora desta decisão.
+
+### Motivo
+
+O QR fiscal é determinístico e auditável para os campos que contém. OCR de uma fotografia/PDF introduziria probabilidade de erro em montantes, datas e referências e exigiria uma política adicional de confiança. A pré-visualização e o clique **Preencher campos** preservam a revisão humana antes de qualquer dado financeiro ser guardado.
+
+### Limitação aceite
+
+O QR não deve ser usado para inferir nome comercial do fornecedor, categoria ou data de vencimento. Estes campos continuam sob responsabilidade do utilizador. O NIF do emitente pode ser colocado como identificação provisória do fornecedor, claramente sujeito a confirmação.
