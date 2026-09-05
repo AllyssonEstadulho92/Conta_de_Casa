@@ -27,6 +27,11 @@ jobs:
           node scripts/probe-retailer-images.cjs
           node scripts/probe-cesta-detail.cjs
 
+      - name: Build official market image index
+        run: |
+          node scripts/build-market-image-index.cjs /tmp/market-image-index.json
+          node -e "const x=JSON.parse(require('fs').readFileSync('/tmp/market-image-index.json','utf8')); if(!Array.isArray(x.entries)||x.entries.length<20) process.exit(1); console.log('Verified official image entries:',x.entries.length)"
+
       - name: Syntax check
         run: |
           node --check core.js
