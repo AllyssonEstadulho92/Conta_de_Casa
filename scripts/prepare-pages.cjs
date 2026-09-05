@@ -11,6 +11,7 @@ const PUBLIC_FILES = Object.freeze([
   'design-system.css',
   'mobile-layout.css',
   'market-experience.css',
+  'market-barcode.css',
   'core.js',
   'finance.js',
   'render.js',
@@ -18,6 +19,7 @@ const PUBLIC_FILES = Object.freeze([
   'sync.js',
   'events.js',
   'market-experience.js',
+  'market-barcode.js',
   'sw.js',
   'manifest.webmanifest',
   'icon.svg'

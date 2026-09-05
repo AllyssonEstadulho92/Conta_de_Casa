@@ -33,6 +33,7 @@ jobs:
           node --check events.js
           node --check sync.js
           node --check market-experience.js
+          node --check market-barcode.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
 
@@ -59,6 +60,9 @@ jobs:
 
       - name: Market live-source tests
         run: node tests/market-experience.test.cjs
+
+      - name: Market barcode scanner tests
+        run: node tests/market-barcode.test.cjs
 
       - name: Market quantity and accounting tests
         run: node tests/market-live-accounting.test.cjs
