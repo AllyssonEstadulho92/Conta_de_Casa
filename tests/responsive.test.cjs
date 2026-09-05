@@ -118,12 +118,12 @@ for (const asset of ['core','finance','render','forms','sync','events']) {
 }
 assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
-// The public app build remains v53; the icon revision deliberately advances only
-// the service worker cache namespace so Safari/iOS cannot reuse the old visual layer.
+// The public app build remains v53; visual-only refinements advance the
+// service worker cache namespace so Safari/iOS cannot reuse the previous layer.
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v54-lucide/);
+assert.match(swSource, /conta-de-casa-public-v55-add-control/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /'\.\/market-experience\.css'/);
 assert.match(swSource, /'\.\/market-experience\.js'/);
