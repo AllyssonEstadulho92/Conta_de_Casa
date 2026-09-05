@@ -36,6 +36,7 @@ jobs:
           node --check market-barcode.js
           node --check ui-icons.js
           node --check invoice-capture.js
+          node --check app-update.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
 
@@ -77,6 +78,9 @@ jobs:
 
       - name: Unified icon audit tests
         run: node tests/ui-icons.test.cjs
+
+      - name: Software update center tests
+        run: node tests/app-update.test.cjs
 
       - name: Security hardening tests
         run: node tests/security.test.cjs
