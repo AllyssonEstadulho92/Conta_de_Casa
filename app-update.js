@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Conta de Casa — Centro de Atualização de Software (v59)
+ * Conta de Casa — Centro de Atualização de Software (v60)
  *
  * Esta camada não altera dados financeiros nem o cofre. O estado de atualização
  * é obtido exclusivamente do Service Worker same-origin distribuído por GitHub Pages.
@@ -11,6 +11,18 @@
  */
 (function installSoftwareUpdateCenter(root){
   const APP_RELEASE_NOTES=Object.freeze([
+    Object.freeze({
+      version:'v60',
+      date:'5 de setembro de 2026',
+      title:'Fotografias oficiais do Continente e Pingo Doce',
+      items:Object.freeze([
+        'A pesquisa passa a priorizar a fotografia publicada pelo próprio Continente ou Pingo Doce para o SKU selecionado.',
+        'O catálogo visual é reconstruído no deploy a partir dos sitemaps oficiais dos dois retalhistas e distribuído em pequenos índices locais.',
+        'A aplicação não faz scraping das páginas dos supermercados no iPhone e não usa proxies genéricos de terceiros.',
+        'Itens antigos sem identificador podem receber fotografia oficial apenas quando o nome corresponde de forma exata e não ambígua a um único produto do catálogo.',
+        'Open Facts permanece apenas como fallback quando não existe uma correspondência oficial segura; as fotografias continuam ampliáveis ao toque.'
+      ])
+    }),
     Object.freeze({
       version:'v59',
       date:'5 de setembro de 2026',
@@ -206,7 +218,7 @@
       try{
         let registration=await navigator.serviceWorker.getRegistration();
         if(!registration){
-          registration=await navigator.serviceWorker.register('./sw.js?v=59',{updateViaCache:'none'});
+          registration=await navigator.serviceWorker.register('./sw.js?v=60',{updateViaCache:'none'});
         }
         let updateFound=false;
         const onUpdateFound=()=>{updateFound=true;updateStatus='updating';renderDialog();};
