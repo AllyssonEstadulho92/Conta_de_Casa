@@ -1,0 +1,59 @@
+name: Apply v55 prototype
+
+on:
+  push:
+    branches: ["ui/prototype-images-swipe-v55"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: ${{ github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[v55-applied]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: ui/prototype-images-swipe-v55
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Apply audited v55 code
+        run: python3 scripts/apply-v55-code.py
+
+      - name: Update project continuity documents
+        run: python3 scripts/apply-v55-docs.py
+
+      - name: Validate syntax and complete regression suite
+        run: |
+          node --check core.js
+          node --check finance.js
+          node --check render.js
+          node --check forms.js
+          node --check events.js
+          node --check app-experience.js
+          node --check sync.js
+          node --check market-experience.js
+          node --check market-barcode.js
+          node --check ui-icons.js
+          node --check invoice-capture.js
+          node --check sw.js
+          node --check scripts/prepare-pages.cjs
+          for file in tests/*.test.cjs; do node "$file"; done
+          node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('Manifest OK')"
+          node scripts/prepare-pages.cjs
+
+      - name: Commit final v55 revision
+        run: |
+          git config user.name "AllyssonEstadulho92"
+          git config user.email "163911342+AllyssonEstadulho92@users.noreply.github.com"
+          git rm .github/workflows/apply-v55.yml scripts/apply-v55-code.py scripts/apply-v55-docs.py scripts/v55-public.patch.gz.b64
+          git add -A
+          git commit -m "feat: aplicar protótipo v55 com imagens e swipe [v55-applied]"
+          git push origin HEAD:ui/prototype-images-swipe-v55
