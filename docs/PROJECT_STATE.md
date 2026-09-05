@@ -1,69 +1,60 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 5 de setembro de 2026
-Build funcional: v51
+Build funcional: v52
 Distribuição: GitHub Pages
-Commit principal validado: `d55328871cbef61d78bbb747e75b3d7b6bd1d06a`
 
 ## Estado atual
 
-A aplicação continua local-first, com cofre cifrado no navegador, dados financeiros no IndexedDB e sincronização GitHub opcional. O schema financeiro permanece na versão 5.
+A aplicação mantém a arquitetura local-first: cofre cifrado no navegador, dados financeiros no IndexedDB e sincronização GitHub opcional. O schema financeiro permanece na versão 5.
 
-A área **Lista de compras / Mercado** recebeu a implementação visual do protótipo aprovado: hierarquia, margens, cartões de resumo, filtros, botão de adicionar, estado vazio e um novo ecrã responsivo **Adicionar produto** com pesquisa, seleção de Pingo Doce/Continente/Mercadona, tabs, comparação visual e cartões de produto.
+A área **Lista de compras / Mercado** deixou de usar o catálogo e os preços fictícios do protótipo v51. O ecrã **Adicionar produto** pesquisa agora fontes externas verificáveis em tempo de utilização e não apresenta imagens de produto.
 
-A nova experiência está isolada em `market-experience.css` e `market-experience.js`, sem substituir o formulário antigo de edição dos itens já guardados.
+## Pesquisa e preços do Mercado v52
 
-## Preços dos mercados — estado confirmado
+### Continente e Pingo Doce
 
-Os valores apresentados no comparador desta revisão são **dados de demonstração do protótipo**, identificados como tal na própria interface. Não são apresentados como preços em tempo real e não são gravados nos dados financeiros da aplicação.
+A pesquisa é realizada através do endpoint MCP público de `cesta.pt`, que consulta produtos das duas cadeias e devolve preço atual, promoções, preço por unidade, identificador do produto e ligação para a página oficial da cadeia.
 
-Não foi ativada uma integração automática de preços porque o projeto continua sem backend próprio e não existe, nesta revisão, uma fonte técnica verificada e estável para os três mercados que possa ser consumida diretamente pelo browser sem introduzir uma dependência insegura ou não confirmada. A CSP atual também não foi alargada para origens de terceiros.
+A aplicação não recebe nem guarda credenciais das lojas. O termo pesquisado é enviado a `cesta.pt` apenas quando a pesquisa envolve Continente e/ou Pingo Doce.
 
-Ao adicionar um produto a partir do comparador, o produto é criado através do modelo existente com `estimatedCents: 0`; os preços de demonstração ficam apenas na vista do protótipo.
+### Mercadona Portugal
 
-## Alteração anterior preservada
+Não foi encontrada uma fonte oficial pública da Mercadona Portugal que disponibilize um catálogo de preços atuais para consumo direto pela PWA. Para não usar preços espanhóis, inventados ou não auditáveis, a aplicação consulta **Open Prices** e restringe os resultados a lojas Mercadona localizadas em Portugal.
 
-Mantém-se a correção do defeito de layout reproduzido em iPhone/Safari: o shell mobile usa `100dvh`/`100svh`, mantendo `VisualViewport` apenas para métricas transitórias de teclado e diálogos. A lista de compras continua a ser gerada integralmente; o modelo de dados não foi alterado.
+Só são aceites registos com comprovativo associado. Cada resultado apresenta a data da observação. Registos antigos são marcados explicitamente como podendo já ter mudado e nunca são descritos como preço atual.
 
-## Última alteração
+A cobertura da Mercadona depende das contribuições existentes no Open Prices e pode ser incompleta. Quando não existe um preço verificável para a pesquisa, a aplicação apresenta essa ausência em vez de fabricar um valor.
 
-- criado `market-experience.css`, carregado depois das restantes camadas visuais;
-- criado `market-experience.js`, carregado depois de `events.js`;
-- o botão **Adicionar item** e a ação rápida **Mercado** abrem o novo comparador visual;
-- a edição de itens existentes continua a utilizar `openMarketForm()` sem alterações;
-- nova composição responsiva específica para 320/359, 430, 820, 1180 px e desktop;
-- safe areas superior e inferior contempladas no ecrã de pesquisa;
-- alvos tácteis do novo fluxo mantidos em 44–52 px;
-- texto da nova camada visual mantido em 12 px ou superior;
-- build público atualizado para v51;
-- Service Worker e allowlist do GitHub Pages incluem os dois novos assets;
-- criado `tests/market-experience.test.cjs` e acrescentado ao CI;
-- corrigida a semântica da pesquisa do comparador para não colocar um botão dentro de `label`;
-- garantido o restauro do botão de fechar do diálogo comum ao sair do comparador;
-- testes responsivos e de regressão mobile atualizados para a build v51.
+## Interface
 
-## Validação técnica concluída
+- removidas as ilustrações/imagens de embalagem dos cartões de produto;
+- cada resultado mantém título, subtítulo, preço, origem/estado de verificação e botão de adicionar;
+- pesquisa inicia vazia e consulta produtos reais depois de pelo menos 2 caracteres;
+- seleção Pingo Doce / Continente / Mercadona continua disponível;
+- sugestões de produtos e categorias apenas preenchem a pesquisa; não contêm preços hardcoded;
+- safe areas, scroll e breakpoints mobile/tablet/desktop foram preservados.
 
-- Pull Request #22 integrado em `main`.
-- CI da revisão principal concluído com sucesso.
-- Testes financeiros, auditoria, isolamento, datas, formulários, categorias de Mercado, segurança, responsividade, viewport mobile, navegação, acessibilidade e sincronização concluídos com sucesso no GitHub Actions.
-- `tests/market-experience.test.cjs` concluído com sucesso, incluindo verificação de ausência de pedidos externos, preços apenas de demonstração, safe areas, breakpoints e texto mínimo de 12 px na nova camada.
-- workflow **Deploy Pages** concluído com sucesso para o mesmo commit principal.
-- publicação do GitHub Pages concluída com sucesso pelo workflow de deployment.
+## Dados financeiros
 
-## Impacto funcional
+Ao adicionar um resultado, o preço consultado é gravado no campo existente `estimatedCents`, nunca em `actualCents`. O preço real pago continua a ser confirmado pelo utilizador após a compra, como já acontecia no modelo anterior.
 
-Nenhuma alteração foi feita a cálculos financeiros, PIN/palavra-passe, PBKDF2, AES-GCM, IndexedDB, backups, sincronização, estrutura persistida dos registos, rotas ou regras de negócio existentes.
+Não foram alterados o schema persistido, PBKDF2, AES-GCM, PIN/palavra-passe, IndexedDB, backups ou sincronização GitHub.
 
-A única nova ação funcional é a criação de um item da lista a partir do comparador; utiliza os mesmos campos persistentes já suportados pelo projeto e não grava os preços fictícios do protótipo.
+## Segurança e privacidade
 
-## Limitação de validação
+A CSP permite apenas as duas novas origens necessárias para pesquisa de preços: `https://cesta.pt` e `https://prices.openfoodfacts.org`, além das origens já existentes. Não existem API keys, tokens ou credenciais de terceiros no código.
 
-A validação automática e o deployment estão concluídos, mas **não foi realizada nesta revisão uma inspeção física em iPhone/Safari nem uma auditoria visual manual em todos os tamanhos 320/375/390/430, tablet e desktop**. Esses testes continuam necessários antes de considerar a equivalência visual do protótipo totalmente confirmada em hardware/browser real.
+Conteúdo remoto é tratado como não confiável: texto é limitado/normalizado antes de apresentação, HTML é escapado e ligações de produto são aceites apenas para hosts oficiais do Continente e Pingo Doce.
+
+## Validação técnica
+
+A conectividade e CORS das fontes foram auditados antes da implementação. Foi confirmada pesquisa real de Continente/Pingo Doce através de `search_products` do cesta.pt e leitura CORS de observações Mercadona Portugal no Open Prices com loja, data, preço e comprovativo.
 
 ## Próximo passo
 
-1. Validar fisicamente no iPhone/Safari o ecrã **Adicionar produto**, incluindo 320/375/390/430 px, scroll, teclado, safe areas e navegação de retorno.
-2. Validar tablet e desktop em browser real, procurando scroll horizontal, cortes e sobreposições.
-3. Definir uma arquitetura de preços reais apenas depois de identificar fontes verificadas para cada mercado e uma camada de backend/proxy adequada a CORS, disponibilidade, termos de utilização, cache e auditoria de origem/data do preço.
-4. Consolidar progressivamente regras mobile duplicadas de `styles.css` e `design-system.css`, sem alterar comportamento.
+1. Validar visualmente a v52 em iPhone/Safari, Android, tablet e desktop com pesquisas reais variadas.
+2. Confirmar comportamento com rede lenta/offline e indisponibilidade parcial de uma fonte.
+3. Monitorizar alterações de contrato/CORS das duas fontes externas.
+4. Substituir a fonte comunitária da Mercadona se a Mercadona Portugal vier a disponibilizar uma API/catálogo oficial de preços.
+5. Continuar a consolidação gradual dos estilos mobile legados sem alterar comportamento.
