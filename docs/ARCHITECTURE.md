@@ -1,256 +1,229 @@
 # Arquitetura — Conta de Casa
 
+Atualizado: 5 de setembro de 2026
+Build em validação: v59
+
 ## Visão geral
 
-Aplicação web estática/PWA distribuída por GitHub Pages, sem backend próprio. A aplicação é local-first: regras de negócio, renderização, formulários, persistência cifrada e sincronização opcional executam no cliente.
+**Conta de Casa** é uma aplicação web estática/PWA distribuída por GitHub Pages, sem backend próprio. A arquitetura é local-first: estado financeiro, regras de negócio, formulários, cifragem e persistência executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
 
-O ciclo de atualização da própria aplicação é também client-side e same-origin. Não existe servidor de atualização dedicado: GitHub Pages publica os assets e o Service Worker controla descoberta, instalação, cache e ativação da nova versão.
+A distribuição pública é composta por `scripts/prepare-pages.cjs`, validada em CI e publicada pelo workflow Pages. O Service Worker gere cache, funcionamento offline e atualização da própria aplicação.
 
 ## Camadas principais
 
-### Interface
+### Estrutura e apresentação
 
-- `index.html`: estrutura semântica, CSP, navegação, páginas e diálogos.
-- `styles.css`: estilos base/legados.
-- `design-system.css`: tokens e componentes visuais principais.
-- `mobile-layout.css`: compatibilidade e estabilidade do viewport móvel.
-- `market-experience.css`: página Mercado e diálogo `market-browser`.
-- `market-barcode.css`: scanner EAN/UPC/GTIN.
-- `ui-icons.css`: camada visual de ícones e normalização de controlos.
-- `invoice-capture.css`: interface e overlay do leitor QR de faturas.
-- `app-update.css`: ecrã de Atualização de Software, responsivo e compatível com tema claro/escuro.
-
-Ordem CSS no bundle público v58:
-
-1. `styles.css`
-2. `design-system.css`
-3. `mobile-layout.css`
-4. `market-experience.css`
-5. `market-barcode.css`
-6. `ui-icons.css`
-7. `invoice-capture.css`
-8. `app-update.css`
+- `index.html` — estrutura semântica, CSP base, páginas, navegação e diálogos.
+- `styles.css` — estilos base/legados.
+- `design-system.css` — tokens, componentes e responsividade principal.
+- `mobile-layout.css` — estabilidade do viewport móvel/Safari.
+- `market-experience.css` — descoberta e comparação de produtos.
+- `market-barcode.css` — scanner EAN/UPC/GTIN.
+- `ui-icons.css` — sistema visual Lucide e overrides finais de interface.
+- `invoice-capture.css` — leitor QR de faturas.
+- `app-update.css` — Centro de Atualização de Software.
+- `market-image-audit.css` — miniaturas tácteis e visualizador ampliado v59.
 
 ### JavaScript
 
-- `core.js`: estado, utilitários, cifragem, persistência e contrato histórico `ICONS`/`icon()`.
-- `finance.js`: cálculos e regras financeiras.
-- `render.js`: renderização das páginas.
-- `forms.js`: formulários e validações.
-- `sync.js`: sincronização cifrada opcional via GitHub.
-- `ui-icons.js`: subset local Lucide, adaptação ao contrato existente e hidratação visual de controlos estáticos/dinâmicos.
-- `events.js`: eventos, navegação, viewport, interação e registo base do Service Worker.
-- `market-experience.js`: pesquisa de preços e criação de itens a partir de resultados confirmados.
-- `market-barcode.js`: leitura GTIN, identificação de produto e handoff para a pesquisa do Mercado.
-- `invoice-capture.js`: leitura local do QR de faturação e preenchimento assistido da nova fatura.
-- `app-update.js`: launcher em Definições, UI de atualização, notas de versão e verificação manual do Service Worker.
+- `core.js` — estado, normalização, cifragem, IndexedDB, segurança e utilitários.
+- `finance.js` — cálculos financeiros.
+- `render.js` — renderização de páginas/listas.
+- `forms.js` — formulários e validação.
+- `sync.js` — sincronização cifrada opcional via GitHub.
+- `ui-icons.js` — subset Lucide local e hidratação de controlos.
+- `events.js` — eventos, navegação, viewport, cofre e Service Worker.
+- `market-experience.js` — preços Pingo Doce/Continente via `cesta.pt` e criação confirmada de itens.
+- `market-barcode.js` — leitura GTIN e identificação assistida.
+- `invoice-capture.js` — leitura local do QR fiscal.
+- `app-update.js` — Atualização de Software, notas de release e `registration.update()`.
+- `market-image-audit.js` — resolução individual de imagens, enriquecimento de itens e lightbox v59.
 
-## Centro de Atualização de Software — v58
+## Modelo de dados e segurança
 
-### Objetivo
+O schema financeiro permanece em `STATE_VERSION = 5`. Valores monetários são inteiros em cêntimos. O Mercado mantém `estimatedCents` separado de `actualCents` e quantidade separada do preço unitário.
 
-Concentrar num único campo visível ao utilizador o estado da versão e as alterações de cada release, usando uma composição semelhante à página de atualização do iPhone sem simular capacidades que a PWA não possui.
+O cofre usa IndexedDB com envelope cifrado. A credencial não é persistida em claro. O modelo de acesso continua baseado em PBKDF2-SHA-256 + AES-GCM; a v59 não altera autenticação, chaves, backups ou sincronização.
 
-### Entrada e apresentação
+Metadados opcionais de fotografia no item de Mercado:
 
-`app-update.js` adiciona progressivamente uma linha **Atualização de Software** dentro de `#page-settings`. Não altera `PAGE_META`, rotas ou schema do estado. A interface abre um `<dialog>`:
+- `productCode`;
+- `imageUrl`;
+- `imageSource`;
+- `imageMatchedAt`.
 
-- fullscreen em mobile (`100dvh`, safe areas);
-- modal centrado em tablet/desktop;
-- botão Voltar;
-- **Atualizações Automáticas — Ativado**;
-- **Atualizações Beta — Desativado**;
-- estado da versão atual;
-- **Mais detalhes**;
-- **Verificar atualizações**.
+Apenas URL/metadados são guardados. Não são persistidos binários de imagem.
 
-A UI utiliza `CDCIcons.markup` quando disponível, mantendo Lucide como linguagem visual. Os fallbacks SVG do próprio módulo são apenas de contingência e não carregam bibliotecas externas.
+## Mercado — separação de responsabilidades
 
-### Canal estável e atualização automática
+O fluxo de produto mantém responsabilidades distintas:
 
-A aplicação já regista o Service Worker no arranque em `events.js` com `updateViaCache:'none'` e chama `registration.update()`. O Service Worker faz `skipWaiting()` após instalar e `clients.claim()` ao ativar. `events.js` escuta `controllerchange` e recarrega a página uma única vez.
+1. **Preço e ligação oficial:** `market-experience.js` consulta `cesta.pt/mcp` para Pingo Doce e Continente.
+2. **Código de barras:** `market-barcode.js` lê GTIN localmente e pode identificar o produto.
+3. **Fotografia:** `market-image-audit.js` resolve uma referência visual sem alterar a origem do preço.
+4. **Persistência:** apenas depois de ação explícita do utilizador o produto entra em `appState.market`.
 
-Assim, o estado **Atualizações Automáticas — Ativado** corresponde a comportamento real: quando o browser abre a aplicação e encontra um Service Worker novo publicado, a nova versão é instalada e passa a controlar o cliente.
+Um GTIN identifica o SKU, mas não prova o preço. Uma fotografia identifica visualmente um produto, mas não é tratada como prova do preço nem como imagem oficial do retalhista.
 
-### Verificação manual
+## Auditoria de imagens — v59
 
-**Verificar atualizações** executa apenas APIs standard do Service Worker:
+### Problema corrigido
 
-1. obtém o `ServiceWorkerRegistration` same-origin;
-2. regista `./sw.js?v=58` se ainda não existir;
-3. chama `registration.update()`;
-4. observa `updatefound` / `installing` / `waiting`;
-5. se existir worker em espera, envia `{type:'SKIP_WAITING'}`;
-6. a ativação provoca `controllerchange`, e o listener existente em `events.js` faz reload.
+A v57 fazia uma pesquisa ampla no Open Food Facts para o termo inteiro. Como o número de candidatos era limitado, muitos resultados específicos de uma pesquisa ampla como “café” ficavam com placeholder mesmo quando existia uma fotografia pública noutro registo.
 
-Não é feita qualquer consulta a GitHub API, endpoint de versão ou backend de atualização.
+A v59 audita **cada produto individualmente** e transforma qualquer fotografia disponível numa ação de ampliação.
 
-### Canal beta
+### Fluxo de resolução
 
-Não existe pipeline beta pública nem contrato de atualização beta. Por isso, a linha **Atualizações Beta** é apresentada como **Desativado** e apenas explica a limitação. Não existe toggle funcional até haver uma decisão separada de distribuição, versionamento, rollback e validação.
+Para cada cartão de pesquisa ou item guardado sem fotografia:
 
-### Notas de versão
+1. determinar nome, embalagem/categoria e códigos disponíveis;
+2. se existir GTIN, tentar correspondência exata;
+3. para resultados Continente, usar o `pid` já devolvido pelo fluxo cesta.pt para consultar `get_product` e extrair EAN quando disponível;
+4. consultar a base Open Facts mais adequada ao tipo de produto;
+5. sem código, pesquisar nome + embalagem;
+6. pontuar candidatos por cobertura de palavras, precisão, nome, marca e quantidade;
+7. aceitar apenas pontuação >= `0.74`;
+8. manter placeholder se não existir correspondência segura.
 
-`APP_RELEASE_NOTES` em `app-update.js` é a fonte das alterações apresentadas ao utilizador em **Mais detalhes**. Cada release pública deve acrescentar uma entrada antes do deploy. Este conteúdo é informativo e não entra no cofre nem em `appState`.
+A resolução limita-se a três produtos em simultâneo (`MAX_CONCURRENT_RESOLUTIONS=3`) para evitar sobrecarga de rede.
 
-## Composição do bundle público e versão v58
+### Fontes de imagem autorizadas
 
-`scripts/prepare-pages.cjs` continua a gerar `dist/` por allowlist. Para v58, o script também funciona como etapa de composição do build público:
+- `world.openfoodfacts.org` / hosts de imagens Open Food Facts;
+- `world.openbeautyfacts.org` / hosts de imagens Open Beauty Facts;
+- `world.openproductsfacts.org` / hosts de imagens Open Products Facts;
+- `world.openpetfoodfacts.org` / hosts de imagens Open Pet Food Facts.
 
-1. copia apenas os assets permitidos;
-2. inclui `app-update.css` e `app-update.js`;
-3. altera apenas o `dist/index.html`, carimbando `app-build` e query strings para `v58`;
-4. injeta as referências `app-update.css?v=58` e `app-update.js?v=58` no HTML público;
-5. altera apenas `dist/events.js`, carimbando o registo do SW como `./sw.js?v=58`;
-6. mantém os templates fonte em v53 para evitar uma substituição massiva de ficheiros sem necessidade funcional.
+Seleção aproximada:
 
-Esta composição é validada por `tests/app-update.test.cjs`, que executa de facto `scripts/prepare-pages.cjs` e inspeciona `dist/`.
+- alimentação/bebidas → Food;
+- higiene/cosmética → Beauty;
+- limpeza/casa/parafarmácia/produtos gerais → Products;
+- alimentação animal → Pet Food.
 
-## Service Worker v58
+Existe fallback entre bases quando necessário.
 
-Cache público: `conta-de-casa-public-v58-software-update`.
+### Porque não fazer scraping direto das páginas Continente/Pingo Doce
 
-A allowlist offline inclui os assets já existentes e os novos:
+A aplicação é uma PWA estática no browser. As páginas dos retalhistas não constituem uma API CORS estável para a PWA extrair HTML/imagens diretamente. Forçar essa recolha exigiria um backend/proxy externo, introduzindo disponibilidade, quotas, privacidade, termos de utilização e uma nova superfície de segurança.
 
-- `./app-update.css`
-- `./app-update.js`
+Decisão v59: **não introduzir proxy genérico**. Quando `cesta.pt` fornece um identificador Continente capaz de resolver EAN, esse identificador é usado para aumentar a precisão; a imagem continua a vir de uma base de produto permitida. Sem correspondência pública suficientemente segura, o placeholder é o comportamento correto.
 
-Regras mantidas:
+### Persistência de enriquecimento
 
-- só `GET`;
-- só same-origin;
-- apenas paths constantes da allowlist;
-- query permitida apenas quando é o parâmetro de versão `v`;
-- navegação usa network-first com fallback para `index.html` em cache;
-- assets públicos usam network-first com atualização do cache e fallback offline;
-- caches anteriores são eliminados na ativação.
+Se a auditoria encontrar uma imagem para um item guardado, atualiza os metadados do item e chama `saveState()` de forma debounced. Isto não cria uma transação financeira nem altera `updatedAt` do item apenas para efeitos de preço; é enriquecimento visual do registo existente.
 
-Novo handler de mensagens: `SKIP_WAITING`, usado pela verificação manual. Não recebe conteúdo do cofre nem comandos genéricos.
+### Ampliação
 
-## Hierarquia visual aprovada — Lista de compras v55
+`market-image-audit.js` converte a superfície `.market-product-photo` com imagem real num botão acessível e abre `#marketProductImageViewer`.
 
-A captura física em iPhone e o protótipo aprovado definem a composição mobile da página **Lista de compras**:
+O visualizador:
 
-1. cabeçalho — menu, carrinho + título, ação principal `+`, mês e Sync;
-2. pesquisa — lupa Lucide e ação secundária visual de scanner;
-3. filtros — controlos existentes com ação neutra de limpeza;
-4. resumo financeiro — quatro cartões em grelha 2×2 no mobile;
-5. lista do mês — estado, identidade, quantidade e valores;
-6. ações — editar/eliminar em formato compacto;
-7. navegação inferior — quatro destinos com métrica Lucide uniforme.
+- usa `<dialog>`;
+- apresenta imagem em `object-fit: contain`;
+- suporta toque/clique, Esc, backdrop e botão Fechar;
+- respeita `100dvh`, `100svh` e `env(safe-area-inset-*)`;
+- suporta dark mode e `prefers-reduced-motion`;
+- mantém `referrerPolicy='no-referrer'`.
 
-O controlo secundário continua a ser `#newMarketBtn` e mantém o fluxo existente. A linguagem visual de scanner não altera os eventos ou a persistência.
+## CSP v59
 
-## Mercado — fotografias reais v57
+O template fonte continua conservador. Na composição pública, `prepare-pages.cjs` expande apenas as origens necessárias à v59:
 
-A v57 passou a permitir fotografia real de referência. `normalizeMarketItem()` normaliza metadados opcionais `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` dentro do schema existente.
+`img-src`:
 
-Preço e ligação oficial continuam provenientes do fluxo cesta.pt. A fotografia é pesquisada/identificada separadamente no Open Food Facts:
+- `https://*.openfoodfacts.org`
+- `https://*.openbeautyfacts.org`
+- `https://*.openproductsfacts.org`
+- `https://*.openpetfoodfacts.org`
 
-- pesquisa textual usa limiar de correspondência forte;
-- scanner GTIN pode obter a fotografia frontal exata;
-- apenas `https://images.openfoodfacts.org` é aceite por `safeProductImageUrl()`;
-- a CSP limita `img-src` ao domínio autorizado;
-- `credentials:'omit'` e `referrerPolicy:'no-referrer'` são usados no fluxo remoto;
-- apenas URL/metadados são persistidos; binários da imagem não são guardados no cofre.
+`connect-src` mantém as origens já usadas e acrescenta apenas:
 
-Sem correspondência forte, a interface mantém placeholder neutro.
+- `https://world.openbeautyfacts.org`
+- `https://world.openproductsfacts.org`
+- `https://world.openpetfoodfacts.org`
 
-## Cofre de acesso — apresentação v56
+`cesta.pt` já era permitido pelo Mercado. Não existe `connect-src *`, proxy genérico ou endpoint próprio novo.
 
-O ecrã `#vaultScreen` continua a usar a estrutura existente em `index.html`, eventos de `events.js` e modelo criptográfico de `core.js`. A v56 é visual e não altera autenticação.
+## Privacidade de rede
 
-Princípios:
+Pedidos de imagem/detalhe usam:
 
-- `100svh`/`100dvh` e `env(safe-area-inset-*)`;
-- cartão responsivo e teclado centrado;
-- teclas circulares com alvos tácteis adequados;
-- `#unlockPassphrase` permanece o input real de credencial;
-- `wireVaultPinPad()` continua responsável pelo modo PIN/palavra-passe;
-- sem passkey/biometria até existir implementação real;
-- sem novos endpoints, armazenamento ou alteração da CSP;
-- dark mode e redução de movimento preservados.
+- `credentials:'omit'`;
+- `referrerPolicy:'no-referrer'`;
+- timeout/AbortController;
+- sem Authorization/API key.
 
-## Sistema visual de ícones — Lucide
+A resolução envia apenas identificadores/nomes necessários do produto. Não envia faturas, montantes financeiros, PIN, chave do cofre, token GitHub ou perfil pessoal.
 
-Lucide Icons é a linguagem visual oficial. O projeto não carrega icon font nem CDN de ícones. Mantém apenas o subset necessário em `ui-icons.js`.
+## Centro de Atualização — v58/v59
 
-Snapshot auditável: `94e4cb9d9db5907053ebf3636a97c45529cf776b`.
+`app-update.js` acrescenta **Definições → Atualização de Software**. A verificação é same-origin e usa o Service Worker:
 
-Licença distribuída em `LUCIDE_LICENSE.txt`:
+1. obter o registo;
+2. `registration.update()`;
+3. observar `installing/waiting`;
+4. enviar `SKIP_WAITING` quando necessário;
+5. `controllerchange` provoca reload através do listener existente.
 
-- ISC — Lucide Icons and Contributors;
-- MIT — aviso aplicável aos glifos derivados de Feather.
+`APP_RELEASE_NOTES` é a fonte visível de “Mais detalhes”. A v59 acrescenta as alterações de imagem e ampliação.
 
-`core.js` mantém `ICONS` e `icon()`. `ui-icons.js` faz `Object.assign(ICONS, LUCIDE_ICONS)` e substitui o renderer preservando a API. `CDCIcons.markup` fica disponível para módulos contextuais como atualização, Mercado e captura.
+## Bundle público v59
 
-Referência visual:
+`scripts/prepare-pages.cjs`:
 
-- `viewBox="0 0 24 24"`;
-- `currentColor`;
-- traço 2 px;
-- terminais e junções arredondados;
-- caixas CSS explícitas;
-- ícones decorativos `aria-hidden` e nome acessível no controlo.
+1. gera `dist/` por allowlist;
+2. copia apenas assets permitidos;
+3. carimba `app-build=v59` e query strings `?v=59`;
+4. injeta `app-update.*` e `market-image-audit.*`;
+5. aplica a CSP pública v59;
+6. carimba `dist/events.js` para `./sw.js?v=59`.
 
-## Faturas — captura QR assistida
+O Service Worker usa:
 
-A captura QR é uma camada progressiva sobre **Nova fatura**. `invoice-capture.js` permite câmara ou imagem local, valida o QR fiscal da AT, mostra pré-visualização e só preenche campos após confirmação. A imagem não é persistida nem enviada. PDFs/OCR geral permanecem fora deste fluxo.
+`conta-de-casa-public-v59-product-images`
 
-## Mercado e scanner GTIN
+Novos assets offline:
 
-Responsabilidades:
+- `./market-image-audit.css`
+- `./market-image-audit.js`
 
-1. `market-barcode.js` lê EAN/UPC/GTIN localmente;
-2. Open Food Facts identifica nome/marca/imagem quando disponíveis;
-3. `market-experience.js` consulta preços de Pingo Doce e Continente através de `cesta.pt`.
+## Faturas e QR
 
-O scanner não escreve diretamente em `appState.market` e GTIN não é prova de preço. A criação exige confirmação de um resultado. `estimatedCents` e `actualCents` continuam inteiros em cêntimos; `marketLineCents()` calcula quantidade × preço unitário com arredondamento seguro.
+`invoice-capture.js` continua a atuar apenas como preenchimento assistido. Vídeo/imagem são processados localmente e não persistidos. O QR fiscal preenche apenas campos comprováveis e mantém revisão explícita antes de guardar.
 
-## Segurança e privacidade
+## Ícones e UI
 
-- dados financeiros permanecem cifrados/local-first;
-- PBKDF2, AES-GCM, PIN, IndexedDB, backups e sincronização não são alterados pela v58;
-- o centro de atualização não acrescenta origem à CSP nem endpoint externo;
-- Lucide não acrescenta dependência externa em runtime;
-- pesquisa de Mercado envia apenas termos necessários ao `cesta.pt` e dados de produto previstos para Open Food Facts;
-- captura de faturas mantém vídeo/imagem/payload QR locais;
-- conteúdo remoto é normalizado/escapado antes da apresentação;
-- nenhuma chave, password ou token é codificado no módulo de atualização.
+Lucide permanece a linguagem visual oficial, vendorizada localmente em `ui-icons.js`. Snapshot de origem:
+
+`94e4cb9d9db5907053ebf3636a97c45529cf776b`
+
+Não há icon font/CDN em runtime. Controlos mantêm semântica nativa; ícones decorativos são `aria-hidden`; botões icon-only têm nomes acessíveis.
 
 ## Viewport e acessibilidade
 
-O shell mobile usa `100dvh`/`100svh`; `VisualViewport` permanece reservado aos fluxos já existentes de teclado/diálogos. O centro de atualização usa safe areas no mobile, alvos >= 48 px, foco visível e `aria-live` no estado. `prefers-reduced-motion` remove efeitos não essenciais.
+- shell estrutural: `100dvh` / `100svh`;
+- `VisualViewport`: apenas comportamento transitório de teclado/diálogos;
+- safe areas mantidas em navegação, scanners, cofre, update center e visualizador de imagem;
+- foco visível e alvos tácteis >= 44/48 px conforme componente;
+- `prefers-reduced-motion` remove movimento não essencial.
 
-## Distribuição
+## CI e deploy
 
-`pages.yml` só publica após CI verde em `main`. Antes do upload:
+`.github/workflows/ci.yml` valida sintaxe e suites de regressão. A v59 acrescenta `tests/market-image-audit.test.cjs`.
 
-- executa verificações de sintaxe;
-- executa suites de finanças, segurança, UI, Mercado, sincronização e atualização;
-- executa `scripts/prepare-pages.cjs`;
-- envia exclusivamente `dist/` ao GitHub Pages.
+`.github/workflows/pages.yml` repete a validação antes de executar `prepare-pages.cjs` e publicar apenas `dist/`.
 
-Assim, o utilizador nunca recebe diretamente documentação, testes, scripts de build ou ficheiros fora da allowlist.
-
-## Testes
-
-- `tests/app-update.test.cjs`: comportamento do centro, ausência de endpoints externos, dark/mobile/safe-area, cache v58 e composição real de `dist/`;
-- `tests/ui-icons.test.cjs`: Lucide, licença, controlos, Sync e hierarquia visual;
-- `tests/invoice-capture.test.cjs`: parser QR, privacidade e lifecycle;
-- `tests/market-barcode.test.cjs`: GTIN/checksum, câmara, privacidade e handoff;
-- `tests/market-experience.test.cjs`: fontes verificadas, escaping e responsividade;
-- `tests/market-product-images.test.cjs`: origem e restrições das fotografias;
-- suites restantes continuam a validar finanças, isolamento, segurança, navegação, acessibilidade, sync e regressões.
+A branch v59 obteve CI `33995086764` com conclusão `success` antes da atualização documental.
 
 ## Regras de manutenção
 
-- cada release pública deve atualizar `APP_RELEASE_NOTES` e o BUILD público de forma coerente;
-- não marcar Beta como ativo enquanto não existir uma pipeline beta real;
-- não criar endpoint de atualização se o Service Worker same-origin for suficiente;
-- novos assets públicos devem entrar explicitamente em `scripts/prepare-pages.cjs` e `sw.js`;
-- qualquer mudança de cache deve atualizar os testes que protegem freshness;
-- novos ícones funcionais devem usar o subset Lucide ou decisão arquitetural justificada;
-- não introduzir emojis, glifos Unicode ou icon fonts como solução principal;
-- alterações a scanners, atualização e controlos nativos devem ser validadas em iPhone/Safari e Android/Chrome físicos;
-- após a primeira transição real v58 → v59, reavaliar se a fonte de versão deve ser consolidada num único artefacto, sem comprometer a segurança do deploy.
+- não apresentar uma imagem aproximada quando o score ficar abaixo do limiar;
+- preferir GTIN/EAN exato sempre que disponível;
+- preço e fotografia devem permanecer fontes independentes;
+- não introduzir proxy de scraping sem decisão arquitetural própria e análise de privacidade/segurança/termos;
+- novas origens de imagem/API exigem allowlist CSP explícita, teste e documentação;
+- novos assets públicos exigem entrada explícita em `prepare-pages.cjs` e `sw.js`;
+- cada release deve atualizar `APP_RELEASE_NOTES`, BUILD, cache e testes de freshness;
+- validar em iPhone/Safari e Android/Chrome qualquer alteração que envolva `<dialog>`, câmara, safe areas ou interação tátil.
