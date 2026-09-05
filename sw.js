@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v57-real-images';
+const CACHE = 'conta-de-casa-public-v58-software-update';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -11,6 +11,7 @@ const PUBLIC_ASSETS = [
   './market-barcode.css',
   './ui-icons.css',
   './invoice-capture.css',
+  './app-update.css',
   './core.js',
   './finance.js',
   './render.js',
@@ -21,6 +22,7 @@ const PUBLIC_ASSETS = [
   './market-barcode.js',
   './ui-icons.js',
   './invoice-capture.js',
+  './app-update.js',
   './manifest.webmanifest',
   './icon.svg',
   './LUCIDE_LICENSE.txt'
@@ -44,6 +46,10 @@ self.addEventListener('install', event => {
 
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+});
+
+self.addEventListener('message', event => {
+  if(event.data?.type==='SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('fetch', event => {
