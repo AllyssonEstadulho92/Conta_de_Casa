@@ -94,9 +94,9 @@ Data: 5 de setembro de 2026 · Estado: aceite
 
 ## D-012 — Fotografia é referência visual, não prova de preço/origem comercial
 
-Data: 5 de setembro de 2026 · Estado: aceite; expandida por D-014
+Data: 5 de setembro de 2026 · Estado: aceite; expandida por D-014 e D-015
 
-**Decisão:** uma fotografia pode ser mostrada quando há correspondência suficientemente forte ou GTIN, mas não é tratada como origem do preço nem automaticamente como imagem oficial do retalhista.
+**Decisão:** uma fotografia pode ser mostrada quando há correspondência suficientemente forte ou GTIN, mas não é tratada como origem do preço. Apenas a proveniência oficial introduzida por D-015 pode usar o rótulo “imagem oficial”.
 
 **Motivo:** imagem e preço têm proveniência independente; uma imagem errada é pior do que um placeholder.
 
@@ -110,69 +110,87 @@ Data: 5 de setembro de 2026 · Estado: aceite
 
 ## D-014 — Auditar imagens por SKU sem introduzir proxy de scraping
 
+Data: 5 de setembro de 2026 · Estado: aceite; fallback após D-015
+
+**Decisão:** `market-image-audit.js/.css` audita cada produto sem imagem, privilegia GTIN/EAN e usa Open Food Facts, Open Beauty Facts, Open Products Facts e Open Pet Food Facts com score mínimo `0.74`. Miniaturas reais abrem visualizador. Não há proxy genérico.
+
+**Motivo:** aumentar cobertura de fotografias de referência sem apresentar variantes erradas nem introduzir um serviço de scraping externo.
+
+**Consequência v60:** depois de D-015, esta camada deixa de ser a primeira escolha para resultados de Continente/Pingo Doce. É fallback quando o catálogo oficial não publica uma imagem para o SKU.
+
+## D-015 — Gerar índice de fotografias oficiais no build; não fazer scraping no browser
+
 Data: 5 de setembro de 2026 · Estado: aceite
 
 ### Contexto
 
-A captura real de **Adicionar produto** mostrou vários resultados de Pingo Doce/Continente com placeholder, mesmo para artigos que possuem fotografias nas páginas das lojas. A v57 usava uma única pesquisa textual ampla no Open Food Facts e um conjunto pequeno de candidatos; isto era insuficiente em termos genéricos como “café”. As miniaturas existentes também eram estáticas.
+A v59 ainda deixava muitos produtos com placeholder. O problema não era CSS ou Safari: preço e página oficial vinham de `cesta.pt`, mas a fotografia continuava dependente das bases Open Facts. Ler o HTML de cada página do Continente/Pingo Doce no iPhone não é fiável porque as páginas não expõem um contrato CORS apropriado, podem redirecionar e podem mudar mecanismos de sessão/front-end.
 
-A aplicação é uma PWA estática. Ler diretamente o HTML das páginas de Continente/Pingo Doce no browser não é uma API estável: depende de CORS, estrutura do retalhista, cookies/anti-bot e alterações de front-end. A alternativa de um proxy genérico acrescentaria uma entidade externa com quotas, privacidade e disponibilidade próprias.
+Durante a auditoria foi confirmado que os dois retalhistas publicam sitemaps XML próprios com associação direta entre URL do produto e `image:loc`:
+
+- Continente: `sitemap_index.xml` → sitemaps `*-image.xml`;
+- Pingo Doce: `home/sitemap_index.xml` → sitemaps `*-product.xml`.
+
+Estes documentos são adequados a processamento no CI/build, onde CORS do browser não se aplica.
 
 ### Decisão
 
-Criar `market-image-audit.js` e `market-image-audit.css` como camada progressiva v59.
+Criar `scripts/refresh-retailer-image-index.cjs` e `market-official-images.js`.
 
-Para cada produto sem imagem:
+O build deve:
 
-1. auditar individualmente, em vez de depender apenas da pesquisa ampla inicial;
-2. usar `productCode`/GTIN quando já existe;
-3. para resultados Continente com `pid`, consultar `cesta.pt/get_product` para tentar obter EAN exato;
-4. pesquisar por código nas bases Open Facts quando disponível;
-5. sem código, pesquisar nome + embalagem e calcular score por nome, marca, tokens e quantidade;
-6. aceitar apenas `score >= 0.74`;
-7. limitar a três resoluções concorrentes;
-8. manter placeholder se não existir correspondência segura.
+1. descarregar apenas os sitemaps oficiais dos dois retalhistas;
+2. extrair PID/SKU da URL do produto;
+3. validar e extrair a primeira URL oficial `image:loc`;
+4. gerar pequenos shards JSON por prefixo de PID;
+5. gerar shards de nome apenas para nomes oficiais exatos e únicos, destinados a reparar itens antigos sem PID;
+6. falhar se o catálogo ficar anormalmente pequeno ou perder SKUs de controlo conhecidos;
+7. copiar os shards para `dist/` sem guardar os binários das fotografias.
 
-Bases autorizadas:
+O runtime deve:
 
-- Open Food Facts;
-- Open Beauty Facts;
-- Open Products Facts;
-- Open Pet Food Facts.
+1. usar `retalhista + pid` do resultado `cesta.pt`;
+2. consultar apenas o shard **same-origin** no GitHub Pages;
+3. usar a URL oficial desse PID;
+4. rotular a origem como `Continente — imagem oficial` ou `Pingo Doce — imagem oficial`;
+5. usar Open Facts apenas quando a imagem oficial não existe;
+6. manter placeholder quando nenhuma fonte é segura.
 
-A seleção é orientada pelo tipo/categoria do produto, com fallback entre bases.
+### Itens antigos
 
-### Ampliação
+Itens criados antes da v60 podem não ter `retailerMarketId`/`retailerProductId`. Para esses itens, a aplicação pode usar o índice de nome somente se:
 
-Qualquer fotografia real torna-se um botão acessível. O toque/clique abre um `<dialog>` fullscreen/responsivo com imagem ampliada, nome, origem, fecho por botão/Esc/backdrop, safe areas, dark mode e redução de movimento.
+- o nome normalizado corresponder exatamente ao nome do sitemap;
+- o nome for único dentro do retalhista;
+- existir apenas uma correspondência oficial entre os retalhistas consultados.
 
-### Persistência
+Se houver ambiguidade, não atribuir fotografia oficial.
 
-Quando uma imagem é resolvida para um item já guardado, persistir apenas:
+### Segurança
 
-- `productCode` comprovável, se em falta;
-- `imageUrl`;
-- `imageSource`;
-- `imageMatchedAt`.
-
-Não guardar binários.
-
-### Segurança e privacidade
-
-- sem proxy genérico (Microlink/Jina/AllOrigins/CORS proxy ou equivalente);
-- sem API key/Authorization;
-- `credentials:'omit'` e `referrerPolicy:'no-referrer'`;
-- CSP limitada às quatro famílias Open Facts e ao `cesta.pt` já existente;
-- nenhum valor financeiro, PIN, token GitHub ou conteúdo do cofre é enviado para resolver imagens.
+- Continente/Pingo Doce não entram em `connect-src`;
+- o browser não lê HTML/API dos retalhistas;
+- `img-src` é alargado apenas a `www.continente.pt` e `static.pingodoce.pt`;
+- os shards são same-origin e passam por regex estrita no Service Worker;
+- sem cookies, Authorization, API keys ou proxy genérico;
+- o cofre guarda apenas URL/origem/data, nunca o ficheiro de imagem;
+- imagens não alteram preços, quantidades ou estado financeiro.
 
 ### Motivo
 
-Esta abordagem aumenta a cobertura e a precisão sem transformar a PWA num scraper de páginas de lojas nem acrescentar um backend apenas para imagens. EAN/GTIN exato é preferido sempre que possível. Quando isso não existe, o score textual reduz a probabilidade de variante errada.
+Esta separação usa uma fonte oficial publicada pelos próprios retalhistas, mantém a PWA estática e evita dependência de scraping em runtime. O PID fornece uma correspondência determinística muito mais forte do que pesquisar uma fotografia por texto.
+
+### Validação
+
+A CI v60 `33996921108` gerou e validou:
+
+- 100 474 produtos Continente;
+- 16 018 produtos Pingo Doce;
+- 101 558 nomes oficiais exatos únicos;
+- Continente SKU `8167440` presente com URL oficial;
+- Pingo Doce SKU `739490` presente com URL oficial;
+- suite completa de finanças, segurança, Mercado, imagens, UI, responsividade, acessibilidade e sincronização em `success`.
 
 ### Limitação aceite
 
-Não se promete 100% de cobertura. Alguns SKUs não têm fotografia pública ou não têm identificador suficiente para uma correspondência segura. Nesses casos o placeholder é o resultado correto.
-
-### Consequência
-
-A v59 acrescenta duas novas camadas públicas, novas origens CSP explicitamente permitidas, um teste dedicado (`tests/market-image-audit.test.cjs`) e cache `conta-de-casa-public-v59-product-images`. A validação final exige iPhone/Safari com amostras reais, incluindo produtos com e sem correspondência.
+Cobertura oficial significa “o que o retalhista publica no sitemap”, não garantia matemática de 100% dos SKUs existentes. Se o sitemap não publicar uma fotografia, a aplicação mantém o fallback ou placeholder em vez de inventar uma imagem.
