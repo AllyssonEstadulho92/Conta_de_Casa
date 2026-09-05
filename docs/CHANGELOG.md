@@ -1,5 +1,44 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-05 — Centro de Atualização de Software v58
+
+### Objetivo
+
+Criar um ponto único, inspirado na hierarquia da página de atualização do iPhone, onde o utilizador possa ver o estado da aplicação, verificar novas versões e consultar as alterações relevantes de cada release.
+
+### Alterações
+
+- criado `app-update.js` como módulo isolado de atualização;
+- criado `app-update.css` com versão mobile fullscreen, modal desktop, safe areas, dark mode, foco visível e `prefers-reduced-motion`;
+- adicionada em **Definições** a entrada **Atualização de Software**;
+- novo ecrã mostra **Atualizações Automáticas — Ativado**, **Atualizações Beta — Desativado**, estado da versão e **Mais detalhes**;
+- **Verificar atualizações** usa `ServiceWorkerRegistration.update()` no registo same-origin;
+- worker em espera pode receber a mensagem fixa `SKIP_WAITING` e o listener existente de `controllerchange` continua responsável pelo reload;
+- `APP_RELEASE_NOTES` passa a concentrar as alterações visíveis ao utilizador; futuras releases devem acrescentar a sua nota antes do deploy;
+- `scripts/prepare-pages.cjs` inclui os dois novos assets e carimba apenas o bundle `dist/` com `v58` e query strings `?v=58`;
+- `dist/events.js` passa a registar `./sw.js?v=58` sem exigir uma substituição estrutural do template fonte;
+- cache do Service Worker atualizado para `conta-de-casa-public-v58-software-update`;
+- `app-update.css` e `app-update.js` passam a integrar a allowlist offline e pública.
+
+### Segurança e privacidade
+
+- nenhum backend ou endpoint de atualização foi adicionado;
+- nenhuma origem nova foi acrescentada à CSP;
+- a verificação não lê nem envia dados do cofre, faturas, Mercado, perfil ou sincronização;
+- nenhum token, password, API key ou segredo é introduzido;
+- Atualizações Beta permanece desativado porque não existe uma pipeline beta real e auditada.
+
+### Testes
+
+- criado `tests/app-update.test.cjs` para validar UI, ausência de endpoints externos, lifecycle do Service Worker, cache v58 e composição real do bundle `dist/`;
+- `ci.yml` e `pages.yml` passam a verificar sintaxe e testes do módulo de atualização;
+- testes antigos que protegiam o namespace de cache foram alinhados com v58 sem relaxar as invariantes de Mercado, imagens, ícones ou responsividade;
+- suite completa passou no CI da branch `feature/software-update-center-v58`, workflow `33993038481`.
+
+### Limitação a validar em hardware
+
+Falta confirmar em iPhone/Safari e PWA instalada uma transição pública real entre duas versões, por exemplo v58 → v59, incluindo deteção, instalação, `controllerchange`, reload e versão apresentada.
+
 ## 2026-09-05 — Hierarquia mobile do protótipo e auditoria transversal de ícones v55
 
 ### Motivo
