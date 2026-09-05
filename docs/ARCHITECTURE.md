@@ -13,7 +13,9 @@ Aplicação web estática/PWA distribuída por GitHub Pages, sem backend própri
 - `design-system.css`: tokens e componentes visuais principais.
 - `mobile-layout.css`: compatibilidade e estabilidade do viewport móvel.
 - `market-experience.css`: camada contextual da página Mercado e do diálogo `market-browser`.
-- `market-barcode.css`: camada isolada do botão de leitura, estado e overlay de câmara do scanner.
+- `market-barcode.css`: camada isolada do botão de leitura, estado e overlay de câmara do scanner de produtos.
+- `ui-icons.css`: normalização de geometria, dimensões e movimento dos ícones de interface.
+- `invoice-capture.css`: interface responsiva e overlay do leitor QR de faturas.
 
 Ordem CSS pública:
 
@@ -22,6 +24,8 @@ Ordem CSS pública:
 3. `mobile-layout.css`
 4. `market-experience.css`
 5. `market-barcode.css`
+6. `ui-icons.css`
+7. `invoice-capture.css`
 
 ### JavaScript
 
@@ -30,9 +34,67 @@ Ordem CSS pública:
 - `render.js`: renderização das páginas.
 - `forms.js`: formulários e validações.
 - `sync.js`: sincronização cifrada opcional via GitHub.
+- `ui-icons.js`: registo vetorial comum e normalização de ícones estáticos/dinâmicos.
 - `events.js`: eventos, navegação, viewport e interação.
 - `market-experience.js`: pesquisa de preços externos e criação de itens a partir dos resultados.
 - `market-barcode.js`: leitura da câmara, validação GTIN, identificação de produto e passagem controlada para a pesquisa existente.
+- `invoice-capture.js`: leitura local do Código QR de faturação pela câmara/imagem e preenchimento assistido da nova fatura.
+
+## Sistema de ícones
+
+`core.js` continua a fornecer o contrato histórico `ICONS`/`icon()`. `ui-icons.js` estende esse registo e substitui o renderer por uma implementação única, mantendo a API usada pela navegação e pelos componentes existentes.
+
+Princípios:
+
+- SVG local, sem fonte remota de ícones e sem dependência de emoji/glifos do sistema operativo;
+- `viewBox 0 0 24 24`, `currentColor`, `stroke-width 1.8`, `stroke-linecap` e `stroke-linejoin` arredondados;
+- dimensões explícitas de 16/20/24/28 px através de `ui-icons.css`;
+- ícones decorativos permanecem `aria-hidden`; o nome acessível continua no botão/controlo;
+- um `MutationObserver` limitado a hidratação visual normaliza componentes criados dinamicamente sem alterar o seu comportamento;
+- a regra específica de `.market-browser-search > .ui-icon-svg` sobrepõe o `svg { height:auto }` legado, eliminando a dimensão automática que podia cortar/deformar a lupa em Safari/iOS;
+- animação só comunica estado. `prefers-reduced-motion` remove animações não essenciais.
+
+A auditoria detalhada está em `docs/UI_ICON_AUDIT.md`.
+
+## Faturas — captura QR assistida
+
+A captura foi adicionada como camada progressiva sobre o formulário existente; `forms.js` e `normalizeBill()` não foram reestruturados.
+
+Fluxo:
+
+1. Ao abrir **Nova fatura**, `invoice-capture.js` injeta um bloco **Ler dados da fatura** antes dos campos existentes.
+2. O utilizador escolhe **Ler QR com câmara** ou **Ler imagem da fatura**.
+3. A leitura usa `BrowserQRCodeReader` do mesmo `@zxing/browser@0.2.0` já autorizado para o scanner do Mercado.
+4. O payload é interpretado de acordo com o formato QR de faturação da Autoridade Tributária.
+5. É exigida uma combinação mínima coerente: NIF do emitente, data do documento, identificação única e total.
+6. A aplicação apresenta os dados numa pré-visualização; não escreve imediatamente no formulário.
+7. Apenas **Preencher campos** transfere valores compatíveis para campos que ainda estejam vazios.
+8. O utilizador continua a confirmar fornecedor, categoria, vencimento e método antes de guardar a fatura com o fluxo normal de `handleBillSubmit()`.
+
+### Campos QR utilizados
+
+- `A`: NIF do emitente;
+- `B`: NIF do adquirente, quando existe;
+- `D`: tipo de documento;
+- `E`: estado do documento;
+- `F`: data do documento no formato `YYYYMMDD`;
+- `G`: identificação única do documento;
+- `H`: ATCUD;
+- `N`: total de impostos;
+- `O`: total do documento com impostos;
+- `Q`: fragmento do hash;
+- `R`: número do certificado.
+
+O QR fiscal não é usado para inferir dados que ele não prova. Em particular, a implementação não assume que contém o nome comercial do fornecedor nem o vencimento do pagamento. Quando o nome não existe, o campo de fornecedor recebe apenas `NIF <emitente>` para revisão humana.
+
+### Privacidade da fatura
+
+- a câmara não grava vídeo/fotogramas;
+- uma imagem selecionada é limitada a 15 MB e processada através de um `blob:` local temporário;
+- o `ObjectURL` é sempre revogado;
+- `invoice-capture.js` não chama `fetch`, `XMLHttpRequest`, armazenamento local, IndexedDB, `commit()` ou `saveState()`;
+- ficheiros e imagens não entram em `appState.attachments` e não são sincronizados;
+- PDFs/OCR geral não fazem parte deste fluxo porque a leitura probabilística de texto financeiro exigiria uma camada adicional de validação e segurança.
 
 ## Mercado v53 — fluxo de pesquisa
 
@@ -97,17 +159,18 @@ Esta fonte não é usada como fonte de preço. Serve apenas para traduzir um GTI
 
 ### Leitor — ZXing Browser
 
-Dependência runtime: `@zxing/browser@0.2.0/umd/zxing-browser.min.js`, carregada de `https://unpkg.com` apenas ao abrir o scanner.
+Dependência runtime: `@zxing/browser@0.2.0/umd/zxing-browser.min.js`, carregada de `https://unpkg.com` apenas quando um leitor precisa da câmara/imagem.
 
-A versão é fixa para evitar alteração silenciosa por uma tag `latest`. Se a dependência mudar de versão, a alteração deve passar por revisão de compatibilidade, segurança, tamanho e comportamento de câmara.
+A origem e versão ficam centralmente declaradas em `index.html` para o leitor de faturas e continuam fixas no scanner do Mercado. Se a dependência mudar de versão, a alteração deve passar por revisão de compatibilidade, segurança, tamanho e comportamento de câmara.
 
-## Política de veracidade dos preços
+## Política de veracidade dos preços e documentos
 
 - nunca usar dados de demonstração como se fossem reais;
 - não apresentar um preço observado antigo como “atual”;
 - ausência de fonte verificável resulta em estado “sem preço verificado”, não em fallback fictício;
 - identificação por código de barras nunca é tratada como confirmação de preço;
-- preço externo é sempre uma estimativa até o utilizador confirmar o valor efetivamente pago.
+- preço externo é sempre uma estimativa até o utilizador confirmar o valor efetivamente pago;
+- leitura de QR de fatura preenche apenas campos explicitamente representados no payload fiscal e exige confirmação antes de guardar.
 
 ## Segurança de conteúdo remoto
 
@@ -119,7 +182,8 @@ A versão é fixa para evitar alteração silenciosa por uma tag `latest`. Se a 
 - URLs remotas do cesta.pt passam por allowlist de domínio e protocolo;
 - pedidos do scanner ao Open Food Facts usam `credentials: 'omit'`, `referrerPolicy: 'no-referrer'`, timeout e abort;
 - pedidos de preço têm timeout e podem ser abortados quando a pesquisa muda;
-- falha de uma fonte não deve criar produto/preço fictício nem destruir resultados válidos de outra fonte.
+- a captura de faturas não adiciona qualquer endpoint de dados: câmara e imagem são processadas localmente;
+- falha de uma fonte não deve criar produto/preço/documento fictício nem destruir resultados válidos de outra fonte.
 
 ## Privacidade
 
@@ -128,31 +192,35 @@ Os dados financeiros e o cofre continuam locais/cifrados. Existem duas exceçõe
 - pesquisa manual: o termo pesquisado é enviado a `cesta.pt` para obter preços;
 - leitura por câmara: o vídeo fica local; o GTIN lido é enviado ao Open Food Facts para identificação e o termo derivado do produto é depois enviado a `cesta.pt` para pesquisa de preços.
 
-Não são enviados PIN, palavra-passe, conteúdo do cofre, faturas, saldo, orçamento ou outros dados financeiros.
+A leitura QR de faturas é ainda mais restritiva: imagem e payload ficam no cliente e só os campos confirmados pelo utilizador entram no formulário normal. Não são enviados PIN, palavra-passe, conteúdo do cofre, faturas, saldo, orçamento ou outros dados financeiros.
 
 ## Viewport e navegação mobile
 
 O shell permanente usa `100dvh`/`100svh`. `VisualViewport` permanece limitado a comportamento transitório de teclado/diálogos. O diálogo do Mercado ocupa o viewport móvel, respeita `safe-area-inset-top` e `safe-area-inset-bottom` e usa scroll interno.
 
-O scanner usa overlay próprio com safe areas em mobile. A animação da linha de leitura é desativada quando `prefers-reduced-motion: reduce` está ativo.
+Os dois scanners usam overlays próprios com safe areas em mobile. As linhas de leitura são desativadas quando `prefers-reduced-motion: reduce` está ativo.
 
 ## Distribuição
 
-`scripts/prepare-pages.cjs` gera `dist/` através de allowlist de assets públicos. `market-barcode.css` e `market-barcode.js` fazem parte dessa allowlist e do conjunto de assets do Service Worker.
+`scripts/prepare-pages.cjs` gera `dist/` através de allowlist de assets públicos. `market-barcode.*`, `ui-icons.*` e `invoice-capture.*` fazem parte dessa allowlist e do conjunto de assets do Service Worker.
 
 O Service Worker só interceta recursos do mesmo origin incluídos na allowlist. A biblioteca ZXing e as consultas Open Food Facts/cesta.pt continuam externas e não são adicionadas ao cache offline da aplicação.
 
 ## Testes
 
-`tests/market-barcode.test.cjs` valida wiring, CSP, allowlists de distribuição, câmara traseira, origem/versão das dependências, GTIN/checksum, encerramento de tracks, ausência de persistência direta, handoff para a pesquisa e requisitos responsivos/acessíveis básicos.
+- `tests/market-barcode.test.cjs`: wiring, CSP, GTIN/checksum, lifecycle da câmara, privacidade e passagem para pesquisa real;
+- `tests/ui-icons.test.cjs`: registo comum, ausência de dependência externa, sizing explícito da lupa/Safari e política de movimento reduzido;
+- `tests/invoice-capture.test.cjs`: parser do QR fiscal, exemplo técnico, validação de datas/valores, privacidade, lifecycle e responsividade.
 
-CI executa `node --check market-barcode.js` e o teste específico. O workflow de Pages repete essas verificações antes da preparação de `dist/`.
+CI executa `node --check` nos módulos e os testes dedicados. O workflow de Pages repete essas verificações antes da preparação de `dist/`.
 
 ## Regra de manutenção
 
 Qualquer alteração futura às fontes de preços ou identificação deve ser auditada quanto a: origem, território, CORS, termos de utilização, privacidade, atualização, evidência/prova, erros parciais e possibilidade de alteração silenciosa do formato de resposta.
 
-Qualquer alteração ao scanner deve ser validada em dispositivos físicos porque permissões, autofocus, lente traseira e lanterna dependem do hardware/browser e não podem ser considerados confirmados apenas por testes unitários.
+Qualquer alteração aos scanners deve ser validada em dispositivos físicos porque permissões, autofocus, lente traseira e lanterna dependem do hardware/browser e não podem ser considerados confirmados apenas por testes unitários.
+
+Novas fontes de ícones devem ser integradas no registo local; não devem ser introduzidos glifos Unicode, emojis ou CDNs de icon fonts sem decisão arquitetural explícita.
 
 ## Quantidades e preços unitários
 
