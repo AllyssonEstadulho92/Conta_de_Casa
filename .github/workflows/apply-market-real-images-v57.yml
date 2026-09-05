@@ -5,6 +5,7 @@ on:
     branches: [ui/market-real-images-v57]
     paths:
       - scripts/apply-market-real-images-v57.cjs
+      - .github/workflows/apply-market-real-images-v57.yml
   workflow_dispatch:
 
 permissions:
