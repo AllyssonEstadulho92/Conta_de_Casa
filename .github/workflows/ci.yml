@@ -34,6 +34,8 @@ jobs:
           node --check sync.js
           node --check market-experience.js
           node --check market-barcode.js
+          node --check ui-icons.js
+          node --check invoice-capture.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
 
@@ -55,6 +57,9 @@ jobs:
       - name: Invoice form regression tests
         run: node tests/form-regression.test.cjs
 
+      - name: Invoice QR capture tests
+        run: node tests/invoice-capture.test.cjs
+
       - name: Market category tests
         run: node tests/market-categories.test.cjs
 
@@ -66,6 +71,9 @@ jobs:
 
       - name: Market quantity and accounting tests
         run: node tests/market-live-accounting.test.cjs
+
+      - name: Unified icon audit tests
+        run: node tests/ui-icons.test.cjs
 
       - name: Security hardening tests
         run: node tests/security.test.cjs
