@@ -2,17 +2,17 @@
 
 ## Visão geral
 
-Aplicação web estática/PWA distribuída por GitHub Pages, sem backend próprio. A aplicação é local-first e utiliza JavaScript no cliente para regras de negócio, renderização, formulários, persistência cifrada e sincronização opcional.
+Aplicação web estática/PWA distribuída por GitHub Pages, sem backend próprio. A aplicação é local-first e executa no cliente as regras de negócio, renderização, formulários, persistência cifrada e sincronização opcional.
 
 ## Camadas principais
 
 ### Interface
 
-- `index.html`: estrutura semântica das páginas, navegação, diálogos e controlos.
-- `styles.css`: estilos históricos/base e regras responsivas legadas.
-- `design-system.css`: tokens, componentes e sistema visual principal.
-- `mobile-layout.css`: camada de compatibilidade para estabilidade do viewport mobile e ajustes validados em iPhone.
-- `market-experience.css`: camada final e estritamente contextual da página Mercado e do diálogo `market-browser`, responsável por reproduzir o protótipo aprovado sem alterar visualmente as restantes áreas.
+- `index.html`: estrutura semântica, CSP, navegação, páginas e diálogos.
+- `styles.css`: estilos base/legados.
+- `design-system.css`: tokens e componentes visuais principais.
+- `mobile-layout.css`: compatibilidade e estabilidade do viewport móvel.
+- `market-experience.css`: camada contextual da página Mercado e do diálogo `market-browser`.
 
 Ordem CSS pública:
 
@@ -23,68 +23,87 @@ Ordem CSS pública:
 
 ### JavaScript
 
-- `core.js`: estado base, utilitários, cifragem/persistência e definições globais.
+- `core.js`: estado, utilitários, cifragem e persistência.
 - `finance.js`: cálculos e regras financeiras.
-- `render.js`: renderização das páginas e componentes.
+- `render.js`: renderização das páginas.
 - `forms.js`: formulários e validações.
-- `sync.js`: sincronização cifrada opcional via GitHub privado.
-- `events.js`: eventos, navegação, métricas de viewport e interação.
-- `market-experience.js`: controlador isolado do protótipo de comparação de produtos/mercados. Interceta apenas a criação de novo item (`#newMarketBtn` e ação rápida Mercado); a edição de itens existentes permanece no fluxo de `forms.js`.
+- `sync.js`: sincronização cifrada opcional via GitHub.
+- `events.js`: eventos, navegação, viewport e interação.
+- `market-experience.js`: pesquisa de preços externos e criação de itens a partir dos resultados.
 
-## Fluxo Mercado v51
+## Mercado v52 — fluxo de pesquisa
 
-1. A página `page-market` continua a ser renderizada por `renderMarket()` e continua a usar o mesmo estado persistido.
-2. **Adicionar item** abre o `formDialog` com `data-mode="market-browser"`.
-3. O comparador apresenta pesquisa, tabs, seleção de mercados e cartões de comparação.
-4. Os preços existentes no comparador v51 são dados de demonstração e ficam apenas em memória/DOM.
-5. Ao adicionar um produto, é criado um registo no array `appState.market` usando exclusivamente o schema já existente. `estimatedCents` é gravado como `0`, impedindo que um valor fictício entre nos cálculos.
-6. A edição posterior do item usa o formulário existente e permite ao utilizador indicar o preço estimado real.
+1. O utilizador abre **Adicionar produto**.
+2. O campo inicia vazio; não existem resultados ou preços pré-carregados.
+3. A partir de 2 caracteres, a pesquisa é debounced e cancela a pesquisa anterior quando o texto muda.
+4. Só são consultadas as fontes correspondentes aos mercados selecionados.
+5. Resultados remotos são normalizados para um modelo transitório de UI e não são armazenados automaticamente.
+6. Ao pressionar `+`, é criado um item através do mesmo array `appState.market` já existente.
+7. O preço consultado entra como `estimatedCents`; `actualCents` permanece `0` até confirmação do utilizador.
+8. A edição posterior continua no formulário `openMarketForm()` existente.
 
 O schema de `normalizeMarketItem()` não foi alterado.
 
-## Integração de preços reais
+## Fontes externas de preços
 
-A build v51 **não implementa fetch a retalhistas nem a serviços externos**. A aplicação continua sem backend e a CSP mantém `connect-src 'self' https://api.github.com`.
+### Continente / Pingo Doce — cesta.pt
 
-Uma integração futura de preços reais deverá ser tratada como um subsistema separado, com pelo menos:
+Endpoint utilizado: `https://cesta.pt/mcp`.
 
-- fontes verificadas e documentadas por mercado;
-- backend/proxy ou serviço próprio para resolver CORS e impedir scraping direto no browser;
-- normalização por EAN/GTIN, quantidade, unidade e embalagem;
-- identificação de mercado, loja/região, data/hora da recolha, preço normal e promoção;
-- cache e controlo de caducidade;
-- tolerância a falhas e indisponibilidade parcial por mercado;
-- indicação explícita de origem e atualidade do preço;
-- validação de termos de utilização, privacidade e segurança antes de ativação.
+A integração usa MCP sobre HTTP/SSE:
+
+- `initialize`;
+- `notifications/initialized`;
+- `tools/call` com a ferramenta `search_products`.
+
+A resposta é textual e é convertida para campos internos: cadeia, nome, embalagem, preço, promoção, preço por unidade, pid e URL oficial. A URL só é exposta se o host pertencer à allowlist `continente.pt` ou `pingodoce.pt` e usar HTTPS.
+
+A integração não utiliza criação de carrinhos, autenticação nem credenciais de retalhistas.
+
+### Mercadona Portugal — Open Prices
+
+Base utilizada: `https://prices.openfoodfacts.org/api/v1`.
+
+Fluxo:
+
+1. `/locations` localiza apenas Mercadona em Portugal com registos de preço;
+2. `/products` procura produtos pelo nome;
+3. `/prices` cruza IDs de produto e de localização;
+4. resultados sem `proof_id`/comprovativo são rejeitados;
+5. é apresentada a data da observação e a localidade da loja;
+6. a idade do registo determina o estado visual: recente, datado ou antigo.
+
+Esta fonte é baseada em observações públicas com comprovativos e não deve ser confundida com uma API oficial da Mercadona. Cobertura e atualidade podem ser incompletas.
+
+## Política de veracidade dos preços
+
+- nunca usar dados de demonstração como se fossem reais;
+- nunca substituir Mercadona Portugal por preços da Mercadona Espanha;
+- não apresentar um preço observado antigo como “atual”;
+- ausência de fonte verificável resulta em estado “sem preço verificado”, não em fallback fictício;
+- preço externo é sempre uma estimativa até o utilizador confirmar o valor efetivamente pago.
+
+## Segurança de conteúdo remoto
+
+- nenhuma API key ou segredo é necessário para as integrações atuais;
+- CSP `connect-src` restringe chamadas a `self`, GitHub API, `cesta.pt` e `prices.openfoodfacts.org`;
+- strings remotas são normalizadas, limitadas e escapadas antes de entrar no DOM;
+- URLs remotas do cesta.pt passam por allowlist de domínio e protocolo;
+- pedidos têm timeout e podem ser abortados quando a pesquisa muda;
+- falha de uma fonte não deve destruir resultados válidos da outra fonte.
+
+## Privacidade
+
+Os dados financeiros e o cofre continuam locais/cifrados. A pesquisa de Mercado é uma exceção explícita: o termo pesquisado é enviado às fontes externas necessárias para obter preços. Não são enviados PIN, palavra-passe, conteúdo do cofre, faturas ou dados financeiros.
 
 ## Viewport e navegação mobile
 
-O corpo da aplicação mantém um contentor de scroll próprio no mobile. O shell permanente usa unidades CSS dinâmicas (`dvh`/`svh`). `window.visualViewport` continua disponível em `events.js`, mas deve ser usado apenas para situações transitórias, nomeadamente teclado virtual e posicionamento de diálogos.
-
-O diálogo do comparador ocupa o viewport móvel e considera `env(safe-area-inset-top)` e `env(safe-area-inset-bottom)`. Em desktop mantém largura máxima de 760 px e scroll interno.
-
-A navegação inferior é fixa e contém quatro destinos principais. O menu completo é apresentado através de drawer.
-
-## Dados e segurança
-
-- Persistência principal: IndexedDB.
-- Estado financeiro cifrado antes de armazenamento.
-- Derivação de chave: PBKDF2-SHA-256.
-- Cifragem: AES-GCM 256.
-- PIN/palavra-passe não é armazenado.
-- Backups são cifrados.
-- Sincronização é opcional, desativada por defeito e usa repositório GitHub privado configurado pelo utilizador.
-- CSP restringe origens e impede carregamento arbitrário de recursos externos.
-- `market-experience.js` não introduz pedidos de rede externos.
+O shell permanente usa `100dvh`/`100svh`. `VisualViewport` permanece limitado a comportamento transitório de teclado/diálogos. O diálogo do Mercado ocupa o viewport móvel, respeita `safe-area-inset-top` e `safe-area-inset-bottom` e usa scroll interno.
 
 ## Distribuição
 
-`scripts/prepare-pages.cjs` cria `dist/` exclusivamente a partir de uma allowlist de assets públicos. O workflow de Pages só publica uma revisão depois da conclusão bem-sucedida do CI.
-
-O Service Worker (`sw.js`) mantém cache offline apenas dos assets públicos autorizados. Na build v51, `market-experience.css` e `market-experience.js` fazem parte da allowlist e do cache público.
+`scripts/prepare-pages.cjs` gera `dist/` através de allowlist de assets públicos. O Service Worker mantém cache apenas desses assets. Chamadas de preços usam `cache: no-store` no runtime e não são incluídas no cache offline do Service Worker.
 
 ## Regra de manutenção
 
-Alterações de layout não devem modificar cálculos, schema, cifragem ou sincronização. Mudanças no conjunto de assets públicos devem ser refletidas simultaneamente em `index.html`, `scripts/prepare-pages.cjs`, `sw.js` e testes de regressão.
-
-A camada `market-experience.*` deve continuar isolada até existir validação visual em browser real e uma decisão explícita sobre eventual consolidação no design system principal.
+Qualquer alteração futura às fontes de preços deve ser auditada quanto a: origem, território, CORS, termos de utilização, privacidade, atualização, evidência/prova, erros parciais e possibilidade de alteração silenciosa do formato de resposta.
