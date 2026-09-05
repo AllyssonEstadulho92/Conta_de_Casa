@@ -14,7 +14,7 @@ assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt https:\/\/world\.openfoodfacts\.org;/);
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
-assert.match(sw, /conta-de-casa-public-v54-lucide/);
+assert.match(sw, /conta-de-casa-public-v55-add-control/);
 
 for (const asset of ['market-experience.css','market-experience.js']) {
   assert.ok(sw.includes(`'./${asset}'`), `${asset} must be cached by the service worker`);
