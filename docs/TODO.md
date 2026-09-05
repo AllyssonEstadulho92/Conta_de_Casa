@@ -1,5 +1,22 @@
 # TODO — Conta de Casa
 
+## P0 — protótipo aprovado / hierarquia mobile v55
+
+- [x] Comparar a captura real de **Lista de compras** no iPhone com o protótipo aprovado.
+- [x] Manter o `+` principal no topo como ação de criação rápida e retirar a duplicação visual junto da pesquisa.
+- [x] Transformar o controlo secundário junto da pesquisa numa ação visual de scanner, sem alterar o fluxo existente de adicionar/pesquisar produto.
+- [x] Adicionar ícone de carrinho à hierarquia do título da página Compras.
+- [x] Adicionar âncoras iconográficas aos quatro cartões financeiros sem alterar os valores/cálculos.
+- [x] Refinar cartões mobile da lista com avatar vetorial neutro, estado, informação financeira e ações compactas.
+- [x] Não inventar fotografias de produtos: o schema atual não possui imagem persistida.
+- [x] Ocultar o campo de preço real enquanto o item ainda está por comprar; manter o campo quando comprado.
+- [x] Normalizar a navegação inferior e o indicador ativo.
+- [x] Renovar o cache do Service Worker para obrigar Safari/iOS a receber a revisão visual.
+- [x] Adicionar testes automatizados para a hierarquia aprovada e a métrica dos ícones contextuais.
+- [ ] Validar fisicamente no iPhone/Safari a revisão v55 depois do deploy: título com carrinho, `+` principal, scanner junto da pesquisa, cartões com ícones e lista sem sobreposições.
+- [ ] Repetir a validação em 320, 375, 390 e 430 px, retrato e paisagem.
+- [ ] Confirmar tema escuro e `prefers-reduced-motion` em hardware/browser real.
+
 ## P0 — validação Lucide e faturas
 
 - [x] Auditar as fontes de ícones usadas pela aplicação e identificar mistura de SVG, glifos Unicode, controlos nativos e módulos contextuais.
@@ -61,6 +78,7 @@
 ## P2 — manutenção
 
 - [ ] Remover progressivamente os glifos Unicode de fallback que ainda permanecem no HTML/JS estático depois de a revisão Lucide estar validada fisicamente, sem alterar o contrato dos controlos.
+- [ ] Migrar gradualmente os pequenos SVG locais de módulos contextuais para `CDCIcons.markup`, reduzindo duplicação de paths sem misturar esta refatoração com a validação v55.
 - [ ] Avaliar remoção gradual de CSS antigo já substituído pelo design system.
 - [ ] Avaliar se `market-experience.css`, `market-barcode.css`, `ui-icons.css` e `invoice-capture.css` devem permanecer isolados ou ser consolidados no design system após validação física.
 - [ ] Avaliar OCR/PDF de faturas apenas com uma estratégia de validação explícita que não grave valores financeiros probabilísticos sem confirmação.
