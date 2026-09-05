@@ -1,155 +1,128 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 5 de setembro de 2026
-Build público: v59
+Build em validação: v60
+Último build público confirmado: v59
 Distribuição: GitHub Pages
-Estado da revisão: auditoria automática de imagens e ampliação tátil integradas em `main` pelo PR #31; CI principal e Deploy Pages concluídos com sucesso; falta validação física no iPhone/Safari
+Branch: `feature/official-product-images-v60`
+Estado: resolução por imagens oficiais implementada e CI da branch concluída com sucesso; integração em `main`, deploy e validação física no iPhone ainda pendentes.
 
 ## Estado atual
 
-A aplicação permanece uma PWA estática/local-first: cofre cifrado no navegador, dados financeiros no IndexedDB, sincronização GitHub opcional e GitHub Pages como distribuição pública. O schema financeiro continua na versão 5. Faturas, Planeamento, Mercado, Relatórios, Segurança, Definições, scanner de códigos de barras, captura QR e Centro de Atualização mantêm os fluxos existentes.
+A aplicação permanece uma PWA estática/local-first. O cofre, IndexedDB, PBKDF2/AES-GCM, estado financeiro, sincronização, faturas, scanners e cálculos mantêm os contratos existentes. A v60 altera apenas a origem e a resolução das fotografias do Mercado, sem introduzir backend, credenciais ou alteração do schema financeiro.
 
-A v59 responde a dois problemas observados no iPhone na pesquisa **Adicionar produto**:
+## Problema confirmado na v59
 
-1. várias linhas tinham placeholder porque a v57 fazia apenas uma pesquisa ampla de imagens por termo, sem auditar cada produto individualmente;
-2. mesmo quando existia fotografia, a miniatura era estática e não podia ser ampliada.
+A v59 conseguia ampliar fotografias e fazia fallback através das bases Open Facts, mas não recebia a fotografia publicada pelo próprio Continente/Pingo Doce. Por isso, muitos produtos com preço e página oficial continuavam com placeholder.
 
-A revisão integrada corresponde ao commit `77e5c26da6c4fa2780d4fe50515f7a147a18c45e`. O CI de `main` (`33995349723`) terminou com `success` e o workflow **Deploy Pages** (`33995368314`) publicou a mesma revisão com conclusão `success`.
+A causa foi confirmada tecnicamente:
 
-## Revisão v59 — auditoria de imagens e ampliação
+- `cesta.pt` devolve nome, preço, URL e `pid` dos resultados, mas não fornece a fotografia no contrato `search_products`;
+- as páginas HTML de Continente/Pingo Doce não expõem CORS para serem lidas de forma fiável pelo browser da PWA;
+- ambos os retalhistas publicam, contudo, sitemaps XML com relação entre página/SKU e fotografia oficial.
 
-Foram adicionados `market-image-audit.js` e `market-image-audit.css` como camada progressiva, sem reescrever `market-experience.js`, `render.js` ou o modelo financeiro.
+## Revisão v60 — imagens oficiais por SKU
 
-### Auditoria automática por produto
+Foi implementado um fluxo em duas fases.
 
-Cada cartão de resultado e cada item guardado sem fotografia passa por uma resolução própria. A estratégia é:
+### Build/CI
 
-1. usar o `productCode`/GTIN já conhecido quando existe;
-2. para resultados Continente com `pid`, tentar obter o EAN exato através de `cesta.pt/get_product`;
-3. procurar esse código nas bases Open Facts;
-4. sem código, pesquisar o nome + embalagem do produto;
-5. calcular uma pontuação por nome, marca, tokens e quantidade;
-6. aceitar apenas resultados com confiança mínima de 0,74;
-7. manter o placeholder quando não há correspondência suficientemente segura.
+`scripts/refresh-retailer-image-index.cjs` lê diretamente os sitemaps oficiais publicados pelos retalhistas:
 
-As bases consultadas são escolhidas por tipo de produto:
+- Continente: `sitemap_index.xml` → `sitemap-custom_sitemap_*-image.xml`;
+- Pingo Doce: `home/sitemap_index.xml` → `home/sitemap_*-product.xml`.
 
-- Open Food Facts — alimentação/bebidas e fallback geral;
-- Open Beauty Facts — higiene pessoal/cosmética;
-- Open Products Facts — limpeza, casa, parafarmácia e produtos gerais;
-- Open Pet Food Facts — alimentação animal.
+A tarefa extrai apenas:
 
-A auditoria limita-se a três resoluções concorrentes para evitar rajadas de pedidos quando uma pesquisa devolve muitos resultados.
+- `pid`/SKU da URL oficial do produto;
+- primeira `image:loc` oficial;
+- nome/título do produto quando publicado no sitemap.
 
-### Imagem ampliável
+O índice é validado antes de ser aceite. A execução CI `33996921108` concluiu com `success` e produziu:
 
-Qualquer fotografia real apresentada no Mercado passa a ser um controlo focável/tátil. Ao tocar ou clicar na miniatura abre um `<dialog>` com:
+- Continente: **100 474** produtos com fotografia oficial;
+- Pingo Doce: **16 018** produtos com fotografia oficial;
+- **101 558** nomes exatos únicos utilizáveis para reparar itens antigos sem PID.
 
-- imagem ampliada e responsiva;
-- nome do produto;
-- origem da fotografia;
-- botão Fechar;
-- fecho por Esc ou toque no backdrop;
-- safe areas em iPhone;
-- dark mode, foco visível e `prefers-reduced-motion`.
+Os dois SKUs fornecidos como exemplos são testes de controlo obrigatórios no build:
 
-### Persistência
+- Continente `8167440` — Compressas Gaze 20 × 20 cm;
+- Pingo Doce `739490` — Arroz Carolino Cigala.
 
-Quando a auditoria resolve uma fotografia para um item já guardado, são persistidos apenas os metadados já previstos pelo schema:
+Se algum destes controlos ou o tamanho mínimo do catálogo falhar, CI/deploy falham em vez de publicar um índice incompleto silenciosamente.
 
-- `productCode` quando comprovável e ainda ausente;
-- `imageUrl`;
-- `imageSource`;
-- `imageMatchedAt`.
+### Runtime
 
-Nenhum ficheiro binário é guardado no cofre.
+`market-official-images.js` é carregado depois da camada v59 e passa a ter prioridade:
 
-## Veracidade da imagem
+1. um resultado de pesquisa já possui `retalhista + pid` proveniente de `cesta.pt`;
+2. a aplicação consulta apenas um pequeno shard JSON **same-origin** em `./retailer-images/...`;
+3. o shard devolve a URL exata da fotografia daquele PID;
+4. a imagem é carregada diretamente do host oficial do retalhista;
+5. tocar na miniatura abre a imagem oficial ampliada;
+6. se o SKU não existir no índice oficial, entra o fallback v59/Open Facts;
+7. sem correspondência segura, mantém-se placeholder.
 
-A fotografia continua separada do preço e da ligação oficial da loja. `cesta.pt` permanece a origem do preço/URL de Pingo Doce e Continente; as bases Open Facts são usadas apenas para a referência visual.
+Para itens antigos, que foram criados antes de existir metadata do retalhista/PID, a v60 só usa resolução por nome quando o nome oficial normalizado é **exato, único e não ambíguo**. Não existe fuzzy matching para afirmar que uma fotografia é oficial.
 
-A aplicação não afirma que uma fotografia Open Facts é “imagem oficial Continente/Pingo Doce”. Quando existe EAN exato a confiança de identidade é maior; quando só existe correspondência textual, aplica-se o limiar de confiança. Se não houver prova suficiente, fica o placeholder.
+Quando um novo resultado é adicionado, a camada v60 acompanha a criação e persiste a fotografia oficial no item, usando os campos já existentes `imageUrl`, `imageSource` e `imageMatchedAt`.
 
-Isto é deliberado: a PWA estática não consegue auditar de forma fiável o HTML das páginas dos retalhistas a partir do browser devido a políticas cross-origin/CORS. Não foi adicionado um proxy genérico de scraping apenas para forçar cobertura visual.
+## Segurança e privacidade
 
-## Segurança e privacidade v59
+- nenhum scraping de HTML dos supermercados ocorre no iPhone/browser;
+- nenhum proxy genérico, Microlink, Jina, AllOrigins, Apify ou semelhante foi introduzido;
+- nenhum token/API key/Authorization é usado para imagens;
+- o browser consulta os índices por `same-origin` no próprio GitHub Pages;
+- a CSP permite imagens apenas nos hosts oficiais `www.continente.pt` e `static.pingodoce.pt`, além das origens Open Facts já autorizadas;
+- os hosts de Continente/Pingo Doce **não** são adicionados a `connect-src`, impedindo que o runtime evolua silenciosamente para scraping/API arbitrária;
+- nenhum binário de imagem entra no cofre; apenas URL/origem/data são persistidos;
+- PIN, chaves, faturas, valores financeiros e token GitHub nunca entram no processo de resolução.
 
-- sem alterações a PIN, PBKDF2, AES-GCM, IndexedDB, backups ou sincronização;
-- sem alteração de `estimatedCents`, `actualCents`, quantidade ou cálculos financeiros;
-- sem API keys, passwords, tokens ou cabeçalhos Authorization no novo módulo;
-- pedidos de imagem usam `credentials:'omit'` e `referrerPolicy:'no-referrer'`;
-- nenhum dado financeiro do cofre é enviado às bases de imagem;
-- `cesta.pt` é reutilizado apenas para detalhe do produto Continente quando é útil obter EAN;
-- não foi introduzido Microlink, Jina, AllOrigins, CORS proxy ou outro proxy genérico de páginas;
-- a CSP pública v59 permite exclusivamente os hosts Open Facts necessários a API/imagens;
-- o cache público é `conta-de-casa-public-v59-product-images`.
+## Distribuição v60
 
-## Build e distribuição v59
+`scripts/prepare-pages.cjs` passa a:
 
-`scripts/prepare-pages.cjs` compõe `v59` e inclui na allowlist pública:
+1. exigir/gerar o índice oficial;
+2. carimbar o build público como `v60`;
+3. distribuir `market-official-images.js`;
+4. copiar `retailer-images/` para `dist/`;
+5. aplicar a CSP restrita aos dois hosts oficiais;
+6. carimbar `events.js` para `./sw.js?v=60`.
 
-- `market-image-audit.css`;
-- `market-image-audit.js`.
+O Service Worker usa `conta-de-casa-public-v60-official-retailer-images` e faz cache lazy apenas dos shards pedidos, não do catálogo completo.
 
-O HTML público gerado recebe:
+`APP_RELEASE_NOTES` contém a entrada v60 em **Definições → Atualização de Software → Mais detalhes**.
 
-- `app-build=v59`;
-- query strings `?v=59`;
-- referências à nova camada;
-- CSP ampliada apenas para Open Food/Beauty/Products/Pet Facts.
+## Validação automatizada
 
-`app-update.js` contém a entrada v59 em `APP_RELEASE_NOTES`, portanto **Definições → Atualização de Software → Mais detalhes** apresenta esta revisão.
+CI de referência da branch: `33996921108` — `success`.
 
-## Validação automatizada e deploy
+Passaram:
 
-Validações da revisão funcional:
-
-- CI da branch `feature/product-image-audit-v59`: `33995295036` — `success`;
-- PR #31 integrado em `main` — commit `77e5c26da6c4fa2780d4fe50515f7a147a18c45e`;
-- CI de `main`: `33995349723` — `success`;
-- Deploy Pages: `33995368314` — `success`.
-
-Foram validados:
-
-- sintaxe de todos os módulos, incluindo `market-image-audit.js`;
-- finanças, invariantes e auditoria financeira;
-- isolamento do cofre e segurança;
-- formulários e captura QR;
-- pesquisa Mercado e imagens reais;
-- teste dedicado de auditoria/zoom de imagens;
-- scanner de códigos de barras;
-- responsividade, navegação e acessibilidade;
-- Centro de Atualização;
-- sincronização;
-- manifest e composição real de `dist/`.
-
-## Estado das revisões anteriores
-
-### v58 — Centro de Atualização de Software
-
-Integrado e publicado. O PR #29, CI principal `33993333620` e Deploy Pages `33993353252` terminaram com sucesso. A transição pública v58 → v59 já existe agora para validação física do lifecycle no iPhone/PWA.
-
-### v57 — fotografias reais
-
-Introduziu `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` e a primeira resolução via Open Food Facts. A v59 mantém este contrato e corrige a cobertura limitada/ausência de ampliação.
-
-### v56 / v55
-
-Cofre visual moderno, sistema Lucide e hierarquia mobile da Lista de compras permanecem integrados, sem alteração do modelo criptográfico ou financeiro.
+- geração do índice oficial;
+- validação dos SKUs 8167440 e 739490;
+- teste dedicado `market-official-images.test.cjs`;
+- Mercado e fallback de imagens v59;
+- finanças e invariantes;
+- isolamento/cofre e segurança;
+- formulários, QR e código de barras;
+- responsividade/mobile;
+- acessibilidade e navegação;
+- Lucide/UI;
+- atualização da PWA;
+- sincronização e manifest.
 
 ## Limitações conhecidas
 
-Não é possível garantir fotografia para 100% dos produtos. Uma cobertura total exigiria que cada SKU tivesse uma imagem pública identificável ou uma infraestrutura própria que recolhesse/normalizasse as imagens dos retalhistas. A v59 prefere ausência de fotografia a mostrar uma imagem errada.
+A v60 cobre o catálogo que cada retalhista publica nos respetivos sitemaps. Não se pode prometer uma fotografia para um SKU que o próprio sitemap não publicar. Nessa situação, a aplicação utiliza o fallback visual existente ou mantém o placeholder para não mostrar outro produto.
 
-As duas URLs de retalhista fornecidas como exemplo não puderam ser validadas de forma determinística pelo crawler externo: a página Continente redirecionou para a homepage e a página Pingo Doce não devolveu conteúdo utilizável. A validação definitiva desses dois SKUs deve ser feita no browser real através do fluxo publicado da aplicação.
-
-A validação automatizada não substitui o comportamento real de Safari/iPhone, sobretudo abertura do `<dialog>`, safe areas, qualidade das imagens e latência de auditoria numa ligação móvel.
+A validação automatizada não substitui o teste físico do carregamento das imagens em Safari/iPhone. O browser deverá poder apresentar `<img>` cross-origin sem necessidade de CORS, mas é necessário confirmar em hardware que os dois hosts oficiais não aplicam proteção de hotlinking incompatível com o GitHub Pages.
 
 ## Próximo passo
 
-1. no iPhone/Safari, atualizar/reabrir a aplicação e confirmar `v59` em **Definições → Atualização de Software**;
-2. pesquisar exemplos com e sem imagem e confirmar que as miniaturas deixam de ser estáticas;
-3. validar toque → ampliação → fechar em 320, 375, 390 e 430 px;
-4. pesquisar os exemplos indicados de Continente/Pingo Doce e confirmar que não é apresentada uma imagem de variante errada;
-5. confirmar que produtos sem correspondência pública segura mantêm placeholder em vez de fotografia incorreta;
-6. observar a transição real v58 → v59 em Safari e PWA instalada, confirmando `controllerchange`/reload.
+1. integrar v60 em `main` apenas com CI verde;
+2. confirmar CI principal e Deploy Pages v60;
+3. no iPhone, abrir **Definições → Atualização de Software** e confirmar `v60`;
+4. pesquisar os dois exemplos de controlo e outros produtos do Continente/Pingo Doce;
+5. confirmar fotografia correta, toque → ampliação e persistência na Lista de compras;
+6. testar itens antigos: correspondência exata deve reparar imagem; ambiguidades devem permanecer sem fotografia oficial.
