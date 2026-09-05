@@ -259,3 +259,38 @@ Material Symbols e Font Awesome são tecnicamente válidos, mas uma integração
 - controlos nativos mantêm a semântica e interação original; a camada Lucide muda apenas a apresentação do símbolo;
 - glifos Unicode que ainda permanecem como fallback estático no HTML/JS só devem ser removidos depois da validação física, para evitar alterações estruturais simultâneas desnecessárias;
 - a validação final exige iPhone/Safari e Android/Chrome reais, sobretudo pesquisa, selects, botões compactos, tema, sincronização e diálogos.
+
+## D-011 — O protótipo aprovado define a hierarquia visual da Lista de compras
+
+Data: 5 de setembro de 2026
+Estado: aceite
+
+### Contexto
+
+A validação física em iPhone mostrou que a revisão Lucide corrigiu a família de ícones, mas a página **Lista de compras** ainda não reproduzia integralmente a hierarquia do protótipo aprovado. O segundo botão `+` junto da pesquisa era visualmente ambíguo, os cartões-resumo não tinham âncoras visuais e a lista de produtos continuava mais técnica do que o protótipo.
+
+### Decisão
+
+Usar o protótipo aprovado como referência de composição para a camada mobile do Mercado, sem alterar o schema nem a lógica financeira:
+
+- título da página recebe um ícone de carrinho alinhado com o nome;
+- o `+` principal permanece a ação de criação rápida no topo;
+- o controlo secundário junto da pesquisa passa a ter linguagem visual de **scanner**, mantendo o fluxo existente de adicionar/pesquisar produto;
+- o estado Sync mantém ícone semântico e recebe indicação direcional discreta;
+- os quatro cartões financeiros recebem ícones vetoriais e cores de apoio consistentes com o significado;
+- cartões de produtos ganham avatar vetorial neutro, porque o schema não guarda fotografia de produto e não devem ser inventadas imagens;
+- preço real fica oculto em itens ainda não comprados e continua disponível quando passa a ser relevante;
+- ações editar/eliminar mantêm a funcionalidade, mas tornam-se compactas e iconográficas em mobile;
+- navegação inferior usa a mesma métrica de ícones e um sublinhado ativo consistente.
+
+### Arquitetura
+
+A alteração permanece na última camada `ui-icons.css`, carregada depois de `market-experience.css`. Isto permite reproduzir o protótipo com overrides contextuais e reversíveis, sem alterar `render.js`, `core.js`, dados persistidos ou eventos de negócio.
+
+### Auditoria de ícones
+
+A revisão global confirmou quatro origens históricas de iconografia: `ICONS`/`icon()`, SVG locais em módulos, glifos Unicode de fallback e decoração nativa do browser. Lucide continua a ser a fonte visual oficial. SVG contextuais antigos recebem por CSS a mesma métrica de traço 2 px enquanto a remoção física dos fallbacks estáticos permanece uma tarefa separada, a executar apenas depois de validação física para não combinar refatoração estrutural com mudança visual.
+
+### Segurança e acessibilidade
+
+Não são adicionadas dependências, fontes, CDNs, endpoints ou dados. Os ícones decorativos não substituem os nomes acessíveis dos controlos. Áreas tácteis permanecem adequadas e `prefers-reduced-motion` continua a retirar movimento não essencial.
