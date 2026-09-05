@@ -1,5 +1,26 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-05 — Mercado v52 com preços reais e contabilização da lista
+
+### Alterações
+
+- removidos preços e imagens de demonstração do fluxo **Adicionar produto**;
+- pesquisa real de Continente e Pingo Doce através de `cesta.pt/mcp`;
+- Mercadona Portugal limitada a observações Open Prices em lojas portuguesas com comprovativo e data;
+- o preço selecionado é guardado em `estimatedCents` e atualiza imediatamente **Estimado total** e **Por comprar**;
+- quando o item é marcado como comprado, **Gasto contabilizado** usa o preço real registado pelo utilizador ou, enquanto esse valor não existir, a estimativa pesquisada;
+- `actualCents` continua separado para não confundir preço consultado com preço efetivamente pago;
+- CSP alargada apenas a `cesta.pt` e `prices.openfoodfacts.org`;
+- ligação para produto oficial é aberta apenas após validação do host e clique explícito do utilizador;
+- Service Worker, cache busting e build pública atualizados para v52;
+- acrescentado teste dinâmico de contabilização de preços e reforçadas as verificações de segurança/origens externas;
+- removido o probe temporário do Super Save, que não faz parte do contrato de produção.
+
+### Segurança e privacidade
+
+Sem credenciais de supermercado, API keys ou tokens de terceiros. O conteúdo remoto é tratado como não confiável e escapado antes de apresentação. A pesquisa envia apenas o termo pesquisado às fontes selecionadas; o cofre financeiro permanece local/cifrado.
+
+
 ## 2026-09-05 — Mercado v51 alinhado com o protótipo aprovado
 
 ### Objetivo

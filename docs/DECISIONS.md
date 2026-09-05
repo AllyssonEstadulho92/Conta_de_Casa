@@ -94,3 +94,27 @@ Gravar ou apresentar um valor fictício como preço real contaminaria cálculos 
 ### Próxima decisão necessária
 
 Antes de preços reais, definir um subsistema próprio de recolha/normalização com fontes verificadas por mercado, backend/proxy, EAN/GTIN, timestamp, região/loja, promoções, cache, caducidade e indicação de origem.
+
+
+## D-006 — Preços reais pesquisados entram como estimativa auditável
+
+Data: 5 de setembro de 2026
+Estado: aceite
+
+### Contexto
+
+O utilizador pediu que a Lista de compras use preços reais pesquisados e que o valor selecionado seja contabilizado na lista, sem manter dados fictícios. A aplicação continua estática/local-first e não deve tratar uma consulta de preço como prova do montante efetivamente pago.
+
+### Decisão
+
+Continente e Pingo Doce são pesquisados através do endpoint público `cesta.pt/mcp`. Mercadona Portugal usa apenas observações do Open Prices localizadas em Portugal e com comprovativo. O preço escolhido é guardado em `estimatedCents`; `actualCents` permanece reservado ao valor efetivamente pago. Ao marcar o item como comprado, o cálculo contabilizado usa `actualCents` quando existe e, caso contrário, usa a estimativa pesquisada.
+
+A CSP autoriza exclusivamente `cesta.pt` e `prices.openfoodfacts.org` para este fluxo, além da API GitHub já existente. A aplicação não envia dados financeiros do cofre a estas fontes.
+
+### Motivo
+
+Esta separação permite que o total da lista reflita imediatamente o preço real consultado sem afirmar que esse foi necessariamente o preço de compra. Também mantém rastreabilidade, evita preços inventados e preserva a lógica financeira existente.
+
+### Limitação
+
+A disponibilidade, cobertura e atualidade dependem das fontes externas. Em particular, Mercadona é uma observação comunitária com data, não uma API oficial em tempo real. Quando não existe evidência adequada, a aplicação deve mostrar ausência de preço em vez de fabricar um valor.

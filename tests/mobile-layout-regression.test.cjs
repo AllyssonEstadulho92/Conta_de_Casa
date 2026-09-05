@@ -17,9 +17,9 @@ assert.match(mobileCss, /\.market-mobile-head\{[\s\S]*grid-template-columns:44px
 assert.match(mobileCss, /\.market-mobile-money\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\);/);
 assert.match(mobileCss, /\.market-mobile-money>div:last-child\{[\s\S]*grid-column:auto;/);
 
-const designPosition = index.indexOf('./design-system.css?v=51');
-const mobilePosition = index.indexOf('./mobile-layout.css?v=51');
-const marketPosition = index.indexOf('./market-experience.css?v=51');
+const designPosition = index.indexOf('./design-system.css?v=52');
+const mobilePosition = index.indexOf('./mobile-layout.css?v=52');
+const marketPosition = index.indexOf('./market-experience.css?v=52');
 assert.ok(designPosition >= 0, 'design-system.css must remain loaded');
 assert.ok(mobilePosition > designPosition, 'mobile-layout.css must load after design-system.css');
 assert.ok(marketPosition > mobilePosition, 'market-experience.css must load after mobile-layout.css as a scoped final layer');

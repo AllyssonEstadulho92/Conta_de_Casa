@@ -334,11 +334,11 @@
     const market=marketById(product.marketId);
     const subtitle=[product.pack,market.name,product.city,product.provider==='open-prices'&&product.observedDate?`observado ${formatObservedDate(product.observedDate)}`:''].filter(Boolean).join(' · ');
     const oldPrice=product.oldPriceCents>product.priceCents?`<span class="market-result-old-price">antes ${money(product.oldPriceCents)}</span>`:'';
-    const sourceLink=product.sourceUrl?`<a class="market-result-source" href="${attr(product.sourceUrl)}" target="_blank" rel="noopener noreferrer">${svgIcon('external',15)}<span>${esc(product.sourceLabel)}</span></a>`:`<span class="market-result-source text-only">${esc(product.sourceLabel)}</span>`;
+    const sourceLink=product.sourceUrl?`<button class="market-result-source" type="button" data-market-source-url="${attr(product.id)}" aria-label="Abrir produto oficial">${svgIcon('external',15)}<span>${esc(product.sourceLabel)}</span></button>`:`<span class="market-result-source text-only">${esc(product.sourceLabel)}</span>`;
     return `<article class="market-catalog-card" data-market-product-card="${attr(product.id)}">
       <div class="market-catalog-main">
         <div class="market-product-copy">
-          <h4>${esc(product.name)}</h4>
+          <h3>${esc(product.name)}</h3>
           <p>${esc(subtitle||market.name)}</p>
           <div class="market-result-meta">${resultStatusHtml(product)}${sourceLink}</div>
           <div class="market-result-price-row"><strong class="market-product-price" data-money>${money(product.priceCents)}</strong>${oldPrice}${product.unitPrice?`<small>${esc(product.unitPrice)}</small>`:''}</div>
@@ -496,6 +496,13 @@
     if(clear){applyQuery('');$('#marketCatalogSearch')?.focus();return;}
     const chip=event.target.closest('[data-market-chip-query]');
     if(chip){applyQuery(chip.dataset.marketChipQuery||'');$('#marketCatalogSearch')?.focus();return;}
+    const sourceButton=event.target.closest('[data-market-source-url]');
+    if(sourceButton){
+      const product=resultById.get(sourceButton.dataset.marketSourceUrl);
+      const url=product?.sourceUrl?safeRetailerUrl(product.sourceUrl,product.marketId):'';
+      if(url)window.open(url,'_blank','noopener,noreferrer');
+      return;
+    }
     const add=event.target.closest('[data-market-add-product]');
     if(add){addProduct(add.dataset.marketAddProduct).catch(()=>toast('Não foi possível adicionar o produto.'));return;}
     const manual=event.target.closest('[data-market-manual]');

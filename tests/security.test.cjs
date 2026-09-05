@@ -11,7 +11,7 @@ class StorageMock {
   clear() { this.data.clear(); }
 }
 
-const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','styles.css','sw.js','manifest.webmanifest'];
+const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','market-experience.js','styles.css','sw.js','manifest.webmanifest'];
 const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','sw.js'];
 const context = vm.createContext({
   crypto: webcrypto,
@@ -67,14 +67,15 @@ assert.equal(syncState.months['2026-09'].updatedAt, '2026-09-01T12:00:00.000Z');
 assert.equal(syncState.syncTombstones.length, 1);
 assert.equal(syncState.syncConflicts.length, 1);
 
+const approvedExternalOrigins = new Set(['https://api.github.com','https://cesta.pt','https://prices.openfoodfacts.org']);
 for (const file of appFiles) {
   const content = fs.readFileSync(file, 'utf8');
   const externalUrls = content.match(/https?:\/\/[^\s"'\`<>)]+/gi) || [];
   for (const url of externalUrls) {
     const normalizedUrl = url.replace(/[;,]+$/g, '');
     const parsed = new URL(normalizedUrl);
-    const approvedApi = parsed.origin === 'https://api.github.com';
-    assert.equal(approvedApi, true, `${file} may only reference the approved GitHub API`);
+    assert.equal(approvedExternalOrigins.has(parsed.origin), true, `${file} references unapproved external origin ${parsed.origin}`);
+    if (parsed.origin !== 'https://api.github.com') assert.equal(['index.html','market-experience.js'].includes(file), true, `${parsed.origin} is only approved for index CSP and market runtime`);
   }
   assert.doesNotMatch(content, /\b(sendBeacon|XMLHttpRequest|gtag|analytics)\b|cdn\.jsdelivr|cdnjs|unpkg/i, `${file} must not include telemetry or CDN hooks`);
 }
@@ -86,6 +87,8 @@ const index = fs.readFileSync('index.html','utf8');
 assert.match(index, /Content-Security-Policy/);
 assert.match(index, /script-src 'self'/);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
+assert.match(index, /https:\/\/cesta\.pt/);
+assert.match(index, /https:\/\/prices\.openfoodfacts\.org/);
 assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline event handlers');
 assert.doesNotMatch(index, /target_name=|Destino automático/);
 
