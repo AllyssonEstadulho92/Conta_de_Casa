@@ -188,6 +188,12 @@
   color:#070707;
 }
 
+.software-update-status-icon .ui-icon-svg,
+.software-update-status-icon>svg{
+  width:46px!important;
+  height:46px!important;
+}
+
 .software-update-status.checking .software-update-status-icon{
   background:#d9eaff;
   color:#0a84ff;
