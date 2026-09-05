@@ -21,6 +21,7 @@ const PUBLIC_FILES = Object.freeze([
   'sync.js',
   'events.js',
   'market-experience.js',
+  'market-image-resolver.js',
   'market-barcode.js',
   'ui-icons.js',
   'invoice-capture.js',
