@@ -14,7 +14,7 @@ Aplicação web estática/PWA distribuída por GitHub Pages, sem backend própri
 - `mobile-layout.css`: compatibilidade e estabilidade do viewport móvel.
 - `market-experience.css`: página Mercado e diálogo `market-browser`.
 - `market-barcode.css`: scanner EAN/UPC/GTIN.
-- `ui-icons.css`: última camada visual de ícones e normalização de pesquisas/selects.
+- `ui-icons.css`: última camada visual de ícones, normalização de controlos e hierarquia aprovada do protótipo mobile.
 - `invoice-capture.css`: interface e overlay do leitor QR de faturas.
 
 Ordem CSS pública:
@@ -40,11 +40,35 @@ Ordem CSS pública:
 - `market-barcode.js`: leitura GTIN, identificação de produto e handoff para a pesquisa do Mercado.
 - `invoice-capture.js`: leitura local do QR de faturação e preenchimento assistido da nova fatura.
 
+## Hierarquia visual aprovada — Lista de compras v55
+
+A captura física em iPhone e o protótipo aprovado passam a definir a composição mobile da página **Lista de compras**. A revisão não altera o DOM estrutural principal nem `renderMarket()`; usa a camada final `ui-icons.css` para ajustar composição e linguagem visual.
+
+Hierarquia:
+
+1. **Cabeçalho** — menu, ícone de carrinho + título, ação principal `+`, mês e estado Sync.
+2. **Pesquisa** — campo com lupa Lucide e ação secundária visual de scanner no lado direito.
+3. **Filtros** — limpeza de filtros como ação neutra, mantendo os controlos existentes e a sua semântica.
+4. **Resumo financeiro** — quatro cartões em grelha 2×2 no mobile, cada um com ícone semântico, rótulo, valor e explicação.
+5. **Lista do mês** — contagem, estado, identidade do produto, quantidade e valores financeiros.
+6. **Ações de item** — editar/eliminar continuam disponíveis, mas passam a formato iconográfico compacto em mobile.
+7. **Navegação inferior** — quatro destinos principais com métrica Lucide uniforme e sublinhado no destino ativo.
+
+O controlo secundário ao lado da pesquisa continua a ser `#newMarketBtn` e mantém o fluxo de adicionar/pesquisar produto existente. A alteração para aparência de scanner é de apresentação, evitando alterar eventos ou persistência.
+
+### Fotografias de produtos
+
+O schema `normalizeMarketItem()` não possui campo de imagem. Por isso, a interface não inventa fotografias nem persiste imagens obtidas de fontes externas. Os cartões usam um avatar vetorial neutro até existir uma decisão explícita de dados, privacidade, origem, cache e sincronização para imagens de produto.
+
+### Preço real em itens pendentes
+
+O campo `actualCents` continua existente no modelo, mas em mobile o controlo de introdução de preço real fica oculto enquanto o item ainda está por comprar. Quando o item é marcado como comprado, o controlo volta a ficar disponível. Isto reduz ruído visual sem alterar a regra financeira.
+
 ## Sistema visual de ícones — Lucide
 
 ### Biblioteca oficial
 
-A linguagem visual oficial passa a ser **Lucide Icons**. O projeto não instala uma icon font e não carrega Lucide por CDN. É mantido apenas um subset de geometria SVG em `ui-icons.js`.
+A linguagem visual oficial é **Lucide Icons**. O projeto não instala uma icon font e não carrega Lucide por CDN. É mantido apenas um subset de geometria SVG em `ui-icons.js`.
 
 Snapshot auditável usado como referência:
 
@@ -59,7 +83,7 @@ O aviso de licença é distribuído em `LUCIDE_LICENSE.txt`:
 
 `core.js` continua a disponibilizar `ICONS` e `icon()`. `ui-icons.js` executa depois de `sync.js` e antes dos módulos de interação/contexto, faz `Object.assign(ICONS, LUCIDE_ICONS)` e substitui o renderer mantendo a mesma API. Assim, `PAGE_META`, navegação, Mercado, faturas e módulos já existentes não precisam de ser reestruturados.
 
-Todos os SVG funcionais usam:
+Todos os SVG funcionais usam como referência visual:
 
 - `viewBox="0 0 24 24"`;
 - `currentColor`;
@@ -69,6 +93,17 @@ Todos os SVG funcionais usam:
 - `vector-effect: non-scaling-stroke` nas superfícies de interface.
 
 Ícones decorativos são `aria-hidden`. A designação acessível continua no texto ou `aria-label` do controlo.
+
+### Auditoria global de origens de ícones
+
+Foram identificadas quatro origens históricas:
+
+1. `ICONS` / `icon()` em `core.js`;
+2. subset Lucide e hidratação em `ui-icons.js`;
+3. SVG locais em módulos contextuais como Mercado, scanner e captura de faturas;
+4. glifos Unicode/fallbacks estáticos e decoração nativa do browser.
+
+A fonte visual oficial continua a ser Lucide. Na v55, SVG contextuais antigos recebem por CSS a mesma métrica de traço, terminais e rendering. A migração física desses pequenos geradores para `CDCIcons.markup` fica separada da revisão visual para evitar uma refatoração estrutural simultânea.
 
 ### Hidratação de controlos
 
@@ -88,19 +123,17 @@ A hidratação normaliza:
 
 A aplicação não depende da decoração nativa de `input[type="search"]`. `ui-icons.css` remove `::-webkit-search-decoration`, acrescenta uma lupa Lucide posicionada dentro do contentor e aplica padding reservado. O `market-browser` mantém também uma caixa fixa de 22 × 22 px.
 
-Isto resolve a inconsistência observada na captura de iPhone e evita que `svg { height:auto }` ou a decoração nativa determinem a geometria do símbolo.
-
 ### Selects
 
 Os `select` são envolvidos por `.ui-select-control`. A seta nativa é desativada com `appearance:none` e é apresentado um único `ChevronDown` Lucide. O elemento `select` real permanece intacto, preservando foco, teclado, acessibilidade e comportamento nativo do menu de opções.
 
 ### Botões compactos de criação
 
-O CSS legado desenhava `+` através de `::before`. A camada Lucide apresenta um `Plus` real e, quando o botão tem `data-ui-iconized="true"`, o pseudo-elemento antigo é desativado. Em mobile, o rótulo visual pode ficar oculto, mas o texto/`aria-label` original continua a identificar a ação.
+O CSS legado desenhava `+` através de `::before`. A camada Lucide apresenta um `Plus` real e, quando o botão tem `data-ui-iconized="true"`, o pseudo-elemento antigo é desativado. No topo mobile o `+` principal continua a representar criação. No Mercado, o botão secundário junto da pesquisa usa uma máscara vetorial Lucide `Scan` para distinguir pesquisa/leitura da ação principal.
 
 ### Sincronização
 
-O antigo ponto colorido de `#syncHeaderStatus` é reutilizado como slot de 18 px e passa a mostrar um estado semântico:
+O antigo ponto colorido de `#syncHeaderStatus` é reutilizado como slot de 18 px e mostra estado semântico:
 
 - cloud/check: sincronizado;
 - refresh: sincronização em curso;
@@ -108,7 +141,7 @@ O antigo ponto colorido de `#syncHeaderStatus` é reutilizado como slot de 18 px
 - warning: conflito/revisão/erro;
 - cloud: ligação ainda sem estado final.
 
-A rotação do refresh é removida quando `prefers-reduced-motion: reduce` está ativo.
+Na hierarquia v55 o chip recebe também um chevron discreto para comunicar que é interativo. A rotação do refresh é removida quando `prefers-reduced-motion: reduce` está ativo.
 
 ## Faturas — captura QR assistida
 
@@ -142,6 +175,7 @@ O scanner não escreve diretamente em `appState.market` e um código não é tra
 - dados financeiros permanecem cifrados/local-first;
 - PBKDF2, AES-GCM, PIN, IndexedDB, backups e sincronização não são alterados pela revisão visual;
 - Lucide não adiciona qualquer origem externa à CSP;
+- a v55 não adiciona endpoints, fontes, imagens remotas nem novas dependências;
 - `LUCIDE_LICENSE.txt` é um asset estático sem código executável;
 - o scanner de produtos envia apenas GTIN ao Open Food Facts e termos de pesquisa ao `cesta.pt`;
 - a captura de faturas não adiciona endpoint: vídeo, imagem e payload QR permanecem locais;
@@ -157,11 +191,11 @@ Alvos tácteis não são reduzidos pela mudança de ícones. Ícones visualmente
 
 `scripts/prepare-pages.cjs` gera `dist/` por allowlist. O bundle público inclui `ui-icons.js`, `ui-icons.css`, `invoice-capture.*`, scanners existentes e `LUCIDE_LICENSE.txt`.
 
-O Service Worker usa cache `conta-de-casa-public-v54-lucide` para invalidar a revisão visual anterior. Só recursos da allowlist e do mesmo origin são armazenados offline; Lucide não é solicitado externamente em runtime.
+O Service Worker usa cache `conta-de-casa-public-v55-prototype` para invalidar as camadas visuais anteriores no Safari/iOS. Só recursos da allowlist e do mesmo origin são armazenados offline; Lucide não é solicitado externamente em runtime.
 
 ## Testes
 
-- `tests/ui-icons.test.cjs`: snapshot Lucide, licença, conjunto semântico, ausência de CDN/runtime externo, pesquisa Safari, selects, `+` duplicado, sync e redução de movimento;
+- `tests/ui-icons.test.cjs`: snapshot Lucide, licença, conjunto semântico, ausência de CDN/runtime externo, pesquisa Safari, selects, prevenção de `+` duplicado, Sync, hierarquia do protótipo, cartões-resumo, lista mobile e redução de movimento;
 - `tests/invoice-capture.test.cjs`: parser QR fiscal, privacidade, lifecycle e responsividade;
 - `tests/market-barcode.test.cjs`: GTIN/checksum, câmara, privacidade e handoff para pesquisa;
 - suites existentes continuam a validar finanças, segurança, responsividade, navegação, acessibilidade e sincronização.
@@ -171,4 +205,5 @@ O Service Worker usa cache `conta-de-casa-public-v54-lucide` para invalidar a re
 - novos ícones funcionais devem vir do mesmo subset Lucide ou ser justificados por decisão arquitetural;
 - não introduzir emojis, glifos Unicode ou icon fonts externas como solução visual principal;
 - qualquer atualização de Lucide deve fixar novo commit de origem, rever licença e executar a suite completa;
+- não adicionar fotografias de produtos ao schema sem decisão própria de origem, armazenamento, privacidade, cache e sincronização;
 - alterações a scanners e controlos nativos devem continuar a ser validadas em iPhone/Safari e Android/Chrome físicos.
