@@ -45,6 +45,7 @@ jobs:
           node --check market-barcode.js
           node --check ui-icons.js
           node --check invoice-capture.js
+          node --check app-update.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
           node tests/finance.test.cjs
@@ -60,6 +61,7 @@ jobs:
           node tests/market-barcode.test.cjs
           node tests/market-live-accounting.test.cjs
           node tests/ui-icons.test.cjs
+          node tests/app-update.test.cjs
           node tests/security.test.cjs
           node tests/responsive.test.cjs
           node tests/mobile-layout-regression.test.cjs
