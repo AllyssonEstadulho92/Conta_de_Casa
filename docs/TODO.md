@@ -14,8 +14,8 @@
 - [x] Não introduzir proxy genérico de scraping nem credenciais externas.
 - [x] Atualizar CSP pública, allowlist Pages, Service Worker, cache v59 e `APP_RELEASE_NOTES`.
 - [x] Adicionar `tests/market-image-audit.test.cjs` e executar a suite CI completa com sucesso.
-- [ ] Integrar a branch v59 em `main` e confirmar CI principal verde.
-- [ ] Confirmar Deploy Pages v59 com sucesso.
+- [x] Integrar a branch v59 em `main` e confirmar CI principal verde (`33995349723`).
+- [x] Confirmar Deploy Pages v59 com sucesso (`33995368314`).
 - [ ] No iPhone/Safari, pesquisar café e outros termos amplos e confirmar que produtos antes vazios são auditados individualmente.
 - [ ] Validar toque na miniatura → imagem ampliada → fechar nas larguras 320, 375, 390 e 430 px.
 - [ ] Confirmar tema claro/escuro e orientação retrato/paisagem no visualizador.
