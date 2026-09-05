@@ -191,21 +191,41 @@
   function productCardById(id){
     return [...document.querySelectorAll('[data-market-product-card]')].find(card=>card.dataset.marketProductCard===String(id))||null;
   }
-  function setPhoto(root,url,sourceLabel='Imagem real do produto'){
+  function setPhoto(root,url,sourceLabel='Imagem real do produto',fallbackUrl=''){
     const photo=root?.querySelector?.('.market-product-photo');
     const safe=safeDisplayImageUrl(url);
+    const fallback=safeReferenceImageUrl(fallbackUrl);
     if(!photo||!safe)return false;
+    const current=photo.querySelector('img');
+    if(current&&current.src===safe){
+      photo.classList.remove('is-empty');
+      return true;
+    }
     photo.classList.remove('is-empty');
     photo.innerHTML='';
     const img=document.createElement('img');
-    img.src=safe;img.alt='';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';img.title=sourceLabel;
+    img.src=safe;
+    img.alt='';
+    img.loading='lazy';
+    img.decoding='async';
+    img.referrerPolicy='no-referrer';
+    img.title=sourceLabel;
+    img.addEventListener('error',()=>{
+      if(fallback&&img.src!==fallback){
+        img.src=fallback;
+        img.title='Imagem real de referência';
+        return;
+      }
+      photo.classList.add('is-empty');
+      img.remove();
+    },{once:false});
     photo.appendChild(img);
     return true;
   }
   function updateSearchCard(product){
     const root=productCardById(product?.id);
     if(!root)return;
-    if(product.officialImageUrl)setPhoto(root,product.officialImageUrl,'Imagem oficial do produto no retalhista');
+    if(product.officialImageUrl)setPhoto(root,product.officialImageUrl,'Imagem oficial do produto no retalhista',product.imageUrl||'');
     else if(product.imageUrl)setPhoto(root,product.imageUrl,product.imageSource||'Imagem real de referência');
   }
 
@@ -296,7 +316,7 @@
           changed=true;
         }
       }
-      if(entry)rootsForSavedItem(item.id).forEach(root=>setPhoto(root,entry.imageUrl,'Imagem oficial do produto no retalhista'));
+      if(entry)rootsForSavedItem(item.id).forEach(root=>setPhoto(root,entry.imageUrl,'Imagem oficial do produto no retalhista',item.imageUrl||''));
     }
     if(changed)scheduleStateSave();
   }
@@ -328,7 +348,7 @@
       clearTimeout(timer);
       timer=setTimeout(()=>applySavedImages().catch(()=>{}),60);
     });
-    listObserver.observe(root,{childList:true,subtree:true});
+    listObserver.observe(root,{childList:true,subtree:false});
     applySavedImages().catch(()=>{});
   }
 
