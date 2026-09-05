@@ -95,11 +95,10 @@ Gravar ou apresentar um valor fictício como preço real contaminaria cálculos 
 
 Antes de preços reais, definir um subsistema próprio de recolha/normalização com fontes verificadas por mercado, backend/proxy, EAN/GTIN, timestamp, região/loja, promoções, cache, caducidade e indicação de origem.
 
-
 ## D-006 — Preços reais pesquisados entram como estimativa auditável
 
 Data: 5 de setembro de 2026
-Estado: aceite
+Estado: aceite; componente Mercadona posteriormente substituída pela decisão v53
 
 ### Contexto
 
@@ -107,9 +106,7 @@ O utilizador pediu que a Lista de compras use preços reais pesquisados e que o 
 
 ### Decisão
 
-Continente e Pingo Doce são pesquisados através do endpoint público `cesta.pt/mcp`. Mercadona Portugal usa apenas observações do Open Prices localizadas em Portugal e com comprovativo. O preço escolhido é guardado em `estimatedCents`; `actualCents` permanece reservado ao valor efetivamente pago. Ao marcar o item como comprado, o cálculo contabilizado usa `actualCents` quando existe e, caso contrário, usa a estimativa pesquisada.
-
-A CSP autoriza exclusivamente `cesta.pt` e `prices.openfoodfacts.org` para este fluxo, além da API GitHub já existente. A aplicação não envia dados financeiros do cofre a estas fontes.
+A decisão original introduziu fontes externas verificáveis e separou `estimatedCents` de `actualCents`. Na revisão v53, a parte relativa à Mercadona/Open Prices foi retirada. A regra atualmente válida é: Continente e Pingo Doce são pesquisados através do endpoint público `cesta.pt/mcp`; o preço escolhido é guardado em `estimatedCents`; `actualCents` permanece reservado ao valor efetivamente pago. Ao marcar o item como comprado, o cálculo contabilizado usa `actualCents` quando existe e, caso contrário, usa a estimativa pesquisada.
 
 ### Motivo
 
@@ -117,8 +114,7 @@ Esta separação permite que o total da lista reflita imediatamente o preço rea
 
 ### Limitação
 
-A disponibilidade, cobertura e atualidade dependem das fontes externas. Em particular, Mercadona é uma observação comunitária com data, não uma API oficial em tempo real. Quando não existe evidência adequada, a aplicação deve mostrar ausência de preço em vez de fabricar um valor.
-
+A disponibilidade, cobertura e atualidade dependem da fonte externa. Quando não existe evidência adequada, a aplicação deve mostrar ausência de preço em vez de fabricar um valor.
 
 ## 2026-09-05 — Mercado v53: dois retalhistas e quantidade automática
 
@@ -129,3 +125,41 @@ Retirar Mercadona da pesquisa de produção enquanto não existir uma fonte ofic
 ### Motivo
 
 Evita uma falsa sensação de cobertura na Mercadona e corrige a inconsistência em que alterar a quantidade não alterava os totais da lista.
+
+## D-007 — Código de barras identifica o produto; preço continua separado
+
+Data: 5 de setembro de 2026
+Estado: aceite
+
+### Contexto
+
+Foi pedido um leitor de código de barras no ecrã **Adicionar produto**, usando a câmara, que permita reconhecer o artigo e chegar ao nome e ao valor praticado no mercado.
+
+Um EAN/UPC/GTIN identifica o produto, mas não transporta o preço atual de uma cadeia. Misturar as duas responsabilidades criaria a falsa impressão de que o preço vem do código de barras.
+
+### Decisão
+
+Implementar uma cadeia de três responsabilidades independentes:
+
+1. **Leitura local:** usar a câmara com `getUserMedia` e `@zxing/browser@0.2.0`, carregado sob pedido, para descodificar o código.
+2. **Identificação:** validar checksum GTIN e consultar Open Food Facts apenas para obter nome, marca e quantidade quando disponíveis.
+3. **Preço:** reutilizar o campo e o evento de pesquisa de `market-experience.js`, que continua a consultar `cesta.pt` para Pingo Doce e Continente.
+
+Apenas GTIN-8, GTIN-12/UPC, GTIN-13/EAN e GTIN-14 válidos avançam. O scanner não adiciona itens diretamente e não escreve no estado financeiro.
+
+### Motivo
+
+A separação mantém a arquitetura auditável: a câmara resolve o código, a base de produtos resolve a identidade e a fonte de mercado resolve o preço. Também preserva todo o fluxo já testado de criação, quantidade, estimativa e preço efetivamente pago.
+
+### Segurança e privacidade
+
+- o vídeo é processado no dispositivo e não é enviado nem guardado;
+- o GTIN é o único dado enviado ao Open Food Facts;
+- pedidos de identificação usam `credentials: 'omit'`, `referrerPolicy: 'no-referrer'`, timeout e cancelamento;
+- a biblioteca ZXing usa URL com versão fixa, nunca `latest`;
+- a câmara é parada ao concluir, cancelar, fechar, ocultar ou abandonar a página;
+- a CSP é alargada apenas às origens necessárias para o fluxo.
+
+### Limitação aceite
+
+Open Food Facts é uma base comunitária e pode não reconhecer todos os códigos. `cesta.pt` pode encontrar uma variante diferente ou nenhum produto para o nome identificado. Por isso, a interface não adiciona automaticamente o primeiro resultado: o utilizador continua a confirmar explicitamente o produto e o preço.
