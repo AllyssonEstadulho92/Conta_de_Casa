@@ -11,8 +11,8 @@ class StorageMock {
   clear() { this.data.clear(); }
 }
 
-const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','market-experience.js','styles.css','sw.js','manifest.webmanifest'];
-const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','sw.js'];
+const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','market-experience.js','market-barcode.js','styles.css','sw.js','manifest.webmanifest'];
+const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','market-barcode.js','sw.js'];
 const context = vm.createContext({
   crypto: webcrypto,
   TextEncoder,
@@ -67,7 +67,18 @@ assert.equal(syncState.months['2026-09'].updatedAt, '2026-09-01T12:00:00.000Z');
 assert.equal(syncState.syncTombstones.length, 1);
 assert.equal(syncState.syncConflicts.length, 1);
 
-const approvedExternalOrigins = new Set(['https://api.github.com','https://cesta.pt']);
+const approvedExternalOrigins = new Set([
+  'https://api.github.com',
+  'https://cesta.pt',
+  'https://world.openfoodfacts.org',
+  'https://unpkg.com'
+]);
+const approvedOriginFiles = new Map([
+  ['https://api.github.com',new Set(['index.html','sync.js'])],
+  ['https://cesta.pt',new Set(['index.html','market-experience.js'])],
+  ['https://world.openfoodfacts.org',new Set(['index.html','market-barcode.js'])],
+  ['https://unpkg.com',new Set(['index.html','market-barcode.js'])]
+]);
 for (const file of appFiles) {
   const content = fs.readFileSync(file, 'utf8');
   const externalUrls = content.match(/https?:\/\/[^\s"'\`<>)]+/gi) || [];
@@ -75,9 +86,10 @@ for (const file of appFiles) {
     const normalizedUrl = url.replace(/[;,]+$/g, '');
     const parsed = new URL(normalizedUrl);
     assert.equal(approvedExternalOrigins.has(parsed.origin), true, `${file} references unapproved external origin ${parsed.origin}`);
-    if (parsed.origin !== 'https://api.github.com') assert.equal(['index.html','market-experience.js'].includes(file), true, `${parsed.origin} is only approved for index CSP and market runtime`);
+    const allowedFiles=approvedOriginFiles.get(parsed.origin);
+    assert.equal(Boolean(allowedFiles?.has(file)), true, `${parsed.origin} is not approved in ${file}`);
   }
-  assert.doesNotMatch(content, /\b(sendBeacon|XMLHttpRequest|gtag|analytics)\b|cdn\.jsdelivr|cdnjs|unpkg/i, `${file} must not include telemetry or CDN hooks`);
+  assert.doesNotMatch(content, /\b(sendBeacon|XMLHttpRequest|gtag|analytics)\b|cdn\.jsdelivr|cdnjs/i, `${file} must not include telemetry or unapproved CDN hooks`);
 }
 for (const file of executableFiles) {
   assert.doesNotMatch(fs.readFileSync(file, 'utf8'), /console\./, `${file} must not write app data to console`);
@@ -85,11 +97,19 @@ for (const file of executableFiles) {
 
 const index = fs.readFileSync('index.html','utf8');
 assert.match(index, /Content-Security-Policy/);
-assert.match(index, /script-src 'self'/);
+assert.match(index, /script-src 'self' https:\/\/unpkg\.com/);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
 assert.match(index, /https:\/\/cesta\.pt/);
+assert.match(index, /https:\/\/world\.openfoodfacts\.org/);
 assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline event handlers');
 assert.doesNotMatch(index, /target_name=|Destino automático/);
+
+const barcode = fs.readFileSync('market-barcode.js','utf8');
+assert.match(barcode, /https:\/\/unpkg\.com\/@zxing\/browser@0\.2\.0\/umd\/zxing-browser\.min\.js/);
+assert.doesNotMatch(barcode, /@latest|unpkg\.com\/@zxing\/browser\/umd/i, 'ZXing CDN dependency must stay pinned to an exact version');
+assert.match(barcode, /credentials:'omit'/);
+assert.match(barcode, /referrerPolicy:'no-referrer'/);
+assert.doesNotMatch(barcode, /localStorage|sessionStorage|idbPut|appState\.market\.push/);
 
 const sw = fs.readFileSync('sw.js','utf8');
 assert.match(sw, /PUBLIC_ASSET_SET/);
@@ -202,7 +222,6 @@ assert.doesNotMatch(sw, /cache\.put\(event\.request|cache\.put\(request/i, 'serv
   console.error(err);
   process.exitCode = 1;
 });
-
 
 assert.match(core, /event instanceof ErrorEvent/);
 assert.match(core, /ResizeObserver loop/);
