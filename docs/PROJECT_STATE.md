@@ -1,15 +1,17 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 5 de setembro de 2026
-Build público preparado: v58
+Build público: v58
 Distribuição: GitHub Pages
-Estado da revisão: centro de atualização de software estilo iPhone implementado e validado em CI na branch `feature/software-update-center-v58`; falta integração em `main`, deploy e validação física no iPhone/Safari
+Estado da revisão: centro de atualização de software estilo iPhone integrado em `main`, CI principal concluído com sucesso e GitHub Pages v58 publicado; falta validação física no iPhone/Safari e uma transição real v58 → v59
 
 ## Estado atual
 
 A aplicação continua local-first: cofre cifrado no navegador, dados financeiros no IndexedDB e sincronização GitHub opcional. O schema financeiro permanece na versão 5. Faturas, Planeamento, Mercado, Relatórios, Segurança, Definições, leitura de códigos de barras e captura QR de faturas mantêm os fluxos existentes.
 
 A revisão v58 não altera dados financeiros, PIN, cifragem, IndexedDB, sincronização nem contratos de Mercado. Acrescenta uma camada isolada de atualização da própria aplicação e usa o Service Worker same-origin que já fazia verificação automática no arranque.
+
+A implementação foi integrada através do PR #29. A revisão testada corresponde ao commit `8d4580957fc64bd8551a34d9fa6e4df3f444b2f6`. O CI de `main` (`33993333620`) terminou com sucesso e o workflow **Deploy Pages** (`33993353252`) publicou a mesma revisão com conclusão `success`.
 
 ## Revisão v58 — Centro de Atualização de Software
 
@@ -53,7 +55,13 @@ O build público é composto em `scripts/prepare-pages.cjs`, que:
 
 ## Validação automatizada v58
 
-A branch passou a suite completa no workflow CI `33993038481`.
+Foram concluídas com sucesso três validações relevantes da mesma revisão funcional:
+
+- CI da branch de implementação: `33993279652` — `success`;
+- CI do pull request #29: `33993314380` — todas as etapas `success`;
+- CI de `main`: `33993333620` — `success`.
+
+O deploy GitHub Pages `33993353252` concluiu também com `success` sobre o commit v58 integrado.
 
 Foi validado:
 
@@ -65,7 +73,7 @@ Foi validado:
 - geração real de `dist/` com versão `v58`;
 - ausência de referências `?v=53` no HTML público gerado;
 - referência `./sw.js?v=58` no `events.js` público gerado;
-- regressões de finanças, auditoria, isolamento, formulários, Mercado, ícones, segurança, navegação, acessibilidade e sincronização.
+- regressões de finanças, auditoria, isolamento, formulários, Mercado, imagens, código de barras, ícones, segurança, navegação, acessibilidade e sincronização.
 
 ## Revisão v57 — fotografias reais de referência
 
@@ -98,13 +106,13 @@ Lucide continua a ser a linguagem visual oficial. O subset é mantido localmente
 
 ## Limitações conhecidas
 
-A validação automatizada não substitui a confirmação física em Safari/iPhone, particularmente quando a aplicação está instalada no ecrã principal como PWA. O mecanismo também precisa de ser observado numa transição real entre duas versões públicas (por exemplo v58 → v59) para confirmar a mensagem de atualização e o reload em hardware real.
+A validação automatizada e o deploy concluído não substituem a confirmação física em Safari/iPhone, particularmente quando a aplicação está instalada no ecrã principal como PWA. O mecanismo precisa ainda de ser observado numa transição real entre duas versões públicas — v58 → v59 — para confirmar em hardware a deteção, instalação, `controllerchange`, reload e apresentação da nova versão.
 
 ## Próximo passo
 
-1. integrar a branch `feature/software-update-center-v58` em `main` apenas mantendo CI verde;
-2. aguardar o workflow de GitHub Pages e confirmar deploy v58;
-3. abrir **Definições → Atualização de Software** no iPhone/Safari e validar a composição em tema claro/escuro;
-4. testar **Verificar atualizações** online e offline;
-5. validar a PWA instalada no ecrã principal e a versão aberta diretamente no Safari;
-6. na próxima release, adicionar as alterações a `APP_RELEASE_NOTES` e validar uma transição real v58 → v59.
+1. abrir **Definições → Atualização de Software** no iPhone/Safari e validar a composição em tema claro/escuro;
+2. testar **Verificar atualizações** online e offline;
+3. validar a PWA instalada no ecrã principal e a versão aberta diretamente no Safari;
+4. repetir a validação mobile em 320, 375, 390 e 430 px, incluindo safe areas;
+5. na próxima release, adicionar as alterações a `APP_RELEASE_NOTES` antes do deploy;
+6. validar uma transição real v58 → v59 e só depois considerar o lifecycle de atualização totalmente confirmado em hardware.
