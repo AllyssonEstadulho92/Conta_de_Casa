@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v53';
+const CACHE = 'conta-de-casa-public-v53-ui-invoice';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -9,6 +9,8 @@ const PUBLIC_ASSETS = [
   './mobile-layout.css',
   './market-experience.css',
   './market-barcode.css',
+  './ui-icons.css',
+  './invoice-capture.css',
   './core.js',
   './finance.js',
   './render.js',
@@ -17,6 +19,8 @@ const PUBLIC_ASSETS = [
   './events.js',
   './market-experience.js',
   './market-barcode.js',
+  './ui-icons.js',
+  './invoice-capture.js',
   './manifest.webmanifest',
   './icon.svg'
 ];
