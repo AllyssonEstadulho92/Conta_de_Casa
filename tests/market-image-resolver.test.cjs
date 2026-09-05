@@ -27,6 +27,9 @@ assert.match(resolver,/Imagem oficial do produto no retalhista/);
 assert.match(resolver,/retailer:\(continente\|pingo-doce\)/);
 assert.match(resolver,/bestIndexMatch/);
 assert.match(resolver,/IntersectionObserver/);
+assert.match(resolver,/current&&current\.src===safe/,'repeated renders must not recreate an identical image');
+assert.match(resolver,/childList:true,subtree:false/,'saved-list observer must not recurse when a photo element changes');
+assert.match(resolver,/img\.addEventListener\('error'/,'failed retailer images must have a controlled fallback');
 assert.doesNotMatch(resolver,/fetch\(product\.sourceUrl/,'browser must not scrape retailer HTML directly');
 
 assert.match(build,/OfficialImageIndex|Official market image index|image index/i);
@@ -36,8 +39,8 @@ assert.match(build,/farinha/);
 assert.match(build,/arroz/);
 assert.match(build,/static\.pingodoce\.pt/);
 assert.match(build,/www\.continente\.pt/);
-assert.match(build,/images\/large/);
-assert.match(build,/images\/col/);
+assert.ok(build.includes('/images/(?:large|medium)/'),'Pingo Doce official image selector must accept large/medium product paths');
+assert.ok(build.includes('/images/col/'),'Continente official image selector must prefer catalog product paths');
 assert.match(build,/market-image-index\.json/);
 
 assert.match(index,/market-image-resolver\.js\?v=58/);
