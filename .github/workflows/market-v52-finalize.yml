@@ -1,5 +1,5 @@
 name: Finalize Market v52
-# Finalization trigger 5
+# Finalization trigger 6
 
 on:
   push:
@@ -80,6 +80,7 @@ jobs:
 
       - name: Commit validated v52 changes
         run: |
+          git checkout -- .github/workflows/ci.yml .github/workflows/pages.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
