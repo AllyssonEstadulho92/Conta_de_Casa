@@ -22,7 +22,9 @@ jobs:
           node-version: "24"
 
       - name: Probe live market sources
-        run: node scripts/probe-market-sources.cjs
+        run: |
+          node scripts/probe-market-sources.cjs
+          node scripts/probe-retailer-images.cjs
 
       - name: Syntax check
         run: |
@@ -38,6 +40,7 @@ jobs:
           node --check invoice-capture.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
+          node --check scripts/probe-retailer-images.cjs
 
       - name: Finance tests
         run: node tests/finance.test.cjs
