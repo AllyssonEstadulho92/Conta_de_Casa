@@ -24,6 +24,9 @@ jobs:
       - name: Probe live market sources
         run: node scripts/probe-market-sources.cjs
 
+      - name: Probe Open Prices Portugal
+        run: node scripts/probe-open-prices.cjs
+
       - name: Syntax check
         run: |
           node --check core.js
