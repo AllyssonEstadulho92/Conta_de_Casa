@@ -42,11 +42,13 @@ jobs:
           node --check events.js
           node --check sync.js
           node --check market-experience.js
+          node --check market-image-resolver.js
           node --check market-barcode.js
           node --check ui-icons.js
           node --check invoice-capture.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
+          node --check scripts/build-market-image-index.cjs
           node tests/finance.test.cjs
           node tests/audit.test.cjs
           node tests/counting-invariants.test.cjs
@@ -71,6 +73,9 @@ jobs:
 
       - name: Prepare public site allowlist
         run: node scripts/prepare-pages.cjs
+
+      - name: Build verified retailer image index
+        run: node scripts/build-market-image-index.cjs dist/market-image-index.json
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
