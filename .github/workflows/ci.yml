@@ -25,6 +25,7 @@ jobs:
         run: |
           node scripts/probe-market-sources.cjs
           node scripts/probe-retailer-images.cjs
+          node scripts/probe-cesta-detail.cjs
 
       - name: Syntax check
         run: |
@@ -41,6 +42,7 @@ jobs:
           node --check sw.js
           node --check scripts/prepare-pages.cjs
           node --check scripts/probe-retailer-images.cjs
+          node --check scripts/probe-cesta-detail.cjs
 
       - name: Finance tests
         run: node tests/finance.test.cjs
