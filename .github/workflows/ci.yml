@@ -27,9 +27,6 @@ jobs:
       - name: Probe Open Prices Portugal
         run: node scripts/probe-open-prices.cjs
 
-      - name: Probe Super Save web
-        run: node scripts/probe-supersave.cjs
-
       - name: Syntax check
         run: |
           node --check core.js
@@ -63,8 +60,11 @@ jobs:
       - name: Market category tests
         run: node tests/market-categories.test.cjs
 
-      - name: Market prototype tests
+      - name: Market live-source tests
         run: node tests/market-experience.test.cjs
+
+      - name: Market live-price accounting tests
+        run: node tests/market-live-accounting.test.cjs
 
       - name: Security hardening tests
         run: node tests/security.test.cjs
