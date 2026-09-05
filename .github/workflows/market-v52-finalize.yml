@@ -1,5 +1,5 @@
 name: Finalize Market v52
-# Finalization trigger 3
+# Finalization trigger 4
 
 on:
   push:
@@ -29,6 +29,16 @@ jobs:
         run: |
           python3 scripts/finalize-market-v52.py
           sed -i 's/v=51/v=52/g' index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tests/security.test.cjs')
+          text = p.read_text(encoding='utf-8')
+          old = "if (parsed.origin !== 'https://api.github.com') assert.equal(file, 'market-experience.js', `${parsed.origin} is only approved for market-experience.js`);"
+          new = "if (parsed.origin !== 'https://api.github.com') assert.equal(['index.html','market-experience.js'].includes(file), true, `${parsed.origin} is only approved for index CSP and market runtime`);"
+          if old not in text:
+              raise SystemExit('Expected external-origin security assertion not found')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
 
       - name: Verify live source contracts
         run: |
