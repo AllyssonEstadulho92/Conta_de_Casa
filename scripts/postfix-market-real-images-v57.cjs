@@ -10,6 +10,7 @@ function update(path,fn){
 
 update('tests/market-experience.test.cjs',source=>source
   .replace("assert.doesNotMatch(js,/Mercadona|openfoodfacts|Open Prices/i);","assert.doesNotMatch(js,/Mercadona|Open Prices/i);\nassert.match(js,/https:\\/\\/world\\.openfoodfacts\\.org\\/cgi\\/search\\.pl/,'Open Food Facts is allowed only as the product-image reference lookup');")
+  .replace("assert.ok(js.includes(\"a pesquisa é enviada apenas à fonte necessária\"), 'remote-search privacy disclosure must be visible');","assert.ok(js.includes(\"fotografia real de referência\") && js.includes(\"Open Food Facts\"), 'remote image-source privacy disclosure must be visible');")
 );
 
 update('tests/security.test.cjs',source=>source
