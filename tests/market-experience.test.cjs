@@ -12,7 +12,7 @@ assert.match(index, /<meta name="app-build" content="v53"/);
 assert.match(index, /market-experience\.css\?v=53/);
 assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
-assert.match(index, /connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt;/);
+assert.match(index, /connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt https:\/\/world\.openfoodfacts\.org;/);
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 assert.match(sw, /conta-de-casa-public-v53/);
 
