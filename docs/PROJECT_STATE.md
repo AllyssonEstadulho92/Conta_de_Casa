@@ -1,63 +1,89 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 5 de setembro de 2026
-Build funcional: v53 com revisão visual Lucide v54 integrada; hierarquia Compras v55 integrada; cofre visual v56 em validação
+Build público preparado: v58
 Distribuição: GitHub Pages
-Estado da revisão: ecrã de desbloqueio do cofre redesenhado visualmente para iPhone/Android/desktop, sem alterar PIN/palavra-passe, cifragem, persistência ou eventos de autenticação
+Estado da revisão: centro de atualização de software estilo iPhone implementado e validado em CI na branch `feature/software-update-center-v58`; falta integração em `main`, deploy e validação física no iPhone/Safari
 
 ## Estado atual
 
 A aplicação continua local-first: cofre cifrado no navegador, dados financeiros no IndexedDB e sincronização GitHub opcional. O schema financeiro permanece na versão 5. Faturas, Planeamento, Mercado, Relatórios, Segurança, Definições, leitura de códigos de barras e captura QR de faturas mantêm os fluxos existentes.
 
-A revisão Lucide anterior já está integrada na `main`. Uma nova captura real de iPhone/Safari da página **Lista de compras** mostrou que a família de ícones estava coerente, mas a composição ainda não reproduzia totalmente o protótipo aprovado.
+A revisão v58 não altera dados financeiros, PIN, cifragem, IndexedDB, sincronização nem contratos de Mercado. Acrescenta uma camada isolada de atualização da própria aplicação e usa o Service Worker same-origin que já fazia verificação automática no arranque.
+
+## Revisão v58 — Centro de Atualização de Software
+
+Foi criado um fluxo inspirado na hierarquia visual do iPhone, acessível a partir de **Definições → Atualização de Software**.
+
+Elementos principais:
+
+- botão/linha **Atualização de Software** nas Definições;
+- ecrã dedicado em modal fullscreen no telemóvel e diálogo centrado em desktop;
+- linha **Atualizações Automáticas — Ativado**;
+- linha **Atualizações Beta — Desativado**;
+- estado central **O Conta de Casa está atualizado** com a versão pública;
+- ação **Mais detalhes** com notas da versão;
+- ação **Verificar atualizações** que chama `ServiceWorkerRegistration.update()`;
+- atualização encontrada usa o ciclo normal `install → skipWaiting → activate → controllerchange → reload`;
+- tema claro/escuro, safe areas, foco visível e `prefers-reduced-motion` contemplados.
+
+A linha Beta não simula uma funcionalidade inexistente. Permanece desativada até existir uma pipeline beta separada, auditada e com política de distribuição própria.
+
+### Centralização das futuras alterações
+
+`app-update.js` contém `APP_RELEASE_NOTES`. A partir da v58, cada versão pública deve acrescentar aí as alterações relevantes para que o utilizador as consulte em **Mais detalhes**.
+
+O build público é composto em `scripts/prepare-pages.cjs`, que:
+
+1. gera `dist/` pela allowlist existente;
+2. inclui `app-update.css` e `app-update.js`;
+3. carimba o `dist/index.html` com `v58` e query strings `?v=58`;
+4. carimba a referência ao Service Worker em `dist/events.js` com `?v=58`;
+5. mantém os ficheiros de desenvolvimento originais sem uma refatoração global desnecessária.
+
+## Segurança e privacidade v58
+
+- não foi criado backend de atualização;
+- não foram adicionados tokens, chaves ou segredos;
+- o centro de atualização não consulta endpoints externos;
+- a verificação usa apenas o Service Worker same-origin distribuído pelo GitHub Pages;
+- nenhum dado do cofre, fatura, compra, sincronização ou perfil é enviado durante a verificação;
+- o cache público passa a `conta-de-casa-public-v58-software-update`;
+- a allowlist pública inclui apenas os novos assets estáticos `app-update.css` e `app-update.js`.
+
+## Validação automatizada v58
+
+A branch passou a suite completa no workflow CI `33993038481`.
+
+Foi validado:
+
+- sintaxe de `app-update.js`;
+- ausência de endpoint externo no módulo de atualização;
+- interface responsiva, dark mode, safe areas e redução de movimento;
+- `registration.update()` e handoff `SKIP_WAITING`;
+- cache v58 e inclusão dos novos assets no Service Worker;
+- geração real de `dist/` com versão `v58`;
+- ausência de referências `?v=53` no HTML público gerado;
+- referência `./sw.js?v=58` no `events.js` público gerado;
+- regressões de finanças, auditoria, isolamento, formulários, Mercado, ícones, segurança, navegação, acessibilidade e sincronização.
+
+## Revisão v57 — fotografias reais de referência
+
+A Lista de compras apresenta fotografia real quando existe correspondência suficientemente forte no Open Food Facts. A imagem não substitui a origem do preço: nome, preço e ligação oficial continuam provenientes do fluxo cesta.pt. Apenas URLs HTTPS de `images.openfoodfacts.org` são aceites; sem correspondência forte é mantido um placeholder neutro.
 
 ## Revisão v56 — cofre de acesso moderno
 
-A captura de referência enviada em iPhone mostrou uma direção visual mais premium para a entrada por PIN. A v56 aplica essa hierarquia ao **Conta de Casa** sem copiar funcionalidades inexistentes: mantém o PIN/palavra-passe atual, não introduz passkey/biometria falsa e não altera a derivação criptográfica.
-
-Alterações principais:
-
-- fundo com profundidade subtil e safe areas completas;
-- cartão do cofre mais limpo, arredondado e centrado;
-- marca **Conta de Casa** compacta e coerente com Lucide;
-- badge de segurança, título e mensagem de sessão com hierarquia reforçada;
-- campo de PIN em cápsula legível e focável;
-- teclado circular com proporções equilibradas e estados tácteis;
-- ação **Entrar** com maior destaque e alternativa **Usar palavra-passe** preservada;
-- transferência de cofre e notas de privacidade mantidas, mas visualmente secundárias;
-- tema escuro e `prefers-reduced-motion` preservados;
-- cache público passa a `conta-de-casa-public-v56-vault-modern` para evitar CSS antigo no Safari/iOS.
-
-Não foi adicionado botão de passkey/biometria porque o projeto não possui esse mecanismo implementado e testado.
+O ecrã de desbloqueio foi redesenhado para iPhone/Android/desktop sem alterar PIN/palavra-passe, derivação criptográfica ou persistência. Mantém safe areas, teclado circular, alternativa por palavra-passe, tema escuro e `prefers-reduced-motion`. Não apresenta passkey/biometria enquanto não existir implementação real.
 
 ## Revisão v55 — hierarquia do protótipo aprovado
 
-A nova camada mantém o desenho e a arquitetura existentes, mas aproxima a página Compras do protótipo aprovado:
+A página Compras foi aproximada do protótipo aprovado: título com carrinho, `+` principal preservado, ação secundária com linguagem de scanner, cartões financeiros com âncoras iconográficas, lista mobile compacta e navegação inferior normalizada. Os cálculos e eventos de negócio permaneceram inalterados.
 
-- título **Lista de compras** recebe um carrinho vetorial alinhado com o texto;
-- o `+` azul principal permanece no cabeçalho como ação primária;
-- o segundo botão junto da pesquisa deixa de parecer outro `+` e passa a comunicar **scanner/pesquisa de produto**;
-- o chip Sync mantém estado semântico e ganha indicação de interatividade;
-- pesquisa continua com lupa Lucide e caixa Safari-safe;
-- os quatro cartões financeiros passam a ter âncoras iconográficas e cores de apoio sem alterar valores;
-- a lista mobile recebe avatar vetorial neutro, estado, quantidade e valores com hierarquia mais próxima do protótipo;
-- fotografias de produto não são inventadas porque `normalizeMarketItem()` não possui campo de imagem;
-- em itens ainda por comprar, o campo de preço real deixa de ocupar espaço; quando o item é comprado, continua disponível;
-- editar/eliminar permanecem funcionais e tornam-se ações iconográficas compactas no mobile;
-- a navegação inferior usa métrica Lucide uniforme e sublinhado ativo consistente.
+## Sistema visual de ícones
 
-## Auditoria global de ícones
+Lucide continua a ser a linguagem visual oficial. O subset é mantido localmente em `ui-icons.js`, sem icon font/CDN de ícones em runtime. O snapshot auditável permanece `94e4cb9d9db5907053ebf3636a97c45529cf776b` e o aviso de licença é distribuído em `LUCIDE_LICENSE.txt`.
 
-A auditoria confirma quatro origens históricas de iconografia:
-
-1. `ICONS` / `icon()` no núcleo;
-2. subset Lucide e hidratação em `ui-icons.js`;
-3. pequenos SVG locais de módulos como Mercado, scanner e leitura de faturas;
-4. glifos Unicode/fallbacks estáticos e decoração nativa de controlos.
-
-**Decisão vigente:** Lucide continua a ser a linguagem visual oficial. A v55 força também os SVG contextuais antigos a usar a mesma métrica visual de traço 2 px, terminais arredondados e rendering consistente. A remoção física dos fallbacks e migração dos geradores locais para `CDCIcons.markup` fica separada da revisão v55 para não introduzir refatoração estrutural durante a validação visual.
-
-## O que não foi alterado
+## O que não foi alterado pela v58
 
 - `appState` e schema financeiro;
 - IndexedDB;
@@ -68,46 +94,17 @@ A auditoria confirma quatro origens históricas de iconografia:
 - pesquisa de preços Pingo Doce/Continente;
 - identificação GTIN pelo Open Food Facts;
 - captura QR de faturas;
-- CSP e origens externas.
-
-## Segurança e privacidade
-
-A revisão v55 é apenas visual. Não adiciona fontes, pacotes, CDNs, endpoints, telemetria nem imagens remotas. O Service Worker muda apenas o namespace de cache para `conta-de-casa-public-v55-prototype`, garantindo que o Safari/iOS não reutiliza a folha visual anterior.
-
-## Validação automatizada
-
-Foram atualizados testes para confirmar:
-
-- snapshot e licença Lucide;
-- scanner, pesquisa e selects;
-- ausência de `+` duplicado;
-- hierarquia do título Compras;
-- ação secundária com linguagem de scanner;
-- ícones dos cartões-resumo;
-- avatar vetorial neutro dos cartões mobile;
-- ocultação do preço real em itens pendentes;
-- navegação inferior ativa;
-- métrica visual aplicada também aos SVG contextuais;
-- cache v55;
-- regressões de Mercado e responsividade.
+- origens externas da CSP.
 
 ## Limitações conhecidas
 
-A validação automatizada não substitui a confirmação física de rendering em Safari/iPhone. A fotografia do protótipo é apenas referência visual; a aplicação não tem dados de imagem de produto e, por isso, usa um avatar vetorial neutro em vez de fotografias falsas.
-
-Os glifos Unicode que ainda existem como fallback estático no código não são a fonte visual final depois da hidratação Lucide. A sua remoção física será feita separadamente após validação v55.
+A validação automatizada não substitui a confirmação física em Safari/iPhone, particularmente quando a aplicação está instalada no ecrã principal como PWA. O mecanismo também precisa de ser observado numa transição real entre duas versões públicas (por exemplo v58 → v59) para confirmar a mensagem de atualização e o reload em hardware real.
 
 ## Próximo passo
 
-1. concluir CI da branch `ui/vault-modern-v56`;
-2. integrar apenas se todas as suites passarem;
-3. publicar pela pipeline normal de GitHub Pages;
-4. validar no iPhone/Safari o cofre em 320, 375, 390 e 430 px, confirmando safe areas, ausência de corte, teclado circular, botão Entrar e acesso por palavra-passe;
-5. validar tema claro/escuro e `prefers-reduced-motion`;
-6. só avaliar passkey/biometria numa decisão separada, com suporte real WebAuthn/biométrico e modelo de recuperação definido.
-
-## 2026-09-05 — Mercado v57: fotografias reais de referência
-
-A Lista de compras passa a apresentar fotografia real quando existe correspondência suficientemente forte no Open Food Facts. A imagem deixa de ser simulada por um avatar vetorial. O nome, preço e ligação oficial do retalhista continuam separados da fotografia: preço e página oficial permanecem provenientes do fluxo cesta.pt; a fotografia é apenas referência visual e a origem fica registada no item.
-
-Apenas URLs HTTPS de images.openfoodfacts.org são aceites. Itens sem correspondência forte mantêm um placeholder neutro; a aplicação não inventa nem força uma fotografia aproximada. Os metadados opcionais productCode, imageUrl, imageSource e imageMatchedAt são normalizados dentro do schema existente, sem migração do IndexedDB.
+1. integrar a branch `feature/software-update-center-v58` em `main` apenas mantendo CI verde;
+2. aguardar o workflow de GitHub Pages e confirmar deploy v58;
+3. abrir **Definições → Atualização de Software** no iPhone/Safari e validar a composição em tema claro/escuro;
+4. testar **Verificar atualizações** online e offline;
+5. validar a PWA instalada no ecrã principal e a versão aberta diretamente no Safari;
+6. na próxima release, adicionar as alterações a `APP_RELEASE_NOTES` e validar uma transição real v58 → v59.
