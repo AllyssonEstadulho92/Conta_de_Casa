@@ -324,3 +324,36 @@ Data: 5 de setembro de 2026
 Estado: aceite
 
 A aplicação pode apresentar uma fotografia real do Open Food Facts quando o emparelhamento textual é forte ou quando existe GTIN. A fotografia não é tratada como imagem oficial do Pingo Doce/Continente e não altera o preço. Se a correspondência não atingir o limiar definido, mantém-se placeholder neutro em vez de mostrar uma imagem possivelmente errada.
+
+## D-013 — Atualizações da aplicação usam o Service Worker same-origin e um canal estável explícito
+
+Data: 5 de setembro de 2026
+Estado: aceite
+
+### Contexto
+
+Foi pedida uma área de **Atualização de Software** com hierarquia semelhante ao iPhone, para que as modificações futuras da aplicação fiquem concentradas num ponto visível. A aplicação é uma PWA estática em GitHub Pages e já possui um Service Worker que verifica novas versões no arranque.
+
+### Decisão
+
+Criar `app-update.js` e `app-update.css` como camada isolada, acessível em **Definições → Atualização de Software**. O módulo não cria um backend de versões nem consulta um endpoint externo: usa `ServiceWorkerRegistration.update()` sobre o registo same-origin já existente.
+
+O canal estável fica apresentado como **Atualizações Automáticas — Ativado**, porque `events.js` já regista/atualiza o Service Worker e o ciclo `skipWaiting → clients.claim → controllerchange → reload` aplica a nova versão. **Atualizações Beta** fica explicitamente **Desativado** enquanto não existir uma pipeline beta real e auditada.
+
+As alterações visíveis de cada release passam a ser registadas em `APP_RELEASE_NOTES`, mostradas em **Mais detalhes**. `scripts/prepare-pages.cjs` compõe o bundle público, inclui os novos assets e carimba a versão publicada; o Service Worker v58 usa o cache `conta-de-casa-public-v58-software-update`.
+
+### Motivo
+
+A solução reutiliza o mecanismo nativo já existente, reduz superfície de ataque e dependências, preserva a arquitetura estática/local-first e evita apresentar um simulacro de loja de aplicações ou de canal beta. Também cria um local claro para explicar ao utilizador o que mudou em cada versão.
+
+### Segurança e privacidade
+
+- nenhum dado do cofre é usado na verificação;
+- nenhum token, password ou chave é transmitido;
+- não há endpoint adicional na CSP;
+- a mensagem `SKIP_WAITING` aceita apenas o comando fixo necessário ao lifecycle do worker;
+- os novos assets continuam sujeitos à allowlist de GitHub Pages e do Service Worker.
+
+### Consequência de manutenção
+
+Cada release pública deve atualizar `APP_RELEASE_NOTES`, o build público e o namespace de cache de forma coerente, com CI verde antes do deploy. A primeira transição real v58 → v59 deve ser validada em iPhone/Safari e PWA instalada antes de se considerar o fluxo completamente validado em hardware.
