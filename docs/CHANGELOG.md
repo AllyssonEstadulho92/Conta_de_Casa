@@ -1,5 +1,75 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-06 — Release candidata v63: consistência visual e atualização controlada (`63-ui2`)
+
+### Estado
+
+- branch: `ui/market-left-alignment`;
+- build candidato: `v63`;
+- revisão visual final: `63-ui2`;
+- cache candidato: `conta-de-casa-public-v63-ui2`;
+- CI completa da branch: sucesso antes das alterações exclusivamente documentais finais;
+- integração em `main`: pendente;
+- Deploy GitHub Pages: pendente.
+
+### Problemas confirmados
+
+A validação física em iPhone/Safari revelou duas regressões visuais acumuladas entre camadas CSS:
+
+- o item ativo da navegação inferior apresentava **duas barras azuis**;
+- a faixa de cor no topo dos cartões-resumo do Mercado aparecia **segmentada/pontilhada** em vez de contínua.
+
+A auditoria do código confirmou as causas:
+
+- `design-system.css` já usava `.mobile-nav .nav-btn::before` como indicador ativo, enquanto `ui-icons.css` e `market-brand.css` acrescentavam `::after`;
+- `ui-icons.css` utilizava `#page-market .market-summary-item::before` como ícone semântico e `market-brand.css` reutilizava o mesmo pseudo-elemento como faixa superior.
+
+### Correções visuais
+
+- criado `ui-consistency.css` como camada final de apresentação da v63;
+- Lucide permanece o único sistema vetorial oficial;
+- `.ui-icon-svg` e `.svg-icon` recebem uma métrica final comum: `stroke-width: 2`, extremidades/junções arredondadas, `vector-effect: non-scaling-stroke` e tamanhos contextuais previsíveis;
+- a navegação inferior passa a manter apenas o `::before` como indicador ativo;
+- qualquer `::after` redundante do item ativo é explicitamente anulado;
+- o indicador ativo usa 42 px de largura, 3 px de altura e reduz para 38 px em ecrãs até 430 px;
+- a faixa dos cartões-resumo passa a ser um `box-shadow: inset` sólido e contínuo no próprio cartão;
+- `market-summary-item::before` fica reservado ao ícone semântico;
+- cores `primary`, `success`, `warning`, `normal` e `danger` continuam representadas sem sobrepor responsabilidades de pseudo-elementos;
+- `Mercearia / Despensa` passa a usar um ícone local mais adequado do que o carrinho;
+- a Lista de compras mantém agrupamento por categoria e alinhamento consistente à esquerda.
+
+### Centro de Atualização e versionamento
+
+- build formal passa de `v62` para `v63`;
+- criado `release-manifest.json` como histórico público versionado da aplicação;
+- `scripts/prepare-pages.cjs` valida que `latestVersion` do manifesto corresponde ao build;
+- o Centro de Atualização consulta o manifesto same-origin com `cache: no-store`;
+- uma nova versão é apresentada ao utilizador antes da instalação;
+- o Service Worker deixa de executar `skipWaiting()` automaticamente durante a instalação de uma atualização;
+- a ativação passa a depender de ação explícita em **Atualizar agora**, usando `APPLY_UPDATE`;
+- `SKIP_WAITING` permanece para compatibilidade com clientes v62;
+- após ativação explícita, o worker reclama clientes, elimina caches anteriores e pode reiniciar/navegar a janela controlada;
+- `v` e `ts` são os únicos parâmetros de cache-busting aceites, sempre como parâmetro único e sempre sujeitos à allowlist `PUBLIC_ASSET_SET`.
+
+### Segurança e dados
+
+- sem alteração ao `STATE_VERSION = 5`;
+- sem alteração a PIN/palavra-passe, PBKDF2-SHA-256, AES-GCM ou IndexedDB;
+- sem alteração a `estimatedCents`, `actualCents`, quantidade ou estado de compra;
+- sem credenciais, cookies, telemetria ou endpoints externos novos;
+- `release-manifest.json` e o Centro de Atualização são same-origin;
+- a atualização substitui assets da aplicação e não apaga nem migra o cofre financeiro.
+
+### Testes
+
+- criado `tests/ui-consistency.test.cjs`;
+- CI passa a validar explicitamente a supressão da segunda barra ativa;
+- CI valida que o cartão-resumo usa acento contínuo independente do pseudo-elemento de ícone;
+- testes de ícones, Mercado, imagens históricas, atualização, segurança e responsividade foram atualizados para a composição `v63` / `63-ui2`;
+- a execução completa validou finanças, isolamento do cofre, datas, faturas, Mercado, categorias, scanner, iconografia, atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade, sincronização e manifest.
+
+A validação visual física final em iPhone/Safari permanece necessária depois da publicação em `main`/GitHub Pages.
+
 ## 2026-09-06 — Lista de compras agrupada por categoria (`62-ui3`)
 
 ### Publicação
