@@ -2,7 +2,7 @@
 
 Atualizado: 6 de setembro de 2026
 Build público base: v62
-Revisão visual em validação: Mercado sem fotografias de produto
+Revisão atual: hotfix de layout móvel e conflitos técnicos do Mercado
 
 ## Visão geral
 
@@ -18,7 +18,7 @@ Não existe backend financeiro próprio. As integrações externas do Mercado se
 - `styles.css` / `design-system.css` — estilos base e design system.
 - `mobile-layout.css` — compatibilidade de viewport/Safari e safe areas.
 - `market-experience.css` — estrutura visual do Mercado.
-- `market-brand.css` — camada final de identidade visual do módulo Compras/Mercado; remove da apresentação as fotografias e placeholders sem tocar no estado.
+- `market-brand.css` — camada final de identidade visual do módulo Compras/Mercado; remove fotografias/placeholders da apresentação e fixa explicitamente a colocação dos conteúdos dos cartões no Grid móvel.
 - `market-barcode.css` — scanner GTIN/EAN/UPC.
 - `ui-icons.css` — linguagem visual Lucide e overrides finais.
 - `invoice-capture.css` — captura QR de faturas.
@@ -31,10 +31,11 @@ Não existe backend financeiro próprio. As integrações externas do Mercado se
 - `finance.js` — cálculos financeiros.
 - `render.js` — renderização de páginas/listas.
 - `forms.js` — formulários e validação.
-- `sync.js` — sincronização cifrada opcional via GitHub.
+- `sync.js` — motor de sincronização cifrada opcional via GitHub.
+- `sync-conflict-policy.js` — política complementar, sem persistência própria, que classifica `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` como metadados técnicos do Mercado para impedir revisões com `0 diferenças`.
 - `events.js` — navegação, eventos, cofre e Service Worker.
 - `market-experience.js` — catálogo/preço Pingo Doce e Continente via `cesta.pt` e criação confirmada de itens.
-- `market-branding.js` — camada sem estado que alinha o texto do browser de produtos com a experiência sem fotografias.
+- `market-branding.js` — camada sem estado que alinha o texto do browser de produtos com a experiência text-first.
 - `market-barcode.js` — leitura GTIN e identificação assistida; a câmara não é um campo de fotografia.
 - `invoice-capture.js` — leitura local de QR fiscal.
 - `ui-icons.js` — subset Lucide local.
@@ -45,9 +46,9 @@ Não existe backend financeiro próprio. As integrações externas do Mercado se
 
 O schema financeiro permanece `STATE_VERSION = 5`. Valores monetários são inteiros em cêntimos. O Mercado mantém `estimatedCents` separado de `actualCents`; quantidade permanece separada do preço unitário.
 
-O cofre usa IndexedDB e envelope cifrado. O modelo continua baseado em PBKDF2-SHA-256 + AES-GCM. A revisão visual não altera autenticação, derivação de chave, backups ou sincronização.
+O cofre usa IndexedDB e envelope cifrado. O modelo continua baseado em PBKDF2-SHA-256 + AES-GCM. A revisão visual e a política de conflitos não alteram autenticação, derivação de chave, backups ou conteúdo cifrado enviado ao GitHub.
 
-Metadados antigos de imagem (`productCode`, `imageUrl`, `imageSource`, `imageMatchedAt`) continuam tolerados pelo normalizador para não destruir dados existentes. A interface do Mercado deixa, no entanto, de lhes reservar espaço visual.
+Metadados antigos de imagem (`productCode`, `imageUrl`, `imageSource`, `imageMatchedAt`) continuam tolerados pelo normalizador para não destruir dados existentes. A interface do Mercado não lhes reserva espaço visual e a sincronização deixa de os tratar como divergências que exijam decisão manual.
 
 ## Mercado — responsabilidades atuais
 
@@ -55,23 +56,33 @@ Metadados antigos de imagem (`productCode`, `imageUrl`, `imageSource`, `imageMat
 2. **Código de barras:** `market-barcode.js`; identifica o artigo, não define preço.
 3. **Persistência financeira:** fluxo existente de `market-experience.js`, apenas após ação explícita do utilizador.
 4. **Apresentação e identidade:** `market-experience.css` + `market-brand.css`.
-5. **Cópia contextual sem fotografias:** `market-branding.js`.
-6. **Compatibilidade histórica de imagens:** módulos v59–v62, sem prioridade visual nesta revisão.
+5. **Cópia contextual text-first:** `market-branding.js`.
+6. **Compatibilidade histórica de imagens:** módulos v59–v62, sem prioridade visual na interface.
 
-A informação principal de um produto passa a ser: **nome → embalagem/quantidade → loja → preço/estado**. A fotografia não é requisito de identificação na interface.
+A informação principal de um produto permanece: **nome → embalagem/quantidade → loja → preço/estado**. A fotografia não é requisito de identificação na interface.
 
-## Decisão de apresentação sem fotografias
+## Browser do Mercado — regra de layout móvel
 
-A nova camada não reescreve o motor do Mercado. Em vez disso, atua como override final:
+A validação física em iPhone/Safari mostrou que ocultar visualmente a fotografia não é suficiente quando o DOM histórico ainda contém o respetivo nó. O Grid passa por isso a usar posições explícitas:
 
-- `.market-product-photo`, botões de fotografia e triggers do visualizador ficam sem apresentação no contexto do Mercado;
-- a identidade de itens guardados refluí para texto sem coluna reservada à imagem;
-- o cabeçalho móvel do item usa `checkbox + conteúdo + estado`;
-- o cartão de resultado usa `conteúdo + ação +`;
-- o aviso do browser passa a declarar que o resultado é apresentado por nome, embalagem, loja e preço e não depende de fotografias;
-- dados antigos não são apagados nem migrados.
+- `.market-product-copy` ocupa sempre a primeira coluna útil;
+- `.market-add-product` ocupa sempre a coluna da ação;
+- dentro de `.market-product-copy`, nome/loja/estado ficam à esquerda e o preço à direita quando existe largura suficiente;
+- abaixo de 360 px, o preço reflui para baixo do conteúdo em vez de comprimir palavras letra a letra;
+- `.market-result-chip`, preço e ligação da loja evitam quebras internas destrutivas.
 
-Esta abordagem reduz risco de regressão: a mudança visual fica isolada e pode ser validada em hardware real antes de remover código histórico.
+Esta regra elimina a “coluna fantasma” deixada pelo antigo slot de fotografia e aproxima a experiência do protótipo aprovado sem alterar o motor do Mercado.
+
+## Sincronização — política de conflitos técnicos
+
+`sync.js` continua responsável por merge, histórico, upload cifrado e decisão de conflitos. `sync-conflict-policy.js` atua apenas sobre a vista de negócio usada por esse motor:
+
+- para entidades diferentes de `market`, delega integralmente no comportamento original;
+- para `market`, retira apenas `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` antes da comparação de equivalência;
+- o registo mais recente/mais completo continua a ser escolhido pelo motor existente;
+- nome, categoria, quantidade, unidade, `estimatedCents`, `actualCents`, `purchased` e `purchasedAt` continuam a ser campos reais e podem exigir revisão.
+
+O objetivo é impedir o estado incoerente “Conflito / 0 diferenças” sem automatizar qualquer decisão financeira.
 
 ## Identidade visual
 
@@ -90,42 +101,42 @@ A camada usa as variáveis existentes (`--bg`, `--surface`, `--border`, `--text`
 
 ## Responsividade e acessibilidade
 
-A estrutura mantém os breakpoints já auditados:
+A estrutura mantém os breakpoints auditados:
 
 - até 820 px: navegação móvel, cards em duas colunas e diálogo full-screen;
 - até 430 px: densidade reduzida e ações de 48 px;
-- abaixo de 360 px: reflow adicional para impedir corte horizontal;
+- abaixo de 360 px: reflow adicional do preço/conteúdo para impedir compressão e corte horizontal;
 - desktop/tablet mantêm filtros e tabelas existentes.
 
 Safe areas, `100dvh`/`100svh`, `prefers-reduced-motion`, foco visível e alvos tácteis existentes continuam ativos.
 
-A ocultação de fotografia não remove informação funcional necessária: nome, categoria, quantidade, estado, preço e ações continuam presentes em texto/controles acessíveis.
-
 ## Rede e privacidade
 
-A nova camada `market-branding.js` não faz `fetch`, não lê `appState` e não adiciona qualquer origem de rede. Apenas altera conteúdo estático do aviso do browser e define um marcador de apresentação no elemento raiz.
+`market-branding.js` não faz `fetch`, não lê `appState` e não adiciona qualquer origem de rede. `sync-conflict-policy.js` também não faz rede, não lê credenciais e não escreve estado; apenas adapta a comparação técnica em memória antes do merge.
 
-Os mecanismos de rede existentes permanecem inalterados nesta revisão. A remoção futura do pipeline histórico de imagens deve ser tratada como mudança arquitetural separada, com revisão de CSP, Service Worker, testes e documentação.
+Os mecanismos de rede existentes permanecem inalterados. A remoção futura do pipeline histórico de imagens continua a ser uma mudança arquitetural separada, com revisão de CSP, Service Worker, testes e documentação.
 
 ## Distribuição
 
-`scripts/prepare-pages.cjs` passa a incluir:
+`scripts/prepare-pages.cjs` inclui:
 
-- `market-brand.css` como camada CSS final do Mercado;
-- `market-branding.js` como camada semântica final;
+- `market-brand.css` e `market-branding.js` com revisão de recurso `62-ui2` para evitar reutilização de assets antigos no Safari;
+- `sync-conflict-policy.js` logo após `sync.js` no HTML distribuído;
 - os assets existentes da v62 para compatibilidade.
 
-O Service Worker inclui os dois novos assets na allowlist de cache. O build público continua a usar a composição v62 até uma mudança de versão formal.
+O Service Worker usa o cache `conta-de-casa-public-v62-market-ui2`, obrigando a renovação do cache público sem alterar o número formal do build, que continua v62.
 
 ## Testes e manutenção
 
-A cobertura do Mercado verifica agora, além das invariantes anteriores:
+A cobertura passa a verificar:
 
-- presença dos novos assets em Pages e Service Worker;
-- ausência visual da fotografia/placeholder;
-- reflow correto dos cards sem imagem;
-- identidade cromática principal;
-- ausência de acesso do branding ao estado financeiro.
+- posição explícita do conteúdo e do botão `+` nos cartões do browser;
+- reflow abaixo de 360 px;
+- nova cópia curta do aviso;
+- publicação/cache dos assets de hotfix;
+- diferenças apenas em metadados de imagem/código de barras não geram conflito manual;
+- diferenças reais de preço continuam a gerar conflito;
+- ausência de acesso do branding/política ao estado financeiro fora do motor existente.
 
 Regras de manutenção:
 
@@ -133,4 +144,5 @@ Regras de manutenção:
 - não apagar metadados antigos apenas por razões visuais;
 - código de barras continua separado de fotografia e de preço;
 - uma alteração de branding não pode modificar cálculos, cifragem ou sincronização;
-- qualquer consolidação dos módulos antigos de imagem deve acontecer depois da validação física e numa alteração separada.
+- campos financeiros nunca podem ser adicionados à lista de metadados técnicos de conflito;
+- qualquer consolidação dos módulos antigos de imagem deve acontecer numa alteração separada.
