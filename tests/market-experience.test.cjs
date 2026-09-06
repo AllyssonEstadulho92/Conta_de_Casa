@@ -19,7 +19,7 @@ assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt https:\/\/world\.openfoodfacts\.org;/);
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
-assert.match(sw, /conta-de-casa-public-v62-retailer-official-only/);
+assert.match(sw, /conta-de-casa-public-v62-market-ui2/);
 
 for (const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js']) {
   assert.ok(sw.includes(`'./${asset}'`), `${asset} must be cached by the service worker`);
@@ -32,7 +32,7 @@ assert.match(js,/https:\/\/world\.openfoodfacts\.org\/cgi\/search\.pl/,'Open Foo
 assert.ok(js.includes("data-market-price-mode=\"live\""), 'market browser must explicitly use live/verified data mode');
 assert.ok(js.includes("https://cesta.pt/mcp"), 'Continente/Pingo Doce provider must be explicit');
 assert.ok(js.includes("name:'search_products'"), 'cesta MCP search tool must be used');
-assert.ok(js.includes("fotografia real de referência") && js.includes("Open Food Facts"), 'source disclosure remains in the stable source template until the presentation layer replaces it at runtime');
+assert.ok(js.includes("fotografia real de referência") && js.includes("Open Food Facts"), 'legacy source disclosure remains in the stable source template until the presentation layer replaces it at runtime');
 assert.match(js, /estimatedCents:product\.priceCents/);
 assert.match(js, /sourceUrl=safeRetailerUrl/);
 assert.match(js, /data-market-source-url=/);
@@ -46,11 +46,14 @@ assert.match(js, /esc\(product\.name\)/);
 assert.match(brandingCss, /identidade visual do Mercado sem fotografias de produto/);
 assert.match(brandingCss, /\.market-product-photo[\s\S]*display:none!important/);
 assert.match(brandingCss, /\.market-mobile-head\{[\s\S]*grid-template-columns:44px minmax\(0,1fr\) auto!important/);
-assert.match(brandingCss, /\.market-catalog-main\{[\s\S]*grid-template-columns:minmax\(0,1fr\) 52px!important/);
+assert.match(brandingCss, /market-catalog-main\{[\s\S]*grid-template-columns:minmax\(0,1fr\) 52px!important/);
+assert.match(brandingCss, /market-catalog-main>\.market-product-copy\{[\s\S]*grid-column:1!important/);
+assert.match(brandingCss, /\.market-catalog-main>\.market-add-product\{[\s\S]*grid-column:2!important/);
+assert.match(brandingCss, /\.market-result-source\{[\s\S]*white-space:nowrap/);
 assert.match(brandingCss, /--cdc-brand-blue:#0b63e5/);
 assert.match(brandingJs, /marketProductImages='hidden'/);
 assert.match(brandingJs, /nome, embalagem, loja e preço/);
-assert.match(brandingJs, /a interface não depende de fotografias de produto/);
+assert.match(brandingJs, /A fotografia é opcional/);
 assert.doesNotMatch(brandingJs, /appState|estimatedCents|actualCents|saveState|commit\(/,'branding layer must not touch financial state');
 
 // v60 mantém o resolvedor legado; v61 resolve o pid oficial; v62 torna os cartões vivos official-only.
