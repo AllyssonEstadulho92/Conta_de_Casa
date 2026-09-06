@@ -45,7 +45,7 @@ assert.match(js,/schedulePersist/,'resolved images for saved items should be per
 assert.match(js,/item\.imageUrl=result\.imageUrl/);
 assert.match(js,/stopImmediatePropagation/,'legacy handoff remains covered; the public add selector is handled by the newer layers');
 
-// v62 makes live Pingo Doce/Continente result cards exclusive to exact official images.
+// The v62 official-only policy remains a historical compatibility layer.
 assert.match(policy,/card\.dataset\.marketImageAudit='done'/);
 assert.match(policy,/marketRetailerImagePolicy='official-only'/);
 assert.match(policy,/CDCOfficialMarketImages\?\.safeOfficialImageUrl/);
@@ -107,21 +107,21 @@ assert.equal(
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/products/123/front.jpg'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/images/large/739490_test.jpg'),'');
 
-assert.match(sw,/conta-de-casa-public-v62-market-ui2/);
+assert.match(sw,/conta-de-casa-public-v63-ui1/);
 for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(prepare.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
 }
-assert.match(prepare,/const BUILD = 'v62'/);
+assert.match(prepare,/const BUILD = 'v63'/);
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-image-audit\.css\?v=62/);
-  assert.match(index,/market-retailer-image-policy\.js\?v=62/);
-  assert.match(index,/market-image-audit\.js\?v=62/);
-  assert.match(index,/market-official-images\.js\?v=62/);
+  assert.match(index,/market-image-audit\.css\?v=63/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=63/);
+  assert.match(index,/market-image-audit\.js\?v=63/);
+  assert.match(index,/market-official-images\.js\?v=63/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.match(index,/https:\/\/www\.continente\.pt/);
   assert.match(index,/https:\/\/static\.pingodoce\.pt/);
