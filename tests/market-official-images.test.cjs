@@ -89,7 +89,7 @@ assert.equal(parsed[0].sourceUrl,pingoProduct);
 assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
-assert.match(sw,/conta-de-casa-public-v62-retailer-official-only/);
+assert.match(sw,/conta-de-casa-public-v62-market-ui2/);
 assert.ok(sw.includes("'./market-retailer-image-policy.js'"));
 assert.ok(sw.includes("'./market-official-images.js'"));
 assert.match(prepare,/const BUILD = 'v62'/);
