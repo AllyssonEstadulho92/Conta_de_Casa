@@ -1,5 +1,40 @@
 # TODO — Conta de Casa
 
+## P0 — Release v63: consistência visual global e atualização controlada
+
+- [x] Confirmar em capturas reais a dupla barra azul no item ativo da navegação inferior.
+- [x] Identificar a causa: `::before` do design system combinado com `::after` de camadas visuais posteriores.
+- [x] Confirmar em captura real a faixa superior azul segmentada/pontilhada nos cartões-resumo.
+- [x] Identificar a causa: `market-summary-item::before` usado simultaneamente como ícone semântico e faixa cromática.
+- [x] Criar `ui-consistency.css` como última camada de apresentação, sem acesso a estado financeiro.
+- [x] Uniformizar `.ui-icon-svg` e `.svg-icon` com métrica Lucide final (`stroke-width:2`, linecap/linejoin arredondados e tamanhos contextuais).
+- [x] Manter apenas `::before` como indicador ativo da navegação mobile e desativar `::after` redundante.
+- [x] Substituir a faixa de pseudo-elemento dos cartões-resumo por um `inset` sólido e contínuo.
+- [x] Reservar `market-summary-item::before` exclusivamente ao ícone semântico.
+- [x] Ajustar `Mercearia / Despensa` para um ícone local mais adequado do que o carrinho.
+- [x] Preservar o agrupamento por categoria e o alinhamento à esquerda da Lista de compras.
+- [x] Subir o build formal para `v63`.
+- [x] Criar e distribuir `release-manifest.json` como histórico público de versões.
+- [x] Fazer o build falhar se `latestVersion` do manifesto divergir do build público.
+- [x] Fazer o Centro de Atualização consultar apenas o manifesto same-origin com `cache: no-store`.
+- [x] Preparar o Service Worker para aguardar confirmação do utilizador antes de ativar uma atualização.
+- [x] Preservar compatibilidade `SKIP_WAITING` com clientes v62 e usar `APPLY_UPDATE` no novo fluxo.
+- [x] Restringir cache-busting a um único parâmetro `v` ou `ts` e sempre à allowlist pública explícita.
+- [x] Renovar cache candidato para `conta-de-casa-public-v63-ui2`.
+- [x] Criar `tests/ui-consistency.test.cjs` e integrar na CI.
+- [x] Atualizar regressões antigas que estavam fixas na revisão/cache v62.
+- [x] Obter CI completa verde na branch com finanças, segurança, responsividade, navegação, acessibilidade, Mercado, atualização e sincronização.
+- [ ] Rever o diff final contra `main`.
+- [ ] Abrir PR da v63 para `main`.
+- [ ] Integrar a v63 apenas com CI do PR verde.
+- [ ] Confirmar CI de `main` após merge.
+- [ ] Confirmar Deploy GitHub Pages da v63.
+- [ ] Validar no iPhone/Safari que existe apenas uma barra ativa na navegação inferior.
+- [ ] Validar no iPhone/Safari que a faixa dos cartões-resumo é sólida e contínua.
+- [ ] Validar visualmente a uniformidade dos ícones em Início, Faturas, Compras, Relatórios, Segurança e Definições.
+- [ ] Testar **Definições → Atualização de Software** e confirmar instalação da v63 num dispositivo real.
+- [ ] Validar tema claro/escuro e larguras 320, 375, 390 e 430 px.
+
 ## P0 — Lista de compras agrupada por categoria
 
 - [x] Confirmar necessidade de reduzir a repetição visual da lista mobile.
@@ -14,14 +49,13 @@
 - [x] Renovar o cache público sem perder a identificação da revisão anterior.
 - [x] Adicionar `tests/market-category-groups.test.cjs`.
 - [x] Integrar o novo teste na CI e no Deploy Pages.
-- [x] Executar CI completa da branch `ui/market-category-groups`.
-- [x] Rever diff final do PR.
+- [x] Executar CI completa da branch de agrupamento.
+- [x] Rever diff final do PR #40.
 - [x] Integrar PR #40 em `main` apenas com CI verde.
 - [x] Confirmar CI de `main` com sucesso.
 - [x] Confirmar Deploy GitHub Pages com sucesso.
-- [ ] Validar no iPhone/Safari categorias com 1 e vários itens.
+- [ ] Validar no iPhone/Safari categorias com 1 e vários itens após instalar a v63.
 - [ ] Validar expandir/recolher, pesquisa, filtros, checkbox, editar, eliminar e preço real.
-- [ ] Validar tema claro/escuro e larguras 320, 375, 390 e 430 px.
 
 ## P0 — hotfix iPhone/Safari: Mercado e sincronização
 
@@ -42,8 +76,7 @@
 - [x] Integrar PR #38 em `main` apenas com CI verde.
 - [x] Confirmar CI de `main` após o merge.
 - [x] Confirmar Deploy Pages com sucesso.
-- [ ] Validar novamente em iPhone/Safari 320, 375, 390 e 430 px.
-- [ ] Confirmar em hardware real que não existe coluna vazia nem compressão letra a letra nos resultados.
+- [ ] Confirmar em hardware real, após v63, que não existe coluna vazia nem compressão letra a letra nos resultados.
 - [ ] Confirmar que um conflito técnico antigo desaparece após “Comparar novamente”/nova sincronização.
 
 ## P0 — identidade visual do Mercado sem fotografias
@@ -61,7 +94,7 @@
 - [x] Incluir os novos assets no bundle GitHub Pages e no Service Worker.
 - [x] Alargar `tests/market-experience.test.cjs` para cobrir a apresentação.
 - [x] Executar CI e publicar a primeira revisão.
-- [ ] Concluir validação física após o hotfix atual.
+- [ ] Concluir validação física após instalar a v63.
 
 ## P0 — regressões essenciais a manter
 
@@ -101,7 +134,7 @@ A validação visual de correspondência de fotografias da v62 deixa de ser requ
 - [ ] Confirmar nomes acessíveis em botões icon-only e `aria-hidden` em ícones decorativos.
 - [ ] Confirmar `prefers-reduced-motion` em dispositivos reais.
 - [ ] Rever contraste dos quatro estados cromáticos em tema claro e escuro.
-- [ ] Consolidar CSS mobile duplicado apenas depois da validação física.
+- [ ] Consolidar CSS mobile substituído/duplicado além dos conflitos corrigidos na v63, apenas após validação física.
 
 ## P2 — manutenção
 
