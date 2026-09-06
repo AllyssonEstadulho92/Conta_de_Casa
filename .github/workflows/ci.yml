@@ -37,6 +37,7 @@ jobs:
           node --check ui-icons.js
           node --check invoice-capture.js
           node --check app-update.js
+          node --check market-retailer-image-policy.js
           node --check market-image-audit.js
           node --check market-official-images.js
           node --check sw.js

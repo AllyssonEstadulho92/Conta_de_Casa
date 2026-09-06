@@ -86,7 +86,7 @@ O Centro de Atualização usa `ServiceWorkerRegistration.update()`, `SKIP_WAITIN
 
 Estado: aceite.
 
-A imagem oficial só é considerada oficial quando domínio, catálogo/CDN e identificador do produto correspondem. Open Facts permanece fallback. Não se aceita URL arbitrária devolvida por um reader.
+A imagem oficial só é considerada oficial quando domínio, catálogo/CDN e identificador do produto correspondem. Open Facts pode existir como fonte auxiliar/fallback noutros contextos, mas não transforma uma correspondência aproximada em fotografia oficial.
 
 ## D-015 — Reader externo restrito a páginas públicas validadas
 
@@ -100,59 +100,65 @@ Data: 6 de setembro de 2026 · Estado: aceite.
 
 ### Contexto
 
-A v60 passou todos os probes de origem, mas a captura real no iPhone continuou com placeholders. A auditoria do código encontrou uma falha de fronteira entre módulos:
-
-- `market-experience.js` mantém `resultById` e funções relacionadas dentro de um IIFE;
-- a camada externa v60 tentou alterar funções privadas que não eram globais;
-- procurava `.market-product-source[href]`, mas o controlo renderizado é `.market-result-source`;
-- tentava interceptar `[data-market-add]`, mas o botão real é `[data-market-add-product]`.
-
-Logo, a existência da fotografia na fonte não garantia que o cartão real a recebesse.
+A v60 passou probes de origem, mas a captura real no iPhone continuou com placeholders. A auditoria encontrou uma falha de fronteira entre módulos: funções privadas dentro de IIFEs e seletores que não correspondiam ao HTML real.
 
 ### Decisão
 
-Criar `market-official-images.js` como bridge progressivo que depende apenas de contratos públicos/reais:
+`market-official-images.js` depende apenas dos contratos públicos/reais:
 
 - `[data-market-product-card]` para cadeia + `pid`;
 - `.market-result-source` para a ação do retalhista;
 - `[data-market-add-product]` para o fluxo real de adição;
 - `appState.market`/`saveState()` apenas depois de o fluxo existente criar o item.
 
-O bridge não tenta aceder a `resultById` nem reatribuir funções privadas de outro IIFE.
+O bridge obtém a URL do SKU através de `cesta.pt`, valida cadeia e `pid`, lê a página pública através do reader restrito, aceita apenas imagem oficial com o mesmo `pid`, confirma carregamento e só depois substitui o placeholder.
 
-### Resolução da imagem
-
-1. obter URL do SKU através de `cesta.pt`;
-2. validar cadeia e `pid`;
-3. ler a página pública via reader restrito;
-4. aceitar apenas imagem oficial com o mesmo `pid`;
-5. confirmar que a imagem carrega;
-6. substituir o placeholder e manter o zoom;
-7. persistir URL/origem após a ação real de adicionar.
-
-### CORS/Safari
-
-O novo bridge usa GET com apenas `Accept: application/json` no reader. Cabeçalhos personalizados de retenção/resumo de imagem foram removidos do pedido desta camada para evitar preflight desnecessário. Isto é uma medida de robustez; não se declara que o preflight era a única causa da falha v60.
+O novo bridge usa GET com apenas `Accept: application/json` no reader para evitar preflight desnecessário no Safari.
 
 ### Sinalização
-
-A interface separa três conceitos:
 
 - `Consultado agora` = atualidade da consulta/preço;
 - `Ver no Pingo Doce` / `Ver no Continente` = ligação para a página do produto;
 - `Pingo Doce · imagem oficial` / `Continente · imagem oficial` = proveniência da fotografia.
 
-O texto genérico “Produto oficial” deixa de ser usado pelo bridge porque podia sugerir, junto de um placeholder, que a própria miniatura vazia era oficial.
+## D-017 — Cartões vivos de retalhista são `official-only`
+
+Data: 6 de setembro de 2026 · Estado: aceite.
+
+### Contexto
+
+Após a v61, a validação física mostrou fotografias que não correspondiam à imagem da página oficial. O bridge v61 estava correto, mas coexistia com mecanismos anteriores:
+
+- `market-experience.js` podia enriquecer resultados vivos com imagem do Open Food Facts por semelhança textual;
+- `market-image-audit.js` podia aplicar Open Food/Beauty/Products/Pet Facts quando a imagem oficial não fosse resolvida;
+- esses mecanismos não tinham autorização semântica para afirmar que a imagem era a fotografia do SKU do Pingo Doce/Continente.
+
+A causa foi classificada como **concorrência de políticas de imagem**, não como falha do CDN oficial.
+
+### Decisão
+
+Em resultados vivos do Pingo Doce e Continente, a política é exclusiva:
+
+> Só a fotografia oficial validada para a mesma cadeia e o mesmo `pid` pode ser apresentada. Sem prova exata, mantém-se placeholder.
+
+Implementação em `market-retailer-image-policy.js`:
+
+- identifica apenas cartões `cesta-(continente|pingo-doce)-<pid>`;
+- marca `data-market-image-audit="done"` para impedir fallback legado nesse cartão;
+- marca `data-market-retailer-image-policy="official-only"`;
+- valida qualquer imagem existente exclusivamente por `CDCOfficialMarketImages.safeOfficialImageUrl`;
+- remove imagens de outras origens/variantes e volta a placeholder;
+- observa alterações de DOM/`src` para impedir reintrodução posterior de fallback;
+- após adicionar, remove metadados visuais auxiliares se não existir uma resolução oficial segura.
+
+### Delimitação
+
+Open Facts não é removido globalmente. Pode continuar a servir identificação por código de barras, itens anteriores e outros fluxos auxiliares explicitamente cobertos. A restrição é sobre a **fotografia dos cartões vivos de retalhista**.
 
 ### Segurança
 
-- nenhuma credencial no bridge;
-- `credentials:'omit'` e `referrerPolicy:'no-referrer'`;
-- reader recebe apenas URL pública validada;
-- nenhuma informação financeira ou conteúdo do cofre é enviado;
-- imagem oficial exige correspondência exata do `pid`;
-- falha de imagem nunca altera preço nem impede a adição do produto.
+A política v62 não acrescenta endpoints nem executa `fetch`. Reutiliza a validação v61. Falha visual não altera `estimatedCents`, `actualCents`, quantidade nem qualquer total financeiro.
 
 ### Consequência
 
-Build passa a v61, cache a `conta-de-casa-public-v61-official-images-bridge`, novo asset entra na allowlist Pages/Service Worker e existe teste dedicado `tests/market-official-images.test.cjs`.
+Build passa a `v62`, cache a `conta-de-casa-public-v62-retailer-official-only`, `market-retailer-image-policy.js` entra em Pages/Service Worker antes da auditoria legada e os testes passam a exigir a regra `official-only`.

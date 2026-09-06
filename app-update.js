@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Conta de Casa — Centro de Atualização de Software (v61)
+ * Conta de Casa — Centro de Atualização de Software (v62)
  *
  * Esta camada não altera dados financeiros nem o cofre. O estado de atualização
  * é obtido exclusivamente do Service Worker same-origin distribuído por GitHub Pages.
@@ -11,6 +11,18 @@
  */
 (function installSoftwareUpdateCenter(root){
   const APP_RELEASE_NOTES=Object.freeze([
+    Object.freeze({
+      version:'v62',
+      date:'6 de setembro de 2026',
+      title:'Fotografia do retalhista sem misturas',
+      items:Object.freeze([
+        'Nos resultados vivos do Pingo Doce e Continente deixa de ser mostrada qualquer fotografia aproximada de Open Facts ou de outra origem.',
+        'Cada cartão fica em placeholder até existir uma fotografia oficial validada para a mesma cadeia e para o mesmo pid/SKU.',
+        'O resolvedor legado de fallbacks deixa de poder substituir a fotografia dos cartões vivos do retalhista.',
+        'Ao adicionar um produto, uma imagem auxiliar eventualmente associada pelo matching textual é removida se a fotografia oficial não puder ser comprovada.',
+        'O botão da origem continua separado da fotografia: “Ver no Pingo Doce/Continente” abre a página da loja e a proveniência visual só é marcada quando a imagem é oficial.'
+      ])
+    }),
     Object.freeze({
       version:'v61',
       date:'6 de setembro de 2026',
@@ -194,7 +206,7 @@
       updateStatus='checking';updateMessage='';renderDialog();
       try{
         let registration=await navigator.serviceWorker.getRegistration();
-        if(!registration)registration=await navigator.serviceWorker.register('./sw.js?v=61',{updateViaCache:'none'});
+        if(!registration)registration=await navigator.serviceWorker.register('./sw.js?v=62',{updateViaCache:'none'});
         let updateFound=false;
         const onUpdateFound=()=>{updateFound=true;updateStatus='updating';renderDialog();};
         registration.addEventListener('updatefound',onUpdateFound,{once:true});

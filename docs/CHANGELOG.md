@@ -1,80 +1,83 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-06 — Bridge de imagens oficiais v61
+## 2026-09-06 — Fotografias official-only nos cartões vivos v62
 
 ### Problema confirmado
 
-Depois da publicação v60, a validação física em iPhone/Safari continuou a mostrar placeholders no ecrã **Adicionar produto**, mesmo em resultados com ligação do retalhista e apesar de o probe de CI conseguir localizar imagens oficiais.
+Depois da publicação v61, a validação física mostrou um novo defeito: alguns cartões apresentavam uma fotografia, mas essa fotografia podia vir de uma fonte auxiliar e não corresponder à imagem do mesmo produto na página oficial do Pingo Doce/Continente.
 
-A revisão do código encontrou uma falha real de integração entre módulos:
+A auditoria confirmou que existiam três pipelines em simultâneo:
 
-- `market-experience.js` renderiza `.market-result-source`, mas a camada v60 procurava `.market-product-source[href]`;
-- o botão real usa `[data-market-add-product]`, mas a camada v60 tentava interceptar `[data-market-add]`;
-- `resultById` e funções de catálogo estão dentro de um IIFE e não podiam ser substituídos externamente como a camada v60 pressupunha.
+- `market-experience.js` fazia enriquecimento inicial por Open Food Facts com matching textual;
+- `market-image-audit.js` mantinha fallbacks Open Food/Beauty/Products/Pet Facts;
+- `market-official-images.js` validava corretamente a imagem oficial por cadeia + `pid`, mas não impedia os dois mecanismos anteriores de preencher o cartão.
 
-Isto explicava a diferença entre “a fonte tem a imagem” e “o cartão real recebeu a imagem”.
+Logo, a v61 resolveu a integração oficial, mas não resolveu a **exclusividade da origem visual**.
 
-### Alterações
+### Alterações v62
 
-- criado `market-official-images.js` como bridge progressivo baseado nos seletores reais do Mercado;
-- cadeia e `pid` são obtidos de `data-market-product-card`;
-- `cesta.pt` continua a resolver a URL pública do SKU;
-- a página do produto é validada por cadeia e `pid` antes de qualquer leitura;
-- o reader `r.jina.ai` passa a ser chamado pelo novo bridge com GET CORS simples e apenas `Accept: application/json`;
-- a fotografia só é aceite quando pertence ao host/catálogo oficial e contém o `pid` exato;
-- antes de retirar o placeholder, o browser testa se a imagem efetivamente carrega;
-- resolução continua limitada a três tarefas simultâneas e é iniciada de forma progressiva com `IntersectionObserver`;
-- depois do clique real no `+`, a imagem resolvida é associada ao item criado e são persistidos `imageUrl`, `imageSource` e `imageMatchedAt`;
-- preços, quantidades e cálculos não foram alterados.
+- criado `market-retailer-image-policy.js`;
+- resultados vivos `cesta-(continente|pingo-doce)-<pid>` passam a ter política `official-only`;
+- cada cartão é marcado `data-market-image-audit="done"`, impedindo o fallback legado nesse contexto;
+- qualquer imagem existente é validada exclusivamente por `CDCOfficialMarketImages.safeOfficialImageUrl(url, marketId, pid)`;
+- imagem que não corresponda ao host/catálogo oficial e ao `pid` exato é retirada e substituída por placeholder;
+- `MutationObserver` vigia novos cartões e mudanças posteriores de `src`, impedindo que uma imagem auxiliar volte a ocupar a miniatura;
+- o bridge oficial v61 continua responsável por resolver a fotografia exata e é preservado quando a validação passa;
+- depois do clique real no `+`, uma imagem/metadados auxiliares são limpos quando não existe fotografia oficial segura;
+- `productCode` proveniente do mesmo matching visual auxiliar também é limpo nesse caso;
+- Open Facts não é removido globalmente: continua disponível para scanner/identificação e compatibilidade de outros contextos.
 
-### Sinalização corrigida
+### Sinalização
 
-O antigo texto genérico **Produto oficial** podia criar conflito visual quando aparecia ao lado de uma miniatura vazia.
+Mantém-se a separação semântica:
 
-Na v61 a camada de integração separa a semântica:
+- **Consultado agora** — estado temporal do catálogo/preço;
+- **Ver no Pingo Doce / Ver no Continente** — ação para abrir a página da loja;
+- **Pingo Doce · imagem oficial / Continente · imagem oficial** — proveniência apenas da fotografia validada.
 
-- **Consultado agora** — atualidade da consulta/preço;
-- **Ver no Pingo Doce** / **Ver no Continente** — ligação para a página do retalhista;
-- **Pingo Doce · imagem oficial** / **Continente · imagem oficial** — proveniência da fotografia validada no contexto da imagem.
-
-Se não houver fotografia comprovável para o SKU, o placeholder permanece, mas sem a sinalização ambígua.
+Se a imagem oficial não puder ser comprovada, fica placeholder. A aplicação deixa deliberadamente de usar uma imagem aproximada de outra fonte para “preencher” o cartão vivo.
 
 ### Segurança e privacidade
 
-- sem API keys ou Authorization;
-- `credentials:'omit'` e `referrerPolicy:'no-referrer'` mantidos;
-- reader recebe apenas uma URL pública previamente validada;
-- nenhum PIN, chave do cofre, token GitHub, fatura, saldo ou preço é enviado para obter a fotografia;
-- binários continuam fora do cofre;
-- falha da imagem não altera valores nem bloqueia a adição do produto.
+- a nova política não faz `fetch` e não acrescenta endpoints;
+- nenhuma API key, Authorization ou segredo;
+- bridge oficial mantém `credentials:'omit'` e `referrerPolicy:'no-referrer'`;
+- nenhum PIN, chave, token GitHub, fatura, saldo ou valor financeiro é enviado;
+- a correção não altera `estimatedCents`, `actualCents`, quantidade nem totais;
+- Open Facts permanece permitido na CSP para fluxos explicitamente existentes, mas a política v62 impede a sua utilização visual nos cartões vivos de retalhista.
 
 ### Build e distribuição
 
-- build passa a `v61`;
-- cache passa a `conta-de-casa-public-v61-official-images-bridge`;
-- `market-official-images.js` entra na allowlist de `scripts/prepare-pages.cjs` e do Service Worker;
-- `app-update.js` recebe **v61 — Imagens oficiais no browser real**;
-- CSP pública mantém apenas as origens necessárias já auditadas.
+- build passa a `v62`;
+- cache passa a `conta-de-casa-public-v62-retailer-official-only`;
+- `market-retailer-image-policy.js` entra na allowlist de Pages e Service Worker;
+- a composição pública carrega a política antes de `market-image-audit.js`;
+- Centro de Atualização recebe **v62 — Fotografia do retalhista sem misturas**;
+- CI passa também a executar `node --check market-retailer-image-policy.js`.
 
-### Testes e publicação
+### Testes
 
-Novo teste: `tests/market-official-images.test.cjs`.
+Foram alinhados testes de Mercado, imagens, auditoria/zoom, bridge oficial, ícones, atualização e responsividade. A cobertura exige explicitamente:
 
-Também foram alinhados testes de Mercado, imagens, Centro de Atualização, ícones e responsividade para v61.
+- `official-only` nos cartões vivos;
+- exclusão da auditoria/fallback legado;
+- remoção de imagem não oficial;
+- validação pelo mesmo `pid` através do bridge oficial;
+- limpeza de metadados visuais auxiliares após adicionar;
+- ordem correta dos scripts no bundle Pages;
+- cache/build v62.
 
-Validação concluída:
+CI funcional da branch `34008331898` — `success`.
 
-- CI funcional da branch `34002655320` — `success`;
-- CI do PR #33 `34002813980` — `success`;
-- PR #33 integrado em `main` no commit `7de15b501c0dadcf28f9e9c6c840075e53a3cc83`;
-- CI de `main` `34002863628` — `success`;
-- Deploy Pages `34002880947` — `success`.
+O probe do mesmo pipeline continuou a confirmar `exact-image=true` para os exemplos Continente `8167440` e Pingo Doce `739490`. A validação final permanece física: comparar no iPhone a miniatura apresentada com a página aberta por **Ver no Pingo Doce/Continente**.
 
-O probe executado no pipeline confirmou disponibilidade de `cesta.pt` e imagens exatas para os exemplos Continente `8167440` e Pingo Doce `739490`. Esta evidência confirma a fonte e o bridge está agora publicado; a validação visual final continua a exigir Safari/iPhone real, incluindo a pesquisa de ovos apresentada pelo utilizador.
+## 2026-09-06 — Bridge de imagens oficiais v61
+
+Depois da v60, a captura real em iPhone/Safari continuou com placeholders. A revisão confirmou seletores incorretos e tentativas de alterar funções privadas dentro de outro IIFE. A v61 criou `market-official-images.js`, baseado nos seletores reais, `pid` exato, reader CORS simples e validação do CDN oficial. PR #33 foi integrado em `main`; CI e Deploy Pages terminaram com sucesso. A validação física posterior revelou a concorrência com imagens auxiliares, tratada na v62.
 
 ## 2026-09-06 — Imagens oficiais e catálogo alargado v60
 
-A v60 introduziu prioridade por SKU oficial, validação de URL/imagem, `r.jina.ai` como reader restrito, catálogo alargado e build/cache próprios. Os probes externos passaram, mas a validação física posterior revelou que a integração com os cartões reais não estava corretamente ligada. A v61 mantém as regras de segurança da v60 e corrige essa fronteira de execução.
+A v60 introduziu prioridade por SKU oficial, validação de URL/imagem, `r.jina.ai` como reader restrito e catálogo alargado. Os probes externos passaram, mas a validação física revelou que a integração com os cartões reais não estava corretamente ligada.
 
 ## 2026-09-05 — Auditoria e ampliação v59
 

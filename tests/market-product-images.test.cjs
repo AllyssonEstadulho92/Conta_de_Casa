@@ -10,6 +10,7 @@ const index=fs.readFileSync('index.html','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const imageAudit=fs.readFileSync('market-image-audit.js','utf8');
 const officialBridge=fs.readFileSync('market-official-images.js','utf8');
+const retailerPolicy=fs.readFileSync('market-retailer-image-policy.js','utf8');
 
 assert.match(core,/function safeProductImageUrl/);
 assert.match(core,/url\.hostname\.toLowerCase\(\) !== 'images\.openfoodfacts\.org'/);
@@ -19,6 +20,8 @@ assert.match(core,/imageSource: cleanString\(i\.imageSource, 60\)/);
 assert.match(core,/ALLOWED_TAGS[^\n]*'img'/);
 assert.match(core,/tag === 'img' && !safeProductImageUrl/);
 
+// O lookup legado continua disponível para outros fluxos, mas v62 impede a sua exibição
+// nos cartões vivos Pingo Doce/Continente.
 assert.match(market,/OFF_IMAGE_SEARCH_URL='https:\/\/world\.openfoodfacts\.org\/cgi\/search\.pl'/);
 assert.match(market,/searchProductImages/);
 assert.match(market,/imageCandidateScore/);
@@ -48,6 +51,17 @@ assert.match(officialBridge,/Ver no \$\{label\}/);
 assert.match(officialBridge,/headers:\{Accept:'application\/json'\}/);
 assert.doesNotMatch(officialBridge,/headers:\{[^}]*['"]X-(?:With-Images-Summary|Retain-Images)/);
 
+assert.match(retailerPolicy,/política de imagem do retalhista \(v62\)/);
+assert.match(retailerPolicy,/card\.dataset\.marketImageAudit='done'/,'live retailer cards must opt out of the legacy fallback resolver');
+assert.match(retailerPolicy,/marketRetailerImagePolicy='official-only'/);
+assert.match(retailerPolicy,/CDCOfficialMarketImages\?\.safeOfficialImageUrl/,'only the exact official pid validator may approve a live-card image');
+assert.match(retailerPolicy,/photo\.replaceWith\(emptyPhoto\(\)\)/,'non-official live-card images must become placeholders');
+assert.match(retailerPolicy,/item\.imageUrl=''/,'non-official image metadata must be removed after add');
+assert.match(retailerPolicy,/item\.productCode=''/,'text-matched code from the same auxiliary candidate must not survive an unverified live result');
+assert.match(retailerPolicy,/\[data-market-add-product\]/);
+assert.match(retailerPolicy,/Ver no \$\{target\.label\}/);
+assert.doesNotMatch(retailerPolicy,/fetch\s*\(/,'policy layer must not add another external network source');
+
 assert.match(barcode,/image_front_small_url,image_front_url/);
 assert.match(barcode,/safeProductImageUrl\(product\.image_front_small_url\|\|product\.image_front_url/);
 assert.match(render,/function marketProductImageHtml/);
@@ -58,9 +72,10 @@ assert.match(css,/\.market-product-photo img/);
 assert.match(css,/object-fit:contain/);
 assert.match(css,/market-mobile-head::before\{content:none!important/);
 
-// index.html remains the stable source template; the Pages build expands CSP at v61.
+// index.html remains the stable source template; the Pages build expands CSP at v62.
 assert.match(index,/img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org;/);
-assert.match(sw,/conta-de-casa-public-v61-official-images-bridge/);
+assert.match(sw,/conta-de-casa-public-v62-retailer-official-only/);
+assert.match(sw,/\.\/market-retailer-image-policy\.js/);
 assert.match(sw,/\.\/market-official-images\.js/);
 
 console.log('Market real and official product image tests: OK');
