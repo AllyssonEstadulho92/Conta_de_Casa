@@ -41,6 +41,7 @@ jobs:
           node --check forms.js
           node --check events.js
           node --check sync.js
+          node --check sync-conflict-policy.js
           node --check market-experience.js
           node --check market-branding.js
           node --check market-barcode.js
@@ -74,6 +75,7 @@ jobs:
           node tests/navigation.test.cjs
           node tests/accessibility.test.cjs
           node tests/sync.test.cjs
+          node tests/sync-conflict-policy.test.cjs
           node tests/sync-runtime.test.cjs
           node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8')); console.log('Manifest OK')"
 
