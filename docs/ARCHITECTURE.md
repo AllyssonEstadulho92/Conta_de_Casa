@@ -1,8 +1,8 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 6 de setembro de 2026
-Build público atual: v62
-Candidato: v63 (`63-ui2`)
+Build público atual: v63
+Revisão visual pública: `63-ui2`
 
 ## Visão geral
 
@@ -128,19 +128,24 @@ Metadados históricos de imagem continuam tolerados para compatibilidade. `sync-
 
 ### Fluxo
 
-1. a aplicação v62/v63 regista o Service Worker;
+1. a aplicação regista o Service Worker;
 2. o Centro de Atualização consulta `release-manifest.json` com `cache: no-store`;
-3. se a versão pública for superior, a interface apresenta a atualização;
+3. se a versão pública for superior à instalada, a interface apresenta a atualização;
 4. `registration.update()` prepara o novo worker;
 5. o novo worker permanece `waiting` numa atualização normal;
-6. apenas após **Atualizar agora** é enviada a mensagem `APPLY_UPDATE` (com compatibilidade `SKIP_WAITING` para clientes anteriores);
-7. o worker ativa, elimina caches antigos, reclama os clientes e reinicia/navega a janela controlada.
+6. apenas após **Atualizar agora** é enviada a mensagem `APPLY_UPDATE`;
+7. `SKIP_WAITING` permanece como compatibilidade de transição com clientes v62;
+8. o worker ativa, elimina caches antigos, reclama os clientes e reinicia/navega a janela controlada.
 
 A instalação atua nos assets da aplicação e não executa migração/destruição do cofre.
 
+### Transição v62 → v63
+
+Como o manifesto e a instalação confirmada foram introduzidos na própria v63, uma sessão que ainda execute a v62 pode precisar de um fecho/reabertura ou refresh inicial para receber a v63. A partir da v63, versões posteriores seguem o fluxo explícito do Centro de Atualização.
+
 ### Cache e allowlist
 
-Cache candidato: `conta-de-casa-public-v63-ui2`.
+Cache público: `conta-de-casa-public-v63-ui2`.
 
 O Service Worker só trata recursos constantes em `PUBLIC_ASSET_SET`. Cache-busting aceita exatamente um parâmetro:
 
@@ -166,6 +171,8 @@ Safe areas, `100dvh`/`100svh`, foco visível, alvos tácteis e `prefers-reduced-
 
 ## Distribuição v63
 
+A composição pública atual foi integrada pelo PR #42 e publicada pelo GitHub Pages a partir do merge `1a034c84976c042e0433d016a5628feaa339a7a6`.
+
 `scripts/prepare-pages.cjs` prepara:
 
 - build `v63`;
@@ -175,4 +182,4 @@ Safe areas, `100dvh`/`100svh`, foco visível, alvos tácteis e `prefers-reduced-
 - `release-manifest.json`;
 - `ui-consistency.css` como último estilo de consolidação.
 
-A publicação em `main` só deve ocorrer com CI verde. A validação física no Safari/iPhone permanece necessária depois do Deploy GitHub Pages.
+A CI de `main` e o Deploy GitHub Pages desta revisão terminaram com sucesso. A validação física no Safari/iPhone continua necessária para confirmar o resultado renderizado no hardware real.
