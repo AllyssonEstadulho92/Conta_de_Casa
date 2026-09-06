@@ -104,7 +104,7 @@ A sincronização podia apresentar uma revisão com `0 diferenças` quando dois 
 Diferenças técnicas de imagem/código de barras são reconciliadas automaticamente e deixam de bloquear a sincronização. Nenhum valor financeiro é escolhido automaticamente.
 
 ## D-021 — A Lista de compras é agrupada por categoria sem alterar o modelo
-Data: 6 de setembro de 2026 · Estado: aceite.
+Data: 6 de setembro de 2026 · Estado: aceite e publicado.
 
 ### Contexto
 A validação física da lista mostrou que uma sequência longa de cartões individuais dificulta localizar produtos e repete a categoria em cada item. A informação já possui categoria estruturada, pelo que não é necessário alterar o schema para melhorar a organização.
@@ -125,3 +125,6 @@ A apresentação da Lista de compras passa a agrupar itens pela categoria já ex
 
 ### Consequência
 A lista fica mais previsível e rápida de consultar sem duplicar lógica de negócio nem alterar persistência. A mudança pode ser removida isoladamente sem migração de dados.
+
+### Publicação
+A decisão foi integrada em `main` através do PR #40, merge `98662aa366ea65316ebd47cf56df8f2a3eeac974`, com CI de `main` e Deploy GitHub Pages concluídos com sucesso.
