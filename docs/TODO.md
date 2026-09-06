@@ -1,37 +1,45 @@
 # TODO — Conta de Casa
 
-## P0 — imagens oficiais no browser real v61
+## P0 — cartões vivos com fotografia oficial exclusiva v62
 
-- [x] Rever a captura real do iPhone com placeholders após v60.
-- [x] Confirmar que o defeito não era apenas ausência de fotografia na fonte.
-- [x] Identificar os seletores reais dos cartões: `.market-result-source` e `[data-market-add-product]`.
-- [x] Confirmar que `resultById`/funções de catálogo de `market-experience.js` permanecem privadas dentro do IIFE.
-- [x] Remover da nova integração a dependência de reatribuição de funções privadas entre IIFEs.
-- [x] Criar `market-official-images.js` baseado no contrato real do DOM + `pid`.
-- [x] Resolver a página do SKU através do `cesta.pt` e validar cadeia/`pid`.
-- [x] Validar imagens oficiais Continente por host, catálogo e `pid` exato.
-- [x] Validar imagens oficiais Pingo Doce por host, pasta e `pid` exato.
-- [x] Testar carregamento real da fotografia antes de remover o placeholder.
-- [x] Manter máximo de três resoluções concorrentes e resolução progressiva por viewport.
-- [x] Persistir URL/origem/data da fotografia depois do fluxo real de adicionar produto.
-- [x] Não alterar `estimatedCents`, `actualCents`, quantidade ou qualquer cálculo financeiro.
-- [x] Usar GET CORS simples no reader, sem cabeçalhos personalizados de imagem no novo bridge.
-- [x] Alterar a sinalização da página do retalhista para **Ver no Pingo Doce / Ver no Continente**.
-- [x] Manter a proveniência da fotografia separada: **Pingo Doce · imagem oficial / Continente · imagem oficial**.
-- [x] Atualizar BUILD para v61, Service Worker, cache, Pages allowlist e Centro de Atualização.
-- [x] Adicionar `tests/market-official-images.test.cjs`.
-- [x] Alinhar testes de Mercado, imagens, atualização, ícones e responsividade com v61.
-- [x] Passar CI funcional completo da branch (`34002655320`) com `success`.
-- [x] Atualizar PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG para v61.
-- [x] Integrar `fix/market-official-images-v61` em `main` através do PR #33 (`7de15b501c0dadcf28f9e9c6c840075e53a3cc83`).
-- [x] Confirmar CI de `main` verde após integração (`34002863628`).
-- [x] Confirmar Deploy Pages v61 com sucesso (`34002880947`).
-- [ ] No iPhone/Safari, confirmar **Definições → Atualização de Software → v61**.
-- [ ] Repetir a pesquisa de ovos da captura e confirmar que o texto da loja é **Ver no Pingo Doce**.
-- [ ] Confirmar que SKUs com fotografia oficial identificável deixam o placeholder e permitem ampliação.
-- [ ] Confirmar que um SKU sem imagem oficial segura mantém placeholder sem mensagem enganadora.
+- [x] Rever o relato real após v61: fotografia apresentada não corresponde à imagem do site oficial.
+- [x] Confirmar no código que `market-experience.js` ainda pode enriquecer resultados vivos com Open Food Facts por semelhança textual.
+- [x] Confirmar que `market-image-audit.js` mantém fallbacks Open Food/Beauty/Products/Pet Facts.
+- [x] Confirmar que `market-official-images.js` valida corretamente cadeia + `pid`, mas não tinha exclusividade sobre os pipelines anteriores.
+- [x] Definir a regra: cartão vivo Pingo Doce/Continente só mostra imagem oficial do mesmo `pid`; caso contrário, placeholder.
+- [x] Criar `market-retailer-image-policy.js` sem nova fonte de rede.
+- [x] Excluir cartões vivos do fallback legado através de `data-market-image-audit="done"`.
+- [x] Validar imagens já presentes apenas por `CDCOfficialMarketImages.safeOfficialImageUrl`.
+- [x] Remover qualquer imagem não oficial/variante e restaurar placeholder.
+- [x] Vigiar alterações posteriores de `src` para impedir reintrodução de fallback.
+- [x] Manter **Ver no Pingo Doce / Ver no Continente** separado da proveniência da fotografia.
+- [x] Após adicionar, limpar metadados visuais auxiliares quando não existir imagem oficial segura.
+- [x] Preservar Open Facts para scanner/compatibilidade fora dos cartões vivos.
+- [x] Atualizar BUILD para v62, cache, Service Worker, Pages e Centro de Atualização.
+- [x] Incluir a nova política no syntax check da CI.
+- [x] Alinhar testes de Mercado, imagens, auditoria, ícones, atualização e responsividade com v62.
+- [x] Passar CI funcional completo da branch (`34008331898`) com `success`.
+- [x] Atualizar PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG para v62.
+- [ ] Integrar `fix/market-retailer-images-v62` em `main`.
+- [ ] Confirmar CI de `main` verde após integração.
+- [ ] Confirmar Deploy Pages v62 com sucesso.
+- [ ] No iPhone/Safari, confirmar **Definições → Atualização de Software → v62**.
+- [ ] Repetir a pesquisa que mostrou imagem errada e abrir **Ver no Pingo Doce/Continente** para comparar o mesmo SKU.
+- [ ] Confirmar que a miniatura corresponde à fotografia oficial do mesmo `pid`.
+- [ ] Confirmar que um SKU sem imagem oficial validável mantém placeholder, sem imagem aproximada.
 - [ ] Validar 320, 375, 390 e 430 px, retrato/paisagem.
-- [ ] Testar rede lenta, falha temporária do reader/CDN e offline; a falha de imagem não pode bloquear o produto.
+- [ ] Testar rede lenta, falha temporária do reader/CDN e offline; falha de imagem não pode bloquear o produto.
+
+## P0 — bridge oficial v61 concluído
+
+- [x] Identificar seletores reais `.market-result-source` e `[data-market-add-product]`.
+- [x] Criar `market-official-images.js` baseado no contrato real do DOM + `pid`.
+- [x] Resolver página do SKU via `cesta.pt` e validar cadeia/`pid`.
+- [x] Validar imagens oficiais Continente/Pingo Doce por host, catálogo e `pid` exato.
+- [x] Testar carregamento real antes de remover placeholder.
+- [x] Usar GET CORS simples no reader.
+- [x] Integrar PR #33 em `main` (`7de15b501c0dadcf28f9e9c6c840075e53a3cc83`).
+- [x] CI de `main` v61 (`34002863628`) e Deploy Pages (`34002880947`) concluídos com sucesso.
 
 ## P0 — regressões essenciais a manter
 
@@ -62,7 +70,7 @@
 - [ ] Monitorizar formato de `search_products` e presença de `pid`/URL oficial.
 - [ ] Monitorizar CORS/formato de `r.jina.ai`.
 - [ ] Monitorizar hosts e caminhos de CDN oficiais Continente/Pingo Doce.
-- [ ] Monitorizar Open Facts como fallback, sem baixar o limiar de confiança apenas para preencher cartões.
+- [ ] Manter Open Facts fora dos cartões vivos de retalhista; qualquer utilização futura nesse contexto exige decisão técnica explícita.
 - [ ] Testar amostra periódica de SKUs portugueses conhecidos, desconhecidos e variantes muito semelhantes.
 - [ ] Criar testes de browser real Safari/iOS quando existir infraestrutura adequada.
 
@@ -75,7 +83,7 @@
 
 ## P2 — manutenção
 
-- [ ] Depois de validar v61 em hardware real, avaliar consolidação de `market-image-audit.js` e `market-official-images.js` para remover compatibilidade legada v60 sem risco.
+- [ ] Depois de validar v62 em hardware real, consolidar `market-experience.js`, `market-image-audit.js`, `market-retailer-image-policy.js` e `market-official-images.js` para remover duplicação/compatibilidade legada sem regressão.
 - [ ] Remover progressivamente glifos Unicode antigos depois da validação Lucide.
 - [ ] Avaliar remoção gradual de CSS substituído pelo design system.
 - [ ] Avaliar OCR/PDF de faturas apenas com política explícita de confiança.
