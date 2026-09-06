@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v63-ui1';
+const CACHE = 'conta-de-casa-public-v63-ui2';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -12,6 +12,7 @@ const PUBLIC_ASSETS = [
   './market-category-groups.css',
   './market-barcode.css',
   './ui-icons.css',
+  './ui-consistency.css',
   './invoice-capture.css',
   './app-update.css',
   './market-image-audit.css',
