@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const index = fs.readFileSync('index.html','utf8');
 const css = fs.readFileSync('market-experience.css','utf8');
 const js = fs.readFileSync('market-experience.js','utf8');
+const imageAudit = fs.readFileSync('market-image-audit.js','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
 const pages = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const events = fs.readFileSync('events.js','utf8');
@@ -14,7 +15,7 @@ assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt https:\/\/world\.openfoodfacts\.org;/);
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
-assert.match(sw, /conta-de-casa-public-v59-product-images/);
+assert.match(sw, /conta-de-casa-public-v60-retailer-images/);
 
 for (const asset of ['market-experience.css','market-experience.js']) {
   assert.ok(sw.includes(`'./${asset}'`), `${asset} must be cached by the service worker`);
@@ -23,11 +24,11 @@ for (const asset of ['market-experience.css','market-experience.js']) {
 
 for (const market of ['Pingo Doce','Continente']) assert.ok(js.includes(market));
 assert.doesNotMatch(js,/Mercadona|Open Prices/i);
-assert.match(js,/https:\/\/world\.openfoodfacts\.org\/cgi\/search\.pl/,'Open Food Facts remains the first-pass product-image reference lookup');
+assert.match(js,/https:\/\/world\.openfoodfacts\.org\/cgi\/search\.pl/,'Open Food Facts remains the legacy first-pass reference lookup');
 assert.ok(js.includes("data-market-price-mode=\"live\""), 'market browser must explicitly use live/verified data mode');
 assert.ok(js.includes("https://cesta.pt/mcp"), 'Continente/Pingo Doce provider must be explicit');
 assert.ok(js.includes("name:'search_products'"), 'cesta MCP search tool must be used');
-assert.ok(js.includes("fotografia real de referência") && js.includes("Open Food Facts"), 'remote image-source privacy disclosure must be visible');
+assert.ok(js.includes("fotografia real de referência") && js.includes("Open Food Facts"), 'legacy remote image-source privacy disclosure must remain visible');
 assert.match(js, /estimatedCents:product\.priceCents/);
 assert.match(js, /sourceUrl=safeRetailerUrl/);
 assert.match(js, /data-market-source-url=/);
@@ -35,6 +36,12 @@ assert.match(js, /window\.open\(url,'_blank','noopener,noreferrer'\)/);
 assert.match(js, /actualCents:0,purchased:false/);
 assert.match(js, /cleanRemoteText/);
 assert.match(js, /esc\(product\.name\)/);
+
+// v60 extends the search without changing the existing event/UI contract.
+assert.match(imageAudit,/searchCatalogV60/);
+assert.match(imageAudit,/searchCestaProducts=searchCatalogV60/);
+assert.match(imageAudit,/limit:20/);
+assert.match(imageAudit,/MAX_CATALOG_RESULTS=40/);
 
 assert.doesNotMatch(js, /DEMO_PRODUCTS/);
 assert.doesNotMatch(js, /Protótipo visual/);
