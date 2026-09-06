@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v61-official-images-bridge';
+const CACHE = 'conta-de-casa-public-v62-retailer-official-only';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -24,6 +24,7 @@ const PUBLIC_ASSETS = [
   './ui-icons.js',
   './invoice-capture.js',
   './app-update.js',
+  './market-retailer-image-policy.js',
   './market-image-audit.js',
   './market-official-images.js',
   './manifest.webmanifest',
