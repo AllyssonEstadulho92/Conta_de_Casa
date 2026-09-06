@@ -107,12 +107,13 @@ assert.equal(
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/products/123/front.jpg'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/images/large/739490_test.jpg'),'');
 
-assert.match(sw,/conta-de-casa-public-v63-ui1/);
-for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js']){
+assert.match(sw,/conta-de-casa-public-v63-ui2/);
+for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','ui-consistency.css']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(prepare.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
 }
 assert.match(prepare,/const BUILD = 'v63'/);
+assert.match(prepare,/const VISUAL_REV = '63-ui2'/);
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -122,6 +123,7 @@ try{
   assert.match(index,/market-retailer-image-policy\.js\?v=63/);
   assert.match(index,/market-image-audit\.js\?v=63/);
   assert.match(index,/market-official-images\.js\?v=63/);
+  assert.match(index,/ui-consistency\.css\?v=63-ui2/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.match(index,/https:\/\/www\.continente\.pt/);
   assert.match(index,/https:\/\/static\.pingodoce\.pt/);
@@ -132,6 +134,7 @@ try{
   assert.ok(fs.existsSync(path.join(dist,'market-retailer-image-policy.js')));
   assert.ok(fs.existsSync(path.join(dist,'market-image-audit.js')));
   assert.ok(fs.existsSync(path.join(dist,'market-official-images.js')));
+  assert.ok(fs.existsSync(path.join(dist,'ui-consistency.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
