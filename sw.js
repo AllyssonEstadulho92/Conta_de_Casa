@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v62-retailer-official-only';
+const CACHE = 'conta-de-casa-public-v62-market-ui2';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -19,6 +19,7 @@ const PUBLIC_ASSETS = [
   './render.js',
   './forms.js',
   './sync.js',
+  './sync-conflict-policy.js',
   './events.js',
   './market-experience.js',
   './market-branding.js',

@@ -74,7 +74,7 @@ assert.match(css,/market-mobile-head::before\{content:none!important/);
 
 // index.html remains the stable source template; the Pages build expands CSP at v62.
 assert.match(index,/img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org;/);
-assert.match(sw,/conta-de-casa-public-v62-retailer-official-only/);
+assert.match(sw,/conta-de-casa-public-v62-market-ui2/);
 assert.match(sw,/\.\/market-retailer-image-policy\.js/);
 assert.match(sw,/\.\/market-official-images\.js/);
 

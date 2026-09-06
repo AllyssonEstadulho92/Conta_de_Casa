@@ -107,7 +107,7 @@ assert.equal(
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/products/123/front.jpg'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/images/large/739490_test.jpg'),'');
 
-assert.match(sw,/conta-de-casa-public-v62-retailer-official-only/);
+assert.match(sw,/conta-de-casa-public-v62-market-ui2/);
 for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(prepare.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);

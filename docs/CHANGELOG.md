@@ -1,5 +1,40 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-06 — Hotfix iPhone/Safari: cartões do Mercado e conflitos técnicos
+
+### Problemas confirmados em validação física
+
+- o browser de produtos podia mostrar uma grande área vazia à esquerda e comprimir todo o conteúdo textual à direita;
+- o estado de sincronização podia apresentar `Conflito` com `0 diferenças` quando apenas metadados auxiliares do Mercado divergiam entre dispositivos;
+- a cópia do aviso do browser continuava excessivamente longa e centrada no pipeline antigo de fotografia.
+
+### Correções
+
+- `market-brand.css` passa a fixar explicitamente o conteúdo textual na primeira coluna e o botão `+` na coluna de ação;
+- nome, embalagem/loja e estado/origem ficam à esquerda e o preço passa a uma coluna interna própria quando existe largura;
+- abaixo de 360 px o preço reflui para baixo do conteúdo para impedir compressão letra a letra;
+- estado, ligação da loja e preço deixam de permitir quebras internas destrutivas;
+- `market-branding.js` usa uma mensagem curta: “Mostramos produtos que correspondem pelo nome, embalagem, loja e preço. A fotografia é opcional.”;
+- criado `sync-conflict-policy.js` para classificar `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` como metadados técnicos na comparação de equivalência do Mercado;
+- diferenças financeiras/operacionais reais continuam a exigir revisão manual;
+- cache público renovado para `conta-de-casa-public-v62-market-ui2`;
+- `market-brand.css`, `market-branding.js` e `sync-conflict-policy.js` são publicados com revisão `62-ui2` para evitar assets antigos no Safari.
+
+### Testes
+
+- reforçado `tests/market-experience.test.cjs` com invariantes de Grid explícito e nova cópia;
+- criado `tests/sync-conflict-policy.test.cjs` para impedir regressão de `0 diferenças`;
+- atualizado `tests/app-update.test.cjs` para validar a composição pública `62-ui2`;
+- CI e Deploy Pages passam a validar sintaxe e comportamento da nova política.
+
+### Segurança e dados
+
+- nenhum cálculo financeiro foi alterado;
+- nenhum preço é escolhido automaticamente;
+- a política técnica não inclui `estimatedCents`, `actualCents`, quantidade, estado de compra ou datas financeiras;
+- PBKDF2, AES-GCM, IndexedDB, PIN e credenciais permanecem inalterados;
+- metadados antigos não são apagados.
+
 ## 2026-09-06 — Publicação validada da identidade visual do Mercado sem fotografias
 
 A revisão visual foi integrada em `main` através do PR #35 e publicada com sucesso no GitHub Pages.

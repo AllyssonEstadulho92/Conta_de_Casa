@@ -1,5 +1,26 @@
 # TODO — Conta de Casa
 
+## P0 — hotfix iPhone/Safari: Mercado e sincronização
+
+- [x] Reproduzir visualmente o cartão do browser com grande área vazia e texto comprimido à direita.
+- [x] Identificar o risco de auto-placement do Grid com o nó histórico de fotografia oculto.
+- [x] Fixar explicitamente `.market-product-copy` na coluna útil e `.market-add-product` na coluna da ação.
+- [x] Reorganizar internamente nome, embalagem/loja, estado/origem e preço.
+- [x] Adicionar reflow dedicado abaixo de 360 px.
+- [x] Impedir quebra destrutiva de estado, preço e ligação da loja.
+- [x] Reduzir o aviso do browser para uma cópia curta e coerente com a experiência text-first.
+- [x] Identificar a causa lógica do estado `Conflito / 0 diferenças`: metadados auxiliares fora dos campos de negócio visíveis.
+- [x] Criar `sync-conflict-policy.js` para tratar `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` como diferenças técnicas.
+- [x] Garantir que preço, quantidade, estado de compra e restantes campos financeiros continuam a gerar conflitos reais.
+- [x] Renovar o cache público para `conta-de-casa-public-v62-market-ui2` e usar revisão `62-ui2` nos assets alterados.
+- [x] Adicionar testes de regressão do layout e da política de conflitos.
+- [ ] Executar CI completa da branch.
+- [ ] Rever diff final do PR.
+- [ ] Integrar em `main` apenas com CI verde.
+- [ ] Confirmar Deploy Pages com sucesso.
+- [ ] Validar novamente em iPhone/Safari 320, 375, 390 e 430 px.
+- [ ] Confirmar que um conflito técnico antigo desaparece após “Comparar novamente”/nova sincronização.
+
 ## P0 — identidade visual do Mercado sem fotografias
 
 - [x] Confirmar a decisão de produto: o nome correspondente é suficiente; fotografias de produto deixam de ser requisito da interface.
@@ -13,15 +34,9 @@
 - [x] Criar `market-branding.js` para tornar a informação de origem coerente com a experiência sem fotografias.
 - [x] Garantir que a camada de branding não acede ao estado financeiro.
 - [x] Incluir os novos assets no bundle GitHub Pages e no Service Worker.
-- [x] Alargar `tests/market-experience.test.cjs` para cobrir a nova apresentação.
-- [x] Executar CI completa da branch.
-- [x] Rever o diff final do PR.
-- [x] Integrar em `main` apenas com CI verde.
-- [x] Confirmar Deploy Pages com sucesso.
-- [x] Reforçar a CI para validar explicitamente `market-branding.js` antes da publicação.
-- [ ] Validar fisicamente em iPhone/Safari nas larguras 320, 375, 390 e 430 px.
-- [ ] Validar tema claro/escuro, retrato/paisagem e navegação inferior.
-- [ ] Confirmar em hardware real que não existe qualquer área vazia reservada a fotografia na lista ou pesquisa.
+- [x] Alargar `tests/market-experience.test.cjs` para cobrir a apresentação.
+- [x] Executar CI e publicar a primeira revisão.
+- [ ] Concluir validação física após o hotfix atual.
 
 ## P0 — regressões essenciais a manter
 

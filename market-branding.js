@@ -6,19 +6,14 @@
  */
 (function installMarketBranding(){
   const NOTICE_SELECTOR='#formDialog[data-mode="market-browser"] .market-source-notice p';
+  const NOTICE_COPY='Mostramos produtos que correspondem pelo nome, embalagem, loja e preço. A fotografia é opcional.';
 
   function updateNotice(root=document){
     const notices=root.querySelectorAll?.(NOTICE_SELECTOR)||[];
     notices.forEach(notice=>{
-      if(notice.dataset.marketBrandCopy==='1')return;
-      notice.replaceChildren();
-      const strong=document.createElement('strong');
-      strong.textContent='Pesquisa em dois mercados. ';
-      notice.append(
-        strong,
-        document.createTextNode('Pingo Doce e Continente são consultados no momento através de cesta.pt. Os resultados são apresentados pelo nome, embalagem, loja e preço; a interface não depende de fotografias de produto.')
-      );
-      notice.dataset.marketBrandCopy='1';
+      if(notice.dataset.marketBrandCopy==='2'&&notice.textContent.trim()===NOTICE_COPY)return;
+      notice.replaceChildren(document.createTextNode(NOTICE_COPY));
+      notice.dataset.marketBrandCopy='2';
     });
   }
 
