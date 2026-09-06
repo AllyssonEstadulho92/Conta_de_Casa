@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "channel": "stable",
+  "latestVersion": "v63",
+  "publishedAt": "2026-09-06",
+  "releases": [
+    {
+      "version": "v63",
+      "date": "6 de setembro de 2026",
+      "title": "Compras organizadas e atualizações controladas",
+      "items": [
+        "A Lista de compras passa a ficar organizada por categoria, com grupos recolhíveis em telemóvel e separadores de categoria no computador.",
+        "O conteúdo dos produtos fica alinhado de forma consistente à esquerda: nome, quantidade, estado, valores e ações passam a seguir a mesma margem visual.",
+        "A categoria Mercearia / Despensa deixa de usar o ícone de carrinho e passa a usar um símbolo local mais neutro de organização/despensa.",
+        "O Centro de Atualização passa a consultar este histórico de versões da própria aplicação e a indicar claramente quando existe uma versão nova.",
+        "Ao carregar em Atualizar agora, a nova versão é instalada pelo Service Worker e a aplicação reinicia para concluir a atualização.",
+        "O histórico de alterações de cada versão fica registado em release-manifest.json e no controlo de versões do projeto.",
+        "A atualização não altera nem apaga o cofre, PIN, faturas, compras ou restantes dados financeiros locais."
+      ]
+    },
+    {
+      "version": "v62",
+      "date": "6 de setembro de 2026",
+      "title": "Mercado text-first e correções no iPhone",
+      "items": [
+        "As fotografias de produto deixaram de ocupar espaço na experiência principal do Mercado; nome, embalagem, loja e preço passam a ser a identificação principal.",
+        "Foi corrigida a coluna fantasma que comprimira os resultados do browser do Mercado no Safari/iPhone.",
+        "Metadados técnicos antigos de imagem e código de barras deixam de gerar conflitos manuais de sincronização com zero diferenças financeiras.",
+        "A identidade visual do módulo Compras foi consolidada com hierarquia, espaçamentos, estados financeiros e navegação móvel mais consistentes."
+      ]
+    },
+    {
+      "version": "v61",
+      "date": "6 de setembro de 2026",
+      "title": "Imagens oficiais no browser real",
+      "items": [
+        "Corrigida a integração entre os cartões reais do Mercado e o resolvedor de fotografias oficiais.",
+        "A imagem oficial passou a ser associada pelo identificador exato do produto devolvido pelo catálogo.",
+        "A leitura da página oficial passou a usar pedidos compatíveis com Safari e a origem do produto ficou separada da origem visual."
+      ]
+    },
+    {
+      "version": "v60",
+      "date": "6 de setembro de 2026",
+      "title": "Imagens oficiais e catálogo alargado",
+      "items": [
+        "As fotografias passaram a dar prioridade ao SKU exato das páginas oficiais do Continente e Pingo Doce.",
+        "A pesquisa do Mercado passou a solicitar mais resultados por cadeia e a validar a ligação oficial antes de aceitar uma imagem."
+      ]
+    },
+    {
+      "version": "v59",
+      "date": "5 de setembro de 2026",
+      "title": "Imagens de produto e ampliação",
+      "items": [
+        "As miniaturas de produto passaram a permitir ampliação ao toque ou clique.",
+        "Produtos sem fotografia passaram a usar correspondência assistida por nome, embalagem e, quando existente, código de barras."
+      ]
+    },
+    {
+      "version": "v58",
+      "date": "5 de setembro de 2026",
+      "title": "Centro de Atualização de Software",
+      "items": [
+        "Foi criado o ecrã Atualização de Software nas Definições.",
+        "A aplicação passou a poder verificar a versão pública através do Service Worker same-origin.",
+        "As notas das versões passaram a ficar disponíveis em Mais detalhes."
+      ]
+    }
+  ]
+}
