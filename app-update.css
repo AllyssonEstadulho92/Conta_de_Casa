@@ -1,4 +1,4 @@
-/* Conta de Casa — Centro de Atualização de Software v58 */
+/* Conta de Casa — Centro de Atualização de Software v63 */
 
 .settings-software-update-block{
   margin:22px 0;
@@ -197,6 +197,11 @@
 .software-update-status.checking .software-update-status-icon{
   background:#d9eaff;
   color:#0a84ff;
+}
+
+.software-update-status.available .software-update-status-icon{
+  background:#dff6e7;
+  color:#16723a;
 }
 
 .software-update-status.warning .software-update-status-icon{
@@ -402,6 +407,11 @@ html[data-theme="dark"] .software-update-status-icon{
 html[data-theme="dark"] .software-update-status.checking .software-update-status-icon{
   background:#12304f;
   color:#64a9ff;
+}
+
+html[data-theme="dark"] .software-update-status.available .software-update-status-icon{
+  background:#123c24;
+  color:#7cdea0;
 }
 
 html[data-theme="dark"] .software-update-status.warning .software-update-status-icon{
