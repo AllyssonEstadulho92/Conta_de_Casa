@@ -1,5 +1,24 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-06 — Publicação validada da identidade visual do Mercado sem fotografias
+
+A revisão visual foi integrada em `main` através do PR #35 e publicada com sucesso no GitHub Pages.
+
+### Publicação
+
+- PR #35 — `UI: identidade visual do Mercado sem fotografias` — integrado com CI verde;
+- merge funcional: `2411a2e5ca30597d7fc5c04a50833fe63aff1042`;
+- CI de `main` após o merge: sucesso;
+- Deploy Pages: sucesso;
+- PR #36 — reforço da validação de sintaxe da camada `market-branding.js` — integrado com CI verde;
+- merge de qualidade: `03cf7f7a07cb28554ddf3ed37dd08c00257acf2e`;
+- CI final de `main`: sucesso;
+- Deploy Pages final: sucesso.
+
+A validação automática incluiu fontes do Mercado, sintaxe, finanças, isolamento do cofre, datas, faturas, Mercado, código de barras, contabilização, segurança, responsividade, viewport móvel, navegação, acessibilidade, sincronização e manifest.
+
+A validação física em iPhone/Safari permanece como próximo passo e não é substituída pela CI.
+
 ## 2026-09-06 — Identidade visual do Mercado sem fotografias
 
 ### Decisão de produto
