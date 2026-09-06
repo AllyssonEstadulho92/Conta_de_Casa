@@ -4,7 +4,8 @@ const fs = require('node:fs');
 const legacyCss = fs.readFileSync('styles.css','utf8');
 const designCss = fs.readFileSync('design-system.css','utf8');
 const consistencyCss = fs.readFileSync('ui-consistency.css','utf8');
-const css = `${legacyCss}\n${designCss}\n${consistencyCss}`;
+const runtimeCss = fs.readFileSync('v64-runtime.css','utf8');
+const css = `${legacyCss}\n${designCss}\n${consistencyCss}\n${runtimeCss}`;
 const events = fs.readFileSync('events.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 const render = fs.readFileSync('render.js','utf8');
@@ -18,6 +19,8 @@ assert.match(designCss, /@media\(min-width:821px\) and \(max-width:1180px\)/);
 assert.match(designCss, /@media\(max-width:820px\)/);
 assert.match(designCss, /@media\(max-width:359px\)/);
 assert.match(designCss, /--mobile-top-safe:max\(12px,env\(safe-area-inset-top\)\)/);
+assert.match(runtimeCss, /--mobile-top-safe:max\(20px,calc\(env\(safe-area-inset-top,0px\) \+ 8px\)\)/,'v64 must override the historical mobile top gap with a touch-safe minimum');
+assert.match(runtimeCss, /--header-height:calc\(112px \+ var\(--mobile-top-safe\)\)/);
 assert.match(designCss, /\.mobile-menu-btn\{[\s\S]*width:48px;[\s\S]*height:48px;[\s\S]*touch-action:manipulation/);
 assert.match(designCss, /\.btn\.primary\.topbar-create\{[\s\S]*width:48px;[\s\S]*background:transparent;[\s\S]*place-items:center/);
 assert.match(designCss, /\.btn\.primary\.topbar-create>span:first-child\{[\s\S]*width:36px;[\s\S]*height:36px;[\s\S]*font-size:1\.25rem/);
@@ -116,21 +119,21 @@ assert.match(index, /styles\.css\?v=53/);
 assert.match(index, /design-system\.css\?v=53/);
 assert.match(index, /market-experience\.css\?v=53/);
 assert.match(index, /manifest\.webmanifest\?v=53/);
-for (const asset of ['core','finance','render','forms','sync','events']) {
-  assert.match(index,new RegExp(`${asset}\\.js\\?v=53`));
-}
+for (const asset of ['core','finance','render','forms','sync','events']) assert.match(index,new RegExp(`${asset}\\.js\\?v=53`));
 assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
-// Source HTML remains at its stable template revision. The Pages build stamps v63;
-// the final visual layer is cached separately as ui2.
+// Source HTML remains at its stable template revision. The Pages build stamps v64;
+// runtime1 carries the safe-area and monthly-cycle behavior.
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v63-ui2/);
+assert.match(swSource, /conta-de-casa-public-v64-runtime1/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /'\.\/market-experience\.css'/);
 assert.match(swSource, /'\.\/market-experience\.js'/);
 assert.match(swSource, /'\.\/ui-consistency\.css'/);
+assert.match(swSource, /'\.\/v64-runtime\.css'/);
+assert.match(swSource, /'\.\/v64-runtime\.js'/);
 assert.match(swSource, /'\.\/app-update\.css'/);
 assert.match(swSource, /'\.\/app-update\.js'/);
 assert.match(swSource, /'\.\/market-image-audit\.css'/);
@@ -140,4 +143,4 @@ assert.match(swSource, /'\.\/market-official-images\.js'/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
 assert.match(swSource, /url\.searchParams\.has\('ts'\)/);
 
-console.log('Responsive mobile-fit shell, PIN entry, single active indicator and GitHub Pages freshness tests: OK');
+console.log('Responsive mobile-fit shell, v64 safe area, PIN entry, single active indicator and GitHub Pages freshness tests: OK');
