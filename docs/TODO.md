@@ -20,9 +20,9 @@
 - [x] Passar CI funcional completo da branch (`34001300466`) com probe real dos dois SKUs e todas as regressões verdes.
 - [x] Atualizar PROJECT_STATE, ARCHITECTURE e DECISIONS para v60.
 - [x] Atualizar TODO e CHANGELOG para v60.
-- [ ] Integrar `fix/retailer-product-images-v60` em `main`.
-- [ ] Confirmar CI de `main` verde após integração.
-- [ ] Confirmar Deploy Pages v60 com sucesso.
+- [x] Integrar `fix/retailer-product-images-v60` em `main` através do PR #32.
+- [x] Confirmar CI de `main` verde após integração (`34001564991`).
+- [x] Confirmar Deploy Pages v60 com sucesso (`34001581207`).
 - [ ] No iPhone/Safari, confirmar **Definições → Atualização de Software → v60**.
 - [ ] Pesquisar o Continente `8167440` e confirmar miniatura oficial + ampliação.
 - [ ] Pesquisar o Pingo Doce `739490` e confirmar miniatura oficial + ampliação.
