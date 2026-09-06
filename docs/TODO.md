@@ -14,13 +14,14 @@
 - [x] Garantir que a camada de branding não acede ao estado financeiro.
 - [x] Incluir os novos assets no bundle GitHub Pages e no Service Worker.
 - [x] Alargar `tests/market-experience.test.cjs` para cobrir a nova apresentação.
-- [ ] Executar CI completa da branch.
-- [ ] Rever o diff final do PR.
-- [ ] Integrar em `main` apenas com CI verde.
-- [ ] Confirmar Deploy Pages com sucesso.
+- [x] Executar CI completa da branch.
+- [x] Rever o diff final do PR.
+- [x] Integrar em `main` apenas com CI verde.
+- [x] Confirmar Deploy Pages com sucesso.
+- [x] Reforçar a CI para validar explicitamente `market-branding.js` antes da publicação.
 - [ ] Validar fisicamente em iPhone/Safari nas larguras 320, 375, 390 e 430 px.
 - [ ] Validar tema claro/escuro, retrato/paisagem e navegação inferior.
-- [ ] Confirmar que não existe qualquer área vazia reservada a fotografia na lista ou pesquisa.
+- [ ] Confirmar em hardware real que não existe qualquer área vazia reservada a fotografia na lista ou pesquisa.
 
 ## P0 — regressões essenciais a manter
 
