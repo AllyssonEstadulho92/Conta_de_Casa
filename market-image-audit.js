@@ -99,7 +99,7 @@
         if(!path.includes('/Sites-pingo-doce-master/'))return '';
         if(!/\/images\/(?:large|medium|small)\//i.test(path))return '';
         if(!/\.(?:jpe?g|png|webp)$/i.test(path))return '';
-        if(id&&!new RegExp(`/${id}[_\-.]`).test(path))return '';
+        if(id&&!path.split('/').some(segment=>segment.startsWith(`${id}_`)||segment.startsWith(`${id}-`)||segment.startsWith(`${id}.`)))return '';
         return url.href.slice(0,1000);
       }
       return '';
