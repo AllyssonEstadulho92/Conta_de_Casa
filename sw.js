@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v62-market-ui3';
+const CACHE = 'conta-de-casa-public-v62-market-ui2-category-ui3';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
