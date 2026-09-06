@@ -34,15 +34,18 @@ assert.match(css,/\.market-category-items \.market-mobile-actions\{[\s\S]*justif
 assert.match(css,/market-mobile-card:not\(\.purchased\)[\s\S]*nth-child\(2\)/,'pending rows must remove redundant duplicate finance blocks');
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-assert.match(sw,/conta-de-casa-public-v63-ui1/);
+assert.match(sw,/conta-de-casa-public-v63-ui2/);
 assert.ok(sw.includes("'./market-category-groups.css'"));
 assert.ok(sw.includes("'./market-category-groups.js'"));
+assert.ok(sw.includes("'./ui-consistency.css'"));
 assert.ok(sw.includes("'./release-manifest.json'"));
 assert.match(prepare,/const BUILD = 'v63'/);
 assert.match(prepare,/const UI_REV = '63-ui1'/);
 assert.match(prepare,/const CATEGORY_REV = '63-ui1'/);
+assert.match(prepare,/const VISUAL_REV = '63-ui2'/);
 assert.ok(prepare.includes("'market-category-groups.css'"));
 assert.ok(prepare.includes("'market-category-groups.js'"));
+assert.ok(prepare.includes("'ui-consistency.css'"));
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -52,10 +55,13 @@ try{
   assert.match(index,/market-branding\.js\?v=63-ui1/);
   assert.match(index,/market-category-groups\.css\?v=63-ui1/);
   assert.match(index,/market-category-groups\.js\?v=63-ui1/);
+  assert.match(index,/ui-consistency\.css\?v=63-ui2/);
   assert.ok(index.indexOf('market-brand.css')<index.indexOf('market-category-groups.css'),'category CSS must load after market branding');
+  assert.ok(index.indexOf('market-category-groups.css')<index.indexOf('ui-consistency.css'),'global visual normalization must load after category styling');
   assert.ok(index.indexOf('market-branding.js')<index.indexOf('market-category-groups.js'),'category grouping must load after market branding');
   assert.ok(fs.existsSync(path.join(dist,'market-category-groups.css')));
   assert.ok(fs.existsSync(path.join(dist,'market-category-groups.js')));
+  assert.ok(fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(fs.existsSync(path.join(dist,'release-manifest.json')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
