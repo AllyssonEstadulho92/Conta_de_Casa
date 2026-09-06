@@ -1,11 +1,9 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 6 de setembro de 2026
-Build público confirmado: v60
-Build em validação: v61
+Build público confirmado: v61
 Distribuição: GitHub Pages
-Branch: `fix/market-official-images-v61`
-Estado: correção funcional v61 implementada; CI da branch `34002655320` terminou com `success`; integração em `main`, Deploy Pages e validação física no iPhone ainda pendentes.
+Estado: **v61 integrada e publicada**. PR #33 fundido em `main`; commit funcional `7de15b501c0dadcf28f9e9c6c840075e53a3cc83`; CI de `main` `34002863628` terminou com `success`; Deploy Pages `34002880947` terminou com `success`. Falta validação física no iPhone/Safari da pesquisa apresentada pelo utilizador.
 
 ## Estado atual
 
@@ -61,27 +59,34 @@ Se não for possível provar que a fotografia pertence ao `pid` exato, o placeho
 - nenhum PIN, chave do cofre, fatura, saldo ou outro dado financeiro é enviado para resolver fotografias;
 - binários continuam fora do cofre.
 
-## Build e testes
+## Build, testes e publicação
 
 Build: `v61`.
 Cache: `conta-de-casa-public-v61-official-images-bridge`.
 Novo asset público: `market-official-images.js`.
 
-CI da branch `34002655320`: `success`.
+Validação:
 
-Passaram: probe das fontes reais, sintaxe, finanças, auditoria, isolamento do cofre, faturas/QR, Mercado, imagens reais, auditoria/zoom, novo teste do bridge browser, scanner, contabilização, ícones, atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade, sincronização e manifest.
+- CI funcional da branch: `34002655320` — `success`;
+- CI do PR #33: `34002813980` — `success`;
+- merge em `main`: `7de15b501c0dadcf28f9e9c6c840075e53a3cc83`;
+- CI de `main`: `34002863628` — `success`;
+- Deploy Pages v61: `34002880947` — `success`.
+
+Passaram: probe das fontes reais, sintaxe, finanças, auditoria, isolamento do cofre, faturas/QR, Mercado, imagens reais, auditoria/zoom, novo teste do bridge browser, scanner, contabilização, ícones, atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade, sincronização, manifest e composição/publicação Pages.
 
 ## Limitações conhecidas
 
 A v61 corrige o defeito de integração confirmado, mas não pode garantir fotografia para todo o catálogo. Um SKU pode continuar sem imagem quando a própria página não expõe uma imagem identificável, o `pid` não coincide, o CDN/reader está indisponível ou a imagem falha ao carregar. Nesses casos a aplicação não deve inventar uma fotografia.
 
-A validação automatizada não substitui o teste físico no Safari/iPhone.
+A validação automatizada e o deploy não substituem o teste físico no Safari/iPhone.
 
 ## Próximo passo
 
-1. integrar a branch v61 em `main` mantendo CI verde;
-2. confirmar CI de `main` e Deploy Pages v61;
-3. no iPhone, atualizar para v61 e repetir a pesquisa de ovos da captura;
-4. confirmar que o texto da loja aparece como **Ver no Pingo Doce/Continente** e não como “Produto oficial” junto de um placeholder;
-5. confirmar fotografia + ampliação para SKUs que tenham imagem oficial validável;
-6. validar 320, 375, 390 e 430 px, rede móvel e comportamento offline/falha da origem.
+1. no iPhone, abrir **Definições → Atualização de Software** e confirmar `v61`;
+2. fechar/reabrir a aplicação ou a PWA após a atualização;
+3. repetir a pesquisa de ovos da captura;
+4. confirmar que o texto da loja aparece como **Ver no Pingo Doce** e não como “Produto oficial” junto de um placeholder;
+5. confirmar fotografia + ampliação nos SKUs que tenham imagem oficial validável;
+6. confirmar que um SKU sem imagem segura mantém placeholder sem sinalização enganadora;
+7. validar 320, 375, 390 e 430 px, rede móvel e comportamento offline/falha da origem.

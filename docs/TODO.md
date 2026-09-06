@@ -23,9 +23,9 @@
 - [x] Alinhar testes de Mercado, imagens, atualização, ícones e responsividade com v61.
 - [x] Passar CI funcional completo da branch (`34002655320`) com `success`.
 - [x] Atualizar PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG para v61.
-- [ ] Integrar `fix/market-official-images-v61` em `main`.
-- [ ] Confirmar CI de `main` verde após integração.
-- [ ] Confirmar Deploy Pages v61 com sucesso.
+- [x] Integrar `fix/market-official-images-v61` em `main` através do PR #33 (`7de15b501c0dadcf28f9e9c6c840075e53a3cc83`).
+- [x] Confirmar CI de `main` verde após integração (`34002863628`).
+- [x] Confirmar Deploy Pages v61 com sucesso (`34002880947`).
 - [ ] No iPhone/Safari, confirmar **Definições → Atualização de Software → v61**.
 - [ ] Repetir a pesquisa de ovos da captura e confirmar que o texto da loja é **Ver no Pingo Doce**.
 - [ ] Confirmar que SKUs com fotografia oficial identificável deixam o placeholder e permitem ampliação.

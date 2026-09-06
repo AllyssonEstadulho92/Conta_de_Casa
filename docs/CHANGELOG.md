@@ -56,15 +56,21 @@ Se não houver fotografia comprovável para o SKU, o placeholder permanece, mas 
 - `app-update.js` recebe **v61 — Imagens oficiais no browser real**;
 - CSP pública mantém apenas as origens necessárias já auditadas.
 
-### Testes
+### Testes e publicação
 
 Novo teste: `tests/market-official-images.test.cjs`.
 
 Também foram alinhados testes de Mercado, imagens, Centro de Atualização, ícones e responsividade para v61.
 
-CI funcional da branch: `34002655320` — `success`.
+Validação concluída:
 
-O probe executado no mesmo pipeline confirmou disponibilidade de `cesta.pt` e imagens exatas para os exemplos Continente `8167440` e Pingo Doce `739490`. Esta evidência confirma a fonte, mas a validação final do comportamento visual continua a exigir Safari/iPhone real.
+- CI funcional da branch `34002655320` — `success`;
+- CI do PR #33 `34002813980` — `success`;
+- PR #33 integrado em `main` no commit `7de15b501c0dadcf28f9e9c6c840075e53a3cc83`;
+- CI de `main` `34002863628` — `success`;
+- Deploy Pages `34002880947` — `success`.
+
+O probe executado no pipeline confirmou disponibilidade de `cesta.pt` e imagens exatas para os exemplos Continente `8167440` e Pingo Doce `739490`. Esta evidência confirma a fonte e o bridge está agora publicado; a validação visual final continua a exigir Safari/iPhone real, incluindo a pesquisa de ovos apresentada pelo utilizador.
 
 ## 2026-09-06 — Imagens oficiais e catálogo alargado v60
 
