@@ -42,8 +42,7 @@ assert.match(js,/showModal\(\)/);
 assert.match(js,/marketProductImageViewer/);
 assert.match(js,/schedulePersist/,'resolved images for saved items should be persisted');
 assert.match(js,/item\.imageUrl=result\.imageUrl/);
-assert.match(js,/stopImmediatePropagation/,'add action must wait for the official image handoff when possible');
-assert.match(js,/searchCestaProducts=searchCatalogV60/,'existing Mercado search contract must be extended without restructuring events');
+assert.match(js,/stopImmediatePropagation/,'legacy handoff remains covered; v61 adds the real browser contract bridge');
 
 assert.match(css,/market-product-photo-button/);
 assert.match(css,/cursor:zoom-in/);
@@ -101,19 +100,20 @@ assert.equal(
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/products/123/front.jpg'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/images/large/739490_test.jpg'),'');
 
-assert.match(sw,/conta-de-casa-public-v60-retailer-images/);
-for(const asset of ['market-image-audit.css','market-image-audit.js']){
+assert.match(sw,/conta-de-casa-public-v61-official-images-bridge/);
+for(const asset of ['market-image-audit.css','market-image-audit.js','market-official-images.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(prepare.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
 }
-assert.match(prepare,/const BUILD = 'v60'/);
+assert.match(prepare,/const BUILD = 'v61'/);
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-image-audit\.css\?v=60/);
-  assert.match(index,/market-image-audit\.js\?v=60/);
+  assert.match(index,/market-image-audit\.css\?v=61/);
+  assert.match(index,/market-image-audit\.js\?v=61/);
+  assert.match(index,/market-official-images\.js\?v=61/);
   assert.match(index,/https:\/\/www\.continente\.pt/);
   assert.match(index,/https:\/\/static\.pingodoce\.pt/);
   assert.match(index,/https:\/\/r\.jina\.ai/);
@@ -121,6 +121,7 @@ try{
   assert.match(index,/https:\/\/world\.openproductsfacts\.org/);
   assert.ok(fs.existsSync(path.join(dist,'market-image-audit.css')));
   assert.ok(fs.existsSync(path.join(dist,'market-image-audit.js')));
+  assert.ok(fs.existsSync(path.join(dist,'market-official-images.js')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }

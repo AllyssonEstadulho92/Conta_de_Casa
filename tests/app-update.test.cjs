@@ -18,8 +18,8 @@ assert.match(updateJs, /Atualizações Automáticas/);
 assert.match(updateJs, /Atualizações Beta/);
 assert.match(updateJs, /Mais detalhes/);
 assert.match(updateJs, /APP_RELEASE_NOTES/);
-assert.match(updateJs, /version:'v60'/);
-assert.match(updateJs, /Imagens oficiais e catálogo alargado/);
+assert.match(updateJs, /version:'v61'/);
+assert.match(updateJs, /Imagens oficiais no browser real/);
 assert.match(updateJs, /navigator\.serviceWorker\.getRegistration/);
 assert.match(updateJs, /registration\.update\(\)/);
 assert.match(updateJs, /SKIP_WAITING/);
@@ -31,30 +31,33 @@ assert.match(updateCss, /safe-area-inset-bottom/);
 assert.match(updateCss, /html\[data-theme="dark"\]/);
 assert.match(updateCss, /prefers-reduced-motion/);
 
-assert.match(sw, /conta-de-casa-public-v60-retailer-images/);
+assert.match(sw, /conta-de-casa-public-v61-official-images-bridge/);
 assert.match(sw, /\.\/app-update\.css/);
 assert.match(sw, /\.\/app-update\.js/);
+assert.match(sw, /\.\/market-official-images\.js/);
 assert.match(sw, /SKIP_WAITING/);
 
-assert.match(prepare, /const BUILD = 'v60'/);
+assert.match(prepare, /const BUILD = 'v61'/);
 assert.match(prepare, /'app-update\.css'/);
 assert.match(prepare, /'app-update\.js'/);
 assert.match(prepare, /'market-image-audit\.css'/);
 assert.match(prepare, /'market-image-audit\.js'/);
+assert.match(prepare, /'market-official-images\.js'/);
 
 const dist = path.join(ROOT, 'dist');
 try {
   execFileSync(process.execPath, ['scripts/prepare-pages.cjs'], { cwd: ROOT, stdio: 'pipe' });
   const index = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
   const events = fs.readFileSync(path.join(dist, 'events.js'), 'utf8');
-  assert.match(index, /<meta name="app-build" content="v60"/);
-  assert.match(index, /app-update\.css\?v=60/);
-  assert.match(index, /app-update\.js\?v=60/);
-  assert.match(index, /market-image-audit\.css\?v=60/);
-  assert.match(index, /market-image-audit\.js\?v=60/);
+  assert.match(index, /<meta name="app-build" content="v61"/);
+  assert.match(index, /app-update\.css\?v=61/);
+  assert.match(index, /app-update\.js\?v=61/);
+  assert.match(index, /market-image-audit\.css\?v=61/);
+  assert.match(index, /market-image-audit\.js\?v=61/);
+  assert.match(index, /market-official-images\.js\?v=61/);
   assert.doesNotMatch(index, /\?v=53/);
-  assert.match(index, /id="appBuildVersion">v60</);
-  assert.match(events, /\.\/sw\.js\?v=60/);
+  assert.match(index, /id="appBuildVersion">v61</);
+  assert.match(events, /\.\/sw\.js\?v=61/);
   assert.match(index,/https:\/\/r\.jina\.ai/);
   assert.match(index,/https:\/\/www\.continente\.pt/);
   assert.match(index,/https:\/\/static\.pingodoce\.pt/);
@@ -62,6 +65,7 @@ try {
   assert.ok(fs.existsSync(path.join(dist, 'app-update.js')));
   assert.ok(fs.existsSync(path.join(dist, 'market-image-audit.css')));
   assert.ok(fs.existsSync(path.join(dist, 'market-image-audit.js')));
+  assert.ok(fs.existsSync(path.join(dist, 'market-official-images.js')));
 } finally {
   fs.rmSync(dist, { recursive: true, force: true });
 }

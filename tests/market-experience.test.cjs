@@ -5,6 +5,7 @@ const index = fs.readFileSync('index.html','utf8');
 const css = fs.readFileSync('market-experience.css','utf8');
 const js = fs.readFileSync('market-experience.js','utf8');
 const imageAudit = fs.readFileSync('market-image-audit.js','utf8');
+const officialBridge = fs.readFileSync('market-official-images.js','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
 const pages = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const events = fs.readFileSync('events.js','utf8');
@@ -15,9 +16,9 @@ assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt https:\/\/world\.openfoodfacts\.org;/);
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
-assert.match(sw, /conta-de-casa-public-v60-retailer-images/);
+assert.match(sw, /conta-de-casa-public-v61-official-images-bridge/);
 
-for (const asset of ['market-experience.css','market-experience.js']) {
+for (const asset of ['market-experience.css','market-experience.js','market-official-images.js']) {
   assert.ok(sw.includes(`'./${asset}'`), `${asset} must be cached by the service worker`);
   assert.ok(pages.includes(`'${asset}'`), `${asset} must be included in the Pages bundle`);
 }
@@ -37,11 +38,16 @@ assert.match(js, /actualCents:0,purchased:false/);
 assert.match(js, /cleanRemoteText/);
 assert.match(js, /esc\(product\.name\)/);
 
-// v60 extends the search without changing the existing event/UI contract.
+// v60 mantém o resolvedor/fallback; v61 corrige o ponto de integração real do browser.
 assert.match(imageAudit,/searchCatalogV60/);
-assert.match(imageAudit,/searchCestaProducts=searchCatalogV60/);
 assert.match(imageAudit,/limit:20/);
 assert.match(imageAudit,/MAX_CATALOG_RESULTS=40/);
+assert.match(officialBridge,/\[data-market-add-product\]/);
+assert.match(officialBridge,/\.market-result-source/);
+assert.match(officialBridge,/data-market-product-card/);
+assert.match(officialBridge,/persistResolvedItem/);
+assert.match(officialBridge,/headers:\{Accept:'application\/json'\}/,'reader must use only the simple Accept request header');
+assert.doesNotMatch(officialBridge,/headers:\{[^}]*['"]X-(?:With-Images-Summary|Retain-Images)/,'reader request must not send custom image X-* headers');
 
 assert.doesNotMatch(js, /DEMO_PRODUCTS/);
 assert.doesNotMatch(js, /Protótipo visual/);

@@ -38,6 +38,7 @@ jobs:
           node --check invoice-capture.js
           node --check app-update.js
           node --check market-image-audit.js
+          node --check market-official-images.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
 
@@ -73,6 +74,9 @@ jobs:
 
       - name: Market image audit and zoom tests
         run: node tests/market-image-audit.test.cjs
+
+      - name: Market browser official-image bridge tests
+        run: node tests/market-official-images.test.cjs
 
       - name: Market barcode scanner tests
         run: node tests/market-barcode.test.cjs
