@@ -12,6 +12,7 @@ const PUBLIC_FILES = Object.freeze([
   'design-system.css',
   'mobile-layout.css',
   'market-experience.css',
+  'market-brand.css',
   'market-barcode.css',
   'ui-icons.css',
   'invoice-capture.css',
@@ -24,6 +25,7 @@ const PUBLIC_FILES = Object.freeze([
   'sync.js',
   'events.js',
   'market-experience.js',
+  'market-branding.js',
   'market-barcode.js',
   'ui-icons.js',
   'invoice-capture.js',
@@ -64,11 +66,15 @@ index=index.replace(
 
 if(!index.includes('app-update.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./app-update.css?v=${BUILD.slice(1)}" />\n</head>`);
 if(!index.includes('market-image-audit.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-image-audit.css?v=${BUILD.slice(1)}" />\n</head>`);
+// Camada final do módulo Compras: identidade visual aprovada e apresentação sem imagens.
+if(!index.includes('market-brand.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-brand.css?v=${BUILD.slice(1)}" />\n</head>`);
 if(!index.includes('app-update.js')) index=index.replace('</body>',`  <script src="./app-update.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 // Tem de executar antes do resolvedor legado para bloquear fallbacks nos cartões vivos.
 if(!index.includes('market-retailer-image-policy.js')) index=index.replace('</body>',`  <script src="./market-retailer-image-policy.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 if(!index.includes('market-image-audit.js')) index=index.replace('</body>',`  <script src="./market-image-audit.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 if(!index.includes('market-official-images.js')) index=index.replace('</body>',`  <script src="./market-official-images.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
+// Executa por último para manter a cópia e a apresentação do Mercado coerentes.
+if(!index.includes('market-branding.js')) index=index.replace('</body>',`  <script src="./market-branding.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 fs.writeFileSync(distIndex,index);
 
 const distEvents=path.join(DIST,'events.js');
