@@ -1,11 +1,9 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 6 de setembro de 2026
-Build público confirmado: v59
-Build em validação: v60
+Build público confirmado: v60
 Distribuição: GitHub Pages
-Branch de implementação: `fix/retailer-product-images-v60`
-Estado da revisão: imagens oficiais por SKU e catálogo alargado implementados; CI funcional da branch `34001300466` concluído com `success`; integração em `main`, Deploy Pages v60 e validação física no iPhone ainda pendentes.
+Estado da revisão: **v60 integrada e publicada**. PR #32 fundido em `main`; CI de `main` `34001564991` terminou com `success`; Deploy Pages `34001581207` terminou com `success` sobre o commit `849edfbce7071215ff222eb5dbfbe6799f0f3cd8`. Falta apenas validação física no iPhone/Safari dos exemplos e da experiência de carregamento progressivo.
 
 ## Estado atual
 
@@ -21,7 +19,7 @@ A v60 corrige a causa real das miniaturas vazias observadas no Mercado: a v59 co
 
 ### Resolução da fotografia oficial
 
-A prioridade passa a ser:
+A prioridade é:
 
 1. ligação oficial do SKU devolvida pelo `cesta.pt`;
 2. validação estrita do domínio e do `pid` da página;
@@ -36,7 +34,7 @@ Hosts oficiais aceites para imagem:
 - Continente: `www.continente.pt`, apenas caminhos de `Sites-col-master-catalog` e ficheiros cujo caminho identifica o `pid` do produto;
 - Pingo Doce: `static.pingodoce.pt`, apenas `Sites-pingo-doce-master/images/(large|medium|small)` e ficheiro iniciado pelo `pid` do produto.
 
-A aplicação não aceita uma URL arbitrária devolvida pelo leitor. A entrada e a saída são validadas pelo SKU.
+A aplicação não aceita uma URL arbitrária devolvida pelo reader. A entrada e a saída são validadas pelo SKU.
 
 ### Evidência técnica com os exemplos reais
 
@@ -47,7 +45,7 @@ O probe de CI confirmou os dois exemplos fornecidos durante a revisão:
 - as páginas diretas não fornecem `Access-Control-Allow-Origin` ao browser;
 - `r.jina.ai` devolveu as páginas com CORS compatível com `https://allyssonestadulho92.github.io` e expôs candidatos contendo os dois `pid` exatos.
 
-O script `scripts/probe-market-sources.cjs` mantém uma verificação pequena e não bloqueante dessas dependências no CI.
+`scripts/probe-market-sources.cjs` mantém uma verificação pequena e não bloqueante dessas dependências no CI.
 
 ### Desempenho e comportamento
 
@@ -61,23 +59,28 @@ As miniaturas continuam tácteis/clicáveis e abrem o visualizador responsivo in
 
 ## Segurança e privacidade v60
 
-- nenhum dado financeiro, PIN, palavra-passe, token GitHub ou chave criptográfica é enviado ao leitor de páginas;
-- o leitor recebe apenas uma URL pública de produto já validada como Continente/Pingo Doce;
+- nenhum dado financeiro, PIN, palavra-passe, token GitHub ou chave criptográfica é enviado ao reader;
+- o reader recebe apenas uma URL pública de produto já validada como Continente/Pingo Doce;
 - pedidos externos usam `credentials:'omit'` e `referrerPolicy:'no-referrer'`;
 - não são usados Microlink, AllOrigins ou proxies CORS genéricos;
 - a CSP pública autoriza `r.jina.ai` apenas em `connect-src` e apenas os dois hosts oficiais de imagem em `img-src`, além dos hosts Open Facts já previstos;
 - apenas URL/origem/data/código opcional são persistidos; binários não entram no cofre;
-- falha do leitor não altera preços nem impede a adição do produto.
+- falha do reader não altera preços nem impede a adição do produto.
 
-## Build e cache v60
+## Build, integração e distribuição v60
 
-`scripts/prepare-pages.cjs` compõe `v60`. O Service Worker usa `conta-de-casa-public-v60-retailer-images`. `app-update.js` inclui a nova versão em **Definições → Atualização de Software → Mais detalhes**.
+- PR #32: `feat: imagens oficiais e catálogo alargado v60` — merged;
+- commit de integração: `849edfbce7071215ff222eb5dbfbe6799f0f3cd8`;
+- CI do PR `34001540327` — `success`;
+- CI de `main` `34001564991` — `success`;
+- Deploy Pages `34001581207` — `success`;
+- `scripts/prepare-pages.cjs` compõe `v60`;
+- Service Worker: `conta-de-casa-public-v60-retailer-images`;
+- `app-update.js` inclui **v60 — Imagens oficiais e catálogo alargado** em **Definições → Atualização de Software → Mais detalhes**.
 
 ## Validação automatizada
 
-CI da revisão funcional: workflow `34001300466` — `success`.
-
-Passaram:
+A revisão passou integralmente:
 
 - probe real de `cesta.pt` e das duas imagens oficiais de exemplo;
 - sintaxe de todos os módulos;
@@ -85,7 +88,7 @@ Passaram:
 - isolamento do cofre;
 - formulários e QR de faturas;
 - pesquisa Mercado e preços;
-- testes de imagens oficiais, fallback e zoom;
+- imagens oficiais, fallback e zoom;
 - scanner de código de barras;
 - quantidades e contabilização;
 - auditoria de ícones;
@@ -104,15 +107,14 @@ Passaram:
 
 ## Limitações conhecidas
 
-A v60 aumenta muito a cobertura, mas não pode prometer fotografia para um SKU cuja página oficial não contenha uma imagem identificável ou quando `cesta.pt`/Jina/retalhista estiver temporariamente indisponível. Nesses casos o fallback Open Facts é tentado e, por fim, permanece o placeholder. A aplicação prefere ausência de imagem a uma fotografia de variante errada.
+A v60 aumenta significativamente a cobertura, mas não pode prometer fotografia para um SKU cuja página oficial não contenha uma imagem identificável ou quando `cesta.pt`/Jina/retalhista estiver temporariamente indisponível. Nesses casos o fallback Open Facts é tentado e, por fim, permanece o placeholder. A aplicação prefere ausência de imagem a uma fotografia de variante errada.
 
 A validação automatizada não substitui a confirmação física no Safari/iPhone para carregamento progressivo, toque/zoom, safe areas e comportamento com rede móvel.
 
 ## Próximo passo
 
-1. integrar a branch apenas mantendo CI verde;
-2. confirmar CI de `main` e Deploy Pages v60;
-3. no iPhone, abrir **Atualização de Software** e confirmar v60;
-4. pesquisar os SKUs `8167440` e `739490` e verificar miniatura + ampliação;
-5. testar pesquisas amplas como café, arroz, leite e limpeza para confirmar a maior variedade;
-6. validar 320, 375, 390 e 430 px e funcionamento com rede lenta/offline.
+1. no iPhone, abrir **Definições → Atualização de Software** e confirmar v60;
+2. pesquisar os SKUs `8167440` e `739490` e verificar miniatura + ampliação;
+3. testar pesquisas amplas como café, arroz, leite e limpeza para confirmar a maior variedade;
+4. validar 320, 375, 390 e 430 px;
+5. testar rede lenta/offline e confirmar que falha de imagem não bloqueia a adição do produto.
