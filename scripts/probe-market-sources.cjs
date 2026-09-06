@@ -19,7 +19,7 @@ const EXAMPLES=[
   }
 ];
 
-function headers(extra={}){return {Origin:ORIGIN,'User-Agent':'ContaDeCasa-MarketSourceAudit/1.3',...extra};}
+function headers(extra={}){return {Origin:ORIGIN,'User-Agent':'ContaDeCasa-MarketSourceAudit/1.4',...extra};}
 function parseSse(text){
   const events=[];
   for(const block of String(text||'').split(/\n\n+/)){
@@ -40,7 +40,7 @@ function urlsFrom(value){
 async function probeCesta(){
   try{
     const common={Accept:'application/json, text/event-stream','Content-Type':'application/json','MCP-Protocol-Version':'2025-06-18'};
-    const init=await request('https://cesta.pt/mcp',{method:'POST',headers:common,body:JSON.stringify({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Conta de Casa source audit',version:'1.3.0'}}})});
+    const init=await request('https://cesta.pt/mcp',{method:'POST',headers:common,body:JSON.stringify({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Conta de Casa source audit',version:'1.4.0'}}})});
     await request('https://cesta.pt/mcp',{method:'POST',headers:common,body:JSON.stringify({jsonrpc:'2.0',method:'notifications/initialized'})}).catch(()=>null);
     const called=await request('https://cesta.pt/mcp',{method:'POST',headers:common,body:JSON.stringify({jsonrpc:'2.0',id:3,method:'tools/call',params:{name:'search_products',arguments:{query:'leite meio gordo',limit:20}}})});
     const text=called.events?.[0]?.result?.content?.find(item=>item?.type==='text')?.text||'';
@@ -53,7 +53,9 @@ async function probeCesta(){
 async function probeRetailerImage(example){
   try{
     const reader=`https://r.jina.ai/${example.url}`;
-    const result=await request(reader,{headers:{Accept:'application/json','X-With-Images-Summary':'true','X-Retain-Images':'true'}});
+    // Deve espelhar o pedido do browser v61: GET simples, sem cabeçalhos X-* que
+    // provoquem preflight. O Reader retém imagens por omissão.
+    const result=await request(reader,{headers:{Accept:'application/json'}});
     const urls=urlsFrom(result.text);
     const exact=urls.find(raw=>{
       try{
@@ -61,7 +63,7 @@ async function probeRetailerImage(example){
         return url.hostname===example.imageHost&&decodeURIComponent(url.pathname).includes(example.imagePath)&&decodeURIComponent(url.pathname).includes(example.pid)&&/\.(?:jpe?g|png|webp)$/i.test(url.pathname);
       }catch(_error){return false;}
     });
-    console.log(`${example.name}: reader ${result.response.status}; CORS=${result.response.headers.get('access-control-allow-origin')||'n/a'}; exact-image=${Boolean(exact)}`);
+    console.log(`${example.name}: reader ${result.response.status}; CORS=${result.response.headers.get('access-control-allow-origin')||'n/a'}; simple-get=true; exact-image=${Boolean(exact)}`);
   }catch(error){
     console.warn(`${example.name} image probe indisponível: ${error?.name||'Error'} ${error?.message||''}`);
   }
