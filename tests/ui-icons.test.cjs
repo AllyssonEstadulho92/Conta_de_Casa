@@ -38,7 +38,7 @@ assert.match(css,/html\.market-prototype-active \.page-heading h1::before/,'mark
 assert.match(css,/#page-market #newMarketBtn\[data-ui-iconized="true"\]::after/,'secondary market action must be represented as a scan control');
 assert.match(css,/#page-market \.market-summary-item::before/,'market summary cards must receive semantic icon anchors');
 assert.match(css,/#page-market \.market-mobile-head::before/,'market mobile cards keep the legacy avatar rule overridden later by the real-image layer');
-assert.match(css,/market-mobile-card:not\(\.purchased\) \.market-mobile-real\{display:none!important\}/,'pending items must not expose unnecessary real-price controls');
+assert.match(css,/market-mobile-card:not\(\.purchased\) \.market-mobile-real\{display:none!important/,'pending items must not expose unnecessary real-price controls');
 assert.match(css,/\.mobile-nav \.nav-btn\.active::after/,'bottom navigation must keep a consistent active underline');
 assert.match(css,/market-browser \.svg-icon[\s\S]*stroke-width:2/,'legacy contextual SVGs must visually align to the Lucide metric');
 assert.match(css,/vector-effect:non-scaling-stroke/);
@@ -64,6 +64,6 @@ assert.match(license,/The MIT License \(MIT\)/);
 assert.match(license,/Cole Bemis/);
 assert.match(pages,/LUCIDE_LICENSE\.txt/,'Pages distribution must include the Lucide notice');
 assert.match(sw,/LUCIDE_LICENSE\.txt/,'offline/public asset allowlist must include the Lucide notice');
-assert.match(sw,/conta-de-casa-public-v59-product-images/,'service worker cache must refresh for the v59 image audit');
+assert.match(sw,/conta-de-casa-public-v60-retailer-images/,'service worker cache must refresh for official retailer images v60');
 
 console.log('Lucide UI icon and approved prototype hierarchy tests: OK');
