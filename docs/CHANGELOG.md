@@ -2,6 +2,20 @@
 
 ## 2026-09-06 — Hotfix iPhone/Safari: cartões do Mercado e conflitos técnicos
 
+### Publicação
+
+- PR #38 — `Fix: cartões do Mercado no iPhone e conflitos técnicos de sincronização` — integrado em `main` com CI verde;
+- merge em `main`: `f1557594aee99b69d10aca852a711b453502a698`;
+- CI de `main` após o merge: sucesso;
+- Deploy GitHub Pages da mesma revisão: sucesso;
+- build formal mantido em v62;
+- revisão pública de interface: `62-ui2`;
+- cache público: `conta-de-casa-public-v62-market-ui2`.
+
+A validação automática final cobriu fontes do Mercado, sintaxe, finanças, isolamento do cofre, datas, faturas, browser de produtos, código de barras, contabilização, ícones, atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade, sincronização, política de conflitos técnicos e manifest.
+
+A validação física final no iPhone/Safari continua necessária para confirmar o resultado visual no hardware real e a limpeza de um conflito técnico já gravado.
+
 ### Problemas confirmados em validação física
 
 - o browser de produtos podia mostrar uma grande área vazia à esquerda e comprimir todo o conteúdo textual à direita;

@@ -14,11 +14,13 @@
 - [x] Garantir que preço, quantidade, estado de compra e restantes campos financeiros continuam a gerar conflitos reais.
 - [x] Renovar o cache público para `conta-de-casa-public-v62-market-ui2` e usar revisão `62-ui2` nos assets alterados.
 - [x] Adicionar testes de regressão do layout e da política de conflitos.
-- [ ] Executar CI completa da branch.
-- [ ] Rever diff final do PR.
-- [ ] Integrar em `main` apenas com CI verde.
-- [ ] Confirmar Deploy Pages com sucesso.
+- [x] Executar CI completa da branch.
+- [x] Rever diff final do PR.
+- [x] Integrar PR #38 em `main` apenas com CI verde.
+- [x] Confirmar CI de `main` após o merge.
+- [x] Confirmar Deploy Pages com sucesso.
 - [ ] Validar novamente em iPhone/Safari 320, 375, 390 e 430 px.
+- [ ] Confirmar em hardware real que não existe coluna vazia nem compressão letra a letra nos resultados.
 - [ ] Confirmar que um conflito técnico antigo desaparece após “Comparar novamente”/nova sincronização.
 
 ## P0 — identidade visual do Mercado sem fotografias
