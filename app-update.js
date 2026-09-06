@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Conta de Casa — Centro de Atualização de Software (v59)
+ * Conta de Casa — Centro de Atualização de Software (v60)
  *
  * Esta camada não altera dados financeiros nem o cofre. O estado de atualização
  * é obtido exclusivamente do Service Worker same-origin distribuído por GitHub Pages.
@@ -11,6 +11,18 @@
  */
 (function installSoftwareUpdateCenter(root){
   const APP_RELEASE_NOTES=Object.freeze([
+    Object.freeze({
+      version:'v60',
+      date:'6 de setembro de 2026',
+      title:'Imagens oficiais e catálogo alargado',
+      items:Object.freeze([
+        'As fotografias passam a dar prioridade ao SKU exato das páginas oficiais do Continente e Pingo Doce.',
+        'A ligação oficial do produto é validada antes de qualquer leitura e a imagem só é aceite quando pertence ao catálogo/CDN oficial e contém o identificador exato do produto.',
+        'A pesquisa do Mercado passa a solicitar até 20 resultados por cadeia, permitindo uma variedade maior de produtos.',
+        'Produtos antigos sem fotografia são reavaliados de forma progressiva; Open Facts permanece apenas como fallback quando não existe imagem oficial segura.',
+        'As miniaturas continuam ampliáveis e nenhum ficheiro de imagem é guardado dentro do cofre.'
+      ])
+    }),
     Object.freeze({
       version:'v59',
       date:'5 de setembro de 2026',
@@ -112,10 +124,7 @@
     </div>`;
   }
 
-  function renderDialog(){
-    if(!updateDialog)return;
-    updateDialog.innerHTML=dialogHtml();
-  }
+  function renderDialog(){if(updateDialog)updateDialog.innerHTML=dialogHtml();}
 
   function ensureDialog(){
     if(updateDialog?.isConnected)return updateDialog;
@@ -126,40 +135,23 @@
     updateDialog.addEventListener('click',event=>{
       if(event.target===updateDialog){closeDialog();return;}
       if(event.target.closest('[data-software-update-close]')){closeDialog();return;}
-      if(event.target.closest('[data-update-details]')){
-        detailsOpen=!detailsOpen;
-        renderDialog();
-        return;
-      }
+      if(event.target.closest('[data-update-details]')){detailsOpen=!detailsOpen;renderDialog();return;}
       const explanation=event.target.closest('[data-update-explain]')?.dataset.updateExplain;
-      if(explanation==='automatic'){
-        root.toast?.('As novas versões são verificadas quando a aplicação abre.');
-        return;
-      }
-      if(explanation==='beta'){
-        root.toast?.('O canal beta ainda não está configurado. A aplicação usa apenas versões estáveis.');
-        return;
-      }
+      if(explanation==='automatic'){root.toast?.('As novas versões são verificadas quando a aplicação abre.');return;}
+      if(explanation==='beta'){root.toast?.('O canal beta ainda não está configurado. A aplicação usa apenas versões estáveis.');return;}
       if(event.target.closest('[data-update-check]')) checkForUpdates();
     });
-    document.body.appendChild(updateDialog);
-    renderDialog();
-    return updateDialog;
+    document.body.appendChild(updateDialog);renderDialog();return updateDialog;
   }
 
   function openDialog(){
-    const dialog=ensureDialog();
-    if(dialog.open)return;
-    updateStatus='ready';
-    updateMessage='';
-    renderDialog();
-    dialog.showModal();
+    const dialog=ensureDialog();if(dialog.open)return;
+    updateStatus='ready';updateMessage='';renderDialog();dialog.showModal();
     requestAnimationFrame(()=>dialog.querySelector('[data-software-update-close]')?.focus({preventScroll:true}));
   }
 
   function closeDialog(){
-    if(!updateDialog?.open)return;
-    updateDialog.close();
+    if(!updateDialog?.open)return;updateDialog.close();
     document.querySelector('[data-open-software-update]')?.focus({preventScroll:true});
   }
 
@@ -167,84 +159,48 @@
     const panel=document.querySelector('#page-settings article.panel.narrow');
     if(!panel||panel.querySelector('[data-open-software-update]'))return;
     const resetButton=panel.querySelector('#resetDataBtn');
-    const block=document.createElement('section');
-    block.className='settings-software-update-block';
-    block.setAttribute('aria-label','Atualização da aplicação');
-    block.innerHTML=`<button class="settings-software-update-row" type="button" data-open-software-update>
-      <span class="settings-software-update-icon" aria-hidden="true">${icon('refresh',22)}</span>
-      <span class="settings-software-update-copy"><strong>Atualização de Software</strong><small>Versão ${escapeHtml(buildVersion())} · atualizações automáticas</small></span>
-      <span class="settings-software-update-chevron" aria-hidden="true">${icon('chevron',20)}</span>
-    </button>`;
+    const block=document.createElement('section');block.className='settings-software-update-block';block.setAttribute('aria-label','Atualização da aplicação');
+    block.innerHTML=`<button class="settings-software-update-row" type="button" data-open-software-update><span class="settings-software-update-icon" aria-hidden="true">${icon('refresh',22)}</span><span class="settings-software-update-copy"><strong>Atualização de Software</strong><small>Versão ${escapeHtml(buildVersion())} · atualizações automáticas</small></span><span class="settings-software-update-chevron" aria-hidden="true">${icon('chevron',20)}</span></button>`;
     panel.insertBefore(block,resetButton?.previousElementSibling||resetButton||null);
     block.querySelector('[data-open-software-update]')?.addEventListener('click',openDialog);
   }
 
   function waitForInstalling(registration,timeoutMs=4500){
     return new Promise(resolve=>{
-      const worker=registration.installing;
-      if(!worker){resolve();return;}
+      const worker=registration.installing;if(!worker){resolve();return;}
       let done=false;
       const finish=()=>{if(done)return;done=true;clearTimeout(timer);worker.removeEventListener?.('statechange',onState);resolve();};
       const onState=()=>{if(['installed','activated','redundant'].includes(worker.state))finish();};
-      const timer=setTimeout(finish,timeoutMs);
-      worker.addEventListener('statechange',onState);
-      onState();
+      const timer=setTimeout(finish,timeoutMs);worker.addEventListener('statechange',onState);onState();
     });
   }
 
   async function checkForUpdates(){
     if(checkInFlight)return checkInFlight;
     checkInFlight=(async()=>{
-      if(!('serviceWorker' in navigator)){
-        updateStatus='unsupported';
-        renderDialog();
-        return;
-      }
-      updateStatus='checking';
-      updateMessage='';
-      renderDialog();
+      if(!('serviceWorker' in navigator)){updateStatus='unsupported';renderDialog();return;}
+      updateStatus='checking';updateMessage='';renderDialog();
       try{
         let registration=await navigator.serviceWorker.getRegistration();
-        if(!registration){
-          registration=await navigator.serviceWorker.register('./sw.js?v=59',{updateViaCache:'none'});
-        }
+        if(!registration)registration=await navigator.serviceWorker.register('./sw.js?v=60',{updateViaCache:'none'});
         let updateFound=false;
         const onUpdateFound=()=>{updateFound=true;updateStatus='updating';renderDialog();};
         registration.addEventListener('updatefound',onUpdateFound,{once:true});
         await registration.update();
         if(registration.installing)await waitForInstalling(registration);
-        if(registration.waiting||updateFound){
-          updateStatus='updating';
-          renderDialog();
-          if(registration.waiting) registration.waiting.postMessage({type:'SKIP_WAITING'});
-          return;
-        }
-        updateStatus='ready';
-        updateMessage='';
-        renderDialog();
-        root.toast?.('Não existem atualizações novas.');
-      }catch(_error){
-        updateStatus='error';
-        updateMessage='Não foi possível contactar a versão pública neste momento.';
-        renderDialog();
-      }
+        if(registration.waiting||updateFound){updateStatus='updating';renderDialog();if(registration.waiting)registration.waiting.postMessage({type:'SKIP_WAITING'});return;}
+        updateStatus='ready';updateMessage='';renderDialog();root.toast?.('Não existem atualizações novas.');
+      }catch(_error){updateStatus='error';updateMessage='Não foi possível contactar a versão pública neste momento.';renderDialog();}
     })().finally(()=>{checkInFlight=null;renderDialog();});
     return checkInFlight;
   }
 
   function install(){
     ensureSettingsLauncher();
-    const observer=new MutationObserver(()=>ensureSettingsLauncher());
-    observer.observe(document.body,{childList:true,subtree:true});
+    const observer=new MutationObserver(()=>ensureSettingsLauncher());observer.observe(document.body,{childList:true,subtree:true});
   }
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});
-  else install();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 
-  root.CDCAppUpdates=Object.freeze({
-    open:openDialog,
-    check:checkForUpdates,
-    releases:APP_RELEASE_NOTES,
-    version:buildVersion
-  });
+  root.CDCAppUpdates=Object.freeze({open:openDialog,check:checkForUpdates,releases:APP_RELEASE_NOTES,version:buildVersion});
 })(window);
