@@ -1,5 +1,26 @@
 # TODO — Conta de Casa
 
+## P0 — Lista de compras agrupada por categoria
+
+- [x] Confirmar necessidade de reduzir a repetição visual da lista mobile.
+- [x] Reutilizar a categoria já existente no modelo, sem alterar schema.
+- [x] Criar `market-category-groups.js` como camada de apresentação isolada.
+- [x] Criar `market-category-groups.css` com grupos compactos e recolhíveis em mobile.
+- [x] Preservar a ordem dos itens já calculada por filtros/ordenação.
+- [x] Definir ordem previsível para as categorias conhecidas do Mercado.
+- [x] Preservar checkbox, editar, eliminar e preço real através dos mesmos nós/atributos existentes.
+- [x] Adicionar separadores por categoria na tabela desktop.
+- [x] Manter branding/sincronização em `62-ui2` e isolar os novos assets em `62-ui3`.
+- [x] Renovar o cache público sem perder a identificação da revisão anterior.
+- [x] Adicionar `tests/market-category-groups.test.cjs`.
+- [x] Integrar o novo teste na CI e no Deploy Pages.
+- [ ] Executar CI completa da branch `ui/market-category-groups`.
+- [ ] Rever diff final do PR.
+- [ ] Integrar em `main` apenas com CI verde.
+- [ ] Confirmar CI de `main` e Deploy GitHub Pages.
+- [ ] Validar no iPhone/Safari categorias com 1 e vários itens.
+- [ ] Validar expandir/recolher, pesquisa, filtros, checkbox, editar, eliminar e preço real.
+
 ## P0 — hotfix iPhone/Safari: Mercado e sincronização
 
 - [x] Reproduzir visualmente o cartão do browser com grande área vazia e texto comprimido à direita.
