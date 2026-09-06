@@ -2,7 +2,7 @@
 
 Atualizado: 6 de setembro de 2026
 Build público base: v62
-Revisão atual em validação: lista de compras agrupada por categoria (`62-ui3`)
+Revisão atual publicada: lista de compras agrupada por categoria (`62-ui3`)
 
 ## Visão geral
 
@@ -140,9 +140,11 @@ Os mecanismos de rede existentes permanecem inalterados. A remoção futura do p
 
 O Service Worker usa `conta-de-casa-public-v62-market-ui2-category-ui3`, forçando a atualização do cache sem alterar o número formal do build.
 
+A revisão foi integrada em `main` pelo PR #40 no commit `98662aa366ea65316ebd47cf56df8f2a3eeac974`; a CI de `main` e o Deploy GitHub Pages da mesma revisão terminaram com sucesso.
+
 ## Testes e manutenção
 
-A cobertura inclui:
+A cobertura validada em CI inclui:
 
 - sintaxe do novo módulo;
 - presença dos grupos e uso de `data-market-toggle`;

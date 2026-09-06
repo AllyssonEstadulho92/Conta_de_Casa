@@ -2,6 +2,18 @@
 
 ## 2026-09-06 — Lista de compras agrupada por categoria (`62-ui3`)
 
+### Publicação
+
+- PR #40 — `UI: organizar Lista de compras por categoria` — integrado em `main` com CI verde;
+- merge em `main`: `98662aa366ea65316ebd47cf56df8f2a3eeac974`;
+- CI de `main` após o merge: sucesso;
+- Deploy GitHub Pages da mesma revisão: sucesso;
+- build formal mantido em v62;
+- novos assets de agrupamento: `62-ui3`;
+- cache público: `conta-de-casa-public-v62-market-ui2-category-ui3`.
+
+A validação automática final incluiu o novo teste de agrupamento e todas as regressões já existentes de finanças, segurança, responsividade, viewport móvel, navegação, acessibilidade, Mercado e sincronização. A validação física final em iPhone/Safari permanece pendente.
+
 ### Motivação
 
 A validação física da página **Lista de compras** mostrou que a sequência de cartões individuais era funcional, mas visualmente repetitiva e difícil de consultar quando existiam vários produtos de categorias diferentes.
@@ -19,12 +31,14 @@ A validação física da página **Lista de compras** mostrou que a sequência d
 - os mesmos nós e atributos `data-market-toggle`, `data-edit-market`, `data-delete-market` e `data-market-actual` são preservados, mantendo os handlers existentes;
 - a tabela desktop recebe separadores de categoria sem perder colunas ou ações;
 - adicionada revisão pública isolada `62-ui3` para os novos assets;
-- Service Worker atualizado para `conta-de-casa-public-v62-market-ui2-category-ui3`.
+- Service Worker atualizado para `conta-de-casa-public-v62-market-ui2-category-ui3`;
+- os breakpoints de 430 px e 359 px permanecem em media queries independentes para maior previsibilidade em Safari;
+- os botões de ação compactos mantêm alvo tátil mínimo de 44 px.
 
 ### Testes
 
 - criado `tests/market-category-groups.test.cjs`;
-- CI e Deploy Pages passam a validar sintaxe e composição do novo módulo;
+- CI e Deploy Pages validam sintaxe e composição do novo módulo;
 - o teste confirma que a camada não escreve em estado financeiro e que os assets são publicados depois do branding existente;
 - branding e política de conflitos permanecem em `62-ui2`, evitando uma alteração desnecessária dos assets anteriores.
 
