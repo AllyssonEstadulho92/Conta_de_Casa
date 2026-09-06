@@ -32,6 +32,7 @@ jobs:
           node --check forms.js
           node --check events.js
           node --check sync.js
+          node --check sync-conflict-policy.js
           node --check market-experience.js
           node --check market-branding.js
           node --check market-barcode.js
@@ -109,6 +110,9 @@ jobs:
 
       - name: Sync safety tests
         run: node tests/sync.test.cjs
+
+      - name: Sync technical-conflict policy tests
+        run: node tests/sync-conflict-policy.test.cjs
 
       - name: Sync runtime tests
         run: node tests/sync-runtime.test.cjs
