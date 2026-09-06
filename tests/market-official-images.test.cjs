@@ -89,10 +89,10 @@ assert.equal(parsed[0].sourceUrl,pingoProduct);
 assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
-assert.match(sw,/conta-de-casa-public-v62-market-ui2/);
+assert.match(sw,/conta-de-casa-public-v63-ui2/);
 assert.ok(sw.includes("'./market-retailer-image-policy.js'"));
 assert.ok(sw.includes("'./market-official-images.js'"));
-assert.match(prepare,/const BUILD = 'v62'/);
+assert.match(prepare,/const BUILD = 'v63'/);
 assert.ok(prepare.includes("'market-retailer-image-policy.js'"));
 assert.ok(prepare.includes("'market-official-images.js'"));
 
@@ -100,8 +100,8 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-retailer-image-policy\.js\?v=62/);
-  assert.match(index,/market-official-images\.js\?v=62/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=63/);
+  assert.match(index,/market-official-images\.js\?v=63/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.ok(fs.existsSync(path.join(dist,'market-retailer-image-policy.js')));
   assert.ok(fs.existsSync(path.join(dist,'market-official-images.js')));

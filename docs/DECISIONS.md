@@ -26,7 +26,7 @@ Estado: aceite. O catálogo alimenta `estimatedCents`; `actualCents` representa 
 Estado: aceite. GTIN/EAN/UPC pode ajudar a identificar o artigo; o preço continua a vir da fonte própria do Mercado.
 
 ## D-008 — Lucide como sistema vetorial oficial
-Estado: aceite. Os ícones são locais e auditáveis.
+Estado: aceite. Os ícones são locais, auditáveis e não dependem de icon fonts/CDN em runtime.
 
 ## D-009 — QR fiscal como preenchimento assistido
 Estado: aceite. O QR apenas preenche dados comprováveis e o utilizador revê antes de guardar.
@@ -41,7 +41,7 @@ Estado: aceite. A interface não apresenta capacidades de autenticação que nã
 Estado: aceite como regra histórica. Uma fotografia nunca prova preço nem transação.
 
 ## D-013 — Atualização de software usa Service Worker same-origin
-Estado: aceite. Atualizações públicas continuam a ser distribuídas pela própria aplicação/PWA.
+Estado: aceite. Atualizações públicas são distribuídas pela própria aplicação/PWA.
 
 ## D-014 — Imagens por SKU com validação estrita
 Estado: compatibilidade histórica. Enquanto os módulos antigos existirem, uma imagem só pode ser considerada oficial quando cadeia e identificador correspondem.
@@ -50,81 +50,85 @@ Estado: compatibilidade histórica. Enquanto os módulos antigos existirem, uma 
 Estado: compatibilidade histórica. Mantém-se apenas enquanto o pipeline antigo de imagens estiver distribuído.
 
 ## D-016 — Integração de imagens usa o contrato real do DOM
-Estado: histórico/compatibilidade. A integração deve depender de seletores e identificadores públicos, não de estado privado entre módulos.
+Estado: histórico/compatibilidade. A integração depende de seletores e identificadores públicos, não de estado privado entre módulos.
 
 ## D-017 — Cartões vivos de retalhista eram `official-only`
-Estado: substituída na apresentação por D-018. A regra continua válida apenas para o pipeline histórico que ainda permaneça no código.
+Estado: substituída na apresentação por D-018. A regra permanece apenas no pipeline histórico ainda distribuído.
 
 ## D-018 — Mercado orientado a nomes, sem fotografias de produto
 Data: 6 de setembro de 2026 · Estado: aceite.
 
-### Contexto
-A fotografia deixou de ser requisito da experiência. Nome, embalagem/quantidade, loja, categoria e preço são suficientes para identificar o produto e tomar a decisão de compra.
-
-### Decisão
-A interface de Compras/Mercado passa a ser `text-first`:
-
-- fotografias e placeholders deixam de ocupar espaço;
-- o nome passa a ser o identificador visual principal;
-- preço, estado e loja continuam claramente visíveis;
-- a câmara permanece porque serve leitura de código de barras;
-- nomes/logos dos mercados podem permanecer porque identificam a fonte;
-- metadados antigos de imagem não são apagados apenas por esta alteração visual.
-
-### Implementação
-`market-brand.css` oculta fotografias e reorganiza os cards. `market-branding.js` atualiza apenas a cópia informativa do browser e não toca no estado financeiro. `scripts/prepare-pages.cjs` e `sw.js` distribuem os dois assets.
-
-Os módulos antigos de imagem permanecem temporariamente por compatibilidade. A sua remoção definitiva será uma alteração separada, após validação física, para não misturar uma mudança visual com uma refatoração arquitetural ampla.
-
-### Consequência
-A decisão reduz ruído visual e preserva os dados e comportamentos existentes. Nenhum cálculo, preço, quantidade, credencial, cofre ou sincronização é alterado.
+A interface de Compras/Mercado é `text-first`: nome, embalagem/quantidade, loja, categoria, estado e preço são a identidade principal. Fotografias/placeholder não ocupam espaço. A câmara permanece para leitura de código de barras. Metadados históricos de imagem são preservados por compatibilidade.
 
 ## D-019 — O layout do browser do Mercado tem posições explícitas em mobile
 Data: 6 de setembro de 2026 · Estado: aceite.
 
-### Contexto
-A validação física em iPhone/Safari revelou um cartão com grande área vazia à esquerda e todo o texto comprimido numa coluna estreita à direita. O DOM histórico ainda pode conter um nó de fotografia oculto e diferentes camadas CSS podem influenciar o auto-placement do Grid.
-
-### Decisão
-No browser do Mercado, o conteúdo textual e o botão `+` passam a ter `grid-column`/`grid-row` explícitos. O bloco textual organiza nome, embalagem/loja, estado/origem e preço sem depender do auto-placement de um nó de imagem oculto. Abaixo de 360 px o preço reflui para uma linha própria.
-
-### Consequência
-A ausência de fotografia deixa de poder criar uma “coluna fantasma”. O cartão mantém largura útil, palavras inteiras, preço legível e ação tátil estável em iPhone/Safari.
+Conteúdo textual e botão `+` usam posições explícitas no Grid para impedir colunas fantasma causadas por slots históricos ocultos. Abaixo de 360 px, o preço reflui em vez de comprimir palavras.
 
 ## D-020 — Metadados visuais do Mercado são conflitos técnicos, não decisões financeiras
 Data: 6 de setembro de 2026 · Estado: aceite.
 
-### Contexto
-A sincronização podia apresentar uma revisão com `0 diferenças` quando dois dispositivos tinham o mesmo item financeiro mas metadados auxiliares diferentes (`productCode`, `imageUrl`, `imageSource`, `imageMatchedAt`). Esses campos não constam da comparação financeira visível e não devem exigir uma escolha do utilizador.
-
-### Decisão
-`sync-conflict-policy.js` remove apenas esses quatro campos da vista de negócio usada para decidir se dois registos do Mercado são equivalentes. O motor base continua a escolher e preservar o registo compatível mais completo. Campos de negócio como nome, categoria, quantidade, unidade, preço estimado, preço real, estado de compra e data de compra continuam a gerar conflito real quando divergem sem uma versão temporalmente mais recente.
-
-### Consequência
-Diferenças técnicas de imagem/código de barras são reconciliadas automaticamente e deixam de bloquear a sincronização. Nenhum valor financeiro é escolhido automaticamente.
+`sync-conflict-policy.js` retira apenas `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` da vista de equivalência do Mercado. Nome, categoria, quantidade, unidade, `estimatedCents`, `actualCents`, estado e datas de compra continuam a ser dados reais.
 
 ## D-021 — A Lista de compras é agrupada por categoria sem alterar o modelo
-Data: 6 de setembro de 2026 · Estado: aceite e publicado.
+Data: 6 de setembro de 2026 · Estado: aceite.
+
+A Lista de compras agrupa itens pela categoria existente, usando `<details>/<summary>` em mobile e separadores na tabela desktop. A camada reorganiza os mesmos nós por `data-market-toggle`, sem criar/migrar dados e preservando os handlers existentes.
+
+## D-022 — Uma única camada final resolve colisões visuais entre CSS legados
+Data: 6 de setembro de 2026 · Estado: aceite para v63.
 
 ### Contexto
-A validação física da lista mostrou que uma sequência longa de cartões individuais dificulta localizar produtos e repete a categoria em cada item. A informação já possui categoria estruturada, pelo que não é necessário alterar o schema para melhorar a organização.
+
+A aplicação acumulou camadas visuais legítimas em momentos diferentes. Duas colisões foram confirmadas no Safari/iPhone:
+
+- a navegação inferior desenhava simultaneamente o indicador ativo em `::before` e `::after`;
+- `market-summary-item::before` era usado ao mesmo tempo como ícone semântico e como faixa cromática superior.
+
+O problema não estava no SVG em si, mas na sobreposição de responsabilidades entre pseudo-elementos e folhas CSS diferentes.
 
 ### Decisão
-A apresentação da Lista de compras passa a agrupar itens pela categoria já existente:
 
-- cada categoria é um grupo visual independente, expandido por defeito e recolhível com `<details>/<summary>`;
-- o cabeçalho mostra categoria e contagem de itens;
-- a ordem das categorias segue a taxonomia conhecida do Mercado e categorias não previstas ficam no fim por ordem alfabética;
-- a ordem interna dos itens continua a ser a definida pelos filtros/ordenação existentes;
-- em mobile, os cartões tornam-se linhas compactas dentro do grupo;
-- em desktop, a tabela mantém as colunas e recebe separadores de categoria;
-- nenhuma categoria, preço, quantidade ou estado é alterado pela camada de apresentação.
+Criar `ui-consistency.css` como **última camada de apresentação**, sem acesso a estado ou regras de negócio.
 
-### Implementação
-`market-category-groups.js` reorganiza o DOM já renderizado usando o identificador real `data-market-toggle` e a categoria presente em `appState.market`. `market-category-groups.css` aplica a apresentação compacta. Os handlers existentes de editar, eliminar, checkbox e preço real são preservados porque os mesmos nós são movidos, não recriados.
+Regras obrigatórias:
+
+- Lucide continua o único sistema vetorial oficial;
+- `.ui-icon-svg` e `.svg-icon` usam métrica final comum (`stroke-width: 2`, linecap/linejoin arredondados e `vector-effect: non-scaling-stroke`);
+- navegação mobile mantém apenas `::before` como indicador ativo e anula `::after` redundante;
+- a faixa dos cartões-resumo passa a ser um `inset` sólido no próprio cartão;
+- `market-summary-item::before` fica reservado exclusivamente ao ícone semântico;
+- a camada final deve ser carregada depois de `market-brand.css` e `market-category-groups.css`.
 
 ### Consequência
-A lista fica mais previsível e rápida de consultar sem duplicar lógica de negócio nem alterar persistência. A mudança pode ser removida isoladamente sem migração de dados.
 
-### Publicação
-A decisão foi integrada em `main` através do PR #40, merge `98662aa366ea65316ebd47cf56df8f2a3eeac974`, com CI de `main` e Deploy GitHub Pages concluídos com sucesso.
+A app ganha um ponto explícito de consolidação visual sem reescrever o design system inteiro nesta release. A mudança é reversível e isolada, e reduz regressões de especificidade no Safari.
+
+## D-023 — Cada alteração pública relevante gera versão, manifesto e instalação confirmada
+Data: 6 de setembro de 2026 · Estado: aceite para v63.
+
+### Contexto
+
+O utilizador pretende que alterações futuras apareçam na área **Atualização de Software**, com histórico, número de versão e instalação deliberada. Atualizações silenciosas tornam difícil perceber o que mudou e podem confundir validações entre dispositivos.
+
+### Decisão
+
+A partir da v63:
+
+- `release-manifest.json` é a fonte pública do histórico de releases;
+- `latestVersion` deve corresponder ao build produzido por `scripts/prepare-pages.cjs`;
+- divergência entre manifesto e build faz a preparação do Pages falhar;
+- o Centro de Atualização consulta o manifesto same-origin com `cache: no-store`;
+- um Service Worker novo permanece `waiting` durante uma atualização normal;
+- a ativação é solicitada após ação explícita em **Atualizar agora**, via `APPLY_UPDATE`;
+- `SKIP_WAITING` permanece como compatibilidade com clientes v62;
+- a atualização substitui assets da aplicação e não migra/apaga o cofre financeiro;
+- o Service Worker continua a cachear apenas caminhos existentes em `PUBLIC_ASSET_SET`.
+
+### Segurança
+
+O parâmetro `ts` usado para obter um manifesto fresco só é aceite como parâmetro único e não contorna a allowlist de assets. Não são introduzidos endpoints externos, credenciais ou telemetria.
+
+### Consequência
+
+O ciclo passa a ser: **alteração → nova versão → notas no manifesto → CI → main → Pages → instalação pelo Centro de Atualização**. A versão torna-se parte do critério de conclusão de releases públicas.

@@ -94,6 +94,9 @@ jobs:
       - name: Unified icon audit tests
         run: node tests/ui-icons.test.cjs
 
+      - name: Visual consistency regression tests
+        run: node tests/ui-consistency.test.cjs
+
       - name: Software update center tests
         run: node tests/app-update.test.cjs
 

@@ -52,6 +52,7 @@
   }
 
   function categoryIconName(category){
+    if(category==='Mercearia / Despensa')return 'plan';
     if(['Limpeza','Higiene pessoal'].includes(category))return 'home';
     if(category==='Outros')return 'more';
     return 'market';
