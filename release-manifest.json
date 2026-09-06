@@ -7,11 +7,14 @@
     {
       "version": "v63",
       "date": "6 de setembro de 2026",
-      "title": "Compras organizadas e atualizações controladas",
+      "title": "Compras organizadas e interface visual consistente",
       "items": [
         "A Lista de compras passa a ficar organizada por categoria, com grupos recolhíveis em telemóvel e separadores de categoria no computador.",
         "O conteúdo dos produtos fica alinhado de forma consistente à esquerda: nome, quantidade, estado, valores e ações passam a seguir a mesma margem visual.",
         "A categoria Mercearia / Despensa deixa de usar o ícone de carrinho e passa a usar um símbolo local mais neutro de organização/despensa.",
+        "Os ícones da aplicação passam a usar uma métrica visual única, com SVG Lucide de espessura, alinhamento e dimensões contextuais consistentes.",
+        "A navegação inferior passa a apresentar apenas um indicador azul no item ativo, eliminando a dupla barra que aparecia no Safari/iPhone.",
+        "Os cartões-resumo do Mercado deixam de sobrepor a faixa colorida ao pseudo-elemento do ícone; a faixa superior passa a ser contínua e sólida.",
         "O Centro de Atualização passa a consultar este histórico de versões da própria aplicação e a indicar claramente quando existe uma versão nova.",
         "Ao carregar em Atualizar agora, a nova versão é instalada pelo Service Worker e a aplicação reinicia para concluir a atualização.",
         "O histórico de alterações de cada versão fica registado em release-manifest.json e no controlo de versões do projeto.",
