@@ -8,6 +8,7 @@ const DIST = path.join(ROOT, 'dist');
 const BUILD = 'v63';
 const UI_REV = '63-ui1';
 const CATEGORY_REV = '63-ui1';
+const VISUAL_REV = '63-ui2';
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -18,6 +19,7 @@ const PUBLIC_FILES = Object.freeze([
   'market-category-groups.css',
   'market-barcode.css',
   'ui-icons.css',
+  'ui-consistency.css',
   'invoice-capture.css',
   'app-update.css',
   'market-image-audit.css',
@@ -72,6 +74,8 @@ if(!index.includes('app-update.css')) index=index.replace('</head>',`  <link rel
 if(!index.includes('market-image-audit.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-image-audit.css?v=${BUILD.slice(1)}" />\n</head>`);
 if(!index.includes('market-brand.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-brand.css?v=${UI_REV}" />\n</head>`);
 if(!index.includes('market-category-groups.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-category-groups.css?v=${CATEGORY_REV}" />\n</head>`);
+// Camada final: consolida métricas Lucide, um único indicador ativo e os cartões-resumo.
+if(!index.includes('ui-consistency.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./ui-consistency.css?v=${VISUAL_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
 if(!index.includes('sync-conflict-policy.js')) index=index.replace(syncScript,`${syncScript}<script src="./sync-conflict-policy.js?v=${UI_REV}" defer></script>`);
@@ -97,4 +101,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; visuals ${VISUAL_REV}).`);
