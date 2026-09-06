@@ -43,7 +43,7 @@ assert.match(imageAudit,/data-market-image-open/,'product images must remain int
 assert.match(officialBridge,/safeOfficialImageUrl/);
 assert.match(officialBridge,/\[data-market-add-product\]/);
 assert.match(officialBridge,/persistResolvedItem/);
-assert.match(officialBridge,/data-market-image-official/);
+assert.match(officialBridge,/dataset\.marketImageOfficial='1'/);
 assert.match(officialBridge,/Ver no \$\{label\}/);
 assert.match(officialBridge,/headers:\{Accept:'application\/json'\}/);
 assert.doesNotMatch(officialBridge,/headers:\{[^}]*['"]X-(?:With-Images-Summary|Retain-Images)/);
