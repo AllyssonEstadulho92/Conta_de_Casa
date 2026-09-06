@@ -44,6 +44,7 @@ jobs:
           node --check sync-conflict-policy.js
           node --check market-experience.js
           node --check market-branding.js
+          node --check market-category-groups.js
           node --check market-barcode.js
           node --check ui-icons.js
           node --check invoice-capture.js
@@ -61,6 +62,7 @@ jobs:
           node tests/form-regression.test.cjs
           node tests/invoice-capture.test.cjs
           node tests/market-categories.test.cjs
+          node tests/market-category-groups.test.cjs
           node tests/market-experience.test.cjs
           node tests/market-product-images.test.cjs
           node tests/market-image-audit.test.cjs
