@@ -30,10 +30,11 @@ assert.match(css,/\.market-category-items \.market-mobile-card/);
 assert.match(css,/market-mobile-card:not\(\.purchased\)[\s\S]*nth-child\(2\)/,'pending rows must remove redundant duplicate finance blocks');
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-assert.match(sw,/conta-de-casa-public-v62-market-ui3/);
+assert.match(sw,/conta-de-casa-public-v62-market-ui2-category-ui3/);
 assert.ok(sw.includes("'./market-category-groups.css'"));
 assert.ok(sw.includes("'./market-category-groups.js'"));
-assert.match(prepare,/const UI_REV = '62-ui3'/);
+assert.match(prepare,/const UI_REV = '62-ui2'/);
+assert.match(prepare,/const CATEGORY_REV = '62-ui3'/);
 assert.ok(prepare.includes("'market-category-groups.css'"));
 assert.ok(prepare.includes("'market-category-groups.js'"));
 
@@ -41,6 +42,8 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
+  assert.match(index,/market-brand\.css\?v=62-ui2/);
+  assert.match(index,/market-branding\.js\?v=62-ui2/);
   assert.match(index,/market-category-groups\.css\?v=62-ui3/);
   assert.match(index,/market-category-groups\.js\?v=62-ui3/);
   assert.ok(index.indexOf('market-brand.css')<index.indexOf('market-category-groups.css'),'category CSS must load after market branding');
