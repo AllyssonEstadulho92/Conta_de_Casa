@@ -1,70 +1,81 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 6 de setembro de 2026
-Build público: v62
+Build público base: v62
 Distribuição: GitHub Pages
 Branch pública: `main`
-Estado da revisão: publicada
+Revisão em validação: `fix/mobile-market-sync-hotfix`
 
 ## Estado atual
 
 A aplicação mantém a arquitetura PWA estática/local-first. O cofre continua no navegador, cifrado com PBKDF2-SHA-256 + AES-GCM; os dados financeiros permanecem no IndexedDB e a sincronização GitHub continua opcional e cifrada. O schema financeiro permanece na versão 5.
 
-A revisão de apresentação do módulo **Compras/Mercado** foi integrada em `main` e publicada no GitHub Pages. Não alterou PIN/palavra-passe, cifragem, faturas, preços, quantidades, totais, backups, sincronização ou regras de contabilização.
+A validação física em iPhone/Safari revelou duas regressões reais depois da revisão text-first do Mercado:
 
-## Decisão de produto confirmada
+1. no browser de produtos, os cartões podiam manter uma grande área vazia à esquerda e comprimir nome, estado, ligação e preço numa coluna estreita à direita;
+2. a sincronização podia apresentar `Conflito` com `0 diferenças` quando a divergência era apenas em metadados auxiliares de imagem/código de barras do Mercado.
 
-As fotografias de produto deixaram de ser um requisito da interface. Para esta experiência, é suficiente identificar cada resultado e cada item pelo **nome**, complementado por embalagem/quantidade, loja, categoria e preço quando aplicável.
+Não existe evidência de erro nos cálculos financeiros, no cofre, na cifragem ou nos preços por causa destas duas regressões.
 
-A fotografia não ocupa espaço nem cria placeholders vazios na lista ou nos resultados. A câmara do Mercado permanece porque serve **leitura de código de barras**, não captura de fotografia do produto.
+## Correção preparada
 
-## Implementação publicada
+### Browser do Mercado
 
-Foram integradas duas camadas isoladas:
+`market-brand.css` passa a definir explicitamente as posições do conteúdo e do botão `+` no Grid dos resultados. O nó histórico de fotografia continua oculto, mas deixa de poder influenciar o auto-placement.
 
-- `market-brand.css` — identidade visual do Mercado, com hierarquia mais limpa, azul de marca, cartões com contraste controlado, estados cromáticos, navegação móvel refinada e remoção visual das fotografias/placeholders;
-- `market-branding.js` — ajuste semântico do aviso de origem para explicar que a interface apresenta nome, embalagem, loja e preço sem depender de fotografias.
+A hierarquia do cartão passa a ser:
 
-A apresentação privilegia:
+- nome do produto;
+- embalagem/quantidade e loja;
+- estado e ligação da loja;
+- preço e preço unitário;
+- ação `+` isolada e tátil.
 
-- nome do produto como elemento principal;
-- preço e estado com maior legibilidade;
-- cartões-resumo com diferenciação azul, verde, âmbar e violeta;
-- `+` como ação primária clara;
-- cartões de lista sem coluna/área reservada a fotografia;
-- pesquisa móvel com maior consistência de espaçamento, raio, sombra e tipografia;
-- navegação inferior coerente com a identidade do módulo.
+Em larguras abaixo de 360 px, o preço reflui para uma linha própria para preservar palavras inteiras e impedir compressão letra a letra.
 
-## Compatibilidade e dados existentes
+`market-branding.js` reduz o aviso para: “Mostramos produtos que correspondem pelo nome, embalagem, loja e preço. A fotografia é opcional.”
 
-A revisão **não elimina metadados antigos de imagem do cofre**. Campos legados como `imageUrl`, `imageSource` e `imageMatchedAt` continuam tolerados pelo schema para não destruir dados já gravados, mas deixam de ser relevantes para a apresentação do Mercado.
+### Sincronização
 
-Os resolvedores de imagem v59–v62 permanecem temporariamente no código e no bundle público por compatibilidade. A camada visual final tem precedência e não mostra fotografias. A remoção técnica definitiva desses mecanismos fica separada para uma fase posterior, depois da validação física.
+Foi criado `sync-conflict-policy.js`. A política classifica apenas `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` como metadados técnicos do Mercado para efeitos de equivalência de sincronização.
+
+Esses campos deixam de abrir uma revisão manual quando todos os dados de negócio são iguais. O motor existente continua a preservar o registo compatível mais completo.
+
+Continuam a ser diferenças reais: nome, categoria, quantidade, unidade, `estimatedCents`, `actualCents`, `purchased` e `purchasedAt`.
+
+## Distribuição e cache
+
+O build formal permanece v62. Para garantir que o Safari não reutiliza os assets anteriores:
+
+- `market-brand.css` e `market-branding.js` usam revisão pública `62-ui2`;
+- `sync-conflict-policy.js` usa a mesma revisão;
+- o Service Worker passa para o cache `conta-de-casa-public-v62-market-ui2`.
 
 ## Segurança e privacidade
 
-A revisão visual:
+A correção:
 
-- não acede a `appState` nem grava estado financeiro;
-- não acrescenta endpoints, credenciais ou segredos;
-- não altera autenticação, autorização ou isolamento do cofre;
+- não altera PIN/palavra-passe;
+- não altera PBKDF2, AES-GCM ou IndexedDB;
 - não altera `estimatedCents` nem `actualCents`;
-- não adiciona telemetria.
+- não acrescenta endpoints, credenciais ou telemetria;
+- não apaga metadados antigos de imagem;
+- não escolhe valores financeiros automaticamente;
+- apenas evita que metadados técnicos invisíveis sejam tratados como conflitos financeiros.
 
-## Validação concluída
+## Testes acrescentados/alterados
 
-- PR #35 — `UI: identidade visual do Mercado sem fotografias` — integrado em `main`;
-- merge funcional: `2411a2e5ca30597d7fc5c04a50833fe63aff1042`;
-- CI do PR #35: sucesso;
-- CI de `main` após o merge funcional: sucesso;
-- Deploy Pages do merge funcional: sucesso;
-- PR #36 — reforço da CI para validar explicitamente `market-branding.js` — integrado em `main`;
-- merge de qualidade: `03cf7f7a07cb28554ddf3ed37dd08c00257acf2e`;
-- CI de `main` após PR #36: sucesso, incluindo probe das fontes do Mercado, sintaxe, finanças, segurança, responsividade, acessibilidade e sincronização;
-- Deploy Pages após PR #36: sucesso.
+- `tests/market-experience.test.cjs` valida posições explícitas no Grid, nova cópia e revisão de cache;
+- `tests/sync-conflict-policy.test.cjs` confirma que diferenças apenas em imagem/código de barras são automáticas e diferenças reais de preço continuam a exigir revisão;
+- `tests/app-update.test.cjs` valida a composição pública `62-ui2`;
+- CI e Deploy Pages passam a verificar `sync-conflict-policy.js` e o novo teste.
 
 ## Próximo passo
 
-1. validar fisicamente no iPhone/Safari a lista, o browser de produtos e a navegação inferior nas larguras 320, 375, 390 e 430 px;
-2. confirmar tema claro/escuro, retrato/paisagem e ausência de qualquer espaço residual de fotografia;
-3. depois da validação física, decidir se os módulos legados de imagem podem ser removidos definitivamente numa alteração arquitetural separada.
+1. executar a CI completa da branch;
+2. rever o diff do PR;
+3. integrar em `main` apenas com CI verde;
+4. confirmar Deploy Pages;
+5. repetir a validação física no iPhone/Safari, sobretudo o browser de produtos nas larguras 320, 375, 390 e 430 px;
+6. confirmar que um conflito técnico antigo desaparece após “Comparar novamente” ou nova sincronização;
+7. manter para alteração separada a eventual remoção definitiva do pipeline histórico de imagens.
