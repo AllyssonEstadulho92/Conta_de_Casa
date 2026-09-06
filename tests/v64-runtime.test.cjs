@@ -14,7 +14,7 @@ assert.match(js,/select.*apenas um supermercado|selecione apenas um supermercado
 assert.match(js,/productCode===scan\.code/,'same GTIN must be detected before adding a duplicate line');
 assert.match(js,/existing\.quantity=addOneQuantity/,'same GTIN must increment quantity');
 assert.match(js,/estimatedCents=candidate\.priceCents/,'live store price must refresh the estimated value');
-assert.match(js,/actualCents/,{message:'runtime must preserve the estimated/actual distinction in surrounding application logic'});
+assert.doesNotMatch(js,/actualCents\s*[:=]/,'barcode automation must not convert a store lookup into an actual paid amount');
 assert.match(js,/totalCents:0,[\s\S]*reference:'',[\s\S]*notes:'',[\s\S]*draft:true/,'new recurring occurrences must start with variable invoice fields empty');
 assert.match(js,/draft:false/,'saving a completed bill must leave draft state');
 assert.match(js,/migrateGeneratedOccurrencesToDrafts/);
