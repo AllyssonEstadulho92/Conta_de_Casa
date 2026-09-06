@@ -6,7 +6,7 @@
 
 Depois da publicação v61, a validação física mostrou um novo defeito: alguns cartões apresentavam uma fotografia, mas essa fotografia podia vir de uma fonte auxiliar e não corresponder à imagem do mesmo produto na página oficial do Pingo Doce/Continente.
 
-A auditoria confirmou que existiam três pipelines em simultâneo:
+A auditoria confirmou três pipelines em simultâneo:
 
 - `market-experience.js` fazia enriquecimento inicial por Open Food Facts com matching textual;
 - `market-image-audit.js` mantinha fallbacks Open Food/Beauty/Products/Pet Facts;
@@ -55,21 +55,19 @@ Se a imagem oficial não puder ser comprovada, fica placeholder. A aplicação d
 - Centro de Atualização recebe **v62 — Fotografia do retalhista sem misturas**;
 - CI passa também a executar `node --check market-retailer-image-policy.js`.
 
-### Testes
+### Testes e publicação
 
-Foram alinhados testes de Mercado, imagens, auditoria/zoom, bridge oficial, ícones, atualização e responsividade. A cobertura exige explicitamente:
+A cobertura exige explicitamente `official-only` nos cartões vivos, exclusão do fallback legado, remoção de imagem não oficial, validação pelo mesmo `pid`, limpeza de metadados visuais auxiliares, ordem correta dos scripts e cache/build v62.
 
-- `official-only` nos cartões vivos;
-- exclusão da auditoria/fallback legado;
-- remoção de imagem não oficial;
-- validação pelo mesmo `pid` através do bridge oficial;
-- limpeza de metadados visuais auxiliares após adicionar;
-- ordem correta dos scripts no bundle Pages;
-- cache/build v62.
+Validação concluída:
 
-CI funcional da branch `34008331898` — `success`.
+- CI funcional da branch `34008447948` — `success`;
+- CI do PR #34 `34008477059` — `success`;
+- PR #34 integrado em `main` no merge `231e445839f07316344719b7423890c6e2e99c47`;
+- CI de `main` `34008497654` — `success`;
+- Deploy Pages v62 `34008513566` — `success`.
 
-O probe do mesmo pipeline continuou a confirmar `exact-image=true` para os exemplos Continente `8167440` e Pingo Doce `739490`. A validação final permanece física: comparar no iPhone a miniatura apresentada com a página aberta por **Ver no Pingo Doce/Continente**.
+O probe do pipeline continuou a confirmar `exact-image=true` para os exemplos Continente `8167440` e Pingo Doce `739490`. A validação final permanece física: comparar no iPhone a miniatura apresentada com a página aberta por **Ver no Pingo Doce/Continente**.
 
 ## 2026-09-06 — Bridge de imagens oficiais v61
 

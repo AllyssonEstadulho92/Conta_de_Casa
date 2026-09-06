@@ -18,11 +18,11 @@
 - [x] Atualizar BUILD para v62, cache, Service Worker, Pages e Centro de Atualização.
 - [x] Incluir a nova política no syntax check da CI.
 - [x] Alinhar testes de Mercado, imagens, auditoria, ícones, atualização e responsividade com v62.
-- [x] Passar CI funcional completo da branch (`34008331898`) com `success`.
+- [x] Passar CI funcional completo da branch (`34008447948`) com `success`.
 - [x] Atualizar PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG para v62.
-- [ ] Integrar `fix/market-retailer-images-v62` em `main`.
-- [ ] Confirmar CI de `main` verde após integração.
-- [ ] Confirmar Deploy Pages v62 com sucesso.
+- [x] Integrar `fix/market-retailer-images-v62` em `main` através do PR #34 (`231e445839f07316344719b7423890c6e2e99c47`).
+- [x] Confirmar CI de `main` verde após integração (`34008497654`).
+- [x] Confirmar Deploy Pages v62 com sucesso (`34008513566`).
 - [ ] No iPhone/Safari, confirmar **Definições → Atualização de Software → v62**.
 - [ ] Repetir a pesquisa que mostrou imagem errada e abrir **Ver no Pingo Doce/Continente** para comparar o mesmo SKU.
 - [ ] Confirmar que a miniatura corresponde à fotografia oficial do mesmo `pid`.

@@ -1,11 +1,10 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 6 de setembro de 2026
-Build público confirmado: v61
-Build em validação: v62
+Build público confirmado: v62
 Distribuição: GitHub Pages
-Branch: `fix/market-retailer-images-v62`
-Estado: **correção v62 implementada e CI funcional da branch verde** (`34008331898` — `success`). Integração em `main`, CI de `main`, Deploy Pages e validação física no iPhone ainda pendentes.
+Branch pública: `main`
+Estado: **v62 integrada, testada e publicada**. PR #34 fundido em `main`; merge `231e445839f07316344719b7423890c6e2e99c47`; CI de `main` `34008497654` terminou com `success`; Deploy Pages `34008513566` terminou com `success`. Falta apenas validação física no iPhone/Safari da correspondência visual dos SKUs reportados.
 
 ## Estado atual
 
@@ -39,7 +38,7 @@ O fluxo v62:
 5. mantém o placeholder enquanto o bridge oficial resolve a fotografia;
 6. preserva a imagem quando o bridge v61 comprova a mesma cadeia e o mesmo `pid`;
 7. observa alterações posteriores de `src` para impedir que um fallback legado volte a substituir a fotografia;
-8. após o clique real em `+`, remove `imageUrl`, `imageSource`, `imageMatchedAt` e o `productCode` auxiliar se o item tiver recebido uma imagem não oficial e não existir resolução oficial segura.
+8. após o clique real em `+`, remove metadados visuais auxiliares se o item tiver recebido uma imagem não oficial e não existir resolução oficial segura.
 
 A política não cria uma nova fonte de rede e não faz `fetch`; reutiliza o bridge oficial já auditado.
 
@@ -51,7 +50,7 @@ Mantém-se a separação:
 - **Ver no Pingo Doce / Ver no Continente** — ligação para a página do retalhista;
 - **Pingo Doce · imagem oficial / Continente · imagem oficial** — proveniência apenas quando a fotografia é validada.
 
-O aviso do browser passa a explicar que, nos resultados vivos, uma fotografia aproximada de outra origem não será usada para preencher o cartão.
+O aviso do browser explica que, nos resultados vivos, uma fotografia aproximada de outra origem não será usada para preencher o cartão.
 
 ## Segurança e privacidade v62
 
@@ -63,13 +62,19 @@ O aviso do browser passa a explicar que, nos resultados vivos, uma fotografia ap
 - falha da imagem não altera preço, quantidade ou possibilidade de adicionar o produto;
 - Open Facts permanece disponível para contextos auxiliares já existentes, como identificação por código de barras e compatibilidade de itens anteriores, mas fica impedido de preencher os cartões vivos Pingo Doce/Continente.
 
-## Build e testes
+## Build, testes e publicação
 
-Build em validação: `v62`.
+Build: `v62`.
 Cache: `conta-de-casa-public-v62-retailer-official-only`.
 Novo asset público: `market-retailer-image-policy.js`.
 
-CI funcional da branch: `34008331898` — `success`.
+Validação concluída:
+
+- CI funcional da branch: `34008447948` — `success`;
+- CI do PR #34: `34008477059` — `success`;
+- merge em `main`: `231e445839f07316344719b7423890c6e2e99c47`;
+- CI de `main`: `34008497654` — `success`;
+- Deploy Pages v62: `34008513566` — `success`.
 
 Passaram: probe das fontes reais, sintaxe incluindo a nova política, finanças, auditoria, isolamento do cofre, faturas/QR, Mercado, imagens, auditoria/zoom, bridge oficial, scanner, contabilização, ícones, Centro de Atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade, sincronização e manifest.
 
@@ -79,13 +84,13 @@ O probe continua a confirmar `exact-image=true` nos exemplos Continente `8167440
 
 A v62 não garante fotografia para todos os produtos. Se a página oficial não expuser uma imagem identificável, o `pid` não coincidir, o reader/CDN estiver indisponível ou a imagem não carregar, o comportamento deliberado é manter o placeholder.
 
-A validação automatizada não substitui o teste físico no Safari/iPhone.
+A validação automatizada e o deploy não substituem o teste físico no Safari/iPhone.
 
 ## Próximo passo
 
-1. integrar `fix/market-retailer-images-v62` em `main`;
-2. confirmar CI de `main` e Deploy Pages v62;
-3. atualizar a PWA no iPhone para v62;
-4. repetir a mesma pesquisa e comparar a miniatura com a página aberta por **Ver no Pingo Doce/Continente**;
-5. confirmar que uma imagem sem correspondência oficial exata é substituída por placeholder, nunca por imagem de outra fonte;
+1. no iPhone, abrir **Definições → Atualização de Software** e confirmar `v62`;
+2. fechar completamente e reabrir a aplicação/PWA após a atualização;
+3. repetir a pesquisa que mostrou a imagem errada;
+4. abrir **Ver no Pingo Doce/Continente** e comparar a miniatura com o mesmo SKU da página oficial;
+5. confirmar que um SKU sem imagem oficial validável mantém placeholder, sem imagem aproximada;
 6. validar 320, 375, 390 e 430 px, rede lenta e indisponibilidade temporária do reader/CDN.

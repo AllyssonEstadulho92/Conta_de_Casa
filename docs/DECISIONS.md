@@ -98,8 +98,6 @@ Como Continente/Pingo Doce não expõem o HTML das páginas de produto através 
 
 Data: 6 de setembro de 2026 · Estado: aceite.
 
-### Contexto
-
 A v60 passou probes de origem, mas a captura real no iPhone continuou com placeholders. A auditoria encontrou uma falha de fronteira entre módulos: funções privadas dentro de IIFEs e seletores que não correspondiam ao HTML real.
 
 ### Decisão
@@ -113,7 +111,7 @@ A v60 passou probes de origem, mas a captura real no iPhone continuou com placeh
 
 O bridge obtém a URL do SKU através de `cesta.pt`, valida cadeia e `pid`, lê a página pública através do reader restrito, aceita apenas imagem oficial com o mesmo `pid`, confirma carregamento e só depois substitui o placeholder.
 
-O novo bridge usa GET com apenas `Accept: application/json` no reader para evitar preflight desnecessário no Safari.
+O bridge usa GET com apenas `Accept: application/json` no reader para evitar preflight desnecessário no Safari.
 
 ### Sinalização
 
@@ -123,7 +121,7 @@ O novo bridge usa GET com apenas `Accept: application/json` no reader para evita
 
 ## D-017 — Cartões vivos de retalhista são `official-only`
 
-Data: 6 de setembro de 2026 · Estado: aceite.
+Data: 6 de setembro de 2026 · Estado: aceite e publicado em v62.
 
 ### Contexto
 
@@ -159,6 +157,6 @@ Open Facts não é removido globalmente. Pode continuar a servir identificação
 
 A política v62 não acrescenta endpoints nem executa `fetch`. Reutiliza a validação v61. Falha visual não altera `estimatedCents`, `actualCents`, quantidade nem qualquer total financeiro.
 
-### Consequência
+### Consequência e publicação
 
-Build passa a `v62`, cache a `conta-de-casa-public-v62-retailer-official-only`, `market-retailer-image-policy.js` entra em Pages/Service Worker antes da auditoria legada e os testes passam a exigir a regra `official-only`.
+Build `v62`, cache `conta-de-casa-public-v62-retailer-official-only` e `market-retailer-image-policy.js` publicados via PR #34. Validação concluída: CI do PR `34008477059`, merge `231e445839f07316344719b7423890c6e2e99c47`, CI de `main` `34008497654` e Deploy Pages `34008513566`, todos com sucesso. Permanece pendente apenas validação física da correspondência visual no Safari/iPhone.

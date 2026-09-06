@@ -1,7 +1,7 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 6 de setembro de 2026
-Build em validação: v62
+Build público: v62
 
 ## Visão geral
 
@@ -33,7 +33,7 @@ Não existe backend financeiro próprio. As integrações externas do Mercado se
 - `events.js` — navegação, eventos, cofre e Service Worker.
 - `market-experience.js` — catálogo/preço Pingo Doce e Continente via `cesta.pt`; criação confirmada de itens; mantém pesquisa visual auxiliar legada para compatibilidade.
 - `market-retailer-image-policy.js` — política v62 que torna resultados vivos do Pingo Doce/Continente `official-only` e bloqueia imagens aproximadas de outras fontes.
-- `market-image-audit.js` — resolvedor v59/v60, Open Facts, visualizador e fallbacks para contextos compatíveis/legados; não deve substituir cartões vivos marcados pela política v62.
+- `market-image-audit.js` — resolvedor v59/v60, Open Facts, visualizador e fallbacks para contextos compatíveis/legados; não substitui cartões vivos marcados pela política v62.
 - `market-official-images.js` — bridge v61/v62 entre o DOM real dos cartões e a resolução/persistência da fotografia oficial por `pid`.
 - `market-barcode.js` — leitura GTIN e identificação assistida.
 - `invoice-capture.js` — leitura local de QR fiscal.
@@ -115,14 +115,10 @@ Para cada cartão visível/próximo do viewport:
 
 1. extrair cadeia, nome, embalagem e `pid` do DOM real;
 2. consultar/reutilizar `cesta.pt` para obter a URL pública do mesmo `pid`;
-3. validar a página oficial:
-   - Continente: `continente.pt` / `www.continente.pt`, caminho `/produto/`, `pid` no final da URL;
-   - Pingo Doce: `pingodoce.pt` / `www.pingodoce.pt`, caminho `/home/produtos/`, `pid` no final da URL;
+3. validar a página oficial;
 4. pedir a página ao reader restrito `r.jina.ai` através de GET CORS simples;
 5. extrair URLs candidatas;
-6. aceitar apenas:
-   - Continente: `www.continente.pt`, `Sites-col-master-catalog`, caminho/ficheiro com `pid` exato;
-   - Pingo Doce: `static.pingodoce.pt`, `Sites-pingo-doce-master/images/(large|medium|small)`, ficheiro iniciado pelo `pid`;
+6. aceitar apenas imagem do catálogo/CDN oficial com o `pid` exato;
 7. testar o carregamento real com `Image`;
 8. substituir o placeholder e manter o visualizador acessível;
 9. depois da ação real `+`, persistir a mesma imagem/origem no item criado.
@@ -155,26 +151,21 @@ Open Facts continua autorizado na CSP porque scanner, itens anteriores e outros 
 
 A ordem pública é deliberada: política official-only → auditoria legada → bridge oficial.
 
-Service Worker:
-
-`conta-de-casa-public-v62-retailer-official-only`
+Service Worker: `conta-de-casa-public-v62-retailer-official-only`.
 
 O novo asset entra no cache offline do shell. Imagens remotas não são copiadas para o cofre.
 
-## Testes e manutenção
+## Testes e publicação
 
-A cobertura v62 verifica:
+A cobertura v62 verifica sintaxe, exclusão dos cartões vivos do fallback legado, remoção de imagem não oficial, validação exclusiva por `safeOfficialImageUrl` + `pid`, limpeza de metadados auxiliares, ordem dos scripts, cache/build e regressões financeiras/segurança/responsividade.
 
-- sintaxe da nova política;
-- exclusão dos cartões vivos do fallback legado;
-- remoção de imagem não oficial;
-- validação exclusiva por `safeOfficialImageUrl` + `pid`;
-- limpeza dos metadados visuais auxiliares após adicionar quando não existe imagem oficial;
-- ordem dos scripts na composição Pages;
-- cache/BUILD v62;
-- bridge oficial, zoom, scanner, cálculos, segurança e responsividade.
+Publicação confirmada:
 
-CI funcional da branch v62: `34008331898` — `success`.
+- CI da branch: `34008447948` — `success`;
+- CI do PR #34: `34008477059` — `success`;
+- merge: `231e445839f07316344719b7423890c6e2e99c47`;
+- CI de `main`: `34008497654` — `success`;
+- Deploy Pages: `34008513566` — `success`.
 
 Regras de manutenção:
 
