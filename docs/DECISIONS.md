@@ -72,9 +72,33 @@ A interface de Compras/Mercado passa a ser `text-first`:
 - metadados antigos de imagem não são apagados apenas por esta alteração visual.
 
 ### Implementação
-`market-brand.css` oculta fotografias e reorganiza os cards. `market-branding.js` atualiza apenas a cópia informativa do browser e não toca no estado financeiro. `scripts/prepare-pages.cjs` e `sw.js` passam a distribuir os dois assets.
+`market-brand.css` oculta fotografias e reorganiza os cards. `market-branding.js` atualiza apenas a cópia informativa do browser e não toca no estado financeiro. `scripts/prepare-pages.cjs` e `sw.js` distribuem os dois assets.
 
 Os módulos antigos de imagem permanecem temporariamente por compatibilidade. A sua remoção definitiva será uma alteração separada, após validação física, para não misturar uma mudança visual com uma refatoração arquitetural ampla.
 
 ### Consequência
 A decisão reduz ruído visual e preserva os dados e comportamentos existentes. Nenhum cálculo, preço, quantidade, credencial, cofre ou sincronização é alterado.
+
+## D-019 — O layout do browser do Mercado tem posições explícitas em mobile
+Data: 6 de setembro de 2026 · Estado: aceite.
+
+### Contexto
+A validação física em iPhone/Safari revelou um cartão com grande área vazia à esquerda e todo o texto comprimido numa coluna estreita à direita. O DOM histórico ainda pode conter um nó de fotografia oculto e diferentes camadas CSS podem influenciar o auto-placement do Grid.
+
+### Decisão
+No browser do Mercado, o conteúdo textual e o botão `+` passam a ter `grid-column`/`grid-row` explícitos. O bloco textual organiza nome, embalagem/loja, estado/origem e preço sem depender do auto-placement de um nó de imagem oculto. Abaixo de 360 px o preço reflui para uma linha própria.
+
+### Consequência
+A ausência de fotografia deixa de poder criar uma “coluna fantasma”. O cartão mantém largura útil, palavras inteiras, preço legível e ação tátil estável em iPhone/Safari.
+
+## D-020 — Metadados visuais do Mercado são conflitos técnicos, não decisões financeiras
+Data: 6 de setembro de 2026 · Estado: aceite.
+
+### Contexto
+A sincronização podia apresentar uma revisão com `0 diferenças` quando dois dispositivos tinham o mesmo item financeiro mas metadados auxiliares diferentes (`productCode`, `imageUrl`, `imageSource`, `imageMatchedAt`). Esses campos não constam da comparação financeira visível e não devem exigir uma escolha do utilizador.
+
+### Decisão
+`sync-conflict-policy.js` remove apenas esses quatro campos da vista de negócio usada para decidir se dois registos do Mercado são equivalentes. O motor base continua a escolher e preservar o registo compatível mais completo. Campos de negócio como nome, categoria, quantidade, unidade, preço estimado, preço real, estado de compra e data de compra continuam a gerar conflito real quando divergem sem uma versão temporalmente mais recente.
+
+### Consequência
+Diferenças técnicas de imagem/código de barras são reconciliadas automaticamente e deixam de bloquear a sincronização. Nenhum valor financeiro é escolhido automaticamente.
