@@ -119,11 +119,11 @@ for (const asset of ['core','finance','render','forms','sync','events']) {
 assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
 // Source HTML remains at its stable template revision. The Pages build stamps v62
-// and the service worker cache advances so installed clients receive the official-only retailer policy.
+// and the service worker cache advances for the current mobile-market hotfix.
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v62-retailer-official-only/);
+assert.match(swSource, /conta-de-casa-public-v62-market-ui2/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /'\.\/market-experience\.css'/);
 assert.match(swSource, /'\.\/market-experience\.js'/);
