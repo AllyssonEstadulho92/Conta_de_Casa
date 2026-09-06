@@ -2,185 +2,157 @@
 
 Atualizado: 6 de setembro de 2026
 
-Este ficheiro mantém as decisões arquiteturais vigentes e o respetivo fundamento. O histórico detalhado permanece no Git; aqui fica a versão consolidada necessária para continuidade do projeto.
+Este ficheiro mantém as decisões arquiteturais vigentes necessárias para continuidade. O histórico detalhado permanece no Git.
 
-## D-001 — Separar altura estrutural do VisualViewport
+## D-001 — Altura estrutural separada do VisualViewport
 
-Data: 4 de setembro de 2026 · Estado: aceite
+Estado: aceite.
 
-**Decisão:** `.app-shell`/`.main` usam `100dvh` com `100svh` como mínimo. `VisualViewport` fica reservado a teclado e diálogos.
+`.app-shell`/`.main` usam `100dvh`/`100svh`; `VisualViewport` fica reservado a teclado e diálogos. Evita cortes provocados pelas barras móveis do Safari.
 
-**Motivo:** Safari/iPhone altera a altura visual com barras/teclado; usar essa medida como altura permanente causava cortes.
+## D-002 — Camada móvel dedicada
 
-## D-002 — Camada de compatibilidade móvel dedicada
+Estado: aceite.
 
-Data: 4 de setembro de 2026 · Estado: aceite
+`mobile-layout.css` permanece como camada de compatibilidade enquanto o CSS legado é consolidado gradualmente.
 
-**Decisão:** manter `mobile-layout.css` como camada final de compatibilidade em vez de reescrever de imediato CSS legado.
+## D-003 — Densidade móvel sem sacrificar alvos tácteis
 
-**Motivo:** reduz risco de regressão enquanto o layout é validado em hardware real.
+Estado: aceite.
 
-## D-003 — Reduzir densidade vertical dos cartões de Compras
+Cartões podem compactar a hierarquia em mobile, mantendo legibilidade e alvos tácteis adequados.
 
-Data: 4 de setembro de 2026 · Estado: aceite
+## D-004 — Mercado como camada isolada
 
-**Decisão:** entre 360 e 560 px, estado e métricas dos itens são compactados; abaixo de 360 px o layout volta a empilhar.
+Estado: aceite.
 
-**Motivo:** aumentar informação útil por ecrã sem reduzir legibilidade/alvos tácteis.
+Descoberta/apresentação do Mercado não reescreve o núcleo de estado, cifragem ou cálculos financeiros.
 
-## D-004 — Mercado implementado como camada isolada
+## D-005 — Nunca tratar demonstração como preço real
 
-Data: 5 de setembro de 2026 · Estado: aceite
+Estado: aceite.
 
-**Decisão:** `market-experience.js/.css` alteram apenas descoberta/apresentação do Mercado; edição e regras financeiras existentes permanecem nos módulos anteriores.
+Valores fictícios não alimentam totais nem são apresentados como preços atuais.
 
-**Motivo:** reproduzir o protótipo sem reescrever lógica madura de estado, cifragem e cálculos.
+## D-006 — Preço pesquisado é estimativa
 
-## D-005 — Não apresentar demonstração como preço real
+Estado: aceite.
 
-Data: 5 de setembro de 2026 · Estado: aceite
+Preços obtidos do catálogo entram em `estimatedCents`; `actualCents` representa o valor efetivamente pago.
 
-**Decisão:** nenhum valor fictício pode alimentar cálculos como preço real.
+## D-007 — Código de barras identifica produto, não preço
 
-**Motivo:** impedir contaminação dos totais e falsas garantias de atualidade.
+Estado: aceite.
 
-## D-006 — Preço pesquisado é estimativa; preço pago permanece separado
+GTIN/EAN/UPC pode identificar o SKU, mas o preço é obtido de fonte própria e exige confirmação do utilizador.
 
-Data: 5 de setembro de 2026 · Estado: aceite
+## D-008 — Lucide como sistema vetorial oficial
 
-**Decisão:** Continente/Pingo Doce são consultados através de `cesta.pt/mcp`; o valor selecionado entra em `estimatedCents`; `actualCents` fica reservado ao valor efetivamente pago.
+Estado: aceite.
 
-**Motivo:** uma consulta de catálogo não prova o montante final de compra.
+Lucide é vendorizado localmente, sem icon font/CDN em runtime. Snapshot auditável: `94e4cb9d9db5907053ebf3636a97c45529cf776b`.
 
-## D-007 — Código de barras identifica produto; preço continua separado
+## D-009 — QR fiscal como preenchimento assistido
 
-Data: 5 de setembro de 2026 · Estado: aceite
+Estado: aceite.
 
-**Decisão:** ZXing lê o GTIN localmente; uma base de produto identifica nome/marca; `cesta.pt` continua responsável pelo preço. O utilizador confirma o resultado antes de adicionar.
+A leitura QR preenche apenas campos estruturados comprováveis; o utilizador revê antes de guardar. Imagens não são persistidas.
 
-**Motivo:** EAN/UPC/GTIN não contém o preço atual do retalhista.
+## D-010 — Protótipo aprovado orienta a hierarquia móvel
 
-## D-008 / D-010 — Lucide como sistema vetorial oficial
+Estado: aceite.
 
-Data: 5 de setembro de 2026 · Estado: aceite
+Compras mantém título contextual, ação `+`, scanner, cartões-resumo, ações compactas e navegação consistente sem alterar o modelo financeiro.
 
-**Decisão:** Lucide é a linguagem de ícones funcional, vendorizada localmente em `ui-icons.js`, sem icon font/CDN. Snapshot: `94e4cb9d9db5907053ebf3636a97c45529cf776b`.
+## D-011 — Cofre moderno não simula biometria
 
-**Motivo:** consistência iOS/Android/desktop, funcionamento offline, CSP mínima e dimensões controladas.
+Estado: aceite.
 
-## D-009 — QR fiscal como preenchimento assistido, não OCR automático
+A interface pode usar linguagem visual moderna de PIN, mas não mostra passkey/biometria sem implementação WebAuthn real e auditada.
 
-Data: 5 de setembro de 2026 · Estado: aceite
+## D-012 — Fotografia é referência visual independente do preço
 
-**Decisão:** `invoice-capture.js/.css` lê QR fiscal localmente, mostra pré-visualização e só transfere campos após ação explícita. Imagens/PDFs não são persistidos.
+Estado: aceite.
 
-**Motivo:** os campos QR são estruturados; OCR geral introduziria incerteza em valores e datas sem política de confiança adequada.
+Uma fotografia não é prova do preço nem da transação. Ausência de imagem é preferível a uma variante incorreta.
 
-## D-011 — Protótipo aprovado define a hierarquia da Lista de compras
+## D-013 — Atualização de software usa Service Worker same-origin
 
-Data: 5 de setembro de 2026 · Estado: aceite
+Estado: aceite.
 
-**Decisão:** título com carrinho, `+` principal preservado, ação secundária visual de scanner, cartões-resumo com ícones, ações compactas e navegação inferior uniforme.
+O Centro de Atualização usa `ServiceWorkerRegistration.update()`, `SKIP_WAITING`, `controllerchange` e notas de release versionadas. Beta continua desativado sem pipeline própria.
 
-**Motivo:** alinhar o produto real ao protótipo sem mexer em schema/cálculos.
+## D-014 — Imagens por SKU com validação estrita
 
-## D-011B — Modernizar o cofre sem simular biometria/passkey
+Estado: aceite.
 
-Data: 5 de setembro de 2026 · Estado: aceite
+A imagem oficial só é considerada oficial quando domínio, catálogo/CDN e identificador do produto correspondem. Open Facts permanece fallback. Não se aceita URL arbitrária devolvida por um reader.
 
-**Decisão:** adotar linguagem visual moderna de PIN/teclado circular sem mostrar passkey/biometria enquanto não existir implementação WebAuthn/recuperação real.
+## D-015 — Reader externo restrito a páginas públicas validadas
 
-**Motivo:** qualidade visual não deve criar uma capacidade de segurança inexistente.
+Estado: aceite.
 
-## D-012 — Fotografia é referência visual, não prova de preço/origem comercial
+Como Continente/Pingo Doce não expõem o HTML das páginas de produto através de CORS utilizável pela PWA, `r.jina.ai` pode ser usado exclusivamente como reader de uma URL pública de produto previamente validada. Não recebe dados do cofre nem credenciais.
 
-Data: 5 de setembro de 2026 · Estado: aceite; expandida por D-014 e D-015
+## D-016 — Integração de imagens oficiais deve usar o contrato real do DOM
 
-**Decisão:** uma fotografia pode ser mostrada quando há correspondência suficientemente forte ou GTIN, mas não é tratada como origem do preço. A partir de D-015, uma imagem só pode ser designada oficial quando host, caminho e `pid` correspondem ao SKU oficial.
-
-**Motivo:** imagem e preço têm proveniência independente; uma imagem errada é pior do que um placeholder.
-
-## D-013 — Atualização usa Service Worker same-origin e canal estável
-
-Data: 5 de setembro de 2026 · Estado: aceite
-
-**Decisão:** `app-update.js/.css` usa `ServiceWorkerRegistration.update()`, `SKIP_WAITING`, `controllerchange` e `APP_RELEASE_NOTES`. Beta permanece desativado sem pipeline própria.
-
-**Motivo:** reutilizar o mecanismo nativo da PWA sem backend de versões ou novo endpoint externo.
-
-## D-014 — Auditar imagens por SKU com Open Facts e ampliação
-
-Data: 5 de setembro de 2026 · Estado: aceite; complementada por D-015
-
-**Decisão:** criar `market-image-audit.js/.css`; auditar cada produto individualmente, preferir GTIN/EAN, usar Open Food/Beauty/Products/Pet Facts com score mínimo `0.74`, limitar concorrência a três, persistir apenas URL/metadados e manter placeholder quando não houver correspondência segura. Qualquer fotografia válida é ampliável em `<dialog>`.
-
-**Motivo:** a pesquisa ampla inicial de Open Food Facts deixava muitos produtos sem imagem e as miniaturas existentes eram estáticas.
-
-**Limitação v59:** a fotografia continuava a vir de Open Facts; portanto não resolvia necessariamente a imagem efetivamente usada pelo Continente/Pingo Doce para esse SKU.
-
-## D-015 — Imagem oficial exige página oficial validada + PID exato
-
-Data: 6 de setembro de 2026 · Estado: aceite
+Data: 6 de setembro de 2026 · Estado: aceite.
 
 ### Contexto
 
-A validação física da v59 mostrou que vários produtos continuavam com placeholder apesar de terem fotografia nas páginas oficiais. A causa ficou confirmada: `cesta.pt` fornecia nome, preço, `pid` e URL oficial, mas a aplicação procurava a fotografia noutro catálogo. Além disso, o browser não consegue ler diretamente o HTML das páginas Continente/Pingo Doce porque os retalhistas não expõem CORS apropriado ao GitHub Pages.
+A v60 passou todos os probes de origem, mas a captura real no iPhone continuou com placeholders. A auditoria do código encontrou uma falha de fronteira entre módulos:
 
-Foram auditadas as duas páginas reais indicadas pelo utilizador:
+- `market-experience.js` mantém `resultById` e funções relacionadas dentro de um IIFE;
+- a camada externa v60 tentou alterar funções privadas que não eram globais;
+- procurava `.market-product-source[href]`, mas o controlo renderizado é `.market-result-source`;
+- tentava interceptar `[data-market-add]`, mas o botão real é `[data-market-add-product]`.
 
-- Continente — produto `8167440`;
-- Pingo Doce — produto `739490`.
-
-A auditoria confirmou que ambas possuem imagens oficiais identificáveis pelo próprio `pid`, e que um reader controlado consegue expor esses URLs com CORS utilizável pela PWA.
+Logo, a existência da fotografia na fonte não garantia que o cartão real a recebesse.
 
 ### Decisão
 
-A v60 passa a usar a seguinte prioridade:
+Criar `market-official-images.js` como bridge progressivo que depende apenas de contratos públicos/reais:
 
-1. `cesta.pt/mcp` fornece o resultado e a URL oficial;
-2. a URL é aceite apenas se pertencer ao domínio/caminho oficial e terminar num `pid` válido;
-3. a página pública é lida através de `r.jina.ai` com `Accept: application/json`, `X-With-Images-Summary: true` e `X-Retain-Images: true`;
-4. a aplicação extrai candidatos e volta a validá-los localmente;
-5. uma imagem só é classificada como oficial se o host, diretório de catálogo e `pid` coincidirem exatamente com o produto;
-6. sem imagem oficial, usar GTIN/EAN Open Facts; depois correspondência textual Open Facts; por fim placeholder.
+- `[data-market-product-card]` para cadeia + `pid`;
+- `.market-result-source` para a ação do retalhista;
+- `[data-market-add-product]` para o fluxo real de adição;
+- `appState.market`/`saveState()` apenas depois de o fluxo existente criar o item.
 
-### Allowlist de saída
+O bridge não tenta aceder a `resultById` nem reatribuir funções privadas de outro IIFE.
 
-**Continente:** `www.continente.pt`, `Sites-col-master-catalog`, JPG/PNG/WebP, caminho contendo o `pid`; imagens `noimage`/fallback são rejeitadas.
+### Resolução da imagem
 
-**Pingo Doce:** `static.pingodoce.pt`, `Sites-pingo-doce-master`, `images/large|medium|small`, JPG/PNG/WebP, nome do ficheiro iniciado pelo `pid`.
+1. obter URL do SKU através de `cesta.pt`;
+2. validar cadeia e `pid`;
+3. ler a página pública via reader restrito;
+4. aceitar apenas imagem oficial com o mesmo `pid`;
+5. confirmar que a imagem carrega;
+6. substituir o placeholder e manter o zoom;
+7. persistir URL/origem após a ação real de adicionar.
 
-Não é aceite qualquer URL de imagem de host genérico apenas por ter sido devolvida pelo reader.
+### CORS/Safari
 
-### Catálogo
+O novo bridge usa GET com apenas `Accept: application/json` no reader. Cabeçalhos personalizados de retenção/resumo de imagem foram removidos do pedido desta camada para evitar preflight desnecessário. Isto é uma medida de robustez; não se declara que o preflight era a única causa da falha v60.
 
-A mesma camada substitui progressivamente a chamada de pesquisa, mantendo o contrato de eventos existente, para pedir `limit:20` ao `cesta.pt` e admitir até 40 resultados normalizados. Isto aumenta a variedade sem introduzir catálogo local fictício.
+### Sinalização
 
-### Desempenho
+A interface separa três conceitos:
 
-As imagens oficiais são resolvidas apenas para cartões visíveis ou próximos através de `IntersectionObserver` (`rootMargin: 800px`) e continuam limitadas a três resoluções concorrentes. O botão `+` aguarda a tentativa de imagem oficial antes de persistir o produto, mas uma falha de imagem nunca bloqueia a adição.
+- `Consultado agora` = atualidade da consulta/preço;
+- `Ver no Pingo Doce` / `Ver no Continente` = ligação para a página do produto;
+- `Pingo Doce · imagem oficial` / `Continente · imagem oficial` = proveniência da fotografia.
 
-### Produtos antigos
+O texto genérico “Produto oficial” deixa de ser usado pelo bridge porque podia sugerir, junto de um placeholder, que a própria miniatura vazia era oficial.
 
-Itens já guardados sem URL oficial podem ser reencontrados pelo nome no `cesta.pt`. Só é aceite uma correspondência com score >= `0.96` e sem empate/variante ambígua. Caso contrário, não se força a imagem oficial.
+### Segurança
 
-### Segurança e privacidade
+- nenhuma credencial no bridge;
+- `credentials:'omit'` e `referrerPolicy:'no-referrer'`;
+- reader recebe apenas URL pública validada;
+- nenhuma informação financeira ou conteúdo do cofre é enviado;
+- imagem oficial exige correspondência exata do `pid`;
+- falha de imagem nunca altera preço nem impede a adição do produto.
 
-- `r.jina.ai` recebe apenas uma URL pública já validada de produto; não recebe PIN, chave do cofre, faturas, saldo, token GitHub ou outros dados pessoais/financeiros;
-- `credentials:'omit'` e `referrerPolicy:'no-referrer'` permanecem obrigatórios;
-- não usar Microlink, AllOrigins ou proxy CORS arbitrário;
-- CSP permite `r.jina.ai` apenas em `connect-src` e os dois hosts oficiais apenas em `img-src`;
-- URLs e `pid` são novamente validados depois da leitura;
-- binários de imagem não são persistidos.
+### Consequência
 
-### Motivo
-
-O requisito é apresentar a fotografia fiel do produto da própria cadeia. A associação por `pid` fornece evidência mais forte do que uma semelhança textual numa base externa. O reader é introduzido apenas para ultrapassar a barreira CORS de páginas públicas e fica cercado por validação de entrada e saída.
-
-### Risco residual
-
-O retalhista pode mudar o domínio/CDN, estrutura de página ou paths de catálogo; `cesta.pt` ou o reader podem ficar temporariamente indisponíveis. Nesses casos a aplicação recua para os fallbacks existentes e nunca inventa uma fotografia.
-
-### Validação
-
-O CI v60 testa os dois exemplos reais, rejeição de `pid` incorreto, hosts não autorizados, CSP, fallback, lazy loading, zoom e regressões completas. A validação física em Safari/iPhone continua necessária após publicação.
+Build passa a v61, cache a `conta-de-casa-public-v61-official-images-bridge`, novo asset entra na allowlist Pages/Service Worker e existe teste dedicado `tests/market-official-images.test.cjs`.
