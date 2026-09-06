@@ -20,19 +20,19 @@
 - [x] Preparar o Service Worker para aguardar confirmação do utilizador antes de ativar uma atualização.
 - [x] Preservar compatibilidade `SKIP_WAITING` com clientes v62 e usar `APPLY_UPDATE` no novo fluxo.
 - [x] Restringir cache-busting a um único parâmetro `v` ou `ts` e sempre à allowlist pública explícita.
-- [x] Renovar cache candidato para `conta-de-casa-public-v63-ui2`.
+- [x] Renovar cache público para `conta-de-casa-public-v63-ui2`.
 - [x] Criar `tests/ui-consistency.test.cjs` e integrar na CI.
 - [x] Atualizar regressões antigas que estavam fixas na revisão/cache v62.
 - [x] Obter CI completa verde na branch com finanças, segurança, responsividade, navegação, acessibilidade, Mercado, atualização e sincronização.
-- [ ] Rever o diff final contra `main`.
-- [ ] Abrir PR da v63 para `main`.
-- [ ] Integrar a v63 apenas com CI do PR verde.
-- [ ] Confirmar CI de `main` após merge.
-- [ ] Confirmar Deploy GitHub Pages da v63.
+- [x] Rever o diff final contra `main`.
+- [x] Abrir PR #42 da v63 para `main`.
+- [x] Integrar a v63 apenas com CI do PR verde.
+- [x] Confirmar CI de `main` após merge — run #999 (`34065040862`) com sucesso.
+- [x] Confirmar Deploy GitHub Pages da v63 — run #992 (`34065057875`) com sucesso.
 - [ ] Validar no iPhone/Safari que existe apenas uma barra ativa na navegação inferior.
 - [ ] Validar no iPhone/Safari que a faixa dos cartões-resumo é sólida e contínua.
 - [ ] Validar visualmente a uniformidade dos ícones em Início, Faturas, Compras, Relatórios, Segurança e Definições.
-- [ ] Testar **Definições → Atualização de Software** e confirmar instalação da v63 num dispositivo real.
+- [ ] Confirmar a transição do dispositivo para v63 e testar **Definições → Atualização de Software**.
 - [ ] Validar tema claro/escuro e larguras 320, 375, 390 e 430 px.
 
 ## P0 — Lista de compras agrupada por categoria
