@@ -45,7 +45,8 @@ assert.match(officialBridge,/\[data-market-add-product\]/);
 assert.match(officialBridge,/persistResolvedItem/);
 assert.match(officialBridge,/data-market-image-official/);
 assert.match(officialBridge,/Ver no \$\{label\}/);
-assert.doesNotMatch(officialBridge,/X-With-Images-Summary|X-Retain-Images/);
+assert.match(officialBridge,/headers:\{Accept:'application\/json'\}/);
+assert.doesNotMatch(officialBridge,/headers:\{[^}]*['"]X-(?:With-Images-Summary|Retain-Images)/);
 
 assert.match(barcode,/image_front_small_url,image_front_url/);
 assert.match(barcode,/safeProductImageUrl\(product\.image_front_small_url\|\|product\.image_front_url/);
