@@ -2,77 +2,84 @@
 
 Atualizado: 6 de setembro de 2026
 Build público: v62
-Revisão pública de interface: `62-ui2`
-Revisão em validação: `62-ui3` — lista de compras por categoria
+Revisão pública de interface: `62-ui3` — lista de compras por categoria
 Distribuição: GitHub Pages
 Branch pública: `main`
-Branch de trabalho: `ui/market-category-groups`
+Estado: publicado
 
 ## Estado atual
 
 A aplicação mantém a arquitetura PWA estática/local-first. O cofre continua no navegador, cifrado com PBKDF2-SHA-256 + AES-GCM; os dados financeiros permanecem no IndexedDB e a sincronização GitHub continua opcional e cifrada. O schema financeiro permanece na versão 5.
 
-O hotfix anterior de iPhone/Safari permanece publicado e estável: corrigiu o browser de produtos com coluna vazia/compressão e o conflito técnico `0 diferenças`. Não existe evidência de regressão financeira associada a essa revisão.
+A organização da página **Lista de compras** por categoria foi integrada em `main` através do PR #40 e publicada no GitHub Pages. O hotfix anterior do browser de produtos e da política de conflitos técnicos permanece ativo.
 
-## Alteração em validação — Lista de compras por categoria
+## Lista de compras por categoria
 
-A validação física da página **Lista de compras** mostrou que a sequência de cartões individuais, embora funcional, cria demasiada repetição visual e dificulta localizar rapidamente produtos semelhantes.
+A lista passa a usar a categoria já existente em cada item como estrutura visual:
 
-A revisão `62-ui3` reorganiza a lista sem alterar o modelo de dados:
+- cada categoria forma um grupo independente;
+- o cabeçalho apresenta categoria e número de itens;
+- em mobile, os grupos ficam expandidos por defeito e podem ser recolhidos;
+- a categoria deixa de ser repetida em cada produto;
+- os itens tornam-se linhas mais compactas dentro do respetivo grupo;
+- para itens pendentes, a apresentação reduz blocos financeiros redundantes sem alterar os valores guardados;
+- itens comprados continuam a mostrar preço real e diferença;
+- editar, eliminar, checkbox, filtros, pesquisa e ordenação reutilizam a lógica existente;
+- em desktop, a tabela mantém as colunas e recebe separadores de categoria.
 
-- os itens passam a ser agrupados pela categoria já existente no próprio registo;
-- cada grupo apresenta categoria, número de itens e controlo nativo expandir/recolher;
-- os grupos usam uma ordem previsível baseada na taxonomia existente do Mercado;
-- dentro de cada categoria é preservada a ordem já calculada pelos filtros/ordenação atuais;
-- em mobile, os cartões passam a linhas mais compactas dentro do grupo;
-- a categoria deixa de ser repetida em cada linha, ficando no cabeçalho do grupo;
-- para itens pendentes, blocos financeiros redundantes visualmente iguais são ocultados na apresentação, mantendo o valor estimado visível;
-- itens comprados continuam a expor preço real, diferença e ações existentes;
-- editar, eliminar e marcar como comprado reutilizam os mesmos atributos/eventos já implementados.
+A ordem das categorias segue a taxonomia conhecida do Mercado. Categorias adicionais são colocadas depois das categorias conhecidas, por ordem alfabética. Dentro de cada categoria é preservada a ordenação calculada pelo fluxo existente.
 
-No desktop, a tabela mantém a estrutura existente e recebe separadores por categoria.
-
-## Implementação
+## Implementação publicada
 
 Foram adicionadas duas camadas isoladas:
 
-- `market-category-groups.js` — reorganiza o DOM renderizado pelo Mercado em grupos por categoria após cada `renderMarket`, sem gravar estado;
-- `market-category-groups.css` — define a apresentação compacta dos grupos em mobile e os cabeçalhos de categoria da tabela em desktop.
+- `market-category-groups.js` — agrupa os nós já renderizados pela categoria existente, sem gravar estado;
+- `market-category-groups.css` — apresentação compacta dos grupos em mobile e separadores de categoria em desktop.
 
-A integração não modifica `render.js`, o schema, os cálculos ou os handlers existentes. O módulo identifica cada item através do `data-market-toggle` já presente nos cartões e consulta apenas a categoria/quantidade para apresentação.
+`render.js`, o schema financeiro e os handlers de negócio não foram alterados para implementar esta organização.
 
 ## Distribuição e cache
 
-O build formal permanece v62.
-
-- branding anterior mantém `62-ui2`;
-- os novos assets de agrupamento usam `62-ui3`;
-- o Service Worker passa a usar `conta-de-casa-public-v62-market-ui2-category-ui3`, preservando o identificador da revisão anterior e forçando atualização do cache;
-- `scripts/prepare-pages.cjs` inclui os dois novos assets no allowlist público.
+- build formal: v62;
+- revisão do branding anterior: `62-ui2`;
+- revisão dos novos assets de agrupamento: `62-ui3`;
+- cache público: `conta-de-casa-public-v62-market-ui2-category-ui3`;
+- merge funcional em `main`: `98662aa366ea65316ebd47cf56df8f2a3eeac974`;
+- CI de `main`: sucesso;
+- Deploy GitHub Pages da mesma revisão: sucesso.
 
 ## Segurança e dados
 
-A revisão de categorias:
+A revisão publicada:
 
 - não altera PIN/palavra-passe;
 - não altera PBKDF2, AES-GCM, IndexedDB ou sincronização;
 - não altera `estimatedCents`, `actualCents`, quantidade ou estado de compra;
-- não cria nem altera categorias: usa apenas a categoria já guardada;
+- não cria nem migra categorias;
 - não acrescenta endpoints, credenciais, cookies ou telemetria;
 - não usa armazenamento adicional para o estado expandido/recolhido;
 - não remove dados existentes.
 
-## Testes preparados
+## Validação automática concluída
 
-- `tests/market-category-groups.test.cjs` valida sintaxe, agrupamento, responsividade, ausência de mutação financeira e composição do Pages;
-- CI e Deploy Pages passam a validar `market-category-groups.js` e o novo teste;
-- a revisão de assets confirma que branding/sincronização continuam em `62-ui2` e apenas o agrupamento usa `62-ui3`.
+A CI validou, entre outros pontos:
+
+- sintaxe do novo módulo;
+- teste dedicado `tests/market-category-groups.test.cjs`;
+- finanças e invariantes de contagem;
+- isolamento do cofre;
+- faturas e datas;
+- Mercado, imagens históricas, código de barras e contabilização;
+- segurança;
+- responsividade e viewport móvel;
+- navegação e acessibilidade;
+- sincronização e política de conflitos técnicos;
+- composição pública do GitHub Pages e manifest.
 
 ## Próximo passo
 
-1. executar a CI completa da branch `ui/market-category-groups`;
-2. rever o diff final;
-3. integrar em `main` apenas com CI verde;
-4. confirmar CI de `main` e Deploy GitHub Pages;
-5. validar fisicamente no iPhone/Safari a lista com várias categorias, incluindo grupos com 1 item, vários itens, itens comprados e pendentes;
-6. confirmar que filtros, pesquisa, editar, eliminar, checkbox e preço real continuam funcionais.
+1. fechar completamente e voltar a abrir a aplicação/PWA no iPhone para carregar o novo cache `62-ui3`;
+2. validar fisicamente grupos com uma e várias categorias;
+3. testar expandir/recolher, pesquisa, filtros, checkbox, editar, eliminar e registo de preço real;
+4. confirmar tema claro/escuro e larguras 320, 375, 390 e 430 px;
+5. manter para alteração separada a eventual remoção definitiva do pipeline histórico de imagens.
