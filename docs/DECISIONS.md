@@ -102,3 +102,26 @@ A sincronização podia apresentar uma revisão com `0 diferenças` quando dois 
 
 ### Consequência
 Diferenças técnicas de imagem/código de barras são reconciliadas automaticamente e deixam de bloquear a sincronização. Nenhum valor financeiro é escolhido automaticamente.
+
+## D-021 — A Lista de compras é agrupada por categoria sem alterar o modelo
+Data: 6 de setembro de 2026 · Estado: aceite.
+
+### Contexto
+A validação física da lista mostrou que uma sequência longa de cartões individuais dificulta localizar produtos e repete a categoria em cada item. A informação já possui categoria estruturada, pelo que não é necessário alterar o schema para melhorar a organização.
+
+### Decisão
+A apresentação da Lista de compras passa a agrupar itens pela categoria já existente:
+
+- cada categoria é um grupo visual independente, expandido por defeito e recolhível com `<details>/<summary>`;
+- o cabeçalho mostra categoria e contagem de itens;
+- a ordem das categorias segue a taxonomia conhecida do Mercado e categorias não previstas ficam no fim por ordem alfabética;
+- a ordem interna dos itens continua a ser a definida pelos filtros/ordenação existentes;
+- em mobile, os cartões tornam-se linhas compactas dentro do grupo;
+- em desktop, a tabela mantém as colunas e recebe separadores de categoria;
+- nenhuma categoria, preço, quantidade ou estado é alterado pela camada de apresentação.
+
+### Implementação
+`market-category-groups.js` reorganiza o DOM já renderizado usando o identificador real `data-market-toggle` e a categoria presente em `appState.market`. `market-category-groups.css` aplica a apresentação compacta. Os handlers existentes de editar, eliminar, checkbox e preço real são preservados porque os mesmos nós são movidos, não recriados.
+
+### Consequência
+A lista fica mais previsível e rápida de consultar sem duplicar lógica de negócio nem alterar persistência. A mudança pode ser removida isoladamente sem migração de dados.
