@@ -9,6 +9,7 @@ const {execFileSync}=require('node:child_process');
 const ROOT=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const js=read('market-official-images.js');
+const policy=read('market-retailer-image-policy.js');
 const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
 
@@ -33,6 +34,10 @@ assert.match(js,/imageSource=result\.source/);
 assert.match(js,/saveState/);
 assert.doesNotMatch(js,/Authorization|api[_-]?key/i);
 assert.doesNotMatch(js,/microlink|allorigins|corsproxy/i);
+
+assert.match(policy,/marketRetailerImagePolicy='official-only'/);
+assert.match(policy,/CDCOfficialMarketImages\?\.safeOfficialImageUrl/);
+assert.match(policy,/photo\.replaceWith\(emptyPhoto\(\)\)/);
 
 const documentStub={
   readyState:'loading',
@@ -84,16 +89,21 @@ assert.equal(parsed[0].sourceUrl,pingoProduct);
 assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
-assert.match(sw,/conta-de-casa-public-v61-official-images-bridge/);
+assert.match(sw,/conta-de-casa-public-v62-retailer-official-only/);
+assert.ok(sw.includes("'./market-retailer-image-policy.js'"));
 assert.ok(sw.includes("'./market-official-images.js'"));
-assert.match(prepare,/const BUILD = 'v61'/);
+assert.match(prepare,/const BUILD = 'v62'/);
+assert.ok(prepare.includes("'market-retailer-image-policy.js'"));
 assert.ok(prepare.includes("'market-official-images.js'"));
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-official-images\.js\?v=61/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=62/);
+  assert.match(index,/market-official-images\.js\?v=62/);
+  assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
+  assert.ok(fs.existsSync(path.join(dist,'market-retailer-image-policy.js')));
   assert.ok(fs.existsSync(path.join(dist,'market-official-images.js')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
