@@ -1,163 +1,178 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 6 de setembro de 2026
-Build público base: v62
-Revisão atual publicada: lista de compras agrupada por categoria (`62-ui3`)
+Build público atual: v62
+Candidato: v63 (`63-ui2`)
 
 ## Visão geral
 
 **Conta de Casa** é uma aplicação web estática/PWA distribuída por GitHub Pages. A arquitetura é local-first: estado financeiro, regras de negócio, formulários, cifragem e persistência executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
 
-Não existe backend financeiro próprio. As integrações externas do Mercado servem descoberta de catálogo, preço e identificação de produto; não recebem conteúdo financeiro do cofre.
+Não existe backend financeiro próprio. Integrações externas do Mercado servem descoberta/identificação de catálogo e preço; não recebem o conteúdo financeiro do cofre.
 
-## Camadas principais
+## Camadas de apresentação
 
-### Estrutura e apresentação
+A ordem das camadas é intencional:
 
-- `index.html` — template semântico, CSP base, páginas, navegação e diálogos.
-- `styles.css` / `design-system.css` — estilos base e design system.
-- `mobile-layout.css` — compatibilidade de viewport/Safari e safe areas.
-- `market-experience.css` — estrutura visual do Mercado.
-- `market-brand.css` — identidade visual text-first do módulo Compras/Mercado e correções do browser móvel.
-- `market-category-groups.css` — apresentação compacta da Lista de compras por categoria em mobile e separadores de categoria na tabela desktop.
-- `market-barcode.css` — scanner GTIN/EAN/UPC.
-- `ui-icons.css` — linguagem visual Lucide e overrides finais.
-- `invoice-capture.css` — captura QR de faturas.
-- `app-update.css` — Centro de Atualização.
-- `market-image-audit.css` — camada histórica de imagens, mantida temporariamente por compatibilidade.
+1. `styles.css` — estilos históricos/base;
+2. `design-system.css` — tokens, componentes e layouts principais;
+3. `mobile-layout.css` — compatibilidade de viewport/Safari e safe areas;
+4. `market-experience.css` — estrutura do Mercado;
+5. `market-brand.css` — identidade text-first do módulo Compras;
+6. `market-category-groups.css` — agrupamento/compactação por categoria;
+7. `ui-icons.css` — sistema Lucide local e hidratação visual base;
+8. `ui-consistency.css` — **camada final v63**, dedicada a resolver colisões entre camadas anteriores e impor invariantes visuais globais.
 
-### JavaScript
+Outras folhas especializadas: `market-barcode.css`, `invoice-capture.css`, `app-update.css` e `market-image-audit.css`.
 
-- `core.js` — estado, normalização, IndexedDB, cifragem e utilitários.
-- `finance.js` — cálculos financeiros.
-- `render.js` — renderização de páginas/listas.
-- `forms.js` — formulários e validação.
-- `sync.js` — motor de sincronização cifrada opcional via GitHub.
-- `sync-conflict-policy.js` — política complementar que ignora apenas metadados técnicos de imagem/código de barras na equivalência do Mercado.
-- `events.js` — navegação, eventos, cofre e Service Worker.
-- `market-experience.js` — catálogo/preço Pingo Doce e Continente via `cesta.pt` e criação confirmada de itens.
-- `market-branding.js` — camada sem estado que alinha o texto do browser de produtos com a experiência text-first.
-- `market-category-groups.js` — camada de apresentação que agrupa os nós já renderizados da Lista de compras pela categoria existente, sem persistência própria.
-- `market-barcode.js` — leitura GTIN e identificação assistida; a câmara não é um campo de fotografia.
-- `invoice-capture.js` — leitura local de QR fiscal.
-- `ui-icons.js` — subset Lucide local.
-- `app-update.js` — versão, notas de release e atualização do Service Worker.
-- `market-retailer-image-policy.js`, `market-image-audit.js` e `market-official-images.js` — mecanismos visuais históricos v59–v62, mantidos nesta revisão para compatibilidade e potencial remoção posterior controlada.
+### Regra de precedência v63
+
+`ui-consistency.css` é carregado depois das camadas do Mercado. Não contém regras de negócio. A sua responsabilidade é limitada a:
+
+- métrica vetorial comum de ícones;
+- um único indicador ativo na navegação mobile;
+- separação entre ícone semântico e faixa cromática dos cartões-resumo;
+- tamanhos contextuais previsíveis para ícones de navegação, ações e botões principais.
+
+## JavaScript principal
+
+- `core.js` — estado, normalização, IndexedDB, cifragem e utilitários;
+- `finance.js` — cálculos financeiros;
+- `render.js` — renderização das páginas/listas;
+- `forms.js` — formulários e validação;
+- `sync.js` — sincronização cifrada opcional via GitHub;
+- `sync-conflict-policy.js` — equivalência complementar para metadados técnicos do Mercado;
+- `events.js` — navegação, cofre, viewport e registo do Service Worker;
+- `market-experience.js` — catálogo/preço Pingo Doce/Continente e criação confirmada de itens;
+- `market-branding.js` — cópia/contexto text-first sem tocar no estado financeiro;
+- `market-category-groups.js` — reorganiza os mesmos nós da Lista de compras pela categoria já existente;
+- `market-barcode.js` — identificação GTIN/EAN/UPC;
+- `ui-icons.js` — subset Lucide local, sem CDN de ícones;
+- `invoice-capture.js` — leitura local de QR fiscal;
+- `app-update.js` — Centro de Atualização e instalação confirmada;
+- módulos `market-retailer-image-policy.js`, `market-image-audit.js` e `market-official-images.js` — compatibilidade histórica, sem prioridade visual na experiência text-first atual.
+
+## Sistema de ícones
+
+Lucide é o sistema vetorial oficial. `ui-icons.js` mantém a geometria SVG local e auditável. A v63 normaliza a apresentação final em `ui-consistency.css`:
+
+- `stroke-width: 2`;
+- `stroke-linecap: round`;
+- `stroke-linejoin: round`;
+- `vector-effect: non-scaling-stroke`;
+- tamanhos contextuais base de 20/22/24 px;
+- `currentColor` continua a controlar o estado cromático quando aplicável.
+
+Não é criada uma segunda biblioteca de ícones.
+
+## Navegação mobile — indicador ativo
+
+O design system já define `.mobile-nav .nav-btn::before` como indicador do item ativo. Camadas posteriores tinham acrescentado `::after`, resultando em duas barras.
+
+Na v63:
+
+- `::before` é o único indicador oficial;
+- `::after` é explicitamente desativado pela camada final;
+- largura padrão: 42 px, reduzida para 38 px até 430 px;
+- altura: 3 px;
+- o Mercado usa o mesmo indicador, apenas herdando o azul da identidade do módulo.
+
+A decisão evita depender da ordem acidental de pseudo-elementos entre ficheiros.
+
+## Cartões-resumo do Mercado
+
+Antes da v63, `market-summary-item::before` tinha duas responsabilidades incompatíveis: ícone semântico em `ui-icons.css` e faixa superior em `market-brand.css`.
+
+A v63 separa as responsabilidades:
+
+- o acento cromático superior é um `box-shadow: inset 0 3px 0 ...`, sólido e contínuo;
+- `::before` fica exclusivamente dedicado ao ícone semântico;
+- a cor do acento usa uma variável por estado (`primary`, `success`, `warning`, `normal`, `danger`).
+
+## Lista de compras por categoria
+
+O agrupamento continua sem alterar o schema:
+
+- cada cartão/linha é associado ao item real por `data-market-toggle`;
+- a categoria é lida do item correspondente em `appState.market` apenas para apresentação;
+- os mesmos nós são movidos para grupos, preservando handlers delegados e atributos `data-*`;
+- mobile usa `<details open>` + `<summary>`;
+- desktop mantém tabela e recebe separadores de categoria;
+- a categoria deixa de se repetir em cada item mobile;
+- pendentes não repetem blocos financeiros equivalentes;
+- itens comprados mantêm preço real/diferença;
+- a v63 também uniformiza a margem esquerda de nome, quantidade, estado, valores e ações.
+
+A ordem das categorias segue a taxonomia conhecida do Mercado; categorias adicionais ficam depois por ordem alfabética. A ordem interna já calculada pelos filtros é preservada.
 
 ## Modelo financeiro e segurança
 
-O schema financeiro permanece `STATE_VERSION = 5`. Valores monetários são inteiros em cêntimos. O Mercado mantém `estimatedCents` separado de `actualCents`; quantidade permanece separada do preço unitário.
+O schema permanece `STATE_VERSION = 5`. Valores monetários são inteiros em cêntimos. `estimatedCents` continua separado de `actualCents`; quantidade permanece separada do preço unitário.
 
-O cofre usa IndexedDB e envelope cifrado. O modelo continua baseado em PBKDF2-SHA-256 + AES-GCM. As revisões visuais não alteram autenticação, derivação de chave, backups ou conteúdo cifrado enviado ao GitHub.
+O cofre usa IndexedDB e envelope cifrado com PBKDF2-SHA-256 + AES-GCM. As revisões v63 de interface e atualização não alteram autenticação, derivação de chave, conteúdo cifrado ou backups.
 
-Metadados antigos de imagem (`productCode`, `imageUrl`, `imageSource`, `imageMatchedAt`) continuam tolerados pelo normalizador para não destruir dados existentes. A interface não lhes reserva espaço visual e a sincronização deixa de os tratar como divergências que exijam decisão manual.
+Metadados históricos de imagem continuam tolerados para compatibilidade. `sync-conflict-policy.js` ignora apenas `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` ao decidir equivalência de negócio do Mercado; preços, quantidade e estado de compra continuam protegidos.
 
-## Mercado — responsabilidades atuais
+## Centro de Atualização v63
 
-1. **Catálogo, preço e página do produto:** `market-experience.js` + `cesta.pt/mcp`.
-2. **Código de barras:** `market-barcode.js`; identifica o artigo, não define preço.
-3. **Persistência financeira:** fluxo existente de `market-experience.js`, apenas após ação explícita do utilizador.
-4. **Apresentação e identidade:** `market-experience.css` + `market-brand.css`.
-5. **Agrupamento da Lista de compras:** `market-category-groups.js` + `market-category-groups.css`.
-6. **Cópia contextual text-first:** `market-branding.js`.
-7. **Compatibilidade histórica de imagens:** módulos v59–v62, sem prioridade visual na interface.
+### Fonte de versão
 
-A informação principal de um produto permanece: **nome → embalagem/quantidade → loja → preço/estado**. Na Lista de compras, a categoria passa a funcionar também como estrutura de navegação visual.
+`release-manifest.json` é um recurso público same-origin com:
 
-## Lista de compras — agrupamento por categoria
+- `schemaVersion`;
+- canal `stable`;
+- `latestVersion`;
+- histórico de releases e alterações.
 
-A revisão `62-ui3` não altera `render.js` nem o schema. O agrupamento atua sobre o DOM já produzido por `renderMarket()`:
+`scripts/prepare-pages.cjs` falha se `latestVersion` não corresponder ao build a publicar.
 
-- cada cartão/linha é associado ao item real pelo `data-market-toggle` já existente;
-- a categoria é lida do item correspondente em `appState.market` apenas para apresentação;
-- os nós existentes são movidos para grupos, preservando handlers delegados e atributos `data-*`;
-- cada grupo mobile usa `<details open>` + `<summary>`, fornecendo expandir/recolher nativo e acessível sem estado adicional;
-- o cabeçalho mostra categoria e contagem; a categoria deixa de se repetir em cada linha mobile;
-- itens pendentes ocultam na apresentação blocos financeiros duplicados que exibiam o mesmo valor, mantendo o estimado visível;
-- itens comprados continuam a mostrar informação financeira e preço real existentes;
-- a tabela desktop recebe linhas separadoras de categoria, mantendo colunas e ações.
+### Fluxo
 
-### Ordem das categorias
+1. a aplicação v62/v63 regista o Service Worker;
+2. o Centro de Atualização consulta `release-manifest.json` com `cache: no-store`;
+3. se a versão pública for superior, a interface apresenta a atualização;
+4. `registration.update()` prepara o novo worker;
+5. o novo worker permanece `waiting` numa atualização normal;
+6. apenas após **Atualizar agora** é enviada a mensagem `APPLY_UPDATE` (com compatibilidade `SKIP_WAITING` para clientes anteriores);
+7. o worker ativa, elimina caches antigos, reclama os clientes e reinicia/navega a janela controlada.
 
-A ordem base acompanha a taxonomia existente do Mercado: frutas/legumes, padaria, lacticínios/ovos, carne/peixe, mercearia/despensa, congelados, bebidas, snacks/doces, higiene, limpeza, bebé, animais e outros. Categorias não previstas ficam depois destas por ordem alfabética. Dentro de cada grupo, a ordem calculada por `marketFilteredItems()` é preservada.
+A instalação atua nos assets da aplicação e não executa migração/destruição do cofre.
 
-## Browser do Mercado — regra de layout móvel
+### Cache e allowlist
 
-O browser de produtos continua a usar posições explícitas para impedir a “coluna fantasma” deixada pelo antigo slot de fotografia:
+Cache candidato: `conta-de-casa-public-v63-ui2`.
 
-- `.market-product-copy` ocupa sempre a primeira coluna útil;
-- `.market-add-product` ocupa sempre a coluna da ação;
-- dentro de `.market-product-copy`, nome/loja/estado ficam à esquerda e o preço à direita quando existe largura suficiente;
-- abaixo de 360 px, o preço reflui para baixo do conteúdo em vez de comprimir palavras letra a letra.
+O Service Worker só trata recursos constantes em `PUBLIC_ASSET_SET`. Cache-busting aceita exatamente um parâmetro:
 
-## Sincronização — política de conflitos técnicos
+- `v` — revisão/versionamento de assets;
+- `ts` — leitura fresca do manifesto de release.
 
-`sync.js` continua responsável por merge, histórico, upload cifrado e decisão de conflitos. `sync-conflict-policy.js` atua apenas sobre a vista de negócio usada por esse motor:
-
-- para entidades diferentes de `market`, delega integralmente no comportamento original;
-- para `market`, retira apenas `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` antes da comparação de equivalência;
-- nome, categoria, quantidade, unidade, `estimatedCents`, `actualCents`, `purchased` e `purchasedAt` continuam a ser campos reais.
-
-## Identidade visual
-
-O módulo adota uma linguagem coerente e contida:
-
-- azul principal `#0b63e5` para ação e navegação ativa;
-- texto principal em azul-marinho/ink;
-- verde para gasto contabilizado/sucesso;
-- âmbar para pendentes/por comprar;
-- violeta para diferença neutra;
-- superfícies claras, bordas discretas, raios de 18–20 px e sombras de baixa intensidade;
-- tipografia com hierarquia forte, números tabulares e espaçamento consistente;
-- navegação inferior com fundo translúcido e marcador ativo azul em mobile.
-
-Os grupos de categoria usam a mesma linguagem, com cabeçalho suave, ícone local Lucide e linhas compactas sem criar um segundo design system.
+Mesmo com esses parâmetros, o caminho precisa pertencer à allowlist; pedidos arbitrários não são cacheados.
 
 ## Responsividade e acessibilidade
 
-A estrutura mantém os breakpoints auditados:
+Breakpoints principais permanecem:
 
-- até 820 px: navegação móvel, lista de compras agrupada e diálogo full-screen;
-- até 430 px: densidade reduzida e ações tácteis compactas;
-- abaixo de 360 px: reflow adicional para estados e cabeçalhos de categoria;
-- desktop/tablet mantêm filtros e tabela, agora com separadores de categoria.
+- até 820 px: navegação móvel, grupos de categoria e diálogos adaptados;
+- até 430 px: densidade menor e indicador ativo ligeiramente reduzido;
+- abaixo de 360 px: reflow adicional para conteúdo estreito;
+- desktop/tablet: filtros/tabela e navegação lateral.
 
-Safe areas, `100dvh`/`100svh`, `prefers-reduced-motion`, foco visível e alvos tácteis existentes continuam ativos. O uso de `<details>/<summary>` evita criar um controlo customizado desnecessário para expandir/recolher categorias.
+Safe areas, `100dvh`/`100svh`, foco visível, alvos tácteis e `prefers-reduced-motion` permanecem cobertos. A normalização de SVG não altera nomes acessíveis dos controlos; ícones decorativos permanecem `aria-hidden` quando aplicável.
 
 ## Rede e privacidade
 
-`market-category-groups.js` não faz `fetch`, não grava `appState`, não usa armazenamento adicional e não adiciona origens de rede. Apenas lê a categoria/quantidade do item correspondente e reorganiza os mesmos nós do DOM.
+`ui-consistency.css`, `market-category-groups.js` e `release-manifest.json` não acrescentam endpoints externos. O Centro de Atualização consulta apenas o próprio origin. Não são introduzidos cookies, telemetria, segredos ou armazenamento financeiro adicional.
 
-Os mecanismos de rede existentes permanecem inalterados. A remoção futura do pipeline histórico de imagens continua a ser uma mudança arquitetural separada.
+## Distribuição v63
 
-## Distribuição
+`scripts/prepare-pages.cjs` prepara:
 
-`scripts/prepare-pages.cjs` inclui:
+- build `v63`;
+- branding/política complementar `63-ui1`;
+- agrupamento por categoria `63-ui1`;
+- normalização visual final `63-ui2`;
+- `release-manifest.json`;
+- `ui-consistency.css` como último estilo de consolidação.
 
-- branding/sincronização anterior em `62-ui2`;
-- `market-category-groups.css` e `market-category-groups.js` em `62-ui3`;
-- os assets existentes da v62 para compatibilidade.
-
-O Service Worker usa `conta-de-casa-public-v62-market-ui2-category-ui3`, forçando a atualização do cache sem alterar o número formal do build.
-
-A revisão foi integrada em `main` pelo PR #40 no commit `98662aa366ea65316ebd47cf56df8f2a3eeac974`; a CI de `main` e o Deploy GitHub Pages da mesma revisão terminaram com sucesso.
-
-## Testes e manutenção
-
-A cobertura validada em CI inclui:
-
-- sintaxe do novo módulo;
-- presença dos grupos e uso de `data-market-toggle`;
-- ausência de escrita em estado financeiro na camada de agrupamento;
-- responsividade e `prefers-reduced-motion`;
-- inclusão dos assets no Service Worker e Pages;
-- ordem de carregamento depois do branding;
-- regressões financeiras, segurança, sincronização e viewport já cobertas pela CI existente.
-
-Regras de manutenção:
-
-- categoria visual nunca deve criar/migrar dados por conta própria;
-- filtros e ordenação continuam responsabilidade de `render.js`;
-- não duplicar handlers de editar, eliminar ou checkbox no módulo de agrupamento;
-- não voltar a introduzir espaço de fotografia sem decisão explícita;
-- qualquer consolidação dos módulos antigos de imagem deve acontecer numa alteração separada.
+A publicação em `main` só deve ocorrer com CI verde. A validação física no Safari/iPhone permanece necessária depois do Deploy GitHub Pages.
