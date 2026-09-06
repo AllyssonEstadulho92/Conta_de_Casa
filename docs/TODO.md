@@ -14,12 +14,14 @@
 - [x] Renovar o cache público sem perder a identificação da revisão anterior.
 - [x] Adicionar `tests/market-category-groups.test.cjs`.
 - [x] Integrar o novo teste na CI e no Deploy Pages.
-- [ ] Executar CI completa da branch `ui/market-category-groups`.
-- [ ] Rever diff final do PR.
-- [ ] Integrar em `main` apenas com CI verde.
-- [ ] Confirmar CI de `main` e Deploy GitHub Pages.
+- [x] Executar CI completa da branch `ui/market-category-groups`.
+- [x] Rever diff final do PR.
+- [x] Integrar PR #40 em `main` apenas com CI verde.
+- [x] Confirmar CI de `main` com sucesso.
+- [x] Confirmar Deploy GitHub Pages com sucesso.
 - [ ] Validar no iPhone/Safari categorias com 1 e vários itens.
 - [ ] Validar expandir/recolher, pesquisa, filtros, checkbox, editar, eliminar e preço real.
+- [ ] Validar tema claro/escuro e larguras 320, 375, 390 e 430 px.
 
 ## P0 — hotfix iPhone/Safari: Mercado e sincronização
 
