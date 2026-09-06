@@ -117,7 +117,8 @@ assert.doesNotMatch(barcode, /localStorage|sessionStorage|idbPut|appState\.marke
 const sw = fs.readFileSync('sw.js','utf8');
 assert.match(sw, /PUBLIC_ASSET_SET/);
 assert.match(sw, /if \(url\.hash\) return null/);
-assert.match(sw, /url\.searchParams\.size===1 && url\.searchParams\.has\('v'\)/, 'service worker may only accept the controlled cache-busting v query');
+assert.match(sw, /url\.searchParams\.size===1 && \(url\.searchParams\.has\('v'\)\|\|url\.searchParams\.has\('ts'\)\)/, 'service worker may only accept one controlled cache-busting query: v for assets or ts for the same-origin release manifest');
+assert.match(sw, /if \(!key \|\| !PUBLIC_ASSET_SET\.has\(key\)\) return/,'query cache-busting must remain constrained to the explicit public asset allowlist');
 assert.doesNotMatch(sw, /cache\.put\(event\.request|cache\.put\(request/i, 'service worker must not cache arbitrary request URLs');
 
 (async () => {
