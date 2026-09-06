@@ -10,6 +10,7 @@ const read = file => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
 const updateJs = read('app-update.js');
 const updateCss = read('app-update.css');
+const consistencyCss = read('ui-consistency.css');
 const sw = read('sw.js');
 const prepare = read('scripts/prepare-pages.cjs');
 const releaseManifest = JSON.parse(read('release-manifest.json'));
@@ -38,6 +39,8 @@ assert.ok(Array.isArray(releaseManifest.releases));
 assert.equal(releaseManifest.releases[0].version,'v63');
 assert.ok(releaseManifest.releases[0].items.length>=5);
 assert.ok(releaseManifest.releases.some(release=>release.version==='v62'));
+assert.ok(releaseManifest.releases[0].items.some(item=>/ícones da aplicação/i.test(item)),'v63 notes must expose global icon normalization');
+assert.ok(releaseManifest.releases[0].items.some(item=>/apenas um indicador azul/i.test(item)),'v63 notes must expose the duplicate-nav fix');
 
 assert.match(updateCss, /Centro de Atualização de Software v63/);
 assert.match(updateCss, /software-update-dialog/);
@@ -46,10 +49,12 @@ assert.match(updateCss, /100dvh/);
 assert.match(updateCss, /safe-area-inset-bottom/);
 assert.match(updateCss, /html\[data-theme="dark"\]/);
 assert.match(updateCss, /prefers-reduced-motion/);
+assert.match(consistencyCss,/Conta de Casa v63/);
 
-assert.match(sw, /conta-de-casa-public-v63-ui1/);
+assert.match(sw, /conta-de-casa-public-v63-ui2/);
 assert.match(sw, /\.\/app-update\.css/);
 assert.match(sw, /\.\/app-update\.js/);
+assert.match(sw, /\.\/ui-consistency\.css/);
 assert.match(sw, /\.\/release-manifest\.json/);
 assert.match(sw, /APPLY_UPDATE/);
 assert.match(sw, /SKIP_WAITING/,'v62 clients must still be able to request activation');
@@ -60,8 +65,10 @@ assert.doesNotMatch(sw, /install[\s\S]{0,260}skipWaiting\(\)/,'updates must not 
 assert.match(prepare, /const BUILD = 'v63'/);
 assert.match(prepare, /const UI_REV = '63-ui1'/);
 assert.match(prepare, /const CATEGORY_REV = '63-ui1'/);
+assert.match(prepare, /const VISUAL_REV = '63-ui2'/);
 assert.match(prepare, /'app-update\.css'/);
 assert.match(prepare, /'app-update\.js'/);
+assert.match(prepare, /'ui-consistency\.css'/);
 assert.match(prepare, /'release-manifest\.json'/);
 assert.match(prepare, /manifest\.latestVersion!==BUILD/,'build must fail if release manifest and public version diverge');
 
@@ -79,13 +86,16 @@ try {
   assert.match(index, /sync-conflict-policy\.js\?v=63-ui1/);
   assert.match(index, /market-category-groups\.css\?v=63-ui1/);
   assert.match(index, /market-category-groups\.js\?v=63-ui1/);
+  assert.match(index, /ui-consistency\.css\?v=63-ui2/);
   assert.doesNotMatch(index, /\?v=53/);
   assert.match(index, /id="appBuildVersion">v63</);
   assert.match(events, /\.\/sw\.js\?v=63/);
   assert.equal(distManifest.latestVersion,'v63');
   assert.ok(index.indexOf('sync.js?v=63') < index.indexOf('sync-conflict-policy.js?v=63-ui1'), 'sync conflict policy must load after the base sync engine');
+  assert.ok(index.indexOf('market-category-groups.css?v=63-ui1') < index.indexOf('ui-consistency.css?v=63-ui2'), 'visual normalization must load last among market presentation styles');
   assert.ok(fs.existsSync(path.join(dist, 'app-update.css')));
   assert.ok(fs.existsSync(path.join(dist, 'app-update.js')));
+  assert.ok(fs.existsSync(path.join(dist, 'ui-consistency.css')));
   assert.ok(fs.existsSync(path.join(dist, 'release-manifest.json')));
 } finally {
   fs.rmSync(dist, { recursive: true, force: true });
