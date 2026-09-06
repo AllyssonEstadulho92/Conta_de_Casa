@@ -6,7 +6,7 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
 const BUILD = 'v62';
-const UI_REV = '62-ui2';
+const UI_REV = '62-ui3';
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -14,6 +14,7 @@ const PUBLIC_FILES = Object.freeze([
   'mobile-layout.css',
   'market-experience.css',
   'market-brand.css',
+  'market-category-groups.css',
   'market-barcode.css',
   'ui-icons.css',
   'invoice-capture.css',
@@ -28,6 +29,7 @@ const PUBLIC_FILES = Object.freeze([
   'events.js',
   'market-experience.js',
   'market-branding.js',
+  'market-category-groups.js',
   'market-barcode.js',
   'ui-icons.js',
   'invoice-capture.js',
@@ -68,8 +70,9 @@ index=index.replace(
 
 if(!index.includes('app-update.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./app-update.css?v=${BUILD.slice(1)}" />\n</head>`);
 if(!index.includes('market-image-audit.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-image-audit.css?v=${BUILD.slice(1)}" />\n</head>`);
-// Camada final do módulo Compras: hotfix com revisão própria para evitar CSS antigo no Safari.
+// Camadas finais do módulo Compras: branding + agrupamento por categoria.
 if(!index.includes('market-brand.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-brand.css?v=${UI_REV}" />\n</head>`);
+if(!index.includes('market-category-groups.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-category-groups.css?v=${UI_REV}" />\n</head>`);
 
 // A política de conflitos executa depois do motor base e antes do DOMContentLoaded.
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
@@ -80,8 +83,9 @@ if(!index.includes('app-update.js')) index=index.replace('</body>',`  <script sr
 if(!index.includes('market-retailer-image-policy.js')) index=index.replace('</body>',`  <script src="./market-retailer-image-policy.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 if(!index.includes('market-image-audit.js')) index=index.replace('</body>',`  <script src="./market-image-audit.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 if(!index.includes('market-official-images.js')) index=index.replace('</body>',`  <script src="./market-official-images.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
-// Executa por último para manter a cópia e a apresentação do Mercado coerentes.
+// Executa no fim para manter o Mercado text-first e agrupar a lista após cada render.
 if(!index.includes('market-branding.js')) index=index.replace('</body>',`  <script src="./market-branding.js?v=${UI_REV}" defer></script>\n</body>`);
+if(!index.includes('market-category-groups.js')) index=index.replace('</body>',`  <script src="./market-category-groups.js?v=${UI_REV}" defer></script>\n</body>`);
 fs.writeFileSync(distIndex,index);
 
 const distEvents=path.join(DIST,'events.js');
