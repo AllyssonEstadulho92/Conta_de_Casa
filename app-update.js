@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Conta de Casa — Centro de Atualização de Software (v60)
+ * Conta de Casa — Centro de Atualização de Software (v61)
  *
  * Esta camada não altera dados financeiros nem o cofre. O estado de atualização
  * é obtido exclusivamente do Service Worker same-origin distribuído por GitHub Pages.
@@ -11,6 +11,18 @@
  */
 (function installSoftwareUpdateCenter(root){
   const APP_RELEASE_NOTES=Object.freeze([
+    Object.freeze({
+      version:'v61',
+      date:'6 de setembro de 2026',
+      title:'Imagens oficiais no browser real',
+      items:Object.freeze([
+        'Corrigida a integração entre os cartões reais do Mercado e o resolvedor de fotografias oficiais.',
+        'A imagem oficial passa a ser associada pelo identificador exato do produto (pid) devolvido pelo catálogo, em vez de depender de estruturas internas inacessíveis entre módulos.',
+        'A leitura da página oficial usa um pedido CORS simples no Safari, sem cabeçalhos personalizados que possam provocar preflight.',
+        'O botão de origem deixa de dizer “Produto oficial” e passa a indicar claramente “Ver no Pingo Doce” ou “Ver no Continente”, separando a página da loja da origem da fotografia.',
+        'Quando a fotografia oficial fica disponível, a mesma URL e origem são persistidas no item adicionado sem alterar preços, quantidades ou dados do cofre.'
+      ])
+    }),
     Object.freeze({
       version:'v60',
       date:'6 de setembro de 2026',
@@ -182,7 +194,7 @@
       updateStatus='checking';updateMessage='';renderDialog();
       try{
         let registration=await navigator.serviceWorker.getRegistration();
-        if(!registration)registration=await navigator.serviceWorker.register('./sw.js?v=60',{updateViaCache:'none'});
+        if(!registration)registration=await navigator.serviceWorker.register('./sw.js?v=61',{updateViaCache:'none'});
         let updateFound=false;
         const onUpdateFound=()=>{updateFound=true;updateStatus='updating';renderDialog();};
         registration.addEventListener('updatefound',onUpdateFound,{once:true});
