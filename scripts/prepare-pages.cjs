@@ -5,7 +5,7 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const BUILD = 'v61';
+const BUILD = 'v62';
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -28,6 +28,7 @@ const PUBLIC_FILES = Object.freeze([
   'ui-icons.js',
   'invoice-capture.js',
   'app-update.js',
+  'market-retailer-image-policy.js',
   'market-image-audit.js',
   'market-official-images.js',
   'sw.js',
@@ -52,9 +53,10 @@ index=index.replace(/<meta name="app-build" content="[^"]+"\s*\/>/,`<meta name="
 index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${BUILD}</strong>`);
 
-// v61: mantém a allowlist v60 e corrige a integração browser real das imagens oficiais.
-// r.jina.ai recebe apenas URLs públicas de produto já validadas; o novo bridge usa
-// um GET CORS simples, sem cabeçalhos X-* personalizados, para evitar preflight no Safari.
+// v62: resultados vivos Pingo Doce/Continente são visualmente official-only.
+// As allowlists Open Facts permanecem porque scanner e itens antigos ainda podem usar
+// essas fontes; a política v62 impede que esses fallbacks sejam apresentados nos
+// cartões vivos do retalhista e deixa o bridge v61 resolver apenas o pid exato.
 index=index.replace(
   "img-src 'self' data: blob: https://images.openfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://world.openfoodfacts.org;",
   "img-src 'self' data: blob: https://www.continente.pt https://static.pingodoce.pt https://*.openfoodfacts.org https://*.openbeautyfacts.org https://*.openproductsfacts.org https://*.openpetfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://r.jina.ai https://world.openfoodfacts.org https://world.openbeautyfacts.org https://world.openproductsfacts.org https://world.openpetfoodfacts.org;"
@@ -63,6 +65,8 @@ index=index.replace(
 if(!index.includes('app-update.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./app-update.css?v=${BUILD.slice(1)}" />\n</head>`);
 if(!index.includes('market-image-audit.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-image-audit.css?v=${BUILD.slice(1)}" />\n</head>`);
 if(!index.includes('app-update.js')) index=index.replace('</body>',`  <script src="./app-update.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
+// Tem de executar antes do resolvedor legado para bloquear fallbacks nos cartões vivos.
+if(!index.includes('market-retailer-image-policy.js')) index=index.replace('</body>',`  <script src="./market-retailer-image-policy.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 if(!index.includes('market-image-audit.js')) index=index.replace('</body>',`  <script src="./market-image-audit.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 if(!index.includes('market-official-images.js')) index=index.replace('</body>',`  <script src="./market-official-images.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 fs.writeFileSync(distIndex,index);
