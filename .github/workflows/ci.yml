@@ -33,6 +33,7 @@ jobs:
           node --check events.js
           node --check sync.js
           node --check market-experience.js
+          node --check market-branding.js
           node --check market-barcode.js
           node --check ui-icons.js
           node --check invoice-capture.js
