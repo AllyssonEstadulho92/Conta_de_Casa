@@ -6,6 +6,7 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
 const BUILD = 'v62';
+const UI_REV = '62-ui2';
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -23,6 +24,7 @@ const PUBLIC_FILES = Object.freeze([
   'render.js',
   'forms.js',
   'sync.js',
+  'sync-conflict-policy.js',
   'events.js',
   'market-experience.js',
   'market-branding.js',
@@ -66,15 +68,20 @@ index=index.replace(
 
 if(!index.includes('app-update.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./app-update.css?v=${BUILD.slice(1)}" />\n</head>`);
 if(!index.includes('market-image-audit.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-image-audit.css?v=${BUILD.slice(1)}" />\n</head>`);
-// Camada final do módulo Compras: identidade visual aprovada e apresentação sem imagens.
-if(!index.includes('market-brand.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-brand.css?v=${BUILD.slice(1)}" />\n</head>`);
+// Camada final do módulo Compras: hotfix com revisão própria para evitar CSS antigo no Safari.
+if(!index.includes('market-brand.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-brand.css?v=${UI_REV}" />\n</head>`);
+
+// A política de conflitos executa depois do motor base e antes do DOMContentLoaded.
+const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
+if(!index.includes('sync-conflict-policy.js')) index=index.replace(syncScript,`${syncScript}<script src="./sync-conflict-policy.js?v=${UI_REV}" defer></script>`);
+
 if(!index.includes('app-update.js')) index=index.replace('</body>',`  <script src="./app-update.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 // Tem de executar antes do resolvedor legado para bloquear fallbacks nos cartões vivos.
 if(!index.includes('market-retailer-image-policy.js')) index=index.replace('</body>',`  <script src="./market-retailer-image-policy.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 if(!index.includes('market-image-audit.js')) index=index.replace('</body>',`  <script src="./market-image-audit.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 if(!index.includes('market-official-images.js')) index=index.replace('</body>',`  <script src="./market-official-images.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 // Executa por último para manter a cópia e a apresentação do Mercado coerentes.
-if(!index.includes('market-branding.js')) index=index.replace('</body>',`  <script src="./market-branding.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
+if(!index.includes('market-branding.js')) index=index.replace('</body>',`  <script src="./market-branding.js?v=${UI_REV}" defer></script>\n</body>`);
 fs.writeFileSync(distIndex,index);
 
 const distEvents=path.join(DIST,'events.js');
@@ -87,4 +94,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD}.`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}).`);
