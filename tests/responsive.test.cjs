@@ -3,7 +3,8 @@ const fs = require('node:fs');
 
 const legacyCss = fs.readFileSync('styles.css','utf8');
 const designCss = fs.readFileSync('design-system.css','utf8');
-const css = `${legacyCss}\n${designCss}`;
+const consistencyCss = fs.readFileSync('ui-consistency.css','utf8');
+const css = `${legacyCss}\n${designCss}\n${consistencyCss}`;
 const events = fs.readFileSync('events.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 const render = fs.readFileSync('render.js','utf8');
@@ -30,6 +31,8 @@ assert.match(designCss, /\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:visib
 assert.match(designCss, /\.nav-drawer\{[\s\S]*width:min\(336px,calc\(100vw - 48px\)\)/);
 assert.match(designCss, /\.section-tabs\{/);
 assert.match(designCss, /\.section-tab\.active\{/);
+assert.match(consistencyCss,/\.mobile-nav \.nav-btn\.active::after[\s\S]*content:none!important/,'final responsive layer must remove the duplicate mobile active bar');
+assert.match(consistencyCss,/\.mobile-nav \.nav-btn\.active::before[\s\S]*background:var\(--primary\)!important/,'final responsive layer must keep one active bar');
 
 assert.match(events, /function updateAdaptiveNavigation\(\)/);
 assert.match(events, /function openMobileDrawer\(\)/);
@@ -118,15 +121,16 @@ for (const asset of ['core','finance','render','forms','sync','events']) {
 }
 assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
-// Source HTML remains at its stable template revision. The Pages build stamps v62
-// and the service worker cache advances for the current mobile-market hotfix.
+// Source HTML remains at its stable template revision. The Pages build stamps v63;
+// the final visual layer is cached separately as ui2.
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v62-market-ui2/);
+assert.match(swSource, /conta-de-casa-public-v63-ui2/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /'\.\/market-experience\.css'/);
 assert.match(swSource, /'\.\/market-experience\.js'/);
+assert.match(swSource, /'\.\/ui-consistency\.css'/);
 assert.match(swSource, /'\.\/app-update\.css'/);
 assert.match(swSource, /'\.\/app-update\.js'/);
 assert.match(swSource, /'\.\/market-image-audit\.css'/);
@@ -134,5 +138,6 @@ assert.match(swSource, /'\.\/market-retailer-image-policy\.js'/);
 assert.match(swSource, /'\.\/market-image-audit\.js'/);
 assert.match(swSource, /'\.\/market-official-images\.js'/);
 assert.match(swSource, /url\.searchParams\.has\('v'\)/);
+assert.match(swSource, /url\.searchParams\.has\('ts'\)/);
 
-console.log('Responsive mobile-fit shell, PIN entry, unified action controls and GitHub Pages freshness tests: OK');
+console.log('Responsive mobile-fit shell, PIN entry, single active indicator and GitHub Pages freshness tests: OK');
