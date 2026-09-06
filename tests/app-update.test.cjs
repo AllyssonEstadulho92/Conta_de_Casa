@@ -31,16 +31,19 @@ assert.match(updateCss, /safe-area-inset-bottom/);
 assert.match(updateCss, /html\[data-theme="dark"\]/);
 assert.match(updateCss, /prefers-reduced-motion/);
 
-assert.match(sw, /conta-de-casa-public-v62-retailer-official-only/);
+assert.match(sw, /conta-de-casa-public-v62-market-ui2/);
 assert.match(sw, /\.\/app-update\.css/);
 assert.match(sw, /\.\/app-update\.js/);
+assert.match(sw, /\.\/sync-conflict-policy\.js/);
 assert.match(sw, /\.\/market-retailer-image-policy\.js/);
 assert.match(sw, /\.\/market-official-images\.js/);
 assert.match(sw, /SKIP_WAITING/);
 
 assert.match(prepare, /const BUILD = 'v62'/);
+assert.match(prepare, /const UI_REV = '62-ui2'/);
 assert.match(prepare, /'app-update\.css'/);
 assert.match(prepare, /'app-update\.js'/);
+assert.match(prepare, /'sync-conflict-policy\.js'/);
 assert.match(prepare, /'market-retailer-image-policy\.js'/);
 assert.match(prepare, /'market-image-audit\.css'/);
 assert.match(prepare, /'market-image-audit\.js'/);
@@ -54,6 +57,9 @@ try {
   assert.match(index, /<meta name="app-build" content="v62"/);
   assert.match(index, /app-update\.css\?v=62/);
   assert.match(index, /app-update\.js\?v=62/);
+  assert.match(index, /market-brand\.css\?v=62-ui2/);
+  assert.match(index, /market-branding\.js\?v=62-ui2/);
+  assert.match(index, /sync-conflict-policy\.js\?v=62-ui2/);
   assert.match(index, /market-retailer-image-policy\.js\?v=62/);
   assert.match(index, /market-image-audit\.css\?v=62/);
   assert.match(index, /market-image-audit\.js\?v=62/);
@@ -64,9 +70,11 @@ try {
   assert.match(index,/https:\/\/r\.jina\.ai/);
   assert.match(index,/https:\/\/www\.continente\.pt/);
   assert.match(index,/https:\/\/static\.pingodoce\.pt/);
+  assert.ok(index.indexOf('sync.js?v=62') < index.indexOf('sync-conflict-policy.js?v=62-ui2'), 'sync conflict policy must load after the base sync engine');
   assert.ok(index.indexOf('market-retailer-image-policy.js') < index.indexOf('market-image-audit.js'), 'official-only policy must load before the legacy image audit');
   assert.ok(fs.existsSync(path.join(dist, 'app-update.css')));
   assert.ok(fs.existsSync(path.join(dist, 'app-update.js')));
+  assert.ok(fs.existsSync(path.join(dist, 'sync-conflict-policy.js')));
   assert.ok(fs.existsSync(path.join(dist, 'market-retailer-image-policy.js')));
   assert.ok(fs.existsSync(path.join(dist, 'market-image-audit.css')));
   assert.ok(fs.existsSync(path.join(dist, 'market-image-audit.js')));
