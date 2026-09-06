@@ -1,6 +1,6 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 5 de setembro de 2026
+Atualizado: 6 de setembro de 2026
 
 Este ficheiro mantém as decisões arquiteturais vigentes e o respetivo fundamento. O histórico detalhado permanece no Git; aqui fica a versão consolidada necessária para continuidade do projeto.
 
@@ -94,9 +94,9 @@ Data: 5 de setembro de 2026 · Estado: aceite
 
 ## D-012 — Fotografia é referência visual, não prova de preço/origem comercial
 
-Data: 5 de setembro de 2026 · Estado: aceite; expandida por D-014
+Data: 5 de setembro de 2026 · Estado: aceite; expandida por D-014 e D-015
 
-**Decisão:** uma fotografia pode ser mostrada quando há correspondência suficientemente forte ou GTIN, mas não é tratada como origem do preço nem automaticamente como imagem oficial do retalhista.
+**Decisão:** uma fotografia pode ser mostrada quando há correspondência suficientemente forte ou GTIN, mas não é tratada como origem do preço. A partir de D-015, uma imagem só pode ser designada oficial quando host, caminho e `pid` correspondem ao SKU oficial.
 
 **Motivo:** imagem e preço têm proveniência independente; uma imagem errada é pior do que um placeholder.
 
@@ -108,71 +108,79 @@ Data: 5 de setembro de 2026 · Estado: aceite
 
 **Motivo:** reutilizar o mecanismo nativo da PWA sem backend de versões ou novo endpoint externo.
 
-## D-014 — Auditar imagens por SKU sem introduzir proxy de scraping
+## D-014 — Auditar imagens por SKU com Open Facts e ampliação
 
-Data: 5 de setembro de 2026 · Estado: aceite
+Data: 5 de setembro de 2026 · Estado: aceite; complementada por D-015
+
+**Decisão:** criar `market-image-audit.js/.css`; auditar cada produto individualmente, preferir GTIN/EAN, usar Open Food/Beauty/Products/Pet Facts com score mínimo `0.74`, limitar concorrência a três, persistir apenas URL/metadados e manter placeholder quando não houver correspondência segura. Qualquer fotografia válida é ampliável em `<dialog>`.
+
+**Motivo:** a pesquisa ampla inicial de Open Food Facts deixava muitos produtos sem imagem e as miniaturas existentes eram estáticas.
+
+**Limitação v59:** a fotografia continuava a vir de Open Facts; portanto não resolvia necessariamente a imagem efetivamente usada pelo Continente/Pingo Doce para esse SKU.
+
+## D-015 — Imagem oficial exige página oficial validada + PID exato
+
+Data: 6 de setembro de 2026 · Estado: aceite
 
 ### Contexto
 
-A captura real de **Adicionar produto** mostrou vários resultados de Pingo Doce/Continente com placeholder, mesmo para artigos que possuem fotografias nas páginas das lojas. A v57 usava uma única pesquisa textual ampla no Open Food Facts e um conjunto pequeno de candidatos; isto era insuficiente em termos genéricos como “café”. As miniaturas existentes também eram estáticas.
+A validação física da v59 mostrou que vários produtos continuavam com placeholder apesar de terem fotografia nas páginas oficiais. A causa ficou confirmada: `cesta.pt` fornecia nome, preço, `pid` e URL oficial, mas a aplicação procurava a fotografia noutro catálogo. Além disso, o browser não consegue ler diretamente o HTML das páginas Continente/Pingo Doce porque os retalhistas não expõem CORS apropriado ao GitHub Pages.
 
-A aplicação é uma PWA estática. Ler diretamente o HTML das páginas de Continente/Pingo Doce no browser não é uma API estável: depende de CORS, estrutura do retalhista, cookies/anti-bot e alterações de front-end. A alternativa de um proxy genérico acrescentaria uma entidade externa com quotas, privacidade e disponibilidade próprias.
+Foram auditadas as duas páginas reais indicadas pelo utilizador:
+
+- Continente — produto `8167440`;
+- Pingo Doce — produto `739490`.
+
+A auditoria confirmou que ambas possuem imagens oficiais identificáveis pelo próprio `pid`, e que um reader controlado consegue expor esses URLs com CORS utilizável pela PWA.
 
 ### Decisão
 
-Criar `market-image-audit.js` e `market-image-audit.css` como camada progressiva v59.
+A v60 passa a usar a seguinte prioridade:
 
-Para cada produto sem imagem:
+1. `cesta.pt/mcp` fornece o resultado e a URL oficial;
+2. a URL é aceite apenas se pertencer ao domínio/caminho oficial e terminar num `pid` válido;
+3. a página pública é lida através de `r.jina.ai` com `Accept: application/json`, `X-With-Images-Summary: true` e `X-Retain-Images: true`;
+4. a aplicação extrai candidatos e volta a validá-los localmente;
+5. uma imagem só é classificada como oficial se o host, diretório de catálogo e `pid` coincidirem exatamente com o produto;
+6. sem imagem oficial, usar GTIN/EAN Open Facts; depois correspondência textual Open Facts; por fim placeholder.
 
-1. auditar individualmente, em vez de depender apenas da pesquisa ampla inicial;
-2. usar `productCode`/GTIN quando já existe;
-3. para resultados Continente com `pid`, consultar `cesta.pt/get_product` para tentar obter EAN exato;
-4. pesquisar por código nas bases Open Facts quando disponível;
-5. sem código, pesquisar nome + embalagem e calcular score por nome, marca, tokens e quantidade;
-6. aceitar apenas `score >= 0.74`;
-7. limitar a três resoluções concorrentes;
-8. manter placeholder se não existir correspondência segura.
+### Allowlist de saída
 
-Bases autorizadas:
+**Continente:** `www.continente.pt`, `Sites-col-master-catalog`, JPG/PNG/WebP, caminho contendo o `pid`; imagens `noimage`/fallback são rejeitadas.
 
-- Open Food Facts;
-- Open Beauty Facts;
-- Open Products Facts;
-- Open Pet Food Facts.
+**Pingo Doce:** `static.pingodoce.pt`, `Sites-pingo-doce-master`, `images/large|medium|small`, JPG/PNG/WebP, nome do ficheiro iniciado pelo `pid`.
 
-A seleção é orientada pelo tipo/categoria do produto, com fallback entre bases.
+Não é aceite qualquer URL de imagem de host genérico apenas por ter sido devolvida pelo reader.
 
-### Ampliação
+### Catálogo
 
-Qualquer fotografia real torna-se um botão acessível. O toque/clique abre um `<dialog>` fullscreen/responsivo com imagem ampliada, nome, origem, fecho por botão/Esc/backdrop, safe areas, dark mode e redução de movimento.
+A mesma camada substitui progressivamente a chamada de pesquisa, mantendo o contrato de eventos existente, para pedir `limit:20` ao `cesta.pt` e admitir até 40 resultados normalizados. Isto aumenta a variedade sem introduzir catálogo local fictício.
 
-### Persistência
+### Desempenho
 
-Quando uma imagem é resolvida para um item já guardado, persistir apenas:
+As imagens oficiais são resolvidas apenas para cartões visíveis ou próximos através de `IntersectionObserver` (`rootMargin: 800px`) e continuam limitadas a três resoluções concorrentes. O botão `+` aguarda a tentativa de imagem oficial antes de persistir o produto, mas uma falha de imagem nunca bloqueia a adição.
 
-- `productCode` comprovável, se em falta;
-- `imageUrl`;
-- `imageSource`;
-- `imageMatchedAt`.
+### Produtos antigos
 
-Não guardar binários.
+Itens já guardados sem URL oficial podem ser reencontrados pelo nome no `cesta.pt`. Só é aceite uma correspondência com score >= `0.96` e sem empate/variante ambígua. Caso contrário, não se força a imagem oficial.
 
 ### Segurança e privacidade
 
-- sem proxy genérico (Microlink/Jina/AllOrigins/CORS proxy ou equivalente);
-- sem API key/Authorization;
-- `credentials:'omit'` e `referrerPolicy:'no-referrer'`;
-- CSP limitada às quatro famílias Open Facts e ao `cesta.pt` já existente;
-- nenhum valor financeiro, PIN, token GitHub ou conteúdo do cofre é enviado para resolver imagens.
+- `r.jina.ai` recebe apenas uma URL pública já validada de produto; não recebe PIN, chave do cofre, faturas, saldo, token GitHub ou outros dados pessoais/financeiros;
+- `credentials:'omit'` e `referrerPolicy:'no-referrer'` permanecem obrigatórios;
+- não usar Microlink, AllOrigins ou proxy CORS arbitrário;
+- CSP permite `r.jina.ai` apenas em `connect-src` e os dois hosts oficiais apenas em `img-src`;
+- URLs e `pid` são novamente validados depois da leitura;
+- binários de imagem não são persistidos.
 
 ### Motivo
 
-Esta abordagem aumenta a cobertura e a precisão sem transformar a PWA num scraper de páginas de lojas nem acrescentar um backend apenas para imagens. EAN/GTIN exato é preferido sempre que possível. Quando isso não existe, o score textual reduz a probabilidade de variante errada.
+O requisito é apresentar a fotografia fiel do produto da própria cadeia. A associação por `pid` fornece evidência mais forte do que uma semelhança textual numa base externa. O reader é introduzido apenas para ultrapassar a barreira CORS de páginas públicas e fica cercado por validação de entrada e saída.
 
-### Limitação aceite
+### Risco residual
 
-Não se promete 100% de cobertura. Alguns SKUs não têm fotografia pública ou não têm identificador suficiente para uma correspondência segura. Nesses casos o placeholder é o resultado correto.
+O retalhista pode mudar o domínio/CDN, estrutura de página ou paths de catálogo; `cesta.pt` ou o reader podem ficar temporariamente indisponíveis. Nesses casos a aplicação recua para os fallbacks existentes e nunca inventa uma fotografia.
 
-### Consequência
+### Validação
 
-A v59 acrescenta duas novas camadas públicas, novas origens CSP explicitamente permitidas, um teste dedicado (`tests/market-image-audit.test.cjs`) e cache `conta-de-casa-public-v59-product-images`. A validação final exige iPhone/Safari com amostras reais, incluindo produtos com e sem correspondência.
+O CI v60 testa os dois exemplos reais, rejeição de `pid` incorreto, hosts não autorizados, CSP, fallback, lazy loading, zoom e regressões completas. A validação física em Safari/iPhone continua necessária após publicação.
