@@ -42,10 +42,12 @@ jobs:
           node --check events.js
           node --check sync.js
           node --check market-experience.js
+          node --check market-branding.js
           node --check market-barcode.js
           node --check ui-icons.js
           node --check invoice-capture.js
           node --check app-update.js
+          node --check market-retailer-image-policy.js
           node --check market-image-audit.js
           node --check market-official-images.js
           node --check sw.js
