@@ -8,6 +8,7 @@ const render=fs.readFileSync('render.js','utf8');
 const css=fs.readFileSync('ui-icons.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
+const runtime=fs.readFileSync('v64-runtime.js','utf8');
 const imageAudit=fs.readFileSync('market-image-audit.js','utf8');
 const officialBridge=fs.readFileSync('market-official-images.js','utf8');
 const retailerPolicy=fs.readFileSync('market-retailer-image-policy.js','utf8');
@@ -74,9 +75,12 @@ assert.match(css,/market-mobile-head::before\{content:none!important/);
 
 // index.html remains the stable source template; the Pages build expands CSP at release time.
 assert.match(index,/img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org;/);
-assert.match(sw,/conta-de-casa-public-v63-ui2/);
+assert.match(sw,/conta-de-casa-public-v64-runtime1/);
 assert.match(sw,/\.\/market-retailer-image-policy\.js/);
 assert.match(sw,/\.\/market-official-images\.js/);
 assert.match(sw,/\.\/ui-consistency\.css/);
+assert.match(sw,/\.\/v64-runtime\.js/);
+assert.match(runtime,/productCode=scan\.code/,'v64 may attach a GTIN only after a high-confidence barcode match');
+assert.doesNotMatch(runtime,/imageUrl\s*=/,'v64 barcode automation must not create a new image source');
 
-console.log('Market real and official product image tests: OK');
+console.log('Market real/official image compatibility and v64 barcode isolation tests: OK');
