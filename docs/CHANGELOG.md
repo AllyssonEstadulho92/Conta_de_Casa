@@ -1,5 +1,40 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-06 — Lista de compras agrupada por categoria (`62-ui3`)
+
+### Motivação
+
+A validação física da página **Lista de compras** mostrou que a sequência de cartões individuais era funcional, mas visualmente repetitiva e difícil de consultar quando existiam vários produtos de categorias diferentes.
+
+### Alterações
+
+- criado `market-category-groups.js` para agrupar os itens pela categoria já existente no estado;
+- criado `market-category-groups.css` para apresentar grupos compactos e recolhíveis em mobile;
+- cada grupo mostra a categoria e a respetiva contagem de itens;
+- a categoria deixa de ser repetida dentro de cada linha mobile;
+- categorias conhecidas seguem uma ordem previsível alinhada com a taxonomia existente do Mercado; categorias adicionais ficam depois por ordem alfabética;
+- dentro de cada grupo é preservada a ordenação já calculada por `marketFilteredItems()`;
+- itens pendentes deixam de repetir visualmente os blocos `Estimado`/`Previsto` quando representam o mesmo valor;
+- itens comprados continuam a expor preço real e diferença;
+- os mesmos nós e atributos `data-market-toggle`, `data-edit-market`, `data-delete-market` e `data-market-actual` são preservados, mantendo os handlers existentes;
+- a tabela desktop recebe separadores de categoria sem perder colunas ou ações;
+- adicionada revisão pública isolada `62-ui3` para os novos assets;
+- Service Worker atualizado para `conta-de-casa-public-v62-market-ui2-category-ui3`.
+
+### Testes
+
+- criado `tests/market-category-groups.test.cjs`;
+- CI e Deploy Pages passam a validar sintaxe e composição do novo módulo;
+- o teste confirma que a camada não escreve em estado financeiro e que os assets são publicados depois do branding existente;
+- branding e política de conflitos permanecem em `62-ui2`, evitando uma alteração desnecessária dos assets anteriores.
+
+### Segurança e dados
+
+- sem alterações ao schema `STATE_VERSION = 5`;
+- sem alterações a `estimatedCents`, `actualCents`, quantidade, estado de compra ou sincronização;
+- sem novos endpoints, credenciais, armazenamento local ou telemetria;
+- nenhuma categoria é criada ou migrada pela camada de apresentação.
+
 ## 2026-09-06 — Hotfix iPhone/Safari: cartões do Mercado e conflitos técnicos
 
 ### Publicação
@@ -82,7 +117,7 @@ A alteração é visual e não destrutiva: metadados antigos de imagem continuam
 - criado `market-branding.js` para alinhar o aviso de origem com a experiência sem fotografias;
 - fotografias, botões de fotografia e placeholders ficam ocultos no contexto do Mercado;
 - cards de lista passam a usar a hierarquia `checkbox + conteúdo + estado`;
-- resultados do browser passam a usar `conteúdo + ação +`, sem coluna reservada à imagem;
+- resultados do browser passam a usar `conteúdo + ação +`, sem coluna reservada a imagem;
 - reforçada a identidade azul/ink com verde para contabilizado, âmbar para pendentes e violeta para diferença neutra;
 - refinados raios, bordas, sombras, tipografia, foco e navegação inferior móvel;
 - `scripts/prepare-pages.cjs` e `sw.js` passam a distribuir/cachear os novos assets;
