@@ -46,7 +46,8 @@ assert.match(officialBridge,/\[data-market-add-product\]/);
 assert.match(officialBridge,/\.market-result-source/);
 assert.match(officialBridge,/data-market-product-card/);
 assert.match(officialBridge,/persistResolvedItem/);
-assert.doesNotMatch(officialBridge,/X-With-Images-Summary|X-Retain-Images/);
+assert.match(officialBridge,/headers:\{Accept:'application\/json'\}/,'reader must use only the simple Accept request header');
+assert.doesNotMatch(officialBridge,/headers:\{[^}]*['"]X-(?:With-Images-Summary|Retain-Images)/,'reader request must not send custom image X-* headers');
 
 assert.doesNotMatch(js, /DEMO_PRODUCTS/);
 assert.doesNotMatch(js, /Protótipo visual/);
