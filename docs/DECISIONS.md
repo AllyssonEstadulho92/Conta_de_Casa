@@ -2,161 +2,79 @@
 
 Atualizado: 6 de setembro de 2026
 
-Este ficheiro mantém as decisões arquiteturais vigentes necessárias para continuidade. O histórico detalhado permanece no Git.
+Este ficheiro mantém as decisões vigentes necessárias para continuidade. O histórico detalhado permanece no Git.
 
 ## D-001 — Altura estrutural separada do VisualViewport
-
-Estado: aceite.
-
-`.app-shell`/`.main` usam `100dvh`/`100svh`; `VisualViewport` fica reservado a teclado e diálogos. Evita cortes provocados pelas barras móveis do Safari.
+Estado: aceite. `.app-shell` e `.main` usam `100dvh`/`100svh`; `VisualViewport` fica reservado a teclado e diálogos.
 
 ## D-002 — Camada móvel dedicada
-
-Estado: aceite.
-
-`mobile-layout.css` permanece como camada de compatibilidade enquanto o CSS legado é consolidado gradualmente.
+Estado: aceite. `mobile-layout.css` permanece como camada de compatibilidade para Safari, safe areas e viewport móvel.
 
 ## D-003 — Densidade móvel sem sacrificar alvos tácteis
-
-Estado: aceite.
-
-Cartões podem compactar a hierarquia em mobile, mantendo legibilidade e alvos tácteis adequados.
+Estado: aceite. A interface pode compactar cartões em mobile mantendo legibilidade e alvos tácteis adequados.
 
 ## D-004 — Mercado como camada isolada
-
-Estado: aceite.
-
-Descoberta/apresentação do Mercado não reescreve o núcleo de estado, cifragem ou cálculos financeiros.
+Estado: aceite. A experiência do Mercado não reescreve o núcleo financeiro, cifragem ou persistência.
 
 ## D-005 — Nunca tratar demonstração como preço real
-
-Estado: aceite.
-
-Valores fictícios não alimentam totais nem são apresentados como preços atuais.
+Estado: aceite. Valores fictícios não alimentam totais nem são apresentados como preços atuais.
 
 ## D-006 — Preço pesquisado é estimativa
-
-Estado: aceite.
-
-Preços obtidos do catálogo entram em `estimatedCents`; `actualCents` representa o valor efetivamente pago.
+Estado: aceite. O catálogo alimenta `estimatedCents`; `actualCents` representa o preço efetivamente pago.
 
 ## D-007 — Código de barras identifica produto, não preço
-
-Estado: aceite.
-
-GTIN/EAN/UPC pode identificar o SKU, mas o preço é obtido de fonte própria e exige confirmação do utilizador.
+Estado: aceite. GTIN/EAN/UPC pode ajudar a identificar o artigo; o preço continua a vir da fonte própria do Mercado.
 
 ## D-008 — Lucide como sistema vetorial oficial
-
-Estado: aceite.
-
-Lucide é vendorizado localmente, sem icon font/CDN em runtime. Snapshot auditável: `94e4cb9d9db5907053ebf3636a97c45529cf776b`.
+Estado: aceite. Os ícones são locais e auditáveis.
 
 ## D-009 — QR fiscal como preenchimento assistido
-
-Estado: aceite.
-
-A leitura QR preenche apenas campos estruturados comprováveis; o utilizador revê antes de guardar. Imagens não são persistidas.
+Estado: aceite. O QR apenas preenche dados comprováveis e o utilizador revê antes de guardar.
 
 ## D-010 — Protótipo aprovado orienta a hierarquia móvel
+Estado: aceite. Compras mantém título contextual, ação `+`, scanner, cartões-resumo, ações compactas e navegação consistente.
 
-Estado: aceite.
+## D-011 — Cofre moderno não simula funcionalidades inexistentes
+Estado: aceite. A interface não apresenta capacidades de autenticação que não estejam realmente implementadas.
 
-Compras mantém título contextual, ação `+`, scanner, cartões-resumo, ações compactas e navegação consistente sem alterar o modelo financeiro.
-
-## D-011 — Cofre moderno não simula biometria
-
-Estado: aceite.
-
-A interface pode usar linguagem visual moderna de PIN, mas não mostra passkey/biometria sem implementação WebAuthn real e auditada.
-
-## D-012 — Fotografia é referência visual independente do preço
-
-Estado: aceite.
-
-Uma fotografia não é prova do preço nem da transação. Ausência de imagem é preferível a uma variante incorreta.
+## D-012 — Fotografia é independente do preço
+Estado: aceite como regra histórica. Uma fotografia nunca prova preço nem transação.
 
 ## D-013 — Atualização de software usa Service Worker same-origin
-
-Estado: aceite.
-
-O Centro de Atualização usa `ServiceWorkerRegistration.update()`, `SKIP_WAITING`, `controllerchange` e notas de release versionadas. Beta continua desativado sem pipeline própria.
+Estado: aceite. Atualizações públicas continuam a ser distribuídas pela própria aplicação/PWA.
 
 ## D-014 — Imagens por SKU com validação estrita
-
-Estado: aceite.
-
-A imagem oficial só é considerada oficial quando domínio, catálogo/CDN e identificador do produto correspondem. Open Facts pode existir como fonte auxiliar/fallback noutros contextos, mas não transforma uma correspondência aproximada em fotografia oficial.
+Estado: compatibilidade histórica. Enquanto os módulos antigos existirem, uma imagem só pode ser considerada oficial quando cadeia e identificador correspondem.
 
 ## D-015 — Reader externo restrito a páginas públicas validadas
+Estado: compatibilidade histórica. Mantém-se apenas enquanto o pipeline antigo de imagens estiver distribuído.
 
-Estado: aceite.
+## D-016 — Integração de imagens usa o contrato real do DOM
+Estado: histórico/compatibilidade. A integração deve depender de seletores e identificadores públicos, não de estado privado entre módulos.
 
-Como Continente/Pingo Doce não expõem o HTML das páginas de produto através de CORS utilizável pela PWA, `r.jina.ai` pode ser usado exclusivamente como reader de uma URL pública de produto previamente validada. Não recebe dados do cofre nem credenciais.
+## D-017 — Cartões vivos de retalhista eram `official-only`
+Estado: substituída na apresentação por D-018. A regra continua válida apenas para o pipeline histórico que ainda permaneça no código.
 
-## D-016 — Integração de imagens oficiais deve usar o contrato real do DOM
-
+## D-018 — Mercado orientado a nomes, sem fotografias de produto
 Data: 6 de setembro de 2026 · Estado: aceite.
 
-A v60 passou probes de origem, mas a captura real no iPhone continuou com placeholders. A auditoria encontrou uma falha de fronteira entre módulos: funções privadas dentro de IIFEs e seletores que não correspondiam ao HTML real.
-
-### Decisão
-
-`market-official-images.js` depende apenas dos contratos públicos/reais:
-
-- `[data-market-product-card]` para cadeia + `pid`;
-- `.market-result-source` para a ação do retalhista;
-- `[data-market-add-product]` para o fluxo real de adição;
-- `appState.market`/`saveState()` apenas depois de o fluxo existente criar o item.
-
-O bridge obtém a URL do SKU através de `cesta.pt`, valida cadeia e `pid`, lê a página pública através do reader restrito, aceita apenas imagem oficial com o mesmo `pid`, confirma carregamento e só depois substitui o placeholder.
-
-O bridge usa GET com apenas `Accept: application/json` no reader para evitar preflight desnecessário no Safari.
-
-### Sinalização
-
-- `Consultado agora` = atualidade da consulta/preço;
-- `Ver no Pingo Doce` / `Ver no Continente` = ligação para a página do produto;
-- `Pingo Doce · imagem oficial` / `Continente · imagem oficial` = proveniência da fotografia.
-
-## D-017 — Cartões vivos de retalhista são `official-only`
-
-Data: 6 de setembro de 2026 · Estado: aceite e publicado em v62.
-
 ### Contexto
-
-Após a v61, a validação física mostrou fotografias que não correspondiam à imagem da página oficial. O bridge v61 estava correto, mas coexistia com mecanismos anteriores:
-
-- `market-experience.js` podia enriquecer resultados vivos com imagem do Open Food Facts por semelhança textual;
-- `market-image-audit.js` podia aplicar Open Food/Beauty/Products/Pet Facts quando a imagem oficial não fosse resolvida;
-- esses mecanismos não tinham autorização semântica para afirmar que a imagem era a fotografia do SKU do Pingo Doce/Continente.
-
-A causa foi classificada como **concorrência de políticas de imagem**, não como falha do CDN oficial.
+A fotografia deixou de ser requisito da experiência. Nome, embalagem/quantidade, loja, categoria e preço são suficientes para identificar o produto e tomar a decisão de compra.
 
 ### Decisão
+A interface de Compras/Mercado passa a ser `text-first`:
 
-Em resultados vivos do Pingo Doce e Continente, a política é exclusiva:
+- fotografias e placeholders deixam de ocupar espaço;
+- o nome passa a ser o identificador visual principal;
+- preço, estado e loja continuam claramente visíveis;
+- a câmara permanece porque serve leitura de código de barras;
+- nomes/logos dos mercados podem permanecer porque identificam a fonte;
+- metadados antigos de imagem não são apagados apenas por esta alteração visual.
 
-> Só a fotografia oficial validada para a mesma cadeia e o mesmo `pid` pode ser apresentada. Sem prova exata, mantém-se placeholder.
+### Implementação
+`market-brand.css` oculta fotografias e reorganiza os cards. `market-branding.js` atualiza apenas a cópia informativa do browser e não toca no estado financeiro. `scripts/prepare-pages.cjs` e `sw.js` passam a distribuir os dois assets.
 
-Implementação em `market-retailer-image-policy.js`:
+Os módulos antigos de imagem permanecem temporariamente por compatibilidade. A sua remoção definitiva será uma alteração separada, após validação física, para não misturar uma mudança visual com uma refatoração arquitetural ampla.
 
-- identifica apenas cartões `cesta-(continente|pingo-doce)-<pid>`;
-- marca `data-market-image-audit="done"` para impedir fallback legado nesse cartão;
-- marca `data-market-retailer-image-policy="official-only"`;
-- valida qualquer imagem existente exclusivamente por `CDCOfficialMarketImages.safeOfficialImageUrl`;
-- remove imagens de outras origens/variantes e volta a placeholder;
-- observa alterações de DOM/`src` para impedir reintrodução posterior de fallback;
-- após adicionar, remove metadados visuais auxiliares se não existir uma resolução oficial segura.
-
-### Delimitação
-
-Open Facts não é removido globalmente. Pode continuar a servir identificação por código de barras, itens anteriores e outros fluxos auxiliares explicitamente cobertos. A restrição é sobre a **fotografia dos cartões vivos de retalhista**.
-
-### Segurança
-
-A política v62 não acrescenta endpoints nem executa `fetch`. Reutiliza a validação v61. Falha visual não altera `estimatedCents`, `actualCents`, quantidade nem qualquer total financeiro.
-
-### Consequência e publicação
-
-Build `v62`, cache `conta-de-casa-public-v62-retailer-official-only` e `market-retailer-image-policy.js` publicados via PR #34. Validação concluída: CI do PR `34008477059`, merge `231e445839f07316344719b7423890c6e2e99c47`, CI de `main` `34008497654` e Deploy Pages `34008513566`, todos com sucesso. Permanece pendente apenas validação física da correspondência visual no Safari/iPhone.
+### Consequência
+A decisão reduz ruído visual e preserva os dados e comportamentos existentes. Nenhum cálculo, preço, quantidade, credencial, cofre ou sincronização é alterado.

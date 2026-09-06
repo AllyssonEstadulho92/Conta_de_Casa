@@ -3,7 +3,9 @@ const fs = require('node:fs');
 
 const index = fs.readFileSync('index.html','utf8');
 const css = fs.readFileSync('market-experience.css','utf8');
+const brandingCss = fs.readFileSync('market-brand.css','utf8');
 const js = fs.readFileSync('market-experience.js','utf8');
+const brandingJs = fs.readFileSync('market-branding.js','utf8');
 const imageAudit = fs.readFileSync('market-image-audit.js','utf8');
 const officialBridge = fs.readFileSync('market-official-images.js','utf8');
 const retailerPolicy = fs.readFileSync('market-retailer-image-policy.js','utf8');
@@ -19,7 +21,7 @@ assert.match(index, /connect-src 'self' https:\/\/api\.github\.com https:\/\/ces
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 assert.match(sw, /conta-de-casa-public-v62-retailer-official-only/);
 
-for (const asset of ['market-experience.css','market-experience.js','market-retailer-image-policy.js','market-official-images.js']) {
+for (const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js']) {
   assert.ok(sw.includes(`'./${asset}'`), `${asset} must be cached by the service worker`);
   assert.ok(pages.includes(`'${asset}'`), `${asset} must be included in the Pages bundle`);
 }
@@ -30,7 +32,7 @@ assert.match(js,/https:\/\/world\.openfoodfacts\.org\/cgi\/search\.pl/,'Open Foo
 assert.ok(js.includes("data-market-price-mode=\"live\""), 'market browser must explicitly use live/verified data mode');
 assert.ok(js.includes("https://cesta.pt/mcp"), 'Continente/Pingo Doce provider must be explicit');
 assert.ok(js.includes("name:'search_products'"), 'cesta MCP search tool must be used');
-assert.ok(js.includes("fotografia real de referência") && js.includes("Open Food Facts"), 'source disclosure remains in the stable source template until the policy layer replaces it at runtime');
+assert.ok(js.includes("fotografia real de referência") && js.includes("Open Food Facts"), 'source disclosure remains in the stable source template until the presentation layer replaces it at runtime');
 assert.match(js, /estimatedCents:product\.priceCents/);
 assert.match(js, /sourceUrl=safeRetailerUrl/);
 assert.match(js, /data-market-source-url=/);
@@ -38,6 +40,18 @@ assert.match(js, /window\.open\(url,'_blank','noopener,noreferrer'\)/);
 assert.match(js, /actualCents:0,purchased:false/);
 assert.match(js, /cleanRemoteText/);
 assert.match(js, /esc\(product\.name\)/);
+
+// A revisão visual aprovada remove a fotografia da apresentação sem destruir dados
+// legados nem alterar o motor de preços/cálculos.
+assert.match(brandingCss, /identidade visual do Mercado sem fotografias de produto/);
+assert.match(brandingCss, /\.market-product-photo[\s\S]*display:none!important/);
+assert.match(brandingCss, /\.market-mobile-head\{[\s\S]*grid-template-columns:44px minmax\(0,1fr\) auto!important/);
+assert.match(brandingCss, /\.market-catalog-main\{[\s\S]*grid-template-columns:minmax\(0,1fr\) 52px!important/);
+assert.match(brandingCss, /--cdc-brand-blue:#0b63e5/);
+assert.match(brandingJs, /marketProductImages='hidden'/);
+assert.match(brandingJs, /nome, embalagem, loja e preço/);
+assert.match(brandingJs, /a interface não depende de fotografias de produto/);
+assert.doesNotMatch(brandingJs, /appState|estimatedCents|actualCents|saveState|commit\(/,'branding layer must not touch financial state');
 
 // v60 mantém o resolvedor legado; v61 resolve o pid oficial; v62 torna os cartões vivos official-only.
 assert.match(imageAudit,/searchCatalogV60/);
@@ -72,12 +86,12 @@ assert.ok(css.includes('env(safe-area-inset-bottom)'), 'market dialog/page must 
 assert.ok(css.includes('min-width:0'), 'market layouts must allow content to shrink without horizontal overflow');
 assert.ok(css.includes('overflow:visible'), 'market page must not hide content to solve layout constraints');
 
-const remSizes = [...css.matchAll(/font-size:\s*([0-9.]+)rem/g)].map(match => Number(match[1]));
+const remSizes = [...`${css}\n${brandingCss}`.matchAll(/font-size:\s*([0-9.]+)rem/g)].map(match => Number(match[1]));
 assert.ok(remSizes.length > 0);
 assert.ok(remSizes.every(size => size >= 0.75), `market live UI contains text smaller than 12px: ${Math.min(...remSizes)}rem`);
-for (const target of ['44px','48px','52px']) assert.ok(css.includes(target));
+for (const target of ['44px','48px','52px']) assert.ok(`${css}\n${brandingCss}`.includes(target));
 
-console.log('Market live-source, verification, privacy and responsive invariants: OK');
+console.log('Market live-source, branding, no-image presentation, privacy and responsive invariants: OK');
 assert.match(css,/market-logo-pingo/);
 assert.match(css,/market-logo-continente/);
 assert.match(css,/market-quantity-stepper/);
