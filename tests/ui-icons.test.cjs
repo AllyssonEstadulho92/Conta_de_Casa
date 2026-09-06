@@ -4,6 +4,7 @@ const fs=require('node:fs');
 const js=fs.readFileSync('ui-icons.js','utf8');
 const css=fs.readFileSync('ui-icons.css','utf8');
 const consistency=fs.readFileSync('ui-consistency.css','utf8');
+const runtime=fs.readFileSync('v64-runtime.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const pages=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
@@ -50,6 +51,7 @@ assert.match(consistency,/\.mobile-nav \.nav-btn\.active::after[\s\S]*content:no
 assert.match(consistency,/\.mobile-nav \.nav-btn\.active::before[\s\S]*background:var\(--primary\)!important/,'final layer must keep one active underline');
 assert.match(consistency,/\.ui-icon-svg,[\s\S]*\.svg-icon\{[\s\S]*stroke-width:2!important/,'final layer must normalize all application SVG metrics');
 assert.match(consistency,/#page-market \.market-summary-item\{[\s\S]*inset 0 3px 0 var\(--market-summary-accent\)/,'summary accent must be solid and independent from the icon pseudo-element');
+assert.match(runtime,/safe-area-inset-top/,'v64 runtime must preserve the unified icon header inside the iPhone safe area');
 
 assert.match(css,/v56 — modern secure vault/,'modern secure vault layer must be present');
 assert.match(css,/\.vault-screen\{[\s\S]*safe-area-inset-top[\s\S]*safe-area-inset-bottom/,'vault must respect iPhone safe areas');
@@ -69,8 +71,10 @@ assert.match(license,/The MIT License \(MIT\)/);
 assert.match(license,/Cole Bemis/);
 assert.match(pages,/LUCIDE_LICENSE\.txt/,'Pages distribution must include the Lucide notice');
 assert.match(pages,/ui-consistency\.css/,'Pages distribution must include the final visual normalization layer');
+assert.match(pages,/v64-runtime\.css/,'Pages distribution must include the v64 safe-area layer');
 assert.match(sw,/LUCIDE_LICENSE\.txt/,'offline/public asset allowlist must include the Lucide notice');
 assert.match(sw,/ui-consistency\.css/,'offline/public asset allowlist must include the visual normalization layer');
-assert.match(sw,/conta-de-casa-public-v63-ui2/,'service worker cache must refresh for the v63 visual update');
+assert.match(sw,/v64-runtime\.css/,'offline/public asset allowlist must include the v64 safe-area layer');
+assert.match(sw,/conta-de-casa-public-v64-runtime1/,'service worker cache must refresh for the v64 runtime update');
 
-console.log('Lucide UI icon and final visual consistency tests: OK');
+console.log('Lucide UI icon, final visual consistency and v64 safe-area tests: OK');
