@@ -3,78 +3,76 @@
 Atualizado: 6 de setembro de 2026
 Build público: v62
 Revisão pública de interface: `62-ui2`
+Revisão em validação: `62-ui3` — lista de compras por categoria
 Distribuição: GitHub Pages
 Branch pública: `main`
-Estado do hotfix: publicado
+Branch de trabalho: `ui/market-category-groups`
 
 ## Estado atual
 
 A aplicação mantém a arquitetura PWA estática/local-first. O cofre continua no navegador, cifrado com PBKDF2-SHA-256 + AES-GCM; os dados financeiros permanecem no IndexedDB e a sincronização GitHub continua opcional e cifrada. O schema financeiro permanece na versão 5.
 
-O hotfix para as duas regressões observadas em iPhone/Safari foi integrado em `main` através do PR #38 e publicado no GitHub Pages.
+O hotfix anterior de iPhone/Safari permanece publicado e estável: corrigiu o browser de produtos com coluna vazia/compressão e o conflito técnico `0 diferenças`. Não existe evidência de regressão financeira associada a essa revisão.
 
-As regressões tratadas foram:
+## Alteração em validação — Lista de compras por categoria
 
-1. browser de produtos com grande área vazia à esquerda e nome, estado, ligação e preço comprimidos numa coluna estreita à direita;
-2. sincronização a apresentar `Conflito` com `0 diferenças` quando a divergência era apenas em metadados auxiliares de imagem/código de barras do Mercado.
+A validação física da página **Lista de compras** mostrou que a sequência de cartões individuais, embora funcional, cria demasiada repetição visual e dificulta localizar rapidamente produtos semelhantes.
 
-Não foi identificada alteração aos cálculos financeiros, ao cofre, à cifragem ou à origem dos preços.
+A revisão `62-ui3` reorganiza a lista sem alterar o modelo de dados:
 
-## Correção publicada
+- os itens passam a ser agrupados pela categoria já existente no próprio registo;
+- cada grupo apresenta categoria, número de itens e controlo nativo expandir/recolher;
+- os grupos usam uma ordem previsível baseada na taxonomia existente do Mercado;
+- dentro de cada categoria é preservada a ordem já calculada pelos filtros/ordenação atuais;
+- em mobile, os cartões passam a linhas mais compactas dentro do grupo;
+- a categoria deixa de ser repetida em cada linha, ficando no cabeçalho do grupo;
+- para itens pendentes, blocos financeiros redundantes visualmente iguais são ocultados na apresentação, mantendo o valor estimado visível;
+- itens comprados continuam a expor preço real, diferença e ações existentes;
+- editar, eliminar e marcar como comprado reutilizam os mesmos atributos/eventos já implementados.
 
-### Browser do Mercado
+No desktop, a tabela mantém a estrutura existente e recebe separadores por categoria.
 
-`market-brand.css` fixa explicitamente as posições do conteúdo e do botão `+` no Grid dos resultados. O nó histórico de fotografia permanece oculto, mas deixa de poder influenciar o auto-placement.
+## Implementação
 
-A hierarquia do cartão é:
+Foram adicionadas duas camadas isoladas:
 
-- nome do produto;
-- embalagem/quantidade e loja;
-- estado e ligação da loja;
-- preço e preço unitário;
-- ação `+` isolada e tátil.
+- `market-category-groups.js` — reorganiza o DOM renderizado pelo Mercado em grupos por categoria após cada `renderMarket`, sem gravar estado;
+- `market-category-groups.css` — define a apresentação compacta dos grupos em mobile e os cabeçalhos de categoria da tabela em desktop.
 
-Em larguras abaixo de 360 px, o preço reflui para uma linha própria para preservar palavras inteiras e impedir compressão letra a letra.
+A integração não modifica `render.js`, o schema, os cálculos ou os handlers existentes. O módulo identifica cada item através do `data-market-toggle` já presente nos cartões e consulta apenas a categoria/quantidade para apresentação.
 
-`market-branding.js` apresenta o aviso curto: “Mostramos produtos que correspondem pelo nome, embalagem, loja e preço. A fotografia é opcional.”
+## Distribuição e cache
 
-### Sincronização
+O build formal permanece v62.
 
-`sync-conflict-policy.js` classifica apenas `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` como metadados técnicos do Mercado para efeitos de equivalência de sincronização.
+- branding anterior mantém `62-ui2`;
+- os novos assets de agrupamento usam `62-ui3`;
+- o Service Worker passa a usar `conta-de-casa-public-v62-market-ui2-category-ui3`, preservando o identificador da revisão anterior e forçando atualização do cache;
+- `scripts/prepare-pages.cjs` inclui os dois novos assets no allowlist público.
 
-Esses campos deixam de abrir uma revisão manual quando todos os dados de negócio são iguais. O motor existente continua a preservar o registo compatível mais completo.
+## Segurança e dados
 
-Continuam a ser diferenças reais: nome, categoria, quantidade, unidade, `estimatedCents`, `actualCents`, `purchased` e `purchasedAt`.
-
-## Publicação confirmada
-
-- PR #38 — `Fix: cartões do Mercado no iPhone e conflitos técnicos de sincronização` — integrado em `main`;
-- merge em `main`: `f1557594aee99b69d10aca852a711b453502a698`;
-- CI do PR #38: sucesso;
-- CI de `main` após o merge: sucesso;
-- Deploy Pages da revisão `f1557594aee99b69d10aca852a711b453502a698`: sucesso;
-- build formal: v62;
-- revisão de assets: `62-ui2`;
-- cache público: `conta-de-casa-public-v62-market-ui2`.
-
-A CI validou fontes do Mercado, sintaxe, finanças, isolamento do cofre, datas, faturas, Mercado, código de barras, contabilização, ícones, atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade, sincronização, política de conflitos técnicos e manifest.
-
-## Segurança e privacidade
-
-A correção publicada:
+A revisão de categorias:
 
 - não altera PIN/palavra-passe;
-- não altera PBKDF2, AES-GCM ou IndexedDB;
-- não altera `estimatedCents` nem `actualCents`;
-- não acrescenta endpoints, credenciais ou telemetria;
-- não apaga metadados antigos de imagem;
-- não escolhe valores financeiros automaticamente;
-- apenas evita que metadados técnicos invisíveis sejam tratados como conflitos financeiros.
+- não altera PBKDF2, AES-GCM, IndexedDB ou sincronização;
+- não altera `estimatedCents`, `actualCents`, quantidade ou estado de compra;
+- não cria nem altera categorias: usa apenas a categoria já guardada;
+- não acrescenta endpoints, credenciais, cookies ou telemetria;
+- não usa armazenamento adicional para o estado expandido/recolhido;
+- não remove dados existentes.
+
+## Testes preparados
+
+- `tests/market-category-groups.test.cjs` valida sintaxe, agrupamento, responsividade, ausência de mutação financeira e composição do Pages;
+- CI e Deploy Pages passam a validar `market-category-groups.js` e o novo teste;
+- a revisão de assets confirma que branding/sincronização continuam em `62-ui2` e apenas o agrupamento usa `62-ui3`.
 
 ## Próximo passo
 
-1. fechar e voltar a abrir a aplicação/PWA no iPhone para garantir ativação do novo Service Worker e dos assets `62-ui2`;
-2. repetir a validação física do browser de produtos nas larguras 320, 375, 390 e 430 px;
-3. confirmar em hardware real que não existe área vazia de fotografia nem compressão letra a letra;
-4. em Segurança e sincronização, usar “Comparar novamente” ou fazer nova sincronização e confirmar que um conflito apenas técnico deixa de aparecer;
-5. manter para alteração separada a eventual remoção definitiva do pipeline histórico de imagens.
+1. executar a CI completa da branch `ui/market-category-groups`;
+2. rever o diff final;
+3. integrar em `main` apenas com CI verde;
+4. confirmar CI de `main` e Deploy GitHub Pages;
+5. validar fisicamente no iPhone/Safari a lista com várias categorias, incluindo grupos com 1 item, vários itens, itens comprados e pendentes;
+6. confirmar que filtros, pesquisa, editar, eliminar, checkbox e preço real continuam funcionais.
