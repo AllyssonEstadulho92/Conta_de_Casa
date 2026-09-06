@@ -1,85 +1,91 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 6 de setembro de 2026
-Build público: v62
-Revisão pública de interface: `62-ui3` — lista de compras por categoria
+Build público atual: v62
+Candidato seguinte: v63 (`63-ui2`)
 Distribuição: GitHub Pages
 Branch pública: `main`
-Estado: publicado
+Branch de preparação: `ui/market-left-alignment`
+Estado: v63 validada em CI na branch; integração/publicação pendentes
 
 ## Estado atual
 
-A aplicação mantém a arquitetura PWA estática/local-first. O cofre continua no navegador, cifrado com PBKDF2-SHA-256 + AES-GCM; os dados financeiros permanecem no IndexedDB e a sincronização GitHub continua opcional e cifrada. O schema financeiro permanece na versão 5.
+A aplicação continua uma PWA estática/local-first. O cofre permanece no navegador, cifrado com PBKDF2-SHA-256 + AES-GCM; os dados financeiros permanecem no IndexedDB e a sincronização GitHub continua opcional e cifrada. O schema financeiro permanece `STATE_VERSION = 5`.
 
-A organização da página **Lista de compras** por categoria foi integrada em `main` através do PR #40 e publicada no GitHub Pages. O hotfix anterior do browser de produtos e da política de conflitos técnicos permanece ativo.
+A v62 publicada introduziu a experiência de Compras text-first, o hotfix do browser móvel e a Lista de compras organizada por categoria. A v63 candidata consolida essa interface, corrige conflitos visuais entre camadas CSS e introduz um fluxo de atualização versionado e confirmado pelo utilizador.
 
-## Lista de compras por categoria
+## v63 — alterações candidatas
 
-A lista passa a usar a categoria já existente em cada item como estrutura visual:
+### Consistência visual global
 
-- cada categoria forma um grupo independente;
-- o cabeçalho apresenta categoria e número de itens;
-- em mobile, os grupos ficam expandidos por defeito e podem ser recolhidos;
-- a categoria deixa de ser repetida em cada produto;
-- os itens tornam-se linhas mais compactas dentro do respetivo grupo;
-- para itens pendentes, a apresentação reduz blocos financeiros redundantes sem alterar os valores guardados;
-- itens comprados continuam a mostrar preço real e diferença;
-- editar, eliminar, checkbox, filtros, pesquisa e ordenação reutilizam a lógica existente;
-- em desktop, a tabela mantém as colunas e recebe separadores de categoria.
+- criado `ui-consistency.css` como camada final de apresentação;
+- `.ui-icon-svg` e `.svg-icon` passam a usar a mesma métrica Lucide (`stroke-width: 2`, extremidades/junções arredondadas e tamanhos contextuais previsíveis);
+- a navegação inferior usa apenas um indicador ativo: o `::before` do design system;
+- os `::after` redundantes de `ui-icons.css`/`market-brand.css` são anulados pela camada final;
+- o cartão-resumo do Mercado deixa de usar o mesmo `::before` simultaneamente como faixa e ícone;
+- a faixa cromática do cartão passa a ser um `inset` sólido e contínuo; o `::before` fica reservado ao ícone semântico;
+- a categoria `Mercearia / Despensa` usa um ícone local mais adequado do que o carrinho.
 
-A ordem das categorias segue a taxonomia conhecida do Mercado. Categorias adicionais são colocadas depois das categorias conhecidas, por ordem alfabética. Dentro de cada categoria é preservada a ordenação calculada pelo fluxo existente.
+### Lista de compras
 
-## Implementação publicada
+- agrupamento por categoria preservado;
+- nome, quantidade, estado, valores e ações mantêm uma margem esquerda coerente em mobile;
+- checkbox, editar, eliminar, preço real, filtros, pesquisa e ordenação continuam a reutilizar a lógica existente;
+- nenhuma alteração ao modelo financeiro ou à persistência.
 
-Foram adicionadas duas camadas isoladas:
+### Atualização de Software
 
-- `market-category-groups.js` — agrupa os nós já renderizados pela categoria existente, sem gravar estado;
-- `market-category-groups.css` — apresentação compacta dos grupos em mobile e separadores de categoria em desktop.
+- build formal sobe para `v63`;
+- `release-manifest.json` torna-se o histórico público versionado da aplicação;
+- o Centro de Atualização consulta apenas esse manifesto same-origin com `cache: no-store`;
+- a aplicação informa quando existe uma versão superior;
+- a instalação exige ação explícita em **Atualizar agora**;
+- o Service Worker fica em `waiting` numa atualização e só recebe `APPLY_UPDATE`/`SKIP_WAITING` após confirmação;
+- o cache candidato é `conta-de-casa-public-v63-ui2`;
+- o novo cache-busting `ts` é permitido apenas como único parâmetro e apenas para assets explicitamente incluídos na allowlist do Service Worker.
 
-`render.js`, o schema financeiro e os handlers de negócio não foram alterados para implementar esta organização.
+## Causa dos defeitos visuais corrigidos
 
-## Distribuição e cache
+### Dupla barra no menu inferior
 
-- build formal: v62;
-- revisão do branding anterior: `62-ui2`;
-- revisão dos novos assets de agrupamento: `62-ui3`;
-- cache público: `conta-de-casa-public-v62-market-ui2-category-ui3`;
-- merge funcional em `main`: `98662aa366ea65316ebd47cf56df8f2a3eeac974`;
-- CI de `main`: sucesso;
-- Deploy GitHub Pages da mesma revisão: sucesso.
+O design system já desenhava o estado ativo em `.mobile-nav .nav-btn::before`. `ui-icons.css` e `market-brand.css` acrescentavam também `::after`. As duas camadas eram visíveis em simultâneo no Safari/iPhone.
+
+### Faixa azul segmentada nos cartões-resumo
+
+`ui-icons.css` usava `#page-market .market-summary-item::before` como ícone semântico, enquanto `market-brand.css` reutilizava o mesmo pseudo-elemento como faixa superior de 3 px. A combinação de propriedades de `background`, dimensões e especificidade produzia a aparência segmentada.
 
 ## Segurança e dados
 
-A revisão publicada:
+A v63 candidata:
 
 - não altera PIN/palavra-passe;
-- não altera PBKDF2, AES-GCM, IndexedDB ou sincronização;
+- não altera PBKDF2, AES-GCM, IndexedDB ou schema financeiro;
 - não altera `estimatedCents`, `actualCents`, quantidade ou estado de compra;
-- não cria nem migra categorias;
-- não acrescenta endpoints, credenciais, cookies ou telemetria;
-- não usa armazenamento adicional para o estado expandido/recolhido;
-- não remove dados existentes.
+- não adiciona credenciais, cookies, telemetria ou endpoints externos;
+- mantém o `release-manifest.json` e o mecanismo de atualização no mesmo origin;
+- restringe cache do Service Worker à allowlist pública explícita;
+- preserva dados existentes durante atualização da aplicação.
 
-## Validação automática concluída
+## Validação automática
 
-A CI validou, entre outros pontos:
+A CI da branch validou com sucesso até à revisão `205cf016ba005c585041f4b2ca9723d44a9caae8` e as correções posteriores mantêm a mesma estratégia de regressão. A cobertura inclui:
 
-- sintaxe do novo módulo;
-- teste dedicado `tests/market-category-groups.test.cjs`;
+- sintaxe;
 - finanças e invariantes de contagem;
-- isolamento do cofre;
-- faturas e datas;
-- Mercado, imagens históricas, código de barras e contabilização;
-- segurança;
-- responsividade e viewport móvel;
-- navegação e acessibilidade;
-- sincronização e política de conflitos técnicos;
-- composição pública do GitHub Pages e manifest.
+- isolamento e criptografia do cofre;
+- datas civis, faturas e QR;
+- Mercado, categorias, scanner, imagens históricas e contabilização;
+- sistema Lucide e novo teste `tests/ui-consistency.test.cjs`;
+- Centro de Atualização e `release-manifest.json`;
+- segurança e allowlist do Service Worker;
+- responsividade, viewport móvel, navegação e acessibilidade;
+- sincronização e política de conflitos técnicos.
 
 ## Próximo passo
 
-1. fechar completamente e voltar a abrir a aplicação/PWA no iPhone para carregar o novo cache `62-ui3`;
-2. validar fisicamente grupos com uma e várias categorias;
-3. testar expandir/recolher, pesquisa, filtros, checkbox, editar, eliminar e registo de preço real;
-4. confirmar tema claro/escuro e larguras 320, 375, 390 e 430 px;
-5. manter para alteração separada a eventual remoção definitiva do pipeline histórico de imagens.
+1. obter CI verde no HEAD final após esta atualização documental;
+2. rever o diff completo contra `main`;
+3. abrir PR para `main` e integrar apenas com CI verde;
+4. confirmar CI de `main` e Deploy GitHub Pages;
+5. no iPhone, abrir **Definições → Atualização de Software** e instalar a v63;
+6. validar fisicamente a barra única da navegação, a faixa sólida dos cartões, iconografia, categorias e tema claro/escuro em 320/375/390/430 px.
