@@ -72,7 +72,7 @@
 
   const buildVersion=()=>document.querySelector('meta[name="app-build"]')?.content?.trim()||FALLBACK_RELEASE_NOTES[0].version;
   const icon=(name,size=22)=>root.CDCIcons?.markup?.(name,size)||fallbackIcon(name,size);
-  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const versionNumber=value=>{
     const match=/^v(\d+)$/.exec(String(value||'').trim());
     return match?Number(match[1]):-1;
