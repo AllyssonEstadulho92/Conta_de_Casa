@@ -118,12 +118,12 @@ for (const asset of ['core','finance','render','forms','sync','events']) {
 }
 assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
-// Source HTML remains at its stable template revision. The Pages build stamps v59
-// and the service worker cache advances so installed clients receive the image audit.
+// Source HTML remains at its stable template revision. The Pages build stamps v60
+// and the service worker cache advances so installed clients receive official retailer images.
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 const swSource=fs.readFileSync('sw.js','utf8');
-assert.match(swSource, /conta-de-casa-public-v59-product-images/);
+assert.match(swSource, /conta-de-casa-public-v60-retailer-images/);
 assert.match(swSource, /'\.\/design-system\.css'/);
 assert.match(swSource, /'\.\/market-experience\.css'/);
 assert.match(swSource, /'\.\/market-experience\.js'/);
