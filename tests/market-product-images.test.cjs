@@ -20,8 +20,8 @@ assert.match(core,/imageSource: cleanString\(i\.imageSource, 60\)/);
 assert.match(core,/ALLOWED_TAGS[^\n]*'img'/);
 assert.match(core,/tag === 'img' && !safeProductImageUrl/);
 
-// O lookup legado continua disponível para outros fluxos, mas v62 impede a sua exibição
-// nos cartões vivos Pingo Doce/Continente.
+// O lookup legado continua disponível para outros fluxos, mas a política official-only
+// permanece como compatibilidade histórica mesmo com a apresentação text-first atual.
 assert.match(market,/OFF_IMAGE_SEARCH_URL='https:\/\/world\.openfoodfacts\.org\/cgi\/search\.pl'/);
 assert.match(market,/searchProductImages/);
 assert.match(market,/imageCandidateScore/);
@@ -72,9 +72,9 @@ assert.match(css,/\.market-product-photo img/);
 assert.match(css,/object-fit:contain/);
 assert.match(css,/market-mobile-head::before\{content:none!important/);
 
-// index.html remains the stable source template; the Pages build expands CSP at v62.
+// index.html remains the stable source template; the Pages build expands CSP at release time.
 assert.match(index,/img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org;/);
-assert.match(sw,/conta-de-casa-public-v62-market-ui2/);
+assert.match(sw,/conta-de-casa-public-v63-ui1/);
 assert.match(sw,/\.\/market-retailer-image-policy\.js/);
 assert.match(sw,/\.\/market-official-images\.js/);
 
