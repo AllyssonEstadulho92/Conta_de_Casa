@@ -76,7 +76,7 @@ Data: 6 de setembro de 2026 · Estado: aceite.
 A Lista de compras agrupa itens pela categoria existente, usando `<details>/<summary>` em mobile e separadores na tabela desktop. A camada reorganiza os mesmos nós por `data-market-toggle`, sem criar/migrar dados e preservando os handlers existentes.
 
 ## D-022 — Uma única camada final resolve colisões visuais entre CSS legados
-Data: 6 de setembro de 2026 · Estado: aceite para v63.
+Data: 6 de setembro de 2026 · Estado: aceite e publicada na v63.
 
 ### Contexto
 
@@ -89,27 +89,27 @@ O problema não estava no SVG em si, mas na sobreposição de responsabilidades 
 
 ### Decisão
 
-Criar `ui-consistency.css` como **última camada de apresentação**, sem acesso a estado ou regras de negócio.
+`ui-consistency.css` é a **última camada de apresentação**, sem acesso a estado ou regras de negócio.
 
 Regras obrigatórias:
 
 - Lucide continua o único sistema vetorial oficial;
 - `.ui-icon-svg` e `.svg-icon` usam métrica final comum (`stroke-width: 2`, linecap/linejoin arredondados e `vector-effect: non-scaling-stroke`);
 - navegação mobile mantém apenas `::before` como indicador ativo e anula `::after` redundante;
-- a faixa dos cartões-resumo passa a ser um `inset` sólido no próprio cartão;
+- a faixa dos cartões-resumo é um `inset` sólido no próprio cartão;
 - `market-summary-item::before` fica reservado exclusivamente ao ícone semântico;
-- a camada final deve ser carregada depois de `market-brand.css` e `market-category-groups.css`.
+- a camada final é carregada depois de `market-brand.css` e `market-category-groups.css`.
 
 ### Consequência
 
-A app ganha um ponto explícito de consolidação visual sem reescrever o design system inteiro nesta release. A mudança é reversível e isolada, e reduz regressões de especificidade no Safari.
+A app tem um ponto explícito de consolidação visual sem reescrever o design system inteiro. A mudança é isolada e reduz regressões de especificidade no Safari.
 
 ## D-023 — Cada alteração pública relevante gera versão, manifesto e instalação confirmada
-Data: 6 de setembro de 2026 · Estado: aceite para v63.
+Data: 6 de setembro de 2026 · Estado: aceite e publicada na v63.
 
 ### Contexto
 
-O utilizador pretende que alterações futuras apareçam na área **Atualização de Software**, com histórico, número de versão e instalação deliberada. Atualizações silenciosas tornam difícil perceber o que mudou e podem confundir validações entre dispositivos.
+As alterações futuras devem aparecer na área **Atualização de Software**, com histórico, número de versão e instalação deliberada. Atualizações silenciosas dificultam saber o que mudou e comparar dispositivos.
 
 ### Decisão
 
@@ -125,10 +125,14 @@ A partir da v63:
 - a atualização substitui assets da aplicação e não migra/apaga o cofre financeiro;
 - o Service Worker continua a cachear apenas caminhos existentes em `PUBLIC_ASSET_SET`.
 
+### Regra de transição
+
+A v62 não tinha ainda o manifesto/controlador completo da v63. Por isso, a passagem inicial v62 → v63 pode exigir fechar/reabrir ou atualizar a aplicação uma vez. Depois de instalada a v63, as versões seguintes seguem o fluxo explícito do Centro de Atualização.
+
 ### Segurança
 
 O parâmetro `ts` usado para obter um manifesto fresco só é aceite como parâmetro único e não contorna a allowlist de assets. Não são introduzidos endpoints externos, credenciais ou telemetria.
 
 ### Consequência
 
-O ciclo passa a ser: **alteração → nova versão → notas no manifesto → CI → main → Pages → instalação pelo Centro de Atualização**. A versão torna-se parte do critério de conclusão de releases públicas.
+O ciclo oficial passa a ser: **alteração → nova versão → notas no manifesto → CI → main → Pages → instalação pelo Centro de Atualização**. A versão é parte do critério de conclusão de releases públicas.
