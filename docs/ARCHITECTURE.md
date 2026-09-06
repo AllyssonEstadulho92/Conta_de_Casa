@@ -1,13 +1,13 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 6 de setembro de 2026
-Build em validação: v61
+Build em validação: v62
 
 ## Visão geral
 
 **Conta de Casa** é uma aplicação web estática/PWA distribuída por GitHub Pages. A arquitetura é local-first: estado financeiro, regras de negócio, formulários, cifragem e persistência executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
 
-Não existe backend financeiro próprio. As integrações externas do Mercado servem apenas descoberta de catálogo, preço e referência visual; não recebem conteúdo financeiro do cofre.
+Não existe backend financeiro próprio. As integrações externas do Mercado servem descoberta de catálogo, preço, identificação de produto e referência visual; não recebem conteúdo financeiro do cofre.
 
 ## Camadas principais
 
@@ -31,9 +31,10 @@ Não existe backend financeiro próprio. As integrações externas do Mercado se
 - `forms.js` — formulários e validação.
 - `sync.js` — sincronização cifrada opcional via GitHub.
 - `events.js` — navegação, eventos, cofre e Service Worker.
-- `market-experience.js` — catálogo/preço Pingo Doce e Continente via `cesta.pt`; criação confirmada de itens.
-- `market-image-audit.js` — resolvedor v59/v60, Open Facts, visualizador e fallbacks.
-- `market-official-images.js` — bridge v61 entre o DOM real dos cartões e a resolução/persistência da fotografia oficial por `pid`.
+- `market-experience.js` — catálogo/preço Pingo Doce e Continente via `cesta.pt`; criação confirmada de itens; mantém pesquisa visual auxiliar legada para compatibilidade.
+- `market-retailer-image-policy.js` — política v62 que torna resultados vivos do Pingo Doce/Continente `official-only` e bloqueia imagens aproximadas de outras fontes.
+- `market-image-audit.js` — resolvedor v59/v60, Open Facts, visualizador e fallbacks para contextos compatíveis/legados; não deve substituir cartões vivos marcados pela política v62.
+- `market-official-images.js` — bridge v61/v62 entre o DOM real dos cartões e a resolução/persistência da fotografia oficial por `pid`.
 - `market-barcode.js` — leitura GTIN e identificação assistida.
 - `invoice-capture.js` — leitura local de QR fiscal.
 - `ui-icons.js` — subset Lucide local.
@@ -43,7 +44,7 @@ Não existe backend financeiro próprio. As integrações externas do Mercado se
 
 O schema financeiro permanece `STATE_VERSION = 5`. Valores monetários são inteiros em cêntimos. O Mercado mantém `estimatedCents` separado de `actualCents`; quantidade permanece separada do preço unitário.
 
-O cofre usa IndexedDB e envelope cifrado. O modelo continua baseado em PBKDF2-SHA-256 + AES-GCM. A v61 não altera autenticação, derivação de chave, backups ou sincronização.
+O cofre usa IndexedDB e envelope cifrado. O modelo continua baseado em PBKDF2-SHA-256 + AES-GCM. A v62 não altera autenticação, derivação de chave, backups ou sincronização.
 
 Metadados visuais opcionais do item:
 
@@ -58,98 +59,128 @@ Apenas URL/metadados são persistidos. Binários não entram no cofre.
 
 1. **Catálogo, preço e página do produto:** `market-experience.js` + `cesta.pt/mcp`.
 2. **Código de barras:** `market-barcode.js`.
-3. **Fotografia oficial por SKU:** `market-official-images.js`.
-4. **Fallback de imagem e visualizador:** `market-image-audit.js`.
-5. **Persistência financeira:** fluxo existente de `market-experience.js`, apenas após ação explícita do utilizador.
+3. **Política visual dos cartões vivos:** `market-retailer-image-policy.js`.
+4. **Fotografia oficial por SKU/pid:** `market-official-images.js`.
+5. **Fallbacks/visualizador para contextos compatíveis:** `market-image-audit.js`.
+6. **Persistência financeira:** fluxo existente de `market-experience.js`, apenas após ação explícita do utilizador.
 
-Uma fotografia não é prova de preço. Um preço pesquisado não é o preço efetivamente pago. Um GTIN/PID identifica um artigo, mas só é usado como prova visual quando a origem da imagem também é validada.
+Uma fotografia não é prova de preço. Um preço pesquisado não é o preço efetivamente pago. Um GTIN/PID identifica um artigo, mas a imagem de um cartão vivo Pingo Doce/Continente só é aceite como fotografia do produto quando a cadeia, catálogo/CDN e o `pid` coincidem exatamente.
 
-## Porque a v60 não funcionava no browser real
+## Evolução v60 → v61 → v62
 
-O problema confirmado era de fronteira entre módulos, não apenas de disponibilidade da fotografia.
+### v60 — disponibilidade sem integração fiável
 
-`market-experience.js` guarda `resultById` e funções de pesquisa dentro de um IIFE. A camada v60 tentou alterar funções lexicais a partir de outro IIFE e também procurava seletores que não correspondiam ao HTML real. Assim, o probe isolado conseguia localizar a fotografia, mas o cartão real podia permanecer sem imagem.
+A fonte conseguia fornecer imagens oficiais, mas a camada usava seletores e fronteiras internas que não correspondiam ao browser real.
 
-Contratos reais usados pela v61:
+### v61 — bridge oficial pelo contrato real
+
+Contratos públicos usados:
 
 - cartão: `[data-market-product-card]`;
 - ação de adicionar: `[data-market-add-product]`;
 - ação da loja: `.market-result-source`;
 - identificador do cartão: `cesta-(continente|pingo-doce)-<pid>`.
 
-A v61 não depende de acesso a `resultById` nem de monkey-patching de funções privadas entre IIFEs.
+O bridge deixou de depender de `resultById` privado e passou a validar página/imagem por `pid`.
 
-## Fluxo de fotografia oficial v61
+### v62 — exclusividade visual
+
+A validação física posterior revelou que v61 coexistia com dois mecanismos anteriores:
+
+- enriquecimento inicial por Open Food Facts em `market-experience.js`;
+- fallbacks Open Facts em `market-image-audit.js`.
+
+Esses mecanismos podiam apresentar uma imagem aproximada antes/depois de o bridge oficial atuar. A v62 estabelece uma fronteira explícita: **cartões vivos de retalhista são official-only**.
+
+## Política `official-only` v62
+
+`market-retailer-image-policy.js` executa antes de `market-image-audit.js` na composição pública Pages.
+
+Para cada cartão vivo:
+
+1. extrai `marketId` e `pid` de `data-market-product-card`;
+2. define `data-market-retailer-image-policy="official-only"`;
+3. define `data-market-image-audit="done"`, impedindo a auditoria/fallback legado de processar esse cartão;
+4. valida qualquer `<img>` existente apenas através de `CDCOfficialMarketImages.safeOfficialImageUrl(url, marketId, pid)`;
+5. se a validação falhar, substitui a imagem por `.market-product-photo.is-empty`;
+6. um `MutationObserver` vigia novos cartões e alterações de `src`, impedindo reintrodução posterior de uma imagem não oficial;
+7. a fotografia oficial resolvida pelo bridge é preservada porque passa a mesma validação exata por `pid`;
+8. no fluxo real de adicionar, se a imagem criada pelo pipeline auxiliar não for oficial e não existir resolução oficial, os metadados visuais auxiliares são limpos antes de permanecerem no item.
+
+A política não faz `fetch` nem adiciona uma fonte de rede.
+
+## Fluxo da fotografia oficial
 
 Para cada cartão visível/próximo do viewport:
 
 1. extrair cadeia, nome, embalagem e `pid` do DOM real;
-2. consultar/reutilizar o catálogo `cesta.pt` e obter a URL pública do mesmo `pid`;
+2. consultar/reutilizar `cesta.pt` para obter a URL pública do mesmo `pid`;
 3. validar a página oficial:
    - Continente: `continente.pt` / `www.continente.pt`, caminho `/produto/`, `pid` no final da URL;
    - Pingo Doce: `pingodoce.pt` / `www.pingodoce.pt`, caminho `/home/produtos/`, `pid` no final da URL;
 4. pedir a página ao reader restrito `r.jina.ai` através de GET CORS simples;
 5. extrair URLs candidatas;
 6. aceitar apenas:
-   - Continente: `www.continente.pt`, `Sites-col-master-catalog`, ficheiro/caminho com `pid` exato;
+   - Continente: `www.continente.pt`, `Sites-col-master-catalog`, caminho/ficheiro com `pid` exato;
    - Pingo Doce: `static.pingodoce.pt`, `Sites-pingo-doce-master/images/(large|medium|small)`, ficheiro iniciado pelo `pid`;
-7. testar o carregamento real da imagem com `Image` antes de substituir o placeholder;
-8. criar/atualizar o botão `.market-product-photo`, mantendo o visualizador acessível;
+7. testar o carregamento real com `Image`;
+8. substituir o placeholder e manter o visualizador acessível;
 9. depois da ação real `+`, persistir a mesma imagem/origem no item criado.
 
 Máximo de três resoluções simultâneas. `IntersectionObserver` evita resolver de imediato todo o catálogo.
 
 ## Sinalização sem conflito
 
-A proveniência é dividida em três níveis:
-
 - **Consultado agora**: estado temporal da consulta/preço;
-- **Ver no Pingo Doce / Ver no Continente**: ação para abrir a página oficial do produto;
-- **Pingo Doce · imagem oficial / Continente · imagem oficial**: proveniência da fotografia validada, associada à imagem/visualizador.
+- **Ver no Pingo Doce / Ver no Continente**: ação para abrir a página do produto;
+- **Pingo Doce · imagem oficial / Continente · imagem oficial**: proveniência da fotografia validada.
 
-Não se usa o texto “Produto oficial” como rótulo genérico junto de um placeholder, porque isso mistura origem da página com origem visual.
+Se não existir imagem oficial segura, o cartão fica com placeholder. Não se substitui por uma imagem “parecida” para preencher espaço visual.
 
 ## Rede, CORS e privacidade
 
-`cesta.pt` continua a ser a fonte de catálogo/preço já integrada. As páginas dos retalhistas não são lidas diretamente pelo browser porque não oferecem um contrato CORS estável para a PWA.
+`cesta.pt` continua a ser a fonte de catálogo/preço. `r.jina.ai` recebe apenas uma URL pública de produto previamente validada e o bridge usa GET com `Accept: application/json`.
 
-O reader recebe apenas a URL pública previamente validada. A v61 usa GET com `Accept: application/json` e não envia cabeçalhos personalizados de retenção/resumo de imagem. Esta escolha reduz dependências de preflight no Safari; não se afirma que o preflight era a única causa da falha v60.
+Pedidos do bridge usam `credentials:'omit'` e `referrerPolicy:'no-referrer'`. Não há Authorization/API key. PIN, chave do cofre, faturas, saldos e token GitHub não são enviados para resolver imagens.
 
-Pedidos externos usam `credentials:'omit'` e `referrerPolicy:'no-referrer'`. Não há Authorization/API key. PIN, chave do cofre, faturas, saldos e token GitHub não são enviados para resolver imagens.
+Open Facts continua autorizado na CSP porque scanner, itens anteriores e outros fluxos auxiliares podem necessitar dessas origens. **A autorização CSP não significa autorização semântica para preencher um cartão vivo de retalhista**; essa decisão pertence à política v62.
 
-## CSP e distribuição v61
+## CSP e distribuição v62
 
-`scripts/prepare-pages.cjs` compõe `v61` e inclui `market-official-images.js` na allowlist pública.
+`scripts/prepare-pages.cjs` compõe `v62` e inclui:
 
-`connect-src` público inclui apenas os hosts necessários, incluindo `cesta.pt`, `r.jina.ai` e APIs Open Facts já autorizadas.
+- `market-retailer-image-policy.js`;
+- `market-image-audit.js`;
+- `market-official-images.js`.
 
-`img-src` público inclui os hosts oficiais de imagem Continente/Pingo Doce e hosts Open Facts autorizados.
+A ordem pública é deliberada: política official-only → auditoria legada → bridge oficial.
 
 Service Worker:
 
-`conta-de-casa-public-v61-official-images-bridge`
+`conta-de-casa-public-v62-retailer-official-only`
 
-O novo asset `./market-official-images.js` entra no cache offline do shell. Imagens remotas não são copiadas para o cofre.
+O novo asset entra no cache offline do shell. Imagens remotas não são copiadas para o cofre.
 
 ## Testes e manutenção
 
-`tests/market-official-images.test.cjs` valida especificamente:
+A cobertura v62 verifica:
 
-- seletores reais do Mercado;
-- parsing de `pid`;
-- URL oficial de página;
-- URL oficial de imagem;
-- exemplos Continente `8167440` e Pingo Doce `739490`;
-- request simples ao reader;
-- persistência da origem após o fluxo real de adicionar;
-- inclusão em Pages/Service Worker.
+- sintaxe da nova política;
+- exclusão dos cartões vivos do fallback legado;
+- remoção de imagem não oficial;
+- validação exclusiva por `safeOfficialImageUrl` + `pid`;
+- limpeza dos metadados visuais auxiliares após adicionar quando não existe imagem oficial;
+- ordem dos scripts na composição Pages;
+- cache/BUILD v62;
+- bridge oficial, zoom, scanner, cálculos, segurança e responsividade.
 
-CI funcional v61: `34002655320` — `success`.
+CI funcional da branch v62: `34008331898` — `success`.
 
 Regras de manutenção:
 
+- nunca usar semelhança textual para classificar uma fotografia de cartão vivo como imagem oficial;
+- ausência de fotografia é preferível a fotografia de outra variante/origem;
 - não depender de variáveis privadas de outro IIFE;
-- não aceitar imagem sem correspondência exata de `pid` quando é classificada como oficial;
 - manter preço, página da loja e proveniência da imagem semanticamente separados;
 - novas origens exigem CSP explícita, testes e documentação;
-- qualquer alteração de Safari/câmara/dialog/safe area exige validação física.
+- qualquer alteração Safari/dialog/safe area exige validação física.
