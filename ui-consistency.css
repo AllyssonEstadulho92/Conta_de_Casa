@@ -1,66 +1,314 @@
-/* Conta de Casa v63 — consolidação visual global de ícones e estados ativos.
-   Camada final de apresentação. Não altera dados, cálculos, cofre ou sincronização. */
+/* Conta de Casa v64 — sistema visual autoritativo.
+   Consolida tipografia, espaçamento, controlos, ícones e alinhamentos sem tocar em
+   estado, cálculos, armazenamento, rotas ou fluxos funcionais. */
 
 :root{
-  --cdc-icon-xs:16px;
+  --cdc-font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --cdc-font-regular:400;
+  --cdc-font-medium:500;
+  --cdc-font-semibold:600;
+  --cdc-text-xs:12px;
+  --cdc-text-sm:14px;
+  --cdc-text-md:16px;
+  --cdc-title-card:16px;
+  --cdc-title-section:20px;
+  --cdc-title-page:24px;
+  --cdc-title-display:28px;
+  --cdc-line-tight:1.25;
+  --cdc-line-body:1.5;
+  --cdc-line-secondary:1.4;
+
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:24px;
+  --space-6:32px;
+  --space-7:48px;
+
+  --cdc-control-height:44px;
+  --cdc-control-radius:12px;
+  --cdc-card-radius:16px;
+  --cdc-dialog-radius:20px;
+  --cdc-card-padding:16px;
+  --cdc-panel-padding:20px;
+  --cdc-section-gap:24px;
+
   --cdc-icon-sm:20px;
-  --cdc-icon-md:22px;
+  --cdc-icon-md:24px;
   --cdc-icon-lg:24px;
   --cdc-nav-indicator-width:42px;
   --cdc-nav-indicator-height:3px;
+
+  --page-gutter:clamp(32px,3vw,48px);
+  --content-max:1480px;
 }
 
-/* Uma única métrica vetorial em toda a aplicação. Mantemos tamanhos contextuais,
-   mas todos os SVG usam a mesma espessura e acabamento Lucide. */
-.ui-icon-svg,
-.svg-icon{
+/* Tipografia: uma única família principal, pesos reais e hierarquia previsível. */
+html{
+  font-family:var(--cdc-font-family)!important;
+  font-size:16px;
+  line-height:var(--cdc-line-body);
+  font-synthesis:none;
+  text-rendering:optimizeLegibility;
+}
+body{
+  font-family:inherit!important;
+  font-size:var(--cdc-text-md)!important;
+  line-height:var(--cdc-line-body)!important;
+  font-weight:var(--cdc-font-regular)!important;
+}
+button,input,select,textarea{font-family:inherit!important}
+button,.btn,.link-btn,.nav-btn{font-weight:var(--cdc-font-medium)!important}
+strong{font-weight:var(--cdc-font-semibold)!important}
+
+h1,
+.vault-unlock-intro h1,
+.vault-card h1{
+  font-size:var(--cdc-title-display)!important;
+  line-height:var(--cdc-line-tight)!important;
+  font-weight:var(--cdc-font-semibold)!important;
+  letter-spacing:-.025em!important;
+}
+.page-heading h1,
+html.market-prototype-active .page-heading h1{
+  font-size:var(--cdc-title-page)!important;
+  line-height:var(--cdc-line-tight)!important;
+  font-weight:var(--cdc-font-semibold)!important;
+  letter-spacing:-.02em!important;
+}
+h2,
+.panel-head h2,
+.dialog-head h2,
+#formDialog[data-mode="market-browser"] .dialog-head h2{
+  font-size:var(--cdc-title-section)!important;
+  line-height:var(--cdc-line-tight)!important;
+  font-weight:var(--cdc-font-semibold)!important;
+  letter-spacing:-.015em!important;
+}
+h3,
+.bill-mobile-head h3,
+.market-mobile-head h3,
+.market-product-copy h3,
+.market-browser-results-head h3,
+.bill-identity strong,
+.market-identity strong{
+  font-size:var(--cdc-title-card)!important;
+  line-height:1.35!important;
+  font-weight:var(--cdc-font-semibold)!important;
+  letter-spacing:-.01em!important;
+}
+p{line-height:var(--cdc-line-body)}
+small{font-size:var(--cdc-text-xs)!important;line-height:var(--cdc-line-secondary)!important}
+label{font-size:var(--cdc-text-sm)!important;line-height:var(--cdc-line-secondary)!important;font-weight:var(--cdc-font-medium)!important}
+
+/* Nenhum texto informativo visível fica abaixo de 12 px. */
+.eyebrow,
+.page-heading .eyebrow,
+.nav-group-label,
+.brand small,
+.dashboard-secondary-card small,
+.bill-filter-field>span,
+.market-filter-field>span,
+.bill-summary-item>small,
+.market-summary-item>small,
+.bill-table th,
+.market-table th,
+.bill-identity small,
+.market-identity small,
+.bill-due-signal,
+.market-results-head>span,
+.market-browser-results-head span,
+.market-result-chip,
+.market-result-source,
+.market-result-price-row small,
+.market-mobile-head small,
+.bill-mobile-head small,
+.market-mobile-money span,
+.market-mobile-real>span,
+.market-mobile-real>small,
+.bill-mobile-focus span,
+.bill-mobile-due span,
+.bill-mobile-finance span,
+.calendar-head,
+.calendar-day,
+.calendar-day small,
+.trend-col small,
+.trend-col em,
+.vault-key small,
+.vault-disclosure small,
+.vault-card .privacy-note,
+.vault-card .form-message,
+.device-transfer-box small,
+.detail-item small,
+.detail-hint,
+.sync-conflict-head small,
+.sync-conflict-row>strong,
+.sync-conflict-columns strong,
+.sync-conflict-row>*,
+.invoice-capture-preview-grid small,
+.market-product-image-viewer-shell>footer small{
+  font-size:var(--cdc-text-xs)!important;
+  line-height:var(--cdc-line-secondary)!important;
+}
+
+/* Pesos tipográficos normalizados: 400 / 500 / 600. */
+.eyebrow,.page-heading .eyebrow,.nav-group-label,
+.status-chip,.bill-due-signal,.market-result-chip,
+.bill-filter-field>span,.market-filter-field>span,
+.bill-summary-item>span,.market-summary-item>span,
+.market-category-count,.market-table-category-row th,
+.market-source-name,.market-source-notice strong,
+.market-product-price,.market-result-source,
+.sync-header-status,.software-update-version-chip{
+  font-weight:var(--cdc-font-semibold)!important;
+}
+.market-browser-tab,.section-tab,.icon-text-btn,
+.market-browser-chip,.market-filter-clear,.bill-filter-clear{
+  font-weight:var(--cdc-font-medium)!important;
+}
+
+/* Eixo horizontal comum e contenção. */
+.main,
+html.market-prototype-active .main{
+  padding-left:var(--page-gutter)!important;
+  padding-right:var(--page-gutter)!important;
+}
+.page,.topbar{
+  width:100%;
+  max-width:var(--content-max);
+  margin-inline:auto;
+}
+.page,.panel,.kpi,.goal-card,.bill-results,.market-results,
+.bill-mobile-card,.market-mobile-card,.market-category-group,
+.bill-command-bar,.market-command-bar,.bill-filter-grid,.market-filter-grid,
+.bill-summary-grid,.market-summary-grid,.two-col,.dashboard-grid{
+  min-width:0;
+  max-width:100%;
+}
+.page{padding-top:var(--space-4)!important}
+
+/* Componentes equivalentes usam a mesma métrica base. */
+input,select,textarea{
+  min-height:var(--cdc-control-height)!important;
+  border-radius:var(--cdc-control-radius)!important;
+  padding:10px 12px;
+  font-size:var(--cdc-text-md)!important;
+  line-height:1.35!important;
+}
+.btn{
+  min-height:var(--cdc-control-height)!important;
+  border-radius:var(--cdc-control-radius)!important;
+  padding:10px 16px;
+  font-size:var(--cdc-text-sm)!important;
+  line-height:1.25!important;
+}
+.btn.primary{font-weight:var(--cdc-font-semibold)!important}
+.link-btn{font-size:var(--cdc-text-sm)!important;line-height:1.3!important}
+.icon-btn,
+.dialog-close,
+.market-search-clear,
+.market-barcode-open,
+.market-barcode-close,
+.invoice-scan-close{
+  width:var(--cdc-control-height)!important;
+  min-width:var(--cdc-control-height)!important;
+  height:var(--cdc-control-height)!important;
+  min-height:var(--cdc-control-height)!important;
+  border-radius:var(--cdc-control-radius)!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+}
+
+.panel,.kpi,.goal-card,
+.bill-summary-item,.market-summary-item,
+.bill-mobile-card,.market-mobile-card{
+  border-radius:var(--cdc-card-radius)!important;
+}
+.panel{padding:var(--cdc-panel-padding)!important}
+.kpi,.bill-summary-item,.market-summary-item{padding:var(--cdc-card-padding)!important}
+.bill-mobile-card,.market-mobile-card{padding:var(--cdc-card-padding)!important}
+.panel-head{gap:var(--space-4)!important;margin-bottom:var(--space-3)!important}
+.panel-head p{font-size:var(--cdc-text-sm)!important;line-height:var(--cdc-line-secondary)!important}
+.dashboard-grid,.two-col,.goal-grid{gap:var(--space-4)!important}
+.kpi-grid,.bill-summary-grid,.market-summary-grid{gap:var(--space-3)!important}
+.bill-command-bar,.market-command-bar{gap:var(--space-3)!important}
+.bill-filter-grid,.market-filter-grid{gap:var(--space-2)!important}
+.button-row,.payment-actions,.bill-table-actions,.market-table-actions{gap:var(--space-2)!important}
+
+/* Cartões e números: leitura leve, sem excesso de negrito. */
+.kpi .label,.bill-summary-item>span,.market-summary-item>span{
+  font-size:var(--cdc-text-sm)!important;
+  line-height:var(--cdc-line-secondary)!important;
+  font-weight:var(--cdc-font-medium)!important;
+}
+.kpi strong,.bill-summary-item>strong,.market-summary-item>strong{
+  font-size:24px!important;
+  line-height:1.2!important;
+  font-weight:var(--cdc-font-semibold)!important;
+  font-variant-numeric:tabular-nums lining-nums;
+}
+.kpi small{font-size:var(--cdc-text-xs)!important}
+.list-main strong{font-size:var(--cdc-text-sm)!important;font-weight:var(--cdc-font-semibold)!important}
+.list-main small{font-size:var(--cdc-text-xs)!important}
+.status-chip{
+  min-height:24px;
+  padding:4px 8px!important;
+  font-size:var(--cdc-text-xs)!important;
+  line-height:1.25!important;
+  font-weight:var(--cdc-font-semibold)!important;
+}
+
+/* Campos de pesquisa e selects: decoração única da aplicação. */
+.ui-search-control>input[type="search"]{padding-left:48px!important}
+.bill-search-wrap::before,.bill-search-wrap::after,
+.market-search-wrap::before,.market-search-wrap::after{
+  content:none!important;
+  display:none!important;
+}
+input[type="search"]{-webkit-appearance:none;appearance:none}
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none}
+.ui-select-control>select{
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  padding-right:44px!important;
+  background-image:none!important;
+}
+
+/* Lucide é o único sistema vetorial efetivo. */
+.ui-icon-svg,.svg-icon{
   shape-rendering:geometricPrecision;
   vector-effect:non-scaling-stroke;
   stroke-width:2!important;
-  stroke-linecap:round;
-  stroke-linejoin:round;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
   flex:0 0 auto;
 }
-.ui-icon-svg path,
-.ui-icon-svg circle,
-.ui-icon-svg rect,
-.ui-icon-svg line,
-.ui-icon-svg polyline,
-.svg-icon path,
-.svg-icon circle,
-.svg-icon rect,
-.svg-icon line,
-.svg-icon polyline{
+.ui-icon-svg path,.ui-icon-svg circle,.ui-icon-svg rect,.ui-icon-svg line,.ui-icon-svg polyline,
+.svg-icon path,.svg-icon circle,.svg-icon rect,.svg-icon line,.svg-icon polyline{
   vector-effect:non-scaling-stroke;
 }
-
-.nav-btn .ui-icon-svg,
-.nav-btn .svg-icon{
+.ui-icon-svg,.svg-icon{width:var(--cdc-icon-sm)!important;height:var(--cdc-icon-sm)!important}
+.nav-btn .ui-icon-svg,.nav-btn .svg-icon,
+.mobile-nav .nav-btn .ui-icon-svg,.mobile-nav .nav-btn .svg-icon,
+.topbar-create .ui-icon-svg,.topbar-create .svg-icon,
+.market-new-btn .ui-icon-svg,.market-new-btn .svg-icon{
   width:var(--cdc-icon-md)!important;
   height:var(--cdc-icon-md)!important;
 }
-.icon-btn .ui-icon-svg,
-.icon-btn .svg-icon,
-.dialog-close .ui-icon-svg,
-.dialog-close .svg-icon{
+.icon-btn .ui-icon-svg,.icon-btn .svg-icon,
+.dialog-close .ui-icon-svg,.dialog-close .svg-icon,
+.ui-select-arrow .ui-icon-svg,.ui-search-icon .ui-icon-svg{
   width:var(--cdc-icon-sm)!important;
   height:var(--cdc-icon-sm)!important;
 }
-.topbar-create .ui-icon-svg,
-.topbar-create .svg-icon,
-.market-new-btn .ui-icon-svg,
-.market-new-btn .svg-icon{
-  width:var(--cdc-icon-lg)!important;
-  height:var(--cdc-icon-lg)!important;
-}
 
-/* Navegação mobile: existiam simultaneamente o indicador ::before do design system
-   e barras ::after acrescentadas por camadas posteriores. O indicador oficial passa
-   a ser apenas o ::before, eliminando a dupla barra visível no Safari/iPhone. */
+/* Navegação: um único indicador ativo e métrica coerente. */
+.nav-btn{font-size:var(--cdc-text-sm)!important;line-height:1.25!important}
 @media(max-width:820px){
-  .mobile-nav .nav-btn{
-    position:relative;
-  }
+  .mobile-nav .nav-btn{position:relative;font-size:var(--cdc-text-xs)!important;font-weight:var(--cdc-font-medium)!important}
   .mobile-nav .nav-btn::after,
   .mobile-nav .nav-btn.active::after,
   html.market-prototype-active .mobile-nav .nav-btn.active::after{
@@ -78,35 +326,20 @@
     transform:translateX(-50%)!important;
     box-shadow:none!important;
   }
-  .mobile-nav .nav-btn.active::before{
-    background:var(--primary)!important;
-  }
-  html.market-prototype-active .mobile-nav .nav-btn.active::before{
-    background:var(--cdc-brand-blue,var(--primary))!important;
-  }
-  .mobile-nav .nav-btn .ui-icon-svg,
-  .mobile-nav .nav-btn .svg-icon{
-    width:24px!important;
-    height:24px!important;
-  }
+  .mobile-nav .nav-btn.active::before{background:var(--primary)!important}
+  html.market-prototype-active .mobile-nav .nav-btn.active::before{background:var(--cdc-brand-blue,var(--primary))!important}
 }
 
-/* Cartões-resumo do Mercado: o ::before era usado por duas camadas diferentes
-   (ícone circular e faixa superior), o que originava segmentos azuis/pontilhados.
-   A faixa passa a ser um inset sólido no próprio cartão e o ::before fica dedicado
-   exclusivamente ao ícone semântico. */
+/* Mercado: acento sólido separado do ícone semântico. */
 #page-market .market-summary-item{
   --market-summary-accent:var(--cdc-brand-blue,var(--primary));
-  box-shadow:
-    inset 0 3px 0 var(--market-summary-accent),
-    var(--cdc-brand-shadow,0 10px 30px rgba(20,35,60,.065))!important;
+  box-shadow:inset 0 3px 0 var(--market-summary-accent),var(--cdc-brand-shadow,0 10px 30px rgba(20,35,60,.065))!important;
 }
 #page-market .market-summary-item.primary{--market-summary-accent:var(--cdc-brand-blue,var(--primary))}
 #page-market .market-summary-item.success{--market-summary-accent:var(--cdc-brand-green,var(--success))}
 #page-market .market-summary-item.warning{--market-summary-accent:var(--cdc-brand-amber,var(--warning))}
 #page-market .market-summary-item.normal{--market-summary-accent:var(--cdc-brand-violet,#6548d8)}
 #page-market .market-summary-item.danger{--market-summary-accent:var(--danger)}
-
 #page-market .market-summary-item::before{
   content:""!important;
   position:static!important;
@@ -116,7 +349,7 @@
   height:44px!important;
   min-width:44px!important;
   min-height:44px!important;
-  border-radius:14px!important;
+  border-radius:12px!important;
   background-color:color-mix(in srgb,var(--market-summary-accent) 12%,var(--surface))!important;
   background-repeat:no-repeat!important;
   background-position:center!important;
@@ -141,22 +374,86 @@
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c72f36' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 21v-6'/%3E%3Cpath d='M12 21V9'/%3E%3Cpath d='M19 21V3'/%3E%3C/svg%3E")!important;
 }
 
-/* Evita que pseudo-elementos legados sejam interpretados como ícones adicionais
-   nos controlos já hidratados pelo sistema Lucide. */
-button[data-ui-iconized="true"]>.ui-icon-svg,
-button[data-ui-iconized="true"]>.svg-icon{
-  flex:0 0 auto;
+#page-market .market-summary-item,
+#page-market .market-mobile-card,
+#page-market .market-category-group,
+.market-catalog-card{border-radius:var(--cdc-card-radius)!important}
+#page-market .market-summary-item{min-height:0!important}
+#page-market .market-mobile-head h3{font-weight:var(--cdc-font-semibold)!important}
+#formDialog[data-mode="market-browser"] .market-product-copy h3,
+#formDialog[data-mode="market-browser"] .market-product-price,
+#formDialog[data-mode="market-browser"] .market-result-source{
+  font-weight:var(--cdc-font-semibold)!important;
+}
+
+/* Tablets: eixo mais largo sem desperdiçar espaço útil. */
+@media(min-width:821px) and (max-width:1180px){
+  :root{--page-gutter:clamp(24px,3vw,32px)}
+  .panel{padding:var(--space-4)!important}
+}
+
+/* Mobile: 16–20 px laterais, tipografia legível e alvos tácteis ≥44 px. */
+@media(max-width:820px){
+  :root{
+    --page-gutter:clamp(16px,4vw,20px);
+    --cdc-panel-padding:16px;
+    --cdc-card-padding:16px;
+    --cdc-section-gap:20px;
+  }
+  body{font-size:var(--cdc-text-md)!important}
+  .page{padding-top:var(--space-4)!important}
+  .topbar-leading{gap:var(--space-2)!important}
+  .page-heading{display:block!important;min-width:0}
+  .page-heading h1,html.market-prototype-active .page-heading h1{
+    font-size:var(--cdc-title-page)!important;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .mobile-menu-btn,
+  .btn.primary.topbar-create{
+    width:48px!important;
+    min-width:48px!important;
+    height:48px!important;
+    min-height:48px!important;
+  }
+  .btn.primary.topbar-create>span:first-child{
+    width:40px!important;
+    height:40px!important;
+    border-radius:12px!important;
+  }
+  .sync-header-status{min-height:44px!important}
+
+  .panel{padding:var(--space-4)!important}
+  .kpi,.bill-summary-item,.market-summary-item{padding:var(--space-4)!important}
+  .bill-mobile-card,.market-mobile-card{padding:var(--space-4)!important}
+  .bill-summary-grid,.market-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:var(--space-3)!important}
+  .bill-summary-item,.market-summary-item{min-height:128px!important}
+  .bill-summary-item>strong,.market-summary-item>strong{font-size:24px!important}
+  .market-category-items .market-mobile-card{padding:var(--space-4)!important}
+
+  .mobile-nav .nav-btn{min-height:var(--mobile-nav-height);padding:8px 4px!important}
+  .mobile-nav .nav-btn span{font-size:var(--cdc-text-xs)!important;line-height:1.25!important}
+
+  .market-barcode-open,.market-barcode-close,.market-barcode-torch,
+  .invoice-scan-close,.invoice-scan-torch{
+    min-width:44px!important;
+    min-height:44px!important;
+  }
 }
 
 @media(max-width:430px){
   :root{--cdc-nav-indicator-width:38px}
-  #page-market .market-summary-item::before{
-    width:42px!important;
-    height:42px!important;
-    min-width:42px!important;
-    min-height:42px!important;
-    background-size:21px 21px!important;
-  }
+  #page-market .market-summary-item::before{width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;background-size:20px 20px!important}
+}
+
+@media(max-width:359px){
+  :root{--page-gutter:16px}
+  .page-heading{display:block!important}
+  .bill-summary-grid,.market-summary-grid{grid-template-columns:1fr!important}
+  .bill-summary-item,.market-summary-item{min-height:108px!important}
+  .month-picker input{min-height:44px!important}
 }
 
 @media(prefers-reduced-motion:reduce){
