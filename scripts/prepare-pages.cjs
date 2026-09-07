@@ -5,12 +5,13 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const BUILD = 'v65';
+const BUILD = 'v66';
 const UI_REV = '64-ui1';
 const CATEGORY_REV = '64-ui1';
 const VISUAL_REV = '64-ui1';
 const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '65-shopping1';
+const SHELL_REV = '66-shell1';
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -66,6 +67,7 @@ for(const name of PUBLIC_FILES){
 const distIndex=path.join(DIST,'index.html');
 let index=fs.readFileSync(distIndex,'utf8');
 index=index.replace(/<meta name="app-build" content="[^"]+"\s*\/>/,`<meta name="app-build" content="${BUILD}" />`);
+index=index.replace(/<meta name="theme-color" content="[^"]+"\s*\/>/,'<meta name="theme-color" content="#f5f7fa" />');
 index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${BUILD}</strong>`);
 
@@ -82,8 +84,8 @@ if(!index.includes('market-brand.css')) index=index.replace('</head>',`  <link r
 if(!index.includes('market-category-groups.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-category-groups.css?v=${CATEGORY_REV}" />\n</head>`);
 // Consolidação visual global da v63, mantida antes dos ajustes de runtime da v64.
 if(!index.includes('ui-consistency.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./ui-consistency.css?v=${VISUAL_REV}" />\n</head>`);
-// Camada v64: safe-area tátil e estado visual das faturas por preencher.
-if(!index.includes('v64-runtime.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v64-runtime.css?v=${RUNTIME_REV}" />\n</head>`);
+// Base v64 do cabeçalho/recorrências; a folha recebeu revisão v66 apenas para uniformizar o shell móvel.
+if(!index.includes('v64-runtime.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v64-runtime.css?v=${SHELL_REV}" />\n</head>`);
 // Camada v65: densidade e prioridade operacional exclusivas da Lista de compras.
 if(!index.includes('market-shopping-focus.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-shopping-focus.css?v=${SHOPPING_REV}" />\n</head>`);
 
@@ -113,4 +115,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; visuals ${VISUAL_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; visuals ${VISUAL_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; shell ${SHELL_REV}).`);
