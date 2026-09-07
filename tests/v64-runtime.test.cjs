@@ -34,7 +34,9 @@ assert.match(css,/\.page-heading h1,[\s\S]*html\.market-prototype-active \.page-
 assert.match(css,/html\.market-prototype-active \.page-heading h1::before\{[\s\S]*content:none!important[\s\S]*display:none!important/,'legacy cart icon injected before the market title must be disabled');
 assert.match(css,/\.btn\.primary\.topbar-create,[\s\S]*html\.market-prototype-active \.btn\.primary\.topbar-create\{[\s\S]*width:44px!important[\s\S]*height:44px!important/,'market add action must use the global topbar button box');
 assert.match(css,/html\.market-prototype-active \.sync-header-status::after\{[\s\S]*content:none!important[\s\S]*display:none!important/,'market Sync must not append a page-specific chevron');
-assert.match(css,/\.sync-header-status,[\s\S]*html\.market-prototype-active \.sync-header-status\{[\s\S]*height:36px!important[\s\S]*max-width:112px!important/,'Sync control metrics must be identical across pages');
+const syncHeaderBlock=css.match(/\.sync-header-status,\s*html\.market-prototype-active \.sync-header-status\{([\s\S]*?)\n  \}/)?.[1]||'';
+assert.match(syncHeaderBlock,/max-width:112px!important/,'Sync max width must be identical across pages');
+assert.match(syncHeaderBlock,/height:36px!important/,'Sync height must be identical across pages');
 assert.match(css,/background:color-mix\(in srgb,var\(--bg,#f7f9fc\) 96%,var\(--surface,#fff\)\)!important/,'fixed topbar must mask page-specific background tint');
 
 assert.match(css,/\.status-chip\.draft/);
