@@ -5,14 +5,14 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const BUILD = 'v67';
+const BUILD = 'v68';
 const UI_REV = '64-ui1';
 const CATEGORY_REV = '64-ui1';
 const VISUAL_REV = '64-ui1';
 const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '65-shopping1';
 const SHELL_REV = '66-shell1';
-const MENU_REV = '67-menu1';
+const MENU_REV = '68-menu2';
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -91,7 +91,7 @@ if(!index.includes('ui-consistency.css')) index=index.replace('</head>',`  <link
 if(!index.includes('v64-runtime.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v64-runtime.css?v=${SHELL_REV}" />\n</head>`);
 // Camada v65: densidade e prioridade operacional exclusivas da Lista de compras.
 if(!index.includes('market-shopping-focus.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-shopping-focus.css?v=${SHOPPING_REV}" />\n</head>`);
-// Camada v67: controlo hambúrguer/X global, sem alterar geometria do topbar.
+// Camada v68: mesmo controlo hambúrguer/X da v67 com painel, estados e responsividade refinados.
 if(!index.includes('mobile-menu-toggle.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./mobile-menu-toggle.css?v=${MENU_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
