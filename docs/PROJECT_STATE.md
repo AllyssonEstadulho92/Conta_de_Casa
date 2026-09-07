@@ -1,92 +1,86 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 8 de setembro de 2026
-Build público atual: `v69`
-Build candidato: `v70`
+Build público atual: `v70`
 Branch pública: `main`
-Branch candidata: `fix/v70-visible-menu-motion`
-Release pública atual: PR #56
-Commit público atual: `a66df37b0fc345491dacf3cac91313d88d080a05`
+Release pública integrada: PR #58
+Commit público: `f4144bff69a3b46e0f6ec78a00af50d29b704578`
 Distribuição: GitHub Pages / PWA
 
 ## Estado atual
 
 A aplicação continua uma PWA estática/local-first. O estado financeiro permanece no navegador/IndexedDB e o cofre continua cifrado com PBKDF2-SHA-256 + AES-GCM. A sincronização GitHub permanece opcional e transfere apenas o envelope cifrado. O schema financeiro base continua `STATE_VERSION = 5`.
 
-A **v69 continua pública**. A validação física no iPhone confirmou que os dois estados visuais estão agora corretos: fechado apresenta hambúrguer e aberto apresenta `X`, sem o conflito Lucide que existia antes. A nova observação é diferente: a transformação entre esses estados pode parecer instantânea, sem movimento claramente perceptível ao toque.
+A **v70 está publicada**. A alteração foi integrada apenas depois da CI do PR terminar com sucesso; a CI de `main` e o Deploy GitHub Pages também concluíram com sucesso.
 
-## Problema observado após validação física da v69
+Referências de publicação:
 
-### Factos observáveis
+- PR funcional: #58 — `v70: tornar visível o movimento do menu hambúrguer no iPhone`;
+- merge em `main`: `f4144bff69a3b46e0f6ec78a00af50d29b704578`;
+- CI final do PR: run #1279 (`34170191884`) — sucesso;
+- CI de `main`: run #1280 (`34170229908`) — sucesso;
+- Deploy GitHub Pages: run #1273 (`34170256426`) — sucesso.
 
-- estado fechado: hambúrguer correto no topbar;
-- estado aberto: `X` correto no cabeçalho do drawer;
-- painel abre corretamente e a navegação continua funcional;
-- a transformação entre os dois estados não fica claramente visível no iPhone como uma animação contínua.
+## Problema confirmado pela validação física da v69
 
-### Causa técnica provável confirmada pela arquitetura
+No iPhone, a v69 já apresentava corretamente hambúrguer no estado fechado e `X` no estado aberto. O problema remanescente era de movimento percebido: a transformação podia parecer instantânea porque o mesmo `#mobileMenuBtn` é movido entre o topbar e `.drawer-head` durante a abertura/fecho do `<dialog>`.
 
-`#mobileMenuBtn` é deliberadamente o mesmo nó DOM nos dois estados. Ao abrir, `openMobileDrawer()` ativa o `<dialog>` e `mobile-menu-toggle.js` move esse mesmo botão do topbar para `.drawer-head`. Ao fechar, o nó regressa ao topbar.
+A v69 dependia principalmente de CSS transitions. Durante esse reparenting, Safari pode recalcular o elemento já no estado final sem apresentar frames intermédios suficientes para tornar a interpolação perceptível.
 
-A v69 depende principalmente de CSS transitions nas propriedades `top`, `width`, `transform` e `opacity`. Durante o mesmo ciclo em que o elemento muda de ancestral/render tree, Safari pode não apresentar um frame intermédio suficiente para tornar a transição perceptível. O estado final continua correto, mas o movimento pode ser consumido pelo reparenting.
+## v70 — correção publicada
 
-## v70 — correção candidata
-
-A v70 mantém a arquitetura v69 e acrescenta movimento explícito depois da reposição do nó:
+A v70 preserva a arquitetura existente e acrescenta movimento explícito depois do reparenting:
 
 - mantém o mesmo `#mobileMenuBtn` e o mesmo `#mobileDrawer`;
 - mantém as três linhas `22 / 18 / 14 px` e o X de `45deg / -45deg`;
 - mantém a sentinela Lucide oculta e `data-ui-icon-slot="menu"`;
 - mantém `aria-expanded`, `aria-label`, `title` e `data-menu-state` sincronizados;
-- depois de o botão entrar no drawer, executa Web Animations com keyframes explícitos no frame seguinte;
-- ao fechar pelo X, executa a sequência inversa depois de o botão regressar ao topbar;
-- acrescenta apenas um micro movimento discreto de escala/inclinação ao glifo, sem deslocar o layout;
-- duração: cerca de `240 ms` com `cubic-bezier(.22,.8,.2,1)`;
-- mantém CSS transition como fallback;
+- usa Web Animations com keyframes explícitos no frame seguinte à mudança de posição do botão;
+- ao abrir, as linhas convergem e rodam até formar o X;
+- ao fechar pelo X, a sequência inversa é executada depois de o botão regressar ao topbar;
+- o glifo recebe apenas um micro movimento discreto de escala/inclinação, sem deslocar layout;
+- duração aproximada: `240 ms`, easing `cubic-bezier(.22,.8,.2,1)`;
+- CSS transition permanece como fallback;
 - `prefers-reduced-motion` impede os keyframes adicionais;
-- fechos externos por Escape/backdrop continuam a restaurar estado sem deixar animações pendentes;
-- foco por teclado, foco por pointer, safe areas, largura do drawer, breakpoints e alvos de toque permanecem inalterados.
+- Escape, backdrop, foco, safe areas, largura do drawer, breakpoints e alvos de toque permanecem preservados.
 
-## Versionamento candidato
+## Versionamento público
 
 - build: `v70`;
 - revisão do menu: `70-menu4`;
 - shell preservado: `66-shell1`;
 - Compras preservada: `65-shopping1`;
 - runtime funcional preservado: `64-runtime1`;
-- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4`.
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4`.
 
-## Segurança e escopo
+## QA automatizado
+
+A CI validou com sucesso sintaxe, finanças, auditoria, invariantes, isolamento do cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, consistência visual, menu animado, Centro de Atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade e sincronização.
+
+A regressão específica da v70 cobre os keyframes por linha, o micro movimento do glifo, abertura/fecho no frame seguinte ao reparenting, fallback, movimento reduzido e sincronização de estado.
+
+## Segurança e compatibilidade
 
 A v70 não altera `appState`, `STATE_VERSION`, faturas, pagamentos, `estimatedCents`, `actualCents`, scanner, recorrências, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB, autenticação, APIs ou sincronização.
 
-Não foram adicionados segredos, tokens, chaves, endpoints externos ou armazenamento novo. O uso de Web Animations é exclusivamente local no elemento visual do menu.
+Não foram adicionados segredos, tokens, chaves, endpoints externos ou armazenamento novo.
 
-## QA necessário antes de publicar
+## Validação física ainda necessária
 
-1. CI do PR totalmente verde;
-2. validar sintaxe e regressão específica de Web Animations/reparenting;
-3. validar `prefers-reduced-motion`;
-4. validar build/manifest/cache `v70` / `70-menu4`;
-5. integrar em `main` apenas com CI verde;
-6. confirmar CI de `main` e Deploy GitHub Pages;
-7. repetir validação física no mesmo iPhone.
+A publicação técnica está concluída. Falta confirmar no iPhone/Safari que o movimento agora é efetivamente perceptível:
 
-## Validação física prioritária v70
-
-- tocar no hambúrguer e ver as linhas moverem-se até formar o `X`;
-- tocar no `X` e ver a animação inversa até ao hambúrguer;
-- confirmar que não existe salto de layout nem moldura grande após toque;
-- confirmar abertura/fecho repetidos sem estado preso;
+- hambúrguer → movimento → `X`;
+- `X` → movimento inverso → hambúrguer;
+- abrir/fechar repetidamente sem estado preso;
+- ausência de salto de layout e moldura grande após toque;
 - Escape, backdrop e seleção de item;
 - portrait/landscape;
-- iPhone/Safari, Android/Chrome e tablet junto do breakpoint 820/821 px;
-- tema claro/escuro e VoiceOver/TalkBack.
+- Android/Chrome, tablet, tema claro/escuro e VoiceOver/TalkBack quando possível.
 
 ## Última alteração
 
-Preparada a candidata v70 para tornar fisicamente perceptível o movimento hambúrguer ↔ `X` no mesmo botão, sem reescrever o drawer nem a navegação.
+Publicada a v70 para tornar visível o movimento do mesmo botão hambúrguer ↔ `X` no Safari/iPhone, preservando drawer, navegação, acessibilidade e dados.
 
 ## Próximo passo
 
-Executar CI completa da v70, integrar apenas se verde, publicar pelo GitHub Pages e repetir o teste visual no iPhone.
+Instalar a v70 pelo Centro de Atualização no iPhone e validar visualmente o movimento de abertura e fecho.
