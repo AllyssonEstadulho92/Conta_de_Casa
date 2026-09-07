@@ -4,7 +4,7 @@ Atualizado: 7 de setembro de 2026
 
 ## P0 — v67 menu móvel hambúrguer/X
 
-### Implementação candidata — PR #52
+### Implementação e publicação — PR #52
 
 - [x] Confirmar no código que o menu móvel usa `#mobileMenuBtn` para abrir e `#drawerCloseBtn` como segundo `X` dentro de `#mobileDrawer`.
 - [x] Confirmar que `#mobileDrawer` é um `<dialog>` modal e que um botão deixado fora do diálogo ficaria inerte enquanto `showModal()` estiver ativo.
@@ -17,17 +17,18 @@ Atualizado: 7 de setembro de 2026
 - [x] Ocultar `#drawerCloseBtn` sem o remover do DOM, preservando o wiring legado de `events.js`.
 - [x] Preservar Escape, backdrop, evento `close` e foco de retorno.
 - [x] Respeitar `prefers-reduced-motion`.
-- [x] Versionar a candidata como `v67` / `67-menu1`.
+- [x] Versionar a release como `v67` / `67-menu1`.
 - [x] Incluir os novos assets em `scripts/prepare-pages.cjs` e na allowlist/cache do Service Worker.
 - [x] Atualizar `release-manifest.json` e `tests/app-update.test.cjs`.
 - [x] Criar `tests/mobile-menu-toggle.test.cjs`.
 - [x] Incluir sintaxe/teste específico na CI e no gate de Pages.
 - [x] Abrir PR #52.
-- [ ] Confirmar CI verde do PR #52.
-- [ ] Rever diff final e confirmar que não existem alterações a dados/finanças/segurança.
-- [ ] Integrar PR #52 em `main` apenas com CI verde.
-- [ ] Confirmar CI de `main` e Deploy GitHub Pages.
-- [ ] Atualizar estes documentos para estado publicado depois da integração efetiva.
+- [x] Confirmar CI verde do PR #52 — run #1178.
+- [x] Rever diff final e confirmar que não existem alterações a dados/finanças/segurança.
+- [x] Integrar PR #52 em `main` no commit `a1d932e580abaa06e7026a515f797411ab205f6e`.
+- [x] Confirmar CI de `main` #1179 com sucesso.
+- [x] Confirmar Deploy GitHub Pages #1172 com sucesso.
+- [x] Sincronizar os documentos de continuidade com o estado publicado da v67.
 
 ### Validação física v67
 
@@ -103,7 +104,7 @@ Atualizado: 7 de setembro de 2026
 - [x] Topbar móvel usa a mesma geometria e o mesmo fundo em Início/Faturas/Compras/Relatórios.
 - [x] Centro de Atualização continua same-origin e controlado pelo utilizador.
 - [x] CSP/allowlist, responsividade, acessibilidade e sincronização permanecem na CI.
-- [x] A candidata v67 mantém um único controlo móvel efetivo e não altera `appState`.
+- [x] A v67 publicada mantém um único controlo móvel efetivo e não altera `appState`.
 
 ## P0 — validação física funcional ainda pendente
 
