@@ -14,7 +14,11 @@
 
 ### Auditoria iPhone/Safari
 
-Duas capturas reais da Lista de compras mostraram estados diferentes do mesmo cabeçalho: numa captura o topo estava completo; noutra, após deslocação, menu/título/botão `+` ficaram parcialmente cortados. A estrutura móvel usava `.main` como scroller interno e `.topbar` como `sticky` dentro desse scroller.
+As capturas reais expuseram dois problemas diferentes no topo móvel.
+
+**Problema 1 — corte durante scroll.** A estrutura usava `.main` como scroller interno e `.topbar` como `sticky` dentro desse scroller. Em Safari/iPhone a primeira linha podia deslocar-se parcialmente para fora da área visível.
+
+**Problema 2 — cabeçalho de Compras diferente das restantes páginas.** A comparação direta entre **Início** e **Lista de compras** mostrou carrinho adicional no título, título maior, caixa do botão `+` ampliada, chevron extra no Sync e tonalidade diferente no fundo do topo. O código confirmou regras históricas associadas a `html.market-prototype-active` como origem dessa divergência visual.
 
 A candidata v64:
 
@@ -22,8 +26,14 @@ A candidata v64:
 - substitui a dependência móvel de `sticky` por `position:fixed` no cabeçalho;
 - fixa os gutters esquerdo/direito;
 - adiciona `padding-top` equivalente à altura do cabeçalho em `.main` para impedir sobreposição;
+- mantém título móvel uniforme em 24 px/600, reduzindo para 20 px apenas abaixo de 360 px;
+- desativa o carrinho pseudo-elemento antes do título de Compras;
+- normaliza menu e botão `+` para a mesma caixa tátil de 44×44 px;
+- mantém a superfície visual do `+` em 36×36 px;
+- remove o chevron exclusivo do Sync no Mercado e usa a mesma métrica global de 36 px de altura;
+- uniformiza o fundo do topbar para não herdar a tonalidade do módulo;
 - mantém o scroller interno, bottom navigation, teclado e diálogos existentes;
-- acrescenta regressão automatizada para esta estrutura.
+- acrescenta regressão automatizada para a igualdade estrutural do cabeçalho entre páginas.
 
 ### Código de barras / Compras
 
@@ -52,14 +62,23 @@ A candidata v64:
 - PIN/palavra-passe, PBKDF2-SHA-256, AES-GCM e IndexedDB inalterados;
 - nenhuma credencial/token/chave adicionada;
 - scanner não transforma consulta de preço em preço pago;
+- correções do cabeçalho são exclusivamente de apresentação;
 - atualização continua same-origin e depende de **Atualizar agora**.
+
+### Versionamento e Centro de Atualização
+
+- `release-manifest.json` mantém `latestVersion = v64`;
+- as notas da v64 passam a registar explicitamente a uniformização do cabeçalho móvel;
+- nenhuma nova versão adicional foi criada porque a v64 ainda é candidata e não foi publicada em `main`;
+- após merge/Pages, a v63 pública deve detetar a v64 em **Definições → Atualização de Software** e instalá-la apenas após **Atualizar agora**.
 
 ### Testes
 
-- criado `tests/v64-runtime.test.cjs`;
-- CI cobre confiança/ambiguidade do scanner, GTIN repetido, separação estimado/real, drafts recorrentes e safe area/cabeçalho móvel;
+- `tests/v64-runtime.test.cjs` cobre confiança/ambiguidade do scanner, GTIN repetido, separação estimado/real, drafts recorrentes e safe area;
+- a regressão visual exige agora que título global e de Compras usem o mesmo tamanho, que o pseudo-carrinho esteja desativado, que o botão `+` mantenha a caixa global e que o Sync não receba chevron exclusivo;
 - regressões existentes de finanças, segurança, Mercado, atualização, responsividade, acessibilidade e sincronização permanecem na pipeline;
-- uma execução completa da branch ficou verde antes do último reforço do cabeçalho; a release só será integrada após nova execução completa verde no HEAD final.
+- a release só será integrada após nova execução completa verde no HEAD final;
+- validação física no iPhone após instalar a v64 permanece pendente e não é considerada concluída por CI.
 
 ## 2026-09-06 — v63 publicada: consistência visual e atualização controlada (`63-ui2`)
 
