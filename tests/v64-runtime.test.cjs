@@ -22,10 +22,18 @@ assert.match(js,/financialDiagnostics/);
 
 assert.match(css,/safe-area-inset-top/);
 assert.match(css,/--mobile-top-safe:max\(20px/);
+assert.match(css,/--mobile-header-gap:16px/,'mobile header must reserve a visible gap before page controls');
+assert.match(css,/--header-height:calc\(112px \+ var\(--mobile-top-safe\) \+ var\(--mobile-header-gap\)\)/,'header height must include the visual separation gap');
 assert.match(css,/position:fixed!important/,'mobile header must not depend on sticky inside Safari internal scrolling');
-assert.match(css,/left:var\(--page-gutter\)!important/);
-assert.match(css,/right:var\(--page-gutter\)!important/);
-assert.match(css,/padding-top:var\(--header-height\)!important/,'main content must be offset by the fixed mobile header');
+assert.match(css,/left:0!important/,'fixed header surface must cover the viewport from the left edge');
+assert.match(css,/right:0!important/,'fixed header surface must cover the viewport to the right edge');
+assert.match(css,/padding-right:var\(--page-gutter\)!important/,'content gutter must be internal to the full-width header');
+assert.match(css,/padding-left:var\(--page-gutter\)!important/,'content gutter must be internal to the full-width header');
+assert.match(css,/padding-bottom:calc\(8px \+ var\(--mobile-header-gap\)\)!important/,'the fixed header must own the separation gap instead of exposing clipped controls');
+assert.match(css,/background:var\(--bg,#f7f9fc\)!important/,'topbar and mobile shell must use the same opaque application background');
+assert.match(css,/html\.market-prototype-active \.main\{[\s\S]*background:var\(--bg,#f7f9fc\)!important/,'market radial/tinted shell must be neutralized on mobile');
+assert.match(css,/padding-top:var\(--header-height\)!important/,'main content must be offset by the full fixed mobile header');
+assert.match(css,/html\.app-active \.page\{[\s\S]*padding-top:0!important/,'page-specific top padding must not double or vary the mobile header gap');
 
 /* Regression from real iPhone screenshots: the Mercado header must not become a
    separate visual component. It uses the same title, menu, add and Sync metrics as
@@ -37,11 +45,11 @@ assert.match(css,/html\.market-prototype-active \.sync-header-status::after\{[\s
 const syncHeaderBlock=css.match(/\.sync-header-status,\s*html\.market-prototype-active \.sync-header-status\{([\s\S]*?)\n  \}/)?.[1]||'';
 assert.match(syncHeaderBlock,/max-width:112px!important/,'Sync max width must be identical across pages');
 assert.match(syncHeaderBlock,/height:36px!important/,'Sync height must be identical across pages');
-assert.match(css,/background:color-mix\(in srgb,var\(--bg,#f7f9fc\) 96%,var\(--surface,#fff\)\)!important/,'fixed topbar must mask page-specific background tint');
+assert.match(syncHeaderBlock,/background:var\(--surface,#fff\)!important/,'Sync uses one explicit surface color on mobile');
 
 assert.match(css,/\.status-chip\.draft/);
 assert.match(css,/\.bill-draft-card/);
-assert.doesNotMatch(css,/dashed|dotted/,'v64 must not reintroduce segmented/dotted visual accents');
+assert.doesNotMatch(css,/dashed|dotted/,'runtime must not reintroduce segmented/dotted visual accents');
 
 const context=vm.createContext({console,setTimeout,clearTimeout,setInterval,clearInterval,globalThis:null});
 context.globalThis=context;
@@ -70,4 +78,4 @@ assert.equal(ambiguous.accepted,false,'near-tied results must require manual con
 const parsed=api.parseBarcodeStatus('Código 5601234567890: Mimosa · Leite Meio Gordo · 1 L. A pesquisar preço no Pingo Doce e Continente…');
 assert.deepEqual(JSON.parse(JSON.stringify(parsed)),{code:'5601234567890',detail:'Mimosa · Leite Meio Gordo · 1 L'});
 
-console.log('v64 barcode confidence, recurring-bill reset and unified fixed mobile header tests: OK');
+console.log('v64 runtime + v65 mobile spacing/surface regression tests: OK');
