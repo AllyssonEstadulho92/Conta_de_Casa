@@ -22,7 +22,7 @@ assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt https:\/\/world\.openfoodfacts\.org;/);
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
-assert.match(sw, /conta-de-casa-public-v64-runtime1/);
+assert.match(sw, /conta-de-casa-public-v65-layout1/);
 
 for (const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','ui-consistency.css','v64-runtime.css','v64-runtime.js']) {
   assert.ok(sw.includes(`'./${asset}'`), `${asset} must be cached by the service worker`);
@@ -60,7 +60,9 @@ assert.match(brandingJs, /A fotografia é opcional/);
 assert.doesNotMatch(brandingJs, /appState|estimatedCents|actualCents|saveState|commit\(/,'branding layer must not touch financial state');
 assert.match(consistencyCss,/\.mobile-nav \.nav-btn\.active::after[\s\S]*content:none!important/,'final layer must remove duplicate mobile active marker');
 assert.match(consistencyCss,/#page-market \.market-summary-item\{[\s\S]*inset 0 3px 0 var\(--market-summary-accent\)/,'summary card accent must render as one solid strip');
-assert.match(runtimeCss,/safe-area-inset-top/,'v64 mobile layer must keep the top controls inside the touch-safe area');
+assert.match(runtimeCss,/safe-area-inset-top/,'mobile layer must keep the top controls inside the touch-safe area');
+assert.match(runtimeCss,/--mobile-header-gap:16px/,'v65 must keep search/filter controls visibly separated from the fixed header');
+assert.match(runtimeCss,/html\.market-prototype-active \.main\{[\s\S]*background:var\(--bg,#f7f9fc\)!important/,'v65 must neutralize the market-only shell tint on mobile');
 assert.match(runtimeJs,/AUTO_MATCH_MIN=0\.84/,'v64 barcode automation must use conservative confidence matching');
 assert.doesNotMatch(runtimeJs,/actualCents\s*[:=]/,'barcode price lookup must remain estimated rather than actual paid value');
 
@@ -102,7 +104,7 @@ assert.ok(remSizes.length > 0);
 assert.ok(remSizes.every(size => size >= 0.75), `market live UI contains text smaller than 12px: ${Math.min(...remSizes)}rem`);
 for (const target of ['44px','48px','52px']) assert.ok(`${css}\n${brandingCss}`.includes(target));
 
-console.log('Market live-source, v64 barcode, branding, no-image presentation, privacy and responsive invariants: OK');
+console.log('Market live-source, v64 barcode, v65 spacing/surface, branding, no-image presentation, privacy and responsive invariants: OK');
 assert.match(css,/market-logo-pingo/);
 assert.match(css,/market-logo-continente/);
 assert.match(css,/market-quantity-stepper/);

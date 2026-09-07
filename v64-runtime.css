@@ -1,4 +1,4 @@
-/* Conta de Casa v64 — safe area móvel, cabeçalho estável e faturas por preencher. */
+/* Conta de Casa v64+ — safe area móvel, cabeçalho estável e faturas por preencher. */
 
 .status-chip.draft{
   color:var(--primary,#0b63e5);
@@ -40,27 +40,44 @@
        O mínimo cobre navegadores que devolvem safe-area=0; no modo instalado prevalece
        a safe area física do aparelho acrescida de uma pequena folga. */
     --mobile-top-safe:max(20px,calc(env(safe-area-inset-top,0px) + 8px));
-    --header-height:calc(112px + var(--mobile-top-safe));
+    /* Espaço estrutural permanente entre o cabeçalho fixo e o primeiro controlo.
+       Impede a pesquisa/filtros de ficarem visualmente cortados sob o topbar. */
+    --mobile-header-gap:16px;
+    --header-height:calc(112px + var(--mobile-top-safe) + var(--mobile-header-gap));
   }
 
   /* O cabeçalho deixa de depender de position:sticky dentro do scroller interno.
      No Safari/iPhone essa combinação podia deixar a primeira linha parcialmente fora
-     da área visível depois de uma deslocação. Fixed mantém menu, título e + íntegros. */
+     da área visível depois de uma deslocação. Fixed mantém menu, título e + íntegros.
+     A superfície cobre a largura total do viewport; o gutter passa a ser padding
+     interno para não deixar faixas laterais com outra tonalidade. */
   html.app-active .topbar,
   .topbar{
     position:fixed!important;
     top:0!important;
-    left:var(--page-gutter)!important;
-    right:var(--page-gutter)!important;
-    width:auto!important;
+    left:0!important;
+    right:0!important;
+    width:100%!important;
     max-width:none!important;
     z-index:34!important;
     height:var(--header-height)!important;
     min-height:var(--header-height)!important;
     padding-top:var(--mobile-top-safe)!important;
-    padding-bottom:8px!important;
-    box-sizing:border-box;
-    background:color-mix(in srgb,var(--bg,#f7f9fc) 96%,var(--surface,#fff))!important;
+    padding-right:var(--page-gutter)!important;
+    padding-bottom:calc(8px + var(--mobile-header-gap))!important;
+    padding-left:var(--page-gutter)!important;
+    box-sizing:border-box!important;
+    border-bottom:1px solid color-mix(in srgb,var(--border,#dfe5ec) 78%,transparent)!important;
+    background:var(--bg,#f7f9fc)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+
+  /* O fundo do módulo Compras deixa de introduzir uma faixa/gradiente diferente
+     junto ao cabeçalho e às margens. Cartões e controlos continuam a usar surface. */
+  html.app-active .main,
+  html.market-prototype-active .main{
+    background:var(--bg,#f7f9fc)!important;
   }
 
   /* O Mercado tinha regras históricas próprias no topo: acrescentava um carrinho ao
@@ -154,7 +171,7 @@
     padding:0 10px!important;
     border:1px solid color-mix(in srgb,var(--border,#dfe5ec) 88%,transparent)!important;
     border-radius:12px!important;
-    background:color-mix(in srgb,var(--surface,#fff) 94%,var(--surface-2,#f2f5f9))!important;
+    background:var(--surface,#fff)!important;
     box-shadow:0 1px 2px rgba(20,35,60,.04)!important;
   }
 
@@ -165,11 +182,16 @@
     height:0!important;
   }
 
-  /* Como o cabeçalho fixed sai do fluxo, o conteúdo recebe exatamente a sua altura.
-     O scroller .main continua a ser o mesmo, preservando navegação, teclado e bottom nav. */
+  /* Como o cabeçalho fixed sai do fluxo, o conteúdo recebe a altura total do topo,
+     já incluindo a separação visual inferior. O padding próprio das páginas é
+     neutralizado no mobile para que a distância não varie entre módulos. */
   html.app-active .main{
     padding-top:var(--header-height)!important;
     scroll-padding-top:calc(var(--header-height) + 8px)!important;
+  }
+
+  html.app-active .page{
+    padding-top:0!important;
   }
 
   .mobile-menu-btn,
@@ -183,6 +205,7 @@
 @media(max-width:359px){
   :root{
     --mobile-top-safe:max(18px,calc(env(safe-area-inset-top,0px) + 6px));
+    --mobile-header-gap:14px;
   }
 
   .page-heading h1,
