@@ -7,7 +7,7 @@
     {
       "version": "v64",
       "date": "7 de setembro de 2026",
-      "title": "Scanner preciso, novas faturas limpas e margem segura no iPhone",
+      "title": "Scanner preciso, novas faturas limpas e cabeçalho móvel uniforme",
       "items": [
         "O leitor de código de barras passa a exigir um único supermercado para evitar misturar preços entre lojas e memoriza a última seleção individual.",
         "Depois de identificar o GTIN, a aplicação compara nome, marca, embalagem e loja; só adiciona automaticamente quando a correspondência atinge confiança elevada.",
@@ -18,6 +18,7 @@
         "Descrição, fornecedor, categoria, método, recorrência e vencimento previsto continuam disponíveis para reduzir trabalho repetitivo sem transportar valores antigos.",
         "Ocorrências recorrentes futuras geradas automaticamente e ainda não editadas são migradas para o novo estado Por preencher sem alterar faturas já confirmadas ou com pagamentos.",
         "O cabeçalho móvel passa a respeitar uma margem superior mínima e a safe area do iPhone, deixando o menu hambúrguer e as ações do topo fora da zona difícil de tocar.",
+        "Início, Faturas, Lista de compras e Relatórios passam a usar exatamente a mesma composição do cabeçalho móvel: mesmo tamanho de título, menu, botão + e controlo Sync; o carrinho extra, o botão ampliado e o chevron exclusivo de Compras deixam de aparecer no topo.",
         "A v64 mantém cofre, PIN, pagamentos, faturas confirmadas e dados financeiros cifrados separados do mecanismo de atualização."
       ]
     },
