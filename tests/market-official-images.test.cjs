@@ -83,39 +83,45 @@ assert.equal(parsed[0].sourceUrl,pingoProduct);
 assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
-assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1/);
+assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v67-menu1/);
 assert.ok(sw.includes("'./market-retailer-image-policy.js'"));
 assert.ok(sw.includes("'./market-official-images.js'"));
 assert.ok(sw.includes("'./v64-runtime.js'"));
 assert.ok(sw.includes("'./market-shopping-focus.js'"));
-assert.match(prepare,/const BUILD = 'v66'/);
+assert.ok(sw.includes("'./mobile-menu-toggle.js'"));
+assert.match(prepare,/const BUILD = 'v67'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const SHOPPING_REV = '65-shopping1'/);
 assert.match(prepare,/const SHELL_REV = '66-shell1'/);
+assert.match(prepare,/const MENU_REV = '67-menu1'/);
 assert.ok(prepare.includes("'market-retailer-image-policy.js'"));
 assert.ok(prepare.includes("'market-official-images.js'"));
 assert.ok(prepare.includes("'v64-runtime.js'"));
 assert.ok(prepare.includes("'market-shopping-focus.js'"));
+assert.ok(prepare.includes("'mobile-menu-toggle.js'"));
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-retailer-image-policy\.js\?v=66/);
-  assert.match(index,/market-official-images\.js\?v=66/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=67/);
+  assert.match(index,/market-official-images\.js\?v=67/);
   assert.match(index,/v64-runtime\.css\?v=66-shell1/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
   assert.match(index,/market-shopping-focus\.js\?v=65-shopping1/);
+  assert.match(index,/mobile-menu-toggle\.js\?v=67-menu1/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.ok(index.indexOf('market-official-images.js')<index.indexOf('v64-runtime.js'));
   assert.ok(index.indexOf('v64-runtime.js')<index.indexOf('market-shopping-focus.js'));
+  assert.ok(index.indexOf('market-shopping-focus.js')<index.indexOf('mobile-menu-toggle.js'));
   assert.ok(fs.existsSync(path.join(dist,'market-retailer-image-policy.js')));
   assert.ok(fs.existsSync(path.join(dist,'market-official-images.js')));
   assert.ok(fs.existsSync(path.join(dist,'v64-runtime.css')));
   assert.ok(fs.existsSync(path.join(dist,'v64-runtime.js')));
   assert.ok(fs.existsSync(path.join(dist,'market-shopping-focus.js')));
+  assert.ok(fs.existsSync(path.join(dist,'mobile-menu-toggle.js')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market browser official-image bridge, v64 runtime, v65 shopping and v66 shell build tests: OK');
+console.log('Market browser official-image bridge, v64 runtime, v65 shopping, v66 shell and v67 menu build tests: OK');
