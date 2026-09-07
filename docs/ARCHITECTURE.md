@@ -50,10 +50,10 @@ A ordem pública é intencional:
 5. `market-brand.css` — identidade text-first;
 6. `market-category-groups.css` — agrupamento por categoria;
 7. `ui-icons.css` — sistema Lucide e componentes visuais;
-8. `ui-consistency.css` — consolidação v63: ícones, indicador único, cartões-resumo;
-9. `v64-runtime.css` — **última camada candidata**, responsável pelo cabeçalho móvel estável/safe area e estado visual das faturas por preencher.
+8. `ui-consistency.css` — consolidação visual global v64: tipografia, ícones, controlos, alinhamentos e espaçamentos;
+9. `v64-runtime.css` — **última camada candidata**, responsável pelo cabeçalho móvel estável/safe area, normalização final do topbar e estado visual das faturas por preencher.
 
-A última camada não altera cálculos ou cifragem.
+A última camada não altera cálculos, persistência ou cifragem.
 
 ## Navegação e viewport móvel
 
@@ -61,7 +61,7 @@ A última camada não altera cálculos ou cifragem.
 
 Em mobile, `.main` continua a ser o scroller interno da aplicação e a navegação inferior continua fixa. Esta opção preserva o tratamento existente de teclado, diálogos e bottom navigation.
 
-### Correção v64 do cabeçalho
+### Correção v64 do cabeçalho durante scroll
 
 O cabeçalho deixou de depender de `position:sticky` dentro do scroller interno. Em Safari/iPhone, as capturas mostraram que a primeira linha podia deslocar-se parcialmente para fora da área visível após scroll.
 
@@ -74,6 +74,27 @@ Na v64:
 - `scroll-padding-top` continua alinhado com a altura real do topo.
 
 Esta correção isola o problema do Safari sem substituir o modelo de viewport/teclado da aplicação inteira.
+
+### Cabeçalho global uniforme
+
+O topbar é um componente estrutural global. A auditoria de 7 de setembro identificou que regras históricas condicionadas por `html.market-prototype-active` alteravam apenas a página **Lista de compras**:
+
+- `h1::before` adicionava um carrinho ao título;
+- o título tinha escala/peso próprios;
+- o botão `+` usava uma caixa maior;
+- `Sync::after` adicionava um chevron exclusivo;
+- a transparência do topo deixava aparecer uma tonalidade diferente do fundo do Mercado.
+
+A v64 normaliza o componente no último nível de cascata sem alterar o conteúdo da página:
+
+- título móvel: 24 px, peso 600, uma linha com ellipsis; abaixo de 360 px passa a 20 px;
+- menu e botão `+`: alvos 44×44 px;
+- superfície visual do `+`: 36×36 px;
+- `Sync`: 36 px de altura e sem chevron adicional no Mercado;
+- o pseudo-elemento do carrinho no título do Mercado é desativado;
+- o fundo do topbar é uniforme entre páginas.
+
+A identidade do módulo Compras permanece no conteúdo, cartões, estados e navegação; não muda a geometria do cabeçalho global.
 
 ## Sistema de ícones
 
@@ -157,6 +178,7 @@ Antes de publicar, a CI deve validar:
 - datas civis, faturas, pagamentos e QR;
 - Mercado, scanner, quantidade × preço e compatibilidade histórica de imagens;
 - ícones e consistência visual;
+- igualdade estrutural do cabeçalho móvel entre Início/Faturas/Compras/Relatórios;
 - atualização e manifesto;
 - segurança/CSP/allowlist;
 - responsividade, viewport móvel, navegação e acessibilidade;
