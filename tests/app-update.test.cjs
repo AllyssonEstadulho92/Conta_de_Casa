@@ -40,19 +40,21 @@ assert.doesNotMatch(updateJs, /https?:\/\//, 'The update center must not contact
 
 assert.equal(releaseManifest.schemaVersion,1);
 assert.equal(releaseManifest.channel,'stable');
-assert.equal(releaseManifest.latestVersion,'v69');
+assert.equal(releaseManifest.latestVersion,'v70');
 assert.ok(Array.isArray(releaseManifest.releases));
-assert.equal(releaseManifest.releases[0].version,'v69');
+assert.equal(releaseManifest.releases[0].version,'v70');
 assert.ok(releaseManifest.releases[0].items.length>=7);
+assert.ok(releaseManifest.releases.some(release=>release.version==='v69'));
 assert.ok(releaseManifest.releases.some(release=>release.version==='v68'));
 assert.ok(releaseManifest.releases.some(release=>release.version==='v67'));
 assert.ok(releaseManifest.releases.some(release=>release.version==='v66'));
 assert.ok(releaseManifest.releases.some(release=>release.version==='v65'));
 assert.ok(releaseManifest.releases.some(release=>release.version==='v64'));
-assert.ok(releaseManifest.releases[0].items.some(item=>/Lucide|SVG|conflito/i.test(item)),'v69 notes must expose the icon hydrator conflict');
-assert.ok(releaseManifest.releases[0].items.some(item=>/hambúrguer|X|anima/i.test(item)),'v69 notes must expose the corrected animated state');
-assert.ok(releaseManifest.releases[0].items.some(item=>/foco|Safari|teclado/i.test(item)),'v69 notes must mention focus behavior on Safari');
-assert.ok(releaseManifest.releases[0].items.some(item=>/não modifica|exclusivamente|não altera/i.test(item)),'v69 notes must state that financial/private data is untouched');
+assert.ok(releaseManifest.releases[0].items.some(item=>/Web Animations|keyframes|reparent/i.test(item)),'v70 notes must expose the Safari/reparenting motion fix');
+assert.ok(releaseManifest.releases[0].items.some(item=>/hambúrguer|X|movimento|anima/i.test(item)),'v70 notes must expose the visible moving state');
+assert.ok(releaseManifest.releases[0].items.some(item=>/240|duração|curva/i.test(item)),'v70 notes must document the restrained timing');
+assert.ok(releaseManifest.releases[0].items.some(item=>/reduced-motion|movimento reduzido/i.test(item)),'v70 notes must preserve reduced motion');
+assert.ok(releaseManifest.releases[0].items.some(item=>/não modifica|exclusivamente|não altera/i.test(item)),'v70 notes must state that financial/private data is untouched');
 assert.equal(webManifest.background_color,'#f5f7fa');
 assert.equal(webManifest.theme_color,'#f5f7fa');
 
@@ -67,10 +69,10 @@ assert.match(runtimeJs,/Conta de Casa v64/);
 assert.match(runtimeCss,/v66 acrescenta consistência cromática/);
 assert.match(shoppingJs,/Conta de Casa v65/);
 assert.match(shoppingCss,/Conta de Casa v65/);
-assert.match(menuJs,/Conta de Casa v69/);
-assert.match(menuCss,/Conta de Casa v69/);
+assert.match(menuJs,/Conta de Casa v70/);
+assert.match(menuCss,/Conta de Casa v70/);
 
-assert.match(sw, /conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v69-menu3/);
+assert.match(sw, /conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4/);
 for(const asset of ['./app-update.css','./app-update.js','./ui-consistency.css','./v64-runtime.css','./v64-runtime.js','./market-shopping-focus.css','./market-shopping-focus.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./release-manifest.json'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be cached`);
 assert.match(sw, /APPLY_UPDATE/);
 assert.match(sw, /SKIP_WAITING/,'legacy clients must still be able to request activation');
@@ -78,14 +80,14 @@ assert.match(sw, /applyRequested=true/);
 assert.match(sw, /client\.navigate\(client\.url\)/,'explicit update must be able to refresh legacy clients');
 assert.doesNotMatch(sw, /install[\s\S]{0,260}skipWaiting\(\)/,'updates must not skip waiting automatically during install');
 
-assert.match(prepare, /const BUILD = 'v69'/);
+assert.match(prepare, /const BUILD = 'v70'/);
 assert.match(prepare, /const UI_REV = '64-ui1'/);
 assert.match(prepare, /const CATEGORY_REV = '64-ui1'/);
 assert.match(prepare, /const VISUAL_REV = '64-ui1'/);
 assert.match(prepare, /const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare, /const SHOPPING_REV = '65-shopping1'/);
 assert.match(prepare, /const SHELL_REV = '66-shell1'/);
-assert.match(prepare, /const MENU_REV = '69-menu3'/);
+assert.match(prepare, /const MENU_REV = '70-menu4'/);
 for(const asset of ['app-update.css','app-update.js','ui-consistency.css','v64-runtime.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','release-manifest.json'])assert.ok(prepare.includes(`'${asset}'`),`${asset} must be copied to dist`);
 assert.match(prepare, /manifest\.latestVersion!==BUILD/,'build must fail if release manifest and public version diverge');
 assert.match(prepare, /theme-color" content="#f5f7fa"/,'public build must stamp the canonical light shell colour');
@@ -97,10 +99,10 @@ try {
   const events = fs.readFileSync(path.join(dist, 'events.js'), 'utf8');
   const distManifest = JSON.parse(fs.readFileSync(path.join(dist,'release-manifest.json'),'utf8'));
   const distWebManifest = JSON.parse(fs.readFileSync(path.join(dist,'manifest.webmanifest'),'utf8'));
-  assert.match(index, /<meta name="app-build" content="v69"/);
+  assert.match(index, /<meta name="app-build" content="v70"/);
   assert.match(index, /<meta name="theme-color" content="#f5f7fa"/);
-  assert.match(index, /app-update\.css\?v=69/);
-  assert.match(index, /app-update\.js\?v=69/);
+  assert.match(index, /app-update\.css\?v=70/);
+  assert.match(index, /app-update\.js\?v=70/);
   assert.match(index, /market-brand\.css\?v=64-ui1/);
   assert.match(index, /market-branding\.js\?v=64-ui1/);
   assert.match(index, /sync-conflict-policy\.js\?v=64-ui1/);
@@ -111,25 +113,25 @@ try {
   assert.match(index, /v64-runtime\.js\?v=64-runtime1/);
   assert.match(index, /market-shopping-focus\.css\?v=65-shopping1/);
   assert.match(index, /market-shopping-focus\.js\?v=65-shopping1/);
-  assert.match(index, /mobile-menu-toggle\.css\?v=69-menu3/);
-  assert.match(index, /mobile-menu-toggle\.js\?v=69-menu3/);
+  assert.match(index, /mobile-menu-toggle\.css\?v=70-menu4/);
+  assert.match(index, /mobile-menu-toggle\.js\?v=70-menu4/);
   assert.doesNotMatch(index, /\?v=53/);
-  assert.match(index, /id="appBuildVersion">v69</);
-  assert.match(events, /\.\/sw\.js\?v=69/);
-  assert.equal(distManifest.latestVersion,'v69');
+  assert.match(index, /id="appBuildVersion">v70</);
+  assert.match(events, /\.\/sw\.js\?v=70/);
+  assert.equal(distManifest.latestVersion,'v70');
   assert.equal(distWebManifest.background_color,'#f5f7fa');
   assert.equal(distWebManifest.theme_color,'#f5f7fa');
-  assert.ok(index.indexOf('sync.js?v=69') < index.indexOf('sync-conflict-policy.js?v=64-ui1'), 'sync conflict policy must load after the base sync engine');
+  assert.ok(index.indexOf('sync.js?v=70') < index.indexOf('sync-conflict-policy.js?v=64-ui1'), 'sync conflict policy must load after the base sync engine');
   assert.ok(index.indexOf('market-category-groups.css?v=64-ui1') < index.indexOf('ui-consistency.css?v=64-ui1'), 'visual normalization must load after category styling');
   assert.ok(index.indexOf('ui-consistency.css?v=64-ui1') < index.indexOf('v64-runtime.css?v=66-shell1'), 'v66 mobile shell CSS must load after prior visual normalization');
   assert.ok(index.indexOf('v64-runtime.css?v=66-shell1') < index.indexOf('market-shopping-focus.css?v=65-shopping1'), 'v65 shopping focus remains after the shell layer');
-  assert.ok(index.indexOf('market-shopping-focus.css?v=65-shopping1') < index.indexOf('mobile-menu-toggle.css?v=69-menu3'), 'v69 global menu styling must load last');
+  assert.ok(index.indexOf('market-shopping-focus.css?v=65-shopping1') < index.indexOf('mobile-menu-toggle.css?v=70-menu4'), 'v70 global menu styling must load last');
   assert.ok(index.indexOf('market-category-groups.js?v=64-ui1') < index.indexOf('v64-runtime.js?v=64-runtime1'), 'v64 runtime must load after market grouping');
   assert.ok(index.indexOf('v64-runtime.js?v=64-runtime1') < index.indexOf('market-shopping-focus.js?v=65-shopping1'), 'v65 shopping focus must run after the established market/runtime layers');
-  assert.ok(index.indexOf('market-shopping-focus.js?v=65-shopping1') < index.indexOf('mobile-menu-toggle.js?v=69-menu3'), 'v69 menu controller must run after the existing navigation/runtime listeners are defined');
+  assert.ok(index.indexOf('market-shopping-focus.js?v=65-shopping1') < index.indexOf('mobile-menu-toggle.js?v=70-menu4'), 'v70 menu controller must run after the existing navigation/runtime listeners are defined');
   for(const asset of ['app-update.css','app-update.js','ui-consistency.css','v64-runtime.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
 } finally {
   fs.rmSync(dist, { recursive:true, force:true });
 }
 
-console.log('Versioned v69 real mobile menu animation, v66 shell, v65 shopping focus and controlled installation tests: OK');
+console.log('Versioned v70 visible mobile menu motion, v66 shell, v65 shopping focus and controlled installation tests: OK');

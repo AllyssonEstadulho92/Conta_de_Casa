@@ -1,4 +1,4 @@
-/* Conta de Casa v69 — botão hambúrguer/X animado e painel móvel refinado. */
+/* Conta de Casa v70 — botão hambúrguer/X com movimento visível e painel móvel refinado. */
 
 @media(max-width:820px){
   .mobile-menu-btn,
@@ -55,6 +55,8 @@
     width:24px;
     height:18px;
     pointer-events:none;
+    transform-origin:center;
+    will-change:transform;
   }
 
   .mobile-menu-glyph>span{
@@ -67,10 +69,10 @@
     transform-origin:center;
     will-change:top,width,transform,opacity;
     transition:
-      top .19s cubic-bezier(.2,.8,.2,1),
-      width .19s cubic-bezier(.2,.8,.2,1),
-      transform .19s cubic-bezier(.2,.8,.2,1),
-      opacity .10s ease;
+      top .24s cubic-bezier(.22,.8,.2,1),
+      width .24s cubic-bezier(.22,.8,.2,1),
+      transform .24s cubic-bezier(.22,.8,.2,1),
+      opacity .12s ease;
   }
 
   .mobile-menu-glyph>span:nth-child(1){top:1px;width:22px}

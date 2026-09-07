@@ -45,7 +45,6 @@ assert.match(js,/schedulePersist/,'resolved images for saved items should be per
 assert.match(js,/item\.imageUrl=result\.imageUrl/);
 assert.match(js,/stopImmediatePropagation/,'legacy handoff remains covered; the public add selector is handled by the newer layers');
 
-// The v62 official-only policy remains a historical compatibility layer.
 assert.match(policy,/card\.dataset\.marketImageAudit='done'/);
 assert.match(policy,/marketRetailerImagePolicy='official-only'/);
 assert.match(policy,/CDCOfficialMarketImages\?\.safeOfficialImageUrl/);
@@ -60,24 +59,8 @@ assert.match(css,/safe-area-inset-bottom/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/:focus-visible/);
 
-const documentStub={
-  readyState:'loading',
-  addEventListener(){},
-  querySelector(){return null;},
-  querySelectorAll(){return [];},
-  body:null
-};
-const sandbox={
-  console,
-  URL,
-  AbortController,
-  setTimeout,
-  clearTimeout,
-  Promise,
-  document:documentStub,
-  requestAnimationFrame:fn=>fn(),
-  fetch:async()=>{throw new Error('network-disabled-in-test');}
-};
+const documentStub={readyState:'loading',addEventListener(){},querySelector(){return null;},querySelectorAll(){return [];},body:null};
+const sandbox={console,URL,AbortController,setTimeout,clearTimeout,Promise,document:documentStub,requestAnimationFrame:fn=>fn(),fetch:async()=>{throw new Error('network-disabled-in-test');}};
 sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(js,sandbox,{filename:'market-image-audit.js'});
@@ -101,30 +84,30 @@ assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://world.openbeautyfacts
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/products/123/front.jpg'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/images/large/739490_test.jpg'),'');
 
-assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v69-menu3/);
+assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4/);
 for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','ui-consistency.css','v64-runtime.css','v64-runtime.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(prepare.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
 }
-assert.match(prepare,/const BUILD = 'v69'/);
+assert.match(prepare,/const BUILD = 'v70'/);
 assert.match(prepare,/const VISUAL_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const SHELL_REV = '66-shell1'/);
-assert.match(prepare,/const MENU_REV = '69-menu3'/);
+assert.match(prepare,/const MENU_REV = '70-menu4'/);
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-image-audit\.css\?v=69/);
-  assert.match(index,/market-retailer-image-policy\.js\?v=69/);
-  assert.match(index,/market-image-audit\.js\?v=69/);
-  assert.match(index,/market-official-images\.js\?v=69/);
+  assert.match(index,/market-image-audit\.css\?v=70/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=70/);
+  assert.match(index,/market-image-audit\.js\?v=70/);
+  assert.match(index,/market-official-images\.js\?v=70/);
   assert.match(index,/ui-consistency\.css\?v=64-ui1/);
   assert.match(index,/v64-runtime\.css\?v=66-shell1/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
-  assert.match(index,/mobile-menu-toggle\.css\?v=69-menu3/);
-  assert.match(index,/mobile-menu-toggle\.js\?v=69-menu3/);
+  assert.match(index,/mobile-menu-toggle\.css\?v=70-menu4/);
+  assert.match(index,/mobile-menu-toggle\.js\?v=70-menu4/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.match(index,/https:\/\/www\.continente\.pt/);
   assert.match(index,/https:\/\/static\.pingodoce\.pt/);
@@ -136,4 +119,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official retailer image, fallback, safe-source, zoom and v69 menu build tests: OK');
+console.log('Market official retailer image, fallback, safe-source, zoom and v70 menu build tests: OK');

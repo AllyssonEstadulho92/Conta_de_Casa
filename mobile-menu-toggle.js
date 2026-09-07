@@ -1,6 +1,6 @@
 'use strict';
 
-/* Conta de Casa v69 — o mesmo controlo móvel alterna hambúrguer <-> X sem ser sobrescrito pelo hidratador Lucide. */
+/* Conta de Casa v70 — o mesmo controlo móvel alterna hambúrguer <-> X com movimento visível mesmo após reparenting do dialog. */
 (function installAnimatedMobileMenu(root){
   let installed=false;
 
@@ -45,6 +45,60 @@
       legacyClose.setAttribute('aria-hidden','true');
     }
 
+    const motionDuration=240;
+    const motionEase='cubic-bezier(.22,.8,.2,1)';
+    let motionAnimations=[];
+    let motionRun=0;
+
+    function prefersReducedMotion(){
+      return Boolean(root.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+    }
+
+    function cancelMenuMotion(){
+      motionRun+=1;
+      for(const animation of motionAnimations){
+        try{animation.cancel();}catch(_error){}
+      }
+      motionAnimations=[];
+      delete glyph.dataset.motion;
+    }
+
+    function animateMenuGlyph(open){
+      if(prefersReducedMotion()||typeof glyph.animate!=='function')return;
+      cancelMenuMotion();
+      const run=motionRun;
+      const direction=open?'opening':'closing';
+      glyph.dataset.motion=direction;
+
+      const closed=[
+        {top:'1px',width:'22px',transform:'translateX(-50%) rotate(0deg) scaleX(1)',opacity:1},
+        {top:'8px',width:'18px',transform:'translateX(-50%) rotate(0deg) scaleX(1)',opacity:1},
+        {top:'15px',width:'14px',transform:'translateX(-50%) rotate(0deg) scaleX(1)',opacity:1}
+      ];
+      const opened=[
+        {top:'8px',width:'22px',transform:'translateX(-50%) rotate(45deg) scaleX(1)',opacity:1},
+        {top:'8px',width:'18px',transform:'translateX(-50%) rotate(0deg) scaleX(.18)',opacity:0},
+        {top:'8px',width:'22px',transform:'translateX(-50%) rotate(-45deg) scaleX(1)',opacity:1}
+      ];
+      const lines=[...glyph.children];
+      lines.forEach((line,index)=>{
+        const frames=open?[closed[index],opened[index]]:[opened[index],closed[index]];
+        motionAnimations.push(line.animate(frames,{duration:motionDuration,easing:motionEase,fill:'none'}));
+      });
+
+      const lean=open?-5:5;
+      const settle=open?1.5:-1.5;
+      const glyphMotion=glyph.animate([
+        {transform:`scale(.92) rotate(${lean}deg)`},
+        {transform:`scale(1.035) rotate(${settle}deg)`,offset:.68},
+        {transform:'scale(1) rotate(0deg)'}
+      ],{duration:motionDuration,easing:motionEase,fill:'none'});
+      motionAnimations.push(glyphMotion);
+      glyphMotion.onfinish=()=>{
+        if(run===motionRun)delete glyph.dataset.motion;
+      };
+    }
+
     function restoreButtonHome(){
       if(homeAnchor.parentNode&&button.parentNode!==homeAnchor.parentNode){
         homeAnchor.parentNode.insertBefore(button,homeAnchor.nextSibling);
@@ -82,6 +136,10 @@
       if(typeof root.openMobileDrawer==='function')root.openMobileDrawer();
       else if(!drawer.open){drawer.showModal();drawer.classList.add('open');}
       syncButton(drawer.open);
+      // O botão é movido para dentro do <dialog>. CSS transitions podem ser consumidas pelo
+      // reparenting no Safari; Web Animations usa keyframes explícitos no frame seguinte e
+      // torna a transformação visível no hardware real.
+      requestAnimationFrame(()=>animateMenuGlyph(true));
       focusButton(keyboard);
     }
 
@@ -92,6 +150,9 @@
       if(typeof root.closeMobileDrawer==='function')root.closeMobileDrawer();
       else if(drawer.open){drawer.classList.remove('open');drawer.close();}
       syncButton(false);
+      // Depois do fecho o mesmo nó regressa ao topbar; a animação inversa é executada já na
+      // posição final para não haver salto visual entre o X e o hambúrguer.
+      requestAnimationFrame(()=>animateMenuGlyph(false));
       focusButton(keyboard);
     }
 
@@ -110,7 +171,12 @@
       else openDrawer(keyboard);
     },true);
 
-    drawer.addEventListener('close',()=>syncButton(false));
+    drawer.addEventListener('close',()=>{
+      // Fecho provocado pelo próprio botão já agendou a animação inversa. Em fechos externos
+      // (Escape, backdrop, breakpoint) cancelamos movimento pendente e restauramos o estado.
+      if(button.dataset.menuState!=='closed')cancelMenuMotion();
+      syncButton(false);
+    });
     syncButton(drawer.open);
   }
 

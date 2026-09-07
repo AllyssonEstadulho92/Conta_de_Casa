@@ -1,65 +1,67 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-07 — v69 publicada: animação hambúrguer → X corrigida no runtime
+## 2026-09-08 — v70 candidata: movimento visível do hambúrguer ↔ X
 
-### Problema observado em hardware real
+### Observação em hardware real
 
-As capturas reais do iPhone mostraram que, depois de abrir o menu, o mesmo botão era movido corretamente para o drawer mas continuava visualmente como hambúrguer. Também surgia uma moldura grande em torno do controlo depois do foco programático.
+A validação da v69 no iPhone confirmou que os estados finais do menu estão corretos: fechado apresenta hambúrguer e aberto apresenta `X`. O problema remanescente é de movimento percebido: a transformação pode parecer instantânea quando o mesmo botão é movido entre o topbar e o `<dialog>`.
 
-### Causa confirmada
+### Causa técnica
 
-A implementação v68 criava corretamente três `<span>` animáveis em `mobile-menu-toggle.js`. Contudo, `ui-icons.js::hydrate()` executava `fillIcon(document.querySelector('#mobileMenuBtn'),'menu',22)` sempre que o `MutationObserver` detetava alterações de `aria-expanded` ou `class`.
+`#mobileMenuBtn` é o mesmo nó DOM nos dois estados. Durante a abertura, o drawer é ativado e o botão é reparented para `.drawer-head`; ao fechar, regressa ao topbar. A v69 usa CSS transitions para interpolar `top`, `width`, `transform` e `opacity`. No Safari, o reparenting pode fazer com que o browser apresente diretamente o estado final e a transição deixe de ser claramente visível.
 
-`fillIcon()` usa `replaceChildren()`. Assim, ao abrir/fechar o drawer, o sistema Lucide removia os três `<span>` e colocava um SVG estático de menu. O CSS de rotação continuava correto, mas os elementos que devia animar já não existiam.
-
-### Correção aplicada
+### Correção aplicada na candidata v70
 
 - preservado o mesmo `#mobileMenuBtn` e o mesmo `#mobileDrawer`;
-- preservadas três linhas proporcionais `22 / 18 / 14 px`;
-- preservado um SVG Lucide direto como sentinela oculta `.mobile-menu-icon-sentinel`;
-- mantido `data-ui-icon-slot="menu"`, fazendo o hidratador reconhecer o botão como já tratado e evitar a substituição destrutiva;
-- `aria-expanded="true"` e `data-menu-state="open"` conduzem em conjunto o estado visual;
-- linha superior roda `45deg`, linha inferior `-45deg` e a linha central colapsa para `scaleX(.18)` + `opacity:0`;
-- duração ajustada para aproximadamente 190 ms;
-- `prefers-reduced-motion` preservado;
-- foco programático originado por toque/rato deixa de desenhar a moldura observada no Safari;
-- ativação por teclado mantém `:focus-visible`;
-- geometria global do cabeçalho, drawer, safe areas, navegação e alvos de 48 px da v68 permanecem inalterados.
+- preservados os três spans, a sentinela Lucide oculta e `data-ui-icon-slot="menu"`;
+- preservados `aria-expanded`, `aria-label`, `title` e `data-menu-state`;
+- criado `animateMenuGlyph(open)` com Web Animations;
+- cada linha recebe keyframes explícitos de posição, largura, rotação, escala e opacidade;
+- abertura é animada no frame seguinte ao reparenting para o drawer;
+- fecho pelo X é animado no frame seguinte ao regresso do mesmo nó ao topbar;
+- glifo recebe micro movimento de escala/inclinação para tornar o toque perceptível sem deslocar layout;
+- duração definida em cerca de `240 ms` com `cubic-bezier(.22,.8,.2,1)`;
+- CSS transition de `240 ms` permanece como fallback;
+- `prefers-reduced-motion` impede os keyframes adicionais;
+- fechos externos restauram estado sem deixar animações pendentes;
+- a animação inversa iniciada pelo próprio X não é cancelada pelo evento `close` posterior do dialog.
 
-### Regressões adicionadas
+### Distribuição candidata
 
-`tests/mobile-menu-toggle.test.cjs` testa explicitamente o contrato entre `ui-icons.js` e `mobile-menu-toggle.js`, incluindo:
-
-- chamada histórica de hidratação Lucide;
-- sentinela oculta;
-- `data-ui-icon-slot="menu"`;
-- três spans animáveis;
-- transformação para `X` por estado aberto;
-- colapso da linha central;
-- supressão de moldura apenas para pointer/toque;
-- versionamento `v69` / `69-menu3`.
-
-Os testes de Centro de Atualização, consistência visual e compatibilidade das camadas históricas do Mercado foram alinhados com o novo build público.
-
-### Distribuição publicada
-
-- build: `v69`;
-- revisão do menu: `69-menu3`;
+- build: `v70`;
+- revisão do menu: `70-menu4`;
 - shell preservado: `66-shell1`;
 - Compras preservada: `65-shopping1`;
 - runtime preservado: `64-runtime1`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v69-menu3`;
-- PR #56 integrado;
-- merge: `a66df37b0fc345491dacf3cac91313d88d080a05`;
-- CI final do PR #1250 (`34168089348`): **sucesso**;
-- CI de `main` #1251 (`34168145569`): **sucesso**;
-- Deploy GitHub Pages #1244 (`34168165101`): **sucesso**.
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4`.
+
+### Testes atualizados
+
+- regressão específica de Web Animations e reparenting;
+- keyframes por linha e micro movimento do glifo;
+- abertura/fecho agendados no frame seguinte;
+- fallback CSS e `prefers-reduced-motion`;
+- Centro de Atualização e versão pública;
+- consistência visual;
+- compatibilidade das camadas históricas do Mercado e build ordering.
 
 ### Segurança e dados
 
 Nenhuma alteração de `STATE_VERSION`, `appState`, faturas, pagamentos, `estimatedCents`, `actualCents`, scanner, recorrências, PIN, cifragem, IndexedDB, autenticação, APIs ou sincronização.
 
-A publicação técnica está concluída. Continua pendente a confirmação visual no mesmo iPhone/Safari que revelou o defeito.
+A v70 só será considerada publicada depois de CI do PR, merge em `main`, CI de `main` e Deploy GitHub Pages concluídos com sucesso.
+
+## 2026-09-07 — v69 publicada: animação hambúrguer → X corrigida no runtime
+
+- resolvido conflito entre `ui-icons.js`/Lucide e os três spans animáveis;
+- sentinela SVG oculta e `data-ui-icon-slot="menu"` impedem substituição destrutiva;
+- estado aberto apresenta X correto e regressa ao hambúrguer;
+- foco programático de pointer deixa de mostrar moldura grande no Safari;
+- teclado mantém `:focus-visible`;
+- PR #56 / merge `a66df37b0fc345491dacf3cac91313d88d080a05`;
+- CI do PR #1250, CI de `main` #1251 e Pages #1244: sucesso.
+
+A validação física posterior confirmou os estados finais e revelou que o movimento entre eles ainda não era suficientemente perceptível, tratado na candidata v70.
 
 ## 2026-09-07 — v68 publicada: painel do menu móvel refinado
 
@@ -71,11 +73,9 @@ A publicação técnica está concluída. Continua pendente a confirmação visu
 - PR #54 / merge `9c8a2b3042c322849e3eb5ea3462f494897b4ab3`;
 - CI e Pages verdes.
 
-A validação física posterior revelou o conflito de hidratação do glifo, corrigido na v69.
-
 ## 2026-09-07 — v67 publicada: menu móvel hambúrguer/X
 
-- criado o mesmo controlo móvel para abrir/fechar;
+- um único controlo móvel para abrir/fechar;
 - botão acompanha o `<dialog>` modal;
 - `#drawerCloseBtn` oculto e fora da tabulação;
 - `aria-expanded`, `aria-label` e `title` sincronizados;
@@ -118,34 +118,3 @@ A validação física posterior revelou o conflito de hidratação do glifo, cor
 - Lucide permanece sistema vetorial oficial;
 - navegação inferior com um único indicador ativo;
 - `release-manifest.json` e Centro de Atualização controlado por Service Worker.
-
-## 2026-09-06 — Lista de compras agrupada por categoria
-
-- criado `market-category-groups.js/.css`;
-- mobile usa grupos por categoria; desktop mantém tabela e separadores;
-- handlers e schema financeiro preservados.
-
-## 2026-09-06 — Mercado e conflitos técnicos
-
-- corrigida coluna fantasma no browser de produtos;
-- preço reflui abaixo de 360 px;
-- `sync-conflict-policy.js` separa metadados técnicos de conflitos financeiros;
-- Mercado passa a `text-first`;
-- câmara permanece para GTIN/EAN/UPC;
-- módulos históricos de imagem permanecem temporariamente por compatibilidade.
-
-## 2026-09-05/06 — v58–v62
-
-- Centro de Atualização em Definições;
-- miniaturas e pesquisa auxiliar histórica por Open Facts;
-- políticas históricas de imagem por cadeia/SKU;
-- bridge de imagens oficiais por identificador exato.
-
-## Base funcional preservada
-
-- cofre local cifrado com PBKDF2-SHA-256 + AES-GCM;
-- IndexedDB para estado privado;
-- Lucide como sistema de ícones local;
-- QR fiscal e scanner GTIN integrados;
-- Pingo Doce/Continente usados como fontes de catálogo/preço via `cesta.pt`;
-- `estimatedCents` e `actualCents` separados.

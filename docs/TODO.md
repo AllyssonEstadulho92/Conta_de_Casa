@@ -1,93 +1,80 @@
 # TODO — Conta de Casa
 
-Atualizado: 7 de setembro de 2026
+Atualizado: 8 de setembro de 2026
 
-## P0 — v69 animação hambúrguer → X publicada
+## P0 — v70 movimento visível do hambúrguer ↔ X
 
-### Problema físico confirmado
+### Observação física v69
 
-- [x] Rever as capturas reais do iPhone.
-- [x] Confirmar que o estado aberto continuava visualmente como hambúrguer.
-- [x] Confirmar moldura visual após foco programático no Safari.
-- [x] Comparar comportamento observado com o código real.
+- [x] Confirmar no iPhone que o estado fechado mostra hambúrguer correto.
+- [x] Confirmar no iPhone que o estado aberto mostra X correto.
+- [x] Confirmar que o drawer e a navegação continuam funcionais.
+- [x] Identificar que o problema atual é ausência de movimento claramente perceptível entre os estados, não estado visual incorreto.
 
-### Causa técnica
+### Causa e arquitetura
 
-- [x] Confirmar que `mobile-menu-toggle.js` cria três `<span>` animáveis.
-- [x] Confirmar que `ui-icons.js::hydrate()` executa `fillIcon(#mobileMenuBtn, 'menu', 22)`.
-- [x] Confirmar que o `MutationObserver` de `ui-icons.js` observa `aria-expanded` e `class`.
-- [x] Confirmar que `fillIcon()` usa `replaceChildren()` e substituía o glifo animável por SVG estático.
+- [x] Confirmar que o mesmo `#mobileMenuBtn` é reparented entre topbar e `.drawer-head`.
+- [x] Confirmar que a v69 depende de CSS transitions para interpolar os spans.
+- [x] Preservar a sentinela Lucide e `data-ui-icon-slot="menu"`.
+- [x] Evitar criar segundo botão, segundo X ou segunda implementação do menu.
 
-### Implementação e publicação v69
+### Implementação candidata v70
 
-- [x] Manter um único `#mobileMenuBtn`.
-- [x] Manter o mesmo `#mobileDrawer` e fluxo de `events.js`.
-- [x] Preservar três linhas proporcionais `22 / 18 / 14 px`.
-- [x] Preservar um SVG Lucide como sentinela oculta.
-- [x] Manter `data-ui-icon-slot="menu"` para impedir re-hidratação destrutiva.
-- [x] Usar `aria-expanded` e `data-menu-state` como estados visuais sincronizados.
-- [x] Fazer linha superior → `45deg` e inferior → `-45deg`.
-- [x] Colapsar a linha central durante a abertura.
-- [x] Ajustar animação para ~190 ms.
+- [x] Adicionar `animateMenuGlyph(open)` com Web Animations.
+- [x] Animar explicitamente `top`, `width`, `transform` e `opacity` das três linhas.
+- [x] Executar abertura no frame seguinte ao reparenting para o drawer.
+- [x] Executar animação inversa no frame seguinte ao regresso ao topbar.
+- [x] Adicionar micro movimento discreto de escala/inclinação do glifo.
+- [x] Usar duração aproximada de `240 ms` e easing `cubic-bezier(.22,.8,.2,1)`.
+- [x] Preservar CSS transition como fallback.
 - [x] Preservar `prefers-reduced-motion`.
-- [x] Suprimir apenas a moldura de foco programático após pointer/toque.
-- [x] Preservar `:focus-visible` em teclado.
-- [x] Manter drawer v68, safe areas, scroll, largura e alvos de 48 px.
-- [x] Versionar como `v69` / `69-menu3`.
+- [x] Não cancelar a animação inversa do X através do evento `close` do dialog.
+- [x] Preservar ARIA, foco pointer/teclado, dimensões, safe areas e breakpoints.
+- [x] Versionar candidata como `v70` / `70-menu4`.
 - [x] Atualizar `release-manifest.json`, `scripts/prepare-pages.cjs` e `sw.js`.
-- [x] Atualizar regressões do menu, consistência, Mercado histórico e Centro de Atualização.
-- [x] Abrir PR #56.
-- [x] Confirmar CI verde do PR: run #1250 (`34168089348`).
-- [x] Rever diff final: apenas menu, distribuição, testes relacionados e documentação.
-- [x] Integrar PR #56 em `main`: `a66df37b0fc345491dacf3cac91313d88d080a05`.
-- [x] Confirmar CI de `main`: run #1251 (`34168145569`).
-- [x] Confirmar Deploy GitHub Pages: run #1244 (`34168165101`).
-- [x] Atualizar documentação para estado publicado.
+- [x] Atualizar regressões específicas e testes de distribuição relacionados.
+- [x] Atualizar `PROJECT_STATE.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md` e `CHANGELOG.md`.
+- [ ] Abrir PR da v70.
+- [ ] Confirmar CI verde do PR.
+- [ ] Rever diff final e escopo.
+- [ ] Integrar em `main` apenas com CI verde.
+- [ ] Confirmar CI de `main`.
+- [ ] Confirmar Deploy GitHub Pages.
+- [ ] Atualizar documentação para estado publicado.
 
-### Validação física prioritária v69
+### Validação física prioritária v70
 
-- [ ] No mesmo iPhone/Safari: tocar hambúrguer e confirmar transformação visível em `X`.
-- [ ] Tocar no `X` e confirmar transformação inversa para hambúrguer.
-- [ ] Confirmar que não existe moldura grande após toque.
-- [ ] Confirmar que teclado continua a mostrar foco visível.
-- [ ] Confirmar fecho por Escape, backdrop e seleção de item.
-- [ ] Confirmar portrait/landscape e rotação.
+- [ ] iPhone/Safari: tocar hambúrguer e observar movimento contínuo até ao X.
+- [ ] Tocar no X e observar movimento inverso até ao hambúrguer.
+- [ ] Repetir abrir/fechar rapidamente e confirmar ausência de estado preso.
+- [ ] Confirmar que não existe salto de layout.
+- [ ] Confirmar ausência de moldura grande após toque.
+- [ ] Confirmar foco visível por teclado.
+- [ ] Escape, backdrop e seleção de item.
+- [ ] Portrait/landscape e rotação.
 - [ ] Android/Chrome em smartphone pequeno e grande.
 - [ ] Tablet junto do breakpoint 820/821 px.
 - [ ] Tema claro/escuro.
 - [ ] VoiceOver/TalkBack.
 
-## P0 — v68 painel do menu móvel refinado publicado
+## P0 — v69 estados hambúrguer/X publicados
+
+- [x] Resolver conflito `ui-icons.js` / Lucide que substituía os três spans.
+- [x] Preservar sentinela oculta e `data-ui-icon-slot="menu"`.
+- [x] Manter um único botão e X correto no drawer.
+- [x] Corrigir moldura programática de pointer no Safari mantendo `:focus-visible` por teclado.
+- [x] Publicar v69 / `69-menu3` pelo PR #56.
+- [x] CI e Pages verdes.
+- [x] Validação física confirmou estados finais corretos.
+- [x] Validação física revelou que o movimento entre estados não é suficientemente perceptível, tratado na v70.
+
+## P0 — v68 painel do menu móvel refinado
 
 - [x] Drawer responsivo e limitado.
 - [x] Safe areas, scroll e ausência de overflow lateral.
 - [x] Itens e ações com alvos mínimos de 48 px.
 - [x] Estados hover/active/focus/current.
-- [x] Release `v68` / `68-menu2` publicada pelo PR #54.
-- [x] CI e Pages verdes.
-- [x] Validação física revelou falha real na transformação do glifo, corrigida na v69.
-
-## P0 — v67 menu móvel hambúrguer/X publicado
-
-- [x] Um único controlo real acompanha o `<dialog>` modal.
-- [x] `#drawerCloseBtn` fica oculto e fora da tabulação.
-- [x] Escape, backdrop, evento `close` e foco de retorno preservados.
-- [x] `aria-expanded`, `aria-label` e `title` sincronizados.
-- [x] Release `v67` / `67-menu1` publicada pelo PR #52.
-
-## P0 — v66 uniformidade cromática do shell móvel publicada
-
-- [x] Shell claro unificado em `#f5f7fa` e escuro em `#0f1722`.
-- [x] Topbar opaco, sem blur, mesma geometria em todas as páginas.
-- [x] Release `v66` / `66-shell1` publicada pelo PR #50.
-
-## P0 — v65 Lista de compras móvel preservada
-
-- [x] Resumo compacto.
-- [x] `+` contextual no topbar.
-- [x] Filtros compactos.
-- [x] Categorias pendentes abertas e Comprados recolhido.
-- [x] Desktop, schema, cálculos, scanner, cofre e sincronização preservados.
+- [x] Release `v68` / `68-menu2` publicada.
 
 ## P0 — regressões essenciais que não podem quebrar
 
@@ -101,7 +88,7 @@ Atualizado: 7 de setembro de 2026
 - [x] Topbar móvel global preservado.
 - [x] Centro de Atualização continua same-origin e controlado pelo utilizador.
 - [x] CSP/allowlist, responsividade, acessibilidade e sincronização permanecem na CI.
-- [x] A v69 não escreve em `appState` nem altera dados financeiros.
+- [x] A v70 não escreve em `appState` nem altera dados financeiros.
 
 ## P0 — validação física funcional ainda pendente
 
