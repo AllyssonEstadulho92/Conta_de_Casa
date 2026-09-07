@@ -1,6 +1,6 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-07 — v69 candidata: animação hambúrguer → X corrigida no runtime
+## 2026-09-07 — v69 publicada: animação hambúrguer → X corrigida no runtime
 
 ### Problema observado em hardware real
 
@@ -18,7 +18,7 @@ A implementação v68 criava corretamente três `<span>` animáveis em `mobile-m
 - preservadas três linhas proporcionais `22 / 18 / 14 px`;
 - preservado um SVG Lucide direto como sentinela oculta `.mobile-menu-icon-sentinel`;
 - mantido `data-ui-icon-slot="menu"`, fazendo o hidratador reconhecer o botão como já tratado e evitar a substituição destrutiva;
-- `aria-expanded="true"` e `data-menu-state="open"` passam a conduzir em conjunto o estado visual;
+- `aria-expanded="true"` e `data-menu-state="open"` conduzem em conjunto o estado visual;
 - linha superior roda `45deg`, linha inferior `-45deg` e a linha central colapsa para `scaleX(.18)` + `opacity:0`;
 - duração ajustada para aproximadamente 190 ms;
 - `prefers-reduced-motion` preservado;
@@ -26,11 +26,11 @@ A implementação v68 criava corretamente três `<span>` animáveis em `mobile-m
 - ativação por teclado mantém `:focus-visible`;
 - geometria global do cabeçalho, drawer, safe areas, navegação e alvos de 48 px da v68 permanecem inalterados.
 
-### Regressão adicionada
+### Regressões adicionadas
 
-`tests/mobile-menu-toggle.test.cjs` passa a testar explicitamente o contrato entre `ui-icons.js` e `mobile-menu-toggle.js`, incluindo:
+`tests/mobile-menu-toggle.test.cjs` testa explicitamente o contrato entre `ui-icons.js` e `mobile-menu-toggle.js`, incluindo:
 
-- existência da chamada histórica de hidratação Lucide;
+- chamada histórica de hidratação Lucide;
 - sentinela oculta;
 - `data-ui-icon-slot="menu"`;
 - três spans animáveis;
@@ -39,71 +39,41 @@ A implementação v68 criava corretamente três `<span>` animáveis em `mobile-m
 - supressão de moldura apenas para pointer/toque;
 - versionamento `v69` / `69-menu3`.
 
-`tests/app-update.test.cjs` e `tests/ui-consistency.test.cjs` foram alinhados com a candidata v69.
+Os testes de Centro de Atualização, consistência visual e compatibilidade das camadas históricas do Mercado foram alinhados com o novo build público.
 
-### Distribuição candidata
+### Distribuição publicada
 
 - build: `v69`;
 - revisão do menu: `69-menu3`;
 - shell preservado: `66-shell1`;
 - Compras preservada: `65-shopping1`;
 - runtime preservado: `64-runtime1`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v69-menu3`.
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v69-menu3`;
+- PR #56 integrado;
+- merge: `a66df37b0fc345491dacf3cac91313d88d080a05`;
+- CI final do PR #1250 (`34168089348`): **sucesso**;
+- CI de `main` #1251 (`34168145569`): **sucesso**;
+- Deploy GitHub Pages #1244 (`34168165101`): **sucesso**.
 
 ### Segurança e dados
 
 Nenhuma alteração de `STATE_VERSION`, `appState`, faturas, pagamentos, `estimatedCents`, `actualCents`, scanner, recorrências, PIN, cifragem, IndexedDB, autenticação, APIs ou sincronização.
 
-A v69 só será considerada publicada depois de CI do PR, merge em `main`, CI de `main` e Deploy GitHub Pages concluídos com sucesso.
+A publicação técnica está concluída. Continua pendente a confirmação visual no mesmo iPhone/Safari que revelou o defeito.
 
 ## 2026-09-07 — v68 publicada: painel do menu móvel refinado
 
-### Objetivo
-
-Evoluir o menu hambúrguer já corrigido na v67 para um painel mais moderno, elegante, compacto e responsivo, sem criar uma segunda implementação nem alterar o tamanho global da aplicação.
-
-### Auditoria antes da alteração
-
-Foi confirmado no código real que:
-
-- `#mobileMenuBtn` e `#mobileDrawer` são a implementação móvel existente;
-- `#mobileDrawer` é um `<dialog>` modal;
-- `events.js` gere abertura/fecho, Escape, backdrop e adaptação de breakpoint;
-- `render.js` usa os mesmos `NAV_GROUPS` para `#desktopNav` e `#drawerNav`;
-- a v67 já usava o mesmo botão para hambúrguer e `X`, movendo o nó para dentro do modal quando aberto;
-- Lucide local continua a ser o sistema oficial de ícones;
-- Inter/SF/system continua a ser a tipografia base;
-- o breakpoint móvel existente é 820 px;
-- não foi encontrado defeito global de viewport, container ou overflow que justificasse redimensionar a aplicação.
-
-### Problema identificado
-
-O painel do drawer ainda herdava regras de apresentação de camadas históricas. O resultado tinha sombra mais pesada, largura/densidade pouco afinadas, hierarquia interna genérica e estados de interação pouco específicos.
-
-### Corrigido — botão e painel
-
-- botão `44 × 44 px`;
-- linhas `22 / 18 / 14 px`;
-- animação aproximada de 200 ms;
+- painel lateral mais compacto e responsivo;
+- botão 44 × 44 px e linhas `22 / 18 / 14 px`;
 - `aria-expanded`, `aria-label`, `title` e `data-menu-state` sincronizados;
-- drawer `min(364px, calc(100vw - 24px))`;
-- abaixo de 360 px: `calc(100vw - 20px)`;
-- safe areas, scroll interno, `overflow-x:hidden`;
-- itens e ações com 48 px;
-- hover/active/focus/current;
-- tema claro/escuro preservado.
-
-### Publicação
-
-- build `v68`, menu `68-menu2`;
+- drawer `min(364px, calc(100vw - 24px))`, abaixo de 360 px `calc(100vw - 20px)`;
+- safe areas, scroll interno, `overflow-x:hidden` e alvos de 48 px;
 - PR #54 / merge `9c8a2b3042c322849e3eb5ea3462f494897b4ab3`;
-- CI final do PR #1217: sucesso;
-- CI de `main` #1218: sucesso;
-- Pages #1211: sucesso.
+- CI e Pages verdes.
 
-A validação física posterior revelou o conflito de hidratação do glifo, corrigido na candidata v69.
+A validação física posterior revelou o conflito de hidratação do glifo, corrigido na v69.
 
-## 2026-09-07 — v67 publicada: menu móvel hambúrguer/X animado
+## 2026-09-07 — v67 publicada: menu móvel hambúrguer/X
 
 - criado o mesmo controlo móvel para abrir/fechar;
 - botão acompanha o `<dialog>` modal;
@@ -120,18 +90,16 @@ A validação física posterior revelou o conflito de hidratação do glifo, cor
 - documento, body, app shell, main e topbar usam o mesmo fundo no mobile;
 - topbar opaco e sem blur;
 - desktop mantém identidade do Mercado;
-- geometria do cabeçalho e navegação inalteradas;
 - PR #50 / commit `9657d558000018af1ea44e6040441f2b9d91648c`;
 - CI/Pages verdes.
 
 ## 2026-09-07 — v65 publicada: Lista de compras focada no supermercado
 
-- resumo inicial compacto: por comprar, comprados e previsto;
+- resumo inicial compacto;
 - detalhe financeiro em disclosure;
 - `+` do topbar reutiliza ação existente;
-- filtros compactos e Limpar apenas quando necessário;
+- filtros compactos;
 - categorias pendentes abertas e Comprados recolhido;
-- cartões priorizam checkbox, nome, quantidade e preço;
 - desktop e estado financeiro preservados;
 - PR #48 / commit `2d39f6f4daa8dccabb51bf906ef22d4a5d9075e4`;
 - CI/Pages verdes.
