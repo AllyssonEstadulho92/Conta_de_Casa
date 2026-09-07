@@ -112,12 +112,14 @@ A migração só atua sobre ocorrências geradas automaticamente e ainda não al
 
 `.github/workflows/pages.yml` publica automaticamente apenas quando a CI de `main` terminou com sucesso. O workflow também suporta `workflow_dispatch` para redeploy manual.
 
-Por essa razão, o passo **Verify tested revision** deve manter uma verificação autónoma coerente com os componentes críticos da release. Após a auditoria de 7 de setembro, inclui explicitamente:
+O passo **Verify tested revision** inclui explicitamente:
 
 - `node --check v64-runtime.js`;
 - `node tests/v64-runtime.test.cjs`.
 
-Isto impede que o caminho manual de Pages deixe de verificar a camada específica da v64.
+Este reforço foi integrado pelo PR #46 no commit `72ee9117ba1383dbcde1ae18729309b07134c144`. A CI de `main` run #1094 e o Deploy GitHub Pages run #1087 terminaram com sucesso depois da integração.
+
+Assim, o caminho manual de Pages não tem cobertura inferior relativamente ao runtime específico da v64.
 
 ## Distribuição v64
 
@@ -126,7 +128,8 @@ Isto impede que o caminho manual de Pages deixe de verificar a camada específic
 - runtime: `64-runtime1`;
 - cache: `conta-de-casa-public-v64-runtime1`;
 - PR #44 integrado;
-- commit público: `78612a9701d60938532d7be768ea35f84c36c7fc`;
+- commit base da release: `78612a9701d60938532d7be768ea35f84c36c7fc`;
+- reforço de pipeline: PR #46 / commit `72ee9117ba1383dbcde1ae18729309b07134c144`;
 - CI de `main`: sucesso;
 - GitHub Pages: sucesso.
 
