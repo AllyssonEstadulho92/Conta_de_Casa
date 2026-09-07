@@ -162,3 +162,27 @@ Sem substituir toda a arquitetura móvel:
 ### Motivo
 
 A correção elimina a dependência de `sticky` no scroller interno do Safari, reduz o risco de regressão no teclado/bottom nav e preserva D-001/D-002.
+
+## D-027 — O topbar móvel é global e não recebe decoração específica por página
+Data: 7 de setembro de 2026 · Estado: aceite para v64.
+
+### Contexto
+
+A comparação direta entre **Início** e **Lista de compras** mostrou que a página de Compras estava a alterar o próprio cabeçalho global. Regras históricas associadas a `html.market-prototype-active` acrescentavam carrinho ao título, aumentavam a escala tipográfica, ampliavam o botão `+` e adicionavam um chevron ao Sync.
+
+### Decisão
+
+O cabeçalho móvel deve manter a mesma geometria em todas as páginas principais:
+
+- título com a mesma hierarquia e tamanho;
+- sem pseudo-ícone específico antes do `h1`;
+- menu com a mesma caixa tátil;
+- botão `+` com a mesma caixa e superfície visual;
+- Sync com a mesma altura, largura máxima e sem chevron extra;
+- fundo do topbar visualmente uniforme.
+
+A identidade de cada módulo fica no conteúdo da página, nos cartões, estados e navegação, não na estrutura do topbar.
+
+### Motivo
+
+Evita que o utilizador interprete páginas como aplicações diferentes, reduz conflitos de CSS e mantém a hierarquia definida no Design System sem alterar rotas, dados ou fluxos.
