@@ -5,13 +5,14 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const BUILD = 'v66';
+const BUILD = 'v67';
 const UI_REV = '64-ui1';
 const CATEGORY_REV = '64-ui1';
 const VISUAL_REV = '64-ui1';
 const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '65-shopping1';
 const SHELL_REV = '66-shell1';
+const MENU_REV = '67-menu1';
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -25,6 +26,7 @@ const PUBLIC_FILES = Object.freeze([
   'ui-consistency.css',
   'v64-runtime.css',
   'market-shopping-focus.css',
+  'mobile-menu-toggle.css',
   'invoice-capture.css',
   'app-update.css',
   'market-image-audit.css',
@@ -35,6 +37,7 @@ const PUBLIC_FILES = Object.freeze([
   'sync.js',
   'sync-conflict-policy.js',
   'events.js',
+  'mobile-menu-toggle.js',
   'market-experience.js',
   'market-branding.js',
   'market-category-groups.js',
@@ -88,6 +91,8 @@ if(!index.includes('ui-consistency.css')) index=index.replace('</head>',`  <link
 if(!index.includes('v64-runtime.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v64-runtime.css?v=${SHELL_REV}" />\n</head>`);
 // Camada v65: densidade e prioridade operacional exclusivas da Lista de compras.
 if(!index.includes('market-shopping-focus.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-shopping-focus.css?v=${SHOPPING_REV}" />\n</head>`);
+// Camada v67: controlo hambúrguer/X global, sem alterar geometria do topbar.
+if(!index.includes('mobile-menu-toggle.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./mobile-menu-toggle.css?v=${MENU_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
 if(!index.includes('sync-conflict-policy.js')) index=index.replace(syncScript,`${syncScript}<script src="./sync-conflict-policy.js?v=${UI_REV}" defer></script>`);
@@ -100,6 +105,7 @@ if(!index.includes('market-branding.js')) index=index.replace('</body>',`  <scri
 if(!index.includes('market-category-groups.js')) index=index.replace('</body>',`  <script src="./market-category-groups.js?v=${CATEGORY_REV}" defer></script>\n</body>`);
 if(!index.includes('v64-runtime.js')) index=index.replace('</body>',`  <script src="./v64-runtime.js?v=${RUNTIME_REV}" defer></script>\n</body>`);
 if(!index.includes('market-shopping-focus.js')) index=index.replace('</body>',`  <script src="./market-shopping-focus.js?v=${SHOPPING_REV}" defer></script>\n</body>`);
+if(!index.includes('mobile-menu-toggle.js')) index=index.replace('</body>',`  <script src="./mobile-menu-toggle.js?v=${MENU_REV}" defer></script>\n</body>`);
 fs.writeFileSync(distIndex,index);
 
 const distEvents=path.join(DIST,'events.js');
@@ -115,4 +121,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; visuals ${VISUAL_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; shell ${SHELL_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; visuals ${VISUAL_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; shell ${SHELL_REV}; menu ${MENU_REV}).`);
