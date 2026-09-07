@@ -1,4 +1,4 @@
-/* Conta de Casa v64 — safe area móvel e estados de fatura por preencher. */
+/* Conta de Casa v64 — safe area móvel, cabeçalho estável e faturas por preencher. */
 
 .status-chip.draft{
   color:var(--primary,#0b63e5);
@@ -36,14 +36,25 @@
 
 @media(max-width:820px){
   :root{
-    /* Mantém os controlos abaixo da área física do sistema e acrescenta uma
-       folga tátil mínima mesmo quando o navegador devolve safe-area = 0. */
+    /* A zona do topo precisa continuar tocável tanto no Safari normal como no PWA.
+       O mínimo cobre navegadores que devolvem safe-area=0; no modo instalado prevalece
+       a safe area física do aparelho acrescida de uma pequena folga. */
     --mobile-top-safe:max(20px,calc(env(safe-area-inset-top,0px) + 8px));
     --header-height:calc(112px + var(--mobile-top-safe));
   }
 
+  /* O cabeçalho deixa de depender de position:sticky dentro do scroller interno.
+     No Safari/iPhone essa combinação podia deixar a primeira linha parcialmente fora
+     da área visível depois de uma deslocação. Fixed mantém menu, título e + íntegros. */
   html.app-active .topbar,
   .topbar{
+    position:fixed!important;
+    top:0!important;
+    left:var(--page-gutter)!important;
+    right:var(--page-gutter)!important;
+    width:auto!important;
+    max-width:none!important;
+    z-index:34!important;
     height:var(--header-height)!important;
     min-height:var(--header-height)!important;
     padding-top:var(--mobile-top-safe)!important;
@@ -51,7 +62,10 @@
     box-sizing:border-box;
   }
 
+  /* Como o cabeçalho fixed sai do fluxo, o conteúdo recebe exatamente a sua altura.
+     O scroller .main continua a ser o mesmo, preservando navegação, teclado e bottom nav. */
   html.app-active .main{
+    padding-top:var(--header-height)!important;
     scroll-padding-top:calc(var(--header-height) + 8px)!important;
   }
 
