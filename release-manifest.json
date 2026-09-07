@@ -1,9 +1,23 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v67",
+  "latestVersion": "v68",
   "publishedAt": "2026-09-07",
   "releases": [
+    {
+      "version": "v68",
+      "date": "7 de setembro de 2026",
+      "title": "Menu lateral mais moderno, compacto e responsivo",
+      "items": [
+        "O painel aberto pelo hambúrguer foi refinado com uma largura fluida e limitada, mantendo espaço visível para o backdrop sem ocupar desnecessariamente todo o ecrã.",
+        "Cabeçalho, marca, grupos de navegação e ações inferiores passam a usar espaçamentos, alinhamentos e hierarquia tipográfica mais consistentes no telemóvel e tablet.",
+        "Os itens do menu mantêm os mesmos destinos da navegação desktop, mas passam a ter alvos tácteis de 48 píxeis, estados hover, active, focus e página atual mais discretos e legíveis.",
+        "O mesmo botão continua a transformar as três linhas do hambúrguer num X e a regressar ao estado inicial ao fechar, com o estado visual sincronizado com o drawer e com aria-expanded.",
+        "A animação do ícone e do painel foi mantida curta e natural, com movimento reduzido respeitado quando essa preferência está ativa no sistema.",
+        "O drawer impede overflow lateral, contém o seu próprio scroll quando necessário e respeita safe areas, tema claro e tema escuro sem alterar o tamanho global da aplicação.",
+        "A alteração é exclusivamente de interface e navegação: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+      ]
+    },
     {
       "version": "v67",
       "date": "7 de setembro de 2026",
