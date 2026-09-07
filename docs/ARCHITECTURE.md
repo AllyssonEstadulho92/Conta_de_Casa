@@ -1,15 +1,15 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 7 de setembro de 2026
+Atualizado: 8 de setembro de 2026
 Build público atual: `v69`
-Release funcional: PR #56
-Commit público: `a66df37b0fc345491dacf3cac91313d88d080a05`
+Build candidato: `v70`
+Branch candidata: `fix/v70-visible-menu-motion`
 
 ## Visão geral
 
-**Conta de Casa** é uma PWA estática distribuída por GitHub Pages. A arquitetura é local-first: estado financeiro, regras de negócio, formulários, cifragem e persistência executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
+**Conta de Casa** é uma PWA estática distribuída por GitHub Pages. A arquitetura continua local-first: estado financeiro, regras de negócio, formulários, cifragem e persistência executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
 
-Não existe backend financeiro próprio. Integrações externas do Mercado servem apenas descoberta/identificação de catálogo e preço; não recebem o conteúdo financeiro do cofre.
+Não existe backend financeiro próprio. A v70 não modifica persistência, autenticação, APIs, cofre ou regras de negócio.
 
 ## Persistência e segurança
 
@@ -19,37 +19,27 @@ Não existe backend financeiro próprio. Integrações externas do Mercado serve
 - schema base: `STATE_VERSION = 5`;
 - sincronização: envelope cifrado opcional via GitHub;
 - sem cookies/telemetria financeira;
-- segredos e PIN não são incluídos no código público.
+- sem segredos ou PIN no código público.
 
-A v69 não modifica esta camada.
+## Navegação existente preservada
 
-## JavaScript principal
+- `core.js` mantém `PAGE_META`, `NAV_GROUPS` e estado;
+- `render.js::renderNav()` continua a usar a mesma fonte `NAV_GROUPS` para desktop e drawer;
+- `events.js` continua responsável por `openMobileDrawer()` / `closeMobileDrawer()`, Escape, backdrop e adaptação de breakpoint;
+- `#mobileDrawer` continua um `<dialog>` modal;
+- `#mobileMenuBtn` continua um único controlo real;
+- `#drawerCloseBtn` permanece oculto apenas por compatibilidade histórica.
 
-- `core.js` — estado, normalização, IndexedDB, cifragem, `PAGE_META`, `NAV_GROUPS` e utilitários;
-- `finance.js` — cálculos e invariantes financeiros;
-- `render.js` — renderização, navegação, tema e hidratação dos mesmos grupos de navegação no sidebar e drawer;
-- `forms.js` — formulários, validação e mutações;
-- `events.js` — eventos globais, viewport, cofre, navegação adaptativa, abertura/fecho do drawer e Service Worker;
-- `mobile-menu-toggle.js` — controlador visual/DOM do botão móvel hambúrguer ↔ `X`;
-- `ui-icons.js` — sistema Lucide local e hidratador de ícones;
-- `sync.js` / `sync-conflict-policy.js` — sincronização cifrada opcional e equivalência de negócio;
-- módulos Mercado/QR/Atualização — preservados.
+Não existe uma segunda implementação do menu.
 
-## Arquitetura da navegação
+## Breakpoints e shell
 
-### Desktop e tablet largo
+- mobile: até `820 px`;
+- desktop/sidebar: acima de `820 px`;
+- tablet largo/desktop compacto: comportamento adaptativo histórico preservado;
+- topbar, gutters, safe areas e tamanho global da aplicação não são alterados.
 
-O sidebar é a navegação primária. Entre 821 e 1180 px pode ficar recolhido/compacto através do mecanismo adaptativo existente.
-
-### Mobile até 820 px
-
-A navegação rápida inferior continua a mostrar `MOBILE_NAV_ITEMS`. O menu completo é `#mobileDrawer`.
-
-`render.js::renderNav()` usa a mesma fonte `NAV_GROUPS` para `#desktopNav` e `#drawerNav`. Não existem duas listas independentes de rotas.
-
-## Camadas CSS e responsabilidade visual
-
-A ordem pública mantém:
+Camadas relevantes, por ordem:
 
 1. `styles.css`;
 2. `design-system.css`;
@@ -57,80 +47,76 @@ A ordem pública mantém:
 4. camadas do Mercado;
 5. `ui-icons.css`;
 6. `ui-consistency.css`;
-7. `v64-runtime.css` — shell v66;
-8. `market-shopping-focus.css` — Compras v65;
-9. `mobile-menu-toggle.css` — camada final do menu, revisão `69-menu3`.
+7. `v64-runtime.css` — shell `66-shell1`;
+8. `market-shopping-focus.css` — Compras `65-shopping1`;
+9. `mobile-menu-toggle.css` — camada final do menu, candidata `70-menu4`.
 
-O tamanho global da aplicação, gutters, topbar e breakpoint de 820 px não foram alterados.
+## Menu móvel — contrato v69 preservado
 
-## Menu móvel v69
+A v69 resolveu o conflito com o hidratador Lucide. O contrato continua:
 
-### Contrato DOM preservado
+- `mobile-menu-toggle.js` é proprietário do glifo visível;
+- o glifo é composto por três `<span>`;
+- `data-ui-icon-slot="menu"` permanece;
+- um SVG `.mobile-menu-icon-sentinel` fica oculto para impedir `ui-icons.js::fillIcon()` de substituir os spans;
+- `aria-expanded`, `aria-label`, `title`, `button.dataset.menuState` e `drawer.dataset.menuState` mantêm o estado acessível e observável.
 
-O HTML continua a expor:
+Geometria preservada:
 
-- `#mobileMenuBtn` com `aria-controls="mobileDrawer"` e `aria-expanded`;
-- `#mobileDrawer` como `<dialog>` modal;
-- `.nav-drawer-shell`, `.drawer-head`, `#drawerNav` e `.drawer-footer`;
-- `#drawerCloseBtn` no DOM por compatibilidade histórica;
-- `openMobileDrawer()` e `closeMobileDrawer()` em `events.js`.
-
-Não existe uma segunda implementação do menu.
-
-### Propriedade visual do botão
-
-A validação física da v68 revelou um conflito de propriedade entre dois módulos:
-
-- `mobile-menu-toggle.js` criava as três linhas animáveis;
-- `ui-icons.js::hydrate()` voltava a executar `fillIcon(#mobileMenuBtn, 'menu', 22)` em mudanças de `aria-expanded`/`class`;
-- `fillIcon()` usava `replaceChildren()`, removendo as linhas e colocando um SVG estático.
-
-A v69 estabelece o seguinte contrato:
-
-1. `mobile-menu-toggle.js` é o proprietário da apresentação visível de `#mobileMenuBtn` depois de instalado;
-2. o botão mantém `data-ui-icon-slot="menu"` para compatibilidade com o hidratador Lucide;
-3. um SVG Lucide direto é preservado como `.mobile-menu-icon-sentinel`, `hidden`, `aria-hidden` e `display:none`;
-4. `ui-icons.js` encontra o mesmo slot e um SVG existente, pelo que `fillIcon()` retorna sem substituir o glifo visível;
-5. o glifo visível é composto exclusivamente por três `<span>` animáveis.
-
-A solução não altera o sistema global de ícones e mantém Lucide como sistema oficial para os restantes controlos.
-
-### Estado e comportamento
-
-Fluxo:
-
-1. fechado: botão no topbar, três linhas proporcionais;
-2. toque/clique/teclado: `openMobileDrawer()` abre o `<dialog>`;
-3. o mesmo nó é movido para `.drawer-head`;
-4. `aria-expanded="true"` e `data-menu-state="open"` colocam as linhas superior/inferior no centro;
-5. linha superior roda `45deg`, linha inferior `-45deg` e a linha central colapsa;
-6. novo toque no mesmo controlo fecha o drawer;
-7. o botão regressa ao topbar e as linhas voltam ao hambúrguer.
-
-`aria-label`, `title`, `aria-expanded`, `button.dataset.menuState` e `drawer.dataset.menuState` permanecem sincronizados.
-
-### Geometria e animação
-
-- alvo: `44 × 44 px`;
+- alvo do botão: `44 × 44 px`;
 - glifo: `24 × 18 px`;
 - linhas: `22 / 18 / 14 px`;
-- espessura: aproximadamente `2.25 px`;
-- duração: aproximadamente `190 ms`;
-- curva: `cubic-bezier(.2,.8,.2,1)`;
-- linha central: `opacity:0` + `scaleX(.18)`;
-- sem borda, fundo verde ou sombra de seleção;
-- `prefers-reduced-motion: reduce` elimina transições.
+- espessura: ~`2.25 px`;
+- X: `45deg / -45deg`;
+- linha central: `opacity:0` + `scaleX(.18)`.
 
-### Foco e Safari
+## Problema de movimento identificado na validação física
 
-O controlo continua a receber foco programático para manter previsibilidade após abrir/fechar o modal. A origem do acionamento é registada em `data-focus-origin`:
+No iPhone, os estados finais da v69 aparecem corretos, mas a animação pode não ser perceptível. A razão arquitetural é o reparenting do mesmo nó:
 
-- toque/rato: o foco é preservado, mas a moldura programática é suprimida;
-- teclado: `:focus-visible` permanece ativo.
+1. fechado: `#mobileMenuBtn` vive no topbar;
+2. `openMobileDrawer()` abre o `<dialog>`;
+3. `mobile-menu-toggle.js` move o mesmo botão para `.drawer-head`;
+4. o estado muda para aberto;
+5. ao fechar, o mesmo nó regressa ao topbar.
 
-Isto corrige a moldura observada no iPhone sem remover acessibilidade por teclado.
+Uma CSS transition depende de o browser apresentar os estilos inicial e final em frames distintos. Quando o elemento muda de ancestral/render tree durante o mesmo ciclo, Safari pode aplicar diretamente o estado final.
 
-### Painel responsivo preservado da v68
+## v70 — camada de movimento explícito
+
+A v70 acrescenta `animateMenuGlyph(open)` em `mobile-menu-toggle.js` sem alterar o drawer.
+
+### Abertura
+
+1. `openMobileDrawer()` mantém o fluxo existente;
+2. `syncButton(true)` mantém ARIA/estado e posiciona o botão no drawer;
+3. no `requestAnimationFrame` seguinte, `animateMenuGlyph(true)` executa keyframes explícitos;
+4. linha superior: `1px → 8px` e `0deg → 45deg`;
+5. linha central: `scaleX(1) → scaleX(.18)` e `opacity 1 → 0`;
+6. linha inferior: `15px → 8px`, largura `14px → 22px` e `0deg → -45deg`;
+7. o glifo recebe um micro movimento `scale(.92)` + inclinação curta e regressa a `scale(1) rotate(0)`.
+
+### Fecho pelo X
+
+1. o drawer fecha pelo fluxo existente;
+2. `syncButton(false)` devolve o mesmo nó ao topbar;
+3. no frame seguinte são executados os keyframes inversos `opened → closed`;
+4. o estado CSS/ARIA fechado já fica como fallback definitivo.
+
+### Fechos externos
+
+Escape, backdrop ou mudança de breakpoint continuam a restaurar o estado. O listener `close` só cancela animação pendente quando o botão ainda não foi sincronizado como fechado, evitando cancelar a animação inversa iniciada pelo próprio X.
+
+### API de animação e fallback
+
+- API: Web Animations (`Element.animate`);
+- duração: `240 ms`;
+- easing: `cubic-bezier(.22,.8,.2,1)`;
+- CSS transitions de `240 ms` permanecem como fallback visual;
+- se `Element.animate` não existir, o menu continua funcional com o estado CSS;
+- `prefers-reduced-motion: reduce` impede a execução dos keyframes adicionais.
+
+## Responsividade do drawer preservada
 
 Até 820 px:
 
@@ -143,41 +129,38 @@ Até 820 px:
 - itens e ações com `min-height:48px`;
 - tema claro/escuro preservado.
 
-## Compatibilidade do X legado
+## Acessibilidade
 
-`#drawerCloseBtn` permanece oculto, fora da tabulação e `aria-hidden="true"`. Continua referido por wiring histórico; a remoção definitiva permanece um refactor separado.
-
-## Sistema de ícones e tipografia
-
-Lucide local continua oficial para a aplicação. A v69 apenas impede que a hidratação genérica substitua o componente animado que necessita de geometria própria. Tipografia Inter/SF/system permanece inalterada.
+- `aria-controls="mobileDrawer"` preservado no HTML;
+- `aria-expanded` sincronizado;
+- `aria-label` alterna Abrir/Fechar menu;
+- foco por pointer continua sem a moldura programática observada no Safari;
+- teclado mantém `:focus-visible`;
+- `prefers-reduced-motion` continua obrigatório.
 
 ## Tema e PWA
 
-- build público: `v69`;
-- menu: `69-menu3`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v69-menu3`.
+Candidata:
 
-`scripts/prepare-pages.cjs` mantém `mobile-menu-toggle.css/.js` como camada final do menu e `sw.js` mantém allowlist same-origin explícita.
+- build: `v70`;
+- menu: `70-menu4`;
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4`.
 
-## Pipeline e regressões
+`scripts/prepare-pages.cjs` mantém `mobile-menu-toggle.css/.js` como camada final e `sw.js` mantém allowlist same-origin explícita.
 
-A v69 foi integrada apenas depois de CI verde. A matriz cobre, além das regressões históricas:
+## Regressões obrigatórias v70
 
-- presença dos três `<span>` do glifo;
-- sentinela Lucide oculta + `data-ui-icon-slot="menu"`;
-- coexistência com a chamada histórica `fillIcon(#mobileMenuBtn, 'menu', 22)`;
-- `aria-expanded` + `data-menu-state` produzirem o `X`;
-- linha central colapsar;
-- foco por pointer sem moldura visual;
-- foco por teclado preservado;
-- fecho pelo mesmo botão, Escape, backdrop e navegação;
-- build/manifest/cache v69.
+- parser do runtime do menu;
+- três spans e sentinela Lucide;
+- mesma instância do botão no topbar/drawer;
+- keyframes explícitos por linha;
+- micro movimento do glifo;
+- duração/easing definidos;
+- abertura e fecho agendados após reparenting;
+- `prefers-reduced-motion`;
+- ARIA e foco;
+- drawer responsivo e sem overflow lateral;
+- build/manifest/cache `v70` / `70-menu4`;
+- regressões históricas financeiras, segurança, Mercado, sync e acessibilidade.
 
-Publicação técnica confirmada:
-
-- CI do PR #1250 (`34168089348`) — sucesso;
-- merge `a66df37b0fc345491dacf3cac91313d88d080a05`;
-- CI de `main` #1251 (`34168145569`) — sucesso;
-- Pages #1244 (`34168165101`) — sucesso.
-
-A CI não substitui a validação física final no mesmo iPhone que revelou o defeito.
+A CI não substitui a validação física final no iPhone/Safari.
