@@ -4,28 +4,36 @@ Atualizado: 7 de setembro de 2026
 Build público atual: `v64`
 Branch pública: `main`
 Release integrada: PR #44
+Reforço de pipeline integrado: PR #46
 Distribuição: GitHub Pages / PWA
 
 ## Estado atual
 
 A aplicação continua uma PWA estática/local-first. O estado financeiro permanece no navegador/IndexedDB e o cofre continua cifrado com PBKDF2-SHA-256 + AES-GCM. A sincronização GitHub permanece opcional e transfere apenas o envelope cifrado. O schema financeiro base continua `STATE_VERSION = 5`.
 
-A **v64 está integrada em `main` e publicada**. O PR #44 foi fundido no commit `78612a9701d60938532d7be768ea35f84c36c7fc`. A CI do `main` para esse commit terminou com sucesso e o GitHub Pages publicou a mesma revisão com sucesso. `release-manifest.json` anuncia `latestVersion = v64`.
+A **v64 está integrada em `main` e publicada**. O PR #44 foi fundido no commit `78612a9701d60938532d7be768ea35f84c36c7fc`. `release-manifest.json` anuncia `latestVersion = v64`.
 
-## Auditoria atual — pipeline de publicação
+A auditoria pós-publicação identificou uma diferença de cobertura no caminho de redeploy manual de GitHub Pages. A correção foi integrada através do PR #46 no commit `72ee9117ba1383dbcde1ae18729309b07134c144`.
 
-Foi identificado um desfasamento no workflow `.github/workflows/pages.yml`: o caminho automático de publicação depende de CI verde, mas o workflow também admite `workflow_dispatch`. A validação repetida pelo próprio deploy não incluía a verificação de sintaxe de `v64-runtime.js` nem `tests/v64-runtime.test.cjs`, apesar de ambos fazerem parte da CI normal.
+## Pipeline de publicação — estado final
 
-Na branch `fix/v64-release-audit`, o passo **Verify tested revision** do Pages passa a executar também:
+`.github/workflows/pages.yml` publica automaticamente apenas depois de CI verde de `main`, mas também suporta `workflow_dispatch`. Antes do PR #46, o passo **Verify tested revision** não repetia duas verificações específicas da v64 que já existiam na CI normal.
+
+Após a correção, o deploy executa também:
 
 - `node --check v64-runtime.js`;
 - `node tests/v64-runtime.test.cjs`.
 
-Isto reduz a diferença entre o caminho automático e um redeploy manual e impede que uma publicação manual ignore precisamente as regressões específicas introduzidas pela v64.
+O PR #46 passou na CI antes da integração. Depois do merge:
+
+- CI de `main` run #1094: **sucesso**;
+- Deploy GitHub Pages run #1087: **sucesso**.
+
+Assim, o caminho automático e o caminho de redeploy manual mantêm cobertura coerente para o runtime específico da v64.
 
 ## v64 — cabeçalho móvel
 
-As capturas reais de 7 de setembro tinham confirmado dois problemas: corte parcial da primeira linha durante scroll em Safari/iPhone e uma geometria diferente do cabeçalho em **Lista de compras**. A v64 publicada mantém o cabeçalho móvel fixo ao viewport, respeita `safe-area-inset-top`, compensa o conteúdo com `padding-top` e uniformiza título, menu, botão `+`, Sync e fundo entre Início, Faturas, Lista de compras e Relatórios.
+As capturas reais de 7 de setembro tinham confirmado dois problemas: corte parcial da primeira linha durante scroll em Safari/iPhone e geometria diferente do cabeçalho em **Lista de compras**. A v64 publicada mantém o cabeçalho móvel fixo ao viewport, respeita `safe-area-inset-top`, compensa o conteúdo com `padding-top` e uniformiza título, menu, botão `+`, Sync e fundo entre Início, Faturas, Lista de compras e Relatórios.
 
 A validação física final no iPhone após instalação da v64 continua pendente; CI não substitui teste tátil/visual real.
 
@@ -49,15 +57,14 @@ Não foram identificados segredos incorporados no código nesta revisão. Perman
 
 ## Qualidade e testes
 
-Confirmado para a v64 publicada:
+Confirmado no estado atual de `main`:
 
-- PR #44 integrado em `main`;
-- CI do `main` concluída com sucesso;
-- Deploy GitHub Pages concluído com sucesso;
+- PR #44 integrado e v64 publicada;
+- PR #46 integrado;
+- CI de `main` após PR #46 concluída com sucesso;
+- Deploy GitHub Pages após PR #46 concluído com sucesso;
 - testes de finanças, auditoria, contagens, isolamento do cofre, datas, faturas, QR, Mercado, scanner, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização executados pela CI;
-- `tests/v64-runtime.test.cjs` cobre scanner, recorrência e safe area no pipeline normal.
-
-A correção atual do pipeline de Pages ainda necessita de CI verde na respetiva branch antes de integração.
+- `tests/v64-runtime.test.cjs` coberto na CI e no gate do próprio deploy.
 
 ## Validação física ainda pendente
 
@@ -69,12 +76,11 @@ A correção atual do pipeline de Pages ainda necessita de CI verde na respetiva
 
 ## Última alteração
 
-Auditoria pós-publicação da v64: estado documental sincronizado com o GitHub real e reforço do caminho de deploy manual para executar também as verificações específicas de `v64-runtime.js`.
+Reforço do pipeline de GitHub Pages integrado e publicado: o redeploy manual passa a repetir as verificações específicas de `v64-runtime.js`, com CI e Pages novamente verdes após integração.
 
 ## Próximo passo
 
-1. obter CI verde para `fix/v64-release-audit`;
-2. integrar a correção do workflow apenas com testes verdes;
-3. confirmar novamente CI/Pages após integração;
-4. concluir a validação física da v64 em iPhone e scanner real;
-5. tratar a dependência externa ZXing numa release de segurança separada.
+1. concluir a validação física da v64 em iPhone e scanner real;
+2. validar a transição de recorrência mensal **Por preencher** num ciclo real;
+3. tratar a dependência externa ZXing numa release de segurança separada;
+4. manter a consolidação de CSS e remoção de módulos históricos para releases independentes, sem misturar com mudanças financeiras.
