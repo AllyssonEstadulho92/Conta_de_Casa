@@ -1,6 +1,6 @@
 'use strict';
 
-/* Conta de Casa v67 — o mesmo controlo móvel alterna hambúrguer <-> X. */
+/* Conta de Casa v68 — o mesmo controlo móvel alterna hambúrguer <-> X e acompanha o drawer. */
 (function installAnimatedMobileMenu(root){
   let installed=false;
 
@@ -40,9 +40,12 @@
 
     function syncButton(open){
       const expanded=Boolean(open);
+      const state=expanded?'open':'closed';
       button.setAttribute('aria-expanded',String(expanded));
       button.setAttribute('aria-label',expanded?'Fechar menu':'Abrir menu');
       button.title=expanded?'Fechar menu':'Abrir menu';
+      button.dataset.menuState=state;
+      drawer.dataset.menuState=state;
       if(expanded)placeButtonInDrawer();
       else restoreButtonHome();
     }
