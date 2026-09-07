@@ -4,7 +4,7 @@ Atualizado: 7 de setembro de 2026
 
 ## P0 — v68 painel do menu móvel refinado
 
-### Auditoria e implementação — PR #54
+### Auditoria, implementação e publicação — PR #54
 
 - [x] Ler estado, arquitetura e decisões antes de alterar código.
 - [x] Confirmar `#mobileMenuBtn`, `#mobileDrawer`, `events.js`, `render.js` e camadas CSS responsáveis.
@@ -17,25 +17,26 @@ Atualizado: 7 de setembro de 2026
 - [x] Encurtar/suavizar a animação e preservar `prefers-reduced-motion`.
 - [x] Sincronizar `aria-expanded`, `aria-label`, `title` e `data-menu-state`.
 - [x] Definir largura fluida do drawer sem ocupar todo o ecrã.
-- [x] Criar salvaguarda específica para ecrãs abaixo de 360 px.
+- [x] Em ecrãs abaixo de 360 px, manter `width: calc(100vw - 20px)` e alvos de 48 px.
 - [x] Preservar safe areas e criar scroll vertical interno sem overflow lateral.
 - [x] Refinar cabeçalho, marca, tipografia e espaçamentos do painel.
 - [x] Definir alvos de 48 px para itens e ações do drawer.
 - [x] Adicionar estados discretos hover, active, focus-visible e current.
 - [x] Preservar tema claro/escuro e fundo global v66.
 - [x] Preservar Escape, backdrop, navegação e fluxo de fecho existente.
-- [x] Manter `#drawerCloseBtn` oculto por compatibilidade, sem o considerar código removível enquanto existirem referências em `events.js`/`ui-icons.js`.
-- [x] Versionar candidata como `v68` / `68-menu2`.
+- [x] Manter `#drawerCloseBtn` oculto por compatibilidade enquanto existirem referências em `events.js`/`ui-icons.js`.
+- [x] Versionar release como `v68` / `68-menu2`.
 - [x] Atualizar `release-manifest.json`, `scripts/prepare-pages.cjs` e Service Worker.
 - [x] Atualizar testes do menu, Centro de Atualização, consistência, Compras e compatibilidade histórica.
 - [x] Abrir PR #54.
-- [ ] Confirmar CI verde do PR #54.
-- [ ] Rever diff final e confirmar escopo restrito a UI/menu/distribuição/testes/docs.
-- [ ] Integrar PR #54 em `main` apenas com CI verde.
-- [ ] Confirmar CI de `main` e Deploy GitHub Pages.
-- [ ] Atualizar documentação para estado publicado depois da integração efetiva.
+- [x] Confirmar CI verde do PR #54 — run #1217 (`34166823195`).
+- [x] Rever diff final e confirmar escopo restrito a UI/menu/distribuição/testes/docs.
+- [x] Integrar PR #54 em `main` — commit `9c8a2b3042c322849e3eb5ea3462f494897b4ab3`.
+- [x] Confirmar CI de `main` — run #1218 (`34166862646`) com sucesso.
+- [x] Confirmar Deploy GitHub Pages — run #1211 (`34166882992`) com sucesso.
+- [x] Atualizar documentação para estado publicado.
 
-### Validação física v68
+### Validação física v68 ainda pendente
 
 - [ ] iPhone/Safari 320, 375, 390 e 430 px: abrir/fechar e confirmar hambúrguer ↔ `X`.
 - [ ] Android/Chrome em smartphone pequeno e grande.
@@ -58,25 +59,13 @@ Atualizado: 7 de setembro de 2026
 - [x] Escape, backdrop, evento `close` e foco de retorno preservados.
 - [x] `aria-expanded`, `aria-label` e `title` sincronizados.
 - [x] Release `v67` / `67-menu1` publicada pelo PR #52.
-- [x] CI do PR #1178, CI de `main` #1179 e Pages #1172 com sucesso.
-
-### Validação física herdada da v67
-
-- [ ] Confirmar ausência de segundo `X`, moldura branca ou fundo verde em hardware real.
-- [ ] Confirmar alinhamento do ícone com título, `+` e Sync.
-- [ ] Validar portrait/landscape e rotação.
 
 ## P0 — v66 uniformidade cromática do shell móvel publicada
 
 - [x] Shell claro unificado em `#f5f7fa` e escuro em `#0f1722`.
 - [x] Topbar opaco, sem blur, mesma geometria em todas as páginas.
 - [x] Desktop mantém identidade do Mercado.
-- [x] Release `v66` / `66-shell1` publicada pelo PR #50 com CI/Pages verdes.
-
-### Validação física herdada da v66
-
-- [ ] No mesmo iPhone que revelou o problema, confirmar ausência de faixa azul ao lado/abaixo do cabeçalho.
-- [ ] Confirmar fundo contínuo em Início, Faturas, Compras e Relatórios, claro/escuro.
+- [x] Release `v66` / `66-shell1` publicada pelo PR #50.
 
 ## P0 — v65 Lista de compras móvel preservada
 
@@ -102,7 +91,7 @@ Atualizado: 7 de setembro de 2026
 - [x] Topbar móvel usa a mesma geometria e fundo em Início/Faturas/Compras/Relatórios.
 - [x] Centro de Atualização continua same-origin e controlado pelo utilizador.
 - [x] CSP/allowlist, responsividade, acessibilidade e sincronização permanecem na CI.
-- [x] A candidata v68 não escreve em `appState` nem altera dados financeiros.
+- [x] A v68 não escreve em `appState` nem altera dados financeiros.
 
 ## P0 — validação física funcional ainda pendente
 

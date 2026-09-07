@@ -1,8 +1,9 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 7 de setembro de 2026
-Build público atual: `v67`
-Build candidato: `v68` — PR #54
+Build público atual: `v68`
+Release integrada: PR #54
+Commit público: `9c8a2b3042c322849e3eb5ea3462f494897b4ab3`
 
 ## Visão geral
 
@@ -34,7 +35,7 @@ A v68 não modifica esta camada.
 - `sync-conflict-policy.js` — equivalência de negócio do Mercado sem ruído de metadados técnicos;
 - `market-experience.js` — catálogo/preço Pingo Doce e Continente através de `cesta.pt`;
 - `market-barcode.js` — leitura GTIN/EAN/UPC e identificação de produto;
-- `market-category-groups.js` — agrupamento visual base da lista de compras;
+- `market-category-groups.js` — agrupamento visual base da Lista de compras;
 - `market-shopping-focus.js` — camada v65 de apresentação móvel;
 - `ui-icons.js` — subset Lucide local;
 - `invoice-capture.js` — leitura local de QR fiscal;
@@ -49,18 +50,18 @@ O sidebar é a navegação primária. Entre 821 e 1180 px pode ficar recolhido/c
 
 ### Mobile até 820 px
 
-A navegação rápida inferior continua a mostrar `MOBILE_NAV_ITEMS`. O menu completo é o `#mobileDrawer`.
+A navegação rápida inferior continua a mostrar `MOBILE_NAV_ITEMS`. O menu completo é `#mobileDrawer`.
 
 `render.js::renderNav()` usa a mesma fonte `NAV_GROUPS` para:
 
 - `#desktopNav`;
 - `#drawerNav`.
 
-Isto evita duas listas de rotas independentes e mantém opções, rótulos, ícones e `aria-current` coerentes entre computador e telemóvel.
+Não existem duas listas de rotas independentes. Opções, rótulos, ícones e `aria-current` permanecem coerentes entre computador e telemóvel.
 
 ## Camadas CSS e responsabilidade visual
 
-A ordem pública candidata é:
+A ordem pública da v68 é:
 
 1. `styles.css` — base histórica;
 2. `design-system.css` — tokens/componentes/layout;
@@ -74,7 +75,7 @@ A ordem pública candidata é:
 10. `market-shopping-focus.css` — ajustes finais da Lista de compras no mobile;
 11. `mobile-menu-toggle.css` — camada final v68 para glifo, drawer e estados de interação do menu.
 
-A folha do menu continua por último para neutralizar apenas conflitos históricos do componente sem alterar o restante layout.
+A folha do menu fica por último para neutralizar apenas conflitos históricos do componente sem alterar o restante layout.
 
 ## Menu móvel v68
 
@@ -85,22 +86,22 @@ O HTML continua a expor:
 - `#mobileMenuBtn` com `aria-controls="mobileDrawer"` e `aria-expanded`;
 - `#mobileDrawer` como `<dialog>` modal;
 - `.nav-drawer-shell`, `.drawer-head`, `#drawerNav` e `.drawer-footer`;
-- `#drawerCloseBtn` no DOM por compatibilidade com wiring histórico;
+- `#drawerCloseBtn` no DOM por compatibilidade histórica;
 - `openMobileDrawer()` e `closeMobileDrawer()` em `events.js`.
 
 Não foi criada uma segunda implementação do menu.
 
 ### Estado e comportamento
 
-Quando `showModal()` abre um `<dialog>`, os elementos externos ficam inertes. Assim, o mesmo `#mobileMenuBtn` é movido para `.drawer-head` depois da abertura para continuar realmente tocável como `X`.
+Quando `showModal()` abre um `<dialog>`, elementos externos ficam inertes. O mesmo `#mobileMenuBtn` é por isso movido para `.drawer-head` depois da abertura para continuar realmente tocável como `X`.
 
 Fluxo:
 
 1. fechado: botão no topbar, três linhas;
 2. clique/toque: fluxo existente abre o drawer;
-3. o mesmo nó é colocado dentro de `.drawer-head`;
-4. `aria-expanded="true"` transforma as linhas em `X`;
-5. clique no `X`, Escape, backdrop ou navegação fecham o drawer;
+3. o mesmo nó entra em `.drawer-head`;
+4. `aria-expanded="true"` transforma as próprias linhas em `X`;
+5. `X`, Escape, backdrop ou seleção de navegação fecham o drawer;
 6. o botão regressa ao `Comment` anchor no topbar e `aria-expanded="false"` restaura o hambúrguer.
 
 `aria-label`, `title`, `button.dataset.menuState` e `drawer.dataset.menuState` acompanham `open/closed`.
@@ -115,37 +116,38 @@ Fluxo:
 - sem moldura, fundo verde ou sombra de estado selecionado;
 - `:focus-visible` explícito;
 - hover apenas em `hover:hover` + `pointer:fine`;
-- `prefers-reduced-motion: reduce` remove as transições.
+- `prefers-reduced-motion: reduce` remove transições não essenciais.
 
 ### Painel responsivo
 
 Até 820 px:
 
-- largura principal: `min(364px, calc(100vw - 24px))`;
-- abaixo de 360 px: `min(300px, calc(100vw - 20px))`;
+- largura normal: `min(364px, calc(100vw - 24px))`;
+- abaixo de 360 px: `width: calc(100vw - 20px)`, mantendo 20 px de backdrop;
+- os alvos de navegação continuam com 48 px mesmo nos smartphones mais pequenos;
 - altura: `100dvh`;
-- shell interno respeita `safe-area-inset-top` e `safe-area-inset-bottom`;
+- shell respeita `safe-area-inset-top` e `safe-area-inset-bottom`;
 - `overflow-x:hidden` impede scroll lateral;
 - `#drawerNav` tem scroll vertical próprio e `overscroll-behavior: contain`;
-- backdrop mantém parte do conteúdo visível e recebe blur discreto;
-- sombra foi reduzida em relação à camada histórica para evitar peso excessivo.
+- backdrop mantém parte do conteúdo visível e usa blur discreto;
+- sombra é intencionalmente mais leve que a camada histórica.
 
-O tamanho global da aplicação, largura da `.main`, gutters e topbar não são alterados.
+O tamanho global da aplicação, largura de `.main`, gutters e topbar não foram alterados.
 
 ### Hierarquia interna
 
 - cabeçalho mínimo de 60 px;
-- marca no drawer: 36 × 36 px;
-- grupos com labels compactas em uppercase e espaçamento regular;
+- marca do drawer: 36 × 36 px;
+- labels de grupo compactas e consistentes;
 - cada `.nav-btn` tem `min-height:48px`;
 - ícones Lucide: 20 px;
 - `active`/`aria-current="page"`: fundo suave + indicador lateral de 3 px;
 - footer de privacidade/bloqueio usa o mesmo ritmo e alvos de 48 px;
-- texto longo usa ellipsis em vez de criar overflow.
+- texto longo usa ellipsis em vez de provocar overflow.
 
 ### Compatibilidade do X legado
 
-`#drawerCloseBtn` permanece oculto, `tabIndex=-1` e `aria-hidden="true"`. Ainda existe porque `events.js` e a camada de ícones o referenciam. Não é um controlo visível/ativo e removê-lo exigiria alterar wiring histórico fora do escopo desta release.
+`#drawerCloseBtn` permanece oculto, `tabIndex=-1` e `aria-hidden="true"`. Ainda existe porque `events.js` e `ui-icons.js` o referenciam. Não é visível nem ativo; a remoção deve ocorrer apenas num refactor dedicado que elimine também essas referências.
 
 ## Sistema de ícones e tipografia
 
@@ -165,20 +167,11 @@ Até 820 px:
 - claro: `--mobile-shell-bg: #f5f7fa`;
 - escuro: `--mobile-shell-bg: #0f1722`.
 
-O topbar continua `fixed`, opaco e sem `backdrop-filter`. A v68 não altera safe area, altura, gutters, título, `+` ou Sync.
+O topbar continua `fixed`, opaco e sem `backdrop-filter`. A v68 não altera safe area do topbar, altura, gutters, título, `+` ou Sync.
 
 ## Lista de compras v65 preservada
 
-No mobile continuam válidos:
-
-- resumo compacto;
-- `+` contextual;
-- filtros compactos;
-- categorias pendentes abertas;
-- grupo **Comprados** recolhido;
-- detalhes progressivos por item.
-
-Desktop continua com tabela, separadores de categoria, pesquisa/filtros e resumos completos.
+No mobile continuam válidos resumo compacto, `+` contextual, filtros compactos, categorias pendentes abertas, grupo **Comprados** recolhido e detalhes progressivos. Desktop mantém tabela, separadores, pesquisa/filtros e resumos completos.
 
 ## Mercado, scanner e preço preservados
 
@@ -188,9 +181,7 @@ Fontes atuais:
 - Open Food Facts para identificação auxiliar por GTIN;
 - `@zxing/browser` carregado em runtime de `unpkg.com`.
 
-A auto-adição mantém os mesmos limiares de confiança e só atualiza `estimatedCents`. `actualCents` continua reservado ao valor efetivamente confirmado.
-
-A dependência ZXing externa permanece dívida técnica separada.
+A auto-adição mantém os mesmos limiares de confiança e só atualiza `estimatedCents`; `actualCents` continua reservado ao valor confirmado. A dependência ZXing externa permanece dívida técnica separada.
 
 ## Faturas recorrentes preservadas
 
@@ -203,7 +194,7 @@ Ocorrências futuras automáticas continuam a poder usar `draft: true`, com `tot
 - claro: `meta[name="theme-color"] = #f5f7fa`;
 - escuro: `meta[name="theme-color"] = #0f1722`.
 
-A candidata v68 usa:
+Versionamento publicado:
 
 - build: `v68`;
 - menu: `68-menu2`;
@@ -211,21 +202,28 @@ A candidata v68 usa:
 
 `scripts/prepare-pages.cjs` injeta `mobile-menu-toggle.css/.js` no fim das camadas e `sw.js` mantém allowlist same-origin explícita.
 
-## Pipeline de qualidade
+## Pipeline de qualidade e publicação
 
-A v68 estende as regressões para cobrir:
+A v68 cobre:
 
 - mesmo nó DOM e transformação hambúrguer/X;
 - estado ARIA e `data-menu-state`;
-- sizing responsivo do drawer;
+- sizing responsivo do drawer, incluindo <360 px;
 - safe areas, scroll e ausência de overflow lateral;
 - alvos de 48 px;
 - hover/active/focus/current;
 - movimento reduzido;
 - Centro de Atualização, manifesto e cache v68;
-- compatibilidade das camadas v65/v66 e módulos históricos.
+- compatibilidade das camadas v65/v66 e módulos históricos;
+- matriz geral de finanças, cofre, datas, QR, Mercado, scanner, segurança, responsividade, navegação, acessibilidade e sincronização.
 
-A matriz geral continua a cobrir finanças, auditoria, invariantes, cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, segurança, responsividade, navegação, acessibilidade e sincronização.
+Publicação confirmada:
+
+- PR #54;
+- merge `9c8a2b3042c322849e3eb5ea3462f494897b4ab3`;
+- PR CI #1217 — sucesso;
+- `main` CI #1218 — sucesso;
+- Pages #1211 — sucesso.
 
 ## Regressões obrigatórias futuras
 
@@ -237,7 +235,7 @@ Devem permanecer cobertos:
 - Mercado, scanner, quantidade × preço;
 - Lista de compras v65;
 - shell móvel v66;
-- **um único comando móvel hambúrguer/X com 44 px e ARIA sincronizado**;
+- um único comando hambúrguer/X com 44 px e ARIA sincronizado;
 - painel sem overflow lateral e com alvos ≥48 px;
 - Escape/backdrop/navegação/fecho do drawer;
 - desktop e drawer alimentados pela mesma fonte de navegação;
