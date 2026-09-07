@@ -2,8 +2,8 @@
 
 Atualizado: 7 de setembro de 2026
 Build público atual: `v68`
-Release integrada: PR #54
-Commit público: `9c8a2b3042c322849e3eb5ea3462f494897b4ab3`
+Build candidato: `v69`
+Branch candidata: `fix/v69-mobile-menu-animation`
 
 ## Visão geral
 
@@ -21,7 +21,7 @@ Não existe backend financeiro próprio. Integrações externas do Mercado serve
 - sem cookies/telemetria financeira;
 - segredos e PIN não são incluídos no código público.
 
-A v68 não modifica esta camada.
+A v69 não modifica esta camada.
 
 ## JavaScript principal
 
@@ -30,17 +30,10 @@ A v68 não modifica esta camada.
 - `render.js` — renderização, navegação, tema e hidratação dos mesmos grupos de navegação no sidebar e drawer;
 - `forms.js` — formulários, validação e mutações;
 - `events.js` — eventos globais, viewport, cofre, navegação adaptativa, abertura/fecho do drawer e Service Worker;
-- `mobile-menu-toggle.js` — camada v68 responsável pelo estado visual/DOM do mesmo botão hambúrguer ↔ `X`, reutilizando o fluxo de abertura/fecho existente;
-- `sync.js` — sincronização cifrada opcional;
-- `sync-conflict-policy.js` — equivalência de negócio do Mercado sem ruído de metadados técnicos;
-- `market-experience.js` — catálogo/preço Pingo Doce e Continente através de `cesta.pt`;
-- `market-barcode.js` — leitura GTIN/EAN/UPC e identificação de produto;
-- `market-category-groups.js` — agrupamento visual base da Lista de compras;
-- `market-shopping-focus.js` — camada v65 de apresentação móvel;
-- `ui-icons.js` — subset Lucide local;
-- `invoice-capture.js` — leitura local de QR fiscal;
-- `app-update.js` — Centro de Atualização;
-- `v64-runtime.js` — correspondência conservadora do scanner e ciclo de faturas recorrentes **Por preencher**.
+- `mobile-menu-toggle.js` — controlador visual/DOM do botão móvel hambúrguer ↔ `X`;
+- `ui-icons.js` — sistema Lucide local e hidratador de ícones;
+- `sync.js` / `sync-conflict-policy.js` — sincronização cifrada opcional e equivalência de negócio;
+- módulos Mercado/QR/Atualização — preservados.
 
 ## Arquitetura da navegação
 
@@ -52,34 +45,27 @@ O sidebar é a navegação primária. Entre 821 e 1180 px pode ficar recolhido/c
 
 A navegação rápida inferior continua a mostrar `MOBILE_NAV_ITEMS`. O menu completo é `#mobileDrawer`.
 
-`render.js::renderNav()` usa a mesma fonte `NAV_GROUPS` para:
-
-- `#desktopNav`;
-- `#drawerNav`.
-
-Não existem duas listas de rotas independentes. Opções, rótulos, ícones e `aria-current` permanecem coerentes entre computador e telemóvel.
+`render.js::renderNav()` usa a mesma fonte `NAV_GROUPS` para `#desktopNav` e `#drawerNav`. Não existem duas listas independentes de rotas.
 
 ## Camadas CSS e responsabilidade visual
 
-A ordem pública da v68 é:
+A ordem candidata mantém:
 
-1. `styles.css` — base histórica;
-2. `design-system.css` — tokens/componentes/layout;
-3. `mobile-layout.css` — compatibilidade móvel/Safari;
-4. `market-experience.css` — estrutura do Mercado;
-5. `market-brand.css` — identidade visual do Mercado;
-6. `market-category-groups.css` — agrupamento por categoria;
-7. `ui-icons.css` — sistema Lucide;
-8. `ui-consistency.css` — consolidação visual global;
-9. `v64-runtime.css` — cabeçalho/safe area e cor canónica do shell móvel v66;
-10. `market-shopping-focus.css` — ajustes finais da Lista de compras no mobile;
-11. `mobile-menu-toggle.css` — camada final v68 para glifo, drawer e estados de interação do menu.
+1. `styles.css`;
+2. `design-system.css`;
+3. `mobile-layout.css`;
+4. camadas do Mercado;
+5. `ui-icons.css`;
+6. `ui-consistency.css`;
+7. `v64-runtime.css` — shell v66;
+8. `market-shopping-focus.css` — Compras v65;
+9. `mobile-menu-toggle.css` — camada final do menu, agora revisão `69-menu3`.
 
-A folha do menu fica por último para neutralizar apenas conflitos históricos do componente sem alterar o restante layout.
+O tamanho global da aplicação, gutters, topbar e breakpoint de 820 px não são alterados.
 
-## Menu móvel v68
+## Menu móvel v69
 
-### Contrato preservado
+### Contrato DOM preservado
 
 O HTML continua a expor:
 
@@ -89,158 +75,102 @@ O HTML continua a expor:
 - `#drawerCloseBtn` no DOM por compatibilidade histórica;
 - `openMobileDrawer()` e `closeMobileDrawer()` em `events.js`.
 
-Não foi criada uma segunda implementação do menu.
+Não existe uma segunda implementação do menu.
+
+### Propriedade visual do botão
+
+A validação física da v68 revelou um conflito de propriedade entre dois módulos:
+
+- `mobile-menu-toggle.js` criava as três linhas animáveis;
+- `ui-icons.js::hydrate()` voltava a executar `fillIcon(#mobileMenuBtn, 'menu', 22)` em mudanças de `aria-expanded`/`class`;
+- `fillIcon()` usava `replaceChildren()`, removendo as linhas e colocando um SVG estático.
+
+A v69 estabelece o seguinte contrato:
+
+1. `mobile-menu-toggle.js` é o proprietário da apresentação visível de `#mobileMenuBtn` depois de instalado;
+2. o botão mantém `data-ui-icon-slot="menu"` para compatibilidade com o hidratador Lucide;
+3. um SVG Lucide direto é preservado como `.mobile-menu-icon-sentinel`, `hidden`, `aria-hidden` e `display:none`;
+4. `ui-icons.js` encontra o mesmo slot e um SVG existente, pelo que `fillIcon()` retorna sem substituir o glifo visível;
+5. o glifo visível é composto exclusivamente por três `<span>` animáveis.
+
+Esta solução evita alterar o sistema global de ícones e mantém Lucide como sistema oficial para os restantes controlos.
 
 ### Estado e comportamento
 
-Quando `showModal()` abre um `<dialog>`, elementos externos ficam inertes. O mesmo `#mobileMenuBtn` é por isso movido para `.drawer-head` depois da abertura para continuar realmente tocável como `X`.
-
 Fluxo:
 
-1. fechado: botão no topbar, três linhas;
-2. clique/toque: fluxo existente abre o drawer;
-3. o mesmo nó entra em `.drawer-head`;
-4. `aria-expanded="true"` transforma as próprias linhas em `X`;
-5. `X`, Escape, backdrop ou seleção de navegação fecham o drawer;
-6. o botão regressa ao `Comment` anchor no topbar e `aria-expanded="false"` restaura o hambúrguer.
+1. fechado: botão no topbar, três linhas proporcionais;
+2. toque/clique/teclado: `openMobileDrawer()` abre o `<dialog>`;
+3. o mesmo nó é movido para `.drawer-head`;
+4. `aria-expanded="true"` e `data-menu-state="open"` colocam as linhas superior/inferior no centro;
+5. linha superior roda `45deg`, linha inferior `-45deg` e a linha central colapsa;
+6. novo toque no mesmo controlo fecha o drawer;
+7. o botão regressa ao topbar e as linhas voltam ao hambúrguer.
 
-`aria-label`, `title`, `button.dataset.menuState` e `drawer.dataset.menuState` acompanham `open/closed`.
+`aria-label`, `title`, `aria-expanded`, `button.dataset.menuState` e `drawer.dataset.menuState` continuam sincronizados.
 
-### Geometria do botão
+### Geometria e animação
 
 - alvo: `44 × 44 px`;
 - glifo: `24 × 18 px`;
-- linhas: aproximadamente `22 / 18 / 14 px`;
-- transformação para `X` pelas próprias linhas superior/inferior;
-- duração aproximada: 200 ms;
-- sem moldura, fundo verde ou sombra de estado selecionado;
-- `:focus-visible` explícito;
-- hover apenas em `hover:hover` + `pointer:fine`;
-- `prefers-reduced-motion: reduce` remove transições não essenciais.
+- linhas: `22 / 18 / 14 px`;
+- espessura: aproximadamente `2.25 px`;
+- duração: aproximadamente `190 ms`;
+- curva: `cubic-bezier(.2,.8,.2,1)`;
+- middle line: `opacity:0` + `scaleX(.18)`;
+- sem borda, fundo verde ou sombra de seleção;
+- `prefers-reduced-motion: reduce` elimina transições.
 
-### Painel responsivo
+### Foco e Safari
+
+O controlo continua a receber foco programático para manter previsibilidade após abrir/fechar o modal. A origem do acionamento é registada em `data-focus-origin`:
+
+- toque/rato: o foco é preservado, mas a moldura programática é suprimida;
+- teclado: `:focus-visible` permanece ativo.
+
+Isto corrige a moldura observada no iPhone sem remover acessibilidade por teclado.
+
+### Painel responsivo preservado da v68
 
 Até 820 px:
 
 - largura normal: `min(364px, calc(100vw - 24px))`;
-- abaixo de 360 px: `width: calc(100vw - 20px)`, mantendo 20 px de backdrop;
-- os alvos de navegação continuam com 48 px mesmo nos smartphones mais pequenos;
+- abaixo de 360 px: `calc(100vw - 20px)`;
 - altura: `100dvh`;
-- shell respeita `safe-area-inset-top` e `safe-area-inset-bottom`;
-- `overflow-x:hidden` impede scroll lateral;
-- `#drawerNav` tem scroll vertical próprio e `overscroll-behavior: contain`;
-- backdrop mantém parte do conteúdo visível e usa blur discreto;
-- sombra é intencionalmente mais leve que a camada histórica.
+- safe areas superior/inferior;
+- scroll vertical próprio;
+- `overflow-x:hidden`;
+- itens e ações com `min-height:48px`;
+- tema claro/escuro preservado.
 
-O tamanho global da aplicação, largura de `.main`, gutters e topbar não foram alterados.
+## Compatibilidade do X legado
 
-### Hierarquia interna
-
-- cabeçalho mínimo de 60 px;
-- marca do drawer: 36 × 36 px;
-- labels de grupo compactas e consistentes;
-- cada `.nav-btn` tem `min-height:48px`;
-- ícones Lucide: 20 px;
-- `active`/`aria-current="page"`: fundo suave + indicador lateral de 3 px;
-- footer de privacidade/bloqueio usa o mesmo ritmo e alvos de 48 px;
-- texto longo usa ellipsis em vez de provocar overflow.
-
-### Compatibilidade do X legado
-
-`#drawerCloseBtn` permanece oculto, `tabIndex=-1` e `aria-hidden="true"`. Ainda existe porque `events.js` e `ui-icons.js` o referenciam. Não é visível nem ativo; a remoção deve ocorrer apenas num refactor dedicado que elimine também essas referências.
+`#drawerCloseBtn` permanece oculto, fora da tabulação e `aria-hidden="true"`. Continua referido por wiring histórico; a remoção definitiva permanece um refactor separado.
 
 ## Sistema de ícones e tipografia
 
-A linguagem visual oficial continua Lucide local:
-
-- viewBox 24×24;
-- stroke 2;
-- `currentColor`;
-- sem icon fonts/CDN.
-
-A tipografia mantém Inter/SF/system definida pelo design system. A v68 não introduz nova fonte.
-
-## Shell móvel v66 preservado
-
-Até 820 px:
-
-- claro: `--mobile-shell-bg: #f5f7fa`;
-- escuro: `--mobile-shell-bg: #0f1722`.
-
-O topbar continua `fixed`, opaco e sem `backdrop-filter`. A v68 não altera safe area do topbar, altura, gutters, título, `+` ou Sync.
-
-## Lista de compras v65 preservada
-
-No mobile continuam válidos resumo compacto, `+` contextual, filtros compactos, categorias pendentes abertas, grupo **Comprados** recolhido e detalhes progressivos. Desktop mantém tabela, separadores, pesquisa/filtros e resumos completos.
-
-## Mercado, scanner e preço preservados
-
-Fontes atuais:
-
-- Pingo Doce e Continente via `https://cesta.pt/mcp`;
-- Open Food Facts para identificação auxiliar por GTIN;
-- `@zxing/browser` carregado em runtime de `unpkg.com`.
-
-A auto-adição mantém os mesmos limiares de confiança e só atualiza `estimatedCents`; `actualCents` continua reservado ao valor confirmado. A dependência ZXing externa permanece dívida técnica separada.
-
-## Faturas recorrentes preservadas
-
-Ocorrências futuras automáticas continuam a poder usar `draft: true`, com `totalCents = 0`, sem herdar referência, observações ou data de emissão. Drafts não entram nos totais pendentes/em atraso até preenchimento.
+Lucide local continua oficial para a aplicação. A v69 apenas impede que a hidratação genérica substitua o componente animado que necessita de geometria própria. Tipografia Inter/SF/system permanece inalterada.
 
 ## Tema e PWA
 
-`render.js::applyTheme()` continua a definir:
+- build candidato: `v69`;
+- menu: `69-menu3`;
+- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v69-menu3`.
 
-- claro: `meta[name="theme-color"] = #f5f7fa`;
-- escuro: `meta[name="theme-color"] = #0f1722`.
+`scripts/prepare-pages.cjs` mantém `mobile-menu-toggle.css/.js` como camada final do menu e `sw.js` mantém allowlist same-origin explícita.
 
-Versionamento publicado:
+## Regressões obrigatórias
 
-- build: `v68`;
-- menu: `68-menu2`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v68-menu2`.
+Além da matriz histórica, a v69 deve testar explicitamente:
 
-`scripts/prepare-pages.cjs` injeta `mobile-menu-toggle.css/.js` no fim das camadas e `sw.js` mantém allowlist same-origin explícita.
+- presença dos três `<span>` do glifo;
+- sentinela Lucide oculta + `data-ui-icon-slot="menu"`;
+- coexistência com a chamada histórica `fillIcon(#mobileMenuBtn, 'menu', 22)`;
+- `aria-expanded` + `data-menu-state` produzirem o `X`;
+- linha central colapsar;
+- foco por pointer sem moldura visual;
+- foco por teclado preservado;
+- fecho pelo mesmo botão, Escape, backdrop e navegação;
+- build/manifest/cache v69.
 
-## Pipeline de qualidade e publicação
-
-A v68 cobre:
-
-- mesmo nó DOM e transformação hambúrguer/X;
-- estado ARIA e `data-menu-state`;
-- sizing responsivo do drawer, incluindo <360 px;
-- safe areas, scroll e ausência de overflow lateral;
-- alvos de 48 px;
-- hover/active/focus/current;
-- movimento reduzido;
-- Centro de Atualização, manifesto e cache v68;
-- compatibilidade das camadas v65/v66 e módulos históricos;
-- matriz geral de finanças, cofre, datas, QR, Mercado, scanner, segurança, responsividade, navegação, acessibilidade e sincronização.
-
-Publicação confirmada:
-
-- PR #54;
-- merge `9c8a2b3042c322849e3eb5ea3462f494897b4ab3`;
-- PR CI #1217 — sucesso;
-- `main` CI #1218 — sucesso;
-- Pages #1211 — sucesso.
-
-## Regressões obrigatórias futuras
-
-Devem permanecer cobertos:
-
-- finanças e invariantes de contagem;
-- isolamento/cifragem do cofre;
-- datas civis, faturas, pagamentos e QR;
-- Mercado, scanner, quantidade × preço;
-- Lista de compras v65;
-- shell móvel v66;
-- um único comando hambúrguer/X com 44 px e ARIA sincronizado;
-- painel sem overflow lateral e com alvos ≥48 px;
-- Escape/backdrop/navegação/fecho do drawer;
-- desktop e drawer alimentados pela mesma fonte de navegação;
-- manifesto, Centro de Atualização e Service Worker;
-- segurança/CSP/allowlist;
-- responsividade e acessibilidade.
-
-A CI não substitui a validação física final em Safari/iPhone, Android/Chrome e tablet.
+A CI não substitui a validação física final no mesmo iPhone que revelou o defeito.

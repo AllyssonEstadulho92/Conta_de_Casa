@@ -83,17 +83,17 @@ assert.equal(parsed[0].sourceUrl,pingoProduct);
 assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
-assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v68-menu2/);
+assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v69-menu3/);
 assert.ok(sw.includes("'./market-retailer-image-policy.js'"));
 assert.ok(sw.includes("'./market-official-images.js'"));
 assert.ok(sw.includes("'./v64-runtime.js'"));
 assert.ok(sw.includes("'./market-shopping-focus.js'"));
 assert.ok(sw.includes("'./mobile-menu-toggle.js'"));
-assert.match(prepare,/const BUILD = 'v68'/);
+assert.match(prepare,/const BUILD = 'v69'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const SHOPPING_REV = '65-shopping1'/);
 assert.match(prepare,/const SHELL_REV = '66-shell1'/);
-assert.match(prepare,/const MENU_REV = '68-menu2'/);
+assert.match(prepare,/const MENU_REV = '69-menu3'/);
 assert.ok(prepare.includes("'market-retailer-image-policy.js'"));
 assert.ok(prepare.includes("'market-official-images.js'"));
 assert.ok(prepare.includes("'v64-runtime.js'"));
@@ -104,12 +104,12 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-retailer-image-policy\.js\?v=68/);
-  assert.match(index,/market-official-images\.js\?v=68/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=69/);
+  assert.match(index,/market-official-images\.js\?v=69/);
   assert.match(index,/v64-runtime\.css\?v=66-shell1/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
   assert.match(index,/market-shopping-focus\.js\?v=65-shopping1/);
-  assert.match(index,/mobile-menu-toggle\.js\?v=68-menu2/);
+  assert.match(index,/mobile-menu-toggle\.js\?v=69-menu3/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.ok(index.indexOf('market-official-images.js')<index.indexOf('v64-runtime.js'));
   assert.ok(index.indexOf('v64-runtime.js')<index.indexOf('market-shopping-focus.js'));
@@ -124,4 +124,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market browser official-image bridge, v64 runtime, v65 shopping, v66 shell and v68 menu build tests: OK');
+console.log('Market browser official-image bridge, v64 runtime, v65 shopping, v66 shell and v69 menu build tests: OK');
