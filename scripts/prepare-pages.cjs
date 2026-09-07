@@ -5,11 +5,11 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const BUILD = 'v64';
-const UI_REV = '64-ui1';
+const BUILD = 'v65';
+const UI_REV = '65-ui1';
 const CATEGORY_REV = '64-ui1';
-const VISUAL_REV = '64-ui1';
-const RUNTIME_REV = '64-runtime1';
+const VISUAL_REV = '65-ui1';
+const RUNTIME_REV = '65-layout1';
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -77,9 +77,8 @@ if(!index.includes('app-update.css')) index=index.replace('</head>',`  <link rel
 if(!index.includes('market-image-audit.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-image-audit.css?v=${BUILD.slice(1)}" />\n</head>`);
 if(!index.includes('market-brand.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-brand.css?v=${UI_REV}" />\n</head>`);
 if(!index.includes('market-category-groups.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-category-groups.css?v=${CATEGORY_REV}" />\n</head>`);
-// Consolidação visual global da v63, mantida antes dos ajustes de runtime da v64.
 if(!index.includes('ui-consistency.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./ui-consistency.css?v=${VISUAL_REV}" />\n</head>`);
-// Camada final v64: safe-area tátil e estado visual das faturas por preencher.
+// Camada final: runtime v64 preservado, com hotfix visual v65 para spacing/surface móvel.
 if(!index.includes('v64-runtime.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v64-runtime.css?v=${RUNTIME_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
