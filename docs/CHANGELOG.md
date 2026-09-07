@@ -1,6 +1,6 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-07 — candidata v65: Lista de compras focada no supermercado
+## 2026-09-07 — v65 publicada: Lista de compras focada no supermercado
 
 ### Objetivo
 
@@ -12,35 +12,50 @@ Reduzir densidade e duplicação no mobile sem tocar no modelo financeiro. A tar
 - resumo inicial compacto: por comprar, comprados e total previsto;
 - detalhes financeiros completos disponíveis em **Resumo financeiro**;
 - `#marketSummary` grande fica oculto apenas no mobile;
-- `+` do topbar passa a reutilizar `#newMarketBtn` quando Compras está ativa;
-- botão `+ Adicionar item` da página fica oculto apenas no mobile;
+- `+` do topbar reutiliza `#newMarketBtn` quando Compras está ativa;
+- botão de adição duplicado da página fica oculto apenas no mobile;
 - Estado, Categoria e Ordenar usam apresentação compacta;
 - **Limpar filtros** só aparece quando pesquisa/filtros/ordenação estão ativos;
 - categorias com itens pendentes permanecem abertas;
 - itens comprados são movidos apenas no DOM para **Comprados**, fechado por padrão;
 - cartões móveis mostram primeiro checkbox, nome, quantidade e preço;
-- preço real, diferença, editar e eliminar permanecem disponíveis em **Detalhes**.
+- preço real, diferença, editar e eliminar permanecem disponíveis em **Detalhes**;
+- desktop permanece com tabela, filtros e resumos completos.
 
 ### Segurança e dados
 
-- nenhuma alteração de `STATE_VERSION`;
+- `STATE_VERSION = 5` preservado;
 - nenhuma escrita nova em `appState` pela camada v65;
 - `estimatedCents`, `actualCents`, quantidade, scanner, faturas, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB e sincronização permanecem inalterados;
-- os mesmos nós e handlers existentes são reutilizados para adicionar/editar/eliminar e introduzir preço real.
+- os mesmos nós e handlers existentes são reutilizados para adicionar/editar/eliminar e introduzir preço real;
+- nenhum segredo, token ou chave foi adicionado.
 
-### Versionamento e QA
+### Versionamento
 
-- build candidato: `v65`;
-- revisão: `65-shopping1`;
-- runtime existente preservado: `64-runtime1`;
+- build público: `v65`;
+- revisão de Compras: `65-shopping1`;
+- runtime preservado: `64-runtime1`;
+- revisão visual preservada: `64-ui1`;
 - cache: `conta-de-casa-public-v64-runtime1-v65-shopping1`;
-- `release-manifest.json` passa a anunciar v65 na branch candidata;
-- criado `tests/market-shopping-focus.test.cjs`;
-- CI e Pages verificam sintaxe e regressão da nova camada.
+- `release-manifest.json`: `latestVersion = v65`.
+
+### QA e correção de integração
+
+A primeira validação revelou duas expectativas antigas de build `v64` em testes legados de imagens. Foram alinhados `tests/market-image-audit.test.cjs` e `tests/market-official-images.test.cjs` para a versão pública v65, mantendo `v64-runtime.js`/`64-runtime1` inalterados.
+
+Depois da correção:
+
+- CI do PR #48 run #1110: **sucesso**;
+- PR #48 integrado em `main`;
+- commit de integração: `2d39f6f4daa8dccabb51bf906ef22d4a5d9075e4`;
+- CI de `main` run #1111: **sucesso**;
+- Deploy GitHub Pages run #1104: **sucesso**.
+
+A matriz validou finanças, auditoria, invariantes, cofre, datas, formulários, QR, Mercado, imagens legadas, scanner, contabilidade, runtime v64, camada v65, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
 
 ### Estado
 
-Implementação preparada; CI, integração em `main`, publicação Pages e validação física ainda pendentes.
+v65 integrada e publicada. Permanece pendente validação física em iPhone/Safari e Android, scanner real, recorrência mensal real, acessibilidade em hardware e atualização v64 → v65 no dispositivo.
 
 ## 2026-09-07 — auditoria pós-publicação v64
 
@@ -48,8 +63,8 @@ Implementação preparada; CI, integração em `main`, publicação Pages e vali
 
 - PR #44 integrado em `main`;
 - merge público da v64: `78612a9701d60938532d7be768ea35f84c36c7fc`;
-- build público: `v64`;
-- `release-manifest.json`: `latestVersion = v64` no estado público anterior à candidata v65.
+- build público anterior: `v64`;
+- reforço de pipeline integrado pelo PR #46.
 
 ### Corrigido — gate de redeploy manual
 
@@ -60,11 +75,9 @@ Foram adicionados:
 - `node --check v64-runtime.js`;
 - `node tests/v64-runtime.test.cjs`.
 
-A alteração não toca em dados, cifragem, finanças, scanner ou UI; reforça apenas a segurança do caminho de publicação manual.
-
 ### Integração e validação
 
-- correção integrada através do PR #46;
+- PR #46 integrado;
 - commit: `72ee9117ba1383dbcde1ae18729309b07134c144`;
 - CI de `main` run #1094: **sucesso**;
 - Deploy GitHub Pages run #1087: **sucesso**.
