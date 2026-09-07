@@ -19,15 +19,16 @@ Atualizado: 7 de setembro de 2026
 - [x] Criar `tests/market-shopping-focus.test.cjs`.
 - [x] Incluir sintaxe/teste v65 na CI e no gate de Pages manual.
 - [x] Versionar build como v65, manifesto e cache do Service Worker.
+- [x] Alinhar testes legados de imagens ao build v65 sem alterar `64-runtime1`.
 
 ### Integração e publicação
 
-- [ ] Obter CI verde no PR da v65.
-- [ ] Rever diff final e confirmar ausência de alterações financeiras.
-- [ ] Integrar em `main` apenas com CI verde.
-- [ ] Confirmar CI de `main` após integração.
-- [ ] Confirmar Deploy GitHub Pages da v65.
-- [ ] Sincronizar PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG com o estado pós-publicação.
+- [x] Obter CI verde no PR da v65: run #1110.
+- [x] Rever diff final e confirmar ausência de alterações financeiras.
+- [x] Integrar em `main` apenas com CI verde: PR #48 / commit `2d39f6f4daa8dccabb51bf906ef22d4a5d9075e4`.
+- [x] Confirmar CI de `main` após integração: run #1111 concluída com sucesso.
+- [x] Confirmar Deploy GitHub Pages da v65: run #1104 concluída com sucesso.
+- [x] Sincronizar PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG com o estado pós-publicação.
 
 ### Validação física da v65
 
@@ -55,9 +56,9 @@ Atualizado: 7 de setembro de 2026
 - [x] Topbar móvel usa a mesma estrutura em Início/Faturas/Compras/Relatórios.
 - [x] Centro de Atualização continua same-origin e controlado pelo utilizador.
 - [x] CSP/allowlist, responsividade, acessibilidade e sincronização permanecem na CI.
-- [x] Runtime v64 e nova camada de apresentação v65 ficam cobertos também no redeploy manual de Pages.
+- [x] Runtime v64 e camada de apresentação v65 ficam cobertos também no redeploy manual de Pages.
 
-## P0 — validação física v64 ainda pendente fora do escopo desta alteração
+## P0 — validação física v64/v65 ainda pendente
 
 - [ ] Scanner: produtos reais no Pingo Doce e Continente, EAN-8/EAN-13, baixa luz, código inválido, repetido e ambíguo.
 - [ ] Faturas: validar fisicamente passagem setembro → outubro com recorrência **Por preencher**.
