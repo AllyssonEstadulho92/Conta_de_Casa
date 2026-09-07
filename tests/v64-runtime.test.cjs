@@ -21,6 +21,10 @@ assert.match(js,/migrateGeneratedOccurrencesToDrafts/);
 assert.match(js,/financialDiagnostics/);
 assert.match(css,/safe-area-inset-top/);
 assert.match(css,/--mobile-top-safe:max\(20px/);
+assert.match(css,/position:fixed!important/,'mobile header must not depend on sticky inside Safari internal scrolling');
+assert.match(css,/left:var\(--page-gutter\)!important/);
+assert.match(css,/right:var\(--page-gutter\)!important/);
+assert.match(css,/padding-top:var\(--header-height\)!important/,'main content must be offset by the fixed mobile header');
 assert.match(css,/\.status-chip\.draft/);
 assert.match(css,/\.bill-draft-card/);
 assert.doesNotMatch(css,/dashed|dotted/,'v64 must not reintroduce segmented/dotted visual accents');
@@ -52,4 +56,4 @@ assert.equal(ambiguous.accepted,false,'near-tied results must require manual con
 const parsed=api.parseBarcodeStatus('Código 5601234567890: Mimosa · Leite Meio Gordo · 1 L. A pesquisar preço no Pingo Doce e Continente…');
 assert.deepEqual(JSON.parse(JSON.stringify(parsed)),{code:'5601234567890',detail:'Mimosa · Leite Meio Gordo · 1 L'});
 
-console.log('v64 barcode confidence, recurring-bill reset and mobile safe-area tests: OK');
+console.log('v64 barcode confidence, recurring-bill reset and fixed mobile safe-area header tests: OK');
