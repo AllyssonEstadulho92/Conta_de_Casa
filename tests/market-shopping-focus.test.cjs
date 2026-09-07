@@ -24,7 +24,7 @@ assert.match(js,/group\.open=false/,'purchased items must start collapsed');
 assert.match(js,/group\.open=true/,'categories with pending items must stay expanded');
 assert.match(js,/market-item-details/,'secondary financial/edit actions must move behind per-item details');
 assert.match(js,/marketClearFilters/);
-assert.match(js,/clear\.hidden=!filterIsActive\(\)/,'clear filters must only appear when a filter/search/sort differs from default');
+assert.match(js,/clear\.hidden=media\.matches\?!filterIsActive\(\):false/,'mobile clear filters must only appear when a filter/search/sort differs from default while desktop remains unchanged');
 assert.doesNotMatch(js,/saveState|commit\(|estimatedCents\s*=|actualCents\s*=|quantity\s*=/,'shopping focus layer must not mutate financial state');
 
 assert.match(css,/@media\(max-width:820px\)/);

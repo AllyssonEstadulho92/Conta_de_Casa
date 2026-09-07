@@ -117,7 +117,7 @@
       if(control&&!control.getAttribute('aria-label'))control.setAttribute('aria-label',label);
     }
     const clear=document.querySelector('#marketClearFilters');
-    if(clear)clear.hidden=!filterIsActive();
+    if(clear)clear.hidden=media.matches?!filterIsActive():false;
   }
 
   function iconMarkup(name){
