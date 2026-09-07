@@ -1,20 +1,18 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 7 de setembro de 2026
-Build público atual: `v65`
-Candidato em validação: `v66`
-Branch candidata: `fix/v66-mobile-shell-color`
+Build público atual: `v66`
 Branch pública: `main`
-Última release pública integrada: PR #48
+Release integrada: PR #50
 Distribuição: GitHub Pages / PWA
 
 ## Estado atual
 
 A aplicação continua uma PWA estática/local-first. O estado financeiro permanece no navegador/IndexedDB e o cofre continua cifrado com PBKDF2-SHA-256 + AES-GCM. A sincronização GitHub permanece opcional e transfere apenas o envelope cifrado. O schema financeiro base continua `STATE_VERSION = 5`.
 
-A **v65 continua a versão pública confirmada**. O PR #48 está integrado em `main` no commit `2d39f6f4daa8dccabb51bf906ef22d4a5d9075e4`; a documentação pós-publicação foi sincronizada pelo PR #49 no commit `c69a4991dfb6125ef6c389d9dc0388e268ec8860`. A CI e o GitHub Pages desse estado terminaram verdes.
+A **v66 está integrada e publicada**. O PR #50 foi fundido em `main` no commit `9657d558000018af1ea44e6040441f2b9d91648c`. A CI do PR, run #1138, terminou com sucesso; a CI de `main`, run #1139, terminou com sucesso; o Deploy GitHub Pages, run #1132, terminou com sucesso.
 
-A alteração atual prepara a **v66**, exclusivamente para corrigir a diferença cromática branca/azulada observada fisicamente no iPhone no cabeçalho da **Lista de compras**.
+A v66 corrige exclusivamente a diferença cromática branca/azulada observada fisicamente no iPhone no cabeçalho da **Lista de compras**.
 
 ## v66 — shell móvel com uma única cor
 
@@ -22,77 +20,78 @@ A alteração atual prepara a **v66**, exclusivamente para corrigir a diferença
 
 Uma captura real de iPhone mostrou que a área do cabeçalho e a zona imediatamente adjacente não tinham a mesma cor: o cabeçalho aparecia quase branco e parte do fundo do módulo Compras apresentava tonalidade azulada.
 
-A causa está no CSS real:
+A inspeção do código confirmou a causa:
 
-- `market-brand.css` aplica em `html.market-prototype-active .main` um `radial-gradient` azul sobre `var(--bg)`;
+- `market-brand.css` aplicava em `html.market-prototype-active .main` um `radial-gradient` azul sobre `var(--bg)`;
 - o cabeçalho móvel é `fixed` e fica recuado por `--page-gutter`, deixando o fundo de `.main` visível nas margens;
-- o cabeçalho também usava `color-mix` com transparência e `backdrop-filter`, permitindo composição visual diferente no Safari;
-- `manifest.webmanifest`, `index.html` e `applyTheme()` usavam tons claros próximos, mas não idênticos.
+- o cabeçalho usava fundo parcialmente composto e `backdrop-filter`, permitindo diferença de composição no Safari;
+- `manifest.webmanifest`, HTML inicial e runtime de tema utilizavam tons claros próximos, mas não totalmente alinhados.
 
-## Correção candidata
+### Correção publicada
 
-No mobile até 820 px, `v64-runtime.css` passa a definir um fundo canónico do shell:
+No mobile até 820 px, `v64-runtime.css` define um fundo canónico do shell:
 
 - tema claro: `#f5f7fa`;
 - tema escuro: `#0f1722`.
 
-Esse fundo é aplicado a `html`, `body`, `.app-shell`, `.main`, ao `.main` específico do Mercado e ao `.topbar`. O cabeçalho fica opaco e sem `backdrop-filter` no mobile, impedindo que o radial azul do Mercado altere visualmente a sua cor no Safari.
+O mesmo fundo é aplicado a `html`, `body`, `.app-shell`, `.main`, ao `.main` específico do Mercado e ao `.topbar`. O cabeçalho fica opaco e sem `backdrop-filter` no mobile, impedindo que o radial azul do Mercado altere visualmente a sua cor no Safari.
 
-O degradê do Mercado permanece disponível no desktop; apenas o shell móvel é uniformizado. Geometria, safe area, menu, título, `+`, Sync e navegação não foram alterados.
+O degradê do Mercado permanece disponível no desktop. Geometria, safe area, menu, título, `+`, Sync e navegação não foram alterados.
 
-`manifest.webmanifest` também passa a usar `#f5f7fa` em `background_color` e `theme_color`, coerente com o valor claro já aplicado por `render.js::applyTheme()`. O build de Pages força o mesmo `theme-color` no HTML público.
+`manifest.webmanifest` usa `#f5f7fa` em `background_color` e `theme_color`. O build de Pages força o mesmo `theme-color` no HTML público; `render.js::applyTheme()` continua a trocar para `#0f1722` quando o tema escuro está ativo.
 
-## Versionamento
-
-A candidata usa:
+## Versionamento publicado
 
 - build público: `v66`;
 - revisão do shell CSS: `66-shell1`;
 - runtime funcional preservado: `64-runtime1`;
 - camada de Compras preservada: `65-shopping1`;
 - revisão visual histórica preservada: `64-ui1`;
-- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1`.
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1`.
 
 A distinção é intencional: `v64-runtime.js` não mudou; apenas a folha `v64-runtime.css`, historicamente associada ao cabeçalho móvel, recebeu a revisão de shell v66.
 
-## Risco e segurança
+## QA confirmado
 
-Risco funcional esperado: baixo. A alteração é CSS, manifesto e versionamento de distribuição. Não escreve em `appState`, não altera `estimatedCents`, `actualCents`, faturas, pagamentos, scanner, recorrências, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB ou sincronização.
+A matriz automatizada passou integralmente no PR e novamente em `main`, incluindo:
+
+- finanças, auditoria e invariantes;
+- isolamento/cifragem do cofre;
+- faturas, pagamentos, datas e QR;
+- Mercado, scanner e quantidade × preço;
+- experiência de Compras v65;
+- shell móvel claro/escuro e manifesto/theme-color;
+- ícones, atualização, segurança, responsividade, navegação e acessibilidade;
+- sincronização e conflitos técnicos.
+
+O gate de GitHub Pages repetiu a verificação da revisão testada antes de preparar e publicar `dist`.
+
+## Segurança e compatibilidade
+
+A v66 não altera `estimatedCents`, `actualCents`, faturas, pagamentos, scanner, recorrências, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB ou sincronização.
 
 Não foram adicionados segredos, tokens ou chaves. Permanece como dívida técnica separada a dependência runtime `@zxing/browser` carregada de `unpkg.com`.
 
-## QA da candidata
-
-Foram atualizados testes para verificar explicitamente:
-
-- uma única cor de shell móvel em claro/escuro;
-- remoção de blur/transparência do topbar móvel;
-- sobreposição do radial do Mercado apenas no mobile;
-- alinhamento entre `theme-color` e `manifest.webmanifest`;
-- build `v66`, revisão `66-shell1` e novo cache;
-- preservação do runtime `64-runtime1` e da experiência de Compras `65-shopping1`.
-
-A CI e o GitHub Pages da v66 ainda não devem ser considerados confirmados até o PR ser criado, validado e integrado.
-
 ## Validação física ainda pendente
 
+A correção está publicada e coberta por CI, mas a confirmação final do aspeto exige o aparelho real:
+
+- no mesmo iPhone que revelou o problema, confirmar ausência da faixa azul ao lado/abaixo do cabeçalho;
 - iPhone/Safari: 320, 375, 390 e 430 px, portrait/landscape;
-- confirmar que safe area, margens laterais, cabeçalho e área de conteúdo mostram o mesmo fundo na Lista de compras;
-- repetir a verificação em Início, Faturas e Relatórios para garantir consistência global;
+- confirmar fundo contínuo entre safe area, margens, topbar e conteúdo em Lista de compras;
+- repetir em Início, Faturas e Relatórios;
 - tema claro e escuro;
 - scroll longo, retorno ao topo, rotação e chrome do navegador expandido/recolhido;
 - confirmar que `+`, Sync, menu e navegação mantêm os mesmos alvos e alinhamento;
-- restante validação física da v65: scanner real, recorrências, QR, VoiceOver/TalkBack e atualização controlada.
+- restante validação física: scanner real, recorrências, QR e VoiceOver/TalkBack.
 
 ## Última alteração
 
-Preparada a candidata v66 para eliminar a diferença branco/azulado do shell móvel, usando uma cor canónica única e removendo a composição translúcida do cabeçalho no mobile.
+Publicada a v66 com o shell móvel cromaticamente uniforme. PR #50, CI de `main` #1139 e GitHub Pages #1132 estão verdes.
 
 ## Próximo passo
 
-1. concluir atualização da cobertura de regressão e documentação da candidata;
-2. abrir PR da v66 e obter CI totalmente verde;
-3. integrar apenas com CI verde;
-4. confirmar CI de `main` e Deploy GitHub Pages;
-5. sincronizar estes documentos para marcar v66 como pública;
-6. validar a correção no mesmo iPhone que revelou a diferença cromática.
+1. instalar/atualizar para v66 no mesmo iPhone onde a diferença foi observada;
+2. confirmar visualmente o fundo contínuo em claro e escuro;
+3. se o hardware real ficar verde, manter a arquitetura estável e avançar para a validação funcional pendente;
+4. tratar ZXing externo numa release de segurança separada.
