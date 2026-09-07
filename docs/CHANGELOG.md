@@ -1,5 +1,47 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-07 — candidata v65: Lista de compras focada no supermercado
+
+### Objetivo
+
+Reduzir densidade e duplicação no mobile sem tocar no modelo financeiro. A tarefa primária passa a ser encontrar o próximo produto e marcá-lo rapidamente.
+
+### Alterado — apresentação móvel
+
+- criado `market-shopping-focus.js/.css` como camada de apresentação isolada;
+- resumo inicial compacto: por comprar, comprados e total previsto;
+- detalhes financeiros completos disponíveis em **Resumo financeiro**;
+- `#marketSummary` grande fica oculto apenas no mobile;
+- `+` do topbar passa a reutilizar `#newMarketBtn` quando Compras está ativa;
+- botão `+ Adicionar item` da página fica oculto apenas no mobile;
+- Estado, Categoria e Ordenar usam apresentação compacta;
+- **Limpar filtros** só aparece quando pesquisa/filtros/ordenação estão ativos;
+- categorias com itens pendentes permanecem abertas;
+- itens comprados são movidos apenas no DOM para **Comprados**, fechado por padrão;
+- cartões móveis mostram primeiro checkbox, nome, quantidade e preço;
+- preço real, diferença, editar e eliminar permanecem disponíveis em **Detalhes**.
+
+### Segurança e dados
+
+- nenhuma alteração de `STATE_VERSION`;
+- nenhuma escrita nova em `appState` pela camada v65;
+- `estimatedCents`, `actualCents`, quantidade, scanner, faturas, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB e sincronização permanecem inalterados;
+- os mesmos nós e handlers existentes são reutilizados para adicionar/editar/eliminar e introduzir preço real.
+
+### Versionamento e QA
+
+- build candidato: `v65`;
+- revisão: `65-shopping1`;
+- runtime existente preservado: `64-runtime1`;
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1`;
+- `release-manifest.json` passa a anunciar v65 na branch candidata;
+- criado `tests/market-shopping-focus.test.cjs`;
+- CI e Pages verificam sintaxe e regressão da nova camada.
+
+### Estado
+
+Implementação preparada; CI, integração em `main`, publicação Pages e validação física ainda pendentes.
+
 ## 2026-09-07 — auditoria pós-publicação v64
 
 ### Estado confirmado
@@ -7,7 +49,7 @@
 - PR #44 integrado em `main`;
 - merge público da v64: `78612a9701d60938532d7be768ea35f84c36c7fc`;
 - build público: `v64`;
-- `release-manifest.json`: `latestVersion = v64`.
+- `release-manifest.json`: `latestVersion = v64` no estado público anterior à candidata v65.
 
 ### Corrigido — gate de redeploy manual
 
@@ -25,68 +67,17 @@ A alteração não toca em dados, cifragem, finanças, scanner ou UI; reforça a
 - correção integrada através do PR #46;
 - commit: `72ee9117ba1383dbcde1ae18729309b07134c144`;
 - CI de `main` run #1094: **sucesso**;
-- Deploy GitHub Pages run #1087: **sucesso**;
-- o runtime específico da v64 passa a ser verificado tanto na CI como no gate do próprio deploy.
-
-### Documentação
-
-PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG ficam sincronizados com o estado efetivo após integração. Permanece pendente a validação física final em iPhone/Safari, scanner real e ciclo recorrente mensal.
+- Deploy GitHub Pages run #1087: **sucesso**.
 
 ## 2026-09-07 — v64 publicada: auditoria móvel, scanner conservador e ciclo recorrente limpo
 
-### Publicação
-
-- branch de desenvolvimento: `feature/v64-scanner-billing-safearea`;
 - PR #44 integrado;
-- build: `v64`;
-- revisão visual: `64-ui1`;
-- runtime: `64-runtime1`;
-- cache: `conta-de-casa-public-v64-runtime1`.
-
-### Auditoria iPhone/Safari
-
-As capturas reais expuseram dois problemas no topo móvel: corte durante scroll devido à combinação de `.main` como scroller interno com `.topbar` sticky, e cabeçalho de Compras diferente das restantes páginas por regras históricas `market-prototype-active`.
-
-A v64:
-
-- reforça `safe-area-inset-top` com folga tátil mínima;
-- usa `position:fixed` no cabeçalho móvel;
-- compensa o conteúdo com `padding-top` em `.main`;
-- uniformiza título, menu, botão `+`, Sync e fundo do topbar entre páginas principais;
-- desativa carrinho pseudo-elemento e chevron exclusivos de Compras;
-- preserva scroller interno, bottom navigation, teclado e diálogos.
-
-### Código de barras / Compras
-
-- exige exatamente um supermercado selecionado para auto-adição precisa;
-- compara GTIN identificado com resultados reais da loja por nome/marca e embalagem;
-- auto-adição apenas com score mínimo `0.84` e margem mínima `0.10`;
-- rejeita embalagem/multipack incompatível;
-- ambiguidade exige confirmação manual;
+- build `v64`, revisão visual `64-ui1`, runtime `64-runtime1`;
+- safe area/cabeçalho móvel uniformizados;
+- scanner exige correspondência conservadora e mantém preço pesquisado em `estimatedCents`;
 - GTIN repetido pendente incrementa quantidade;
-- preço encontrado atualiza `estimatedCents` e nunca `actualCents` automaticamente.
-
-### Faturas recorrentes
-
-- novas ocorrências automáticas passam a **Por preencher**;
-- mantêm descrição, fornecedor, categoria, método, recorrência e vencimento previsto;
-- não herdam valor, referência, observações nem data de emissão;
-- drafts não entram em pendentes/atrasos;
-- ao preencher e guardar regressam ao fluxo financeiro normal;
-- migração preserva ocorrências com pagamentos, canceladas, arquivadas ou já editadas.
-
-### Segurança e dados
-
-- `STATE_VERSION = 5` preservado;
-- PIN/palavra-passe, PBKDF2-SHA-256, AES-GCM e IndexedDB inalterados;
-- nenhuma credencial/token/chave adicionada pela release;
-- atualização continua same-origin e controlada por **Atualizar agora**.
-
-### Testes
-
-- `tests/v64-runtime.test.cjs` cobre confiança/ambiguidade do scanner, GTIN repetido, separação estimado/real, drafts recorrentes e safe area;
-- regressões de finanças, segurança, Mercado, atualização, responsividade, acessibilidade e sincronização permanecem na CI;
-- validação física da v64 em hardware real continua pendente.
+- novas ocorrências recorrentes começam **Por preencher** sem herdar valores variáveis;
+- cofre, PIN e dados financeiros cifrados preservados.
 
 ## 2026-09-06 — v63 publicada: consistência visual e atualização controlada (`63-ui2`)
 
@@ -96,7 +87,6 @@ A v64:
 - criado `ui-consistency.css` como camada final de apresentação;
 - Lucide permanece sistema vetorial oficial;
 - navegação inferior mantém um único indicador ativo;
-- cartões-resumo mantêm faixa sólida;
 - criado `release-manifest.json` e Centro de Atualização controlado por Service Worker.
 
 ## 2026-09-06 — Lista de compras agrupada por categoria (`62-ui3`)
