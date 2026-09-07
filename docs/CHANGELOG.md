@@ -1,6 +1,6 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-07 — candidata v66: fundo móvel uniforme no iPhone
+## 2026-09-07 — v66 publicada: fundo móvel uniforme no iPhone
 
 ### Problema observado
 
@@ -25,13 +25,13 @@ Uma captura real de iPhone na **Lista de compras** revelou uma diferença cromá
 
 ### PWA e versionamento
 
-- build candidato: `v66`;
+- build: `v66`;
 - revisão de shell: `66-shell1`;
 - runtime funcional preservado: `64-runtime1`;
 - camada de Compras preservada: `65-shopping1`;
 - revisão visual preservada: `64-ui1`;
-- novo cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1`;
-- `manifest.webmanifest.background_color` e `theme_color` passam para `#f5f7fa`;
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1`;
+- `manifest.webmanifest.background_color` e `theme_color` usam `#f5f7fa`;
 - Pages força o `theme-color` inicial do HTML público para `#f5f7fa`; `applyTheme()` continua a trocar para `#0f1722` no tema escuro.
 
 ### Segurança e dados
@@ -41,11 +41,16 @@ Uma captura real de iPhone na **Lista de compras** revelou uma diferença cromá
 - nenhum segredo, token ou chave adicionado;
 - a dívida técnica do ZXing via `unpkg.com` permanece separada desta release.
 
-### QA candidato
+### QA e publicação
 
-Os testes foram atualizados para validar a cor canónica do shell, ausência de blur no topbar móvel, alinhamento do manifesto/theme-color, revisão `66-shell1`, novo cache e preservação das revisões funcionais v64/v65.
+- PR #50 integrado em `main`;
+- commit: `9657d558000018af1ea44e6040441f2b9d91648c`;
+- CI do PR run #1138: **sucesso**;
+- CI de `main` run #1139: **sucesso**;
+- Deploy GitHub Pages run #1132: **sucesso**;
+- matriz completa de regressão passou, incluindo shell, manifesto/theme-color, finanças, cofre, Mercado, scanner, Lista de compras v65, acessibilidade, responsividade e sincronização.
 
-Estado: implementação e documentação da candidata preparadas; CI do PR, integração em `main`, publicação GitHub Pages e confirmação física no iPhone ainda pendentes.
+A validação física no mesmo iPhone continua pendente; a publicação e a cobertura automatizada estão confirmadas, mas a composição real do Safari/PWA só pode ser validada no aparelho.
 
 ## 2026-09-07 — v65 publicada: Lista de compras focada no supermercado
 

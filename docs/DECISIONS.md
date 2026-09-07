@@ -155,7 +155,7 @@ Testes de distribuição validam a **versão pública atual** quando inspecionam
 Separar a versão da aplicação da revisão de componentes evita falsos negativos de CI durante releases de apresentação e impede que um teste legado force alterações artificiais em código funcional que não mudou.
 
 ## D-031 — O shell móvel usa uma única cor canónica
-Data: 7 de setembro de 2026 · Estado: aceite para a candidata v66; integração pendente de CI verde.
+Data: 7 de setembro de 2026 · Estado: aceite, integrada no PR #50 e publicada na v66.
 
 ### Contexto
 
@@ -176,11 +176,15 @@ O token é aplicado ao documento ativo, `body`, `.app-shell`, `.main`, `.main` e
 
 ### Versionamento
 
-A release pública candidata é `v66`. Como apenas a folha historicamente chamada `v64-runtime.css` mudou, ela recebe revisão própria `66-shell1`; `v64-runtime.js` permanece `64-runtime1` e `market-shopping-focus.js/.css` permanece `65-shopping1`.
+A release pública é `v66`. Como apenas a folha historicamente chamada `v64-runtime.css` mudou, ela recebe revisão própria `66-shell1`; `v64-runtime.js` permanece `64-runtime1` e `market-shopping-focus.js/.css` permanece `65-shopping1`.
 
 ### Restrições
 
-A correção não altera geometria do cabeçalho, safe area, navegação, dados, scanner, faturas, pagamentos, persistência, cifragem ou sincronização. Não deve remover a identidade visual do Mercado no desktop.
+A correção não altera geometria do cabeçalho, safe area, navegação, dados, scanner, faturas, pagamentos, persistência, cifragem ou sincronização. Não remove a identidade visual do Mercado no desktop.
+
+### Validação
+
+PR #50 integrado no commit `9657d558000018af1ea44e6040441f2b9d91648c`. CI do PR #1138, CI de `main` #1139 e Deploy GitHub Pages #1132 terminaram com sucesso. A verificação visual final no mesmo iPhone continua necessária porque a CI não reproduz a composição física do Safari/PWA.
 
 ### Motivo
 

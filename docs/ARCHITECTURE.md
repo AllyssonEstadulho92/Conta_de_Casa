@@ -1,8 +1,7 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 7 de setembro de 2026
-Build público atual: `v65`
-Candidato em validação: `v66`
+Build público atual: `v66`
 
 ## Visão geral
 
@@ -38,11 +37,11 @@ Não existe backend financeiro próprio. Integrações externas do Mercado serve
 - `app-update.js` — Centro de Atualização;
 - `v64-runtime.js` — correspondência conservadora do scanner e ciclo de faturas recorrentes **Por preencher**.
 
-A candidata v66 não modifica estes fluxos funcionais.
+A v66 não modificou estes fluxos funcionais.
 
 ## Camadas CSS e responsabilidade visual
 
-A ordem pública permanece:
+A ordem pública é:
 
 1. `styles.css` — base histórica;
 2. `design-system.css` — tokens/componentes/layout;
@@ -52,16 +51,16 @@ A ordem pública permanece:
 6. `market-category-groups.css` — agrupamento por categoria;
 7. `ui-icons.css` — sistema Lucide;
 8. `ui-consistency.css` — consolidação visual global;
-9. `v64-runtime.css` — cabeçalho/safe area e, na candidata v66, cor canónica do shell móvel;
+9. `v64-runtime.css` — cabeçalho/safe area e cor canónica do shell móvel v66;
 10. `market-shopping-focus.css` — ajustes finais da Lista de compras no mobile.
 
-`v64-runtime.css` mantém o nome histórico porque também contém a geometria v64 do cabeçalho e os estados visuais de faturas `draft`. A candidata v66 altera apenas a parte cromática dessa folha e publica-a com revisão independente `66-shell1`. O JavaScript `v64-runtime.js` continua em `64-runtime1`.
+`v64-runtime.css` mantém o nome histórico porque também contém a geometria v64 do cabeçalho e os estados visuais de faturas `draft`. A v66 alterou apenas a parte cromática dessa folha e publica-a com revisão independente `66-shell1`. O JavaScript `v64-runtime.js` continua em `64-runtime1`.
 
 ## Shell móvel v66
 
 ### Causa da diferença branco/azulado
 
-`market-brand.css` contém uma identidade específica do Mercado em desktop e mobile:
+`market-brand.css` contém uma identidade específica do Mercado:
 
 ```css
 html.market-prototype-active .main {
@@ -71,7 +70,7 @@ html.market-prototype-active .main {
 
 O topbar móvel é `fixed` e usa `left/right: var(--page-gutter)`. Como o fundo radial pertence a `.main`, esse fundo continuava visível nas margens laterais e por baixo do cabeçalho. O topbar, por sua vez, tinha fundo parcialmente composto e `backdrop-filter`, produzindo uma tonalidade diferente no Safari/iPhone.
 
-### Regra v66
+### Regra v66 publicada
 
 Até 820 px existe um único token de shell:
 
@@ -87,16 +86,16 @@ O token é aplicado com precedência final a:
 - `html.market-prototype-active .main`;
 - `.topbar`.
 
-O topbar móvel fica opaco e sem `backdrop-filter`. A identidade radial do Mercado não é eliminada do código e continua disponível acima de 820 px; só deixa de participar no shell móvel, em conformidade com a decisão de que o cabeçalho é global.
+O topbar móvel fica opaco e sem `backdrop-filter`. A identidade radial do Mercado continua disponível acima de 820 px; só deixa de participar no shell móvel, em conformidade com a decisão de que o cabeçalho é global.
 
 ## Tema e PWA
 
-`render.js::applyTheme()` já define dinamicamente:
+`render.js::applyTheme()` define dinamicamente:
 
 - claro: `meta[name="theme-color"] = #f5f7fa`;
 - escuro: `meta[name="theme-color"] = #0f1722`.
 
-Na candidata v66:
+Na v66:
 
 - `manifest.webmanifest.background_color = #f5f7fa`;
 - `manifest.webmanifest.theme_color = #f5f7fa`;
@@ -133,35 +132,34 @@ A dependência ZXing externa continua dívida técnica de segurança e não faz 
 
 As ocorrências futuras automáticas continuam a poder usar `draft: true`, com `totalCents = 0`, sem herdar referência, observações ou data de emissão. Drafts não entram nos totais pendentes/em atraso até preenchimento.
 
-## Versionamento e distribuição candidata
+## Versionamento e distribuição
 
-- público atual: `v65`;
-- candidato: `v66`;
+- público: `v66`;
 - revisão visual histórica: `64-ui1`;
 - runtime funcional: `64-runtime1`;
 - Compras: `65-shopping1`;
-- shell CSS candidato: `66-shell1`;
-- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1`.
+- shell CSS: `66-shell1`;
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1`.
 
 `scripts/prepare-pages.cjs` mantém a separação entre versão pública e revisões internas. `v64-runtime.css` usa `?v=66-shell1`; `v64-runtime.js` continua `?v=64-runtime1`.
 
-## Pipeline de qualidade
+## Pipeline de qualidade e publicação
 
-A CI continua a cobrir finanças, auditoria, invariantes, cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
+A v66 foi integrada pelo PR #50 no commit `9657d558000018af1ea44e6040441f2b9d91648c`.
 
-A v66 acrescenta/regressa explicitamente:
+Validações confirmadas:
 
-- cor canónica do shell claro/escuro;
-- fundo idêntico entre `.main` do Mercado e topbar móvel;
-- ausência de `backdrop-filter` no topbar móvel;
-- alinhamento do manifesto e `theme-color`;
-- build/revisão/cache v66 sem mudar o runtime JS ou a camada v65 de Compras.
+- CI do PR #1138: sucesso;
+- CI de `main` #1139: sucesso;
+- Deploy GitHub Pages #1132: sucesso.
+
+A matriz cobre finanças, auditoria, invariantes, cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização. A v66 acrescenta regressões explícitas para shell claro/escuro, fundo idêntico entre Mercado e topbar móvel, ausência de `backdrop-filter`, manifesto/theme-color e revisão/cache de distribuição.
 
 O gate manual de GitHub Pages executa a mesma matriz antes de preparar `dist`.
 
-## Regressões obrigatórias
+## Regressões obrigatórias futuras
 
-Antes de publicar v66 devem permanecer cobertos:
+Devem permanecer cobertos:
 
 - finanças e invariantes de contagem;
 - isolamento/cifragem do cofre;
