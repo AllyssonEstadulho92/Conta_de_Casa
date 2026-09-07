@@ -60,6 +60,109 @@
     padding-top:var(--mobile-top-safe)!important;
     padding-bottom:8px!important;
     box-sizing:border-box;
+    background:color-mix(in srgb,var(--bg,#f7f9fc) 96%,var(--surface,#fff))!important;
+  }
+
+  /* O Mercado tinha regras históricas próprias no topo: acrescentava um carrinho ao
+     título, aumentava a tipografia, criava um contentor maior no botão + e adicionava
+     um chevron ao Sync. O cabeçalho é um componente global, portanto esses adornos
+     deixam de participar na versão móvel. A identidade do Mercado permanece no
+     conteúdo da página e na navegação, não no componente estrutural do topo. */
+  .topbar-leading,
+  html.market-prototype-active .topbar-leading{
+    min-width:0!important;
+    gap:8px!important;
+  }
+
+  .page-heading,
+  html.market-prototype-active .page-heading{
+    display:block!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+
+  .page-heading h1,
+  html.market-prototype-active .page-heading h1{
+    display:block!important;
+    min-width:0!important;
+    max-width:100%!important;
+    margin:0!important;
+    color:var(--text,#152033)!important;
+    font-size:24px!important;
+    line-height:1.25!important;
+    font-weight:600!important;
+    letter-spacing:-.02em!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  html.market-prototype-active .page-heading h1::before{
+    content:none!important;
+    display:none!important;
+    width:0!important;
+    height:0!important;
+    flex-basis:0!important;
+  }
+
+  .mobile-menu-btn,
+  html.market-prototype-active .mobile-menu-btn{
+    width:44px!important;
+    min-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+    margin:0!important;
+    border-radius:12px!important;
+  }
+
+  .btn.primary.topbar-create,
+  html.market-prototype-active .btn.primary.topbar-create{
+    width:44px!important;
+    min-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:12px!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    display:grid!important;
+    place-items:center!important;
+  }
+
+  .btn.primary.topbar-create>span:first-child,
+  html.market-prototype-active .btn.primary.topbar-create>span:first-child{
+    width:36px!important;
+    min-width:36px!important;
+    height:36px!important;
+    min-height:36px!important;
+    display:grid!important;
+    place-items:center!important;
+    border-radius:12px!important;
+    background:var(--primary,#0b63e5)!important;
+    color:#fff!important;
+    box-shadow:0 5px 14px rgba(11,99,229,.14)!important;
+  }
+
+  .sync-header-status,
+  html.market-prototype-active .sync-header-status{
+    width:auto!important;
+    min-width:0!important;
+    max-width:112px!important;
+    height:36px!important;
+    min-height:36px!important;
+    padding:0 10px!important;
+    border:1px solid color-mix(in srgb,var(--border,#dfe5ec) 88%,transparent)!important;
+    border-radius:12px!important;
+    background:color-mix(in srgb,var(--surface,#fff) 94%,var(--surface-2,#f2f5f9))!important;
+    box-shadow:0 1px 2px rgba(20,35,60,.04)!important;
+  }
+
+  html.market-prototype-active .sync-header-status::after{
+    content:none!important;
+    display:none!important;
+    width:0!important;
+    height:0!important;
   }
 
   /* Como o cabeçalho fixed sai do fluxo, o conteúdo recebe exatamente a sua altura.
@@ -80,6 +183,11 @@
 @media(max-width:359px){
   :root{
     --mobile-top-safe:max(18px,calc(env(safe-area-inset-top,0px) + 6px));
+  }
+
+  .page-heading h1,
+  html.market-prototype-active .page-heading h1{
+    font-size:20px!important;
   }
 }
 
