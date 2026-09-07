@@ -43,6 +43,7 @@ assert.ok(releaseManifest.releases.some(release=>release.version==='v63'));
 assert.ok(releaseManifest.releases[0].items.some(item=>/código de barras/i.test(item)),'v64 notes must expose barcode automation');
 assert.ok(releaseManifest.releases[0].items.some(item=>/Por preencher/i.test(item)),'v64 notes must expose clean recurring bills');
 assert.ok(releaseManifest.releases[0].items.some(item=>/margem superior|safe area/i.test(item)),'v64 notes must expose the mobile top safe area');
+assert.ok(releaseManifest.releases[0].items.some(item=>/mesma composição do cabeçalho móvel|cabeçalho móvel/i.test(item)),'v64 notes must expose the unified mobile header');
 
 assert.match(updateCss, /software-update-dialog/);
 assert.match(updateCss, /software-update-status\.available/);
@@ -50,7 +51,7 @@ assert.match(updateCss, /100dvh/);
 assert.match(updateCss, /safe-area-inset-bottom/);
 assert.match(updateCss, /html\[data-theme="dark"\]/);
 assert.match(updateCss, /prefers-reduced-motion/);
-assert.match(consistencyCss,/Conta de Casa v63/);
+assert.match(consistencyCss,/Conta de Casa v64/);
 assert.match(runtimeJs,/Conta de Casa v64/);
 assert.match(runtimeCss,/Conta de Casa v64/);
 
