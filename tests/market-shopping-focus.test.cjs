@@ -36,18 +36,21 @@ assert.match(css,/\.market-item-details>summary/);
 assert.match(css,/min-height:44px/,'compact controls must retain the project touch-target minimum');
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-assert.equal(manifest.latestVersion,'v65');
-assert.equal(manifest.releases[0].version,'v65');
-assert.ok(manifest.releases[0].items.some(item=>/lista de compras/i.test(item)));
-assert.ok(manifest.releases[0].items.some(item=>/por comprar/i.test(item)));
-assert.ok(manifest.releases[0].items.some(item=>/filtro/i.test(item)));
-assert.ok(manifest.releases[0].items.some(item=>/comprados/i.test(item)));
+assert.equal(manifest.latestVersion,'v66');
+const v65=manifest.releases.find(release=>release.version==='v65');
+assert.ok(v65,'v65 shopping release notes must remain in history after later releases');
+assert.ok(v65.items.some(item=>/lista de compras/i.test(item)));
+assert.ok(v65.items.some(item=>/por comprar/i.test(item)));
+assert.ok(v65.items.some(item=>/filtro/i.test(item)));
+assert.ok(v65.items.some(item=>/comprados/i.test(item)));
 
 assert.ok(sw.includes("'./market-shopping-focus.css'"));
 assert.ok(sw.includes("'./market-shopping-focus.js'"));
 assert.match(sw,/v65-shopping1/);
-assert.match(prepare,/const BUILD = 'v65'/);
+assert.match(sw,/v66-shell1/);
+assert.match(prepare,/const BUILD = 'v66'/);
 assert.match(prepare,/const SHOPPING_REV = '65-shopping1'/);
+assert.match(prepare,/const SHELL_REV = '66-shell1'/);
 assert.ok(prepare.includes("'market-shopping-focus.css'"));
 assert.ok(prepare.includes("'market-shopping-focus.js'"));
 
@@ -55,9 +58,10 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
+  assert.match(index,/v64-runtime\.css\?v=66-shell1/);
   assert.match(index,/market-shopping-focus\.css\?v=65-shopping1/);
   assert.match(index,/market-shopping-focus\.js\?v=65-shopping1/);
-  assert.ok(index.indexOf('v64-runtime.css')<index.indexOf('market-shopping-focus.css'),'shopping focus CSS must be the final market-specific layer');
+  assert.ok(index.indexOf('v64-runtime.css')<index.indexOf('market-shopping-focus.css'),'shopping focus CSS must remain the final market-specific layer after the v66 shell fix');
   assert.ok(index.indexOf('market-category-groups.js')<index.indexOf('market-shopping-focus.js'),'shopping focus must run after category grouping');
   assert.ok(fs.existsSync(path.join(dist,'market-shopping-focus.css')));
   assert.ok(fs.existsSync(path.join(dist,'market-shopping-focus.js')));
@@ -65,4 +69,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v65 mobile shopping focus, compact filters, grouped purchased items and direct add tests: OK');
+console.log('v65 mobile shopping focus preserved under the v66 unified-shell release: OK');
