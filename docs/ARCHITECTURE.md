@@ -1,9 +1,9 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 7 de setembro de 2026
-Build público atual: `v68`
-Build candidato: `v69`
-Branch candidata: `fix/v69-mobile-menu-animation`
+Build público atual: `v69`
+Release funcional: PR #56
+Commit público: `a66df37b0fc345491dacf3cac91313d88d080a05`
 
 ## Visão geral
 
@@ -49,7 +49,7 @@ A navegação rápida inferior continua a mostrar `MOBILE_NAV_ITEMS`. O menu com
 
 ## Camadas CSS e responsabilidade visual
 
-A ordem candidata mantém:
+A ordem pública mantém:
 
 1. `styles.css`;
 2. `design-system.css`;
@@ -59,9 +59,9 @@ A ordem candidata mantém:
 6. `ui-consistency.css`;
 7. `v64-runtime.css` — shell v66;
 8. `market-shopping-focus.css` — Compras v65;
-9. `mobile-menu-toggle.css` — camada final do menu, agora revisão `69-menu3`.
+9. `mobile-menu-toggle.css` — camada final do menu, revisão `69-menu3`.
 
-O tamanho global da aplicação, gutters, topbar e breakpoint de 820 px não são alterados.
+O tamanho global da aplicação, gutters, topbar e breakpoint de 820 px não foram alterados.
 
 ## Menu móvel v69
 
@@ -93,7 +93,7 @@ A v69 estabelece o seguinte contrato:
 4. `ui-icons.js` encontra o mesmo slot e um SVG existente, pelo que `fillIcon()` retorna sem substituir o glifo visível;
 5. o glifo visível é composto exclusivamente por três `<span>` animáveis.
 
-Esta solução evita alterar o sistema global de ícones e mantém Lucide como sistema oficial para os restantes controlos.
+A solução não altera o sistema global de ícones e mantém Lucide como sistema oficial para os restantes controlos.
 
 ### Estado e comportamento
 
@@ -107,7 +107,7 @@ Fluxo:
 6. novo toque no mesmo controlo fecha o drawer;
 7. o botão regressa ao topbar e as linhas voltam ao hambúrguer.
 
-`aria-label`, `title`, `aria-expanded`, `button.dataset.menuState` e `drawer.dataset.menuState` continuam sincronizados.
+`aria-label`, `title`, `aria-expanded`, `button.dataset.menuState` e `drawer.dataset.menuState` permanecem sincronizados.
 
 ### Geometria e animação
 
@@ -117,7 +117,7 @@ Fluxo:
 - espessura: aproximadamente `2.25 px`;
 - duração: aproximadamente `190 ms`;
 - curva: `cubic-bezier(.2,.8,.2,1)`;
-- middle line: `opacity:0` + `scaleX(.18)`;
+- linha central: `opacity:0` + `scaleX(.18)`;
 - sem borda, fundo verde ou sombra de seleção;
 - `prefers-reduced-motion: reduce` elimina transições.
 
@@ -153,15 +153,15 @@ Lucide local continua oficial para a aplicação. A v69 apenas impede que a hidr
 
 ## Tema e PWA
 
-- build candidato: `v69`;
+- build público: `v69`;
 - menu: `69-menu3`;
-- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v69-menu3`.
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v69-menu3`.
 
 `scripts/prepare-pages.cjs` mantém `mobile-menu-toggle.css/.js` como camada final do menu e `sw.js` mantém allowlist same-origin explícita.
 
-## Regressões obrigatórias
+## Pipeline e regressões
 
-Além da matriz histórica, a v69 deve testar explicitamente:
+A v69 foi integrada apenas depois de CI verde. A matriz cobre, além das regressões históricas:
 
 - presença dos três `<span>` do glifo;
 - sentinela Lucide oculta + `data-ui-icon-slot="menu"`;
@@ -172,5 +172,12 @@ Além da matriz histórica, a v69 deve testar explicitamente:
 - foco por teclado preservado;
 - fecho pelo mesmo botão, Escape, backdrop e navegação;
 - build/manifest/cache v69.
+
+Publicação técnica confirmada:
+
+- CI do PR #1250 (`34168089348`) — sucesso;
+- merge `a66df37b0fc345491dacf3cac91313d88d080a05`;
+- CI de `main` #1251 (`34168145569`) — sucesso;
+- Pages #1244 (`34168165101`) — sucesso.
 
 A CI não substitui a validação física final no mesmo iPhone que revelou o defeito.
