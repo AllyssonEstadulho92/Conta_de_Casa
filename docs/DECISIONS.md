@@ -152,16 +152,39 @@ A v68 mantém o mesmo `#mobileDrawer`, `#mobileMenuBtn`, `events.js`, `render.js
 
 `#drawerCloseBtn` **não é removido nesta release** porque `events.js` e `ui-icons.js` ainda o referenciam. Mantê-lo oculto evita código órfão e não cria duplicação visual. A remoção só deve ocorrer num refactor dedicado que elimine também essas referências e respetivos testes.
 
-### Motivo
-
-A solução melhora clareza, densidade, responsividade e interação sem duplicar componentes, sem alterar rotas ou tamanho global da aplicação e sem aumentar o escopo para dados, finanças ou segurança.
-
 ### Versionamento e validação
 
 - release: `v68`;
 - revisão do componente: `68-menu2`;
-- revisões preservadas: `64-runtime1`, `65-shopping1`, `66-shell1`;
 - merge: `9c8a2b3042c322849e3eb5ea3462f494897b4ab3`;
 - CI do PR #1217: sucesso;
 - CI de `main` #1218: sucesso;
 - Deploy Pages #1211: sucesso.
+
+## D-034 — O controlador animado é proprietário do glifo visível do menu
+Data: 7 de setembro de 2026 · Estado: aceite como candidata v69.
+
+### Contexto
+
+A validação física da v68 mostrou que o botão continuava a apresentar o hambúrguer depois de o drawer abrir. A causa foi confirmada no código: `ui-icons.js::hydrate()` observa alterações de `aria-expanded`/`class` e executa `fillIcon(#mobileMenuBtn, 'menu', 22)`. `fillIcon()` usa `replaceChildren()`, substituindo os três `<span>` animáveis por um SVG Lucide estático.
+
+A v68 tinha testes separados para o glifo e para o sistema de ícones, mas não uma regressão explícita do contrato entre os dois módulos.
+
+### Decisão
+
+Depois da instalação de `mobile-menu-toggle.js`:
+
+- o glifo visível de `#mobileMenuBtn` pertence exclusivamente ao controlador animado;
+- Lucide continua sistema oficial da aplicação e mantém compatibilidade através de `data-ui-icon-slot="menu"`;
+- um SVG direto é preservado como sentinela oculta `.mobile-menu-icon-sentinel`;
+- o hidratador encontra o slot e o SVG existente e deixa de substituir os três `<span>`;
+- `aria-expanded` e `data-menu-state` conduzem a mesma transformação visual;
+- foco programático originado por pointer não desenha moldura no Safari; teclado mantém `:focus-visible`.
+
+### Motivo
+
+A alteração corrige a causa real sem criar um segundo menu, sem remover Lucide globalmente, sem alterar `events.js`/rotas e sem tocar em dados, segurança ou regras de negócio.
+
+### Versionamento
+
+Candidata: `v69`; revisão do menu: `69-menu3`; revisões `64-runtime1`, `65-shopping1` e `66-shell1` permanecem preservadas. A publicação depende de CI verde, merge em `main` e Pages verde.
