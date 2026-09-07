@@ -162,7 +162,7 @@ A v68 mantém o mesmo `#mobileDrawer`, `#mobileMenuBtn`, `events.js`, `render.js
 - Deploy Pages #1211: sucesso.
 
 ## D-034 — O controlador animado é proprietário do glifo visível do menu
-Data: 7 de setembro de 2026 · Estado: aceite como candidata v69.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v69 através do PR #56.
 
 ### Contexto
 
@@ -185,6 +185,12 @@ Depois da instalação de `mobile-menu-toggle.js`:
 
 A alteração corrige a causa real sem criar um segundo menu, sem remover Lucide globalmente, sem alterar `events.js`/rotas e sem tocar em dados, segurança ou regras de negócio.
 
-### Versionamento
+### Versionamento e validação
 
-Candidata: `v69`; revisão do menu: `69-menu3`; revisões `64-runtime1`, `65-shopping1` e `66-shell1` permanecem preservadas. A publicação depende de CI verde, merge em `main` e Pages verde.
+- release: `v69`;
+- revisão do menu: `69-menu3`;
+- merge: `a66df37b0fc345491dacf3cac91313d88d080a05`;
+- CI do PR #1250 (`34168089348`): sucesso;
+- CI de `main` #1251 (`34168145569`): sucesso;
+- Deploy Pages #1244 (`34168165101`): sucesso;
+- revisões `64-runtime1`, `65-shopping1` e `66-shell1` permanecem preservadas.
