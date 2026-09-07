@@ -78,111 +78,51 @@ O agrupamento reutiliza a categoria e os mesmos nós/handlers. Mobile usa `<deta
 ## D-022 — Uma camada final resolve colisões visuais entre CSS legados
 Data: 6 de setembro de 2026 · Estado: aceite e publicada na v63.
 
-`ui-consistency.css` consolida as regras visuais globais sem tocar no estado financeiro:
-
-- Lucide é o único sistema vetorial;
-- `.ui-icon-svg` e `.svg-icon` usam a mesma métrica;
-- a navegação móvel mantém um único indicador ativo em `::before`;
-- `::after` redundante é desativado;
-- a faixa dos cartões-resumo é um `inset` sólido;
-- `market-summary-item::before` fica reservado ao ícone semântico.
+`ui-consistency.css` consolida regras visuais globais sem tocar no estado financeiro. Lucide mantém métrica comum, a navegação móvel usa um único indicador ativo e a faixa dos cartões-resumo permanece sólida.
 
 ## D-023 — Cada alteração pública relevante gera versão, manifesto e instalação confirmada
 Data: 6 de setembro de 2026 · Estado: aceite.
 
 Ciclo oficial: **alteração → nova versão → notas no `release-manifest.json` → CI → `main` → Pages → instalação pelo Centro de Atualização**.
 
-Regras:
-
-- `latestVersion` deve corresponder ao build de `scripts/prepare-pages.cjs`;
-- o manifesto é same-origin e consultado com `cache: no-store`;
-- atualização normal não ativa silenciosamente o novo worker;
-- **Atualizar agora** envia `APPLY_UPDATE`;
-- a allowlist do Service Worker permanece explícita;
-- atualizar assets não apaga/migra o cofre financeiro.
+`latestVersion` deve corresponder ao build; a atualização normal não ativa silenciosamente o novo worker; **Atualizar agora** envia `APPLY_UPDATE`; a allowlist do Service Worker permanece explícita; atualizar assets não apaga o cofre.
 
 ## D-024 — Auto-adição por código de barras exige correspondência conservadora
-Data: 7 de setembro de 2026 · Estado: aceite para v64.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64.
 
-### Contexto
-
-O utilizador pretende ler o produto no supermercado e reduzir ao mínimo a intervenção manual. O risco é adicionar automaticamente uma embalagem, variante ou loja errada.
-
-### Decisão
-
-A auto-adição só pode ocorrer quando:
-
-- existe exatamente um supermercado selecionado;
-- o resultado pertence ao mesmo supermercado;
-- nome/marca e embalagem são compatíveis;
-- score de correspondência é pelo menos `0.84`;
-- a diferença para o segundo candidato é pelo menos `0.10`.
-
-Resultados ambíguos exigem confirmação manual. O mesmo GTIN ainda pendente incrementa quantidade em vez de duplicar a linha.
-
-### Segurança financeira
-
-O preço encontrado atualiza apenas `estimatedCents`. A automatização não escreve `actualCents` e não pode transformar uma consulta de catálogo em prova do preço efetivamente pago.
+A auto-adição só ocorre quando existe exatamente um supermercado selecionado, o resultado pertence à mesma loja, nome/marca e embalagem são compatíveis, score >= `0.84` e a diferença para o segundo candidato >= `0.10`. Ambiguidade exige confirmação manual. GTIN repetido pendente incrementa quantidade. O preço encontrado atualiza apenas `estimatedCents`.
 
 ## D-025 — Próximas faturas recorrentes começam como `Por preencher`
-Data: 7 de setembro de 2026 · Estado: aceite para v64.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64.
 
-### Contexto
-
-Uma recorrência mensal representa a continuidade da obrigação, não a garantia de que valor, referência ou observações serão iguais no mês seguinte.
-
-### Decisão
-
-Uma nova ocorrência recorrente automática mantém os campos estruturais reutilizáveis e limpa os campos variáveis:
-
-- mantém descrição, fornecedor, categoria, método, recorrência e vencimento previsto;
-- define `totalCents = 0`;
-- limpa referência, observações e data de emissão;
-- usa `draft: true` até o utilizador preencher a nova fatura.
-
-Drafts não entram em pendentes/atrasos. Faturas com pagamentos, canceladas, arquivadas ou já editadas não são limpas pela migração.
+Uma nova ocorrência automática mantém descrição, fornecedor, categoria, método, recorrência e vencimento; define `totalCents = 0`; limpa referência, observações e data de emissão; usa `draft: true` até preenchimento. Drafts não entram em pendentes/atrasos. Faturas com pagamentos, canceladas, arquivadas ou editadas são preservadas.
 
 ## D-026 — Cabeçalho móvel é fixo; o conteúdo continua no scroller interno
-Data: 7 de setembro de 2026 · Estado: aceite para v64.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64.
 
-### Contexto
-
-Capturas reais de Safari/iPhone mostraram que a primeira linha do cabeçalho podia ficar parcialmente fora da área visível depois de deslocar a página. O código usava `position:sticky` dentro de `.main`, que é um scroller interno limitado por `100dvh`.
-
-### Decisão
-
-Sem substituir toda a arquitetura móvel:
-
-- `.main` continua o scroller interno;
-- a navegação inferior continua fixa;
-- o cabeçalho móvel passa de `sticky` para `fixed` na camada final v64;
-- `safe-area-inset-top` e uma folga mínima definem a zona tátil superior;
-- `.main` recebe `padding-top` igual à altura do cabeçalho para impedir sobreposição.
-
-### Motivo
-
-A correção elimina a dependência de `sticky` no scroller interno do Safari, reduz o risco de regressão no teclado/bottom nav e preserva D-001/D-002.
+`.main` continua o scroller interno e a navegação inferior continua fixa. O cabeçalho móvel usa `fixed`, respeita `safe-area-inset-top` e `.main` recebe `padding-top` para impedir sobreposição.
 
 ## D-027 — O topbar móvel é global e não recebe decoração específica por página
-Data: 7 de setembro de 2026 · Estado: aceite para v64.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64.
+
+Início, Faturas, Compras e Relatórios mantêm a mesma geometria de título, menu, botão `+`, Sync e fundo. A identidade de cada módulo permanece no conteúdo e não na estrutura global do cabeçalho.
+
+## D-028 — O redeploy manual de Pages deve repetir as verificações específicas da release
+Data: 7 de setembro de 2026 · Estado: aceite para integração após CI verde.
 
 ### Contexto
 
-A comparação direta entre **Início** e **Lista de compras** mostrou que a página de Compras estava a alterar o próprio cabeçalho global. Regras históricas associadas a `html.market-prototype-active` acrescentavam carrinho ao título, aumentavam a escala tipográfica, ampliavam o botão `+` e adicionavam um chevron ao Sync.
+O deploy automático de Pages só ocorre após CI verde de `main`, mas `.github/workflows/pages.yml` também suporta `workflow_dispatch`. O passo de verificação do próprio deploy não incluía `v64-runtime.js` nem `tests/v64-runtime.test.cjs`, apesar de ambos serem componentes críticos da v64 e estarem na CI normal.
 
 ### Decisão
 
-O cabeçalho móvel deve manter a mesma geometria em todas as páginas principais:
+O caminho manual de Pages deve verificar, no mínimo, a sintaxe do runtime específico da versão e executar a respetiva regressão antes de preparar/publicar `dist`.
 
-- título com a mesma hierarquia e tamanho;
-- sem pseudo-ícone específico antes do `h1`;
-- menu com a mesma caixa tátil;
-- botão `+` com a mesma caixa e superfície visual;
-- Sync com a mesma altura, largura máxima e sem chevron extra;
-- fundo do topbar visualmente uniforme.
+Para a v64, o workflow passa a executar explicitamente:
 
-A identidade de cada módulo fica no conteúdo da página, nos cartões, estados e navegação, não na estrutura do topbar.
+- `node --check v64-runtime.js`;
+- `node tests/v64-runtime.test.cjs`.
 
 ### Motivo
 
-Evita que o utilizador interprete páginas como aplicações diferentes, reduz conflitos de CSS e mantém a hierarquia definida no Design System sem alterar rotas, dados ou fluxos.
+Um redeploy manual não deve ter uma cobertura inferior à necessária para a camada que altera scanner, recorrências e safe area. A medida não altera dados nem lógica de negócio; reforça apenas o gate de publicação.
