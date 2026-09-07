@@ -108,7 +108,7 @@ Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64.
 Início, Faturas, Compras e Relatórios mantêm a mesma geometria de título, menu, botão `+`, Sync e fundo. A identidade de cada módulo permanece no conteúdo e não na estrutura global do cabeçalho.
 
 ## D-028 — O redeploy manual de Pages deve repetir as verificações específicas da release
-Data: 7 de setembro de 2026 · Estado: aceite para integração após CI verde.
+Data: 7 de setembro de 2026 · Estado: aceite, integrada no PR #46 e publicada.
 
 ### Contexto
 
@@ -118,7 +118,7 @@ O deploy automático de Pages só ocorre após CI verde de `main`, mas `.github/
 
 O caminho manual de Pages deve verificar, no mínimo, a sintaxe do runtime específico da versão e executar a respetiva regressão antes de preparar/publicar `dist`.
 
-Para a v64, o workflow passa a executar explicitamente:
+Para a v64, o workflow executa explicitamente:
 
 - `node --check v64-runtime.js`;
 - `node tests/v64-runtime.test.cjs`.
@@ -126,3 +126,7 @@ Para a v64, o workflow passa a executar explicitamente:
 ### Motivo
 
 Um redeploy manual não deve ter uma cobertura inferior à necessária para a camada que altera scanner, recorrências e safe area. A medida não altera dados nem lógica de negócio; reforça apenas o gate de publicação.
+
+### Validação
+
+A decisão foi integrada no commit `72ee9117ba1383dbcde1ae18729309b07134c144`; a CI de `main` run #1094 e o Deploy GitHub Pages run #1087 terminaram com sucesso.
