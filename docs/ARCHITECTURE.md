@@ -1,8 +1,8 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 7 de setembro de 2026
-Build público atual: `v66`
-Build candidato: `v67` — PR #52
+Build público atual: `v67`
+Release pública: PR #52 · commit `a1d932e580abaa06e7026a515f797411ab205f6e`
 
 ## Visão geral
 
@@ -43,7 +43,7 @@ A v67 não modifica esta camada.
 
 ## Camadas CSS e responsabilidade visual
 
-A ordem pública candidata passa a ser:
+A ordem pública atual é:
 
 1. `styles.css` — base histórica;
 2. `design-system.css` — tokens/componentes/layout;
@@ -57,7 +57,7 @@ A ordem pública candidata passa a ser:
 10. `market-shopping-focus.css` — ajustes finais da Lista de compras no mobile;
 11. `mobile-menu-toggle.css` — geometria do glifo e animação hambúrguer/`X` v67.
 
-A nova folha fica por último porque corrige apenas o comando global do menu e precisa de prevalecer sobre dimensões/estados legados sem alterar as restantes camadas.
+A folha v67 fica por último porque corrige apenas o comando global do menu e precisa de prevalecer sobre dimensões/estados legados sem alterar as restantes camadas.
 
 ## Menu móvel v67
 
@@ -149,20 +149,24 @@ As ocorrências futuras automáticas continuam a poder usar `draft: true`, com `
 
 `manifest.webmanifest` continua alinhado com `#f5f7fa` no arranque claro.
 
-Na candidata v67, `scripts/prepare-pages.cjs` acrescenta os dois assets do menu à allowlist pública e injeta-os no fim das respetivas camadas. `sw.js` inclui ambos na allowlist explícita de cache.
+Na v67 publicada, `scripts/prepare-pages.cjs` acrescenta os dois assets do menu à allowlist pública e injeta-os no fim das respetivas camadas. `sw.js` inclui ambos na allowlist explícita de cache.
 
 ## Versionamento e distribuição
 
-- público atual: `v66`;
-- candidato: `v67`;
+- público atual: `v67`;
 - revisão visual histórica: `64-ui1`;
 - runtime funcional: `64-runtime1`;
 - Compras: `65-shopping1`;
 - shell CSS: `66-shell1`;
 - menu móvel: `67-menu1`;
-- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v67-menu1`.
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v67-menu1`.
 
-A versão candidata está no PR #52. Não é considerada publicada até CI, merge em `main` e GitHub Pages concluírem com sucesso.
+Publicação confirmada:
+
+- PR #52 integrado em `main` no commit `a1d932e580abaa06e7026a515f797411ab205f6e`;
+- CI do PR #1178: sucesso;
+- CI de `main` #1179: sucesso;
+- Deploy GitHub Pages #1172: sucesso.
 
 ## Pipeline de qualidade
 
@@ -172,7 +176,7 @@ A v67 acrescenta:
 - `tests/mobile-menu-toggle.test.cjs` na CI e no gate de Pages;
 - atualização de `tests/app-update.test.cjs` para a versão/caches/assets v67.
 
-A matriz anterior continua a cobrir finanças, auditoria, invariantes, cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
+A matriz continua a cobrir finanças, auditoria, invariantes, cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
 
 ## Regressões obrigatórias futuras
 

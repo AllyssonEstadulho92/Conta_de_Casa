@@ -1,24 +1,31 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 7 de setembro de 2026
-Build público atual: `v66`
-Build candidato: `v67`
+Build público atual: `v67`
 Branch pública: `main`
-Release pública integrada: PR #50
-Release candidata: PR #52 (`ui/v67-animated-mobile-menu`)
+Release pública integrada: PR #52
+Commit público: `a1d932e580abaa06e7026a515f797411ab205f6e`
 Distribuição: GitHub Pages / PWA
 
 ## Estado atual
 
 A aplicação continua uma PWA estática/local-first. O estado financeiro permanece no navegador/IndexedDB e o cofre continua cifrado com PBKDF2-SHA-256 + AES-GCM. A sincronização GitHub permanece opcional e transfere apenas o envelope cifrado. O schema financeiro base continua `STATE_VERSION = 5`.
 
-A **v66 permanece a versão pública**. A **v67 está preparada no PR #52** para modernizar exclusivamente o comando do menu móvel. A alteração ainda não deve ser descrita como publicada enquanto o PR, a CI de `main` e o Deploy GitHub Pages não terminarem com sucesso.
+A **v67 está publicada**. O PR #52 foi integrado em `main`, a CI final de `main` terminou com sucesso e o Deploy GitHub Pages concluiu sem erro.
+
+Referências de publicação:
+
+- PR: #52 — `v67: menu hambúrguer animado no mobile`;
+- merge em `main`: `a1d932e580abaa06e7026a515f797411ab205f6e`;
+- CI do PR: run #1178 — sucesso;
+- CI de `main`: run #1179 (`34157629736`) — sucesso;
+- Deploy GitHub Pages: run #1172 (`34157653463`) — sucesso.
 
 ## v67 — menu hambúrguer/X animado
 
-### Objetivo confirmado
+### Objetivo implementado
 
-O pedido é substituir o comportamento visual atual por um único comando móvel moderno:
+O comando móvel foi consolidado num único botão moderno:
 
 - fechado: hambúrguer de três traços proporcionais;
 - aberto: os próprios traços transformam-se num `X`;
@@ -26,33 +33,33 @@ O pedido é substituir o comportamento visual atual por um único comando móvel
 - sem moldura branca, sem fundo verde/estado selecionado e sem segundo `X` visível;
 - dimensões compatíveis com o cabeçalho atual da aplicação.
 
-### Implementação candidata
+### Implementação publicada
 
-Foram criados `mobile-menu-toggle.css` e `mobile-menu-toggle.js` como camada final e isolada da navegação móvel.
+`mobile-menu-toggle.css` e `mobile-menu-toggle.js` formam uma camada final e isolada da navegação móvel.
 
 O botão `#mobileMenuBtn` mantém um alvo tátil de `44 × 44 px`; o glifo ocupa aproximadamente `24 × 18 px`. Os três traços usam comprimentos progressivos e transformam-se por rotação/translação em `X`. Em `prefers-reduced-motion: reduce`, a transição é desativada.
 
-Como `#mobileDrawer` é um `<dialog>` modal, os elementos exteriores ficam inertes enquanto o menu está aberto. Para que o **mesmo botão** continue realmente tocável como `X`, o mesmo nó DOM é movido para o cabeçalho do drawer depois de `showModal()` e regressa ao topbar quando o menu fecha. Isto preserva a semântica modal e evita criar dois controlos concorrentes.
+Como `#mobileDrawer` é um `<dialog>` modal, elementos exteriores ficam inertes enquanto o menu está aberto. Para que o **mesmo botão** continue tocável como `X`, o mesmo nó DOM é movido para o cabeçalho do drawer depois de `showModal()` e regressa ao topbar quando o menu fecha. Isto preserva a semântica modal e evita dois controlos concorrentes.
 
-O botão legado `#drawerCloseBtn` permanece no DOM para não quebrar o wiring histórico de `events.js`, mas fica oculto e fora da ordem de tabulação. Escape, clique no backdrop e o evento `close` continuam a usar o fluxo existente.
+O botão legado `#drawerCloseBtn` permanece no DOM por compatibilidade com o wiring histórico de `events.js`, mas fica oculto e fora da ordem de tabulação. Escape, clique no backdrop e o evento `close` continuam a usar o fluxo existente.
 
 `aria-expanded`, `aria-label` e `title` acompanham o estado **Abrir menu / Fechar menu**.
 
-## Versionamento candidato
+## Versionamento publicado
 
-- build proposto: `v67`;
-- revisão do novo componente: `67-menu1`;
+- build: `v67`;
+- revisão do menu: `67-menu1`;
 - shell preservado: `66-shell1`;
 - Compras preservada: `65-shopping1`;
 - runtime funcional preservado: `64-runtime1`;
 - revisão visual histórica preservada: `64-ui1`;
-- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v67-menu1`.
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v67-menu1`.
 
-`release-manifest.json`, `scripts/prepare-pages.cjs` e `sw.js` foram atualizados para a v67. A instalação continua controlada pelo utilizador através do Centro de Atualização.
+`release-manifest.json`, `scripts/prepare-pages.cjs` e `sw.js` estão alinhados com a v67. A instalação continua controlada pelo utilizador através do Centro de Atualização.
 
 ## QA da v67
 
-Foi acrescentado `tests/mobile-menu-toggle.test.cjs` para validar:
+`tests/mobile-menu-toggle.test.cjs` valida:
 
 - transformação hambúrguer → `X` → hambúrguer;
 - utilização do mesmo nó DOM no topbar e no drawer;
@@ -63,7 +70,7 @@ Foi acrescentado `tests/mobile-menu-toggle.test.cjs` para validar:
 - inclusão dos assets na distribuição e no Service Worker;
 - coerência entre build v67 e `release-manifest.json`.
 
-A CI e o gate de Pages foram estendidos para executar este teste e verificar a sintaxe de `mobile-menu-toggle.js`. O resultado final da CI deve ser confirmado antes da integração.
+A matriz final de CI passou também por finanças, cofre, Mercado, scanner, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
 
 ## Segurança e compatibilidade
 
@@ -82,7 +89,7 @@ O fundo continua aplicado ao documento, `body`, `.app-shell`, `.main`, Mercado e
 
 ## Validação física ainda pendente
 
-Depois de publicada a v67, validar no aparelho real:
+A publicação e a validação automatizada estão confirmadas. A validação física continua necessária no aparelho real:
 
 - iPhone/Safari: 320, 375, 390 e 430 px, portrait/landscape;
 - hambúrguer → `X` ao abrir e `X` → hambúrguer ao fechar;
@@ -97,13 +104,11 @@ Continuam pendentes as validações físicas funcionais já registadas: scanner 
 
 ## Última alteração
 
-Preparada a v67 no PR #52 com um único botão móvel animado, assets dedicados, versão/cache próprios e regressões automáticas. A publicação ainda depende de CI, integração em `main` e GitHub Pages.
+Publicada a v67 através do PR #52, com um único botão móvel animado, assets dedicados, versão/cache próprios e regressões automáticas. CI de `main` #1179 e Deploy Pages #1172 terminaram com sucesso.
 
 ## Próximo passo
 
-1. confirmar CI verde do PR #52;
-2. rever o diff final para garantir escopo apenas em navegação/apresentação e distribuição;
-3. integrar em `main` apenas se a matriz estiver verde;
-4. confirmar CI de `main` e Deploy GitHub Pages;
-5. validar fisicamente no iPhone o ciclo hambúrguer ↔ `X` e os restantes fechos do drawer;
-6. manter ZXing externo como tarefa de segurança separada.
+1. validar fisicamente no iPhone o ciclo hambúrguer ↔ `X` e os restantes fechos do drawer;
+2. confirmar alinhamento e ausência de regressões visuais em 320–430 px;
+3. validar VoiceOver/TalkBack e movimento reduzido;
+4. manter ZXing externo como tarefa de segurança separada.

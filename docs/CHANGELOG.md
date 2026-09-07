@@ -1,10 +1,10 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-07 — v67 candidata: menu móvel hambúrguer/X animado
+## 2026-09-07 — v67 publicada: menu móvel hambúrguer/X animado
 
 ### Objetivo
 
-Modernizar o comando do menu móvel segundo o padrão visual solicitado: três traços proporcionais no estado fechado, transformação suave em `X` ao abrir e regresso ao hambúrguer ao fechar. A alteração deve manter o tamanho e a arquitetura do cabeçalho atual.
+Modernizar o comando do menu móvel segundo o padrão visual solicitado: três traços proporcionais no estado fechado, transformação suave em `X` ao abrir e regresso ao hambúrguer ao fechar. A alteração mantém o tamanho e a arquitetura do cabeçalho atual.
 
 ### Problema confirmado no código
 
@@ -27,22 +27,28 @@ Modernizar o comando do menu móvel segundo o padrão visual solicitado: três t
 - `prefers-reduced-motion: reduce` desativa a animação;
 - Escape, backdrop e evento `close` continuam preservados pelo fluxo existente.
 
-### Distribuição candidata
+### Distribuição publicada
 
 - build: `v67`;
 - revisão do menu: `67-menu1`;
 - shell preservado: `66-shell1`;
 - Compras preservada: `65-shopping1`;
 - runtime funcional preservado: `64-runtime1`;
-- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v67-menu1`;
-- `release-manifest.json`, `scripts/prepare-pages.cjs` e Service Worker atualizados para incluir os novos assets.
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v67-menu1`;
+- `release-manifest.json`, `scripts/prepare-pages.cjs` e Service Worker incluem os novos assets.
 
-### QA
+### QA e publicação
 
 - criado `tests/mobile-menu-toggle.test.cjs`;
-- CI e gate de Pages passam a verificar sintaxe do novo runtime e regressões do componente;
+- CI e gate de Pages verificam sintaxe do novo runtime e regressões do componente;
 - `tests/app-update.test.cjs` foi atualizado para build, manifesto, ordem de carregamento e cache v67;
-- PR #52 aberto para revisão e CI.
+- testes históricos de release foram ajustados segundo D-030 para distinguir build público v67 de revisões internas preservadas;
+- PR #52 integrado em `main`;
+- commit: `a1d932e580abaa06e7026a515f797411ab205f6e`;
+- CI do PR run #1178: **sucesso**;
+- CI de `main` run #1179 (`34157629736`): **sucesso**;
+- Deploy GitHub Pages run #1172 (`34157653463`): **sucesso**;
+- matriz completa de regressão passou, incluindo finanças, cofre, Mercado, scanner, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
 
 ### Segurança e dados
 
@@ -51,7 +57,7 @@ Modernizar o comando do menu móvel segundo o padrão visual solicitado: três t
 - nenhum segredo, token, chave ou endpoint externo novo;
 - a dívida técnica do ZXing via `unpkg.com` permanece separada desta release.
 
-A v67 só deve passar a **publicada** depois de CI verde, integração em `main` e Deploy GitHub Pages concluídos.
+A publicação está confirmada. A validação física do comportamento no iPhone/Safari continua pendente e não é substituída pela CI.
 
 ## 2026-09-07 — v66 publicada: fundo móvel uniforme no iPhone
 
