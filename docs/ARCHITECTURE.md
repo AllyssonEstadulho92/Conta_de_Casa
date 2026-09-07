@@ -2,6 +2,7 @@
 
 Atualizado: 7 de setembro de 2026
 Build público atual: `v66`
+Build candidato: `v67` — PR #52
 
 ## Visão geral
 
@@ -19,13 +20,16 @@ Não existe backend financeiro próprio. Integrações externas do Mercado serve
 - sem cookies/telemetria financeira;
 - segredos e PIN não são incluídos no código público.
 
+A v67 não modifica esta camada.
+
 ## JavaScript principal
 
 - `core.js` — estado, normalização, IndexedDB, cifragem e utilitários;
 - `finance.js` — cálculos e invariantes financeiros;
 - `render.js` — renderização, navegação e aplicação de tema;
 - `forms.js` — formulários, validação e mutações;
-- `events.js` — eventos globais, viewport, cofre e Service Worker;
+- `events.js` — eventos globais, viewport, cofre, navegação adaptativa e Service Worker;
+- `mobile-menu-toggle.js` — camada v67 exclusivamente responsável pelo estado visual/DOM do botão hambúrguer ↔ `X` no mobile;
 - `sync.js` — sincronização cifrada opcional;
 - `sync-conflict-policy.js` — equivalência de negócio do Mercado sem ruído de metadados técnicos;
 - `market-experience.js` — catálogo/preço Pingo Doce e Continente através de `cesta.pt`;
@@ -37,11 +41,9 @@ Não existe backend financeiro próprio. Integrações externas do Mercado serve
 - `app-update.js` — Centro de Atualização;
 - `v64-runtime.js` — correspondência conservadora do scanner e ciclo de faturas recorrentes **Por preencher**.
 
-A v66 não modificou estes fluxos funcionais.
-
 ## Camadas CSS e responsabilidade visual
 
-A ordem pública é:
+A ordem pública candidata passa a ser:
 
 1. `styles.css` — base histórica;
 2. `design-system.css` — tokens/componentes/layout;
@@ -52,60 +54,66 @@ A ordem pública é:
 7. `ui-icons.css` — sistema Lucide;
 8. `ui-consistency.css` — consolidação visual global;
 9. `v64-runtime.css` — cabeçalho/safe area e cor canónica do shell móvel v66;
-10. `market-shopping-focus.css` — ajustes finais da Lista de compras no mobile.
+10. `market-shopping-focus.css` — ajustes finais da Lista de compras no mobile;
+11. `mobile-menu-toggle.css` — geometria do glifo e animação hambúrguer/`X` v67.
 
-`v64-runtime.css` mantém o nome histórico porque também contém a geometria v64 do cabeçalho e os estados visuais de faturas `draft`. A v66 alterou apenas a parte cromática dessa folha e publica-a com revisão independente `66-shell1`. O JavaScript `v64-runtime.js` continua em `64-runtime1`.
+A nova folha fica por último porque corrige apenas o comando global do menu e precisa de prevalecer sobre dimensões/estados legados sem alterar as restantes camadas.
 
-## Shell móvel v66
+## Menu móvel v67
 
-### Causa da diferença branco/azulado
+### Contrato existente preservado
 
-`market-brand.css` contém uma identidade específica do Mercado:
+O HTML continua a expor:
 
-```css
-html.market-prototype-active .main {
-  background: radial-gradient(... azul ...), var(--bg);
-}
-```
+- `#mobileMenuBtn` com `aria-controls="mobileDrawer"` e `aria-expanded`;
+- `#mobileDrawer` como `<dialog>` modal;
+- `#drawerCloseBtn` no DOM para preservar o wiring histórico de `events.js`;
+- `openMobileDrawer()` e `closeMobileDrawer()` como funções de abertura/fecho existentes.
 
-O topbar móvel é `fixed` e usa `left/right: var(--page-gutter)`. Como o fundo radial pertence a `.main`, esse fundo continuava visível nas margens laterais e por baixo do cabeçalho. O topbar, por sua vez, tinha fundo parcialmente composto e `backdrop-filter`, produzindo uma tonalidade diferente no Safari/iPhone.
+`events.js` continua responsável por Escape, backdrop, `close`, adaptação desktop/mobile e restante navegação. A v67 não reimplementa estes fluxos quando as funções existentes estão disponíveis.
 
-### Regra v66 publicada
+### Por que o mesmo botão é movido para dentro do dialog
 
-Até 820 px existe um único token de shell:
+Quando `HTMLDialogElement.showModal()` abre o drawer, o conteúdo exterior ao `<dialog>` fica inerte. Portanto, deixar o `#mobileMenuBtn` fisicamente no topbar e apenas desenhá-lo como `X` produziria um controlo visualmente correto mas não clicável enquanto o modal estivesse aberto.
+
+A v67 mantém **um único controlo real**:
+
+1. antes de abrir, `#mobileMenuBtn` está no topbar;
+2. `showModal()` abre o drawer;
+3. o mesmo nó DOM é inserido no início de `.drawer-head`;
+4. `aria-expanded="true"` transforma os três traços em `X`;
+5. ao fechar, o nó regressa ao ponto original marcado por um `Comment` anchor;
+6. `aria-expanded="false"` repõe o hambúrguer.
+
+Esta solução preserva foco, semântica modal e identidade do botão. Não existem dois botões ativos para a mesma ação.
+
+### X legado
+
+`#drawerCloseBtn` é mantido no DOM para que a linha histórica de `events.js` que lhe associa `closeMobileDrawer` continue segura. A camada v67 aplica `hidden`, `tabIndex=-1` e `aria-hidden="true"`; o CSS reforça `display:none` dentro do drawer. Assim não existe segundo `X` visível nem duplicação na ordem de tabulação.
+
+### Geometria e acessibilidade
+
+- alvo do botão: `44 × 44 px`;
+- glifo: `24 × 18 px`;
+- traços: comprimentos aproximados `22 / 18 / 14 px`;
+- sem border/background/box-shadow no estado aberto, pressionado ou hover;
+- `aria-label`: **Abrir menu** / **Fechar menu**;
+- `aria-expanded`: `false` / `true`;
+- animação desativada em `prefers-reduced-motion: reduce`;
+- o foco regressa ao mesmo controlo após fecho.
+
+## Shell móvel v66 preservado
+
+Até 820 px continua um único token de shell:
 
 - claro: `--mobile-shell-bg: #f5f7fa`;
 - escuro: `--mobile-shell-bg: #0f1722`.
 
-O token é aplicado com precedência final a:
-
-- `html.app-active`;
-- `body`;
-- `.app-shell`;
-- `.main` global;
-- `html.market-prototype-active .main`;
-- `.topbar`.
-
-O topbar móvel fica opaco e sem `backdrop-filter`. A identidade radial do Mercado continua disponível acima de 820 px; só deixa de participar no shell móvel, em conformidade com a decisão de que o cabeçalho é global.
-
-## Tema e PWA
-
-`render.js::applyTheme()` define dinamicamente:
-
-- claro: `meta[name="theme-color"] = #f5f7fa`;
-- escuro: `meta[name="theme-color"] = #0f1722`.
-
-Na v66:
-
-- `manifest.webmanifest.background_color = #f5f7fa`;
-- `manifest.webmanifest.theme_color = #f5f7fa`;
-- `scripts/prepare-pages.cjs` força o HTML público a iniciar com `theme-color = #f5f7fa`.
-
-Isto reduz divergências entre a área da PWA controlada pelo navegador e o shell da aplicação. O runtime continua a trocar o `theme-color` para `#0f1722` quando o tema escuro está ativo.
+O token permanece aplicado ao documento ativo, `body`, `.app-shell`, `.main`, Mercado e `.topbar`. O topbar continua `fixed`, opaco e sem `backdrop-filter`. A v67 não altera safe area, altura, gutters, título, `+` ou Sync.
 
 ## Lista de compras v65 preservada
 
-A v66 não altera `market-shopping-focus.js/.css`. No mobile continuam válidos:
+No mobile continuam válidos:
 
 - resumo compacto;
 - `+` contextual;
@@ -126,36 +134,45 @@ Fontes atuais:
 
 A auto-adição continua conservadora: exatamente um supermercado, score `>= 0.84`, margem `>= 0.10`, loja/nome/marca/embalagem compatíveis. GTIN repetido num item pendente incrementa quantidade. O catálogo continua a atualizar apenas `estimatedCents`; `actualCents` permanece reservado ao valor efetivamente confirmado.
 
-A dependência ZXing externa continua dívida técnica de segurança e não faz parte da v66.
+A dependência ZXing externa continua dívida técnica separada.
 
 ## Faturas recorrentes preservadas
 
 As ocorrências futuras automáticas continuam a poder usar `draft: true`, com `totalCents = 0`, sem herdar referência, observações ou data de emissão. Drafts não entram nos totais pendentes/em atraso até preenchimento.
 
+## Tema e PWA
+
+`render.js::applyTheme()` continua a definir dinamicamente:
+
+- claro: `meta[name="theme-color"] = #f5f7fa`;
+- escuro: `meta[name="theme-color"] = #0f1722`.
+
+`manifest.webmanifest` continua alinhado com `#f5f7fa` no arranque claro.
+
+Na candidata v67, `scripts/prepare-pages.cjs` acrescenta os dois assets do menu à allowlist pública e injeta-os no fim das respetivas camadas. `sw.js` inclui ambos na allowlist explícita de cache.
+
 ## Versionamento e distribuição
 
-- público: `v66`;
+- público atual: `v66`;
+- candidato: `v67`;
 - revisão visual histórica: `64-ui1`;
 - runtime funcional: `64-runtime1`;
 - Compras: `65-shopping1`;
 - shell CSS: `66-shell1`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1`.
+- menu móvel: `67-menu1`;
+- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v67-menu1`.
 
-`scripts/prepare-pages.cjs` mantém a separação entre versão pública e revisões internas. `v64-runtime.css` usa `?v=66-shell1`; `v64-runtime.js` continua `?v=64-runtime1`.
+A versão candidata está no PR #52. Não é considerada publicada até CI, merge em `main` e GitHub Pages concluírem com sucesso.
 
-## Pipeline de qualidade e publicação
+## Pipeline de qualidade
 
-A v66 foi integrada pelo PR #50 no commit `9657d558000018af1ea44e6040441f2b9d91648c`.
+A v67 acrescenta:
 
-Validações confirmadas:
+- sintaxe de `mobile-menu-toggle.js` na CI e no gate manual de Pages;
+- `tests/mobile-menu-toggle.test.cjs` na CI e no gate de Pages;
+- atualização de `tests/app-update.test.cjs` para a versão/caches/assets v67.
 
-- CI do PR #1138: sucesso;
-- CI de `main` #1139: sucesso;
-- Deploy GitHub Pages #1132: sucesso.
-
-A matriz cobre finanças, auditoria, invariantes, cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização. A v66 acrescenta regressões explícitas para shell claro/escuro, fundo idêntico entre Mercado e topbar móvel, ausência de `backdrop-filter`, manifesto/theme-color e revisão/cache de distribuição.
-
-O gate manual de GitHub Pages executa a mesma matriz antes de preparar `dist`.
+A matriz anterior continua a cobrir finanças, auditoria, invariantes, cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
 
 ## Regressões obrigatórias futuras
 
@@ -168,8 +185,10 @@ Devem permanecer cobertos:
 - Lista de compras v65;
 - um único fundo de shell no mobile claro/escuro;
 - safe area/cabeçalho sem alteração de geometria;
+- **um único comando móvel hambúrguer/`X`, sem X duplicado, com 44 px e ARIA sincronizado**;
+- Escape/backdrop/fecho do drawer e foco de retorno;
 - manifesto, Centro de Atualização e Service Worker;
 - segurança/CSP/allowlist;
 - responsividade, navegação, acessibilidade e sincronização.
 
-A CI não substitui a validação física final no mesmo iPhone/Safari onde a diferença de cor foi observada.
+A CI não substitui a validação física final no iPhone/Safari.
