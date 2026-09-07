@@ -1,9 +1,8 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 8 de setembro de 2026
-Build público atual: `v69`
-Build candidato: `v70`
-Branch candidata: `fix/v70-visible-menu-motion`
+Build público atual: `v70`
+Branch pública: `main`
 
 ## Visão geral
 
@@ -49,11 +48,11 @@ Camadas relevantes, por ordem:
 6. `ui-consistency.css`;
 7. `v64-runtime.css` — shell `66-shell1`;
 8. `market-shopping-focus.css` — Compras `65-shopping1`;
-9. `mobile-menu-toggle.css` — camada final do menu, candidata `70-menu4`.
+9. `mobile-menu-toggle.css` — camada final do menu, revisão pública `70-menu4`.
 
-## Menu móvel — contrato v69 preservado
+## Menu móvel — contrato preservado
 
-A v69 resolveu o conflito com o hidratador Lucide. O contrato continua:
+A v69 resolveu o conflito com o hidratador Lucide e a v70 mantém esse contrato:
 
 - `mobile-menu-toggle.js` é proprietário do glifo visível;
 - o glifo é composto por três `<span>`;
@@ -70,19 +69,9 @@ Geometria preservada:
 - X: `45deg / -45deg`;
 - linha central: `opacity:0` + `scaleX(.18)`.
 
-## Problema de movimento identificado na validação física
+## v70 — movimento explícito publicado
 
-No iPhone, os estados finais da v69 aparecem corretos, mas a animação pode não ser perceptível. A razão arquitetural é o reparenting do mesmo nó:
-
-1. fechado: `#mobileMenuBtn` vive no topbar;
-2. `openMobileDrawer()` abre o `<dialog>`;
-3. `mobile-menu-toggle.js` move o mesmo botão para `.drawer-head`;
-4. o estado muda para aberto;
-5. ao fechar, o mesmo nó regressa ao topbar.
-
-Uma CSS transition depende de o browser apresentar os estilos inicial e final em frames distintos. Quando o elemento muda de ancestral/render tree durante o mesmo ciclo, Safari pode aplicar diretamente o estado final.
-
-## v70 — camada de movimento explícito
+A validação física da v69 mostrou que os estados finais estavam corretos, mas a transição podia não ser perceptível quando o mesmo nó era reparented entre topbar e `.drawer-head`.
 
 A v70 acrescenta `animateMenuGlyph(open)` em `mobile-menu-toggle.js` sem alterar o drawer.
 
@@ -101,7 +90,7 @@ A v70 acrescenta `animateMenuGlyph(open)` em `mobile-menu-toggle.js` sem alterar
 1. o drawer fecha pelo fluxo existente;
 2. `syncButton(false)` devolve o mesmo nó ao topbar;
 3. no frame seguinte são executados os keyframes inversos `opened → closed`;
-4. o estado CSS/ARIA fechado já fica como fallback definitivo.
+4. o estado CSS/ARIA fechado permanece como fallback definitivo.
 
 ### Fechos externos
 
@@ -140,27 +129,21 @@ Até 820 px:
 
 ## Tema e PWA
 
-Candidata:
+Publicação v70:
 
 - build: `v70`;
 - menu: `70-menu4`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4`.
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4`;
+- PR #58;
+- merge: `f4144bff69a3b46e0f6ec78a00af50d29b704578`;
+- CI do PR #1279 (`34170191884`): sucesso;
+- CI de `main` #1280 (`34170229908`): sucesso;
+- Deploy Pages #1273 (`34170256426`): sucesso.
 
 `scripts/prepare-pages.cjs` mantém `mobile-menu-toggle.css/.js` como camada final e `sw.js` mantém allowlist same-origin explícita.
 
-## Regressões obrigatórias v70
+## Regressões v70
 
-- parser do runtime do menu;
-- três spans e sentinela Lucide;
-- mesma instância do botão no topbar/drawer;
-- keyframes explícitos por linha;
-- micro movimento do glifo;
-- duração/easing definidos;
-- abertura e fecho agendados após reparenting;
-- `prefers-reduced-motion`;
-- ARIA e foco;
-- drawer responsivo e sem overflow lateral;
-- build/manifest/cache `v70` / `70-menu4`;
-- regressões históricas financeiras, segurança, Mercado, sync e acessibilidade.
+A matriz automatizada passou incluindo parser do runtime, três spans e sentinela Lucide, mesma instância do botão, keyframes por linha, micro movimento do glifo, duração/easing, abertura/fecho após reparenting, movimento reduzido, ARIA/foco, responsividade, build/manifest/cache e regressões financeiras, segurança, Mercado, sync e acessibilidade.
 
-A CI não substitui a validação física final no iPhone/Safari.
+A CI não substitui a validação física final no iPhone/Safari para confirmar a perceção do movimento.

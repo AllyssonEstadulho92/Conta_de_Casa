@@ -96,38 +96,26 @@ Decisão: no mobile, resumo compacto surge primeiro; detalhe financeiro completo
 Validação histórica: PR #48, commit `2d39f6f4daa8dccabb51bf906ef22d4a5d9075e4`, CI e Pages verdes.
 
 ## D-030 — Versão pública e revisões internas são conceitos distintos
-Data: 7 de setembro de 2026 · Estado: aceite. Testes de distribuição validam o build público atual; componentes preservados podem manter revisões internas como `64-runtime1`, `65-shopping1` e `66-shell1`. Isto evita alterar artificialmente código funcional apenas por mudança de release.
+Data: 7 de setembro de 2026 · Estado: aceite. Testes de distribuição validam o build público atual; componentes preservados podem manter revisões internas como `64-runtime1`, `65-shopping1` e `66-shell1`.
 
 ## D-031 — O shell móvel usa uma única cor canónica
-Data: 7 de setembro de 2026 · Estado: aceite e publicada na v66.
-
-Até 820 px, shell estrutural usa claro `#f5f7fa` e escuro `#0f1722`. Documento, `body`, `.app-shell`, `.main`, Mercado e `.topbar` usam o mesmo fundo. Topbar é opaco e sem `backdrop-filter`. Desktop mantém identidade do Mercado. Release: v66 / `66-shell1`.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v66. Até 820 px, shell estrutural usa claro `#f5f7fa` e escuro `#0f1722`; topbar é opaco e desktop mantém identidade do Mercado.
 
 ## D-032 — O botão móvel é um único controlo que acompanha o drawer modal
-Data: 7 de setembro de 2026 · Estado: aceite e publicada na v67.
-
-`#mobileMenuBtn` é o mesmo nó DOM nos dois estados. Fechado permanece no topbar; aberto é movido para `.drawer-head`. `#drawerCloseBtn` fica oculto por compatibilidade. A área tátil é 44×44 px e ARIA acompanha o estado.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v67. `#mobileMenuBtn` é o mesmo nó DOM nos dois estados; `#drawerCloseBtn` fica oculto por compatibilidade; ARIA acompanha o estado.
 
 ## D-033 — Refinar o drawer existente sem criar uma segunda navegação
-Data: 7 de setembro de 2026 · Estado: aceite e publicada na v68 através do PR #54.
-
-A v68 manteve `#mobileDrawer`, `#mobileMenuBtn`, `events.js`, `render.js` e `NAV_GROUPS`; refinou apenas apresentação: largura fluida, `100dvh`, safe areas, overflow, 48 px de alvo mínimo, estados hover/active/focus/current e sombra mais leve.
-
-`#drawerCloseBtn` não é removido porque `events.js` e `ui-icons.js` ainda o referenciam. A remoção definitiva exige refactor dedicado.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v68 através do PR #54. A v68 manteve drawer, botão, `events.js`, `render.js` e `NAV_GROUPS`, refinando apenas apresentação e responsividade.
 
 ## D-034 — O controlador animado é proprietário do glifo visível do menu
-Data: 7 de setembro de 2026 · Estado: aceite e publicada na v69 através do PR #56.
-
-A v69 resolveu o conflito em que `ui-icons.js::fillIcon()` substituía os três spans por SVG estático. O controlador mantém `data-ui-icon-slot="menu"`, sentinela SVG oculta e os três spans visíveis. `aria-expanded` e `data-menu-state` conduzem o X; foco pointer não mostra a moldura programática do Safari e teclado mantém `:focus-visible`.
-
-Validação de publicação v69: merge `a66df37b0fc345491dacf3cac91313d88d080a05`; CI do PR #1250, CI de `main` #1251 e Pages #1244 concluíram com sucesso.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v69 através do PR #56. A v69 resolveu a substituição dos spans pelo hidratador Lucide usando `data-ui-icon-slot="menu"` e sentinela SVG oculta.
 
 ## D-035 — Movimento explícito do glifo depois do reparenting
-Data: 8 de setembro de 2026 · Estado: aceite como candidata v70.
+Data: 8 de setembro de 2026 · Estado: aceite e publicada na v70 através do PR #58.
 
 ### Contexto
 
-A validação física da v69 confirmou que os estados finais estão corretos — hambúrguer fechado e X aberto — mas o utilizador não vê claramente as linhas a moverem-se entre os dois estados. O mesmo nó é reparented entre topbar e `.drawer-head` durante a abertura/fecho. CSS transitions podem ser consumidas quando o Safari recalcula o elemento já no estado final depois dessa mudança de render tree.
+A validação física da v69 confirmou os estados finais corretos — hambúrguer fechado e X aberto — mas mostrou que o movimento entre eles podia parecer instantâneo. O mesmo nó é reparented entre topbar e `.drawer-head`; no Safari, a CSS transition pode ser consumida quando o elemento reaparece já no estado final.
 
 ### Decisão
 
@@ -135,18 +123,23 @@ Manter CSS como estado/fallback e acrescentar Web Animations explícitas no cont
 
 - após `syncButton(true)` e o reparenting para o drawer, executar `animateMenuGlyph(true)` no frame seguinte;
 - após `syncButton(false)` e o regresso ao topbar, executar `animateMenuGlyph(false)` no frame seguinte;
-- animar cada uma das três linhas com keyframes completos de `top`, `width`, `transform` e `opacity`;
-- acrescentar um micro movimento de escala/inclinação no contentor do glifo para tornar o toque perceptível sem deslocar layout;
+- animar as três linhas com keyframes completos de `top`, `width`, `transform` e `opacity`;
+- acrescentar micro movimento de escala/inclinação do glifo sem deslocar layout;
 - duração `240 ms`, easing `cubic-bezier(.22,.8,.2,1)`;
-- cancelar animações pendentes quando necessário para evitar estados presos;
-- não cancelar a animação inversa iniciada pelo próprio X quando o evento `close` do dialog chegar;
+- cancelar animações pendentes quando necessário, sem cancelar a sequência inversa iniciada pelo próprio X;
 - não executar keyframes adicionais quando `prefers-reduced-motion` estiver ativo;
-- manter funcionamento se `Element.animate` não existir, usando o estado CSS como fallback.
+- manter funcionamento sem `Element.animate`, usando o estado CSS como fallback.
 
 ### Motivo
 
-A solução atua sobre a causa da falta de movimento percebido sem alterar `events.js`, drawer, rotas, medidas, dados ou sistema global de ícones. Preserva um único botão e torna a animação independente da capacidade do Safari de interpolar uma CSS transition através do reparenting.
+A solução atua sobre a causa da falta de movimento percebido sem alterar `events.js`, drawer, rotas, medidas, dados ou sistema global de ícones. Preserva um único botão e torna a animação independente da capacidade do Safari de interpolar CSS através do reparenting.
 
-### Versionamento
+### Publicação
 
-Candidata: `v70`; revisão do menu: `70-menu4`; revisões `64-runtime1`, `65-shopping1` e `66-shell1` permanecem preservadas. Publicação depende de CI verde, merge em `main`, CI final e Pages verde.
+- release: `v70`;
+- revisão do menu: `70-menu4`;
+- merge: `f4144bff69a3b46e0f6ec78a00af50d29b704578`;
+- CI final do PR #1279 (`34170191884`): sucesso;
+- CI de `main` #1280 (`34170229908`): sucesso;
+- Deploy Pages #1273 (`34170256426`): sucesso;
+- revisões `64-runtime1`, `65-shopping1` e `66-shell1` permanecem preservadas.

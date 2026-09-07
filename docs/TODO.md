@@ -2,26 +2,21 @@
 
 Atualizado: 8 de setembro de 2026
 
-## P0 — v70 movimento visível do hambúrguer ↔ X
+## P0 — v70 movimento visível do hambúrguer ↔ X publicado
 
 ### Observação física v69
 
 - [x] Confirmar no iPhone que o estado fechado mostra hambúrguer correto.
 - [x] Confirmar no iPhone que o estado aberto mostra X correto.
 - [x] Confirmar que o drawer e a navegação continuam funcionais.
-- [x] Identificar que o problema atual é ausência de movimento claramente perceptível entre os estados, não estado visual incorreto.
+- [x] Identificar que o problema atual era ausência de movimento claramente perceptível entre os estados, não estado visual incorreto.
 
-### Causa e arquitetura
+### Implementação e publicação v70
 
-- [x] Confirmar que o mesmo `#mobileMenuBtn` é reparented entre topbar e `.drawer-head`.
-- [x] Confirmar que a v69 depende de CSS transitions para interpolar os spans.
-- [x] Preservar a sentinela Lucide e `data-ui-icon-slot="menu"`.
-- [x] Evitar criar segundo botão, segundo X ou segunda implementação do menu.
-
-### Implementação candidata v70
-
+- [x] Manter o mesmo `#mobileMenuBtn`, `#mobileDrawer` e navegação.
+- [x] Preservar sentinela Lucide, três spans e `data-ui-icon-slot="menu"`.
 - [x] Adicionar `animateMenuGlyph(open)` com Web Animations.
-- [x] Animar explicitamente `top`, `width`, `transform` e `opacity` das três linhas.
+- [x] Animar `top`, `width`, `transform` e `opacity` das três linhas.
 - [x] Executar abertura no frame seguinte ao reparenting para o drawer.
 - [x] Executar animação inversa no frame seguinte ao regresso ao topbar.
 - [x] Adicionar micro movimento discreto de escala/inclinação do glifo.
@@ -30,21 +25,21 @@ Atualizado: 8 de setembro de 2026
 - [x] Preservar `prefers-reduced-motion`.
 - [x] Não cancelar a animação inversa do X através do evento `close` do dialog.
 - [x] Preservar ARIA, foco pointer/teclado, dimensões, safe areas e breakpoints.
-- [x] Versionar candidata como `v70` / `70-menu4`.
+- [x] Versionar como `v70` / `70-menu4`.
 - [x] Atualizar `release-manifest.json`, `scripts/prepare-pages.cjs` e `sw.js`.
 - [x] Atualizar regressões específicas e testes de distribuição relacionados.
-- [x] Atualizar `PROJECT_STATE.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md` e `CHANGELOG.md`.
-- [ ] Abrir PR da v70.
-- [ ] Confirmar CI verde do PR.
-- [ ] Rever diff final e escopo.
-- [ ] Integrar em `main` apenas com CI verde.
-- [ ] Confirmar CI de `main`.
-- [ ] Confirmar Deploy GitHub Pages.
-- [ ] Atualizar documentação para estado publicado.
+- [x] Atualizar os cinco documentos de continuidade.
+- [x] Abrir PR #58.
+- [x] Confirmar CI verde do PR: run #1279 (`34170191884`).
+- [x] Rever diff final: apenas menu, distribuição, testes relacionados e documentação.
+- [x] Integrar PR #58 em `main`: `f4144bff69a3b46e0f6ec78a00af50d29b704578`.
+- [x] Confirmar CI de `main`: run #1280 (`34170229908`).
+- [x] Confirmar Deploy GitHub Pages: run #1273 (`34170256426`).
+- [x] Atualizar documentação para estado publicado.
 
 ### Validação física prioritária v70
 
-- [ ] iPhone/Safari: tocar hambúrguer e observar movimento contínuo até ao X.
+- [ ] iPhone/Safari: instalar v70 e tocar hambúrguer, confirmando movimento contínuo até ao X.
 - [ ] Tocar no X e observar movimento inverso até ao hambúrguer.
 - [ ] Repetir abrir/fechar rapidamente e confirmar ausência de estado preso.
 - [ ] Confirmar que não existe salto de layout.
@@ -66,15 +61,7 @@ Atualizado: 8 de setembro de 2026
 - [x] Publicar v69 / `69-menu3` pelo PR #56.
 - [x] CI e Pages verdes.
 - [x] Validação física confirmou estados finais corretos.
-- [x] Validação física revelou que o movimento entre estados não é suficientemente perceptível, tratado na v70.
-
-## P0 — v68 painel do menu móvel refinado
-
-- [x] Drawer responsivo e limitado.
-- [x] Safe areas, scroll e ausência de overflow lateral.
-- [x] Itens e ações com alvos mínimos de 48 px.
-- [x] Estados hover/active/focus/current.
-- [x] Release `v68` / `68-menu2` publicada.
+- [x] Validação física revelou que o movimento entre estados não era suficientemente perceptível, tratado na v70.
 
 ## P0 — regressões essenciais que não podem quebrar
 
