@@ -5,9 +5,7 @@
 ### Estado confirmado
 
 - PR #44 integrado em `main`;
-- merge público: `78612a9701d60938532d7be768ea35f84c36c7fc`;
-- CI de `main`: **sucesso**;
-- Deploy GitHub Pages da mesma revisão: **sucesso**;
+- merge público da v64: `78612a9701d60938532d7be768ea35f84c36c7fc`;
 - build público: `v64`;
 - `release-manifest.json`: `latestVersion = v64`.
 
@@ -15,16 +13,24 @@
 
 A auditoria pós-publicação identificou que `.github/workflows/pages.yml` admite `workflow_dispatch`, mas o passo local **Verify tested revision** não repetia duas verificações específicas da v64 que já existiam na CI normal.
 
-Na branch `fix/v64-release-audit` foram adicionados:
+Foram adicionados:
 
 - `node --check v64-runtime.js`;
 - `node tests/v64-runtime.test.cjs`.
 
 A alteração não toca em dados, cifragem, finanças, scanner ou UI; reforça apenas a segurança do caminho de publicação manual.
 
+### Integração e validação
+
+- correção integrada através do PR #46;
+- commit: `72ee9117ba1383dbcde1ae18729309b07134c144`;
+- CI de `main` run #1094: **sucesso**;
+- Deploy GitHub Pages run #1087: **sucesso**;
+- o runtime específico da v64 passa a ser verificado tanto na CI como no gate do próprio deploy.
+
 ### Documentação
 
-PROJECT_STATE, ARCHITECTURE, DECISIONS e TODO foram sincronizados com o estado real da v64 já publicada. Permanece pendente a validação física final em iPhone/Safari, scanner real e ciclo recorrente mensal.
+PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG ficam sincronizados com o estado efetivo após integração. Permanece pendente a validação física final em iPhone/Safari, scanner real e ciclo recorrente mensal.
 
 ## 2026-09-07 — v64 publicada: auditoria móvel, scanner conservador e ciclo recorrente limpo
 
