@@ -135,10 +135,6 @@ Na Lista de compras até 820 px:
 
 A camada não escreve em `appState`, não altera `estimatedCents`/`actualCents`/quantidade, não chama `commit()`/`saveState()`, não substitui handlers financeiros e não altera desktop. O agrupamento móvel move os nós existentes para preservar listeners e acessibilidade.
 
-### Motivo
-
-A tarefa dominante no supermercado é localizar o próximo produto e marcá-lo. Progressive disclosure reduz densidade sem eliminar informação financeira, e a reutilização dos handlers existentes reduz risco de regressão.
-
 ### Validação
 
 PR #48 integrado no commit `2d39f6f4daa8dccabb51bf906ef22d4a5d9075e4`. CI do PR run #1110, CI de `main` run #1111 e Deploy GitHub Pages run #1104 terminaram com sucesso.
@@ -152,8 +148,40 @@ Ao promover a aplicação de v64 para v65, alguns testes históricos de imagens 
 
 ### Decisão
 
-Testes de distribuição devem validar a **versão pública atual** (`v65`) quando inspecionam `BUILD`, assets versionados, manifesto e Service Worker. Testes de componentes preservados podem continuar a validar os seus identificadores internos (`v64-runtime.js`, `64-runtime1`) quando essa revisão não foi alterada.
+Testes de distribuição validam a **versão pública atual** quando inspecionam `BUILD`, assets versionados, manifesto e Service Worker. Testes de componentes preservados podem continuar a validar identificadores internos (`v64-runtime.js`, `64-runtime1`, `65-shopping1`) quando essas revisões não mudaram.
 
 ### Motivo
 
 Separar a versão da aplicação da revisão de componentes evita falsos negativos de CI durante releases de apresentação e impede que um teste legado force alterações artificiais em código funcional que não mudou.
+
+## D-031 — O shell móvel usa uma única cor canónica
+Data: 7 de setembro de 2026 · Estado: aceite para a candidata v66; integração pendente de CI verde.
+
+### Contexto
+
+Uma captura real de iPhone na Lista de compras mostrou uma diferença visível entre o fundo quase branco do cabeçalho e uma faixa/área azulada adjacente. A inspeção do código confirmou que `market-brand.css` aplicava um `radial-gradient` azul a `.main` no Mercado, enquanto o topbar `fixed` usava outro fundo com transparência e `backdrop-filter`. Como o topbar tem recuo lateral por `--page-gutter`, o fundo do Mercado ficava visível nas margens e a composição do Safari acentuava a diferença.
+
+Também existiam três tons claros próximos na superfície PWA: tokens CSS, `theme-color` e `manifest.webmanifest`.
+
+### Decisão
+
+Até 820 px, todo o shell estrutural da aplicação usa um único token:
+
+- claro: `--mobile-shell-bg: #f5f7fa`;
+- escuro: `--mobile-shell-bg: #0f1722`.
+
+O token é aplicado ao documento ativo, `body`, `.app-shell`, `.main`, `.main` específico do Mercado e `.topbar`. O topbar móvel fica opaco e sem `backdrop-filter`. O radial azul do Mercado continua permitido no desktop, mas é suprimido no shell móvel.
+
+`manifest.webmanifest` e o `theme-color` inicial do build público usam `#f5f7fa`; `applyTheme()` continua a alternar para `#0f1722` no tema escuro.
+
+### Versionamento
+
+A release pública candidata é `v66`. Como apenas a folha historicamente chamada `v64-runtime.css` mudou, ela recebe revisão própria `66-shell1`; `v64-runtime.js` permanece `64-runtime1` e `market-shopping-focus.js/.css` permanece `65-shopping1`.
+
+### Restrições
+
+A correção não altera geometria do cabeçalho, safe area, navegação, dados, scanner, faturas, pagamentos, persistência, cifragem ou sincronização. Não deve remover a identidade visual do Mercado no desktop.
+
+### Motivo
+
+Uma única superfície cromática elimina a emenda branco/azulado, reduz diferenças de composição entre Safari/PWA e mantém a regra D-027 de que o topbar é um componente global, não uma área tematizada por página.
