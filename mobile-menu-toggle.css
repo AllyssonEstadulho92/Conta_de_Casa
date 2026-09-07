@@ -273,12 +273,10 @@
 }
 
 @media(max-width:359px){
-  .nav-drawer{width:min(300px,calc(100vw - 20px))}
+  .nav-drawer{width:calc(100vw - 20px)}
   .nav-drawer-shell{padding-inline:10px}
   .drawer-nav{margin-top:12px}
   .drawer-nav.nav-list{gap:11px}
-  .drawer-nav .nav-btn,
-  .drawer-footer .icon-text-btn{min-height:46px}
 }
 
 @media(prefers-reduced-motion:reduce){
