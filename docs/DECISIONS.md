@@ -191,7 +191,7 @@ PR #50 integrado no commit `9657d558000018af1ea44e6040441f2b9d91648c`. CI do PR 
 Uma única superfície cromática elimina a emenda branco/azulado, reduz diferenças de composição entre Safari/PWA e mantém a regra D-027 de que o topbar é um componente global, não uma área tematizada por página.
 
 ## D-032 — O botão móvel é um único controlo que acompanha o drawer modal
-Data: 7 de setembro de 2026 · Estado: aceite como candidata v67 no PR #52.
+Data: 7 de setembro de 2026 · Estado: aceite, integrada no PR #52 e publicada na v67.
 
 ### Contexto
 
@@ -223,7 +223,11 @@ O glifo usa três traços arredondados de comprimentos progressivos e transforma
 
 ### Restrições
 
-A camada `mobile-menu-toggle.js/.css` não escreve em `appState`, não altera persistência, finanças, scanner, sincronização, tema, safe area, título, `+` ou Sync. A versão proposta é `v67`, revisão `67-menu1`.
+A camada `mobile-menu-toggle.js/.css` não escreve em `appState`, não altera persistência, finanças, scanner, sincronização, tema, safe area, título, `+` ou Sync. A versão publicada é `v67`, revisão `67-menu1`.
+
+### Validação
+
+PR #52 integrado no commit `a1d932e580abaa06e7026a515f797411ab205f6e`. CI do PR run #1178, CI de `main` run #1179 e Deploy GitHub Pages run #1172 terminaram com sucesso. A validação física no iPhone/Safari continua pendente.
 
 ### Motivo
 
