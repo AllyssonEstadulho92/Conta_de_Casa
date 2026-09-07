@@ -1,9 +1,23 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v68",
+  "latestVersion": "v69",
   "publishedAt": "2026-09-07",
   "releases": [
+    {
+      "version": "v69",
+      "date": "7 de setembro de 2026",
+      "title": "Animação hambúrguer para X corrigida no iPhone",
+      "items": [
+        "Corrigido um conflito entre o sistema Lucide e o controlo móvel que substituía as três linhas animáveis por um SVG estático sempre que o estado aria-expanded mudava.",
+        "O mesmo botão passa a manter as três linhas proporcionais no estado fechado e a transformá-las efetivamente num X ao abrir o menu, regressando ao hambúrguer quando o menu fecha.",
+        "O estado visual usa aria-expanded e data-menu-state em conjunto, mantendo o X sincronizado com o estado real do drawer.",
+        "O foco programático depois de toque ou rato deixa de desenhar a moldura visual observada no Safari; a indicação de foco por teclado continua preservada.",
+        "A animação permanece curta e discreta, com cerca de 190 ms, e continua a respeitar prefers-reduced-motion.",
+        "A correção reutiliza o mesmo #mobileMenuBtn, o mesmo #mobileDrawer e o fluxo de navegação existente; não cria um segundo controlo nem altera o tamanho global da aplicação.",
+        "A alteração é exclusivamente de interface e navegação: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+      ]
+    },
     {
       "version": "v68",
       "date": "7 de setembro de 2026",
