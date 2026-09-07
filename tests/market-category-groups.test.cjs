@@ -42,7 +42,7 @@ assert.ok(sw.includes("'./ui-consistency.css'"));
 assert.ok(sw.includes("'./v64-runtime.css'"));
 assert.ok(sw.includes("'./v64-runtime.js'"));
 assert.ok(sw.includes("'./release-manifest.json'"));
-assert.match(prepare,/const BUILD = 'v66'/);
+assert.match(prepare,/const BUILD = 'v67'/);
 assert.match(prepare,/const UI_REV = '64-ui1'/);
 assert.match(prepare,/const CATEGORY_REV = '64-ui1'/);
 assert.match(prepare,/const VISUAL_REV = '64-ui1'/);
@@ -75,4 +75,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market category grouping, left alignment and v66 shell build ordering tests: OK');
+console.log('Market category grouping, left alignment and v67 public build ordering tests: OK');
