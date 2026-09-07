@@ -1,9 +1,25 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v64",
+  "latestVersion": "v65",
   "publishedAt": "2026-09-07",
   "releases": [
+    {
+      "version": "v65",
+      "date": "7 de setembro de 2026",
+      "title": "Lista de compras mais rápida e focada no supermercado",
+      "items": [
+        "No telemóvel, a Lista de compras passa a começar por um resumo compacto com quantos itens faltam comprar, quantos já foram comprados e o total previsto.",
+        "Os quatro cartões financeiros deixam de ocupar o primeiro ecrã no mobile; estimado, contabilizado, por comprar e diferença continuam disponíveis em Resumo financeiro.",
+        "O botão + do cabeçalho passa a abrir diretamente Adicionar produto quando a Lista de compras está ativa, reutilizando a ação existente e evitando um segundo botão de adição no mobile.",
+        "Estado, Categoria e Ordenar passam a usar controlos compactos; Limpar filtros só aparece quando pesquisa, estado, categoria ou ordenação diferem do padrão.",
+        "Categorias que ainda têm produtos por comprar permanecem abertas e mostram apenas a contagem pendente para reduzir ruído durante a compra.",
+        "Produtos já comprados são reunidos numa secção Comprados recolhida por padrão, deixando a lista principal progressivamente mais curta.",
+        "Cada produto móvel prioriza checkbox, nome, quantidade e preço; preço real, diferença, edição e eliminação ficam disponíveis em Detalhes.",
+        "A alteração é exclusivamente de apresentação: não modifica estimatedCents, actualCents, quantidade, cofre, scanner, faturas, persistência ou sincronização.",
+        "A tabela e os resumos completos do desktop são preservados, e os novos controlos mantêm alvos tácteis, nomes acessíveis e suporte a movimento reduzido."
+      ]
+    },
     {
       "version": "v64",
       "date": "7 de setembro de 2026",

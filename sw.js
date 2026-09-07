@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v64-runtime1';
+const CACHE = 'conta-de-casa-public-v64-runtime1-v65-shopping1';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -14,6 +14,7 @@ const PUBLIC_ASSETS = [
   './ui-icons.css',
   './ui-consistency.css',
   './v64-runtime.css',
+  './market-shopping-focus.css',
   './invoice-capture.css',
   './app-update.css',
   './market-image-audit.css',
@@ -35,6 +36,7 @@ const PUBLIC_ASSETS = [
   './market-image-audit.js',
   './market-official-images.js',
   './v64-runtime.js',
+  './market-shopping-focus.js',
   './release-manifest.json',
   './manifest.webmanifest',
   './icon.svg',

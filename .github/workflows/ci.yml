@@ -36,6 +36,7 @@ jobs:
           node --check market-experience.js
           node --check market-branding.js
           node --check market-category-groups.js
+          node --check market-shopping-focus.js
           node --check market-barcode.js
           node --check ui-icons.js
           node --check invoice-capture.js
@@ -73,6 +74,9 @@ jobs:
 
       - name: Market grouped-list tests
         run: node tests/market-category-groups.test.cjs
+
+      - name: Market mobile shopping-focus tests
+        run: node tests/market-shopping-focus.test.cjs
 
       - name: Market live-source tests
         run: node tests/market-experience.test.cjs

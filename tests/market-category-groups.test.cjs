@@ -19,7 +19,7 @@ assert.match(js,/market-category-summary/);
 assert.match(js,/market-category-items/);
 assert.match(js,/MutationObserver/,'grouping must be restored after renderMarket replaces the list');
 assert.match(js,/data-market-toggle/,'grouping must reuse the real market item identifier');
-assert.match(js,/details\.open=true/,'categories must start expanded');
+assert.match(js,/details\.open=true/,'base category layer must start categories expanded before v65 shopping focus prioritizes pending items');
 assert.match(js,/localeCompare\(b,'pt-PT'\)/);
 assert.match(js,/category==='Mercearia \/ Despensa'\)return 'plan'/,'pantry category must use the cleaner local icon instead of the shopping cart');
 assert.doesNotMatch(js,/estimatedCents|actualCents|saveState|commit\(/,'presentation layer must not mutate financial state');
@@ -41,7 +41,7 @@ assert.ok(sw.includes("'./ui-consistency.css'"));
 assert.ok(sw.includes("'./v64-runtime.css'"));
 assert.ok(sw.includes("'./v64-runtime.js'"));
 assert.ok(sw.includes("'./release-manifest.json'"));
-assert.match(prepare,/const BUILD = 'v64'/);
+assert.match(prepare,/const BUILD = 'v65'/);
 assert.match(prepare,/const UI_REV = '64-ui1'/);
 assert.match(prepare,/const CATEGORY_REV = '64-ui1'/);
 assert.match(prepare,/const VISUAL_REV = '64-ui1'/);
@@ -73,4 +73,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market category grouping, left alignment and v64 runtime ordering tests: OK');
+console.log('Market category grouping, left alignment and v65 build ordering tests: OK');

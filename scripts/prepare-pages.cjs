@@ -5,11 +5,12 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const BUILD = 'v64';
+const BUILD = 'v65';
 const UI_REV = '64-ui1';
 const CATEGORY_REV = '64-ui1';
 const VISUAL_REV = '64-ui1';
 const RUNTIME_REV = '64-runtime1';
+const SHOPPING_REV = '65-shopping1';
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -22,6 +23,7 @@ const PUBLIC_FILES = Object.freeze([
   'ui-icons.css',
   'ui-consistency.css',
   'v64-runtime.css',
+  'market-shopping-focus.css',
   'invoice-capture.css',
   'app-update.css',
   'market-image-audit.css',
@@ -43,6 +45,7 @@ const PUBLIC_FILES = Object.freeze([
   'market-image-audit.js',
   'market-official-images.js',
   'v64-runtime.js',
+  'market-shopping-focus.js',
   'release-manifest.json',
   'sw.js',
   'manifest.webmanifest',
@@ -79,8 +82,10 @@ if(!index.includes('market-brand.css')) index=index.replace('</head>',`  <link r
 if(!index.includes('market-category-groups.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-category-groups.css?v=${CATEGORY_REV}" />\n</head>`);
 // Consolidação visual global da v63, mantida antes dos ajustes de runtime da v64.
 if(!index.includes('ui-consistency.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./ui-consistency.css?v=${VISUAL_REV}" />\n</head>`);
-// Camada final v64: safe-area tátil e estado visual das faturas por preencher.
+// Camada v64: safe-area tátil e estado visual das faturas por preencher.
 if(!index.includes('v64-runtime.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v64-runtime.css?v=${RUNTIME_REV}" />\n</head>`);
+// Camada v65: densidade e prioridade operacional exclusivas da Lista de compras.
+if(!index.includes('market-shopping-focus.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-shopping-focus.css?v=${SHOPPING_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
 if(!index.includes('sync-conflict-policy.js')) index=index.replace(syncScript,`${syncScript}<script src="./sync-conflict-policy.js?v=${UI_REV}" defer></script>`);
@@ -92,6 +97,7 @@ if(!index.includes('market-official-images.js')) index=index.replace('</body>',`
 if(!index.includes('market-branding.js')) index=index.replace('</body>',`  <script src="./market-branding.js?v=${UI_REV}" defer></script>\n</body>`);
 if(!index.includes('market-category-groups.js')) index=index.replace('</body>',`  <script src="./market-category-groups.js?v=${CATEGORY_REV}" defer></script>\n</body>`);
 if(!index.includes('v64-runtime.js')) index=index.replace('</body>',`  <script src="./v64-runtime.js?v=${RUNTIME_REV}" defer></script>\n</body>`);
+if(!index.includes('market-shopping-focus.js')) index=index.replace('</body>',`  <script src="./market-shopping-focus.js?v=${SHOPPING_REV}" defer></script>\n</body>`);
 fs.writeFileSync(distIndex,index);
 
 const distEvents=path.join(DIST,'events.js');
@@ -107,4 +113,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; visuals ${VISUAL_REV}; runtime ${RUNTIME_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; visuals ${VISUAL_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}).`);
