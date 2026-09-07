@@ -1,9 +1,21 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v64",
+  "latestVersion": "v65",
   "publishedAt": "2026-09-07",
   "releases": [
+    {
+      "version": "v65",
+      "date": "7 de setembro de 2026",
+      "title": "Espaçamento móvel e superfícies visuais uniformes",
+      "items": [
+        "O cabeçalho móvel passa a reservar uma separação visual fixa antes do primeiro controlo da página, evitando que pesquisa, filtros ou separadores pareçam cortados sob o topo.",
+        "A superfície do cabeçalho passa a cobrir toda a largura do viewport e usa o gutter apenas como padding interno, eliminando faixas laterais com tonalidade diferente.",
+        "O fundo móvel de Compras deixa de expor o gradiente radial histórico junto ao cabeçalho e às margens; a superfície estrutural passa a usar o mesmo fundo neutro das restantes páginas.",
+        "Início, Faturas, Lista de compras e Relatórios passam a usar a mesma distância entre cabeçalho e conteúdo, sem alterar rotas, dados, cálculos, scanner, faturas ou sincronização.",
+        "O cache público é renovado para garantir que Safari/PWA recebe o CSS corrigido após a confirmação da atualização."
+      ]
+    },
     {
       "version": "v64",
       "date": "7 de setembro de 2026",
