@@ -1,9 +1,22 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v65",
+  "latestVersion": "v66",
   "publishedAt": "2026-09-07",
   "releases": [
+    {
+      "version": "v66",
+      "date": "7 de setembro de 2026",
+      "title": "Cabeçalho móvel com fundo uniforme",
+      "items": [
+        "O fundo do cabeçalho, da safe area, das margens laterais e do conteúdo móvel passa a usar a mesma cor, eliminando a diferença visual entre branco e azul observada no iPhone.",
+        "Na Lista de compras, o degradê azul histórico do Mercado deixa de aparecer por baixo e ao lado do cabeçalho no mobile; a identidade do módulo continua nos controlos e no conteúdo.",
+        "O cabeçalho móvel deixa de usar transparência e blur sobre o fundo da página, evitando variações de cor provocadas pela composição do Safari.",
+        "O tema claro usa o mesmo tom de shell já anunciado pelo theme-color da aplicação, e o tema escuro mantém um fundo único coerente com o respetivo theme-color.",
+        "A correção é apenas visual e responsiva: não altera faturas, pagamentos, Lista de compras, estimatedCents, actualCents, scanner, cofre, IndexedDB ou sincronização.",
+        "A versão desktop mantém o fundo e a identidade visual existentes; a alteração está limitada ao shell da aplicação até 820 px."
+      ]
+    },
     {
       "version": "v65",
       "date": "7 de setembro de 2026",

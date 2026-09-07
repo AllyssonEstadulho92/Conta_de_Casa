@@ -1,5 +1,52 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-07 — candidata v66: fundo móvel uniforme no iPhone
+
+### Problema observado
+
+Uma captura real de iPhone na **Lista de compras** revelou uma diferença cromática entre o cabeçalho quase branco e uma área azulada adjacente. O problema era visual, mas quebrava a continuidade do shell e tornava o cabeçalho aparentemente mal configurado.
+
+### Causa confirmada
+
+- `market-brand.css` aplicava um `radial-gradient` azul a `html.market-prototype-active .main`;
+- o topbar móvel é `fixed` e usa recuo lateral por `--page-gutter`, deixando o fundo de `.main` visível nas margens;
+- o topbar usava fundo parcialmente composto e `backdrop-filter`, podendo herdar tonalidades diferentes na composição do Safari;
+- os tons claros do token visual, `theme-color` e `manifest.webmanifest` eram próximos, mas não idênticos.
+
+### Corrigido — shell móvel
+
+- criado `--mobile-shell-bg` no breakpoint até 820 px;
+- tema claro: `#f5f7fa`;
+- tema escuro: `#0f1722`;
+- documento ativo, `body`, `.app-shell`, `.main`, `.main` do Mercado e `.topbar` usam o mesmo fundo no mobile;
+- o radial azul do Mercado é suprimido apenas no shell móvel e continua disponível no desktop;
+- topbar móvel passa a fundo opaco, sem `backdrop-filter`/`-webkit-backdrop-filter`;
+- geometria do cabeçalho, safe area, menu, título, `+`, Sync e navegação permanecem inalteradas.
+
+### PWA e versionamento
+
+- build candidato: `v66`;
+- revisão de shell: `66-shell1`;
+- runtime funcional preservado: `64-runtime1`;
+- camada de Compras preservada: `65-shopping1`;
+- revisão visual preservada: `64-ui1`;
+- novo cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1`;
+- `manifest.webmanifest.background_color` e `theme_color` passam para `#f5f7fa`;
+- Pages força o `theme-color` inicial do HTML público para `#f5f7fa`; `applyTheme()` continua a trocar para `#0f1722` no tema escuro.
+
+### Segurança e dados
+
+- nenhuma alteração de `STATE_VERSION`;
+- nenhuma alteração a `estimatedCents`, `actualCents`, faturas, pagamentos, scanner, recorrências, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB ou sincronização;
+- nenhum segredo, token ou chave adicionado;
+- a dívida técnica do ZXing via `unpkg.com` permanece separada desta release.
+
+### QA candidato
+
+Os testes foram atualizados para validar a cor canónica do shell, ausência de blur no topbar móvel, alinhamento do manifesto/theme-color, revisão `66-shell1`, novo cache e preservação das revisões funcionais v64/v65.
+
+Estado: implementação e documentação da candidata preparadas; CI do PR, integração em `main`, publicação GitHub Pages e confirmação física no iPhone ainda pendentes.
+
 ## 2026-09-07 — v65 publicada: Lista de compras focada no supermercado
 
 ### Objetivo
@@ -30,63 +77,28 @@ Reduzir densidade e duplicação no mobile sem tocar no modelo financeiro. A tar
 - os mesmos nós e handlers existentes são reutilizados para adicionar/editar/eliminar e introduzir preço real;
 - nenhum segredo, token ou chave foi adicionado.
 
-### Versionamento
+### Versionamento e validação
 
-- build público: `v65`;
-- revisão de Compras: `65-shopping1`;
-- runtime preservado: `64-runtime1`;
-- revisão visual preservada: `64-ui1`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1`;
-- `release-manifest.json`: `latestVersion = v65`.
-
-### QA e correção de integração
-
-A primeira validação revelou duas expectativas antigas de build `v64` em testes legados de imagens. Foram alinhados `tests/market-image-audit.test.cjs` e `tests/market-official-images.test.cjs` para a versão pública v65, mantendo `v64-runtime.js`/`64-runtime1` inalterados.
-
-Depois da correção:
-
-- CI do PR #48 run #1110: **sucesso**;
-- PR #48 integrado em `main`;
-- commit de integração: `2d39f6f4daa8dccabb51bf906ef22d4a5d9075e4`;
-- CI de `main` run #1111: **sucesso**;
-- Deploy GitHub Pages run #1104: **sucesso**.
-
-A matriz validou finanças, auditoria, invariantes, cofre, datas, formulários, QR, Mercado, imagens legadas, scanner, contabilidade, runtime v64, camada v65, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
-
-### Estado
-
-v65 integrada e publicada. Permanece pendente validação física em iPhone/Safari e Android, scanner real, recorrência mensal real, acessibilidade em hardware e atualização v64 → v65 no dispositivo.
+- build: `v65`;
+- Compras: `65-shopping1`;
+- runtime: `64-runtime1`;
+- cache anterior: `conta-de-casa-public-v64-runtime1-v65-shopping1`;
+- PR #48 integrado no commit `2d39f6f4daa8dccabb51bf906ef22d4a5d9075e4`;
+- CI do PR #1110: sucesso;
+- CI de `main` #1111: sucesso;
+- Deploy GitHub Pages #1104: sucesso.
 
 ## 2026-09-07 — auditoria pós-publicação v64
 
-### Estado confirmado
-
-- PR #44 integrado em `main`;
-- merge público da v64: `78612a9701d60938532d7be768ea35f84c36c7fc`;
-- build público anterior: `v64`;
-- reforço de pipeline integrado pelo PR #46.
-
-### Corrigido — gate de redeploy manual
-
-A auditoria pós-publicação identificou que `.github/workflows/pages.yml` admite `workflow_dispatch`, mas o passo local **Verify tested revision** não repetia duas verificações específicas da v64 que já existiam na CI normal.
-
-Foram adicionados:
-
-- `node --check v64-runtime.js`;
-- `node tests/v64-runtime.test.cjs`.
-
-### Integração e validação
-
-- PR #46 integrado;
-- commit: `72ee9117ba1383dbcde1ae18729309b07134c144`;
-- CI de `main` run #1094: **sucesso**;
-- Deploy GitHub Pages run #1087: **sucesso**.
-
-## 2026-09-07 — v64 publicada: auditoria móvel, scanner conservador e ciclo recorrente limpo
-
 - PR #44 integrado;
-- build `v64`, revisão visual `64-ui1`, runtime `64-runtime1`;
-- safe area/cabeçalho móvel uniformizados;
+- merge público da v64: `78612a9701d60938532d7be768ea35f84c36c7fc`;
+- reforço do redeploy manual integrado pelo PR #46;
+- `pages.yml` passou a repetir sintaxe/teste de `v64-runtime.js` no caminho manual;
+- CI de `main` #1094 e Pages #1087: sucesso.
+
+## 2026-09-07 — v64 publicada: scanner conservador, recorrências limpas e cabeçalho móvel
+
+- safe area/cabeçalho móvel uniformizados em geometria;
 - scanner exige correspondência conservadora e mantém preço pesquisado em `estimatedCents`;
 - GTIN repetido pendente incrementa quantidade;
 - novas ocorrências recorrentes começam **Por preencher** sem herdar valores variáveis;
@@ -94,13 +106,10 @@ Foram adicionados:
 
 ## 2026-09-06 — v63 publicada: consistência visual e atualização controlada (`63-ui2`)
 
-- PR #42 integrado em `main`;
-- merge: `1a034c84976c042e0433d016a5628feaa339a7a6`;
-- CI e Deploy GitHub Pages: sucesso;
-- criado `ui-consistency.css` como camada final de apresentação;
+- `ui-consistency.css` como camada final de apresentação;
 - Lucide permanece sistema vetorial oficial;
-- navegação inferior mantém um único indicador ativo;
-- criado `release-manifest.json` e Centro de Atualização controlado por Service Worker.
+- navegação inferior com um único indicador ativo;
+- `release-manifest.json` e Centro de Atualização controlado por Service Worker.
 
 ## 2026-09-06 — Lista de compras agrupada por categoria (`62-ui3`)
 
@@ -111,7 +120,6 @@ Foram adicionados:
 
 ## 2026-09-06 — Hotfix iPhone/Safari do Mercado e conflitos técnicos (`62-ui2`)
 
-- PR #38 integrado com CI/Pages verdes;
 - corrigida coluna fantasma no browser de produtos;
 - preço reflui abaixo de 360 px;
 - `sync-conflict-policy.js` separa metadados técnicos de conflitos financeiros.
