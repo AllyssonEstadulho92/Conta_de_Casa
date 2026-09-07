@@ -1,6 +1,6 @@
 'use strict';
 
-/* Conta de Casa v68 — o mesmo controlo móvel alterna hambúrguer <-> X e acompanha o drawer. */
+/* Conta de Casa v69 — o mesmo controlo móvel alterna hambúrguer <-> X sem ser sobrescrito pelo hidratador Lucide. */
 (function installAnimatedMobileMenu(root){
   let installed=false;
 
@@ -17,7 +17,26 @@
     button.parentNode?.insertBefore(homeAnchor,button);
 
     button.classList.add('animated-mobile-menu-toggle');
-    button.innerHTML='<span class="mobile-menu-glyph" aria-hidden="true"><span></span><span></span><span></span></span>';
+
+    // ui-icons.js hidrata #mobileMenuBtn com o SVG Lucide "menu". Mantemos um SVG-sentinela
+    // oculto e o mesmo data-ui-icon-slot para que essa hidratação reconheça o controlo como
+    // já tratado e não substitua as três linhas animáveis sempre que aria-expanded muda.
+    let iconSentinel=button.querySelector(':scope > svg.ui-icon-svg');
+    if(!iconSentinel){
+      iconSentinel=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      iconSentinel.classList.add('ui-icon-svg');
+    }
+    iconSentinel.classList.add('mobile-menu-icon-sentinel');
+    iconSentinel.hidden=true;
+    iconSentinel.setAttribute('aria-hidden','true');
+    iconSentinel.setAttribute('focusable','false');
+
+    const glyph=document.createElement('span');
+    glyph.className='mobile-menu-glyph';
+    glyph.setAttribute('aria-hidden','true');
+    glyph.append(document.createElement('span'),document.createElement('span'),document.createElement('span'));
+    button.dataset.uiIconSlot='menu';
+    button.replaceChildren(glyph,iconSentinel);
 
     // Mantém o botão histórico no DOM para não quebrar wiring legado, mas remove o X duplicado da interface.
     if(legacyClose){
@@ -50,26 +69,45 @@
       else restoreButtonHome();
     }
 
-    function openDrawer(){
-      if(typeof root.openMobileDrawer==='function')root.openMobileDrawer();
-      else if(!drawer.open){drawer.showModal();drawer.classList.add('open');}
-      syncButton(drawer.open);
+    function setFocusOrigin(keyboard){
+      button.dataset.focusOrigin=keyboard?'keyboard':'pointer';
+    }
+
+    function focusButton(keyboard){
+      setFocusOrigin(keyboard);
       requestAnimationFrame(()=>button.focus({preventScroll:true}));
     }
 
-    function closeDrawer(){
+    function openDrawer(keyboard=false){
+      if(typeof root.openMobileDrawer==='function')root.openMobileDrawer();
+      else if(!drawer.open){drawer.showModal();drawer.classList.add('open');}
+      syncButton(drawer.open);
+      focusButton(keyboard);
+    }
+
+    function closeDrawer(keyboard=false){
+      // Define primeiro a origem para neutralizar apenas o anel de foco programático após toque/rato.
+      // A ativação por teclado continua a expor :focus-visible normalmente.
+      setFocusOrigin(keyboard);
       if(typeof root.closeMobileDrawer==='function')root.closeMobileDrawer();
       else if(drawer.open){drawer.classList.remove('open');drawer.close();}
       syncButton(false);
       requestAnimationFrame(()=>button.focus({preventScroll:true}));
     }
 
+    button.addEventListener('pointerdown',()=>setFocusOrigin(false),{passive:true});
+    button.addEventListener('keydown',event=>{
+      if(event.key==='Enter'||event.key===' ')setFocusOrigin(true);
+    });
+    button.addEventListener('blur',()=>delete button.dataset.focusOrigin);
+
     // Captura o gesto antes do listener legado: abrir e fechar passam a usar o mesmo botão.
     button.addEventListener('click',event=>{
       event.preventDefault();
       event.stopImmediatePropagation();
-      if(drawer.open)closeDrawer();
-      else openDrawer();
+      const keyboard=event.detail===0;
+      if(drawer.open)closeDrawer(keyboard);
+      else openDrawer(keyboard);
     },true);
 
     drawer.addEventListener('close',()=>syncButton(false));
