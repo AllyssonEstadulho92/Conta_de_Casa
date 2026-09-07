@@ -1,16 +1,16 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-08 — v70 candidata: movimento visível do hambúrguer ↔ X
+## 2026-09-08 — v70 publicada: movimento visível do hambúrguer ↔ X
 
 ### Observação em hardware real
 
-A validação da v69 no iPhone confirmou que os estados finais do menu estão corretos: fechado apresenta hambúrguer e aberto apresenta `X`. O problema remanescente é de movimento percebido: a transformação pode parecer instantânea quando o mesmo botão é movido entre o topbar e o `<dialog>`.
+A validação da v69 no iPhone confirmou que os estados finais do menu estavam corretos: fechado apresentava hambúrguer e aberto apresentava `X`. O problema remanescente era de movimento percebido: a transformação podia parecer instantânea quando o mesmo botão era movido entre o topbar e o `<dialog>`.
 
 ### Causa técnica
 
-`#mobileMenuBtn` é o mesmo nó DOM nos dois estados. Durante a abertura, o drawer é ativado e o botão é reparented para `.drawer-head`; ao fechar, regressa ao topbar. A v69 usa CSS transitions para interpolar `top`, `width`, `transform` e `opacity`. No Safari, o reparenting pode fazer com que o browser apresente diretamente o estado final e a transição deixe de ser claramente visível.
+`#mobileMenuBtn` é o mesmo nó DOM nos dois estados. Durante a abertura, o drawer é ativado e o botão é reparented para `.drawer-head`; ao fechar, regressa ao topbar. A v69 usava CSS transitions para interpolar `top`, `width`, `transform` e `opacity`. No Safari, o reparenting pode fazer com que o browser apresente diretamente o estado final e a transição deixe de ser claramente visível.
 
-### Correção aplicada na candidata v70
+### Correção publicada
 
 - preservado o mesmo `#mobileMenuBtn` e o mesmo `#mobileDrawer`;
 - preservados os três spans, a sentinela Lucide oculta e `data-ui-icon-slot="menu"`;
@@ -26,32 +26,33 @@ A validação da v69 no iPhone confirmou que os estados finais do menu estão co
 - fechos externos restauram estado sem deixar animações pendentes;
 - a animação inversa iniciada pelo próprio X não é cancelada pelo evento `close` posterior do dialog.
 
-### Distribuição candidata
+### Distribuição publicada
 
 - build: `v70`;
 - revisão do menu: `70-menu4`;
 - shell preservado: `66-shell1`;
 - Compras preservada: `65-shopping1`;
 - runtime preservado: `64-runtime1`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4`.
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4`;
+- PR #58 integrado;
+- merge: `f4144bff69a3b46e0f6ec78a00af50d29b704578`;
+- CI final do PR #1279 (`34170191884`): **sucesso**;
+- CI de `main` #1280 (`34170229908`): **sucesso**;
+- Deploy GitHub Pages #1273 (`34170256426`): **sucesso**.
 
-### Testes atualizados
+### Testes
 
-- regressão específica de Web Animations e reparenting;
-- keyframes por linha e micro movimento do glifo;
-- abertura/fecho agendados no frame seguinte;
-- fallback CSS e `prefers-reduced-motion`;
-- Centro de Atualização e versão pública;
-- consistência visual;
-- compatibilidade das camadas históricas do Mercado e build ordering.
+A matriz completa passou incluindo sintaxe, finanças, auditoria, invariantes, isolamento, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, consistência visual, menu animado, Centro de Atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade e sincronização.
+
+A regressão v70 verifica explicitamente Web Animations/reparenting, keyframes por linha, micro movimento do glifo, abertura/fecho no frame seguinte, fallback CSS e `prefers-reduced-motion`.
 
 ### Segurança e dados
 
 Nenhuma alteração de `STATE_VERSION`, `appState`, faturas, pagamentos, `estimatedCents`, `actualCents`, scanner, recorrências, PIN, cifragem, IndexedDB, autenticação, APIs ou sincronização.
 
-A v70 só será considerada publicada depois de CI do PR, merge em `main`, CI de `main` e Deploy GitHub Pages concluídos com sucesso.
+A publicação técnica está concluída. A validação física final deve confirmar no iPhone/Safari que o movimento agora é efetivamente perceptível.
 
-## 2026-09-07 — v69 publicada: animação hambúrguer → X corrigida no runtime
+## 2026-09-07 — v69 publicada: estados hambúrguer/X corrigidos
 
 - resolvido conflito entre `ui-icons.js`/Lucide e os três spans animáveis;
 - sentinela SVG oculta e `data-ui-icon-slot="menu"` impedem substituição destrutiva;
@@ -59,9 +60,9 @@ A v70 só será considerada publicada depois de CI do PR, merge em `main`, CI de
 - foco programático de pointer deixa de mostrar moldura grande no Safari;
 - teclado mantém `:focus-visible`;
 - PR #56 / merge `a66df37b0fc345491dacf3cac91313d88d080a05`;
-- CI do PR #1250, CI de `main` #1251 e Pages #1244: sucesso.
+- CI e Pages verdes.
 
-A validação física posterior confirmou os estados finais e revelou que o movimento entre eles ainda não era suficientemente perceptível, tratado na candidata v70.
+A validação física posterior confirmou os estados finais e revelou que o movimento entre eles ainda não era suficientemente perceptível, tratado na v70.
 
 ## 2026-09-07 — v68 publicada: painel do menu móvel refinado
 
