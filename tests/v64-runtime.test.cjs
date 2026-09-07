@@ -11,7 +11,7 @@ new Function(js);
 assert.match(js,/AUTO_MATCH_MIN=0\.84/);
 assert.match(js,/AUTO_MATCH_GAP=0\.10/);
 assert.match(js,/select.*apenas um supermercado|selecione apenas um supermercado/i);
-assert.match(js,/productCode===scan\.code/,'same GTIN must be detected before adding a duplicate line');
+assert.match(js,/String\(item\.productCode\|\|''\)===scan\.code/,'same GTIN must be detected before adding a duplicate line');
 assert.match(js,/existing\.quantity=addOneQuantity/,'same GTIN must increment quantity');
 assert.match(js,/estimatedCents=candidate\.priceCents/,'live store price must refresh the estimated value');
 assert.doesNotMatch(js,/actualCents\s*[:=]/,'barcode automation must not convert a store lookup into an actual paid amount');
