@@ -5,230 +5,157 @@ Atualizado: 7 de setembro de 2026
 Este ficheiro mantém as decisões vigentes necessárias para continuidade. O histórico detalhado permanece no Git.
 
 ## D-001 — Altura estrutural separada do VisualViewport
-Estado: aceite. `.app-shell` e `.main` usam unidades de viewport CSS; `VisualViewport` fica reservado a teclado e diálogos. A v64 não elimina o scroller interno de `.main`; apenas deixa de depender de `sticky` para o cabeçalho móvel.
+Estado: aceite. `.app-shell` e `.main` usam unidades de viewport CSS; `VisualViewport` fica reservado a teclado e diálogos. O scroller interno de `.main` é preservado.
 
 ## D-002 — Camada móvel dedicada
-Estado: aceite. `mobile-layout.css` continua como compatibilidade para Safari, safe areas e viewport móvel. Correções de release podem ser aplicadas numa camada final explicitamente versionada.
+Estado: aceite. `mobile-layout.css` mantém compatibilidade Safari/safe areas/viewport. Correções de release podem usar uma camada final explicitamente versionada.
 
 ## D-003 — Densidade móvel sem sacrificar alvos tácteis
-Estado: aceite. A interface pode compactar cartões mantendo legibilidade, foco e alvos tácteis adequados.
+Estado: aceite. A interface pode ser compacta desde que preserve legibilidade, foco e áreas de toque adequadas.
 
 ## D-004 — Mercado como camada isolada
-Estado: aceite. A experiência de Compras não reescreve cifragem, persistência ou o núcleo financeiro sem necessidade comprovada.
+Estado: aceite. Compras não reescreve cifragem, persistência ou núcleo financeiro sem necessidade comprovada.
 
 ## D-005 — Nunca tratar demonstração como preço real
 Estado: aceite. Valores fictícios não alimentam totais nem são apresentados como preços atuais.
 
 ## D-006 — Preço pesquisado é estimativa
-Estado: aceite. O catálogo alimenta `estimatedCents`; `actualCents` representa o preço efetivamente pago/confirmado.
+Estado: aceite. Catálogo alimenta `estimatedCents`; `actualCents` representa valor efetivamente pago/confirmado.
 
 ## D-007 — Código de barras identifica produto, não prova preço pago
-Estado: aceite. GTIN/EAN/UPC identifica o artigo. O preço vem da fonte do Mercado e permanece estimado até existir confirmação da compra.
+Estado: aceite. GTIN/EAN/UPC identifica artigo; preço pesquisado continua estimado até confirmação.
 
 ## D-008 — Lucide como sistema vetorial oficial
-Estado: aceite. Os ícones são locais, auditáveis e não dependem de icon fonts/CDN em runtime.
+Estado: aceite. Ícones são locais, auditáveis, consistentes e sem icon font/CDN em runtime.
 
 ## D-009 — QR fiscal como preenchimento assistido
-Estado: aceite. O QR apenas preenche dados comprováveis e o utilizador revê antes de guardar.
+Estado: aceite. QR apenas preenche dados comprováveis e o utilizador revê antes de guardar.
 
 ## D-010 — Hierarquia móvel consistente
-Estado: aceite e refinada por D-029. Compras mantém título contextual, ação `+`, scanner, informação financeira e navegação inferior consistente, mas a informação secundária pode usar progressive disclosure para não bloquear a tarefa principal.
+Estado: aceite e refinada por D-029. Informação secundária pode usar progressive disclosure para não bloquear a tarefa principal.
 
 ## D-011 — Cofre não simula funcionalidades inexistentes
-Estado: aceite. A interface não apresenta autenticação/capacidades que não estejam realmente implementadas.
+Estado: aceite. A interface não apresenta autenticação ou capacidades não implementadas.
 
 ## D-012 — Fotografia é independente do preço
-Estado: aceite como regra histórica. Uma fotografia nunca prova preço nem transação.
+Estado: aceite como regra histórica. Imagem nunca prova preço nem transação.
 
 ## D-013 — Atualização de software usa Service Worker same-origin
-Estado: aceite. Atualizações públicas são distribuídas pela própria PWA.
+Estado: aceite. Releases públicas são distribuídas pela própria PWA.
 
 ## D-014 — Imagens por SKU com validação estrita
-Estado: compatibilidade histórica. Enquanto os módulos antigos existirem, uma imagem só é considerada oficial quando cadeia e identificador correspondem.
+Estado: compatibilidade histórica. Enquanto módulos antigos existirem, imagem oficial exige cadeia e identificador correspondentes.
 
 ## D-015 — Reader externo restrito a páginas públicas validadas
 Estado: compatibilidade histórica enquanto o pipeline antigo de imagens estiver distribuído.
 
 ## D-016 — Integração de imagens usa o contrato real do DOM
-Estado: histórico/compatibilidade. A integração depende de seletores e identificadores públicos, não de estado privado entre módulos.
+Estado: histórico/compatibilidade. Integrações dependem de seletores/IDs públicos, não de estado privado entre módulos.
 
 ## D-017 — Cartões vivos de retalhista eram `official-only`
-Estado: substituída na apresentação por D-018; permanece apenas no pipeline histórico.
+Estado: substituída na apresentação por D-018; preservada apenas no pipeline histórico.
 
 ## D-018 — Mercado orientado a nomes, sem fotografias de produto
-Data: 6 de setembro de 2026 · Estado: aceite.
-
-A interface é `text-first`: nome, embalagem/quantidade, loja, categoria, estado e preço são a identidade principal. Fotografias/placeholder não ocupam espaço. A câmara permanece para código de barras. Metadados históricos de imagem são preservados por compatibilidade.
+Data: 6 de setembro de 2026 · Estado: aceite. A experiência principal é `text-first`: nome, embalagem/quantidade, loja, categoria, estado e preço. Câmara continua disponível para código de barras; metadados históricos ficam por compatibilidade.
 
 ## D-019 — Browser do Mercado usa posições explícitas em mobile
-Data: 6 de setembro de 2026 · Estado: aceite.
-
-Conteúdo textual e botão `+` usam posições explícitas no Grid para impedir colunas fantasma. Abaixo de 360 px, o preço reflui em vez de comprimir palavras.
+Data: 6 de setembro de 2026 · Estado: aceite. Conteúdo textual e botão `+` usam posições explícitas no Grid; abaixo de 360 px o preço reflui em vez de comprimir palavras.
 
 ## D-020 — Metadados visuais do Mercado são conflitos técnicos
-Data: 6 de setembro de 2026 · Estado: aceite.
-
-`sync-conflict-policy.js` retira apenas `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` da vista de equivalência de negócio. Nome, quantidade, `estimatedCents`, `actualCents`, estado e datas continuam protegidos como dados reais.
+Data: 6 de setembro de 2026 · Estado: aceite. `sync-conflict-policy.js` ignora apenas `productCode`, `imageUrl`, `imageSource` e `imageMatchedAt` para equivalência de negócio. Nome, quantidade, valores, estado e datas continuam protegidos.
 
 ## D-021 — Lista de compras agrupada por categoria sem alterar o modelo
-Data: 6 de setembro de 2026 · Estado: aceite.
-
-O agrupamento reutiliza a categoria e os mesmos nós/handlers. Mobile usa `<details>/<summary>`; desktop mantém tabela e separadores de categoria.
+Data: 6 de setembro de 2026 · Estado: aceite. Agrupamento reutiliza categoria e os mesmos nós/handlers. Mobile usa disclosures; desktop mantém tabela e separadores.
 
 ## D-022 — Uma camada final resolve colisões visuais entre CSS legados
-Data: 6 de setembro de 2026 · Estado: aceite e publicada na v63.
-
-`ui-consistency.css` consolida regras visuais globais sem tocar no estado financeiro. Lucide mantém métrica comum, a navegação móvel usa um único indicador ativo e a faixa dos cartões-resumo permanece sólida.
+Data: 6 de setembro de 2026 · Estado: aceite e publicada na v63. `ui-consistency.css` consolida regras visuais sem tocar em estado financeiro.
 
 ## D-023 — Cada alteração pública relevante gera versão, manifesto e instalação confirmada
-Data: 6 de setembro de 2026 · Estado: aceite.
-
-Ciclo oficial: **alteração → nova versão → notas no `release-manifest.json` → CI → `main` → Pages → instalação pelo Centro de Atualização**.
-
-`latestVersion` deve corresponder ao build; a atualização normal não ativa silenciosamente o novo worker; **Atualizar agora** envia `APPLY_UPDATE`; a allowlist do Service Worker permanece explícita; atualizar assets não apaga o cofre.
+Data: 6 de setembro de 2026 · Estado: aceite. Ciclo oficial: **alteração → versão → `release-manifest.json` → CI → `main` → Pages → instalação pelo Centro de Atualização**. `latestVersion` deve corresponder ao build e a allowlist do SW permanece explícita.
 
 ## D-024 — Auto-adição por código de barras exige correspondência conservadora
-Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64.
-
-A auto-adição só ocorre quando existe exatamente um supermercado selecionado, o resultado pertence à mesma loja, nome/marca e embalagem são compatíveis, score >= `0.84` e a diferença para o segundo candidato >= `0.10`. Ambiguidade exige confirmação manual. GTIN repetido pendente incrementa quantidade. O preço encontrado atualiza apenas `estimatedCents`.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64. Exige exatamente um supermercado, loja/nome/marca/embalagem compatíveis, score `>=0.84` e margem `>=0.10`. Ambiguidade exige confirmação manual. GTIN repetido pendente incrementa quantidade. Só `estimatedCents` é atualizado.
 
 ## D-025 — Próximas faturas recorrentes começam como `Por preencher`
-Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64. Nova ocorrência mantém campos estruturais, usa `totalCents=0`, limpa campos variáveis e fica `draft:true` até preenchimento. Drafts não entram em pendentes/atrasos.
 
-Uma nova ocorrência automática mantém descrição, fornecedor, categoria, método, recorrência e vencimento; define `totalCents = 0`; limpa referência, observações e data de emissão; usa `draft: true` até preenchimento. Drafts não entram em pendentes/atrasos. Faturas com pagamentos, canceladas, arquivadas ou editadas são preservadas.
-
-## D-026 — Cabeçalho móvel é fixo; o conteúdo continua no scroller interno
-Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64.
-
-`.main` continua o scroller interno e a navegação inferior continua fixa. O cabeçalho móvel usa `fixed`, respeita `safe-area-inset-top` e `.main` recebe `padding-top` para impedir sobreposição.
+## D-026 — Cabeçalho móvel é fixo; conteúdo continua no scroller interno
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64. `.main` continua o scroller; topbar usa `fixed`, respeita safe area e o conteúdo recebe offset adequado.
 
 ## D-027 — O topbar móvel é global e não recebe decoração específica por página
-Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v64. Início, Faturas, Compras e Relatórios partilham geometria de título, menu, `+`, Sync e fundo.
 
-Início, Faturas, Compras e Relatórios mantêm a mesma geometria de título, menu, botão `+`, Sync e fundo. A identidade de cada módulo permanece no conteúdo e não na estrutura global do cabeçalho.
-
-## D-028 — O redeploy manual de Pages deve repetir as verificações específicas da release
-Data: 7 de setembro de 2026 · Estado: aceite, integrada no PR #46 e publicada.
-
-O caminho manual de Pages deve verificar a sintaxe e executar a regressão específica das camadas críticas da release antes de preparar/publicar `dist`. A v64 acrescentou `v64-runtime.js` e o respetivo teste; a v65 estendeu o mesmo princípio a `market-shopping-focus.js` e `tests/market-shopping-focus.test.cjs`.
+## D-028 — Redeploy manual de Pages repete verificações específicas da release
+Data: 7 de setembro de 2026 · Estado: aceite e publicada. O caminho manual verifica sintaxe e regressões das camadas críticas antes de gerar `dist`.
 
 ## D-029 — Lista de compras móvel prioriza execução e usa progressive disclosure
-Data: 7 de setembro de 2026 · Estado: aceite, integrada no PR #48 e publicada na v65.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v65.
 
-### Contexto
+Decisão: no mobile, resumo compacto surge primeiro; detalhe financeiro completo fica em disclosure; `+` do topbar reutiliza a ação existente; filtros são compactos; categorias pendentes ficam abertas; Comprados fica recolhido; cartões priorizam checkbox, nome, quantidade e preço. A camada não escreve em `appState`, `estimatedCents`, `actualCents` ou quantidade e não substitui handlers financeiros.
 
-A página móvel apresentava pesquisa, botão de adição duplicado, três filtros, limpar filtros e quatro cartões financeiros antes do conteúdo operacional. Os cartões de cada produto também expunham permanentemente preço real, diferença e ações secundárias, mesmo durante a tarefa simples de marcar compras.
-
-### Decisão
-
-Na Lista de compras até 820 px:
-
-- a primeira informação é uma linha compacta com **por comprar**, **comprados** e **previsto**;
-- o detalhe financeiro completo fica em **Resumo financeiro**;
-- o `+` do topbar reutiliza o handler existente de `#newMarketBtn`; o botão duplicado da página fica oculto no mobile;
-- filtros mantêm os mesmos valores/handlers, mas ocupam menos espaço e **Limpar filtros** só aparece quando necessário;
-- categorias com pendentes ficam abertas;
-- comprados migram apenas no DOM para um grupo **Comprados** fechado por padrão;
-- cada cartão mostra primeiro checkbox, nome, quantidade e preço, colocando informação secundária em `<details>`.
-
-### Restrições
-
-A camada não escreve em `appState`, não altera `estimatedCents`/`actualCents`/quantidade, não chama `commit()`/`saveState()`, não substitui handlers financeiros e não altera desktop. O agrupamento móvel move os nós existentes para preservar listeners e acessibilidade.
-
-### Validação
-
-PR #48 integrado no commit `2d39f6f4daa8dccabb51bf906ef22d4a5d9075e4`. CI do PR run #1110, CI de `main` run #1111 e Deploy GitHub Pages run #1104 terminaram com sucesso.
+Validação histórica: PR #48, commit `2d39f6f4daa8dccabb51bf906ef22d4a5d9075e4`, CI e Pages verdes.
 
 ## D-030 — Versão pública e revisões internas são conceitos distintos
-Data: 7 de setembro de 2026 · Estado: aceite.
+Data: 7 de setembro de 2026 · Estado: aceite. Testes de distribuição validam o build público atual; componentes preservados podem manter revisões internas como `64-runtime1`, `65-shopping1` e `66-shell1`. Isto evita alterar artificialmente código funcional apenas por mudança de release.
+
+## D-031 — O shell móvel usa uma única cor canónica
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v66.
+
+Até 820 px, shell estrutural usa:
+
+- claro: `--mobile-shell-bg:#f5f7fa`;
+- escuro: `--mobile-shell-bg:#0f1722`.
+
+Documento, `body`, `.app-shell`, `.main`, Mercado e `.topbar` usam o mesmo fundo. Topbar é opaco e sem `backdrop-filter`. Desktop mantém identidade do Mercado. Release: v66 / `66-shell1`. PR #50 e respetivas CI/Pages terminaram com sucesso.
+
+## D-032 — O botão móvel é um único controlo que acompanha o drawer modal
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v67.
 
 ### Contexto
 
-Ao promover a aplicação de v64 para v65, alguns testes históricos de imagens ainda exigiam literalmente `const BUILD = 'v64'`. O componente `v64-runtime.js` e a revisão `64-runtime1` continuam válidos e preservados, mas o build público passou corretamente para `v65`.
+O drawer tinha um hambúrguer exterior e um `X` separado. Além da duplicação, um botão exterior ficaria inerte quando `showModal()` ativasse o `<dialog>`.
 
 ### Decisão
 
-Testes de distribuição validam a **versão pública atual** quando inspecionam `BUILD`, assets versionados, manifesto e Service Worker. Testes de componentes preservados podem continuar a validar identificadores internos (`v64-runtime.js`, `64-runtime1`, `65-shopping1`) quando essas revisões não mudaram.
+`#mobileMenuBtn` é o mesmo nó DOM nos dois estados:
+
+- fechado: permanece no topbar e mostra três traços;
+- aberto: é movido para `.drawer-head` e `aria-expanded="true"` transforma os próprios traços em `X`;
+- novo toque fecha o menu;
+- ao fechar por qualquer via, regressa ao ponto original e repõe o hambúrguer.
+
+`#drawerCloseBtn` fica oculto e fora da tabulação por compatibilidade com wiring histórico. Alvo do botão: 44×44 px; `aria-label` alterna Abrir/Fechar; movimento reduzido é respeitado. PR #52 foi publicado na v67.
+
+## D-033 — Refinar o drawer existente sem criar uma segunda navegação
+Data: 7 de setembro de 2026 · Estado: aceite como candidata v68 no PR #54.
+
+### Contexto
+
+A auditoria confirmou que desktop e drawer já partilham `NAV_GROUPS`, que o ciclo hambúrguer/X v67 está tecnicamente correto e que não existe defeito global de viewport que justifique redimensionar a aplicação. O problema residual é de apresentação do painel: várias camadas históricas deixam sombra mais pesada, hierarquia genérica e estados de interação pouco específicos.
+
+### Decisão
+
+A v68 mantém o mesmo `#mobileDrawer`, `#mobileMenuBtn`, `events.js`, `render.js` e fonte de navegação. A melhoria fica na camada final `mobile-menu-toggle.css/.js`:
+
+- largura do drawer: `min(364px, calc(100vw - 24px))`;
+- abaixo de 360 px: `min(300px, calc(100vw - 20px))`;
+- `100dvh`, safe areas e scroll vertical próprio;
+- `overflow-x:hidden` para eliminar scroll lateral;
+- botão continua 44×44 px;
+- itens e ações do painel usam alvos mínimos de 48 px;
+- hover só com pointer fino; `active`, `focus-visible` e `aria-current` têm estados discretos;
+- sombra/backdrop reduzidos;
+- tipografia e ícones continuam os sistemas existentes;
+- `data-menu-state` é acrescentado apenas como estado observável, sincronizado com ARIA.
+
+### Restrição sobre o X legado
+
+`#drawerCloseBtn` **não é removido nesta release** porque `events.js` e `ui-icons.js` ainda o referenciam. Mantê-lo oculto evita código órfão e não cria duplicação visual. A remoção só deve ocorrer num refactor dedicado que elimine também essas referências e respetivos testes.
 
 ### Motivo
 
-Separar a versão da aplicação da revisão de componentes evita falsos negativos de CI durante releases de apresentação e impede que um teste legado force alterações artificiais em código funcional que não mudou.
-
-## D-031 — O shell móvel usa uma única cor canónica
-Data: 7 de setembro de 2026 · Estado: aceite, integrada no PR #50 e publicada na v66.
-
-### Contexto
-
-Uma captura real de iPhone na Lista de compras mostrou uma diferença visível entre o fundo quase branco do cabeçalho e uma faixa/área azulada adjacente. A inspeção do código confirmou que `market-brand.css` aplicava um `radial-gradient` azul a `.main` no Mercado, enquanto o topbar `fixed` usava outro fundo com transparência e `backdrop-filter`. Como o topbar tem recuo lateral por `--page-gutter`, o fundo do Mercado ficava visível nas margens e a composição do Safari acentuava a diferença.
-
-Também existiam três tons claros próximos na superfície PWA: tokens CSS, `theme-color` e `manifest.webmanifest`.
-
-### Decisão
-
-Até 820 px, todo o shell estrutural da aplicação usa um único token:
-
-- claro: `--mobile-shell-bg: #f5f7fa`;
-- escuro: `--mobile-shell-bg: #0f1722`.
-
-O token é aplicado ao documento ativo, `body`, `.app-shell`, `.main`, `.main` específico do Mercado e `.topbar`. O topbar móvel fica opaco e sem `backdrop-filter`. O radial azul do Mercado continua permitido no desktop, mas é suprimido no shell móvel.
-
-`manifest.webmanifest` e o `theme-color` inicial do build público usam `#f5f7fa`; `applyTheme()` continua a alternar para `#0f1722` no tema escuro.
+A solução melhora clareza, densidade, responsividade e interação sem duplicar componentes, sem alterar rotas ou tamanho global da aplicação e sem aumentar o escopo para dados/finanças/segurança.
 
 ### Versionamento
 
-A release pública é `v66`. Como apenas a folha historicamente chamada `v64-runtime.css` mudou, ela recebe revisão própria `66-shell1`; `v64-runtime.js` permanece `64-runtime1` e `market-shopping-focus.js/.css` permanece `65-shopping1`.
-
-### Restrições
-
-A correção não altera geometria do cabeçalho, safe area, navegação, dados, scanner, faturas, pagamentos, persistência, cifragem ou sincronização. Não remove a identidade visual do Mercado no desktop.
-
-### Validação
-
-PR #50 integrado no commit `9657d558000018af1ea44e6040441f2b9d91648c`. CI do PR #1138, CI de `main` #1139 e Deploy GitHub Pages #1132 terminaram com sucesso. A verificação visual final no mesmo iPhone continua necessária porque a CI não reproduz a composição física do Safari/PWA.
-
-### Motivo
-
-Uma única superfície cromática elimina a emenda branco/azulado, reduz diferenças de composição entre Safari/PWA e mantém a regra D-027 de que o topbar é um componente global, não uma área tematizada por página.
-
-## D-032 — O botão móvel é um único controlo que acompanha o drawer modal
-Data: 7 de setembro de 2026 · Estado: aceite, integrada no PR #52 e publicada na v67.
-
-### Contexto
-
-O cabeçalho tinha um botão hambúrguer para abrir `#mobileDrawer` e o próprio drawer apresentava um segundo botão `#drawerCloseBtn` com `X`. Além da duplicação visual, uma transformação puramente CSS do botão exterior não resolveria o requisito de tocar novamente no `X`: quando um `<dialog>` abre com `showModal()`, os elementos exteriores ao diálogo ficam inertes.
-
-### Decisão
-
-A v67 mantém **um único controlo móvel efetivo**. `#mobileMenuBtn` é o mesmo nó DOM nos dois estados:
-
-- fechado: permanece no topbar e mostra três traços;
-- depois de `showModal()`: é movido para `.drawer-head` e transforma-se em `X` através de `aria-expanded="true"`;
-- ao tocar no `X`: chama o fluxo de fecho existente;
-- quando o drawer fecha por qualquer via: regressa ao ponto original do topbar e repõe `aria-expanded="false"`.
-
-O ponto original é preservado por um `Comment` anchor. O botão legado `#drawerCloseBtn` fica no DOM apenas por compatibilidade com o wiring histórico, mas oculto, fora da tabulação e sem exposição acessível.
-
-### Acessibilidade e geometria
-
-- alvo tátil: `44 × 44 px`;
-- estado acessível: `aria-expanded` sincronizado;
-- nome: **Abrir menu** / **Fechar menu**;
-- foco regressa ao mesmo controlo no fecho;
-- `prefers-reduced-motion: reduce` remove a animação;
-- Escape, backdrop e eventos de fecho existentes permanecem válidos.
-
-### Apresentação
-
-O glifo usa três traços arredondados de comprimentos progressivos e transforma os traços exterior superior/inferior em diagonais de `X`. O botão não recebe borda, caixa branca, fundo verde, estado selecionado cromático ou sombra adicional.
-
-### Restrições
-
-A camada `mobile-menu-toggle.js/.css` não escreve em `appState`, não altera persistência, finanças, scanner, sincronização, tema, safe area, título, `+` ou Sync. A versão publicada é `v67`, revisão `67-menu1`.
-
-### Validação
-
-PR #52 integrado no commit `a1d932e580abaa06e7026a515f797411ab205f6e`. CI do PR run #1178, CI de `main` run #1179 e Deploy GitHub Pages run #1172 terminaram com sucesso. A validação física no iPhone/Safari continua pendente.
-
-### Motivo
-
-Mover o mesmo nó para dentro do `<dialog>` satisfaz simultaneamente o requisito visual hambúrguer ↔ `X`, a interação de fechar pelo próprio `X` e a semântica modal nativa, sem introduzir um botão duplicado nem quebrar o foco do drawer.
+Candidata: `v68`; revisão do componente: `68-menu2`; `64-runtime1`, `65-shopping1` e `66-shell1` permanecem preservadas. A publicação depende de CI do PR, merge em `main` e GitHub Pages verdes.

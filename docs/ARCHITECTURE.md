@@ -2,7 +2,7 @@
 
 Atualizado: 7 de setembro de 2026
 Build público atual: `v67`
-Release pública: PR #52 · commit `a1d932e580abaa06e7026a515f797411ab205f6e`
+Build candidato: `v68` — PR #54
 
 ## Visão geral
 
@@ -20,16 +20,16 @@ Não existe backend financeiro próprio. Integrações externas do Mercado serve
 - sem cookies/telemetria financeira;
 - segredos e PIN não são incluídos no código público.
 
-A v67 não modifica esta camada.
+A v68 não modifica esta camada.
 
 ## JavaScript principal
 
-- `core.js` — estado, normalização, IndexedDB, cifragem e utilitários;
+- `core.js` — estado, normalização, IndexedDB, cifragem, `PAGE_META`, `NAV_GROUPS` e utilitários;
 - `finance.js` — cálculos e invariantes financeiros;
-- `render.js` — renderização, navegação e aplicação de tema;
+- `render.js` — renderização, navegação, tema e hidratação dos mesmos grupos de navegação no sidebar e drawer;
 - `forms.js` — formulários, validação e mutações;
-- `events.js` — eventos globais, viewport, cofre, navegação adaptativa e Service Worker;
-- `mobile-menu-toggle.js` — camada v67 exclusivamente responsável pelo estado visual/DOM do botão hambúrguer ↔ `X` no mobile;
+- `events.js` — eventos globais, viewport, cofre, navegação adaptativa, abertura/fecho do drawer e Service Worker;
+- `mobile-menu-toggle.js` — camada v68 responsável pelo estado visual/DOM do mesmo botão hambúrguer ↔ `X`, reutilizando o fluxo de abertura/fecho existente;
 - `sync.js` — sincronização cifrada opcional;
 - `sync-conflict-policy.js` — equivalência de negócio do Mercado sem ruído de metadados técnicos;
 - `market-experience.js` — catálogo/preço Pingo Doce e Continente através de `cesta.pt`;
@@ -41,9 +41,26 @@ A v67 não modifica esta camada.
 - `app-update.js` — Centro de Atualização;
 - `v64-runtime.js` — correspondência conservadora do scanner e ciclo de faturas recorrentes **Por preencher**.
 
+## Arquitetura da navegação
+
+### Desktop e tablet largo
+
+O sidebar é a navegação primária. Entre 821 e 1180 px pode ficar recolhido/compacto através do mecanismo adaptativo existente.
+
+### Mobile até 820 px
+
+A navegação rápida inferior continua a mostrar `MOBILE_NAV_ITEMS`. O menu completo é o `#mobileDrawer`.
+
+`render.js::renderNav()` usa a mesma fonte `NAV_GROUPS` para:
+
+- `#desktopNav`;
+- `#drawerNav`.
+
+Isto evita duas listas de rotas independentes e mantém opções, rótulos, ícones e `aria-current` coerentes entre computador e telemóvel.
+
 ## Camadas CSS e responsabilidade visual
 
-A ordem pública atual é:
+A ordem pública candidata é:
 
 1. `styles.css` — base histórica;
 2. `design-system.css` — tokens/componentes/layout;
@@ -55,61 +72,100 @@ A ordem pública atual é:
 8. `ui-consistency.css` — consolidação visual global;
 9. `v64-runtime.css` — cabeçalho/safe area e cor canónica do shell móvel v66;
 10. `market-shopping-focus.css` — ajustes finais da Lista de compras no mobile;
-11. `mobile-menu-toggle.css` — geometria do glifo e animação hambúrguer/`X` v67.
+11. `mobile-menu-toggle.css` — camada final v68 para glifo, drawer e estados de interação do menu.
 
-A folha v67 fica por último porque corrige apenas o comando global do menu e precisa de prevalecer sobre dimensões/estados legados sem alterar as restantes camadas.
+A folha do menu continua por último para neutralizar apenas conflitos históricos do componente sem alterar o restante layout.
 
-## Menu móvel v67
+## Menu móvel v68
 
-### Contrato existente preservado
+### Contrato preservado
 
 O HTML continua a expor:
 
 - `#mobileMenuBtn` com `aria-controls="mobileDrawer"` e `aria-expanded`;
 - `#mobileDrawer` como `<dialog>` modal;
-- `#drawerCloseBtn` no DOM para preservar o wiring histórico de `events.js`;
-- `openMobileDrawer()` e `closeMobileDrawer()` como funções de abertura/fecho existentes.
+- `.nav-drawer-shell`, `.drawer-head`, `#drawerNav` e `.drawer-footer`;
+- `#drawerCloseBtn` no DOM por compatibilidade com wiring histórico;
+- `openMobileDrawer()` e `closeMobileDrawer()` em `events.js`.
 
-`events.js` continua responsável por Escape, backdrop, `close`, adaptação desktop/mobile e restante navegação. A v67 não reimplementa estes fluxos quando as funções existentes estão disponíveis.
+Não foi criada uma segunda implementação do menu.
 
-### Por que o mesmo botão é movido para dentro do dialog
+### Estado e comportamento
 
-Quando `HTMLDialogElement.showModal()` abre o drawer, o conteúdo exterior ao `<dialog>` fica inerte. Portanto, deixar o `#mobileMenuBtn` fisicamente no topbar e apenas desenhá-lo como `X` produziria um controlo visualmente correto mas não clicável enquanto o modal estivesse aberto.
+Quando `showModal()` abre um `<dialog>`, os elementos externos ficam inertes. Assim, o mesmo `#mobileMenuBtn` é movido para `.drawer-head` depois da abertura para continuar realmente tocável como `X`.
 
-A v67 mantém **um único controlo real**:
+Fluxo:
 
-1. antes de abrir, `#mobileMenuBtn` está no topbar;
-2. `showModal()` abre o drawer;
-3. o mesmo nó DOM é inserido no início de `.drawer-head`;
-4. `aria-expanded="true"` transforma os três traços em `X`;
-5. ao fechar, o nó regressa ao ponto original marcado por um `Comment` anchor;
-6. `aria-expanded="false"` repõe o hambúrguer.
+1. fechado: botão no topbar, três linhas;
+2. clique/toque: fluxo existente abre o drawer;
+3. o mesmo nó é colocado dentro de `.drawer-head`;
+4. `aria-expanded="true"` transforma as linhas em `X`;
+5. clique no `X`, Escape, backdrop ou navegação fecham o drawer;
+6. o botão regressa ao `Comment` anchor no topbar e `aria-expanded="false"` restaura o hambúrguer.
 
-Esta solução preserva foco, semântica modal e identidade do botão. Não existem dois botões ativos para a mesma ação.
+`aria-label`, `title`, `button.dataset.menuState` e `drawer.dataset.menuState` acompanham `open/closed`.
 
-### X legado
+### Geometria do botão
 
-`#drawerCloseBtn` é mantido no DOM para que a linha histórica de `events.js` que lhe associa `closeMobileDrawer` continue segura. A camada v67 aplica `hidden`, `tabIndex=-1` e `aria-hidden="true"`; o CSS reforça `display:none` dentro do drawer. Assim não existe segundo `X` visível nem duplicação na ordem de tabulação.
-
-### Geometria e acessibilidade
-
-- alvo do botão: `44 × 44 px`;
+- alvo: `44 × 44 px`;
 - glifo: `24 × 18 px`;
-- traços: comprimentos aproximados `22 / 18 / 14 px`;
-- sem border/background/box-shadow no estado aberto, pressionado ou hover;
-- `aria-label`: **Abrir menu** / **Fechar menu**;
-- `aria-expanded`: `false` / `true`;
-- animação desativada em `prefers-reduced-motion: reduce`;
-- o foco regressa ao mesmo controlo após fecho.
+- linhas: aproximadamente `22 / 18 / 14 px`;
+- transformação para `X` pelas próprias linhas superior/inferior;
+- duração aproximada: 200 ms;
+- sem moldura, fundo verde ou sombra de estado selecionado;
+- `:focus-visible` explícito;
+- hover apenas em `hover:hover` + `pointer:fine`;
+- `prefers-reduced-motion: reduce` remove as transições.
+
+### Painel responsivo
+
+Até 820 px:
+
+- largura principal: `min(364px, calc(100vw - 24px))`;
+- abaixo de 360 px: `min(300px, calc(100vw - 20px))`;
+- altura: `100dvh`;
+- shell interno respeita `safe-area-inset-top` e `safe-area-inset-bottom`;
+- `overflow-x:hidden` impede scroll lateral;
+- `#drawerNav` tem scroll vertical próprio e `overscroll-behavior: contain`;
+- backdrop mantém parte do conteúdo visível e recebe blur discreto;
+- sombra foi reduzida em relação à camada histórica para evitar peso excessivo.
+
+O tamanho global da aplicação, largura da `.main`, gutters e topbar não são alterados.
+
+### Hierarquia interna
+
+- cabeçalho mínimo de 60 px;
+- marca no drawer: 36 × 36 px;
+- grupos com labels compactas em uppercase e espaçamento regular;
+- cada `.nav-btn` tem `min-height:48px`;
+- ícones Lucide: 20 px;
+- `active`/`aria-current="page"`: fundo suave + indicador lateral de 3 px;
+- footer de privacidade/bloqueio usa o mesmo ritmo e alvos de 48 px;
+- texto longo usa ellipsis em vez de criar overflow.
+
+### Compatibilidade do X legado
+
+`#drawerCloseBtn` permanece oculto, `tabIndex=-1` e `aria-hidden="true"`. Ainda existe porque `events.js` e a camada de ícones o referenciam. Não é um controlo visível/ativo e removê-lo exigiria alterar wiring histórico fora do escopo desta release.
+
+## Sistema de ícones e tipografia
+
+A linguagem visual oficial continua Lucide local:
+
+- viewBox 24×24;
+- stroke 2;
+- `currentColor`;
+- sem icon fonts/CDN.
+
+A tipografia mantém Inter/SF/system definida pelo design system. A v68 não introduz nova fonte.
 
 ## Shell móvel v66 preservado
 
-Até 820 px continua um único token de shell:
+Até 820 px:
 
 - claro: `--mobile-shell-bg: #f5f7fa`;
 - escuro: `--mobile-shell-bg: #0f1722`.
 
-O token permanece aplicado ao documento ativo, `body`, `.app-shell`, `.main`, Mercado e `.topbar`. O topbar continua `fixed`, opaco e sem `backdrop-filter`. A v67 não altera safe area, altura, gutters, título, `+` ou Sync.
+O topbar continua `fixed`, opaco e sem `backdrop-filter`. A v68 não altera safe area, altura, gutters, título, `+` ou Sync.
 
 ## Lista de compras v65 preservada
 
@@ -132,51 +188,44 @@ Fontes atuais:
 - Open Food Facts para identificação auxiliar por GTIN;
 - `@zxing/browser` carregado em runtime de `unpkg.com`.
 
-A auto-adição continua conservadora: exatamente um supermercado, score `>= 0.84`, margem `>= 0.10`, loja/nome/marca/embalagem compatíveis. GTIN repetido num item pendente incrementa quantidade. O catálogo continua a atualizar apenas `estimatedCents`; `actualCents` permanece reservado ao valor efetivamente confirmado.
+A auto-adição mantém os mesmos limiares de confiança e só atualiza `estimatedCents`. `actualCents` continua reservado ao valor efetivamente confirmado.
 
-A dependência ZXing externa continua dívida técnica separada.
+A dependência ZXing externa permanece dívida técnica separada.
 
 ## Faturas recorrentes preservadas
 
-As ocorrências futuras automáticas continuam a poder usar `draft: true`, com `totalCents = 0`, sem herdar referência, observações ou data de emissão. Drafts não entram nos totais pendentes/em atraso até preenchimento.
+Ocorrências futuras automáticas continuam a poder usar `draft: true`, com `totalCents = 0`, sem herdar referência, observações ou data de emissão. Drafts não entram nos totais pendentes/em atraso até preenchimento.
 
 ## Tema e PWA
 
-`render.js::applyTheme()` continua a definir dinamicamente:
+`render.js::applyTheme()` continua a definir:
 
 - claro: `meta[name="theme-color"] = #f5f7fa`;
 - escuro: `meta[name="theme-color"] = #0f1722`.
 
-`manifest.webmanifest` continua alinhado com `#f5f7fa` no arranque claro.
+A candidata v68 usa:
 
-Na v67 publicada, `scripts/prepare-pages.cjs` acrescenta os dois assets do menu à allowlist pública e injeta-os no fim das respetivas camadas. `sw.js` inclui ambos na allowlist explícita de cache.
+- build: `v68`;
+- menu: `68-menu2`;
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v68-menu2`.
 
-## Versionamento e distribuição
-
-- público atual: `v67`;
-- revisão visual histórica: `64-ui1`;
-- runtime funcional: `64-runtime1`;
-- Compras: `65-shopping1`;
-- shell CSS: `66-shell1`;
-- menu móvel: `67-menu1`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v67-menu1`.
-
-Publicação confirmada:
-
-- PR #52 integrado em `main` no commit `a1d932e580abaa06e7026a515f797411ab205f6e`;
-- CI do PR #1178: sucesso;
-- CI de `main` #1179: sucesso;
-- Deploy GitHub Pages #1172: sucesso.
+`scripts/prepare-pages.cjs` injeta `mobile-menu-toggle.css/.js` no fim das camadas e `sw.js` mantém allowlist same-origin explícita.
 
 ## Pipeline de qualidade
 
-A v67 acrescenta:
+A v68 estende as regressões para cobrir:
 
-- sintaxe de `mobile-menu-toggle.js` na CI e no gate manual de Pages;
-- `tests/mobile-menu-toggle.test.cjs` na CI e no gate de Pages;
-- atualização de `tests/app-update.test.cjs` para a versão/caches/assets v67.
+- mesmo nó DOM e transformação hambúrguer/X;
+- estado ARIA e `data-menu-state`;
+- sizing responsivo do drawer;
+- safe areas, scroll e ausência de overflow lateral;
+- alvos de 48 px;
+- hover/active/focus/current;
+- movimento reduzido;
+- Centro de Atualização, manifesto e cache v68;
+- compatibilidade das camadas v65/v66 e módulos históricos.
 
-A matriz continua a cobrir finanças, auditoria, invariantes, cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
+A matriz geral continua a cobrir finanças, auditoria, invariantes, cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, segurança, responsividade, navegação, acessibilidade e sincronização.
 
 ## Regressões obrigatórias futuras
 
@@ -187,12 +236,13 @@ Devem permanecer cobertos:
 - datas civis, faturas, pagamentos e QR;
 - Mercado, scanner, quantidade × preço;
 - Lista de compras v65;
-- um único fundo de shell no mobile claro/escuro;
-- safe area/cabeçalho sem alteração de geometria;
-- **um único comando móvel hambúrguer/`X`, sem X duplicado, com 44 px e ARIA sincronizado**;
-- Escape/backdrop/fecho do drawer e foco de retorno;
+- shell móvel v66;
+- **um único comando móvel hambúrguer/X com 44 px e ARIA sincronizado**;
+- painel sem overflow lateral e com alvos ≥48 px;
+- Escape/backdrop/navegação/fecho do drawer;
+- desktop e drawer alimentados pela mesma fonte de navegação;
 - manifesto, Centro de Atualização e Service Worker;
 - segurança/CSP/allowlist;
-- responsividade, navegação, acessibilidade e sincronização.
+- responsividade e acessibilidade.
 
-A CI não substitui a validação física final no iPhone/Safari.
+A CI não substitui a validação física final em Safari/iPhone, Android/Chrome e tablet.
