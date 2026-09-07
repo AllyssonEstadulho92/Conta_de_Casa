@@ -14,10 +14,11 @@ Atualizado: 7 de setembro de 2026
 - [x] Acrescentar `node --check v64-runtime.js` ao passo de verificação do deploy.
 - [x] Acrescentar `node tests/v64-runtime.test.cjs` ao passo de verificação do deploy.
 - [x] Atualizar PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG com o estado real pós-merge.
-- [ ] Obter CI verde para `fix/v64-release-audit`.
-- [ ] Rever o diff final da correção de pipeline.
-- [ ] Integrar a correção apenas com CI verde.
-- [ ] Confirmar novamente CI de `main` e Pages após integração.
+- [x] Obter CI verde para `fix/v64-release-audit`.
+- [x] Rever o diff final da correção de pipeline.
+- [x] Integrar a correção através do PR #46 com CI verde.
+- [x] Confirmar novamente CI de `main` após integração: run #1094 concluída com sucesso.
+- [x] Confirmar novamente GitHub Pages após integração: run #1087 concluída com sucesso.
 
 ### Validação física da v64
 
