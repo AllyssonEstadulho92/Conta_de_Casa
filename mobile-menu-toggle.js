@@ -172,7 +172,9 @@
     },true);
 
     drawer.addEventListener('close',()=>{
-      cancelMenuMotion();
+      // Fecho provocado pelo próprio botão já agendou a animação inversa. Em fechos externos
+      // (Escape, backdrop, breakpoint) cancelamos movimento pendente e restauramos o estado.
+      if(button.dataset.menuState!=='closed')cancelMenuMotion();
       syncButton(false);
     });
     syncButton(drawer.open);
