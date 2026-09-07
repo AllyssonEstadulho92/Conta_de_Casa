@@ -1,6 +1,6 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-07 — v68 candidata: painel do menu móvel refinado
+## 2026-09-07 — v68 publicada: painel do menu móvel refinado
 
 ### Objetivo
 
@@ -14,7 +14,7 @@ Foi confirmado no código real que:
 - `#mobileDrawer` é um `<dialog>` modal;
 - `events.js` gere abertura/fecho, Escape, backdrop e adaptação de breakpoint;
 - `render.js` usa os mesmos `NAV_GROUPS` para `#desktopNav` e `#drawerNav`;
-- a v67 já usa o mesmo botão para hambúrguer e `X`, movendo o nó para dentro do modal quando aberto;
+- a v67 já usava o mesmo botão para hambúrguer e `X`, movendo o nó para dentro do modal quando aberto;
 - Lucide local continua a ser o sistema oficial de ícones;
 - Inter/SF/system continua a ser a tipografia base;
 - o breakpoint móvel existente é 820 px;
@@ -28,7 +28,7 @@ O painel do drawer ainda herdava regras de apresentação de camadas históricas
 - largura e densidade pouco afinadas para ecrãs pequenos/grandes;
 - hierarquia interna genérica;
 - estados hover/focus/current dependentes sobretudo dos estilos globais;
-- margem para tornar scroll e overflow do próprio drawer mais explícitos.
+- necessidade de tornar scroll e overflow do próprio drawer mais explícitos.
 
 ### Corrigido — botão e estado
 
@@ -42,15 +42,15 @@ O painel do drawer ainda herdava regras de apresentação de camadas históricas
 
 ### Corrigido — painel responsivo
 
-- largura principal: `min(364px, calc(100vw - 24px))`;
-- abaixo de 360 px: `min(300px, calc(100vw - 20px))`;
+- largura normal: `min(364px, calc(100vw - 24px))`;
+- abaixo de 360 px: `width: calc(100vw - 20px)`, mantendo 20 px de backdrop sem limitar artificialmente o painel a 300 px;
+- alvos de navegação e footer permanecem com 48 px mesmo nos ecrãs mais pequenos;
 - altura `100dvh` e safe areas superior/inferior;
 - drawer com scroll vertical próprio, overscroll contido e `overflow-x:hidden`;
 - backdrop suavizado e sombra reduzida;
 - cabeçalho interno mais compacto e alinhado;
 - marca do drawer reduzida para 36 × 36 px;
 - labels de grupo com hierarquia discreta;
-- itens de navegação e ações inferiores com alvo mínimo de 48 px;
 - ícones Lucide a 20 px;
 - página atual com fundo suave + indicador lateral de 3 px;
 - hover aplicado apenas a rato/pointer fino;
@@ -61,24 +61,30 @@ O painel do drawer ainda herdava regras de apresentação de camadas históricas
 
 `#drawerCloseBtn` continua no DOM mas oculto. Não foi removido porque ainda existem referências em `events.js` e `ui-icons.js`; eliminá-lo nesta release criaria um refactor lateral não necessário para o objetivo visual.
 
-### Distribuição candidata
+### Distribuição publicada
 
 - build: `v68`;
 - revisão do menu: `68-menu2`;
 - shell preservado: `66-shell1`;
 - Compras preservada: `65-shopping1`;
 - runtime preservado: `64-runtime1`;
-- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v68-menu2`.
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v68-menu2`.
 
-`release-manifest.json`, `scripts/prepare-pages.cjs` e `sw.js` foram alinhados com a candidata.
+`release-manifest.json`, `scripts/prepare-pages.cjs` e `sw.js` estão alinhados com a release pública.
 
-### QA
+### QA e publicação
 
-- `tests/mobile-menu-toggle.test.cjs` cobre sizing, safe areas, overflow, alvos, estados, ARIA e movimento;
+- `tests/mobile-menu-toggle.test.cjs` cobre sizing, safe areas, overflow, alvos, estados, ARIA, ecrãs <360 px e movimento reduzido;
 - `tests/app-update.test.cjs` cobre build/cache/assets v68;
 - `tests/ui-consistency.test.cjs` cobre integração com tipografia/Lucide/shell/Compras;
 - regressões históricas de Mercado/Compras foram alinhadas com o novo build público sem alterar revisões internas preservadas;
-- PR #54 aberto para validação CI.
+- PR #54 integrado em `main`;
+- commit: `9c8a2b3042c322849e3eb5ea3462f494897b4ab3`;
+- CI final do PR run #1217 (`34166823195`): **sucesso**;
+- CI de `main` run #1218 (`34166862646`): **sucesso**;
+- Deploy GitHub Pages run #1211 (`34166882992`): **sucesso**.
+
+A matriz final passou em sintaxe, finanças, auditoria, invariantes, isolamento do cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, consistência visual, menu animado, atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade e sincronização.
 
 ### Segurança e dados
 
@@ -86,7 +92,9 @@ O painel do drawer ainda herdava regras de apresentação de camadas históricas
 - nenhuma alteração a `appState`, `estimatedCents`, `actualCents`, faturas, pagamentos, scanner, recorrências, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB, autenticação, APIs ou sincronização;
 - nenhum segredo, token, chave, endpoint externo ou armazenamento novo.
 
-A v68 só será considerada publicada depois de CI do PR, merge em `main`, CI de `main` e Deploy GitHub Pages concluídos com sucesso.
+### Limitação de validação
+
+A publicação e os testes automatizados estão confirmados. A validação física final em iPhone/Safari, Android/Chrome, tablet, orientação horizontal e VoiceOver/TalkBack continua pendente.
 
 ## 2026-09-07 — v67 publicada: menu móvel hambúrguer/X animado
 
@@ -108,67 +116,28 @@ Modernizar o comando do menu móvel segundo o padrão visual solicitado: três t
 - ao abrir, o mesmo nó DOM é movido para `.drawer-head`, ficando dentro do `<dialog>` modal e continuando realmente interativo;
 - ao fechar, regressa ao ponto original no topbar;
 - os três traços transformam-se em `X` através de `aria-expanded="true"` e voltam ao hambúrguer em `false`;
-- `#drawerCloseBtn` permanece no DOM apenas por compatibilidade com o wiring histórico, mas fica oculto e fora da tabulação;
+- `#drawerCloseBtn` permanece no DOM apenas por compatibilidade com wiring histórico, mas fica oculto e fora da tabulação;
 - não existe segundo `X` visível;
 - o botão mantém alvo de `44 × 44 px`, sem moldura branca, fundo verde/selecionado ou sombra nova;
 - `aria-label`/`title` alternam entre **Abrir menu** e **Fechar menu**;
 - `prefers-reduced-motion: reduce` desativa a animação;
 - Escape, backdrop e evento `close` continuam preservados pelo fluxo existente.
 
-### Distribuição publicada
+### Publicação
 
-- build: `v67`;
-- revisão do menu: `67-menu1`;
-- shell preservado: `66-shell1`;
-- Compras preservada: `65-shopping1`;
-- runtime funcional preservado: `64-runtime1`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v67-menu1`;
-- `release-manifest.json`, `scripts/prepare-pages.cjs` e Service Worker incluem os novos assets.
-
-### QA e publicação
-
-- criado `tests/mobile-menu-toggle.test.cjs`;
-- CI e gate de Pages verificam sintaxe do runtime e regressões do componente;
-- testes de release distinguem build público de revisões internas preservadas;
-- PR #52 integrado em `main`;
-- commit: `a1d932e580abaa06e7026a515f797411ab205f6e`;
-- CI do PR run #1178: **sucesso**;
-- CI de `main` run #1179 (`34157629736`): **sucesso**;
-- Deploy GitHub Pages run #1172 (`34157653463`): **sucesso**.
-
-### Segurança e dados
-
-- nenhuma alteração de `STATE_VERSION`;
-- nenhuma alteração a dados financeiros, scanner, PIN, cifragem, IndexedDB ou sincronização;
-- nenhum segredo, token, chave ou endpoint externo novo.
-
-A validação física no iPhone/Safari continua pendente.
+- build `v67`, menu `67-menu1`;
+- PR #52 / commit `a1d932e580abaa06e7026a515f797411ab205f6e`;
+- CI do PR #1178, CI de `main` #1179 e Pages #1172: **sucesso**.
 
 ## 2026-09-07 — v66 publicada: fundo móvel uniforme no iPhone
-
-### Problema observado
-
-Uma captura real de iPhone na **Lista de compras** revelou uma diferença cromática entre o cabeçalho quase branco e uma área azulada adjacente.
-
-### Causa confirmada
-
-- `market-brand.css` aplicava um `radial-gradient` azul a `.main` no Mercado;
-- o topbar móvel é `fixed` e tem recuo lateral, deixando o fundo da página visível nas margens;
-- transparência/blur podia acentuar diferenças de composição no Safari.
-
-### Corrigido
 
 - shell claro `#f5f7fa` e escuro `#0f1722`;
 - documento, body, app shell, main e topbar usam o mesmo fundo no mobile;
 - topbar opaco e sem blur;
 - desktop mantém identidade do Mercado;
-- geometria do cabeçalho e navegação inalteradas.
-
-### Publicação
-
-- build `v66`, shell `66-shell1`;
+- geometria do cabeçalho e navegação inalteradas;
 - PR #50 / commit `9657d558000018af1ea44e6040441f2b9d91648c`;
-- CI do PR #1138, CI de `main` #1139 e Pages #1132: **sucesso**.
+- CI/Pages verdes.
 
 ## 2026-09-07 — v65 publicada: Lista de compras focada no supermercado
 
@@ -211,13 +180,6 @@ Uma captura real de iPhone na **Lista de compras** revelou uma diferença cromá
 - Mercado passa a `text-first`;
 - câmara permanece para GTIN/EAN/UPC;
 - módulos históricos de imagem permanecem temporariamente por compatibilidade.
-
-## 2026-09-05/06 — v58–v62
-
-- Centro de Atualização em Definições;
-- miniaturas e pesquisa auxiliar histórica por Open Facts;
-- políticas históricas de imagem por cadeia/SKU;
-- bridge de imagens oficiais por identificador exato.
 
 ## Base funcional preservada
 
