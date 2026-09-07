@@ -1,8 +1,7 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 7 de setembro de 2026
-Build público atual: `v63`
-Build candidato: `v64`
+Build público atual: `v64`
 
 ## Visão geral
 
@@ -35,9 +34,9 @@ Não existe backend financeiro próprio. Integrações externas do Mercado serve
 - `ui-icons.js` — subset Lucide local;
 - `invoice-capture.js` — leitura local de QR fiscal;
 - `app-update.js` — Centro de Atualização;
-- `v64-runtime.js` — camada candidata v64 para correspondência conservadora do scanner e ciclo de faturas recorrentes **Por preencher**.
+- `v64-runtime.js` — correspondência conservadora do scanner e ciclo de faturas recorrentes **Por preencher**.
 
-Os módulos históricos `market-retailer-image-policy.js`, `market-image-audit.js` e `market-official-images.js` continuam distribuídos por compatibilidade, embora a UI principal seja `text-first` e não dependa de fotografias.
+Os módulos históricos `market-retailer-image-policy.js`, `market-image-audit.js` e `market-official-images.js` continuam distribuídos por compatibilidade, embora a UI principal seja `text-first`.
 
 ## Ordem das camadas CSS
 
@@ -50,135 +49,98 @@ A ordem pública é intencional:
 5. `market-brand.css` — identidade text-first;
 6. `market-category-groups.css` — agrupamento por categoria;
 7. `ui-icons.css` — sistema Lucide e componentes visuais;
-8. `ui-consistency.css` — consolidação visual global v64: tipografia, ícones, controlos, alinhamentos e espaçamentos;
-9. `v64-runtime.css` — **última camada candidata**, responsável pelo cabeçalho móvel estável/safe area, normalização final do topbar e estado visual das faturas por preencher.
+8. `ui-consistency.css` — consolidação visual global;
+9. `v64-runtime.css` — última camada, responsável pelo cabeçalho móvel/safe area e estado visual das faturas por preencher.
 
-A última camada não altera cálculos, persistência ou cifragem.
+A última camada não altera cifragem nem persistência financeira.
 
 ## Navegação e viewport móvel
 
-### Estrutura mantida
+Em mobile, `.main` continua a ser o scroller interno e a navegação inferior permanece fixa. Na v64, `.topbar` usa `position:fixed` até 820 px; `--mobile-top-safe` respeita `env(safe-area-inset-top)`; `.main` recebe `padding-top: var(--header-height)` e `scroll-padding-top` acompanha a altura do topo.
 
-Em mobile, `.main` continua a ser o scroller interno da aplicação e a navegação inferior continua fixa. Esta opção preserva o tratamento existente de teclado, diálogos e bottom navigation.
-
-### Correção v64 do cabeçalho durante scroll
-
-O cabeçalho deixou de depender de `position:sticky` dentro do scroller interno. Em Safari/iPhone, as capturas mostraram que a primeira linha podia deslocar-se parcialmente para fora da área visível após scroll.
-
-Na v64:
-
-- `.topbar` usa `position:fixed` até 820 px;
-- `top`, `left` e `right` são definidos explicitamente com o gutter da página;
-- `--mobile-top-safe` respeita `env(safe-area-inset-top)` e mantém uma folga tátil mínima quando o navegador devolve zero;
-- `.main` recebe `padding-top: var(--header-height)` para que o conteúdo nunca fique atrás do cabeçalho;
-- `scroll-padding-top` continua alinhado com a altura real do topo.
-
-Esta correção isola o problema do Safari sem substituir o modelo de viewport/teclado da aplicação inteira.
-
-### Cabeçalho global uniforme
-
-O topbar é um componente estrutural global. A auditoria de 7 de setembro identificou que regras históricas condicionadas por `html.market-prototype-active` alteravam apenas a página **Lista de compras**:
-
-- `h1::before` adicionava um carrinho ao título;
-- o título tinha escala/peso próprios;
-- o botão `+` usava uma caixa maior;
-- `Sync::after` adicionava um chevron exclusivo;
-- a transparência do topo deixava aparecer uma tonalidade diferente do fundo do Mercado.
-
-A v64 normaliza o componente no último nível de cascata sem alterar o conteúdo da página:
-
-- título móvel: 24 px, peso 600, uma linha com ellipsis; abaixo de 360 px passa a 20 px;
-- menu e botão `+`: alvos 44×44 px;
-- superfície visual do `+`: 36×36 px;
-- `Sync`: 36 px de altura e sem chevron adicional no Mercado;
-- o pseudo-elemento do carrinho no título do Mercado é desativado;
-- o fundo do topbar é uniforme entre páginas.
-
-A identidade do módulo Compras permanece no conteúdo, cartões, estados e navegação; não muda a geometria do cabeçalho global.
+O topbar é global. Início, Faturas, Lista de compras e Relatórios usam a mesma geometria: título, menu, botão `+`, Sync e fundo. Regras históricas específicas de Compras que acrescentavam carrinho, aumentavam tipografia e adicionavam chevron ao Sync são neutralizadas na camada final.
 
 ## Sistema de ícones
 
-Lucide permanece o único sistema vetorial oficial da aplicação. `ui-consistency.css` impõe:
-
-- `stroke-width: 2`;
-- linecap/linejoin arredondados;
-- `vector-effect: non-scaling-stroke`;
-- tamanhos contextuais previsíveis;
-- um único indicador ativo na navegação móvel (`::before`);
-- supressão dos `::after` redundantes.
-
-Os cartões-resumo do Mercado usam um `inset` sólido para a faixa cromática; o pseudo-elemento `::before` fica reservado ao ícone semântico.
+Lucide permanece o sistema vetorial oficial. `ui-consistency.css` mantém métrica previsível, stroke consistente, um único indicador ativo na navegação móvel e supressão de pseudo-elementos redundantes.
 
 ## Mercado e código de barras
 
 ### Fontes
 
 - Pingo Doce e Continente: pesquisa de produto/preço via `https://cesta.pt/mcp`;
-- Open Food Facts: identificação auxiliar do produto a partir do código de barras;
-- o preço não é inventado nem derivado da fotografia.
+- Open Food Facts: identificação auxiliar por código de barras;
+- `@zxing/browser`: biblioteca de leitura carregada em runtime a partir de `unpkg.com`.
+
+A última dependência é funcional mas constitui superfície externa adicional. A estratégia de auto-hospedagem/integridade deve ser revista numa release de segurança dedicada.
 
 ### Fluxo v64
 
-1. o utilizador escolhe exatamente um supermercado para leitura precisa;
+1. o utilizador escolhe exatamente um supermercado;
 2. o scanner valida checksum GTIN/EAN/UPC e identifica o produto;
-3. o Mercado consulta os resultados reais dessa loja;
+3. o Mercado consulta resultados dessa loja;
 4. `v64-runtime.js` compara loja, nome/marca e embalagem;
 5. auto-adição só ocorre com score `>= 0.84` e diferença `>= 0.10` face ao segundo candidato;
-6. uma correspondência ambígua exige confirmação manual;
-7. GTIN repetido num item ainda pendente incrementa a quantidade em vez de duplicar a linha.
+6. ambiguidade exige confirmação manual;
+7. GTIN repetido num item pendente incrementa a quantidade.
 
-### Regra financeira
-
-O preço encontrado pelo catálogo atualiza `estimatedCents`. O scanner não escreve `actualCents`. O preço efetivamente pago só deve ser registado quando existe confirmação de compra/talão.
+O preço encontrado atualiza `estimatedCents`; o scanner não escreve `actualCents`.
 
 ## Faturas recorrentes v64
 
-As ocorrências futuras automáticas passam a poder ter `draft: true` na camada v64.
+As ocorrências futuras automáticas podem ter `draft: true`:
 
-Para uma nova ocorrência recorrente:
-
-- preservados: descrição, fornecedor, categoria, método, regra de recorrência, vencimento;
+- preservados: descrição, fornecedor, categoria, método, recorrência e vencimento;
 - limpos: valor total, referência, observações e data de emissão;
 - `totalCents = 0` enquanto estiver **Por preencher**;
-- o estado draft não entra nos totais pendentes/em atraso;
-- ao preencher e guardar, `draft` passa a `false` e a fatura regressa ao fluxo financeiro normal.
+- drafts não entram nos totais pendentes/em atraso;
+- ao preencher e guardar, `draft` passa a `false`.
 
-A migração só atua sobre ocorrências geradas automaticamente e ainda não alteradas. Faturas com pagamentos ou intervenções do utilizador são preservadas.
+A migração só atua sobre ocorrências geradas automaticamente e ainda não alteradas.
 
 ## Centro de Atualização
 
-`release-manifest.json` é a fonte pública de versões e notas. `scripts/prepare-pages.cjs` exige que `latestVersion` corresponda ao build.
+`release-manifest.json` é a fonte pública de versões e notas. `scripts/prepare-pages.cjs` exige que `latestVersion` corresponda ao build. A atualização pública substitui assets da aplicação; não recria nem apaga o cofre.
 
-Fluxo:
+## Pipeline de qualidade e distribuição
 
-1. Pages publica os novos assets e o novo Service Worker;
-2. o Centro consulta o manifesto same-origin com `cache: no-store`;
-3. o novo worker pode ficar `waiting`;
-4. **Atualizar agora** envia `APPLY_UPDATE`;
-5. o worker ativa, remove caches antigos, reclama clientes e reinicia/navega a aplicação.
+### CI
 
-A atualização substitui assets da aplicação; não apaga nem recria o cofre financeiro.
+`.github/workflows/ci.yml` valida sintaxe, finanças, auditoria, invariantes, isolamento do cofre, datas, formulários, QR, Mercado, scanner, `v64-runtime`, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
 
-## Distribuição v64 candidata
+### GitHub Pages
+
+`.github/workflows/pages.yml` publica automaticamente apenas quando a CI de `main` terminou com sucesso. O workflow também suporta `workflow_dispatch` para redeploy manual.
+
+Por essa razão, o passo **Verify tested revision** deve manter uma verificação autónoma coerente com os componentes críticos da release. Após a auditoria de 7 de setembro, inclui explicitamente:
+
+- `node --check v64-runtime.js`;
+- `node tests/v64-runtime.test.cjs`.
+
+Isto impede que o caminho manual de Pages deixe de verificar a camada específica da v64.
+
+## Distribuição v64
 
 - build: `v64`;
 - revisão visual: `64-ui1`;
 - runtime: `64-runtime1`;
 - cache: `conta-de-casa-public-v64-runtime1`;
-- PR: #44;
-- publicação em `main` ainda pendente até CI final verde e revisão do diff.
+- PR #44 integrado;
+- commit público: `78612a9701d60938532d7be768ea35f84c36c7fc`;
+- CI de `main`: sucesso;
+- GitHub Pages: sucesso.
 
 ## Regressões obrigatórias
 
-Antes de publicar, a CI deve validar:
+Antes de qualquer nova publicação devem permanecer cobertos:
 
-- sintaxe;
+- sintaxe e runtime específico da versão;
 - finanças e invariantes de contagem;
 - isolamento/cifragem do cofre;
 - datas civis, faturas, pagamentos e QR;
-- Mercado, scanner, quantidade × preço e compatibilidade histórica de imagens;
+- Mercado, scanner, quantidade × preço;
 - ícones e consistência visual;
-- igualdade estrutural do cabeçalho móvel entre Início/Faturas/Compras/Relatórios;
+- cabeçalho móvel entre páginas principais;
 - atualização e manifesto;
 - segurança/CSP/allowlist;
 - responsividade, viewport móvel, navegação e acessibilidade;
