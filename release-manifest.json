@@ -1,9 +1,24 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v69",
-  "publishedAt": "2026-09-07",
+  "latestVersion": "v70",
+  "publishedAt": "2026-09-08",
   "releases": [
+    {
+      "version": "v70",
+      "date": "8 de setembro de 2026",
+      "title": "Movimento visível do menu hambúrguer ao tocar",
+      "items": [
+        "A validação real no iPhone confirmou que os estados hambúrguer e X já estavam corretos, mas a transformação podia parecer instantânea porque o mesmo botão é movido entre o cabeçalho e o dialog durante a abertura e o Safari pode consumir a transição CSS nesse reparenting.",
+        "O controlo passa a executar keyframes explícitos com Web Animations no frame seguinte à mudança de posição, tornando visível o movimento das três linhas no hardware real sem criar um segundo ícone.",
+        "Ao abrir, as linhas deslocam-se para o centro, a superior roda 45 graus, a inferior roda -45 graus e a linha central colapsa enquanto o glifo faz um micro movimento discreto de escala e inclinação.",
+        "Ao fechar pelo X, a animação inversa é executada já na posição final do cabeçalho para regressar de forma perceptível ao hambúrguer sem salto visual.",
+        "A duração foi ajustada para cerca de 240 ms com uma curva suave, mantendo a interação curta, natural e sem efeitos exagerados.",
+        "prefers-reduced-motion continua respeitado; em sistemas com redução de movimento os keyframes adicionais não são executados e o estado acessível permanece correto.",
+        "O mesmo #mobileMenuBtn, #mobileDrawer, estados aria-expanded/data-menu-state, foco por teclado, dimensões, breakpoints, safe areas e navegação existente são preservados.",
+        "A alteração é exclusivamente de interface e movimento: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+      ]
+    },
     {
       "version": "v69",
       "date": "7 de setembro de 2026",
