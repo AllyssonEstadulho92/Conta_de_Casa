@@ -127,26 +127,26 @@ O drawer tinha um hambúrguer exterior e um `X` separado. Além da duplicação,
 `#drawerCloseBtn` fica oculto e fora da tabulação por compatibilidade com wiring histórico. Alvo do botão: 44×44 px; `aria-label` alterna Abrir/Fechar; movimento reduzido é respeitado. PR #52 foi publicado na v67.
 
 ## D-033 — Refinar o drawer existente sem criar uma segunda navegação
-Data: 7 de setembro de 2026 · Estado: aceite como candidata v68 no PR #54.
+Data: 7 de setembro de 2026 · Estado: aceite e publicada na v68 através do PR #54.
 
 ### Contexto
 
-A auditoria confirmou que desktop e drawer já partilham `NAV_GROUPS`, que o ciclo hambúrguer/X v67 está tecnicamente correto e que não existe defeito global de viewport que justifique redimensionar a aplicação. O problema residual é de apresentação do painel: várias camadas históricas deixam sombra mais pesada, hierarquia genérica e estados de interação pouco específicos.
+A auditoria confirmou que desktop e drawer já partilham `NAV_GROUPS`, que o ciclo hambúrguer/X da v67 estava tecnicamente correto e que não existia defeito global de viewport que justificasse redimensionar a aplicação. O problema residual era de apresentação do painel: várias camadas históricas deixavam sombra mais pesada, hierarquia genérica e estados de interação pouco específicos.
 
 ### Decisão
 
 A v68 mantém o mesmo `#mobileDrawer`, `#mobileMenuBtn`, `events.js`, `render.js` e fonte de navegação. A melhoria fica na camada final `mobile-menu-toggle.css/.js`:
 
-- largura do drawer: `min(364px, calc(100vw - 24px))`;
-- abaixo de 360 px: `min(300px, calc(100vw - 20px))`;
+- largura normal do drawer: `min(364px, calc(100vw - 24px))`;
+- abaixo de 360 px: `width: calc(100vw - 20px)`, sem limite artificial de 300 px;
 - `100dvh`, safe areas e scroll vertical próprio;
 - `overflow-x:hidden` para eliminar scroll lateral;
 - botão continua 44×44 px;
-- itens e ações do painel usam alvos mínimos de 48 px;
+- itens e ações do painel mantêm alvos mínimos de 48 px em todos os smartphones;
 - hover só com pointer fino; `active`, `focus-visible` e `aria-current` têm estados discretos;
 - sombra/backdrop reduzidos;
 - tipografia e ícones continuam os sistemas existentes;
-- `data-menu-state` é acrescentado apenas como estado observável, sincronizado com ARIA.
+- `data-menu-state` é apenas estado observável, sincronizado com ARIA.
 
 ### Restrição sobre o X legado
 
@@ -154,8 +154,14 @@ A v68 mantém o mesmo `#mobileDrawer`, `#mobileMenuBtn`, `events.js`, `render.js
 
 ### Motivo
 
-A solução melhora clareza, densidade, responsividade e interação sem duplicar componentes, sem alterar rotas ou tamanho global da aplicação e sem aumentar o escopo para dados/finanças/segurança.
+A solução melhora clareza, densidade, responsividade e interação sem duplicar componentes, sem alterar rotas ou tamanho global da aplicação e sem aumentar o escopo para dados, finanças ou segurança.
 
-### Versionamento
+### Versionamento e validação
 
-Candidata: `v68`; revisão do componente: `68-menu2`; `64-runtime1`, `65-shopping1` e `66-shell1` permanecem preservadas. A publicação depende de CI do PR, merge em `main` e GitHub Pages verdes.
+- release: `v68`;
+- revisão do componente: `68-menu2`;
+- revisões preservadas: `64-runtime1`, `65-shopping1`, `66-shell1`;
+- merge: `9c8a2b3042c322849e3eb5ea3462f494897b4ab3`;
+- CI do PR #1217: sucesso;
+- CI de `main` #1218: sucesso;
+- Deploy Pages #1211: sucesso.
