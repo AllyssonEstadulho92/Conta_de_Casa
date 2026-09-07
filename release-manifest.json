@@ -1,9 +1,24 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v70",
+  "latestVersion": "v71",
   "publishedAt": "2026-09-08",
   "releases": [
+    {
+      "version": "v71",
+      "date": "8 de setembro de 2026",
+      "title": "Menu lateral com entrada e saída mais suaves",
+      "items": [
+        "O painel do menu deixa de surgir com um pequeno salto visual e passa a entrar como uma superfície off-canvas completa, deslizando suavemente da esquerda para a posição final.",
+        "A abertura usa apenas transform e uma variação mínima de opacidade, evitando animar largura, margens ou layout e reduzindo repaints no Safari/iPhone.",
+        "O fundo escurecido passa a aparecer de forma progressiva e discreta, com blur muito ligeiro, mantendo o conteúdo por trás legível sem tornar o efeito pesado.",
+        "O fecho passa a aguardar a transição lateral do painel antes de fechar efetivamente o dialog, evitando desaparecimento seco e mantendo o cabeçalho estável durante a saída.",
+        "O mesmo botão hambúrguer/X permanece dentro do drawer enquanto este fecha e só regressa ao topbar depois do evento close, evitando saltos de alinhamento no cabeçalho.",
+        "A abertura dura cerca de 280 ms e o fecho cerca de 240 ms, com curvas de desaceleração naturais; prefers-reduced-motion continua a eliminar as transições adicionais.",
+        "A largura responsiva, safe areas, scroll interno, alvos tácteis, tema claro/escuro, ARIA, foco, Escape, backdrop e navegação existente são preservados.",
+        "A alteração é exclusivamente de interface e movimento: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+      ]
+    },
     {
       "version": "v70",
       "date": "8 de setembro de 2026",
