@@ -40,8 +40,6 @@
     outline-offset:2px;
   }
 
-  /* Em toque/rato o foco é reposto programaticamente para manter o controlo acessível,
-     mas sem desenhar a moldura de foco observada no Safari. Teclado mantém focus-visible. */
   .mobile-menu-btn[data-focus-origin="pointer"]:focus,
   .mobile-menu-btn[data-focus-origin="pointer"]:focus-visible{
     outline:none!important;
@@ -69,10 +67,10 @@
     transform-origin:center;
     will-change:top,width,transform,opacity;
     transition:
-      top .24s cubic-bezier(.22,.8,.2,1),
-      width .24s cubic-bezier(.22,.8,.2,1),
-      transform .24s cubic-bezier(.22,.8,.2,1),
-      opacity .12s ease;
+      top .24s cubic-bezier(.32,.72,0,1),
+      width .24s cubic-bezier(.32,.72,0,1),
+      transform .24s cubic-bezier(.32,.72,0,1),
+      opacity .12s ease-out;
   }
 
   .mobile-menu-glyph>span:nth-child(1){top:1px;width:22px}
@@ -99,7 +97,6 @@
     transform:translateX(-50%) rotate(-45deg) scaleX(1);
   }
 
-  /* Drawer off-canvas: entra como uma única superfície da esquerda, sem animar layout. */
   .nav-drawer{
     width:min(364px,calc(100vw - 24px));
     max-width:none;
@@ -115,15 +112,15 @@
     backdrop-filter:blur(0);
     -webkit-backdrop-filter:blur(0);
     transition:
-      background-color .22s ease,
-      backdrop-filter .22s ease,
-      -webkit-backdrop-filter .22s ease;
+      background-color .22s ease-out,
+      backdrop-filter .22s ease-out,
+      -webkit-backdrop-filter .22s ease-out;
   }
 
   .nav-drawer.open::backdrop{
-    background:rgba(10,18,30,.38);
-    backdrop-filter:blur(1.5px);
-    -webkit-backdrop-filter:blur(1.5px);
+    background:rgba(10,18,30,.34);
+    backdrop-filter:blur(1px);
+    -webkit-backdrop-filter:blur(1px);
   }
 
   .nav-drawer-shell{
@@ -135,19 +132,22 @@
     flex-direction:column;
     background:var(--surface);
     border-right:1px solid color-mix(in srgb,var(--border) 82%,transparent);
-    box-shadow:20px 0 44px rgba(20,35,60,.12);
+    box-shadow:18px 0 40px rgba(20,35,60,.10);
     transform:translate3d(calc(-100% - 8px),0,0);
-    opacity:.985;
+    opacity:.995;
+    transform-origin:left center;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
     will-change:transform,opacity;
     transition:
-      transform .28s cubic-bezier(.22,1,.36,1),
-      opacity .20s ease,
-      box-shadow .28s ease;
+      transform .28s cubic-bezier(.32,.72,0,1),
+      opacity .18s ease-out,
+      box-shadow .28s ease-out;
   }
 
   html[data-theme="dark"] .nav-drawer-shell{
     border-right-color:color-mix(in srgb,var(--border) 72%,transparent);
-    box-shadow:20px 0 44px rgba(0,0,0,.30);
+    box-shadow:18px 0 40px rgba(0,0,0,.26);
   }
 
   .nav-drawer.open .nav-drawer-shell{
@@ -155,12 +155,10 @@
     opacity:1;
   }
 
-  /* O fecho é ligeiramente mais rápido do que a abertura e mantém o painel estável até
-     o transform terminar. O controlador só fecha o <dialog> depois desta transição. */
   .nav-drawer[data-closing="true"] .nav-drawer-shell{
     pointer-events:none;
-    transition-duration:.24s,.18s,.24s;
-    transition-timing-function:cubic-bezier(.4,0,.2,1),ease,ease;
+    transition-duration:.24s,.16s,.24s;
+    transition-timing-function:cubic-bezier(.4,0,.2,1),ease-out,ease-out;
   }
 
   .nav-drawer[data-closing="true"]::backdrop{
