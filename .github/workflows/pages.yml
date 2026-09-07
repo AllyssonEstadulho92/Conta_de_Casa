@@ -45,6 +45,7 @@ jobs:
           node --check market-experience.js
           node --check market-branding.js
           node --check market-category-groups.js
+          node --check market-shopping-focus.js
           node --check market-barcode.js
           node --check ui-icons.js
           node --check invoice-capture.js
@@ -64,6 +65,7 @@ jobs:
           node tests/invoice-capture.test.cjs
           node tests/market-categories.test.cjs
           node tests/market-category-groups.test.cjs
+          node tests/market-shopping-focus.test.cjs
           node tests/market-experience.test.cjs
           node tests/market-product-images.test.cjs
           node tests/market-image-audit.test.cjs
@@ -72,6 +74,7 @@ jobs:
           node tests/market-live-accounting.test.cjs
           node tests/v64-runtime.test.cjs
           node tests/ui-icons.test.cjs
+          node tests/ui-consistency.test.cjs
           node tests/app-update.test.cjs
           node tests/security.test.cjs
           node tests/responsive.test.cjs

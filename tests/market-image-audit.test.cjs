@@ -106,7 +106,7 @@ for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(prepare.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
 }
-assert.match(prepare,/const BUILD = 'v64'/);
+assert.match(prepare,/const BUILD = 'v65'/);
 assert.match(prepare,/const VISUAL_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 
@@ -114,10 +114,10 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-image-audit\.css\?v=64/);
-  assert.match(index,/market-retailer-image-policy\.js\?v=64/);
-  assert.match(index,/market-image-audit\.js\?v=64/);
-  assert.match(index,/market-official-images\.js\?v=64/);
+  assert.match(index,/market-image-audit\.css\?v=65/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=65/);
+  assert.match(index,/market-image-audit\.js\?v=65/);
+  assert.match(index,/market-official-images\.js\?v=65/);
   assert.match(index,/ui-consistency\.css\?v=64-ui1/);
   assert.match(index,/v64-runtime\.css\?v=64-runtime1/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
@@ -132,4 +132,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official retailer image, fallback, safe-source, zoom and v64 build tests: OK');
+console.log('Market official retailer image, fallback, safe-source, zoom and v65 build tests: OK');

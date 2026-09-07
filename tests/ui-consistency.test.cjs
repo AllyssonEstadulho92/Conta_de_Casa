@@ -9,6 +9,7 @@ const ROOT=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const css=read('ui-consistency.css');
 const runtimeCss=read('v64-runtime.css');
+const shoppingCss=read('market-shopping-focus.css');
 const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
 
@@ -34,15 +35,20 @@ assert.match(runtimeCss,/\.status-chip\.draft/);
 assert.match(runtimeCss,/\.bill-draft-card/);
 assert.match(runtimeCss,/html\.market-prototype-active \.page-heading h1::before\{[\s\S]*content:none!important/,'market-specific cart decoration must not alter the global mobile header');
 assert.match(runtimeCss,/html\.market-prototype-active \.sync-header-status::after\{[\s\S]*content:none!important/,'market-specific Sync chevron must be disabled');
+assert.match(shoppingCss,/Conta de Casa v65/);
+assert.match(shoppingCss,/#page-market/,'v65 shopping focus must remain scoped to the market page');
 
 assert.match(sw,/conta-de-casa-public-v64-runtime1/);
 assert.ok(sw.includes("'./ui-consistency.css'"));
 assert.ok(sw.includes("'./v64-runtime.css'"));
-assert.match(prepare,/const BUILD = 'v64'/);
+assert.ok(sw.includes("'./market-shopping-focus.css'"));
+assert.match(prepare,/const BUILD = 'v65'/);
 assert.match(prepare,/const VISUAL_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
+assert.match(prepare,/const SHOPPING_REV = '65-shopping1'/);
 assert.ok(prepare.includes("'ui-consistency.css'"));
 assert.ok(prepare.includes("'v64-runtime.css'"));
+assert.ok(prepare.includes("'market-shopping-focus.css'"));
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -50,12 +56,15 @@ try{
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
   assert.match(index,/ui-consistency\.css\?v=64-ui1/);
   assert.match(index,/v64-runtime\.css\?v=64-runtime1/);
+  assert.match(index,/market-shopping-focus\.css\?v=65-shopping1/);
   assert.ok(index.indexOf('market-category-groups.css')<index.indexOf('ui-consistency.css'),'visual consistency CSS must load after market/category layers');
-  assert.ok(index.indexOf('ui-consistency.css')<index.indexOf('v64-runtime.css'),'v64 touch-safe layer must be the final visual layer');
+  assert.ok(index.indexOf('ui-consistency.css')<index.indexOf('v64-runtime.css'),'v64 touch-safe layer must follow prior visual normalization');
+  assert.ok(index.indexOf('v64-runtime.css')<index.indexOf('market-shopping-focus.css'),'v65 shopping focus may override only market-page presentation after the global runtime layer');
   assert.ok(fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(fs.existsSync(path.join(dist,'v64-runtime.css')));
+  assert.ok(fs.existsSync(path.join(dist,'market-shopping-focus.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Authoritative typography, Lucide, navigation, market summary and v64 mobile-header consistency tests: OK');
+console.log('Authoritative typography, Lucide, navigation, v64 header and v65 market-focus consistency tests: OK');

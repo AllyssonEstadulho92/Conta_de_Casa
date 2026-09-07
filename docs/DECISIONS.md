@@ -32,7 +32,7 @@ Estado: aceite. Os ícones são locais, auditáveis e não dependem de icon font
 Estado: aceite. O QR apenas preenche dados comprováveis e o utilizador revê antes de guardar.
 
 ## D-010 — Hierarquia móvel consistente
-Estado: aceite. Compras mantém título contextual, ação `+`, scanner, cartões-resumo, ações compactas e navegação inferior consistente.
+Estado: aceite e refinada por D-029. Compras mantém título contextual, ação `+`, scanner, informação financeira e navegação inferior consistente, mas a informação secundária pode usar progressive disclosure para não bloquear a tarefa principal.
 
 ## D-011 — Cofre não simula funcionalidades inexistentes
 Estado: aceite. A interface não apresenta autenticação/capacidades que não estejam realmente implementadas.
@@ -110,23 +110,31 @@ Início, Faturas, Compras e Relatórios mantêm a mesma geometria de título, me
 ## D-028 — O redeploy manual de Pages deve repetir as verificações específicas da release
 Data: 7 de setembro de 2026 · Estado: aceite, integrada no PR #46 e publicada.
 
+O caminho manual de Pages deve verificar a sintaxe e executar a regressão específica das camadas críticas da release antes de preparar/publicar `dist`. A v64 acrescentou `v64-runtime.js` e o respetivo teste; a candidata v65 estende o mesmo princípio a `market-shopping-focus.js` e `tests/market-shopping-focus.test.cjs`.
+
+## D-029 — Lista de compras móvel prioriza execução e usa progressive disclosure
+Data: 7 de setembro de 2026 · Estado: aceite para a candidata v65; integração pendente de CI verde.
+
 ### Contexto
 
-O deploy automático de Pages só ocorre após CI verde de `main`, mas `.github/workflows/pages.yml` também suporta `workflow_dispatch`. O passo de verificação do próprio deploy não incluía `v64-runtime.js` nem `tests/v64-runtime.test.cjs`, apesar de ambos serem componentes críticos da v64 e estarem na CI normal.
+A página móvel apresentava pesquisa, botão de adição duplicado, três filtros, limpar filtros e quatro cartões financeiros antes do conteúdo operacional. Os cartões de cada produto também expunham permanentemente preço real, diferença e ações secundárias, mesmo durante a tarefa simples de marcar compras.
 
 ### Decisão
 
-O caminho manual de Pages deve verificar, no mínimo, a sintaxe do runtime específico da versão e executar a respetiva regressão antes de preparar/publicar `dist`.
+Na Lista de compras até 820 px:
 
-Para a v64, o workflow executa explicitamente:
+- a primeira informação será uma linha compacta com **por comprar**, **comprados** e **previsto**;
+- o detalhe financeiro completo fica em **Resumo financeiro**;
+- o `+` do topbar reutiliza o handler existente de `#newMarketBtn`; o botão duplicado da página fica oculto no mobile;
+- filtros mantêm os mesmos valores/handlers, mas ocupam menos espaço e **Limpar filtros** só aparece quando necessário;
+- categorias com pendentes ficam abertas;
+- comprados migram apenas no DOM para um grupo **Comprados** fechado por padrão;
+- cada cartão mostra primeiro checkbox, nome, quantidade e preço, colocando informação secundária em `<details>`.
 
-- `node --check v64-runtime.js`;
-- `node tests/v64-runtime.test.cjs`.
+### Restrições
+
+A camada não pode escrever em `appState`, alterar `estimatedCents`/`actualCents`/quantidade, chamar `commit()`/`saveState()`, substituir handlers financeiros nem alterar desktop. O agrupamento móvel deve mover os nós existentes para preservar listeners e acessibilidade.
 
 ### Motivo
 
-Um redeploy manual não deve ter uma cobertura inferior à necessária para a camada que altera scanner, recorrências e safe area. A medida não altera dados nem lógica de negócio; reforça apenas o gate de publicação.
-
-### Validação
-
-A decisão foi integrada no commit `72ee9117ba1383dbcde1ae18729309b07134c144`; a CI de `main` run #1094 e o Deploy GitHub Pages run #1087 terminaram com sucesso.
+A tarefa dominante no supermercado é localizar o próximo produto e marcá-lo. Progressive disclosure reduz densidade sem eliminar informação financeira, e a reutilização dos handlers existentes reduz risco de regressão.
