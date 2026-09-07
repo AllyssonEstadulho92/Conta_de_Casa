@@ -1,90 +1,92 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 7 de setembro de 2026
+Atualizado: 8 de setembro de 2026
 Build público atual: `v69`
+Build candidato: `v70`
 Branch pública: `main`
-Release pública integrada: PR #56
-Commit público: `a66df37b0fc345491dacf3cac91313d88d080a05`
+Branch candidata: `fix/v70-visible-menu-motion`
+Release pública atual: PR #56
+Commit público atual: `a66df37b0fc345491dacf3cac91313d88d080a05`
 Distribuição: GitHub Pages / PWA
 
 ## Estado atual
 
 A aplicação continua uma PWA estática/local-first. O estado financeiro permanece no navegador/IndexedDB e o cofre continua cifrado com PBKDF2-SHA-256 + AES-GCM. A sincronização GitHub permanece opcional e transfere apenas o envelope cifrado. O schema financeiro base continua `STATE_VERSION = 5`.
 
-A **v69 está publicada**. O PR #56 foi integrado em `main`; a CI final de `main` e o Deploy GitHub Pages concluíram com sucesso.
+A **v69 continua pública**. A validação física no iPhone confirmou que os dois estados visuais estão agora corretos: fechado apresenta hambúrguer e aberto apresenta `X`, sem o conflito Lucide que existia antes. A nova observação é diferente: a transformação entre esses estados pode parecer instantânea, sem movimento claramente perceptível ao toque.
 
-Referências de publicação:
+## Problema observado após validação física da v69
 
-- PR funcional: #56 — `v69: corrigir animação hambúrguer para X no iPhone`;
-- merge em `main`: `a66df37b0fc345491dacf3cac91313d88d080a05`;
-- CI final do PR: run #1250 (`34168089348`) — sucesso;
-- CI de `main`: run #1251 (`34168145569`) — sucesso;
-- Deploy GitHub Pages: run #1244 (`34168165101`) — sucesso.
+### Factos observáveis
 
-## Problema confirmado na v68
+- estado fechado: hambúrguer correto no topbar;
+- estado aberto: `X` correto no cabeçalho do drawer;
+- painel abre corretamente e a navegação continua funcional;
+- a transformação entre os dois estados não fica claramente visível no iPhone como uma animação contínua.
 
-A validação física através das capturas reais do iPhone mostrou que o botão era movido corretamente para o drawer, mas continuava visualmente como hambúrguer em vez de se transformar num `X`. Também podia surgir uma moldura visual grande depois do foco programático.
+### Causa técnica provável confirmada pela arquitetura
 
-### Causa técnica confirmada
+`#mobileMenuBtn` é deliberadamente o mesmo nó DOM nos dois estados. Ao abrir, `openMobileDrawer()` ativa o `<dialog>` e `mobile-menu-toggle.js` move esse mesmo botão do topbar para `.drawer-head`. Ao fechar, o nó regressa ao topbar.
 
-`mobile-menu-toggle.js` criava corretamente três `<span>` animáveis. Porém `ui-icons.js::hydrate()` contém `fillIcon(document.querySelector('#mobileMenuBtn'),'menu',22)` e observa alterações de `aria-expanded`/`class`.
+A v69 depende principalmente de CSS transitions nas propriedades `top`, `width`, `transform` e `opacity`. Durante o mesmo ciclo em que o elemento muda de ancestral/render tree, Safari pode não apresentar um frame intermédio suficiente para tornar a transição perceptível. O estado final continua correto, mas o movimento pode ser consumido pelo reparenting.
 
-`fillIcon()` usa `replaceChildren()`. Assim, a cada mudança de estado, os três `<span>` eram substituídos por um SVG Lucide estático de menu e o CSS deixava de ter os elementos necessários para executar a transformação visual.
+## v70 — correção candidata
 
-## v69 — correção publicada
+A v70 mantém a arquitetura v69 e acrescenta movimento explícito depois da reposição do nó:
 
-- preservado o mesmo `#mobileMenuBtn` e o mesmo `#mobileDrawer`;
-- preservadas as três linhas proporcionais `22 / 18 / 14 px`;
-- preservado o mesmo nó DOM durante fechado/aberto;
-- adicionado um SVG Lucide oculto como sentinela de hidratação e mantido `data-ui-icon-slot="menu"`, impedindo `fillIcon()` de substituir o glifo animável;
-- estado aberto sincronizado por `aria-expanded="true"` e `data-menu-state="open"`;
-- linha superior roda `45deg`, linha inferior `-45deg` e a linha central colapsa;
-- animação aproximada de 190 ms, curta e discreta;
-- `prefers-reduced-motion` preservado;
-- foco programático após toque/rato deixa de desenhar a moldura observada no Safari;
-- ativação por teclado continua a mostrar foco visível;
-- drawer, largura, safe areas, scroll, navegação e alvos de 48 px da v68 permanecem inalterados.
+- mantém o mesmo `#mobileMenuBtn` e o mesmo `#mobileDrawer`;
+- mantém as três linhas `22 / 18 / 14 px` e o X de `45deg / -45deg`;
+- mantém a sentinela Lucide oculta e `data-ui-icon-slot="menu"`;
+- mantém `aria-expanded`, `aria-label`, `title` e `data-menu-state` sincronizados;
+- depois de o botão entrar no drawer, executa Web Animations com keyframes explícitos no frame seguinte;
+- ao fechar pelo X, executa a sequência inversa depois de o botão regressar ao topbar;
+- acrescenta apenas um micro movimento discreto de escala/inclinação ao glifo, sem deslocar o layout;
+- duração: cerca de `240 ms` com `cubic-bezier(.22,.8,.2,1)`;
+- mantém CSS transition como fallback;
+- `prefers-reduced-motion` impede os keyframes adicionais;
+- fechos externos por Escape/backdrop continuam a restaurar estado sem deixar animações pendentes;
+- foco por teclado, foco por pointer, safe areas, largura do drawer, breakpoints e alvos de toque permanecem inalterados.
 
-## Versionamento público
+## Versionamento candidato
 
-- build: `v69`;
-- revisão do menu: `69-menu3`;
+- build: `v70`;
+- revisão do menu: `70-menu4`;
 - shell preservado: `66-shell1`;
 - Compras preservada: `65-shopping1`;
 - runtime funcional preservado: `64-runtime1`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v69-menu3`.
+- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4`.
 
-`release-manifest.json`, `scripts/prepare-pages.cjs`, `sw.js` e as regressões foram publicados em conjunto.
+## Segurança e escopo
 
-## QA automatizado
+A v70 não altera `appState`, `STATE_VERSION`, faturas, pagamentos, `estimatedCents`, `actualCents`, scanner, recorrências, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB, autenticação, APIs ou sincronização.
 
-A CI final validou com sucesso sintaxe, finanças, auditoria, invariantes, isolamento do cofre, datas civis, formulários, QR, Mercado, agrupamento e Lista de compras, fontes reais, imagens históricas, scanner, quantidade/contabilidade, runtime v64, ícones, consistência visual, menu animado, Centro de Atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade e sincronização.
+Não foram adicionados segredos, tokens, chaves, endpoints externos ou armazenamento novo. O uso de Web Animations é exclusivamente local no elemento visual do menu.
 
-Foi acrescentada regressão específica do contrato entre `ui-icons.js` e `mobile-menu-toggle.js`, cobrindo a sentinela Lucide, os três spans animáveis, estado aberto, colapso da linha central e foco por pointer/teclado.
+## QA necessário antes de publicar
 
-## Segurança e compatibilidade
+1. CI do PR totalmente verde;
+2. validar sintaxe e regressão específica de Web Animations/reparenting;
+3. validar `prefers-reduced-motion`;
+4. validar build/manifest/cache `v70` / `70-menu4`;
+5. integrar em `main` apenas com CI verde;
+6. confirmar CI de `main` e Deploy GitHub Pages;
+7. repetir validação física no mesmo iPhone.
 
-A v69 não altera `appState`, `estimatedCents`, `actualCents`, faturas, pagamentos, scanner, recorrências, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB, autenticação, APIs ou sincronização.
+## Validação física prioritária v70
 
-Não foram adicionados segredos, tokens, chaves, endpoints externos ou armazenamento novo.
-
-## Validação física ainda pendente
-
-A publicação técnica está concluída, mas a correção visual deve ser confirmada no mesmo iPhone que revelou o defeito:
-
-- abrir: hambúrguer → `X` real no mesmo botão;
-- fechar pelo `X`: `X` → hambúrguer;
-- confirmar ausência de moldura visual após toque;
-- confirmar foco visível por teclado;
+- tocar no hambúrguer e ver as linhas moverem-se até formar o `X`;
+- tocar no `X` e ver a animação inversa até ao hambúrguer;
+- confirmar que não existe salto de layout nem moldura grande após toque;
+- confirmar abertura/fecho repetidos sem estado preso;
 - Escape, backdrop e seleção de item;
 - portrait/landscape;
-- iPhone/Safari e Android/Chrome;
+- iPhone/Safari, Android/Chrome e tablet junto do breakpoint 820/821 px;
 - tema claro/escuro e VoiceOver/TalkBack.
 
 ## Última alteração
 
-Publicada a v69 para corrigir o conflito entre o hidratador Lucide e o glifo animado do menu móvel, identificado pela validação física da v68.
+Preparada a candidata v70 para tornar fisicamente perceptível o movimento hambúrguer ↔ `X` no mesmo botão, sem reescrever o drawer nem a navegação.
 
 ## Próximo passo
 
-Instalar/atualizar para a v69 no dispositivo real e confirmar visualmente o ciclo hambúrguer → `X` → hambúrguer e a ausência da moldura após toque.
+Executar CI completa da v70, integrar apenas se verde, publicar pelo GitHub Pages e repetir o teste visual no iPhone.
