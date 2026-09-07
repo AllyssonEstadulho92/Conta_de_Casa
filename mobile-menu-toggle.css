@@ -1,4 +1,4 @@
-/* Conta de Casa v70 — botão hambúrguer/X com movimento visível e painel móvel refinado. */
+/* Conta de Casa v71 — botão hambúrguer/X animado e drawer off-canvas suave. */
 
 @media(max-width:820px){
   .mobile-menu-btn,
@@ -99,7 +99,7 @@
     transform:translateX(-50%) rotate(-45deg) scaleX(1);
   }
 
-  /* Painel: largura fluida sem ocupar desnecessariamente o ecrã. */
+  /* Drawer off-canvas: entra como uma única superfície da esquerda, sem animar layout. */
   .nav-drawer{
     width:min(364px,calc(100vw - 24px));
     max-width:none;
@@ -111,9 +111,19 @@
   }
 
   .nav-drawer::backdrop{
-    background:rgba(10,18,30,.40);
-    backdrop-filter:blur(2px);
-    -webkit-backdrop-filter:blur(2px);
+    background:rgba(10,18,30,0);
+    backdrop-filter:blur(0);
+    -webkit-backdrop-filter:blur(0);
+    transition:
+      background-color .22s ease,
+      backdrop-filter .22s ease,
+      -webkit-backdrop-filter .22s ease;
+  }
+
+  .nav-drawer.open::backdrop{
+    background:rgba(10,18,30,.38);
+    backdrop-filter:blur(1.5px);
+    -webkit-backdrop-filter:blur(1.5px);
   }
 
   .nav-drawer-shell{
@@ -125,20 +135,36 @@
     flex-direction:column;
     background:var(--surface);
     border-right:1px solid color-mix(in srgb,var(--border) 82%,transparent);
-    box-shadow:18px 0 48px rgba(20,35,60,.14);
-    transform:translateX(-18px);
-    opacity:.82;
-    transition:transform .2s cubic-bezier(.2,.8,.2,1),opacity .16s ease;
+    box-shadow:20px 0 44px rgba(20,35,60,.12);
+    transform:translate3d(calc(-100% - 8px),0,0);
+    opacity:.985;
+    will-change:transform,opacity;
+    transition:
+      transform .28s cubic-bezier(.22,1,.36,1),
+      opacity .20s ease,
+      box-shadow .28s ease;
   }
 
   html[data-theme="dark"] .nav-drawer-shell{
     border-right-color:color-mix(in srgb,var(--border) 72%,transparent);
-    box-shadow:18px 0 48px rgba(0,0,0,.34);
+    box-shadow:20px 0 44px rgba(0,0,0,.30);
   }
 
   .nav-drawer.open .nav-drawer-shell{
-    transform:translateX(0);
+    transform:translate3d(0,0,0);
     opacity:1;
+  }
+
+  /* O fecho é ligeiramente mais rápido do que a abertura e mantém o painel estável até
+     o transform terminar. O controlador só fecha o <dialog> depois desta transição. */
+  .nav-drawer[data-closing="true"] .nav-drawer-shell{
+    pointer-events:none;
+    transition-duration:.24s,.18s,.24s;
+    transition-timing-function:cubic-bezier(.4,0,.2,1),ease,ease;
+  }
+
+  .nav-drawer[data-closing="true"]::backdrop{
+    transition-duration:.18s,.18s,.18s;
   }
 
   .drawer-head{
@@ -316,6 +342,7 @@
   .mobile-menu-btn,
   .mobile-menu-glyph>span,
   .nav-drawer-shell,
+  .nav-drawer::backdrop,
   .drawer-nav .nav-btn,
   .drawer-nav .nav-btn::before,
   .drawer-footer .icon-text-btn{transition:none!important}
