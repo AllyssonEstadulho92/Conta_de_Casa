@@ -92,7 +92,7 @@
       if(typeof root.closeMobileDrawer==='function')root.closeMobileDrawer();
       else if(drawer.open){drawer.classList.remove('open');drawer.close();}
       syncButton(false);
-      requestAnimationFrame(()=>button.focus({preventScroll:true}));
+      focusButton(keyboard);
     }
 
     button.addEventListener('pointerdown',()=>setFocusOrigin(false),{passive:true});
