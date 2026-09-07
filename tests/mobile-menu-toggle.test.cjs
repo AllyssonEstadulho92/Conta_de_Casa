@@ -34,7 +34,8 @@ assert.match(css, /\.drawer-footer \.icon-text-btn\{[\s\S]*min-height:48px/, 'fo
 assert.match(css, /\.drawer-nav \.nav-btn\.active,[\s\S]*aria-current="page"/, 'selected page must have a synchronized visual state');
 assert.match(css, /@media\(hover:hover\) and \(pointer:fine\) and \(max-width:820px\)/, 'mouse hover feedback must only apply to fine pointers');
 assert.match(css, /\.mobile-menu-btn:focus-visible/);
-assert.match(css, /@media\(max-width:359px\)/, 'very small smartphones need a dedicated density safeguard');
+assert.match(css, /@media\(max-width:359px\)\{[\s\S]*\.nav-drawer\{width:calc\(100vw - 20px\)\}/, 'very small smartphones must keep a 20px backdrop margin without an unnecessary 300px cap');
+assert.doesNotMatch(css, /@media\(max-width:359px\)\{[\s\S]*min-height:46px/, 'small-screen density must not reduce the 48px drawer touch targets');
 assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
 assert.doesNotMatch(css, /background:\s*(?:green|#0f0|#00ff00)/i);
 
