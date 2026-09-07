@@ -40,6 +40,7 @@ jobs:
           node --check render.js
           node --check forms.js
           node --check events.js
+          node --check mobile-menu-toggle.js
           node --check sync.js
           node --check sync-conflict-policy.js
           node --check market-experience.js
@@ -75,6 +76,7 @@ jobs:
           node tests/v64-runtime.test.cjs
           node tests/ui-icons.test.cjs
           node tests/ui-consistency.test.cjs
+          node tests/mobile-menu-toggle.test.cjs
           node tests/app-update.test.cjs
           node tests/security.test.cjs
           node tests/responsive.test.cjs

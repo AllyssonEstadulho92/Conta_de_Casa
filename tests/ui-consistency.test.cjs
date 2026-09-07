@@ -10,6 +10,7 @@ const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const css=read('ui-consistency.css');
 const runtimeCss=read('v64-runtime.css');
 const shoppingCss=read('market-shopping-focus.css');
+const menuCss=read('mobile-menu-toggle.css');
 const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
 
@@ -40,19 +41,25 @@ assert.match(runtimeCss,/html\.market-prototype-active \.page-heading h1::before
 assert.match(runtimeCss,/html\.market-prototype-active \.sync-header-status::after\{[\s\S]*content:none!important/,'market-specific Sync chevron must be disabled');
 assert.match(shoppingCss,/Conta de Casa v65/);
 assert.match(shoppingCss,/#page-market/,'v65 shopping focus must remain scoped to the market page');
+assert.match(menuCss,/Conta de Casa v67/);
+assert.match(menuCss,/\.mobile-menu-btn\[aria-expanded="true"\]/,'v67 menu visual state must be driven by the accessible expanded state');
+assert.match(menuCss,/background:transparent!important/,'v67 menu button must not add a selected/green surface');
 
-assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1/);
+assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v67-menu1/);
 assert.ok(sw.includes("'./ui-consistency.css'"));
 assert.ok(sw.includes("'./v64-runtime.css'"));
 assert.ok(sw.includes("'./market-shopping-focus.css'"));
-assert.match(prepare,/const BUILD = 'v66'/);
+assert.ok(sw.includes("'./mobile-menu-toggle.css'"));
+assert.match(prepare,/const BUILD = 'v67'/);
 assert.match(prepare,/const VISUAL_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const SHOPPING_REV = '65-shopping1'/);
 assert.match(prepare,/const SHELL_REV = '66-shell1'/);
+assert.match(prepare,/const MENU_REV = '67-menu1'/);
 assert.ok(prepare.includes("'ui-consistency.css'"));
 assert.ok(prepare.includes("'v64-runtime.css'"));
 assert.ok(prepare.includes("'market-shopping-focus.css'"));
+assert.ok(prepare.includes("'mobile-menu-toggle.css'"));
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -61,15 +68,18 @@ try{
   assert.match(index,/ui-consistency\.css\?v=64-ui1/);
   assert.match(index,/v64-runtime\.css\?v=66-shell1/);
   assert.match(index,/market-shopping-focus\.css\?v=65-shopping1/);
+  assert.match(index,/mobile-menu-toggle\.css\?v=67-menu1/);
   assert.match(index,/<meta name="theme-color" content="#f5f7fa"/,'public HTML theme-color must match the v66 light shell');
   assert.ok(index.indexOf('market-category-groups.css')<index.indexOf('ui-consistency.css'),'visual consistency CSS must load after market/category layers');
   assert.ok(index.indexOf('ui-consistency.css')<index.indexOf('v64-runtime.css'),'v66 shell correction must follow prior visual normalization');
   assert.ok(index.indexOf('v64-runtime.css')<index.indexOf('market-shopping-focus.css'),'v65 shopping focus may override only market-page presentation after the global shell layer');
+  assert.ok(index.indexOf('market-shopping-focus.css')<index.indexOf('mobile-menu-toggle.css'),'v67 global menu styling must be the final mobile-menu layer');
   assert.ok(fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(fs.existsSync(path.join(dist,'v64-runtime.css')));
   assert.ok(fs.existsSync(path.join(dist,'market-shopping-focus.css')));
+  assert.ok(fs.existsSync(path.join(dist,'mobile-menu-toggle.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Authoritative typography, Lucide, navigation, v66 mobile shell and v65 market-focus consistency tests: OK');
+console.log('Authoritative typography, Lucide, navigation, v66 shell, v65 market focus and v67 mobile menu consistency tests: OK');

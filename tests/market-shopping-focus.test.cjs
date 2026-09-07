@@ -36,7 +36,7 @@ assert.match(css,/\.market-item-details>summary/);
 assert.match(css,/min-height:44px/,'compact controls must retain the project touch-target minimum');
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-assert.equal(manifest.latestVersion,'v66');
+assert.equal(manifest.latestVersion,'v67');
 const v65=manifest.releases.find(release=>release.version==='v65');
 assert.ok(v65,'v65 shopping release notes must remain in history after later releases');
 assert.ok(v65.items.some(item=>/lista de compras/i.test(item)));
@@ -48,9 +48,11 @@ assert.ok(sw.includes("'./market-shopping-focus.css'"));
 assert.ok(sw.includes("'./market-shopping-focus.js'"));
 assert.match(sw,/v65-shopping1/);
 assert.match(sw,/v66-shell1/);
-assert.match(prepare,/const BUILD = 'v66'/);
+assert.match(sw,/v67-menu1/);
+assert.match(prepare,/const BUILD = 'v67'/);
 assert.match(prepare,/const SHOPPING_REV = '65-shopping1'/);
 assert.match(prepare,/const SHELL_REV = '66-shell1'/);
+assert.match(prepare,/const MENU_REV = '67-menu1'/);
 assert.ok(prepare.includes("'market-shopping-focus.css'"));
 assert.ok(prepare.includes("'market-shopping-focus.js'"));
 
@@ -61,12 +63,16 @@ try{
   assert.match(index,/v64-runtime\.css\?v=66-shell1/);
   assert.match(index,/market-shopping-focus\.css\?v=65-shopping1/);
   assert.match(index,/market-shopping-focus\.js\?v=65-shopping1/);
-  assert.ok(index.indexOf('v64-runtime.css')<index.indexOf('market-shopping-focus.css'),'shopping focus CSS must remain the final market-specific layer after the v66 shell fix');
+  assert.match(index,/mobile-menu-toggle\.css\?v=67-menu1/);
+  assert.match(index,/mobile-menu-toggle\.js\?v=67-menu1/);
+  assert.ok(index.indexOf('v64-runtime.css')<index.indexOf('market-shopping-focus.css'),'shopping focus CSS must remain after the v66 shell fix');
+  assert.ok(index.indexOf('market-shopping-focus.css')<index.indexOf('mobile-menu-toggle.css'),'v67 global menu CSS may load after the preserved v65 market-specific layer');
   assert.ok(index.indexOf('market-category-groups.js')<index.indexOf('market-shopping-focus.js'),'shopping focus must run after category grouping');
+  assert.ok(index.indexOf('market-shopping-focus.js')<index.indexOf('mobile-menu-toggle.js'),'v67 menu controller must run after the preserved v65 shopping layer');
   assert.ok(fs.existsSync(path.join(dist,'market-shopping-focus.css')));
   assert.ok(fs.existsSync(path.join(dist,'market-shopping-focus.js')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v65 mobile shopping focus preserved under the v66 unified-shell release: OK');
+console.log('v65 mobile shopping focus preserved under the v67 menu release: OK');

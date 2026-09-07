@@ -1,9 +1,22 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v66",
+  "latestVersion": "v67",
   "publishedAt": "2026-09-07",
   "releases": [
+    {
+      "version": "v67",
+      "date": "7 de setembro de 2026",
+      "title": "Menu móvel animado e mais limpo",
+      "items": [
+        "O botão hambúrguer do cabeçalho passa a transformar-se suavemente num X quando o menu lateral é aberto e regressa ao hambúrguer quando o menu fecha.",
+        "O mesmo controlo abre e fecha o menu, eliminando o X visual duplicado que existia no cabeçalho interno do drawer.",
+        "O ícone usa três traços proporcionais, sem moldura branca ou estado verde de seleção, mantendo uma apresentação mais limpa e coerente com o cabeçalho global.",
+        "A área tátil permanece com 44 por 44 píxeis e o estado acessível alterna entre Abrir menu e Fechar menu através de aria-expanded e aria-label.",
+        "A animação respeita a preferência de movimento reduzido do sistema e mantém o fecho por Escape, backdrop e restantes fluxos existentes do drawer.",
+        "A alteração é exclusivamente de navegação e apresentação: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem ou sincronização."
+      ]
+    },
     {
       "version": "v66",
       "date": "7 de setembro de 2026",

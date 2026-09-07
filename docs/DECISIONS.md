@@ -189,3 +189,42 @@ PR #50 integrado no commit `9657d558000018af1ea44e6040441f2b9d91648c`. CI do PR 
 ### Motivo
 
 Uma única superfície cromática elimina a emenda branco/azulado, reduz diferenças de composição entre Safari/PWA e mantém a regra D-027 de que o topbar é um componente global, não uma área tematizada por página.
+
+## D-032 — O botão móvel é um único controlo que acompanha o drawer modal
+Data: 7 de setembro de 2026 · Estado: aceite como candidata v67 no PR #52.
+
+### Contexto
+
+O cabeçalho tinha um botão hambúrguer para abrir `#mobileDrawer` e o próprio drawer apresentava um segundo botão `#drawerCloseBtn` com `X`. Além da duplicação visual, uma transformação puramente CSS do botão exterior não resolveria o requisito de tocar novamente no `X`: quando um `<dialog>` abre com `showModal()`, os elementos exteriores ao diálogo ficam inertes.
+
+### Decisão
+
+A v67 mantém **um único controlo móvel efetivo**. `#mobileMenuBtn` é o mesmo nó DOM nos dois estados:
+
+- fechado: permanece no topbar e mostra três traços;
+- depois de `showModal()`: é movido para `.drawer-head` e transforma-se em `X` através de `aria-expanded="true"`;
+- ao tocar no `X`: chama o fluxo de fecho existente;
+- quando o drawer fecha por qualquer via: regressa ao ponto original do topbar e repõe `aria-expanded="false"`.
+
+O ponto original é preservado por um `Comment` anchor. O botão legado `#drawerCloseBtn` fica no DOM apenas por compatibilidade com o wiring histórico, mas oculto, fora da tabulação e sem exposição acessível.
+
+### Acessibilidade e geometria
+
+- alvo tátil: `44 × 44 px`;
+- estado acessível: `aria-expanded` sincronizado;
+- nome: **Abrir menu** / **Fechar menu**;
+- foco regressa ao mesmo controlo no fecho;
+- `prefers-reduced-motion: reduce` remove a animação;
+- Escape, backdrop e eventos de fecho existentes permanecem válidos.
+
+### Apresentação
+
+O glifo usa três traços arredondados de comprimentos progressivos e transforma os traços exterior superior/inferior em diagonais de `X`. O botão não recebe borda, caixa branca, fundo verde, estado selecionado cromático ou sombra adicional.
+
+### Restrições
+
+A camada `mobile-menu-toggle.js/.css` não escreve em `appState`, não altera persistência, finanças, scanner, sincronização, tema, safe area, título, `+` ou Sync. A versão proposta é `v67`, revisão `67-menu1`.
+
+### Motivo
+
+Mover o mesmo nó para dentro do `<dialog>` satisfaz simultaneamente o requisito visual hambúrguer ↔ `X`, a interação de fechar pelo próprio `X` e a semântica modal nativa, sem introduzir um botão duplicado nem quebrar o foco do drawer.

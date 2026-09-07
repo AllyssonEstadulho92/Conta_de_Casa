@@ -2,6 +2,47 @@
 
 Atualizado: 7 de setembro de 2026
 
+## P0 — v67 menu móvel hambúrguer/X
+
+### Implementação candidata — PR #52
+
+- [x] Confirmar no código que o menu móvel usa `#mobileMenuBtn` para abrir e `#drawerCloseBtn` como segundo `X` dentro de `#mobileDrawer`.
+- [x] Confirmar que `#mobileDrawer` é um `<dialog>` modal e que um botão deixado fora do diálogo ficaria inerte enquanto `showModal()` estiver ativo.
+- [x] Definir um único controlo real que acompanha o drawer, sem segundo `X` visível.
+- [x] Criar `mobile-menu-toggle.css` com glifo de três traços e transformação animada para `X`.
+- [x] Manter alvo tátil de `44 × 44 px` e glifo proporcional ao cabeçalho atual.
+- [x] Remover visualmente borda branca, fundo verde/selecionado e sombra adicional do comando móvel.
+- [x] Criar `mobile-menu-toggle.js` para mover o mesmo nó DOM para dentro do drawer quando aberto e repô-lo no topbar ao fechar.
+- [x] Sincronizar `aria-expanded`, `aria-label` e `title` com **Abrir menu / Fechar menu**.
+- [x] Ocultar `#drawerCloseBtn` sem o remover do DOM, preservando o wiring legado de `events.js`.
+- [x] Preservar Escape, backdrop, evento `close` e foco de retorno.
+- [x] Respeitar `prefers-reduced-motion`.
+- [x] Versionar a candidata como `v67` / `67-menu1`.
+- [x] Incluir os novos assets em `scripts/prepare-pages.cjs` e na allowlist/cache do Service Worker.
+- [x] Atualizar `release-manifest.json` e `tests/app-update.test.cjs`.
+- [x] Criar `tests/mobile-menu-toggle.test.cjs`.
+- [x] Incluir sintaxe/teste específico na CI e no gate de Pages.
+- [x] Abrir PR #52.
+- [ ] Confirmar CI verde do PR #52.
+- [ ] Rever diff final e confirmar que não existem alterações a dados/finanças/segurança.
+- [ ] Integrar PR #52 em `main` apenas com CI verde.
+- [ ] Confirmar CI de `main` e Deploy GitHub Pages.
+- [ ] Atualizar estes documentos para estado publicado depois da integração efetiva.
+
+### Validação física v67
+
+- [ ] iPhone/Safari 320, 375, 390 e 430 px: tocar no hambúrguer e confirmar transformação em `X`.
+- [ ] Tocar no `X` e confirmar fecho + regresso ao hambúrguer.
+- [ ] Confirmar ausência de segundo `X` no drawer.
+- [ ] Confirmar ausência de moldura branca, fundo verde ou indicador de seleção no botão.
+- [ ] Confirmar alinhamento com título, `+` e Sync sem alterar a geometria do topbar.
+- [ ] Confirmar fecho por Escape/backdrop e reposição correta do ícone.
+- [ ] Confirmar fecho após navegação pelo drawer e reposição correta do ícone.
+- [ ] Validar portrait/landscape, scroll e rotação.
+- [ ] Validar tema claro e escuro.
+- [ ] Validar foco por teclado e VoiceOver/TalkBack no estado **Abrir menu / Fechar menu**.
+- [ ] Validar `prefers-reduced-motion` num sistema com movimento reduzido.
+
 ## P0 — v66 uniformidade cromática do shell móvel
 
 ### Implementação e publicação
@@ -35,7 +76,7 @@ Atualizado: 7 de setembro de 2026
 - [ ] Validar scroll longo, retorno ao topo, rotação e browser chrome expandido/recolhido.
 - [ ] Confirmar que menu, título, `+` e Sync mantêm posição, tamanho e área tátil.
 - [ ] Confirmar que desktop mantém a identidade visual anterior do Mercado.
-- [ ] Num dispositivo com v65, confirmar deteção/instalação da v66 pelo Centro de Atualização.
+- [ ] Num dispositivo com v65/v66, confirmar deteção/instalação da próxima versão pelo Centro de Atualização.
 
 ## P0 — v65 Lista de compras móvel preservada
 
@@ -62,6 +103,7 @@ Atualizado: 7 de setembro de 2026
 - [x] Topbar móvel usa a mesma geometria e o mesmo fundo em Início/Faturas/Compras/Relatórios.
 - [x] Centro de Atualização continua same-origin e controlado pelo utilizador.
 - [x] CSP/allowlist, responsividade, acessibilidade e sincronização permanecem na CI.
+- [x] A candidata v67 mantém um único controlo móvel efetivo e não altera `appState`.
 
 ## P0 — validação física funcional ainda pendente
 
@@ -73,7 +115,7 @@ Atualizado: 7 de setembro de 2026
 ## P1 — segurança e simplificação técnica
 
 - [ ] Rever a dependência runtime `@zxing/browser` carregada de `unpkg.com` e decidir entre auto-hospedagem local ou integridade verificável numa release dedicada.
-- [ ] Depois da v66 validada fisicamente, avaliar remoção do pipeline histórico de imagens (`market-retailer-image-policy.js`, `market-image-audit.js`, `market-official-images.js`, CSS associado).
+- [ ] Depois das releases móveis validadas fisicamente, avaliar remoção do pipeline histórico de imagens (`market-retailer-image-policy.js`, `market-image-audit.js`, `market-official-images.js`, CSS associado).
 - [ ] Manter Open Food Facts quando necessário para identificação por GTIN mesmo que o pipeline de fotografias seja removido.
 - [ ] Consolidar CSS antigo substituído por `ui-consistency.css`/`v64-runtime.css`/`market-shopping-focus.css` apenas numa release separada, depois de hardware real verde.
 - [ ] Avaliar incorporar o estado `draft` de recorrência diretamente no schema numa migração formal futura.

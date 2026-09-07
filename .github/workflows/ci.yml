@@ -31,6 +31,7 @@ jobs:
           node --check render.js
           node --check forms.js
           node --check events.js
+          node --check mobile-menu-toggle.js
           node --check sync.js
           node --check sync-conflict-policy.js
           node --check market-experience.js
@@ -104,6 +105,9 @@ jobs:
 
       - name: Visual consistency regression tests
         run: node tests/ui-consistency.test.cjs
+
+      - name: Animated mobile menu tests
+        run: node tests/mobile-menu-toggle.test.cjs
 
       - name: Software update center tests
         run: node tests/app-update.test.cjs

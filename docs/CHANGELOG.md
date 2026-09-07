@@ -1,5 +1,58 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-07 — v67 candidata: menu móvel hambúrguer/X animado
+
+### Objetivo
+
+Modernizar o comando do menu móvel segundo o padrão visual solicitado: três traços proporcionais no estado fechado, transformação suave em `X` ao abrir e regresso ao hambúrguer ao fechar. A alteração deve manter o tamanho e a arquitetura do cabeçalho atual.
+
+### Problema confirmado no código
+
+- `#mobileMenuBtn` abria `#mobileDrawer` com um SVG hambúrguer fixo;
+- o drawer apresentava um segundo controlo `#drawerCloseBtn` com `X`;
+- um simples `aria-expanded`/CSS no botão exterior não seria suficiente para o tornar clicável durante `showModal()`, porque os elementos exteriores ao `<dialog>` modal ficam inertes;
+- a duplicação de comandos permitia que o utilizador visse um hambúrguer e um `X` como elementos separados, em vez de um único controlo que muda de estado.
+
+### Alterado — navegação e apresentação
+
+- criados `mobile-menu-toggle.js` e `mobile-menu-toggle.css`;
+- o mesmo `#mobileMenuBtn` abre e fecha o drawer;
+- ao abrir, o mesmo nó DOM é movido para `.drawer-head`, ficando dentro do `<dialog>` modal e continuando realmente interativo;
+- ao fechar, regressa ao ponto original no topbar;
+- os três traços transformam-se em `X` através de `aria-expanded="true"` e voltam ao hambúrguer em `false`;
+- `#drawerCloseBtn` permanece no DOM apenas por compatibilidade com o wiring histórico, mas fica oculto e fora da tabulação;
+- não existe segundo `X` visível;
+- o botão mantém alvo de `44 × 44 px`, sem moldura branca, fundo verde/selecionado ou sombra nova;
+- `aria-label`/`title` alternam entre **Abrir menu** e **Fechar menu**;
+- `prefers-reduced-motion: reduce` desativa a animação;
+- Escape, backdrop e evento `close` continuam preservados pelo fluxo existente.
+
+### Distribuição candidata
+
+- build: `v67`;
+- revisão do menu: `67-menu1`;
+- shell preservado: `66-shell1`;
+- Compras preservada: `65-shopping1`;
+- runtime funcional preservado: `64-runtime1`;
+- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v67-menu1`;
+- `release-manifest.json`, `scripts/prepare-pages.cjs` e Service Worker atualizados para incluir os novos assets.
+
+### QA
+
+- criado `tests/mobile-menu-toggle.test.cjs`;
+- CI e gate de Pages passam a verificar sintaxe do novo runtime e regressões do componente;
+- `tests/app-update.test.cjs` foi atualizado para build, manifesto, ordem de carregamento e cache v67;
+- PR #52 aberto para revisão e CI.
+
+### Segurança e dados
+
+- nenhuma alteração de `STATE_VERSION`;
+- nenhuma alteração a `estimatedCents`, `actualCents`, faturas, pagamentos, scanner, recorrências, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB ou sincronização;
+- nenhum segredo, token, chave ou endpoint externo novo;
+- a dívida técnica do ZXing via `unpkg.com` permanece separada desta release.
+
+A v67 só deve passar a **publicada** depois de CI verde, integração em `main` e Deploy GitHub Pages concluídos.
+
 ## 2026-09-07 — v66 publicada: fundo móvel uniforme no iPhone
 
 ### Problema observado
