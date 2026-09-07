@@ -4,7 +4,7 @@ Atualizado: 7 de setembro de 2026
 
 ## P0 — v66 uniformidade cromática do shell móvel
 
-### Implementação
+### Implementação e publicação
 
 - [x] Confirmar a diferença branco/azulado através da captura real de iPhone.
 - [x] Identificar no código a sobreposição entre o radial azul do Mercado e o topbar móvel `fixed`.
@@ -14,20 +14,16 @@ Atualizado: 7 de setembro de 2026
 - [x] Preservar o radial/identidade do Mercado no desktop.
 - [x] Alinhar `manifest.webmanifest` e `theme-color` público ao fundo claro `#f5f7fa`.
 - [x] Manter `applyTheme()` e o fundo escuro coerentes em `#0f1722`.
-- [x] Versionar candidata como `v66`, shell `66-shell1` e novo cache do Service Worker.
+- [x] Versionar release como `v66`, shell `66-shell1` e novo cache do Service Worker.
 - [x] Preservar `v64-runtime.js` em `64-runtime1` e Compras em `65-shopping1`.
 - [x] Atualizar regressões de shell, manifesto, build, imagens legadas, Compras e Centro de Atualização.
 - [x] Preservar schema, finanças, scanner, cofre e sincronização.
-
-### Integração e publicação
-
-- [ ] Abrir PR da v66.
-- [ ] Obter CI totalmente verde no PR.
-- [ ] Rever diff final e confirmar escopo exclusivamente visual/distribuição.
-- [ ] Integrar em `main` apenas com CI verde.
-- [ ] Confirmar CI de `main` após integração.
-- [ ] Confirmar Deploy GitHub Pages da v66.
-- [ ] Sincronizar PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG com o estado pós-publicação.
+- [x] Abrir PR #50 e obter CI verde (#1138).
+- [x] Rever diff final e confirmar escopo exclusivamente visual/distribuição.
+- [x] Integrar PR #50 em `main` no commit `9657d558000018af1ea44e6040441f2b9d91648c`.
+- [x] Confirmar CI de `main` #1139 com sucesso.
+- [x] Confirmar Deploy GitHub Pages #1132 com sucesso.
+- [x] Sincronizar os cinco documentos de continuidade com o estado pós-publicação.
 
 ### Validação física v66
 
@@ -63,7 +59,7 @@ Atualizado: 7 de setembro de 2026
 - [x] QR fiscal continua preenchimento assistido/local.
 - [x] Lucide continua sistema de ícones local.
 - [x] Um único indicador ativo na navegação inferior.
-- [x] Topbar móvel usa a mesma geometria em Início/Faturas/Compras/Relatórios.
+- [x] Topbar móvel usa a mesma geometria e o mesmo fundo em Início/Faturas/Compras/Relatórios.
 - [x] Centro de Atualização continua same-origin e controlado pelo utilizador.
 - [x] CSP/allowlist, responsividade, acessibilidade e sincronização permanecem na CI.
 
