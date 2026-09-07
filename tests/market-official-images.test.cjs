@@ -83,29 +83,34 @@ assert.equal(parsed[0].sourceUrl,pingoProduct);
 assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
-assert.match(sw,/conta-de-casa-public-v64-runtime1/);
+assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1/);
 assert.ok(sw.includes("'./market-retailer-image-policy.js'"));
 assert.ok(sw.includes("'./market-official-images.js'"));
 assert.ok(sw.includes("'./v64-runtime.js'"));
-assert.match(prepare,/const BUILD = 'v64'/);
+assert.ok(sw.includes("'./market-shopping-focus.js'"));
+assert.match(prepare,/const BUILD = 'v65'/);
 assert.ok(prepare.includes("'market-retailer-image-policy.js'"));
 assert.ok(prepare.includes("'market-official-images.js'"));
 assert.ok(prepare.includes("'v64-runtime.js'"));
+assert.ok(prepare.includes("'market-shopping-focus.js'"));
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-retailer-image-policy\.js\?v=64/);
-  assert.match(index,/market-official-images\.js\?v=64/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=65/);
+  assert.match(index,/market-official-images\.js\?v=65/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
+  assert.match(index,/market-shopping-focus\.js\?v=65-shopping1/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.ok(index.indexOf('market-official-images.js')<index.indexOf('v64-runtime.js'));
+  assert.ok(index.indexOf('v64-runtime.js')<index.indexOf('market-shopping-focus.js'));
   assert.ok(fs.existsSync(path.join(dist,'market-retailer-image-policy.js')));
   assert.ok(fs.existsSync(path.join(dist,'market-official-images.js')));
   assert.ok(fs.existsSync(path.join(dist,'v64-runtime.js')));
+  assert.ok(fs.existsSync(path.join(dist,'market-shopping-focus.js')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market browser official-image bridge and v64 build tests: OK');
+console.log('Market browser official-image bridge, v64 runtime and v65 shopping build tests: OK');
