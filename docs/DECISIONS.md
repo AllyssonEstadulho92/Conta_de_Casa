@@ -143,3 +143,35 @@ A solução atua sobre a causa da falta de movimento percebido sem alterar `even
 - CI de `main` #1280 (`34170229908`): sucesso;
 - Deploy Pages #1273 (`34170256426`): sucesso;
 - revisões `64-runtime1`, `65-shopping1` e `66-shell1` permanecem preservadas.
+
+## D-036 — Drawer móvel usa off-canvas completo e só fecha depois da transição
+Data: 8 de setembro de 2026 · Estado: aceite como candidata v71.
+
+### Contexto
+
+A validação física da v70 mostrou o drawer correto em conteúdo, estado e hierarquia, mas a entrada permanecia visualmente seca. A camada final partia apenas de `translateX(-18px)`, portanto quase todo o painel já estava no local quando o browser o apresentava. O backdrop surgia já escurecido. No fecho, `drawer.close()` removia imediatamente o `<dialog>` da renderização, inviabilizando uma saída lateral completa.
+
+### Decisão
+
+Manter o mesmo `<dialog>`, a mesma navegação e os mesmos métodos públicos, mas coordenar a apresentação dentro do controlador já existente:
+
+- estado fechado da superfície: `translate3d(calc(-100% - 8px),0,0)`;
+- estado aberto: `translate3d(0,0,0)`;
+- abertura: `280 ms` com `cubic-bezier(.22,1,.36,1)`;
+- fecho: `240 ms`, ligeiramente mais rápido;
+- backdrop: transparente → `rgba(10,18,30,.38)` com blur máximo de `1.5px`;
+- não animar largura, `left`, margens ou outros valores que causem reflow;
+- preservar uma referência ao `drawer.close` nativo e substituir apenas o método da instância por um wrapper coordenador;
+- o wrapper remove `.open`, espera `transitionend` do `transform` e só então executa o close nativo;
+- usar fallback temporal de `360 ms` para impedir estado preso se `transitionend` não ocorrer;
+- deixar o mesmo botão dentro de `.drawer-head` até ao evento `close` real, regressando ao topbar apenas depois;
+- em `prefers-reduced-motion` ou fora do breakpoint mobile, não esperar pela animação;
+- todos os fluxos existentes (`X`, backdrop, Escape, seleção de página e breakpoint) continuam a usar `drawer.close()` sem duplicação.
+
+### Motivo
+
+A solução produz um movimento off-canvas claro e composto principalmente por `transform`, evita alterações de layout, mantém um único drawer e evita tocar em `events.js` e `render.js`. O wrapper local garante ainda que os caminhos históricos de fecho recebem o mesmo comportamento sem reescrever a navegação.
+
+### Versionamento
+
+Candidata: `v71`; revisão do menu: `71-menu5`; revisões `64-runtime1`, `65-shopping1` e `66-shell1` permanecem preservadas. Publicação depende de CI verde, merge em `main`, CI final e Pages verde.
