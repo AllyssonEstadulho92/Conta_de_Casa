@@ -2,6 +2,7 @@
 
 Atualizado: 7 de setembro de 2026
 Build público atual: `v65`
+Candidato em validação: `v66`
 
 ## Visão geral
 
@@ -23,7 +24,7 @@ Não existe backend financeiro próprio. Integrações externas do Mercado serve
 
 - `core.js` — estado, normalização, IndexedDB, cifragem e utilitários;
 - `finance.js` — cálculos e invariantes financeiros;
-- `render.js` — renderização e navegação de páginas;
+- `render.js` — renderização, navegação e aplicação de tema;
 - `forms.js` — formulários, validação e mutações;
 - `events.js` — eventos globais, viewport, cofre e Service Worker;
 - `sync.js` — sincronização cifrada opcional;
@@ -31,137 +32,146 @@ Não existe backend financeiro próprio. Integrações externas do Mercado serve
 - `market-experience.js` — catálogo/preço Pingo Doce e Continente através de `cesta.pt`;
 - `market-barcode.js` — leitura GTIN/EAN/UPC e identificação de produto;
 - `market-category-groups.js` — agrupamento visual base da lista de compras;
-- `market-shopping-focus.js` — camada v65 de apresentação móvel: resumo compacto, `+` contextual, filtros compactos, pendentes prioritários, Comprados recolhidos e detalhes progressivos;
+- `market-shopping-focus.js` — camada v65 de apresentação móvel;
 - `ui-icons.js` — subset Lucide local;
 - `invoice-capture.js` — leitura local de QR fiscal;
 - `app-update.js` — Centro de Atualização;
 - `v64-runtime.js` — correspondência conservadora do scanner e ciclo de faturas recorrentes **Por preencher**.
 
-`market-shopping-focus.js` lê o estado apenas para apresentar métricas já definidas por `marketMetrics()`. Não escreve `estimatedCents`, `actualCents`, quantidade, estado de compra, persistência ou sincronização. Para adicionar produto, o `+` contextual dispara `#newMarketBtn`, preservando o fluxo/handler oficial.
+A candidata v66 não modifica estes fluxos funcionais.
 
-Os módulos históricos `market-retailer-image-policy.js`, `market-image-audit.js` e `market-official-images.js` continuam distribuídos por compatibilidade, embora a UI principal seja `text-first`.
+## Camadas CSS e responsabilidade visual
 
-## Ordem das camadas CSS
-
-A ordem pública da v65 é intencional:
+A ordem pública permanece:
 
 1. `styles.css` — base histórica;
 2. `design-system.css` — tokens/componentes/layout;
 3. `mobile-layout.css` — compatibilidade móvel/Safari;
 4. `market-experience.css` — estrutura do Mercado;
-5. `market-brand.css` — identidade text-first;
+5. `market-brand.css` — identidade visual do Mercado;
 6. `market-category-groups.css` — agrupamento por categoria;
-7. `ui-icons.css` — sistema Lucide e componentes visuais;
+7. `ui-icons.css` — sistema Lucide;
 8. `ui-consistency.css` — consolidação visual global;
-9. `v64-runtime.css` — cabeçalho móvel/safe area e estado visual das faturas por preencher;
-10. `market-shopping-focus.css` — ajustes finais exclusivamente dentro de `#page-market` no mobile.
+9. `v64-runtime.css` — cabeçalho/safe area e, na candidata v66, cor canónica do shell móvel;
+10. `market-shopping-focus.css` — ajustes finais da Lista de compras no mobile.
 
-A camada v65 não redefine a geometria global do topbar nem altera cifragem/persistência. Fica depois de `v64-runtime.css` para resolver apenas densidade e prioridade do conteúdo de Compras.
+`v64-runtime.css` mantém o nome histórico porque também contém a geometria v64 do cabeçalho e os estados visuais de faturas `draft`. A candidata v66 altera apenas a parte cromática dessa folha e publica-a com revisão independente `66-shell1`. O JavaScript `v64-runtime.js` continua em `64-runtime1`.
 
-## Lista de compras v65
+## Shell móvel v66
 
-### Desktop
+### Causa da diferença branco/azulado
 
-Permanece inalterado: tabela, separadores de categoria, pesquisa/filtros e quatro resumos financeiros completos.
+`market-brand.css` contém uma identidade específica do Mercado em desktop e mobile:
 
-### Mobile até 820 px
+```css
+html.market-prototype-active .main {
+  background: radial-gradient(... azul ...), var(--bg);
+}
+```
 
-1. `market-shopping-focus.js` insere `#marketMobileOverview` antes da barra de pesquisa;
-2. o resumo compacto apresenta contagens por comprar/compradas e total previsto;
-3. **Resumo financeiro** expande estimado, contabilizado, pendente e diferença;
-4. `#marketSummary` original é ocultado apenas no mobile;
-5. `#newMarketBtn` fica visualmente oculto no mobile, mas continua a ser o handler oficial acionado pelo `+` do topbar;
-6. filtros reutilizam os selects existentes; labels continuam disponíveis para acessibilidade e o botão de limpar depende de estado ativo;
-7. após `market-category-groups.js`, grupos com pendentes permanecem abertos e cartões comprados são movidos para um grupo fechado **Comprados**;
-8. em cada cartão, o preço de leitura rápida é copiado da informação já renderizada e os blocos secundários são movidos para `<details>` sem recriar handlers.
+O topbar móvel é `fixed` e usa `left/right: var(--page-gutter)`. Como o fundo radial pertence a `.main`, esse fundo continuava visível nas margens laterais e por baixo do cabeçalho. O topbar, por sua vez, tinha fundo parcialmente composto e `backdrop-filter`, produzindo uma tonalidade diferente no Safari/iPhone.
 
-A sequência dos MutationObservers é protegida por `data-marketShoppingFocused` para evitar reprocessamento do mesmo DOM. `renderMarket()` continua a ser a fonte do HTML e cada render novo remove naturalmente as marcações antigas antes de nova aplicação.
+### Regra v66
 
-## Navegação e viewport móvel
+Até 820 px existe um único token de shell:
 
-Em mobile, `.main` continua a ser o scroller interno e a navegação inferior permanece fixa. A camada v64 mantém `.topbar` com `position:fixed` até 820 px, `--mobile-top-safe` respeita `env(safe-area-inset-top)` e `.main` recebe `padding-top: var(--header-height)`.
+- claro: `--mobile-shell-bg: #f5f7fa`;
+- escuro: `--mobile-shell-bg: #0f1722`.
 
-A v65 não altera estas métricas; apenas torna a ação `+` contextual quando `#page-market` está ativo.
+O token é aplicado com precedência final a:
 
-## Mercado e código de barras
+- `html.app-active`;
+- `body`;
+- `.app-shell`;
+- `.main` global;
+- `html.market-prototype-active .main`;
+- `.topbar`.
 
-### Fontes
+O topbar móvel fica opaco e sem `backdrop-filter`. A identidade radial do Mercado não é eliminada do código e continua disponível acima de 820 px; só deixa de participar no shell móvel, em conformidade com a decisão de que o cabeçalho é global.
 
-- Pingo Doce e Continente: pesquisa de produto/preço via `https://cesta.pt/mcp`;
-- Open Food Facts: identificação auxiliar por código de barras;
-- `@zxing/browser`: leitura de código de barras carregada em runtime a partir de `unpkg.com`.
+## Tema e PWA
 
-A última dependência constitui superfície externa adicional. A estratégia de auto-hospedagem/integridade permanece dívida técnica para release de segurança dedicada.
+`render.js::applyTheme()` já define dinamicamente:
 
-### Fluxo v64 preservado na v65
+- claro: `meta[name="theme-color"] = #f5f7fa`;
+- escuro: `meta[name="theme-color"] = #0f1722`.
 
-1. exatamente um supermercado selecionado;
-2. checksum GTIN/EAN/UPC validado;
-3. consulta de resultados da loja;
-4. comparação de loja, nome/marca e embalagem;
-5. auto-adição apenas com score `>= 0.84` e diferença `>= 0.10` para o segundo candidato;
-6. ambiguidade exige confirmação manual;
-7. GTIN repetido num item pendente incrementa quantidade.
+Na candidata v66:
 
-O preço encontrado atualiza `estimatedCents`; o scanner não escreve `actualCents`.
+- `manifest.webmanifest.background_color = #f5f7fa`;
+- `manifest.webmanifest.theme_color = #f5f7fa`;
+- `scripts/prepare-pages.cjs` força o HTML público a iniciar com `theme-color = #f5f7fa`.
+
+Isto reduz divergências entre a área da PWA controlada pelo navegador e o shell da aplicação. O runtime continua a trocar o `theme-color` para `#0f1722` quando o tema escuro está ativo.
+
+## Lista de compras v65 preservada
+
+A v66 não altera `market-shopping-focus.js/.css`. No mobile continuam válidos:
+
+- resumo compacto;
+- `+` contextual;
+- filtros compactos;
+- categorias pendentes abertas;
+- grupo **Comprados** recolhido;
+- detalhes progressivos por item.
+
+Desktop continua com tabela, separadores de categoria, pesquisa/filtros e resumos completos.
+
+## Mercado, scanner e preço preservados
+
+Fontes atuais:
+
+- Pingo Doce e Continente via `https://cesta.pt/mcp`;
+- Open Food Facts para identificação auxiliar por GTIN;
+- `@zxing/browser` carregado em runtime de `unpkg.com`.
+
+A auto-adição continua conservadora: exatamente um supermercado, score `>= 0.84`, margem `>= 0.10`, loja/nome/marca/embalagem compatíveis. GTIN repetido num item pendente incrementa quantidade. O catálogo continua a atualizar apenas `estimatedCents`; `actualCents` permanece reservado ao valor efetivamente confirmado.
+
+A dependência ZXing externa continua dívida técnica de segurança e não faz parte da v66.
 
 ## Faturas recorrentes preservadas
 
-As ocorrências futuras automáticas podem ter `draft: true`: descrição/fornecedor/categoria/método/recorrência/vencimento são preservados; valor/referência/observações/data de emissão são limpos; `totalCents = 0` enquanto **Por preencher**; drafts não entram nos totais pendentes/em atraso.
+As ocorrências futuras automáticas continuam a poder usar `draft: true`, com `totalCents = 0`, sem herdar referência, observações ou data de emissão. Drafts não entram nos totais pendentes/em atraso até preenchimento.
 
-## Centro de Atualização
+## Versionamento e distribuição candidata
 
-`release-manifest.json` é a fonte pública de versões e notas. Na v65, `latestVersion = v65`; `scripts/prepare-pages.cjs` exige correspondência entre manifesto e build. A atualização pública substitui assets da aplicação; não recria nem apaga o cofre.
+- público atual: `v65`;
+- candidato: `v66`;
+- revisão visual histórica: `64-ui1`;
+- runtime funcional: `64-runtime1`;
+- Compras: `65-shopping1`;
+- shell CSS candidato: `66-shell1`;
+- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1`.
 
-## Pipeline de qualidade e distribuição
+`scripts/prepare-pages.cjs` mantém a separação entre versão pública e revisões internas. `v64-runtime.css` usa `?v=66-shell1`; `v64-runtime.js` continua `?v=64-runtime1`.
 
-### CI
+## Pipeline de qualidade
 
-A cobertura inclui sintaxe, finanças, auditoria, invariantes, isolamento do cofre, datas, formulários, QR, Mercado, imagens legadas, scanner, quantidade/contabilidade, runtime v64, camada v65, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
+A CI continua a cobrir finanças, auditoria, invariantes, cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
 
-A v65 acrescentou explicitamente:
+A v66 acrescenta/regressa explicitamente:
 
-- `node --check market-shopping-focus.js`;
-- `node tests/market-shopping-focus.test.cjs`.
+- cor canónica do shell claro/escuro;
+- fundo idêntico entre `.main` do Mercado e topbar móvel;
+- ausência de `backdrop-filter` no topbar móvel;
+- alinhamento do manifesto e `theme-color`;
+- build/revisão/cache v66 sem mudar o runtime JS ou a camada v65 de Compras.
 
-As expectativas legadas de build em `tests/market-image-audit.test.cjs` e `tests/market-official-images.test.cjs` foram alinhadas de `v64` para `v65`; o runtime `64-runtime1` continua preservado.
-
-### GitHub Pages
-
-`.github/workflows/pages.yml` publica automaticamente após CI verde de `main` e suporta `workflow_dispatch`. O gate manual repete também a sintaxe e a regressão específica da v65 antes de preparar `dist`.
-
-Validação da publicação v65:
-
-- PR #48 / CI run #1110: **sucesso**;
-- merge em `main`: `2d39f6f4daa8dccabb51bf906ef22d4a5d9075e4`;
-- CI de `main` run #1111: **sucesso**;
-- Deploy GitHub Pages run #1104: **sucesso**.
-
-## Distribuição v65
-
-- build: `v65`;
-- revisão de Compras: `65-shopping1`;
-- revisões preservadas: `64-ui1` / `64-runtime1`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1`;
-- PR #48 integrado;
-- GitHub Pages publicado com sucesso.
+O gate manual de GitHub Pages executa a mesma matriz antes de preparar `dist`.
 
 ## Regressões obrigatórias
 
-Devem permanecer cobertos:
+Antes de publicar v66 devem permanecer cobertos:
 
 - finanças e invariantes de contagem;
 - isolamento/cifragem do cofre;
 - datas civis, faturas, pagamentos e QR;
 - Mercado, scanner, quantidade × preço;
-- agrupamento por categoria e prioridade pendentes/comprados;
-- botão `+` contextual sem duplicar handlers;
-- filtros, resumo compacto e detalhes progressivos no mobile;
-- ícones e consistência visual;
-- safe area/cabeçalho móvel;
-- atualização, manifesto e Service Worker;
+- Lista de compras v65;
+- um único fundo de shell no mobile claro/escuro;
+- safe area/cabeçalho sem alteração de geometria;
+- manifesto, Centro de Atualização e Service Worker;
 - segurança/CSP/allowlist;
-- responsividade, navegação e acessibilidade;
-- sincronização e conflitos técnicos.
+- responsividade, navegação, acessibilidade e sincronização.
 
-A CI automatizada não substitui a validação física final em Safari/iPhone e Android.
+A CI não substitui a validação física final no mesmo iPhone/Safari onde a diferença de cor foi observada.
