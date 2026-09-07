@@ -46,7 +46,7 @@
     }
 
     const motionDuration=240;
-    const motionEase='cubic-bezier(.22,.8,.2,1)';
+    const motionEase='cubic-bezier(.32,.72,0,1)';
     const drawerCloseFallback=360;
     let motionAnimations=[];
     let motionRun=0;
