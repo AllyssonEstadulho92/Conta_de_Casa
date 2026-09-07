@@ -1,9 +1,27 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v63",
-  "publishedAt": "2026-09-06",
+  "latestVersion": "v64",
+  "publishedAt": "2026-09-07",
   "releases": [
+    {
+      "version": "v64",
+      "date": "7 de setembro de 2026",
+      "title": "Scanner preciso, novas faturas limpas e cabeçalho móvel uniforme",
+      "items": [
+        "O leitor de código de barras passa a exigir um único supermercado para evitar misturar preços entre lojas e memoriza a última seleção individual.",
+        "Depois de identificar o GTIN, a aplicação compara nome, marca, embalagem e loja; só adiciona automaticamente quando a correspondência atinge confiança elevada.",
+        "Ao ler novamente o mesmo GTIN ainda pendente, a quantidade é incrementada em vez de criar uma linha duplicada, e o preço estimado é atualizado com o valor encontrado nessa leitura.",
+        "Se a correspondência do produto ou da embalagem não for suficientemente segura, a aplicação não contabiliza automaticamente e pede confirmação manual do resultado.",
+        "O preço encontrado pelo supermercado continua registado como estimado; o valor efetivamente pago permanece separado até existir confirmação de compra ou talão.",
+        "As próximas ocorrências de faturas recorrentes deixam de herdar o valor, referência e observações do mês anterior: ficam como Por preencher até chegar a nova fatura.",
+        "Descrição, fornecedor, categoria, método, recorrência e vencimento previsto continuam disponíveis para reduzir trabalho repetitivo sem transportar valores antigos.",
+        "Ocorrências recorrentes futuras geradas automaticamente e ainda não editadas são migradas para o novo estado Por preencher sem alterar faturas já confirmadas ou com pagamentos.",
+        "O cabeçalho móvel passa a respeitar uma margem superior mínima e a safe area do iPhone, deixando o menu hambúrguer e as ações do topo fora da zona difícil de tocar.",
+        "Início, Faturas, Lista de compras e Relatórios passam a usar exatamente a mesma composição do cabeçalho móvel: mesmo tamanho de título, menu, botão + e controlo Sync; o carrinho extra, o botão ampliado e o chevron exclusivo de Compras deixam de aparecer no topo.",
+        "A v64 mantém cofre, PIN, pagamentos, faturas confirmadas e dados financeiros cifrados separados do mecanismo de atualização."
+      ]
+    },
     {
       "version": "v63",
       "date": "6 de setembro de 2026",

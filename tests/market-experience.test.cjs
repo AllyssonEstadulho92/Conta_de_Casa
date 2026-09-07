@@ -5,8 +5,10 @@ const index = fs.readFileSync('index.html','utf8');
 const css = fs.readFileSync('market-experience.css','utf8');
 const brandingCss = fs.readFileSync('market-brand.css','utf8');
 const consistencyCss = fs.readFileSync('ui-consistency.css','utf8');
+const runtimeCss = fs.readFileSync('v64-runtime.css','utf8');
 const js = fs.readFileSync('market-experience.js','utf8');
 const brandingJs = fs.readFileSync('market-branding.js','utf8');
+const runtimeJs = fs.readFileSync('v64-runtime.js','utf8');
 const imageAudit = fs.readFileSync('market-image-audit.js','utf8');
 const officialBridge = fs.readFileSync('market-official-images.js','utf8');
 const retailerPolicy = fs.readFileSync('market-retailer-image-policy.js','utf8');
@@ -20,9 +22,9 @@ assert.match(index, /market-experience\.js\?v=53/);
 assert.match(index, /id="appBuildVersion">v53</);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt https:\/\/world\.openfoodfacts\.org;/);
 assert.match(events, /register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
-assert.match(sw, /conta-de-casa-public-v63-ui2/);
+assert.match(sw, /conta-de-casa-public-v64-runtime1/);
 
-for (const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','ui-consistency.css']) {
+for (const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','ui-consistency.css','v64-runtime.css','v64-runtime.js']) {
   assert.ok(sw.includes(`'./${asset}'`), `${asset} must be cached by the service worker`);
   assert.ok(pages.includes(`'${asset}'`), `${asset} must be included in the Pages bundle`);
 }
@@ -58,6 +60,9 @@ assert.match(brandingJs, /A fotografia é opcional/);
 assert.doesNotMatch(brandingJs, /appState|estimatedCents|actualCents|saveState|commit\(/,'branding layer must not touch financial state');
 assert.match(consistencyCss,/\.mobile-nav \.nav-btn\.active::after[\s\S]*content:none!important/,'final layer must remove duplicate mobile active marker');
 assert.match(consistencyCss,/#page-market \.market-summary-item\{[\s\S]*inset 0 3px 0 var\(--market-summary-accent\)/,'summary card accent must render as one solid strip');
+assert.match(runtimeCss,/safe-area-inset-top/,'v64 mobile layer must keep the top controls inside the touch-safe area');
+assert.match(runtimeJs,/AUTO_MATCH_MIN=0\.84/,'v64 barcode automation must use conservative confidence matching');
+assert.doesNotMatch(runtimeJs,/actualCents\s*[:=]/,'barcode price lookup must remain estimated rather than actual paid value');
 
 // v60 mantém o resolvedor legado; v61 resolve o pid oficial; v62 torna os cartões vivos official-only.
 assert.match(imageAudit,/searchCatalogV60/);
@@ -92,12 +97,12 @@ assert.ok(css.includes('env(safe-area-inset-bottom)'), 'market dialog/page must 
 assert.ok(css.includes('min-width:0'), 'market layouts must allow content to shrink without horizontal overflow');
 assert.ok(css.includes('overflow:visible'), 'market page must not hide content to solve layout constraints');
 
-const remSizes = [...`${css}\n${brandingCss}\n${consistencyCss}`.matchAll(/font-size:\s*([0-9.]+)rem/g)].map(match => Number(match[1]));
+const remSizes = [...`${css}\n${brandingCss}\n${consistencyCss}\n${runtimeCss}`.matchAll(/font-size:\s*([0-9.]+)rem/g)].map(match => Number(match[1]));
 assert.ok(remSizes.length > 0);
 assert.ok(remSizes.every(size => size >= 0.75), `market live UI contains text smaller than 12px: ${Math.min(...remSizes)}rem`);
 for (const target of ['44px','48px','52px']) assert.ok(`${css}\n${brandingCss}`.includes(target));
 
-console.log('Market live-source, branding, no-image presentation, privacy and responsive invariants: OK');
+console.log('Market live-source, v64 barcode, branding, no-image presentation, privacy and responsive invariants: OK');
 assert.match(css,/market-logo-pingo/);
 assert.match(css,/market-logo-continente/);
 assert.match(css,/market-quantity-stepper/);

@@ -52,14 +52,8 @@ vm.createContext(sandbox);
 vm.runInContext(js,sandbox,{filename:'market-official-images.js'});
 assert.ok(sandbox.CDCOfficialMarketImages,'official-image bridge API must be installed');
 
-assert.deepEqual(
-  JSON.parse(JSON.stringify(sandbox.CDCOfficialMarketImages.parseCardId('cesta-pingo-doce-739490'))),
-  {marketId:'pingo-doce',pid:'739490'}
-);
-assert.deepEqual(
-  JSON.parse(JSON.stringify(sandbox.CDCOfficialMarketImages.parseCardId('cesta-continente-8167440'))),
-  {marketId:'continente',pid:'8167440'}
-);
+assert.deepEqual(JSON.parse(JSON.stringify(sandbox.CDCOfficialMarketImages.parseCardId('cesta-pingo-doce-739490'))),{marketId:'pingo-doce',pid:'739490'});
+assert.deepEqual(JSON.parse(JSON.stringify(sandbox.CDCOfficialMarketImages.parseCardId('cesta-continente-8167440'))),{marketId:'continente',pid:'8167440'});
 assert.equal(sandbox.CDCOfficialMarketImages.parseCardId('other-739490'),null);
 
 const continenteProduct='https://www.continente.pt/produto/compressas-gaze-20-x-20-cm-continente-8167440.html';
@@ -89,24 +83,29 @@ assert.equal(parsed[0].sourceUrl,pingoProduct);
 assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
-assert.match(sw,/conta-de-casa-public-v63-ui2/);
+assert.match(sw,/conta-de-casa-public-v64-runtime1/);
 assert.ok(sw.includes("'./market-retailer-image-policy.js'"));
 assert.ok(sw.includes("'./market-official-images.js'"));
-assert.match(prepare,/const BUILD = 'v63'/);
+assert.ok(sw.includes("'./v64-runtime.js'"));
+assert.match(prepare,/const BUILD = 'v64'/);
 assert.ok(prepare.includes("'market-retailer-image-policy.js'"));
 assert.ok(prepare.includes("'market-official-images.js'"));
+assert.ok(prepare.includes("'v64-runtime.js'"));
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-retailer-image-policy\.js\?v=63/);
-  assert.match(index,/market-official-images\.js\?v=63/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=64/);
+  assert.match(index,/market-official-images\.js\?v=64/);
+  assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
+  assert.ok(index.indexOf('market-official-images.js')<index.indexOf('v64-runtime.js'));
   assert.ok(fs.existsSync(path.join(dist,'market-retailer-image-policy.js')));
   assert.ok(fs.existsSync(path.join(dist,'market-official-images.js')));
+  assert.ok(fs.existsSync(path.join(dist,'v64-runtime.js')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market browser official-image bridge tests: OK');
+console.log('Market browser official-image bridge and v64 build tests: OK');

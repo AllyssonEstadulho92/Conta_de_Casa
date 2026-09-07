@@ -96,47 +96,40 @@ assert.equal(sandbox.CDCMarketImages.safeRetailerImageUrl(pingoImage,'pingo-doce
 assert.equal(sandbox.CDCMarketImages.safeRetailerImageUrl(pingoImage,'pingo-doce','123456'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl(continenteImage),continenteImage);
 assert.equal(sandbox.CDCMarketImages.safeImageUrl(pingoImage),pingoImage);
-assert.equal(
-  sandbox.CDCMarketImages.safeImageUrl('https://images.openfoodfacts.org/images/products/123/front.jpg'),
-  'https://images.openfoodfacts.org/images/products/123/front.jpg'
-);
-assert.equal(
-  sandbox.CDCMarketImages.safeImageUrl('https://world.openbeautyfacts.org/images/products/123/front.jpg'),
-  'https://world.openbeautyfacts.org/images/products/123/front.jpg'
-);
+assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://images.openfoodfacts.org/images/products/123/front.jpg'),'https://images.openfoodfacts.org/images/products/123/front.jpg');
+assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://world.openbeautyfacts.org/images/products/123/front.jpg'),'https://world.openbeautyfacts.org/images/products/123/front.jpg');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/products/123/front.jpg'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/images/large/739490_test.jpg'),'');
 
-assert.match(sw,/conta-de-casa-public-v63-ui2/);
-for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','ui-consistency.css']){
+assert.match(sw,/conta-de-casa-public-v64-runtime1/);
+for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','ui-consistency.css','v64-runtime.css','v64-runtime.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(prepare.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
 }
-assert.match(prepare,/const BUILD = 'v63'/);
-assert.match(prepare,/const VISUAL_REV = '63-ui2'/);
+assert.match(prepare,/const BUILD = 'v64'/);
+assert.match(prepare,/const VISUAL_REV = '64-ui1'/);
+assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-image-audit\.css\?v=63/);
-  assert.match(index,/market-retailer-image-policy\.js\?v=63/);
-  assert.match(index,/market-image-audit\.js\?v=63/);
-  assert.match(index,/market-official-images\.js\?v=63/);
-  assert.match(index,/ui-consistency\.css\?v=63-ui2/);
+  assert.match(index,/market-image-audit\.css\?v=64/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=64/);
+  assert.match(index,/market-image-audit\.js\?v=64/);
+  assert.match(index,/market-official-images\.js\?v=64/);
+  assert.match(index,/ui-consistency\.css\?v=64-ui1/);
+  assert.match(index,/v64-runtime\.css\?v=64-runtime1/);
+  assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.match(index,/https:\/\/www\.continente\.pt/);
   assert.match(index,/https:\/\/static\.pingodoce\.pt/);
   assert.match(index,/https:\/\/r\.jina\.ai/);
   assert.match(index,/https:\/\/\*\.openbeautyfacts\.org/);
   assert.match(index,/https:\/\/world\.openproductsfacts\.org/);
-  assert.ok(fs.existsSync(path.join(dist,'market-image-audit.css')));
-  assert.ok(fs.existsSync(path.join(dist,'market-retailer-image-policy.js')));
-  assert.ok(fs.existsSync(path.join(dist,'market-image-audit.js')));
-  assert.ok(fs.existsSync(path.join(dist,'market-official-images.js')));
-  assert.ok(fs.existsSync(path.join(dist,'ui-consistency.css')));
+  for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','ui-consistency.css','v64-runtime.css','v64-runtime.js'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official retailer image, fallback, safe-source and zoom tests: OK');
+console.log('Market official retailer image, fallback, safe-source, zoom and v64 build tests: OK');
