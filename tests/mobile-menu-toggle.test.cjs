@@ -30,7 +30,7 @@ assert.match(js, /glyph\.append\(document\.createElement\('span'\),document\.cre
 
 // Regression v70 retained: explicit Web Animations keep hamburger/X movement visible after reparenting.
 assert.match(js, /const motionDuration=240/);
-assert.match(js, /const motionEase='cubic-bezier\(\.22,\.8,\.2,1\)'/);
+assert.match(js, /const motionEase='cubic-bezier\(\.32,\.72,0,1\)'/);
 assert.match(js, /typeof glyph\.animate!=='function'/);
 assert.match(js, /motionAnimations\.push\(line\.animate\(frames,/);
 assert.match(js, /const glyphMotion=glyph\.animate\(/);
@@ -52,24 +52,49 @@ assert.match(js, /if\(returnValue===undefined\)nativeDrawerClose\(\)/);
 assert.match(js, /drawer\.addEventListener\('close',[\s\S]*syncButton\(false\)/, 'button must return home only after the dialog really closes');
 assert.match(js, /prefersReducedMotion\(\)\|\|!mobile[\s\S]*finishDrawerClose\(\)/, 'reduced motion and desktop must not wait on mobile transitions');
 
+// v71 interactive swipe: drawer follows the finger and snaps by progress/velocity.
+assert.match(js, /const swipeEdgeWidth=30/,'closed drawer swipe must start from a narrow left edge');
+assert.match(js, /const swipeIntentThreshold=8/,'gesture must wait for deliberate movement');
+assert.match(js, /const swipeHorizontalBias=1\.08/,'horizontal intent must win over vertical scroll before capture');
+assert.match(js, /const swipeOpenThreshold=\.34/);
+assert.match(js, /const swipeKeepOpenThreshold=\.66/);
+assert.match(js, /const swipeFlingVelocity=\.45/);
+assert.match(js, /function beginTouchDrag\(gesture\)/);
+assert.match(js, /function settleTouchDrag\(keepOpen\)/);
+assert.match(js, /function onTouchStart\(event\)/);
+assert.match(js, /function onTouchMove\(event\)/);
+assert.match(js, /function onTouchEnd\(event\)/);
+assert.match(js, /gesture\.mode==='opening'[\s\S]*-width\+Math\.max\(0,dx\)/,'opening drag must derive panel offset directly from finger delta');
+assert.match(js, /gesture\.mode==='closing'[\s\S]*Math\.min\(0,dx\)/,'closing drag must follow leftward finger delta');
+assert.match(js, /setDragVisual\(offset,progress\)/,'drag must update transform/backdrop continuously');
+assert.match(js, /event\.cancelable\)event\.preventDefault\(\)/,'horizontal drag must stop browser scrolling only after gesture capture');
+assert.match(js, /document\.addEventListener\('touchstart',onTouchStart,\{capture:true,passive:true\}\)/);
+assert.match(js, /document\.addEventListener\('touchmove',onTouchMove,\{capture:true,passive:false\}\)/);
+assert.match(js, /document\.addEventListener\('touchend',onTouchEnd,\{capture:true,passive:false\}\)/);
+assert.match(js, /Date\.now\(\)\+swipeClickGuardMs/,'a completed swipe must suppress the synthesized click');
+assert.match(js, /settleTouchDrag\(gesture\.mode==='closing'\)/,'system touch cancel must restore the previous stable state');
+
 assert.match(css, /Conta de Casa v71/);
 assert.match(css, /\.mobile-menu-icon-sentinel\{display:none!important\}/);
 assert.match(css, /\.mobile-menu-glyph>span:nth-child\(1\)\{top:1px;width:22px\}/);
 assert.match(css, /\.mobile-menu-glyph>span:nth-child\(2\)\{top:8px;width:18px\}/);
 assert.match(css, /\.mobile-menu-glyph>span:nth-child\(3\)\{top:15px;width:14px\}/);
-assert.match(css, /top \.24s cubic-bezier\(\.22,\.8,\.2,1\)/);
+assert.match(css, /top \.24s cubic-bezier\(\.32,\.72,0,1\)/);
 assert.match(css, /data-menu-state="open"[\s\S]*rotate\(45deg\)/);
 assert.match(css, /rotate\(-45deg\)/);
 assert.match(css, /scaleX\(\.18\)/);
 assert.match(css, /width:44px!important;[\s\S]*height:44px!important/);
 assert.match(css, /data-focus-origin="pointer"[\s\S]*outline:none!important/);
 assert.match(css, /\.nav-drawer\{[\s\S]*width:min\(364px,calc\(100vw - 24px\)/);
-assert.match(css, /\.nav-drawer::backdrop\{[\s\S]*background:rgba\(10,18,30,0\)[\s\S]*background-color \.22s ease/, 'backdrop must fade in from transparent');
-assert.match(css, /\.nav-drawer\.open::backdrop\{[\s\S]*background:rgba\(10,18,30,\.38\)/, 'open backdrop must remain restrained');
+assert.match(css, /\.nav-drawer::backdrop\{[\s\S]*background:rgba\(10,18,30,0\)[\s\S]*background-color \.22s ease-out/, 'backdrop must fade in from transparent');
+assert.match(css, /\.nav-drawer\.open::backdrop\{[\s\S]*background:rgba\(10,18,30,\.34\)[\s\S]*blur\(1px\)/, 'open backdrop must remain restrained');
 assert.match(css, /transform:translate3d\(calc\(-100% - 8px\),0,0\)/, 'closed drawer shell must be fully off-canvas');
 assert.match(css, /\.nav-drawer\.open \.nav-drawer-shell\{[\s\S]*translate3d\(0,0,0\)/, 'open drawer shell must settle at its natural position');
-assert.match(css, /transform \.28s cubic-bezier\(\.22,1,\.36,1\)/, 'opening must use a clean decelerating slide');
-assert.match(css, /\.nav-drawer\[data-closing="true"\] \.nav-drawer-shell\{[\s\S]*transition-duration:\.24s,\.18s,\.24s/, 'closing must be slightly faster than opening');
+assert.match(css, /transform \.28s cubic-bezier\(\.32,\.72,0,1\)/, 'opening must use the canonical spring-like deceleration');
+assert.match(css, /touch-action:pan-y/,'drawer must preserve vertical scrolling while reserving horizontal dragging');
+assert.match(css, /\.nav-drawer\[data-dragging="true"\] \.nav-drawer-shell\{[\s\S]*var\(--drawer-drag-x,-100%\)[\s\S]*transition:none!important/, 'dragging shell must follow the live CSS variable without transition lag');
+assert.match(css, /\.nav-drawer\[data-dragging="true"\]::backdrop\{[\s\S]*--drawer-drag-alpha[\s\S]*--drawer-drag-blur[\s\S]*transition:none!important/, 'backdrop must follow drag progress continuously');
+assert.match(css, /\.nav-drawer\[data-closing="true"\] \.nav-drawer-shell\{[\s\S]*transition-duration:\.24s,\.16s,\.24s/, 'closing must be slightly faster than opening');
 assert.match(css, /\.nav-drawer-shell\{[\s\S]*safe-area-inset-top[\s\S]*safe-area-inset-bottom/);
 assert.match(css, /\.drawer-nav\{[\s\S]*overflow-y:auto[\s\S]*overflow-x:hidden/);
 assert.match(css, /\.drawer-nav \.nav-btn\{[\s\S]*min-height:48px/);
@@ -90,9 +115,10 @@ assert.match(sw, /'\.\/mobile-menu-toggle\.js'/);
 assert.equal(manifest.latestVersion,'v71');
 assert.equal(manifest.releases[0]?.version,'v71');
 assert.ok(manifest.releases[0].items.some(item=>/off-canvas|deslizando|esquerda/i.test(item)));
+assert.ok(manifest.releases[0].items.some(item=>/dedo|arrastar|swipe|gesto/i.test(item)),'v71 release notes must expose the interactive swipe');
 assert.ok(manifest.releases[0].items.some(item=>/backdrop|fundo|blur/i.test(item)));
 assert.ok(manifest.releases[0].items.some(item=>/280|240|dura/i.test(item)));
 assert.ok(manifest.releases[0].items.some(item=>/reduced-motion|movimento reduzido/i.test(item)));
 assert.ok(manifest.releases[0].items.some(item=>/não modifica|exclusivamente|não altera/i.test(item)));
 
-console.log('v71 smooth off-canvas mobile drawer and animated hamburger/X tests: OK');
+console.log('v71 finger-tracking swipe, smooth off-canvas drawer and animated hamburger/X tests: OK');
