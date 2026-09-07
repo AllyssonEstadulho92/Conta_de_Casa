@@ -16,30 +16,37 @@ A versão pública ainda é a **v63**. A **v64** está preparada no PR #44 e só
 
 ## Auditoria atual — iPhone/Safari
 
-### Facto observado
+### Factos observados
 
-As capturas de 7 de setembro mostram dois estados reais da página **Lista de compras**:
+As capturas reais de 7 de setembro confirmaram dois problemas distintos no cabeçalho móvel:
 
-- num estado, o cabeçalho aparece completo;
-- depois de deslocar o conteúdo, a primeira linha do cabeçalho pode ficar parcialmente fora da área visível, cortando menu, ícone/título e botão `+`.
+1. durante scroll, a primeira linha do cabeçalho podia ficar parcialmente fora da área visível;
+2. mesmo sem scroll, **Lista de compras** apresentava um cabeçalho diferente de **Início**: carrinho adicional antes do título, título visivelmente maior, contentor do botão `+` ampliado, controlo Sync com chevron e tonalidade de fundo diferente.
 
-Os cartões-resumo, os ícones Lucide e o indicador único da navegação inferior aparecem coerentes nas capturas atuais; as regressões de dupla barra e faixa segmentada corrigidas na v63 não reaparecem.
+A segunda diferença não era funcionalmente necessária: o cabeçalho é um componente global e não deve mudar de geometria por página.
 
-### Causa provável sustentada pelo código
+Os cartões-resumo, os ícones Lucide e o indicador único da navegação inferior permanecem coerentes nas capturas atuais; as regressões de dupla barra e faixa segmentada corrigidas na v63 não reaparecem.
 
-`mobile-layout.css` mantém `.main` como scroller interno (`overflow-y:auto`) e o cabeçalho usava `position:sticky` dentro desse scroller. A combinação é sensível às mudanças do viewport visual e do chrome dinâmico do Safari. A captura com o cabeçalho parcialmente deslocado é compatível com essa falha de `sticky` no scroller interno.
+### Causas sustentadas pelo código
 
-Não é possível afirmar que o motor do Safari é a única causa sem instrumentação física do aparelho, mas a dependência estrutural foi removida na candidata v64.
+Para o corte durante scroll, `mobile-layout.css` mantém `.main` como scroller interno e o cabeçalho usava `position:sticky` dentro desse scroller. A combinação é sensível às mudanças do viewport visual e do chrome dinâmico do Safari.
+
+Para a diferença entre **Início** e **Lista de compras**, existiam regras históricas condicionadas por `html.market-prototype-active` em camadas antigas do Mercado. Essas regras injetavam um carrinho em `h1::before`, aumentavam a tipografia, alteravam as dimensões do botão `+` e acrescentavam um `::after` ao Sync.
 
 ### Correção v64
 
-`v64-runtime.css`, carregado como última camada, passa a:
+`v64-runtime.css`, carregado como última camada candidata, passa a:
 
 - manter uma `safe-area` superior mínima e respeitar `env(safe-area-inset-top)`;
 - fixar o cabeçalho móvel ao viewport em vez de depender de `sticky` dentro de `.main`;
 - compensar a altura do cabeçalho através de `padding-top` em `.main`, evitando sobreposição de conteúdo;
-- preservar o scroller interno, a navegação inferior fixa, o teclado e os diálogos existentes;
-- manter alvos tácteis com `touch-action: manipulation`.
+- aplicar a mesma métrica de cabeçalho em Início, Faturas, Lista de compras e Relatórios;
+- usar título móvel de 24 px/600, com redução para 20 px apenas abaixo de 360 px;
+- desativar o carrinho pseudo-elemento do título do Mercado;
+- manter menu e botão `+` em caixas tácteis de 44×44 px, com o `+` visual em 36×36 px;
+- remover o chevron exclusivo do Sync no Mercado e manter o mesmo controlo global;
+- uniformizar o fundo do topbar para impedir que a identidade cromática da página altere a leitura do cabeçalho;
+- preservar o scroller interno, a navegação inferior fixa, o teclado e os diálogos existentes.
 
 ## v64 — código de barras e preço
 
@@ -80,15 +87,18 @@ A preferência do supermercado do scanner é apenas uma preferência de UI local
 
 ## Qualidade e testes
 
-A branch v64 já obteve uma execução completa de CI verde antes do último reforço do cabeçalho móvel. Essa execução cobriu finanças, auditoria, contagens, isolamento do cofre, datas, faturas, QR, Mercado, scanner, imagens legadas, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
+A branch v64 já obteve uma execução completa de CI verde antes dos últimos reforços visuais do cabeçalho. Essa execução cobriu finanças, auditoria, contagens, isolamento do cofre, datas, faturas, QR, Mercado, scanner, imagens legadas, ícones, atualização, segurança, responsividade, navegação, acessibilidade e sincronização.
 
-O reforço final do cabeçalho móvel tem teste dedicado que exige `position:fixed`, compensação de conteúdo e safe area. A CI final do novo HEAD deve ficar verde antes do merge.
+`tests/v64-runtime.test.cjs` passa a exigir, além da safe area e do `position:fixed`, que o cabeçalho do Mercado use a mesma tipografia e dimensões do cabeçalho global, que o carrinho pseudo-elemento esteja desativado e que o Sync não receba chevron exclusivo.
+
+A CI final do novo HEAD deve ficar verde antes do merge. A correção visual ainda não foi validada fisicamente no iPhone após instalação da v64.
 
 ## Próximo passo
 
-1. concluir a CI final do PR #44;
-2. rever o diff final contra `main`;
-3. integrar a v64 apenas com testes verdes;
-4. confirmar CI de `main` e Deploy GitHub Pages;
-5. no iPhone, abrir **Definições → Atualização de Software**, verificar a v64 e carregar em **Atualizar agora**;
-6. validar fisicamente o cabeçalho ao fazer scroll, a leitura de código de barras e uma ocorrência recorrente **Por preencher**.
+1. atualizar o PR #44 com o HEAD final da auditoria visual;
+2. concluir a CI final;
+3. rever o diff final contra `main`;
+4. integrar a v64 apenas com testes verdes;
+5. confirmar CI de `main` e Deploy GitHub Pages;
+6. no iPhone, abrir **Definições → Atualização de Software**, verificar a v64 e carregar em **Atualizar agora**;
+7. validar fisicamente que Início, Faturas, Lista de compras e Relatórios usam o mesmo cabeçalho, além do scroll, scanner e recorrência **Por preencher**.
