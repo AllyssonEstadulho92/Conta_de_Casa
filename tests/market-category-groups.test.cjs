@@ -34,18 +34,18 @@ assert.match(css,/\.market-category-items \.market-mobile-actions\{[\s\S]*justif
 assert.match(css,/market-mobile-card:not\(\.purchased\)[\s\S]*nth-child\(2\)/,'pending rows must remove redundant duplicate finance blocks');
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-assert.match(sw,/conta-de-casa-public-v64-runtime1/);
+assert.match(sw,/conta-de-casa-public-v65-layout1/);
 assert.ok(sw.includes("'./market-category-groups.css'"));
 assert.ok(sw.includes("'./market-category-groups.js'"));
 assert.ok(sw.includes("'./ui-consistency.css'"));
 assert.ok(sw.includes("'./v64-runtime.css'"));
 assert.ok(sw.includes("'./v64-runtime.js'"));
 assert.ok(sw.includes("'./release-manifest.json'"));
-assert.match(prepare,/const BUILD = 'v64'/);
-assert.match(prepare,/const UI_REV = '64-ui1'/);
+assert.match(prepare,/const BUILD = 'v65'/);
+assert.match(prepare,/const UI_REV = '65-ui1'/);
 assert.match(prepare,/const CATEGORY_REV = '64-ui1'/);
-assert.match(prepare,/const VISUAL_REV = '64-ui1'/);
-assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
+assert.match(prepare,/const VISUAL_REV = '65-ui1'/);
+assert.match(prepare,/const RUNTIME_REV = '65-layout1'/);
 assert.ok(prepare.includes("'market-category-groups.css'"));
 assert.ok(prepare.includes("'market-category-groups.js'"));
 assert.ok(prepare.includes("'ui-consistency.css'"));
@@ -56,21 +56,21 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-brand\.css\?v=64-ui1/);
-  assert.match(index,/market-branding\.js\?v=64-ui1/);
+  assert.match(index,/market-brand\.css\?v=65-ui1/);
+  assert.match(index,/market-branding\.js\?v=65-ui1/);
   assert.match(index,/market-category-groups\.css\?v=64-ui1/);
   assert.match(index,/market-category-groups\.js\?v=64-ui1/);
-  assert.match(index,/ui-consistency\.css\?v=64-ui1/);
-  assert.match(index,/v64-runtime\.css\?v=64-runtime1/);
-  assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
+  assert.match(index,/ui-consistency\.css\?v=65-ui1/);
+  assert.match(index,/v64-runtime\.css\?v=65-layout1/);
+  assert.match(index,/v64-runtime\.js\?v=65-layout1/);
   assert.ok(index.indexOf('market-brand.css')<index.indexOf('market-category-groups.css'),'category CSS must load after market branding');
   assert.ok(index.indexOf('market-category-groups.css')<index.indexOf('ui-consistency.css'),'global visual normalization must load after category styling');
-  assert.ok(index.indexOf('ui-consistency.css')<index.indexOf('v64-runtime.css'),'v64 safe-area layer must load after prior visual normalization');
+  assert.ok(index.indexOf('ui-consistency.css')<index.indexOf('v64-runtime.css'),'mobile runtime spacing layer must load after prior visual normalization');
   assert.ok(index.indexOf('market-branding.js')<index.indexOf('market-category-groups.js'),'category grouping must load after market branding');
-  assert.ok(index.indexOf('market-category-groups.js')<index.indexOf('v64-runtime.js'),'v64 runtime must execute after category grouping');
+  assert.ok(index.indexOf('market-category-groups.js')<index.indexOf('v64-runtime.js'),'runtime must execute after category grouping');
   for(const asset of ['market-category-groups.css','market-category-groups.js','ui-consistency.css','v64-runtime.css','v64-runtime.js','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market category grouping, left alignment and v64 runtime ordering tests: OK');
+console.log('Market category grouping, left alignment and v65 runtime ordering tests: OK');
