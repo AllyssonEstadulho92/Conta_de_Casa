@@ -2,12 +2,12 @@
 
 Atualizado: 7 de setembro de 2026
 
-## P0 — v69 animação hambúrguer → X corrigida
+## P0 — v69 animação hambúrguer → X publicada
 
 ### Problema físico confirmado
 
 - [x] Rever as capturas reais do iPhone.
-- [x] Confirmar que o estado aberto continua visualmente como hambúrguer.
+- [x] Confirmar que o estado aberto continuava visualmente como hambúrguer.
 - [x] Confirmar moldura visual após foco programático no Safari.
 - [x] Comparar comportamento observado com o código real.
 
@@ -16,9 +16,9 @@ Atualizado: 7 de setembro de 2026
 - [x] Confirmar que `mobile-menu-toggle.js` cria três `<span>` animáveis.
 - [x] Confirmar que `ui-icons.js::hydrate()` executa `fillIcon(#mobileMenuBtn, 'menu', 22)`.
 - [x] Confirmar que o `MutationObserver` de `ui-icons.js` observa `aria-expanded` e `class`.
-- [x] Confirmar que `fillIcon()` usa `replaceChildren()` e substitui o glifo animável por SVG estático.
+- [x] Confirmar que `fillIcon()` usa `replaceChildren()` e substituía o glifo animável por SVG estático.
 
-### Implementação v69
+### Implementação e publicação v69
 
 - [x] Manter um único `#mobileMenuBtn`.
 - [x] Manter o mesmo `#mobileDrawer` e fluxo de `events.js`.
@@ -33,17 +33,16 @@ Atualizado: 7 de setembro de 2026
 - [x] Suprimir apenas a moldura de foco programático após pointer/toque.
 - [x] Preservar `:focus-visible` em teclado.
 - [x] Manter drawer v68, safe areas, scroll, largura e alvos de 48 px.
-- [x] Versionar candidata como `v69` / `69-menu3`.
+- [x] Versionar como `v69` / `69-menu3`.
 - [x] Atualizar `release-manifest.json`, `scripts/prepare-pages.cjs` e `sw.js`.
-- [x] Atualizar regressões do menu, consistência e Centro de Atualização.
-- [x] Atualizar `PROJECT_STATE.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md` e `CHANGELOG.md`.
-- [ ] Abrir PR da v69.
-- [ ] Confirmar CI verde do PR.
-- [ ] Rever diff final e escopo.
-- [ ] Integrar em `main` apenas com CI verde.
-- [ ] Confirmar CI de `main`.
-- [ ] Confirmar Deploy GitHub Pages.
-- [ ] Atualizar documentação para estado publicado.
+- [x] Atualizar regressões do menu, consistência, Mercado histórico e Centro de Atualização.
+- [x] Abrir PR #56.
+- [x] Confirmar CI verde do PR: run #1250 (`34168089348`).
+- [x] Rever diff final: apenas menu, distribuição, testes relacionados e documentação.
+- [x] Integrar PR #56 em `main`: `a66df37b0fc345491dacf3cac91313d88d080a05`.
+- [x] Confirmar CI de `main`: run #1251 (`34168145569`).
+- [x] Confirmar Deploy GitHub Pages: run #1244 (`34168165101`).
+- [x] Atualizar documentação para estado publicado.
 
 ### Validação física prioritária v69
 
@@ -66,7 +65,7 @@ Atualizado: 7 de setembro de 2026
 - [x] Estados hover/active/focus/current.
 - [x] Release `v68` / `68-menu2` publicada pelo PR #54.
 - [x] CI e Pages verdes.
-- [x] Validação física revelou falha real na transformação do glifo, agora tratada na v69.
+- [x] Validação física revelou falha real na transformação do glifo, corrigida na v69.
 
 ## P0 — v67 menu móvel hambúrguer/X publicado
 
