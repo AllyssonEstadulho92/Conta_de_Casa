@@ -1,56 +1,90 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-08 — v71 candidata: drawer off-canvas suave
+
+### Observação em hardware real
+
+A validação da v70 no iPhone confirmou que o menu está funcional, o item ativo está correto e o hambúrguer se transforma em `X`. O problema remanescente é a própria entrada do painel: visualmente surge demasiado depressa e quase no lugar final, sem transmitir um movimento lateral contínuo.
+
+### Causa técnica
+
+A camada final da v70 posiciona `.nav-drawer-shell` apenas em `translateX(-18px)` antes de aplicar `.open`, com `opacity:.82`. O deslocamento é pequeno face à largura real do drawer e o backdrop já aparece escurecido quando o `<dialog>` é mostrado.
+
+No fecho, `events.js::closeMobileDrawer()` e `render.js::showPage()` usam o método real `drawer.close()`. Um `<dialog>` fechado deixa imediatamente de ser renderizado, portanto uma transição CSS de saída não poderia terminar sem coordenação adicional.
+
+### Correção aplicada na candidata v71
+
+- preservado o mesmo `#mobileDrawer`, `#mobileMenuBtn`, `NAV_GROUPS` e fluxo de navegação;
+- preservadas as Web Animations do hambúrguer/X da v70;
+- superfície fechada alterada para `translate3d(calc(-100% - 8px),0,0)`;
+- superfície aberta mantém `translate3d(0,0,0)`;
+- abertura definida em cerca de `280 ms` com `cubic-bezier(.22,1,.36,1)`;
+- fecho definido em cerca de `240 ms`, ligeiramente mais rápido;
+- backdrop parte de transparente e chega a `rgba(10,18,30,.38)`;
+- blur do backdrop limitado a `1.5px`;
+- apenas `transform`, opacidade e composição visual participam na animação, sem alterar largura ou margens;
+- o controlador preserva `drawer.close.bind(drawer)` como método nativo e instala um wrapper apenas na instância real do drawer;
+- o wrapper remove `.open`, aguarda `transitionend` do `transform` e só depois executa o close nativo;
+- fallback de `360 ms` impede estado preso caso `transitionend` não seja emitido;
+- o botão permanece em `.drawer-head` durante a saída e regressa ao topbar somente no evento `close` real;
+- X, backdrop, Escape, escolha de página e mudança de breakpoint continuam a usar os caminhos existentes;
+- `prefers-reduced-motion` elimina a espera/transição e fecha imediatamente;
+- ARIA, foco, safe areas, largura responsiva, scroll e temas permanecem preservados.
+
+### Distribuição candidata
+
+- build: `v71`;
+- revisão do menu: `71-menu5`;
+- shell preservado: `66-shell1`;
+- Compras preservada: `65-shopping1`;
+- runtime preservado: `64-runtime1`;
+- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v71-menu5`.
+
+### Testes atualizados
+
+- regressão específica de entrada totalmente off-canvas;
+- backdrop progressivo;
+- duração diferenciada de abertura/fecho;
+- coordenação de `drawer.close()` com `transitionend` e timeout;
+- posição do botão até ao `close` real;
+- `prefers-reduced-motion`;
+- Centro de Atualização e versão pública;
+- consistência visual;
+- compatibilidade das camadas históricas do Mercado e build ordering.
+
+### Segurança e dados
+
+Nenhuma alteração de `STATE_VERSION`, `appState`, faturas, pagamentos, `estimatedCents`, `actualCents`, scanner, recorrências, PIN, cifragem, IndexedDB, autenticação, APIs ou sincronização.
+
+A v71 só será considerada publicada depois de CI do PR, merge em `main`, CI de `main` e Deploy GitHub Pages concluídos com sucesso.
+
 ## 2026-09-08 — v70 publicada: movimento visível do hambúrguer ↔ X
 
 ### Observação em hardware real
 
 A validação da v69 no iPhone confirmou que os estados finais do menu estavam corretos: fechado apresentava hambúrguer e aberto apresentava `X`. O problema remanescente era de movimento percebido: a transformação podia parecer instantânea quando o mesmo botão era movido entre o topbar e o `<dialog>`.
 
-### Causa técnica
-
-`#mobileMenuBtn` é o mesmo nó DOM nos dois estados. Durante a abertura, o drawer é ativado e o botão é reparented para `.drawer-head`; ao fechar, regressa ao topbar. A v69 usava CSS transitions para interpolar `top`, `width`, `transform` e `opacity`. No Safari, o reparenting pode fazer com que o browser apresente diretamente o estado final e a transição deixe de ser claramente visível.
-
 ### Correção publicada
 
 - preservado o mesmo `#mobileMenuBtn` e o mesmo `#mobileDrawer`;
 - preservados os três spans, a sentinela Lucide oculta e `data-ui-icon-slot="menu"`;
-- preservados `aria-expanded`, `aria-label`, `title` e `data-menu-state`;
 - criado `animateMenuGlyph(open)` com Web Animations;
 - cada linha recebe keyframes explícitos de posição, largura, rotação, escala e opacidade;
-- abertura é animada no frame seguinte ao reparenting para o drawer;
-- fecho pelo X é animado no frame seguinte ao regresso do mesmo nó ao topbar;
-- glifo recebe micro movimento de escala/inclinação para tornar o toque perceptível sem deslocar layout;
+- abertura e fecho do glifo são animados depois do reparenting;
 - duração definida em cerca de `240 ms` com `cubic-bezier(.22,.8,.2,1)`;
-- CSS transition de `240 ms` permanece como fallback;
-- `prefers-reduced-motion` impede os keyframes adicionais;
-- fechos externos restauram estado sem deixar animações pendentes;
-- a animação inversa iniciada pelo próprio X não é cancelada pelo evento `close` posterior do dialog.
+- `prefers-reduced-motion` preservado.
 
 ### Distribuição publicada
 
 - build: `v70`;
 - revisão do menu: `70-menu4`;
-- shell preservado: `66-shell1`;
-- Compras preservada: `65-shopping1`;
-- runtime preservado: `64-runtime1`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4`;
 - PR #58 integrado;
 - merge: `f4144bff69a3b46e0f6ec78a00af50d29b704578`;
 - CI final do PR #1279 (`34170191884`): **sucesso**;
 - CI de `main` #1280 (`34170229908`): **sucesso**;
 - Deploy GitHub Pages #1273 (`34170256426`): **sucesso**.
 
-### Testes
-
-A matriz completa passou incluindo sintaxe, finanças, auditoria, invariantes, isolamento, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, consistência visual, menu animado, Centro de Atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade e sincronização.
-
-A regressão v70 verifica explicitamente Web Animations/reparenting, keyframes por linha, micro movimento do glifo, abertura/fecho no frame seguinte, fallback CSS e `prefers-reduced-motion`.
-
-### Segurança e dados
-
-Nenhuma alteração de `STATE_VERSION`, `appState`, faturas, pagamentos, `estimatedCents`, `actualCents`, scanner, recorrências, PIN, cifragem, IndexedDB, autenticação, APIs ou sincronização.
-
-A publicação técnica está concluída. A validação física final deve confirmar no iPhone/Safari que o movimento agora é efetivamente perceptível.
+A validação física posterior confirmou o menu funcional e revelou apenas a necessidade de tornar a própria superfície do drawer mais suave, tratada na candidata v71.
 
 ## 2026-09-07 — v69 publicada: estados hambúrguer/X corrigidos
 
@@ -62,15 +96,11 @@ A publicação técnica está concluída. A validação física final deve confi
 - PR #56 / merge `a66df37b0fc345491dacf3cac91313d88d080a05`;
 - CI e Pages verdes.
 
-A validação física posterior confirmou os estados finais e revelou que o movimento entre eles ainda não era suficientemente perceptível, tratado na v70.
-
 ## 2026-09-07 — v68 publicada: painel do menu móvel refinado
 
 - painel lateral mais compacto e responsivo;
 - botão 44 × 44 px e linhas `22 / 18 / 14 px`;
-- `aria-expanded`, `aria-label`, `title` e `data-menu-state` sincronizados;
-- drawer `min(364px, calc(100vw - 24px))`, abaixo de 360 px `calc(100vw - 20px)`;
-- safe areas, scroll interno, `overflow-x:hidden` e alvos de 48 px;
+- drawer responsivo, safe areas, scroll interno e alvos de 48 px;
 - PR #54 / merge `9c8a2b3042c322849e3eb5ea3462f494897b4ab3`;
 - CI e Pages verdes.
 
