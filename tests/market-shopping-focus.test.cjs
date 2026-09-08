@@ -41,7 +41,8 @@ assert.match(css,/min-height:44px/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(brand,/\.market-product-photo[\s\S]*display:grid!important/);
 assert.match(experience,/\.cdc-market-home/,'v74 experience must place the shopping list inside the prototype market screen');
-assert.match(architecture,/\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:visible!important;display:grid!important\}/,'v75 must keep Mercado visible in primary navigation');
+assert.match(architecture,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'v75 must keep Mercado visible in primary navigation');
+assert.match(architecture,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'v75 prototype must keep compact product cards');
 
 assert.equal(manifest.latestVersion,'v75');
 const v65=manifest.releases.find(release=>release.version==='v65');
@@ -57,12 +58,12 @@ assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.match(sw,/v74-shopping2/);
 assert.match(sw,/v73-menu8/);
 assert.match(sw,/v74-experience2/);
-assert.match(sw,/v75-architecture1/);
+assert.match(sw,/v75-architecture2/);
 assert.match(prepare,/const BUILD = 'v75'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
 assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture1'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -75,8 +76,8 @@ try{
   assert.match(index,/mobile-menu-toggle\.js\?v=73-menu8/);
   assert.match(index,/v74-experience\.css\?v=74-experience2/);
   assert.match(index,/v74-experience\.js\?v=74-experience2/);
-  assert.match(index,/v75-architecture\.css\?v=75-architecture1/);
-  assert.match(index,/v75-architecture\.js\?v=75-architecture1/);
+  assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
+  assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
   assert.ok(index.indexOf('market-shopping-focus.css')<index.indexOf('mobile-menu-toggle.css'));
   assert.ok(index.indexOf('mobile-menu-toggle.css')<index.indexOf('v74-experience.css'));
   assert.ok(index.indexOf('v74-experience.css')<index.indexOf('v75-architecture.css'));
@@ -89,4 +90,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Mobile shopping focus preserved under the v75 architecture release: OK');
+console.log('Mobile shopping focus preserved under the final v75 prototype architecture: OK');
