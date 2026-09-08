@@ -87,7 +87,7 @@ assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://world.openbeautyfacts
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/products/123/front.jpg'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/images/large/739490_test.jpg'),'');
 
-assert.match(sw,/conta-de-casa-public-v75-architecture1-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
 for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','design-system.css','v64-runtime.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
@@ -101,7 +101,7 @@ assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
 assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture1'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -118,8 +118,8 @@ try{
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/v74-experience\.css\?v=74-experience2/);
   assert.match(index,/v74-experience\.js\?v=74-experience2/);
-  assert.match(index,/v75-architecture\.css\?v=75-architecture1/);
-  assert.match(index,/v75-architecture\.js\?v=75-architecture1/);
+  assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
+  assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.match(index,/https:\/\/www\.continente\.pt/);
   assert.match(index,/https:\/\/static\.pingodoce\.pt/);
@@ -133,4 +133,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official retailer image, fallback and safe-source expectations under the v75 architecture release: OK');
+console.log('Market official retailer image, fallback and safe-source expectations under the final v75 prototype architecture: OK');
