@@ -10,7 +10,7 @@ const sw = fs.readFileSync('sw.js','utf8');
 const manifest = JSON.parse(fs.readFileSync('release-manifest.json','utf8'));
 
 assert.doesNotThrow(()=>new vm.Script(js), 'mobile menu runtime must parse');
-assert.match(js, /Conta de Casa v71/);
+assert.match(js, /Conta de Casa v72/);
 assert.match(js, /button\.addEventListener\('click',[\s\S]*stopImmediatePropagation\(\)[\s\S]*drawer\.open[\s\S]*closeDrawer\(keyboard\)[\s\S]*openDrawer\(keyboard\)[\s\S]*,true\)/);
 assert.match(js, /drawerHead\.insertBefore\(button,drawerHead\.firstChild\)/, 'same menu button must move into the modal drawer');
 assert.match(js, /homeAnchor\.parentNode\.insertBefore\(button,homeAnchor\.nextSibling\)/, 'same menu button must return to the topbar');
@@ -39,7 +39,7 @@ assert.match(js, /rotate\(-45deg\)/);
 assert.match(js, /scaleX\(\.18\)/);
 assert.match(js, /requestAnimationFrame\(\(\)=>animateMenuGlyph\(true\)\)/);
 
-// Regression v71: the dialog must stay open until the off-canvas close transition finishes.
+// Regression v71 retained: the dialog stays alive until the off-canvas close transition finishes.
 assert.match(js, /const drawerCloseFallback=360/);
 assert.match(js, /const nativeDrawerClose=drawer\.close\.bind\(drawer\)/);
 assert.match(js, /function animatedDrawerClose\(returnValue\)/);
@@ -52,7 +52,7 @@ assert.match(js, /if\(returnValue===undefined\)nativeDrawerClose\(\)/);
 assert.match(js, /drawer\.addEventListener\('close',[\s\S]*syncButton\(false\)/, 'button must return home only after the dialog really closes');
 assert.match(js, /prefersReducedMotion\(\)\|\|!mobile[\s\S]*finishDrawerClose\(\)/, 'reduced motion and desktop must not wait on mobile transitions');
 
-// v71 interactive swipe: drawer follows the finger and snaps by progress/velocity.
+// v71/v72 interactive swipe: drawer follows the finger and snaps by progress/velocity.
 assert.match(js, /const swipeEdgeWidth=30/,'closed drawer swipe must start from a narrow left edge');
 assert.match(js, /const swipeIntentThreshold=8/,'gesture must wait for deliberate movement');
 assert.match(js, /const swipeHorizontalBias=1\.08/,'horizontal intent must win over vertical scroll before capture');
@@ -73,6 +73,14 @@ assert.match(js, /document\.addEventListener\('touchmove',onTouchMove,\{capture:
 assert.match(js, /document\.addEventListener\('touchend',onTouchEnd,\{capture:true,passive:false\}\)/);
 assert.match(js, /Date\.now\(\)\+swipeClickGuardMs/,'a completed swipe must suppress the synthesized click');
 assert.match(js, /settleTouchDrag\(gesture\.mode==='closing'\)/,'system touch cancel must restore the previous stable state');
+
+// v72: when open, the closing gesture may start either on the drawer or on the exposed page/backdrop.
+assert.match(js, /const source=shell\.contains\(event\.target\)\?'drawer':'page'/, 'open drawer touch source must distinguish the page/backdrop from the drawer surface');
+assert.doesNotMatch(js, /if\(!shell\?\.contains\(event\.target\)\)return/, 'page/backdrop touches must no longer be rejected while the drawer is open');
+assert.match(js, /mode:'closing',source,identifier:/, 'closing gesture must retain its origin');
+assert.match(js, /drawer\.dataset\.dragSource=gesture\.source\|\|gesture\.mode/, 'drag diagnostics must expose whether the gesture started on the page or drawer');
+assert.match(js, /delete drawer\.dataset\.dragSource/, 'drag source must be cleaned after settling');
+assert.match(js, /mode:'opening',source:'edge'/, 'edge-open gesture must remain explicit and separate from page-close');
 
 assert.match(css, /Conta de Casa v71/);
 assert.match(css, /\.mobile-menu-icon-sentinel\{display:none!important\}/);
@@ -103,22 +111,20 @@ assert.match(css, /@media\(max-width:359px\)\{[\s\S]*\.nav-drawer\{width:calc\(1
 assert.match(css, /@media\(prefers-reduced-motion:reduce\)[\s\S]*\.nav-drawer::backdrop[\s\S]*transition:none!important/, 'reduced motion must also disable backdrop motion');
 assert.doesNotMatch(css, /background:\s*(?:green|#0f0|#00ff00)/i);
 
-assert.match(prepare, /const BUILD = 'v71'/);
-assert.match(prepare, /const MENU_REV = '71-menu5'/);
+assert.match(prepare, /const BUILD = 'v72'/);
+assert.match(prepare, /const MENU_REV = '72-menu6'/);
 assert.match(prepare, /'mobile-menu-toggle\.css'/);
 assert.match(prepare, /'mobile-menu-toggle\.js'/);
 assert.match(prepare, /mobile-menu-toggle\.css\?v=\$\{MENU_REV\}/);
 assert.match(prepare, /mobile-menu-toggle\.js\?v=\$\{MENU_REV\}/);
-assert.match(sw, /v71-menu5/);
+assert.match(sw, /v72-menu6/);
 assert.match(sw, /'\.\/mobile-menu-toggle\.css'/);
 assert.match(sw, /'\.\/mobile-menu-toggle\.js'/);
-assert.equal(manifest.latestVersion,'v71');
-assert.equal(manifest.releases[0]?.version,'v71');
-assert.ok(manifest.releases[0].items.some(item=>/off-canvas|deslizando|esquerda/i.test(item)));
-assert.ok(manifest.releases[0].items.some(item=>/dedo|arrastar|swipe|gesto/i.test(item)),'v71 release notes must expose the interactive swipe');
-assert.ok(manifest.releases[0].items.some(item=>/backdrop|fundo|blur/i.test(item)));
-assert.ok(manifest.releases[0].items.some(item=>/280|240|dura/i.test(item)));
-assert.ok(manifest.releases[0].items.some(item=>/reduced-motion|movimento reduzido/i.test(item)));
+assert.equal(manifest.latestVersion,'v72');
+assert.equal(manifest.releases[0]?.version,'v72');
+assert.ok(manifest.releases[0].items.some(item=>/página|backdrop|área visível/i.test(item)),'v72 notes must expose page/backdrop swipe close');
+assert.ok(manifest.releases[0].items.some(item=>/dedo|deslizar|swipe|gesto/i.test(item)),'v72 notes must expose finger-tracking return');
+assert.ok(manifest.releases[0].items.some(item=>/vertical|intenção horizontal/i.test(item)),'v72 notes must preserve vertical gesture safety');
 assert.ok(manifest.releases[0].items.some(item=>/não modifica|exclusivamente|não altera/i.test(item)));
 
-console.log('v71 finger-tracking swipe, smooth off-canvas drawer and animated hamburger/X tests: OK');
+console.log('v72 page-swipe close, finger-tracking drawer and animated hamburger/X tests: OK');
