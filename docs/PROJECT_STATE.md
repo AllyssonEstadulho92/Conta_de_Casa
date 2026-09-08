@@ -46,9 +46,9 @@ A alteração é exclusivamente visual em `v75-header-refinement.css`; não alte
 - experiência base: `74-experience2`;
 - arquitetura final: `75-architecture2`;
 - cabeçalho: `75-header2`;
-- cache: `conta-de-casa-public-v75-architecture2-header2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2`.
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2`.
 
-O Service Worker elimina caches anteriores durante `activate`; `v75-header-refinement.css` é asset público e o build Pages injeta `?v=75-header2` para invalidar a versão anterior do cabeçalho.
+O Service Worker elimina caches anteriores durante `activate`; `v75-header-refinement.css` é asset público e o build Pages injeta `?v=75-header2` para invalidar a versão anterior do cabeçalho. O sufixo `header2` mantém o identificador-base da v75 compatível com as verificações existentes e ainda força um cache novo.
 
 ## Integridade funcional
 

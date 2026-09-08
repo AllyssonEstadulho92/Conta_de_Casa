@@ -100,7 +100,7 @@ assert.match(menuJs,/drawer\.close=animatedDrawerClose/);
 assert.match(menuJs,/touch\.clientX>=root\.innerWidth-swipeEdgeWidth/);
 assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 0 0 auto!important/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-header2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2/);
 for(const asset of ['./design-system.css','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js','./v75-header-refinement.css'])assert.ok(sw.includes(`'${asset}'`));
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));

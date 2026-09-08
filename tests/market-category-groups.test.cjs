@@ -36,7 +36,7 @@ assert.match(css,/\.market-category-items \.status-chip\{[\s\S]*justify-self:sta
 assert.match(css,/\.market-category-items \.market-mobile-actions\{[\s\S]*justify-content:flex-start/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-header2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2/);
 assert.ok(sw.includes("'./market-category-groups.css'"));
 assert.ok(sw.includes("'./market-category-groups.js'"));
 assert.ok(sw.includes("'./design-system.css'"));

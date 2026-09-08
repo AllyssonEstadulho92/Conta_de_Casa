@@ -102,13 +102,13 @@ O painel real permanece em `#syncPanel`; a v75 apenas acrescenta apresentação.
 - `EXPERIENCE_REV = 74-experience2`;
 - `ARCHITECTURE_REV = 75-architecture2`;
 - `HEADER_REV = 75-header2`;
-- cache: `conta-de-casa-public-v75-architecture2-header2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2`.
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2`.
 
 `ui-consistency.css` e `v64-runtime.css` continuam fora de `dist`. `v75-header-refinement.css` integra o bundle Pages e recebe query de revisão própria para invalidação de cache.
 
 ## 11. Atualização e cache
 
-`sw.js` utiliza cache versionado e elimina caches antigos na ativação. O bundle público carrega `v75-header-refinement.css?v=75-header2`, garantindo que a revisão visual do cabeçalho não fica presa à folha anterior.
+`sw.js` utiliza cache versionado e elimina caches antigos na ativação. O bundle público carrega `v75-header-refinement.css?v=75-header2`, garantindo que a revisão visual do cabeçalho não fica presa à folha anterior. O identificador do cache mantém a assinatura-base da v75 e acrescenta `-header2` como revisão visual.
 
 ## 12. Validação manual ainda necessária
 

@@ -23,9 +23,13 @@ Reduzir ruído visual no topo da aplicação e aproximar a composição do padr�
 ### Distribuição
 
 - `HEADER_REV`: `75-header2`;
-- cache: `conta-de-casa-public-v75-architecture2-header2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2`;
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2`;
 - `v75-header-refinement.css` permanece no bundle público;
 - nenhum ficheiro financeiro, de cofre, QR, Mercado ou sincronização foi alterado.
+
+### Compatibilidade de atualização
+
+O sufixo `header2` foi colocado no final da assinatura do cache. Assim, a revisão força um cache novo sem alterar a assinatura-base histórica da v75 usada pelas verificações de regressão.
 
 ## 2026-09-08 — v75 publicada: reestruturação total alinhada com o protótipo
 
