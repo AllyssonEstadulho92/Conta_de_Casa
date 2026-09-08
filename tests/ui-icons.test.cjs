@@ -40,7 +40,7 @@ assert.match(css,/input\[type="search"\]::\-webkit-search-decoration/,'Safari na
 assert.match(css,/\.ui-select-control>select[\s\S]*appearance:none!important/,'platform-specific select arrows must be suppressed');
 assert.match(css,/bill-new-btn\[data-ui-iconized="true"\]::before[\s\S]*content:none!important/,'legacy CSS plus must not duplicate the Lucide add icon');
 assert.match(css,/\.sync-header-status \.sync-dot[\s\S]*width:18px!important/,'sync dot slot must become a proper icon slot');
-assert.match(css,/html\.market-prototype-active \.page-heading h1::before/,'market heading keeps the historical icon anchor before the v74 shell suppresses page-specific topbar decoration on mobile');
+assert.match(css,/html\.market-prototype-active \.page-heading h1::before/,'market heading keeps the historical icon anchor before the final shell suppresses page-specific topbar decoration on mobile');
 assert.match(css,/#page-market #newMarketBtn\[data-ui-iconized="true"\]::after/,'secondary market action must be represented as a scan control');
 assert.match(css,/#page-market \.market-summary-item::before/,'market summary cards retain semantic icon anchors');
 assert.match(css,/#page-market \.market-mobile-head::before/,'market mobile cards keep the historical avatar rule overridden by the verified-image layer');
@@ -51,7 +51,6 @@ assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/ui-icon-spin/);
 assert.match(css,/ui-alert-pulse/);
 
-/* v74 remains the consolidated visual base; v75 adds information architecture. */
 assert.match(design,/Conta de Casa v74/);
 assert.match(design,/\.ui-icon-svg,\.svg-icon\{[\s\S]*stroke-width:2!important/,'v74 design system must normalize all application SVG metrics');
 assert.match(design,/vector-effect:non-scaling-stroke/);
@@ -62,10 +61,10 @@ assert.doesNotMatch(design,/\.mobile-nav \.nav-btn\.active::after[\s\S]*backgrou
 assert.match(experience,/Conta de Casa v74/);
 assert.match(experience,/\.cdc-quick-action-icon/,'prototype action tiles must use the shared vector icon language');
 assert.match(architecture,/Conta de Casa v75/);
-assert.match(architecture,/\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:visible!important;display:grid!important\}/,'Mercado icon must be visible as the third mobile destination');
+assert.match(architecture,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'Mercado icon must be visible as the third mobile destination');
 assert.match(architecture,/\.v75-more-icon/,'secondary navigation keeps the shared vector icon language');
+assert.match(architecture,/url\('\.\/icon\.svg'\)/,'local application identity must be reused in the prototype shell');
 
-/* The legacy icon CSS still contains the secure-vault base; v75 overrides geometry only. */
 assert.match(css,/v56 — modern secure vault/,'modern secure vault layer must be present');
 assert.match(css,/\.vault-screen\{[\s\S]*safe-area-inset-top[\s\S]*safe-area-inset-bottom/,'vault must respect iPhone safe areas');
 assert.match(css,/\.vault-card\{[\s\S]*border-radius:32px/,'vault base must retain its rounded hierarchy');
@@ -95,6 +94,6 @@ assert.match(sw,/v74-experience\.css/,'offline/public asset allowlist must inclu
 assert.match(sw,/v75-architecture\.css/,'offline/public asset allowlist must include the architecture overlay');
 assert.doesNotMatch(sw,/['"]\.\/ui-consistency\.css['"]/,'service worker must not cache obsolete visual normalization CSS');
 assert.doesNotMatch(sw,/['"]\.\/v64-runtime\.css['"]/,'service worker must not cache obsolete v64 shell CSS');
-assert.match(sw,/conta-de-casa-public-v75-architecture1-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/,'service worker cache must refresh for the v75 architecture release');
+assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/,'service worker cache must refresh for the final v75 prototype architecture');
 
-console.log('Lucide UI icons, v74 visual base and v75 information architecture: OK');
+console.log('Lucide UI icons, v74 base and final v75 prototype architecture: OK');
