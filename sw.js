@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v73-menu8';
+const CACHE = 'conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience1';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -12,8 +12,6 @@ const PUBLIC_ASSETS = [
   './market-category-groups.css',
   './market-barcode.css',
   './ui-icons.css',
-  './ui-consistency.css',
-  './v64-runtime.css',
   './market-shopping-focus.css',
   './mobile-menu-toggle.css',
   './invoice-capture.css',
@@ -39,6 +37,7 @@ const PUBLIC_ASSETS = [
   './market-official-images.js',
   './v64-runtime.js',
   './market-shopping-focus.js',
+  './v74-experience.js',
   './release-manifest.json',
   './manifest.webmanifest',
   './icon.svg',
@@ -71,8 +70,6 @@ async function refreshClientsAfterExplicitUpdate() {
 }
 
 self.addEventListener('install', event => {
-  // O novo worker fica em waiting até o utilizador confirmar no Centro de Atualização.
-  // Numa instalação inicial, o navegador ativa-o normalmente.
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(PUBLIC_ASSETS)));
 });
 
