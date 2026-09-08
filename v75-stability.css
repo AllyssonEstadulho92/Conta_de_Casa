@@ -114,6 +114,12 @@ html.cdc-v75 .market-product-photo:is(.mobile,.market-browser-photo):is(.is-erro
   line-height:1.05;
   text-align:center;
 }
+html.cdc-v75 .market-product-photo-button:disabled{
+  cursor:default!important;
+  opacity:1!important;
+  transform:none!important;
+  box-shadow:none!important;
+}
 @keyframes v75-image-skeleton{0%{background-position:180% 0}100%{background-position:-70% 0}}
 
 @media(min-width:821px){
@@ -286,6 +292,13 @@ html.cdc-v75 .market-product-photo:is(.mobile,.market-browser-photo):is(.is-erro
 @media(max-width:540px){
   html.cdc-v75 :is(.bill-filter-grid,.market-filter-grid){grid-template-columns:1fr!important}
   html.cdc-v75 :is(.bill-filter-clear,.market-filter-clear){width:100%!important}
+}
+
+@media(max-width:430px){
+  /* Três cartões de produto ficam demasiado estreitos em telemóveis compactos. */
+  html.cdc-v75 .cdc-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  html.cdc-v75 .cdc-product-card{padding:8px!important}
+  html.cdc-v75 .cdc-product-image{height:78px!important}
 }
 
 @media(max-width:360px){
