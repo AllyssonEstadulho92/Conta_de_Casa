@@ -19,6 +19,9 @@ const menuCss = read('mobile-menu-toggle.css');
 const experienceJs = read('v74-experience.js');
 const sw = read('sw.js');
 const prepare = read('scripts/prepare-pages.cjs');
+const publicFilesStart=prepare.indexOf('const PUBLIC_FILES');
+const publicFilesEnd=prepare.indexOf(']);',publicFilesStart);
+const publicFilesBlock=prepare.slice(publicFilesStart,publicFilesEnd+3);
 const releaseManifest = JSON.parse(read('release-manifest.json'));
 const webManifest = JSON.parse(read('manifest.webmanifest'));
 
@@ -74,9 +77,9 @@ assert.match(prepare, /const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare, /const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare, /const MENU_REV = '73-menu8'/);
 assert.match(prepare, /const EXPERIENCE_REV = '74-experience1'/);
-for(const asset of ['app-update.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.js','release-manifest.json'])assert.ok(prepare.includes(`'${asset}'`),`${asset} must be copied to dist`);
-assert.ok(!prepare.match(/PUBLIC_FILES[\s\S]*'ui-consistency\.css'/));
-assert.ok(!prepare.match(/PUBLIC_FILES[\s\S]*'v64-runtime\.css'/));
+for(const asset of ['app-update.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.js','release-manifest.json'])assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be copied to dist`);
+assert.doesNotMatch(publicFilesBlock,/'ui-consistency\.css'/);
+assert.doesNotMatch(publicFilesBlock,/'v64-runtime\.css'/);
 assert.match(prepare, /manifest\.latestVersion!==BUILD/,'build must fail if release manifest and public version diverge');
 assert.match(prepare, /theme-color" content="#f4f8f8"/);
 
