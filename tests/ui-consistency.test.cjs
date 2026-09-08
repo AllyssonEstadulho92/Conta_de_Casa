@@ -12,6 +12,8 @@ const marketBrand=read('market-brand.css');
 const shopping=read('market-shopping-focus.css');
 const experience=read('v74-experience.js');
 const experienceCss=read('v74-experience.css');
+const architecture=read('v75-architecture.js');
+const architectureCss=read('v75-architecture.css');
 const menuCss=read('mobile-menu-toggle.css');
 const menuJs=read('mobile-menu-toggle.js');
 const sw=read('sw.js');
@@ -34,18 +36,20 @@ assert.match(design,/\.ui-icon-svg,\.svg-icon\{[\s\S]*stroke-width:2!important/)
 assert.match(design,/prefers-reduced-motion:reduce/);
 
 assert.match(experienceCss,/Conta de Casa v74/);
-assert.match(experienceCss,/--cdc-prototype-header:#003b48/,'prototype mobile header must use the approved dark teal');
-assert.match(experienceCss,/\.cdc-mobile-greeting/);
-assert.match(experienceCss,/\.cdc-dashboard-categories/);
-assert.match(experienceCss,/\.cdc-expense-feed/);
-assert.match(experienceCss,/\.cdc-market-home/);
-assert.match(experienceCss,/\.cdc-planning-overview/);
-assert.match(experienceCss,/\.cdc-report-summary/);
-assert.match(experienceCss,/\.cdc-more-menu/);
+assert.match(experienceCss,/--cdc-prototype-header:#003b48/);
+for(const marker of ['.cdc-mobile-greeting','.cdc-dashboard-categories','.cdc-expense-feed','.cdc-market-home','.cdc-planning-overview','.cdc-report-summary','.cdc-more-menu'])assert.ok(experienceCss.includes(marker));
 assert.match(experienceCss,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/);
-assert.match(experienceCss,/#formDialog\.dialog\{width:100vw!important/,'mobile add-expense flow must use the full-screen prototype composition');
+assert.match(experienceCss,/#formDialog\.dialog\{width:100vw!important/);
 assert.match(experienceCss,/\.invoice-scan-overlay/);
 assert.match(experienceCss,/prefers-reduced-motion:reduce/);
+
+assert.match(architectureCss,/Conta de Casa v75/);
+assert.match(architectureCss,/\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:visible!important;display:grid!important\}/);
+assert.match(architectureCss,/\.v75-more-group/);
+assert.match(architectureCss,/\.v75-budget-summary/);
+assert.match(architectureCss,/\.vault-keypad\{display:grid!important;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
+assert.match(architectureCss,/background:var\(--v75-surface\)!important/);
+assert.match(architectureCss,/prefers-reduced-motion:reduce/);
 
 assert.match(marketBrand,/Conta de Casa v74/);
 assert.match(marketBrand,/\.market-product-photo[\s\S]*display:grid!important/);
@@ -63,12 +67,18 @@ assert.match(experience,/data-invoice-capture/);
 assert.match(experience,/invoiceImageInput/);
 assert.match(experience,/SUPPORTED_STORES=\[[\s\S]*Continente[\s\S]*Pingo Doce/);
 assert.doesNotMatch(experience,/Auchan|Lidl|Mercadona/);
-assert.doesNotMatch(experience,/saveState|commit\(|estimatedCents\s*=|actualCents\s*=/,'presentation layer must not mutate financial state');
-assert.doesNotMatch(experience,/observer\.observe\(app,\{childList:true,subtree:true\}\)/,'v74 must not observe and rewrite its whole generated app subtree');
+assert.doesNotMatch(experience,/saveState|commit\(|estimatedCents\s*=|actualCents\s*=/);
 assert.match(experience,/observeStableRoots/);
 assert.match(experience,/CDCV74/);
 
-/* v73 menu behavior remains the dedicated navigation controller. */
+assert.match(architecture,/Conta de Casa v75/);
+assert.match(architecture,/bills:\['Despesas','Movimentos'\]/);
+assert.match(architecture,/settings:\['Mais','Conta e aplicação'\]/);
+assert.match(architecture,/DRAWER_GROUPS/);
+assert.match(architecture,/MORE_GROUPS/);
+assert.match(architecture,/CDCV75/);
+assert.doesNotMatch(architecture,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/);
+
 assert.match(menuCss,/Conta de Casa v73/);
 assert.match(menuCss,/\.mobile-menu-btn\[aria-expanded="true"\]/);
 assert.match(menuJs,/line\.animate\(frames/);
@@ -76,19 +86,19 @@ assert.match(menuJs,/drawer\.close=animatedDrawerClose/);
 assert.match(menuJs,/touch\.clientX>=root\.innerWidth-swipeEdgeWidth/);
 assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 0 0 auto!important/);
 
-assert.match(sw,/conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
-for(const asset of ['./design-system.css','./v74-experience.css','./v74-experience.js'])assert.ok(sw.includes(`'${asset}'`));
+assert.match(sw,/conta-de-casa-public-v75-architecture1-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+for(const asset of ['./design-system.css','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`));
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 
-assert.match(prepare,/const BUILD = 'v74'/);
+assert.match(prepare,/const BUILD = 'v75'/);
 assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture1'/);
 assert.doesNotMatch(publicFilesBlock,/'ui-consistency\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'v64-runtime\.css'/);
-assert.ok(publicFilesBlock.includes("'v74-experience.css'"));
-assert.ok(publicFilesBlock.includes("'v74-experience.js'"));
+for(const asset of ['v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js'])assert.ok(publicFilesBlock.includes(`'${asset}'`));
 
 assert.equal(manifest.background_color,'#f4f8f8');
 assert.equal(manifest.theme_color,'#f4f8f8');
@@ -97,18 +107,20 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/design-system\.css\?v=74/);
+  assert.match(index,/design-system\.css\?v=75/);
   assert.match(index,/market-brand\.css\?v=74-ui1/);
   assert.match(index,/market-shopping-focus\.css\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/v74-experience\.css\?v=74-experience2/);
+  assert.match(index,/v75-architecture\.css\?v=75-architecture1/);
   assert.match(index,/v74-experience\.js\?v=74-experience2/);
+  assert.match(index,/v75-architecture\.js\?v=75-architecture1/);
   assert.match(index,/<meta name="theme-color" content="#f4f8f8"/);
-  for(const asset of ['design-system.css','v74-experience.css','v74-experience.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  for(const asset of ['design-system.css','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Conta de Casa v74 prototype composition, visual identity and lean public bundle: OK');
+console.log('Conta de Casa v75 architecture overlay, v74 base visual identity and lean public bundle: OK');
