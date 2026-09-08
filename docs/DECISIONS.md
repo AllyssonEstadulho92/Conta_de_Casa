@@ -56,7 +56,7 @@ Estado: aceite. Módulos não dependem de estado privado de outros módulos.
 Estado: aceite no pipeline de resultados vivos.
 
 ## D-018 — Mercado é `text-first`; fotografia é opcional
-Data: 6 de setembro de 2026 · Estado: aceite e refinada pela D-039. Nome, embalagem, loja, categoria, estado e preço são suficientes para identificar o artigo; uma fotografia verificada pode ser apresentada como apoio visual, nunca como requisito nem prova de preço.
+Data: 6 de setembro de 2026 · Estado: aceite e refinada pela D-039. Nome, embalagem, loja, categoria, estado e preço são suficientes para identificar o artigo; fotografia verificada pode ser apoio visual, nunca requisito nem prova de preço.
 
 ## D-019 — Browser do Mercado usa posições explícitas em mobile
 Estado: aceite. Grid evita compressão de nome/preço e abaixo de 360 px permite reflow controlado.
@@ -68,7 +68,7 @@ Estado: aceite. `sync-conflict-policy.js` pode ignorar apenas metadados visuais 
 Estado: aceite. Agrupamento e disclosures reutilizam os mesmos itens, IDs e handlers.
 
 ## D-022 — Colisões visuais devem ser consolidadas
-Estado: aceite e refinada pela D-039. A antiga camada `ui-consistency.css` cumpriu este papel nas versões anteriores; na v74 as regras necessárias passam para `design-system.css` e deixam de ser distribuídas como override separado.
+Estado: aceite e refinada pela D-039. Na v74, as regras necessárias foram consolidadas em `design-system.css`; `ui-consistency.css` deixou de ser distribuído.
 
 ## D-023 — Cada alteração pública relevante gera versão e validação
 Estado: aceite. Fluxo oficial: alteração → versão → `release-manifest.json` → CI → `main` → Pages → instalação/atualização.
@@ -83,7 +83,7 @@ Estado: aceite. Ocorrências novas não inventam montantes variáveis e ficam fo
 Estado: aceite. Safe area e offset do conteúdo são obrigatórios.
 
 ## D-027 — Topbar móvel mantém geometria global
-Estado: aceite e refinada pela D-039. O modelo v74 pode alterar a apresentação global do topbar, mas não criar implementações divergentes por página.
+Estado: aceite e refinada pela D-039. O modelo v74 altera a apresentação global do topbar, sem criar implementações divergentes por página.
 
 ## D-028 — Redeploy repete verificações da release
 Estado: aceite. Build público só deve ser preparado após testes de sintaxe e regressões críticas.
@@ -95,10 +95,10 @@ Estado: aceite. Resumo, checkbox, nome, quantidade e preço têm prioridade; det
 Estado: aceite. Uma release pode reutilizar módulos funcionais validados com revisões anteriores.
 
 ## D-031 — Shell móvel usa identidade canónica por release
-Estado: aceite e substituída visualmente pela D-039 para a v74. A cor do shell deve ser definida numa única camada final, evitando overrides concorrentes.
+Estado: aceite e substituída visualmente pela D-039 para a v74. A cor do shell deve existir numa única camada final, evitando overrides concorrentes.
 
 ## D-032 — O botão móvel é um único controlo
-Estado: aceite. `#mobileMenuBtn` é o mesmo nó nos estados hambúrguer e X; não existe um segundo botão visual concorrente.
+Estado: aceite. `#mobileMenuBtn` é o mesmo nó nos estados hambúrguer e X.
 
 ## D-033 — Refinar o drawer sem criar segunda navegação
 Estado: aceite. `NAV_GROUPS`, drawer, eventos e renderização continuam únicos.
@@ -107,10 +107,10 @@ Estado: aceite. `NAV_GROUPS`, drawer, eventos e renderização continuam únicos
 Estado: aceite. `mobile-menu-toggle.js` controla o glifo animado e impede substituição destrutiva pelo hidratador de ícones.
 
 ## D-035 — Movimento do glifo usa animação explícita após reparenting
-Estado: aceite. Web Animations complementa o estado CSS, respeitando `prefers-reduced-motion` e fallback sem `Element.animate`.
+Estado: aceite. Web Animations complementa o estado CSS, respeitando `prefers-reduced-motion` e fallback.
 
 ## D-036 — Drawer fecha apenas depois da transição off-canvas
-Estado: aceite. O wrapper do `dialog.close()` espera pelo fim da transição ou fallback temporal para não cortar a animação.
+Estado: aceite. O wrapper do `dialog.close()` espera pelo fim da transição ou fallback temporal.
 
 ## D-037 — Drawer acompanha o dedo e só captura intenção horizontal
 Estado: aceite. Swipe é progressivo, preserva scroll vertical e usa thresholds/velocidade para snap.
@@ -119,34 +119,36 @@ Estado: aceite. Swipe é progressivo, preserva scroll vertical e usa thresholds/
 Data: 8 de setembro de 2026 · Estado: aceite e publicada na v73. Desktop reserva sidebar com `margin-right`; drawer abre da direita; swipe de abertura começa na margem direita e move-se para a esquerda.
 
 ## D-039 — v74 aplica o novo protótipo como camada de experiência sem migrar o núcleo
-Data: 8 de setembro de 2026 · Estado: aceite como release candidata v74.
-
-### Contexto
-
-O novo modelo aprovado redefine a apresentação móvel de Conta de Casa: onboarding, Início, Despesas, adicionar despesa, leitura de fatura, Mercado, Planeamento, Relatórios, Mais e Sincronização. O requisito principal é aproximar a aplicação do protótipo sem perder dados, cálculos, segurança ou fluxos já validados.
+Data: 8 de setembro de 2026 · Estado: aceite e publicada.
 
 ### Decisão
 
-1. **Preservar o núcleo funcional.** `core.js`, `finance.js`, IndexedDB, `STATE_VERSION = 5`, cofre, pagamentos e sincronização não são reescritos para produzir o redesign.
-2. **Consolidar o sistema visual em `design-system.css`.** A identidade canónica passa a usar fundo claro `#f4f8f8`, texto `#0c2830`, primário `#075b63` e acento `#17b890`, mantendo tema escuro.
-3. **Criar `v74-experience.css/js` como camada de composição.** Esta camada reutiliza IDs, dados e handlers existentes e não deve escrever diretamente valores financeiros.
-4. **Priorizar cinco destinos no mobile:** Início, Despesas, Mercado, Planeamento e Mais. O drawer preserva a arquitetura completa.
-5. **Reutilizar fluxos reais.** “Adicionar despesa” chama o formulário existente; “Ler fatura” usa a captura QR/fotografia existente; Mercado reutiliza pesquisa/scanner e preços existentes.
-6. **Não inventar dados para imitar o protótipo.** Valores, faturas, lojas e produtos apresentados na aplicação devem vir do estado real ou de fontes validadas.
-7. **Fotografias do Mercado são opcionais e verificadas.** D-018 continua válida como `text-first`, mas fotografias aprovadas podem voltar a ser visíveis.
-8. **Remover overrides visuais redundantes do bundle.** `ui-consistency.css` e `v64-runtime.css` deixam de ser distribuídos; regras necessárias são consolidadas. `v64-runtime.js` permanece por conter comportamento funcional.
-9. **Preservar a navegação v73.** Sidebar/drawer continuam à direita e o mesmo hambúrguer continua a transformar-se em X.
-10. **Validar antes de publicar.** Finanças, isolamento, QR, Mercado, scanner, atualização, segurança, responsividade, acessibilidade e sincronização devem estar verdes no CI.
+1. Preservar `core.js`, `finance.js`, IndexedDB, `STATE_VERSION = 5`, cofre, pagamentos e sincronização.
+2. Consolidar o sistema visual em `design-system.css` com fundo `#f4f8f8`, texto `#0c2830`, primário `#075b63` e acento `#17b890`.
+3. Usar `v74-experience.css/js` como camada de composição que reutiliza IDs, dados e handlers existentes e não escreve diretamente valores financeiros.
+4. Priorizar no mobile Início, Despesas, Mercado, Planeamento e Mais; o drawer mantém a arquitetura completa.
+5. “Adicionar despesa” chama o formulário existente; “Ler fatura” usa captura QR/fotografia existente; Mercado reutiliza pesquisa/scanner e preços existentes.
+6. Não inventar dados para imitar o protótipo.
+7. Fotografias do Mercado são opcionais e verificadas.
+8. `ui-consistency.css` e `v64-runtime.css` deixam de ser distribuídos; `v64-runtime.js` permanece funcional.
+9. Preservar a navegação v73 à direita e o mesmo hambúrguer/X.
+10. Publicar apenas com finanças, isolamento, QR, Mercado, scanner, atualização, segurança, responsividade, acessibilidade e sincronização verdes.
 
 ### Versionamento
 
 - build: `v74`;
 - UI: `74-ui1`;
 - Mercado: `74-shopping2`;
-- menu preservado: `73-menu8`;
+- menu: `73-menu8`;
 - experiência: `74-experience2`;
 - cache: `conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience2`.
 
-### Validação
+### Publicação
 
-CI da branch `34209567627` / `#1435`: sucesso integral. A validação física pós-publicação continua recomendada e não deve ser confundida com validação automática.
+- PR `#64`;
+- CI PR `34210060213` / `#1441`: sucesso;
+- merge `a1974860755d70e7abf30ed93cee7220f5e65409`;
+- CI `main` `34210146307` / `#1442`: sucesso;
+- Pages `34210213884` / `#1435`: sucesso.
+
+A validação física pós-publicação permanece como controlo adicional, não como substituto do CI.
