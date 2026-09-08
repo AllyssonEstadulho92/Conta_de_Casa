@@ -56,7 +56,7 @@ assert.match(design,/position:fixed!important/,'mobile topbar remains fixed in v
 assert.match(design,/\.mobile-nav \.nav-btn\.active::before[\s\S]*background:var\(--primary\)!important/,'v74 keeps one canonical active indicator');
 assert.doesNotMatch(design,/\.mobile-nav \.nav-btn\.active::after[\s\S]*background:/,'v74 must not reintroduce a duplicate active underline');
 assert.match(experience,/Conta de Casa v74/);
-assert.match(experience,/\.cdc-action-icon/,'prototype action tiles must use the shared vector icon language');
+assert.match(experience,/\.cdc-quick-action-icon/,'prototype action tiles must use the shared vector icon language');
 
 assert.match(css,/v56 — modern secure vault/,'modern secure vault layer must be present');
 assert.match(css,/\.vault-screen\{[\s\S]*safe-area-inset-top[\s\S]*safe-area-inset-bottom/,'vault must respect iPhone safe areas');
