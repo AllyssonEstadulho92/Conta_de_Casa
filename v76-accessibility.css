@@ -1,0 +1,26 @@
+/* Conta de Casa v76 — correções de contraste verificadas na auditoria final.
+   Apenas tokens de apresentação em tema claro; tema escuro mantém a paleta v75. */
+
+html.cdc-v75:not([data-theme="dark"]) {
+  /* #5d7277 sobre branco = contraste aproximado 5.07:1;
+     também permanece acima de 4.5:1 sobre a superfície suave #f0f5f5. */
+  --v75-muted: #5d7277;
+
+  /* Estados usados como texto sobre superfícies claras. */
+  --v75-success: #117852;
+  --v75-danger: #b9364b;
+  --v75-warning: #a95410;
+}
+
+/* O foco do teclado deve continuar visível mesmo nos controlos que a v75
+   recompõe com background/border próprios. */
+html.cdc-v75 :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 3px solid var(--v75-primary) !important;
+  outline-offset: 2px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.cdc-v75 :focus-visible {
+    scroll-behavior: auto !important;
+  }
+}
