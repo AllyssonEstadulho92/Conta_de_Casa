@@ -1,34 +1,37 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-08 — v71 candidata: drawer off-canvas suave
+## 2026-09-08 — v71 candidata: drawer off-canvas suave com swipe interativo
 
 ### Observação em hardware real
 
-A validação da v70 no iPhone confirmou que o menu está funcional, o item ativo está correto e o hambúrguer se transforma em `X`. O problema remanescente é a própria entrada do painel: visualmente surge demasiado depressa e quase no lugar final, sem transmitir um movimento lateral contínuo.
+A validação da v70 no iPhone confirmou que o menu está funcional, o item ativo está correto e o hambúrguer se transforma em `X`. A melhoria seguinte é de interação: o drawer deve comportar-se como uma superfície física, acompanhando o dedo lateralmente em vez de apenas alternar entre fechado e aberto.
 
 ### Causa técnica
 
-A camada final da v70 posiciona `.nav-drawer-shell` apenas em `translateX(-18px)` antes de aplicar `.open`, com `opacity:.82`. O deslocamento é pequeno face à largura real do drawer e o backdrop já aparece escurecido quando o `<dialog>` é mostrado.
-
-No fecho, `events.js::closeMobileDrawer()` e `render.js::showPage()` usam o método real `drawer.close()`. Um `<dialog>` fechado deixa imediatamente de ser renderizado, portanto uma transição CSS de saída não poderia terminar sem coordenação adicional.
+Uma transição automática entre dois estados CSS não acompanha o deslocamento real do toque. Para obter um comportamento semelhante ao drawer do ChatGPT, a posição do painel precisa de ser calculada a partir do delta horizontal do dedo, com a transição temporariamente desligada durante o arrasto e reativada apenas para completar o percurso restante.
 
 ### Correção aplicada na candidata v71
 
 - preservado o mesmo `#mobileDrawer`, `#mobileMenuBtn`, `NAV_GROUPS` e fluxo de navegação;
 - preservadas as Web Animations do hambúrguer/X da v70;
-- superfície fechada alterada para `translate3d(calc(-100% - 8px),0,0)`;
-- superfície aberta mantém `translate3d(0,0,0)`;
-- abertura definida em cerca de `280 ms` com `cubic-bezier(.22,1,.36,1)`;
-- fecho definido em cerca de `240 ms`, ligeiramente mais rápido;
-- backdrop parte de transparente e chega a `rgba(10,18,30,.38)`;
-- blur do backdrop limitado a `1.5px`;
-- apenas `transform`, opacidade e composição visual participam na animação, sem alterar largura ou margens;
-- o controlador preserva `drawer.close.bind(drawer)` como método nativo e instala um wrapper apenas na instância real do drawer;
-- o wrapper remove `.open`, aguarda `transitionend` do `transform` e só depois executa o close nativo;
-- fallback de `360 ms` impede estado preso caso `transitionend` não seja emitido;
-- o botão permanece em `.drawer-head` durante a saída e regressa ao topbar somente no evento `close` real;
+- superfície fechada em `translate3d(calc(-100% - 8px),0,0)` e aberta em `translate3d(0,0,0)`;
+- abertura automática ~`280 ms` com `cubic-bezier(.32,.72,0,1)`;
+- fecho automático ~`240 ms`;
+- backdrop transparente → `rgba(10,18,30,.34)` com blur máximo de `1px`;
+- swipe de abertura iniciado nos primeiros `30 px` da margem esquerda;
+- swipe para a esquerda em qualquer ponto da superfície do drawer aberto;
+- intenção horizontal só é assumida depois de `8 px` e depois de a componente horizontal superar a vertical, preservando o scroll normal;
+- durante o arrasto, `--drawer-drag-x` controla diretamente o `translate3d` sem transição intermédia;
+- `--drawer-drag-alpha` e `--drawer-drag-blur` fazem o backdrop acompanhar o mesmo progresso;
+- ao soltar, o snap combina progresso (`34%` para abrir; `66%` para fechar quando aberto) e velocidade (`0.45 px/ms`);
+- o transform atual é fixado durante um frame e o CSS anima apenas a distância restante;
+- clique sintetizado pós-swipe é bloqueado durante `320 ms` para evitar abrir um item por acidente;
+- `touchcancel` restaura o estado estável anterior, evitando drawer preso a meio;
+- `touch-action:pan-y` e `overscroll-behavior-x:contain` preservam scroll vertical e evitam competição desnecessária com movimento lateral;
+- `drawer.close()` continua coordenado por `transitionend` do `transform`, com fallback de `360 ms`;
+- o botão permanece em `.drawer-head` durante a saída e regressa ao topbar somente no `close` real;
 - X, backdrop, Escape, escolha de página e mudança de breakpoint continuam a usar os caminhos existentes;
-- `prefers-reduced-motion` elimina a espera/transição e fecha imediatamente;
+- `prefers-reduced-motion` elimina transições adicionais e não captura o swipe interativo;
 - ARIA, foco, safe areas, largura responsiva, scroll e temas permanecem preservados.
 
 ### Distribuição candidata
@@ -42,8 +45,14 @@ No fecho, `events.js::closeMobileDrawer()` e `render.js::showPage()` usam o mét
 
 ### Testes atualizados
 
-- regressão específica de entrada totalmente off-canvas;
-- backdrop progressivo;
+- swipe de abertura pela margem esquerda;
+- swipe de fecho acompanhando o dedo;
+- intenção horizontal sem bloquear scroll vertical;
+- snap por progresso e velocidade;
+- backdrop sincronizado com o arrasto;
+- prevenção de clique sintetizado pós-swipe;
+- recuperação em `touchcancel`;
+- entrada totalmente off-canvas;
 - duração diferenciada de abertura/fecho;
 - coordenação de `drawer.close()` com `transitionend` e timeout;
 - posição do botão até ao `close` real;
@@ -51,6 +60,8 @@ No fecho, `events.js::closeMobileDrawer()` e `render.js::showPage()` usam o mét
 - Centro de Atualização e versão pública;
 - consistência visual;
 - compatibilidade das camadas históricas do Mercado e build ordering.
+
+A CI do PR #60 passou no run #1325 (`34171997598`). Uma alteração documental posterior do TODO exige nova execução automática da CI antes do merge final.
 
 ### Segurança e dados
 
@@ -84,7 +95,7 @@ A validação da v69 no iPhone confirmou que os estados finais do menu estavam c
 - CI de `main` #1280 (`34170229908`): **sucesso**;
 - Deploy GitHub Pages #1273 (`34170256426`): **sucesso**.
 
-A validação física posterior confirmou o menu funcional e revelou apenas a necessidade de tornar a própria superfície do drawer mais suave, tratada na candidata v71.
+A validação física posterior confirmou o menu funcional e revelou a necessidade de tornar a própria superfície do drawer mais suave e interativa, tratada na candidata v71.
 
 ## 2026-09-07 — v69 publicada: estados hambúrguer/X corrigidos
 
