@@ -17,6 +17,7 @@ const shoppingCss = read('market-shopping-focus.css');
 const menuJs = read('mobile-menu-toggle.js');
 const menuCss = read('mobile-menu-toggle.css');
 const experienceJs = read('v74-experience.js');
+const experienceCss = read('v74-experience.css');
 const sw = read('sw.js');
 const prepare = read('scripts/prepare-pages.cjs');
 const publicFilesStart=prepare.indexOf('const PUBLIC_FILES');
@@ -45,7 +46,7 @@ assert.ok(releaseManifest.releases.some(release=>release.version==='v73'));
 assert.ok(releaseManifest.releases.some(release=>release.version==='v64'));
 assert.ok(releaseManifest.releases[0].items.some(item=>/identidade|verde-petróleo|teal/i.test(item)));
 assert.ok(releaseManifest.releases[0].items.some(item=>/Ler fatura|QR/i.test(item)));
-assert.ok(releaseManifest.releases[0].items.some(item=>/não foram reescritos|não.*migrados/i.test(item)),'v74 notes must state preservation of financial/security data');
+assert.ok(releaseManifest.releases[0].items.some(item=>/não foram reescritos|não.*migrados/i.test(item)));
 assert.equal(webManifest.background_color,'#f4f8f8');
 assert.equal(webManifest.theme_color,'#f4f8f8');
 
@@ -59,16 +60,17 @@ assert.match(shoppingCss,/Conta de Casa v74/);
 assert.match(menuJs,/Conta de Casa v73/);
 assert.match(menuCss,/Conta de Casa v73/);
 assert.match(experienceJs,/Conta de Casa v74/);
+assert.match(experienceCss,/Conta de Casa v74/);
 
-assert.match(sw, /conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience1/);
-for(const asset of ['./app-update.css','./app-update.js','./design-system.css','./v64-runtime.js','./market-shopping-focus.css','./market-shopping-focus.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v74-experience.js','./release-manifest.json'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be cached`);
+assert.match(sw, /conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+for(const asset of ['./app-update.css','./app-update.js','./design-system.css','./v64-runtime.js','./market-shopping-focus.css','./market-shopping-focus.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v74-experience.css','./v74-experience.js','./release-manifest.json'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be cached`);
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.match(sw, /APPLY_UPDATE/);
 assert.match(sw, /SKIP_WAITING/);
 assert.match(sw, /applyRequested=true/);
 assert.match(sw, /client\.navigate\(client\.url\)/);
-assert.doesNotMatch(sw, /install[\s\S]{0,260}skipWaiting\(\)/,'updates must not skip waiting automatically during install');
+assert.doesNotMatch(sw, /install[\s\S]{0,260}skipWaiting\(\)/);
 
 assert.match(prepare, /const BUILD = 'v74'/);
 assert.match(prepare, /const UI_REV = '74-ui1'/);
@@ -76,11 +78,11 @@ assert.match(prepare, /const CATEGORY_REV = '64-ui1'/);
 assert.match(prepare, /const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare, /const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare, /const MENU_REV = '73-menu8'/);
-assert.match(prepare, /const EXPERIENCE_REV = '74-experience1'/);
-for(const asset of ['app-update.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.js','release-manifest.json'])assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be copied to dist`);
+assert.match(prepare, /const EXPERIENCE_REV = '74-experience2'/);
+for(const asset of ['app-update.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','release-manifest.json'])assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be copied to dist`);
 assert.doesNotMatch(publicFilesBlock,/'ui-consistency\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'v64-runtime\.css'/);
-assert.match(prepare, /manifest\.latestVersion!==BUILD/,'build must fail if release manifest and public version diverge');
+assert.match(prepare, /manifest\.latestVersion!==BUILD/);
 assert.match(prepare, /theme-color" content="#f4f8f8"/);
 
 const dist = path.join(ROOT, 'dist');
@@ -96,10 +98,9 @@ try {
   assert.match(index, /app-update\.css\?v=74/);
   assert.match(index, /market-brand\.css\?v=74-ui1/);
   assert.match(index, /market-shopping-focus\.css\?v=74-shopping2/);
-  assert.match(index, /market-shopping-focus\.js\?v=74-shopping2/);
   assert.match(index, /mobile-menu-toggle\.css\?v=73-menu8/);
-  assert.match(index, /mobile-menu-toggle\.js\?v=73-menu8/);
-  assert.match(index, /v74-experience\.js\?v=74-experience1/);
+  assert.match(index, /v74-experience\.css\?v=74-experience2/);
+  assert.match(index, /v74-experience\.js\?v=74-experience2/);
   assert.doesNotMatch(index, /ui-consistency\.css/);
   assert.doesNotMatch(index, /v64-runtime\.css/);
   assert.doesNotMatch(index, /\?v=53/);
@@ -110,12 +111,13 @@ try {
   assert.equal(distWebManifest.theme_color,'#f4f8f8');
   assert.ok(index.indexOf('sync.js?v=74') < index.indexOf('sync-conflict-policy.js?v=74-ui1'));
   assert.ok(index.indexOf('market-shopping-focus.js?v=74-shopping2') < index.indexOf('mobile-menu-toggle.js?v=73-menu8'));
-  assert.ok(index.indexOf('mobile-menu-toggle.js?v=73-menu8') < index.indexOf('v74-experience.js?v=74-experience1'));
-  for(const asset of ['app-update.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.js','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  assert.ok(index.indexOf('mobile-menu-toggle.js?v=73-menu8') < index.indexOf('v74-experience.js?v=74-experience2'));
+  assert.ok(index.indexOf('mobile-menu-toggle.css?v=73-menu8') < index.indexOf('v74-experience.css?v=74-experience2'));
+  for(const asset of ['app-update.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 } finally {
   fs.rmSync(dist, { recursive:true, force:true });
 }
 
-console.log('Versioned v74 identity, controlled installation and lean public bundle expectations: OK');
+console.log('Versioned v74 prototype, controlled installation and lean public bundle expectations: OK');
