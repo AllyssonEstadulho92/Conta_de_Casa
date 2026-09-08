@@ -11,8 +11,9 @@ const legacyCss=read('styles.css');
 const designCss=read('design-system.css');
 const experienceCss=read('v74-experience.css');
 const architectureCss=read('v75-architecture.css');
+const usabilityCss=read('v76-usability.css');
 const menuCss=read('mobile-menu-toggle.css');
-const css=`${legacyCss}\n${designCss}\n${experienceCss}\n${architectureCss}\n${menuCss}`;
+const css=`${legacyCss}\n${designCss}\n${experienceCss}\n${menuCss}\n${architectureCss}\n${usabilityCss}`;
 const events=read('events.js');
 const index=read('index.html');
 const render=read('render.js');
@@ -31,7 +32,7 @@ assert.match(designCss,/--mobile-top-safe:max\(20px,calc\(env\(safe-area-inset-t
 assert.match(designCss,/--header-height:calc\(108px \+ var\(--mobile-top-safe\)\)/);
 assert.match(designCss,/html\.app-active \.topbar,[\s\S]*position:fixed!important/,'mobile shell must retain a fixed topbar');
 assert.match(designCss,/html\.app-active \.main\{padding-top:var\(--header-height\)!important/,'content must compensate the fixed topbar');
-assert.match(designCss,/\.mobile-menu-btn\{width:44px!important;[\s\S]*height:44px!important/,'menu target must remain at least 44px');
+assert.match(designCss,/\.mobile-menu-btn\{width:44px!important;[\s\S]*height:44px!important/,'base menu target must remain at least 44px');
 assert.match(designCss,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/,'base bottom navigation must reserve five destinations');
 assert.match(designCss,/\.mobile-nav \.nav-btn\.active::before\{background:var\(--primary\)!important\}/,'there must be one canonical active indicator');
 assert.match(designCss,/prefers-reduced-motion:reduce/);
@@ -55,6 +56,14 @@ assert.match(architectureCss,/\.v75-budget-summary/);
 assert.match(architectureCss,/\.v75-more-group/);
 assert.match(architectureCss,/\.vault-keypad\{display:grid!important;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
 assert.match(architectureCss,/prefers-reduced-motion:reduce/);
+
+/* v76 is the final cascade: it repairs the actual post-v75 touch/readability regressions. */
+assert.match(usabilityCss,/Conta de Casa v76/);
+assert.match(usabilityCss,/\.mobile-menu-btn,[\s\S]*min-width: 44px !important[\s\S]*min-height: 44px !important/);
+assert.match(usabilityCss,/\.mobile-nav \.nav-btn,[\s\S]*min-height: 58px !important/);
+assert.match(usabilityCss,/\.page-heading h1[\s\S]*white-space: normal !important/);
+assert.match(usabilityCss,/@media \(min-width: 821px\)[\s\S]*#page-planning > \.cdc-planning-overview[\s\S]*display: grid !important/);
+assert.match(usabilityCss,/\.cdc-planning-categories > div[\s\S]*grid-template-areas:/);
 
 /* Right-side navigation controller from v73 remains valid. */
 assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 0 0 auto!important/);
@@ -99,7 +108,7 @@ assert.match(events,/openAccountBalanceForm\(\)/);
 
 assert.doesNotMatch(css,/\bzoom\s*:/i,'do not reintroduce CSS zoom as a responsive workaround');
 
-/* Source HTML remains stable; Pages stamps v75. */
+/* Source HTML remains stable; Pages stamps the public build. */
 assert.match(index,/name="app-build" content="v53"/);
 assert.match(index,/styles\.css\?v=53/);
 assert.match(index,/design-system\.css\?v=53/);
@@ -107,27 +116,29 @@ assert.match(index,/manifest\.webmanifest\?v=53/);
 for(const asset of ['core','finance','render','forms','sync','events'])assert.match(index,new RegExp(`${asset}\\.js\\?v=53`));
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
-for(const asset of ['./design-system.css','./v74-experience.css','./v75-architecture.css','./market-experience.css','./market-experience.js','./v64-runtime.js','./app-update.css','./app-update.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be available offline`);
+assert.match(sw,/conta-de-casa-public-v76-usability1-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+for(const asset of ['./design-system.css','./v74-experience.css','./v75-architecture.css','./v76-usability.css','./market-experience.css','./market-experience.js','./v64-runtime.js','./app-update.css','./app-update.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be available offline`);
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.match(sw,/url\.searchParams\.has\('v'\)/);
 assert.match(sw,/url\.searchParams\.has\('ts'\)/);
 
-assert.match(prepare,/const BUILD = 'v75'/);
+assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
+assert.match(prepare,/const USABILITY_REV = '76-usability1'/);
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const builtIndex=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(builtIndex,/name="app-build" content="v75"/);
-  assert.match(builtIndex,/design-system\.css\?v=75/);
+  assert.match(builtIndex,/name="app-build" content="v76"/);
+  assert.match(builtIndex,/design-system\.css\?v=76/);
   assert.match(builtIndex,/v74-experience\.css\?v=74-experience2/);
   assert.match(builtIndex,/v74-experience\.js\?v=74-experience2/);
   assert.match(builtIndex,/v75-architecture\.css\?v=75-architecture2/);
   assert.match(builtIndex,/v75-architecture\.js\?v=75-architecture2/);
+  assert.match(builtIndex,/v76-usability\.css\?v=76-usability1/);
   assert.match(builtIndex,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.doesNotMatch(builtIndex,/ui-consistency\.css/);
   assert.doesNotMatch(builtIndex,/v64-runtime\.css/);
@@ -136,8 +147,9 @@ try{
   assert.ok(fs.existsSync(path.join(dist,'v74-experience.js')));
   assert.ok(fs.existsSync(path.join(dist,'v75-architecture.css')));
   assert.ok(fs.existsSync(path.join(dist,'v75-architecture.js')));
+  assert.ok(fs.existsSync(path.join(dist,'v76-usability.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Responsive v75 architecture, safe areas, visible five-destination navigation and Pages freshness tests: OK');
+console.log('Responsive v76 architecture, readable planning, final touch targets, safe areas and Pages freshness tests: OK');
