@@ -88,7 +88,7 @@ assert.match(index,/id="toast"[\s\S]*role="status" aria-live="polite"/);
 assert.match(experience,/\.cdc-mobile-greeting/);
 assert.match(experience,/\.cdc-mobile-month/);
 assert.match(experience,/\.cdc-expense-feed/);
-assert.match(experience,/\.cdc-more-row/);
+assert.match(experience,/\.cdc-more-menu/);
 assert.doesNotMatch(experience,/pointer-events:none!important;[^}]*\.cdc-quick-action/,'quick actions must remain interactive');
 
 console.log('Accessibility contrast, focus, touch targets, semantic state and mobile safe-area tests for v74: OK');
