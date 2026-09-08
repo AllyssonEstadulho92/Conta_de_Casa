@@ -11,6 +11,8 @@ const experienceCss=fs.readFileSync('v74-experience.css','utf8');
 const experienceJs=fs.readFileSync('v74-experience.js','utf8');
 const architectureCss=fs.readFileSync('v75-architecture.css','utf8');
 const architectureJs=fs.readFileSync('v75-architecture.js','utf8');
+const usabilityCss=fs.readFileSync('v76-usability.css','utf8');
+const accessibilityCss=fs.readFileSync('v76-accessibility.css','utf8');
 const js=fs.readFileSync('market-experience.js','utf8');
 const runtimeJs=fs.readFileSync('v64-runtime.js','utf8');
 const imageAudit=fs.readFileSync('market-image-audit.js','utf8');
@@ -20,20 +22,22 @@ const sw=fs.readFileSync('sw.js','utf8');
 const pages=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const events=fs.readFileSync('events.js','utf8');
 
+/* Source HTML remains stable; the public build is stamped by prepare-pages. */
 assert.match(index,/<meta name="app-build" content="v53"/);
 assert.match(index,/market-experience\.css\?v=53/);
 assert.match(index,/market-experience\.js\?v=53/);
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
-for(const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js']){
+assert.match(sw,/conta-de-casa-public-v76-usability1-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+for(const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v76-usability.css','v76-accessibility.css']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be cached by the service worker`);
   assert.ok(pages.includes(`'${asset}'`),`${asset} must be included in the Pages bundle`);
 }
 assert.ok(!sw.includes("'./ui-consistency.css'"),'obsolete visual override must not ship');
 assert.ok(!sw.includes("'./v64-runtime.css'"),'obsolete v64 visual shell must not ship');
-assert.match(pages,/const BUILD = 'v75'/);
+assert.match(pages,/const BUILD = 'v76'/);
 assert.match(pages,/const ARCHITECTURE_REV = '75-architecture2'/);
+assert.match(pages,/const USABILITY_REV = '76-usability1'/);
 
 for(const market of ['Pingo Doce','Continente'])assert.ok(js.includes(market));
 assert.doesNotMatch(js,/Mercadona|Open Prices/i);
@@ -63,9 +67,12 @@ assert.match(experienceCss,/\.cdc-market-home/);
 assert.match(experienceCss,/\.cdc-product-grid/);
 assert.match(experienceCss,/\.cdc-store-grid/);
 assert.match(architectureCss,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'Mercado must remain visible in the v75 primary navigation');
-assert.match(architectureCss,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'prototype market grid must remain compact');
+assert.match(architectureCss,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'v75 remains the compact prototype base');
+assert.match(usabilityCss,/\.cdc-product-grid[\s\S]*repeat\(2, minmax\(0, 1fr\)\) !important/,'v76 must increase final mobile market readability');
+assert.match(accessibilityCss,/--v75-muted: #5d7277/,'v76 final palette must keep secondary text readable');
 assert.match(architectureJs,/market:\['Mercado','Compras'\]/);
 assert.doesNotMatch(architectureJs,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/,'architecture overlay must not mutate market financial state');
+assert.doesNotMatch(usabilityCss,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/,'usability overlay must remain presentation-only');
 
 assert.match(runtimeJs,/AUTO_MATCH_MIN=0\.84/);
 assert.match(runtimeJs,/AUTO_MATCH_GAP=0\.10/);
@@ -86,4 +93,4 @@ assert.ok(css.includes('env(safe-area-inset-top)'));
 assert.ok(css.includes('env(safe-area-inset-bottom)'));
 assert.ok(css.includes('min-width:0'));
 
-console.log('Market live sources, verified photos and final v75 prototype architecture remain isolated and safe: OK');
+console.log('Market live sources, verified photos and v76 final usability architecture remain isolated and safe: OK');
