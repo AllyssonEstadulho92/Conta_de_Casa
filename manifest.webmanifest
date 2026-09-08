@@ -1,12 +1,12 @@
 {
   "name": "Conta de Casa",
   "short_name": "ContaCasa",
-  "description": "Gestão privada de faturas, despesas e planeamento doméstico.",
+  "description": "Gestão privada de despesas, faturas, mercado e planeamento doméstico.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f5f7fa",
-  "theme_color": "#f5f7fa",
+  "background_color": "#f4f8f8",
+  "theme_color": "#f4f8f8",
   "lang": "pt-PT",
   "orientation": "any",
   "icons": [
@@ -19,8 +19,8 @@
   ],
   "shortcuts": [
     {
-      "name": "Faturas",
-      "short_name": "Faturas",
+      "name": "Despesas e faturas",
+      "short_name": "Despesas",
       "url": "./#bills"
     },
     {

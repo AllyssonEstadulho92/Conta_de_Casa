@@ -13,6 +13,9 @@ const policy=read('market-retailer-image-policy.js');
 const css=read('market-image-audit.css');
 const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
+const publicFilesStart=prepare.indexOf('const PUBLIC_FILES');
+const publicFilesEnd=prepare.indexOf(']);',publicFilesStart);
+const publicFilesBlock=prepare.slice(publicFilesStart,publicFilesEnd+3);
 
 assert.match(js,/auditoria de catálogo e imagens de produto \(v60\)/);
 assert.match(js,/world\.openfoodfacts\.org/);
@@ -24,26 +27,26 @@ assert.match(js,/safeRetailerProductUrl/);
 assert.match(js,/safeRetailerImageUrl/);
 assert.match(js,/Sites-col-master-catalog/);
 assert.match(js,/Sites-pingo-doce-master/);
-assert.match(js,/matchedBy:'retailer'/,'official retailer image must have a first-class exact resolution path');
-assert.match(js,/matchedBy:'code'/,'barcode/EAN fallback must remain available outside official-only live retailer cards');
+assert.match(js,/matchedBy:'retailer'/);
+assert.match(js,/matchedBy:'code'/);
 assert.match(js,/candidateScore/);
-assert.match(js,/MIN_MATCH_SCORE=\.74/,'Open Facts text matching must keep a confidence threshold');
-assert.match(js,/MAX_CONCURRENT_RESOLUTIONS=3/,'image auditing must cap concurrent resolutions');
+assert.match(js,/MIN_MATCH_SCORE=\.74/);
+assert.match(js,/MAX_CONCURRENT_RESOLUTIONS=3/);
 assert.match(js,/MAX_CATALOG_RESULTS=40/);
-assert.match(js,/limit:20/,'v60 resolver keeps the broader catalogue path for compatibility');
+assert.match(js,/limit:20/);
 assert.match(js,/X-With-Images-Summary/);
 assert.match(js,/X-Retain-Images/);
-assert.match(js,/IntersectionObserver/,'official image lookup must be lazy/near-viewport');
+assert.match(js,/IntersectionObserver/);
 assert.match(js,/credentials:'omit'/);
 assert.match(js,/referrerPolicy:'no-referrer'/);
-assert.doesNotMatch(js,/microlink|allorigins|corsproxy/i,'legacy image audit must not use generic scraping proxies or the rejected Microlink fallback');
-assert.doesNotMatch(js,/Authorization|api[_-]?key/i,'image audit must not embed credentials');
+assert.doesNotMatch(js,/microlink|allorigins|corsproxy/i);
+assert.doesNotMatch(js,/Authorization|api[_-]?key/i);
 assert.match(js,/data-market-image-open/);
 assert.match(js,/showModal\(\)/);
 assert.match(js,/marketProductImageViewer/);
-assert.match(js,/schedulePersist/,'resolved images for saved items should be persisted');
+assert.match(js,/schedulePersist/);
 assert.match(js,/item\.imageUrl=result\.imageUrl/);
-assert.match(js,/stopImmediatePropagation/,'legacy handoff remains covered; the public add selector is handled by the newer layers');
+assert.match(js,/stopImmediatePropagation/);
 
 assert.match(policy,/card\.dataset\.marketImageAudit='done'/);
 assert.match(policy,/marketRetailerImagePolicy='official-only'/);
@@ -84,39 +87,47 @@ assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://world.openbeautyfacts
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/products/123/front.jpg'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/images/large/739490_test.jpg'),'');
 
-assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v73-menu8/);
-for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','ui-consistency.css','v64-runtime.css','v64-runtime.js']){
+assert.match(sw,/conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','design-system.css','v64-runtime.js','v74-experience.css','v74-experience.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
-  assert.ok(prepare.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
+  assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
 }
-assert.match(prepare,/const BUILD = 'v73'/);
-assert.match(prepare,/const VISUAL_REV = '64-ui1'/);
+for(const obsolete of ['ui-consistency.css','v64-runtime.css']){
+  assert.ok(!sw.includes(`'./${obsolete}'`),`${obsolete} must not ship in v74`);
+  assert.ok(!publicFilesBlock.includes(`'${obsolete}'`),`${obsolete} must not be copied to dist`);
+}
+assert.match(prepare,/const BUILD = 'v74'/);
+assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
-assert.match(prepare,/const SHELL_REV = '66-shell1'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
+assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-image-audit\.css\?v=73/);
-  assert.match(index,/market-retailer-image-policy\.js\?v=73/);
-  assert.match(index,/market-image-audit\.js\?v=73/);
-  assert.match(index,/market-official-images\.js\?v=73/);
-  assert.match(index,/ui-consistency\.css\?v=64-ui1/);
-  assert.match(index,/v64-runtime\.css\?v=66-shell1/);
+  assert.match(index,/market-image-audit\.css\?v=74/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=74/);
+  assert.match(index,/market-image-audit\.js\?v=74/);
+  assert.match(index,/market-official-images\.js\?v=74/);
+  assert.match(index,/design-system\.css\?v=74/);
+  assert.doesNotMatch(index,/ui-consistency\.css/);
+  assert.doesNotMatch(index,/v64-runtime\.css/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
-  assert.match(index,/mobile-menu-toggle\.js\?v=73-menu8/);
+  assert.match(index,/v74-experience\.css\?v=74-experience2/);
+  assert.match(index,/v74-experience\.js\?v=74-experience2/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.match(index,/https:\/\/www\.continente\.pt/);
   assert.match(index,/https:\/\/static\.pingodoce\.pt/);
   assert.match(index,/https:\/\/r\.jina\.ai/);
   assert.match(index,/https:\/\/\*\.openbeautyfacts\.org/);
   assert.match(index,/https:\/\/world\.openproductsfacts\.org/);
-  for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','ui-consistency.css','v64-runtime.css','v64-runtime.js'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','design-system.css','v64-runtime.js','v74-experience.css','v74-experience.js'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
+  assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official retailer image, fallback, safe-source, zoom and v73 navigation build expectations: OK');
+console.log('Market official retailer image, fallback, safe-source and v74 experience2 build expectations: OK');

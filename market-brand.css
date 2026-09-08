@@ -1,362 +1,88 @@
-/* Conta de Casa — identidade visual do Mercado sem fotografias de produto.
-   Camada de apresentação: não altera preços, quantidades, estado financeiro ou cofre. */
+/* Conta de Casa v74 — Mercado alinhado com a identidade visual global.
+   Mantém preços reais/estimados separados e volta a dar espaço útil às fotografias
+   verificadas, como no protótipo, sem depender delas para identificar o produto. */
+
 :root{
-  --cdc-brand-blue:#0b63e5;
-  --cdc-brand-blue-strong:#0756c9;
-  --cdc-brand-ink:#10233f;
-  --cdc-brand-green:#158a45;
-  --cdc-brand-amber:#a86d00;
-  --cdc-brand-violet:#6548d8;
-  --cdc-brand-radius:20px;
-  --cdc-brand-shadow:0 10px 30px rgba(20,35,60,.065);
+  --cdc-brand-blue:var(--primary,#075b63);
+  --cdc-brand-blue-strong:var(--primary-hover,#064d54);
+  --cdc-brand-ink:var(--text,#0c2830);
+  --cdc-brand-green:var(--accent,#17b890);
+  --cdc-brand-amber:var(--warning,#9a6100);
+  --cdc-brand-violet:#6b5cb5;
+  --cdc-brand-radius:18px;
+  --cdc-brand-shadow:var(--shadow-card,0 12px 32px rgba(7,47,52,.065));
 }
 
-/* A fotografia deixa de ocupar espaço na experiência do Mercado. O modelo legado
-   pode conservar metadados para compatibilidade, mas a apresentação usa nome,
-   categoria, quantidade, loja e preço. */
-#page-market .market-product-photo,
-#page-market .market-product-photo-button,
-#formDialog[data-mode="market-browser"] .market-product-photo,
-#formDialog[data-mode="market-browser"] .market-product-photo-button,
-#page-market [data-market-image-open],
-#formDialog[data-mode="market-browser"] [data-market-image-open]{
-  display:none!important;
-}
+html.market-prototype-active .main{background:var(--bg)!important}
+html.market-prototype-active .page-heading h1{color:var(--text);font-weight:650;letter-spacing:-.025em}
+html.market-prototype-active .topbar{border-bottom-color:color-mix(in srgb,var(--border) 80%,transparent);background:color-mix(in srgb,var(--bg) 90%,transparent)}
+html.market-prototype-active .topbar-create,#page-market .market-new-btn{border-color:var(--primary);border-radius:12px;background:var(--primary);color:#fff;box-shadow:0 8px 20px rgba(7,91,99,.18)}
+html.market-prototype-active .topbar-create:hover,#page-market .market-new-btn:hover{background:var(--primary-hover)}
 
-#page-market .market-identity-with-photo{
-  grid-template-columns:minmax(0,1fr)!important;
-  gap:0!important;
-}
+#page-market .market-search-wrap input,#page-market .market-filter-field select,#page-market .market-filter-clear{border-color:var(--border);background:var(--surface);box-shadow:0 2px 8px rgba(7,47,52,.025)}
+#page-market .market-search-wrap input:focus,#page-market .market-filter-field select:focus{border-color:color-mix(in srgb,var(--primary) 54%,var(--border));box-shadow:0 0 0 3px var(--focus-ring)}
+
+#page-market .market-summary-item{position:relative;overflow:hidden;border-color:var(--border);border-radius:var(--cdc-brand-radius);background:linear-gradient(155deg,var(--surface),color-mix(in srgb,var(--surface-2) 38%,var(--surface)));box-shadow:var(--cdc-brand-shadow)}
+#page-market .market-summary-item::before{content:"";position:absolute;inset:0 auto auto 0;width:100%;height:3px;background:var(--primary)}
+#page-market .market-summary-item.success::before{background:var(--accent)}
+#page-market .market-summary-item.warning::before{background:var(--warning)}
+#page-market .market-summary-item.normal::before{background:var(--cdc-brand-violet)}
+#page-market .market-summary-item.danger::before{background:var(--danger)}
+#page-market .market-summary-item>span{color:var(--muted);font-weight:600}
+#page-market .market-summary-item>strong{color:var(--text);font-weight:650;letter-spacing:-.025em;font-variant-numeric:tabular-nums lining-nums}
+#page-market .market-summary-item.primary>strong{color:var(--primary)}
+#page-market .market-summary-item.success>strong{color:var(--success)}
+#page-market .market-summary-item.warning>strong{color:var(--warning)}
+
+/* Fotografias: apenas imagens já validadas pelos módulos de produto. */
+#page-market .market-product-photo,#formDialog[data-mode="market-browser"] .market-product-photo{display:grid!important;place-items:center;overflow:hidden;flex:0 0 auto;border:1px solid var(--border);border-radius:14px;background:linear-gradient(145deg,var(--surface),var(--surface-2))}
+#page-market .market-product-photo img,#formDialog[data-mode="market-browser"] .market-product-photo img{display:block;width:100%;height:100%;object-fit:contain;padding:4px;background:#fff}
+#page-market .market-product-photo.is-empty{background:var(--surface-2)}
+#page-market .market-product-photo.table{width:54px;height:54px}
+#page-market .market-product-photo.mobile{width:58px;height:58px}
+#page-market .market-identity-with-photo{display:grid!important;grid-template-columns:54px minmax(0,1fr)!important;gap:12px!important;align-items:center}
 #page-market .market-identity-with-photo>span{min-width:0}
 
-/* Linguagem visual do módulo Compras. */
-html.market-prototype-active .main{
-  background:
-    radial-gradient(circle at 92% 3%,color-mix(in srgb,var(--cdc-brand-blue) 7%,transparent),transparent 26rem),
-    var(--bg);
-}
-html.market-prototype-active .page-heading h1{
-  color:color-mix(in srgb,var(--cdc-brand-ink) 92%,var(--text));
-  font-weight:720;
-  letter-spacing:-.035em;
-}
-html.market-prototype-active .topbar{
-  border-bottom-color:color-mix(in srgb,var(--border) 82%,transparent);
-  background:color-mix(in srgb,var(--bg) 88%,transparent);
-  backdrop-filter:blur(18px) saturate(1.18);
-  -webkit-backdrop-filter:blur(18px) saturate(1.18);
-}
-html.market-prototype-active .topbar-create,
-#page-market .market-new-btn{
-  border:0;
-  border-radius:999px;
-  background:linear-gradient(145deg,#2281f5,var(--cdc-brand-blue));
-  color:#fff;
-  box-shadow:0 10px 24px rgba(11,99,229,.24);
-}
-html.market-prototype-active .topbar-create:hover,
-#page-market .market-new-btn:hover{background:linear-gradient(145deg,#2d89f6,var(--cdc-brand-blue-strong))}
-
-#page-market .market-search-wrap input,
-#page-market .market-filter-field select,
-#page-market .market-filter-clear{
-  border-color:color-mix(in srgb,var(--border) 84%,#c8d5e7);
-  background:color-mix(in srgb,var(--surface) 97%,#f9fbff);
-  box-shadow:0 2px 8px rgba(20,35,60,.035);
-}
-#page-market .market-search-wrap input:focus,
-#page-market .market-filter-field select:focus{
-  border-color:color-mix(in srgb,var(--cdc-brand-blue) 45%,var(--border));
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--cdc-brand-blue) 14%,transparent);
-}
-
-#page-market .market-summary-item{
-  position:relative;
-  overflow:hidden;
-  border-color:color-mix(in srgb,var(--border) 82%,#d8e2ef);
-  border-radius:var(--cdc-brand-radius);
-  background:linear-gradient(155deg,var(--surface),color-mix(in srgb,var(--surface-2) 44%,var(--surface)));
-  box-shadow:var(--cdc-brand-shadow);
-}
-#page-market .market-summary-item::before{
-  content:"";
-  position:absolute;
-  inset:0 auto auto 0;
-  width:100%;
-  height:3px;
-  background:var(--cdc-brand-blue);
-}
-#page-market .market-summary-item.success::before{background:var(--cdc-brand-green)}
-#page-market .market-summary-item.warning::before{background:var(--cdc-brand-amber)}
-#page-market .market-summary-item.normal::before{background:var(--cdc-brand-violet)}
-#page-market .market-summary-item>span{color:var(--muted);font-weight:650}
-#page-market .market-summary-item>strong{
-  color:color-mix(in srgb,var(--cdc-brand-ink) 90%,var(--text));
-  font-weight:720;
-  letter-spacing:-.03em;
-  font-variant-numeric:tabular-nums lining-nums;
-}
-#page-market .market-summary-item.primary>strong{color:var(--cdc-brand-blue)}
-#page-market .market-summary-item.success>strong{color:var(--cdc-brand-green)}
-#page-market .market-summary-item.warning>strong{color:var(--cdc-brand-amber)}
-#page-market .market-results-head>strong{
-  color:color-mix(in srgb,var(--cdc-brand-ink) 92%,var(--text));
-  font-size:1.05rem;
-  letter-spacing:-.02em;
-}
-
-#page-market .market-mobile-card{
-  overflow:hidden;
-  border:1px solid color-mix(in srgb,var(--border) 82%,#d6e0ed);
-  border-radius:var(--cdc-brand-radius);
-  background:var(--surface);
-  box-shadow:var(--cdc-brand-shadow);
-}
-#page-market .market-mobile-head{
-  grid-template-columns:44px minmax(0,1fr) auto!important;
-  align-items:center;
-}
+#page-market .market-mobile-card{overflow:hidden;border-color:var(--border);border-radius:var(--cdc-brand-radius);background:var(--surface);box-shadow:var(--cdc-brand-shadow)}
+#page-market .market-mobile-head{grid-template-columns:40px 58px minmax(0,1fr) auto!important;align-items:center;gap:10px!important}
 #page-market .market-mobile-head>div{min-width:0}
-#page-market .market-mobile-head h3{
-  color:color-mix(in srgb,var(--cdc-brand-ink) 94%,var(--text));
-  font-weight:700;
-  letter-spacing:-.02em;
-}
-#page-market .market-mobile-money{
-  border-top-color:color-mix(in srgb,var(--border) 80%,transparent);
-  border-bottom-color:color-mix(in srgb,var(--border) 80%,transparent);
-}
-#page-market .market-mobile-actions .btn{
-  min-height:46px;
-  border-radius:13px;
-}
-#page-market .market-mobile-actions .btn.danger{
-  background:color-mix(in srgb,var(--danger-bg) 82%,var(--surface));
-  border-color:color-mix(in srgb,var(--danger) 24%,var(--border));
-  color:var(--danger);
-}
+#page-market .market-mobile-head h3{color:var(--text);font-weight:650;letter-spacing:-.015em}
+#page-market .market-mobile-money{border-top-color:var(--border);border-bottom-color:var(--border)}
+#page-market .market-mobile-actions .btn{min-height:44px;border-radius:12px}
+#page-market .market-mobile-actions .btn.danger{background:var(--danger-bg);border-color:color-mix(in srgb,var(--danger) 24%,var(--border));color:var(--danger)}
+#page-market .market-check input{accent-color:var(--primary)}
 
-/* Browser de produtos: nome e preço são a identidade principal. */
-#formDialog[data-mode="market-browser"] .dialog-shell{
-  background:color-mix(in srgb,var(--bg) 92%,#f7faff);
-}
-#formDialog[data-mode="market-browser"] .dialog-head h2{
-  color:color-mix(in srgb,var(--cdc-brand-ink) 94%,var(--text));
-  font-weight:720;
-}
-.market-browser-search{
-  border-color:color-mix(in srgb,var(--border) 82%,#cbd8e8);
-  border-radius:18px;
-  box-shadow:0 5px 18px rgba(20,35,60,.05);
-}
-.market-browser-tabs{border-radius:16px;background:color-mix(in srgb,var(--surface-2) 72%,#eef4fb)}
-.market-browser-tab{border-radius:13px;font-weight:560}
-.market-browser-tab.active{
-  background:linear-gradient(145deg,#2383f5,var(--cdc-brand-blue));
-  box-shadow:0 8px 18px rgba(11,99,229,.2);
-}
-.market-browser-chip,
-.market-source-card{
-  border-color:color-mix(in srgb,var(--border) 84%,#d2deeb);
-  border-radius:15px;
-  box-shadow:0 4px 16px rgba(20,35,60,.04);
-}
-.market-browser-chip:hover,
-.market-source-card:hover{border-color:color-mix(in srgb,var(--cdc-brand-blue) 24%,var(--border))}
-.market-source-notice{
-  border-color:color-mix(in srgb,var(--cdc-brand-blue) 20%,var(--border));
-  border-radius:16px;
-  background:color-mix(in srgb,var(--primary-2) 46%,var(--surface));
-}
-.market-source-notice p{line-height:1.5}
-.market-browser-results-head h3{
-  color:color-mix(in srgb,var(--cdc-brand-ink) 94%,var(--text));
-  font-weight:720;
-  letter-spacing:-.025em;
-}
-.market-catalog-card{
-  min-width:0;
-  border-color:color-mix(in srgb,var(--border) 82%,#d4dfed);
-  border-radius:var(--cdc-brand-radius);
-  box-shadow:var(--cdc-brand-shadow);
-}
+/* Browser de produtos */
+#formDialog[data-mode="market-browser"] .dialog-shell{background:var(--bg)}
+#formDialog[data-mode="market-browser"] .dialog-head h2{color:var(--text);font-weight:650}
+.market-browser-search{border-color:var(--border);border-radius:16px;background:var(--surface);box-shadow:0 5px 18px rgba(7,47,52,.045)}
+.market-browser-tabs{border-radius:14px;background:var(--surface-2)}
+.market-browser-tab{border-radius:11px;font-weight:550}
+.market-browser-tab.active{background:var(--primary);color:#fff;box-shadow:0 7px 16px rgba(7,91,99,.18)}
+.market-browser-chip,.market-source-card{border-color:var(--border);border-radius:15px;background:var(--surface);box-shadow:0 4px 14px rgba(7,47,52,.035)}
+.market-browser-chip:hover,.market-source-card:hover{border-color:color-mix(in srgb,var(--primary) 28%,var(--border))}
+.market-source-card.selected{border-color:color-mix(in srgb,var(--primary) 52%,var(--border));background:var(--primary-2)}
+.market-source-notice{border-color:color-mix(in srgb,var(--primary) 20%,var(--border));border-radius:15px;background:color-mix(in srgb,var(--primary-2) 58%,var(--surface))}
+.market-catalog-card{min-width:0;border-color:var(--border);border-radius:var(--cdc-brand-radius);background:var(--surface);box-shadow:var(--cdc-brand-shadow)}
+.market-catalog-card:hover{border-color:color-mix(in srgb,var(--primary) 30%,var(--border))}
+.market-result-price{color:var(--primary)!important}.market-result-source{color:var(--muted)}
+.market-result-add{background:var(--primary)!important;color:#fff!important;border-color:var(--primary)!important}.market-result-add:hover{background:var(--primary-hover)!important}
 
-/* Correção crítica de mobile: o DOM histórico ainda pode conter um nó de fotografia
-   oculto. As posições explícitas impedem que esse nó deixe uma coluna fantasma e
-   eliminam o efeito de texto comprimido à direita observado no Safari. */
-#formDialog[data-mode="market-browser"] .market-catalog-main{
-  min-width:0!important;
-  width:100%;
-  grid-template-columns:minmax(0,1fr) 52px!important;
-  align-items:center!important;
-  gap:16px!important;
-  padding:18px!important;
-}
-#formDialog[data-mode="market-browser"] .market-catalog-main>.market-product-copy{
-  grid-column:1!important;
-  grid-row:1!important;
-  min-width:0!important;
-  width:100%!important;
-  max-width:none!important;
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) max-content;
-  grid-template-rows:auto auto auto;
-  column-gap:18px;
-  row-gap:5px;
-  align-items:center;
-}
-#formDialog[data-mode="market-browser"] .market-product-copy h3{
-  grid-column:1;
-  grid-row:1;
-  min-width:0;
-  margin:0;
-  color:color-mix(in srgb,var(--cdc-brand-ink) 95%,var(--text));
-  font-weight:720;
-  line-height:1.28;
-  letter-spacing:-.02em;
-  overflow-wrap:normal;
-  word-break:normal;
-}
-#formDialog[data-mode="market-browser"] .market-product-copy>p{
-  grid-column:1;
-  grid-row:2;
-  min-width:0;
-  margin:0;
-}
-#formDialog[data-mode="market-browser"] .market-result-meta{
-  grid-column:1;
-  grid-row:3;
-  min-width:0;
-  gap:8px;
-}
-#formDialog[data-mode="market-browser"] .market-result-price-row{
-  grid-column:2;
-  grid-row:1 / span 3;
-  align-self:center;
-  justify-self:end;
-  min-width:max-content;
-  display:grid;
-  justify-items:end;
-  gap:2px;
-  margin:0;
-  text-align:right;
-}
-#formDialog[data-mode="market-browser"] .market-product-price{
-  white-space:nowrap;
-  font-weight:750;
-  color:color-mix(in srgb,var(--cdc-brand-ink) 94%,var(--text));
-}
-#formDialog[data-mode="market-browser"] .market-result-chip{
-  white-space:nowrap;
-}
-#formDialog[data-mode="market-browser"] .market-result-source{
-  min-width:0;
-  white-space:nowrap;
-  color:var(--cdc-brand-blue);
-  font-weight:620;
-}
-#formDialog[data-mode="market-browser"] .market-catalog-main>.market-add-product{
-  grid-column:2!important;
-  grid-row:1!important;
-  justify-self:end;
-  align-self:center;
-}
-.market-add-product{
-  width:52px;
-  height:52px;
-  background:linear-gradient(145deg,#2b88f6,var(--cdc-brand-blue));
-  color:#fff;
-  box-shadow:0 8px 20px rgba(11,99,229,.2);
-}
-.market-result-chip.current,.market-result-chip.promo{
-  background:color-mix(in srgb,var(--success-bg) 88%,#edf9f1);
-  color:var(--cdc-brand-green);
-}
+/* Marcas dos supermercados continuam sem copiar logótipos protegidos como imagem. */
+.market-brand-mark{box-shadow:none!important}.market-brand-mark.red{color:#c92d35}.market-brand-mark.green{color:#157343}.market-source-check{background:var(--primary)!important;color:#fff!important}
 
-/* Navegação inferior: linguagem de aplicação nativa sem interferir nas restantes páginas. */
 @media(max-width:820px){
-  html.market-prototype-active .mobile-nav{
-    border-top-color:color-mix(in srgb,var(--border) 74%,transparent);
-    background:color-mix(in srgb,var(--surface) 93%,transparent);
-    backdrop-filter:blur(20px) saturate(1.18);
-    -webkit-backdrop-filter:blur(20px) saturate(1.18);
-    box-shadow:0 -8px 30px rgba(20,35,60,.055);
-  }
-  html.market-prototype-active .mobile-nav .nav-btn{color:var(--muted)}
-  html.market-prototype-active .mobile-nav .nav-btn.active{color:var(--cdc-brand-blue);font-weight:650}
-  html.market-prototype-active .mobile-nav .nav-btn.active::after{
-    content:"";
-    position:absolute;
-    left:50%;
-    bottom:4px;
-    width:30px;
-    height:3px;
-    border-radius:999px;
-    background:var(--cdc-brand-blue);
-    transform:translateX(-50%);
-  }
-  #page-market .market-summary-grid{gap:12px}
-  #page-market .market-summary-item{min-height:148px;padding:18px}
-  #page-market .market-summary-item>strong{font-size:1.55rem}
-  #page-market .market-mobile-card{padding:14px;gap:10px}
-  #formDialog[data-mode="market-browser"] .dialog-shell{background:color-mix(in srgb,var(--bg) 95%,#f7faff)}
+  html.market-prototype-active .main,html.market-prototype-active .topbar{background:var(--mobile-shell-bg)!important}
+  #page-market .market-product-photo.mobile{width:54px;height:54px}
+  #page-market .market-category-items .market-mobile-head{grid-template-columns:40px 54px minmax(0,1fr) auto!important;column-gap:9px!important}
+  #page-market .market-category-items .market-mobile-head>.market-check{grid-column:1!important;grid-row:1!important}
+  #page-market .market-category-items .market-mobile-head>.market-product-photo{grid-column:2!important;grid-row:1!important}
+  #page-market .market-category-items .market-mobile-head>div{grid-column:3!important;grid-row:1!important}
+  #page-market .market-mobile-quick-price{grid-column:4!important;grid-row:1!important;max-width:86px;color:var(--text);font-weight:650;text-align:right;white-space:nowrap}
+  #page-market .market-item-details{margin-left:0!important;padding-left:94px}
+  #page-market .market-browser{padding-bottom:4px}
 }
 
-@media(max-width:430px){
-  #page-market .market-summary-item{min-height:146px;padding:16px}
-  #page-market .market-summary-item>strong{font-size:1.48rem}
-  #formDialog[data-mode="market-browser"] .market-catalog-main{
-    grid-template-columns:minmax(0,1fr) 48px!important;
-    gap:12px!important;
-    padding:16px 14px!important;
-  }
-  #formDialog[data-mode="market-browser"] .market-catalog-main>.market-product-copy{
-    column-gap:14px;
-  }
-  .market-add-product{width:48px;height:48px}
-}
+@media(max-width:390px){#page-market .market-product-photo.mobile{width:48px;height:48px}#page-market .market-category-items .market-mobile-head{grid-template-columns:38px 48px minmax(0,1fr) auto!important;column-gap:7px!important}#page-market .market-item-details{padding-left:86px}#page-market .market-mobile-quick-price{max-width:72px;font-size:12px}}
 
-@media(max-width:359px){
-  #page-market .market-mobile-head{grid-template-columns:42px minmax(0,1fr)!important}
-  #page-market .market-mobile-head>.status-chip{grid-column:2;justify-self:start}
-  #formDialog[data-mode="market-browser"] .market-catalog-main{
-    grid-template-columns:minmax(0,1fr) 46px!important;
-    gap:10px!important;
-    padding:14px 12px!important;
-  }
-  #formDialog[data-mode="market-browser"] .market-catalog-main>.market-product-copy{
-    grid-template-columns:minmax(0,1fr)!important;
-    grid-template-rows:auto!important;
-    row-gap:5px;
-  }
-  #formDialog[data-mode="market-browser"] .market-product-copy h3,
-  #formDialog[data-mode="market-browser"] .market-product-copy>p,
-  #formDialog[data-mode="market-browser"] .market-result-meta,
-  #formDialog[data-mode="market-browser"] .market-result-price-row{
-    grid-column:1!important;
-    grid-row:auto!important;
-    justify-self:start;
-    justify-items:start;
-    text-align:left;
-  }
-  #formDialog[data-mode="market-browser"] .market-result-price-row{
-    display:flex;
-    align-items:baseline;
-    flex-wrap:wrap;
-    min-width:0;
-    margin-top:4px;
-  }
-  .market-add-product{width:46px;height:46px}
-}
-
-html[data-theme="dark"] #page-market .market-summary-item,
-html[data-theme="dark"] #page-market .market-mobile-card,
-html[data-theme="dark"] .market-catalog-card{
-  box-shadow:0 12px 30px rgba(0,0,0,.2);
-}
-
-@media(prefers-reduced-motion:reduce){
-  .market-add-product,
-  html.market-prototype-active .topbar-create,
-  #page-market .market-new-btn{transition:none}
-}
+@media(prefers-reduced-motion:reduce){.market-catalog-card,.market-browser-chip,.market-source-card{transition:none!important}}

@@ -1,9 +1,23 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v73",
+  "latestVersion": "v74",
   "publishedAt": "2026-09-08",
   "releases": [
+    {
+      "version": "v74",
+      "date": "8 de setembro de 2026",
+      "title": "Nova identidade Conta de Casa e interface alinhada com o protótipo",
+      "items": [
+        "A interface principal passa a usar uma identidade própria em verde-petróleo, teal e menta, com contraste, superfícies, estados e ícone PWA revistos.",
+        "O Início recebe um Resumo do mês com despesas efetivas e orçamento, acompanhado por ações rápidas para Adicionar despesa, Ler fatura e abrir o Mercado.",
+        "A navegação inferior móvel passa a refletir o protótipo com Início, Despesas, Mercado, Planeamento e Mais, preservando as rotas e dados existentes.",
+        "O Mercado volta a apresentar fotografias reais apenas quando os módulos atuais conseguem validá-las; nome, embalagem, loja e preço continuam a ser a referência funcional.",
+        "A leitura de faturas mantém o fluxo seguro existente: QR da AT por câmara ou imagem local, preenchimento assistido e confirmação do utilizador antes de guardar.",
+        "design-system.css foi reescrito e consolidado; ui-consistency.css e v64-runtime.css deixam de integrar o bundle público porque as regras visuais e de safe-area necessárias foram absorvidas no sistema v74.",
+        "Cofre, PIN, STATE_VERSION 5, cálculos em cêntimos, faturas, pagamentos, sincronização cifrada e regras financeiras não foram reescritos nem migrados, reduzindo risco sobre dados reais."
+      ]
+    },
     {
       "version": "v73",
       "date": "8 de setembro de 2026",
@@ -14,8 +28,7 @@
         "A entrada do drawer usa transform composto com cerca de 300 ms e uma curva de desaceleração suave; o fecho é ligeiramente mais rápido para manter a interação natural.",
         "O gesto horizontal foi invertido para corresponder à nova direção: o drawer pode ser puxado a partir da margem direita e fechado deslizando para a direita.",
         "A sidebar desktop passa a reservar espaço através de margin-right, preservando a largura útil do conteúdo, o modo recolhido e os breakpoints existentes.",
-        "Indicadores de item ativo, borda lateral e sombra foram também espelhados para que a composição pareça nativa do lado direito, sem alterar tipografia ou sistema de ícones.",
-        "A alteração é exclusivamente de interface e navegação: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+        "Indicadores de item ativo, borda lateral e sombra foram também espelhados para que a composição pareça nativa do lado direito, sem alterar tipografia ou sistema de ícones."
       ]
     },
     {
@@ -24,12 +37,8 @@
       "title": "Menu hambúrguer sem desaparecimento ao abrir",
       "items": [
         "Corrigido o salto visual observado no iPhone em que o botão hambúrguer desaparecia do cabeçalho e surgia de imediato dentro do menu lateral.",
-        "A causa era a ordem de abertura: o dialog tornava-se modal e alterava aria-expanded antes de o mesmo botão ser transferido para o cabeçalho do drawer, fazendo o Safari compor duas posições do controlo no mesmo gesto.",
         "O mesmo #mobileMenuBtn passa a ser preparado dentro do drawer antes de showModal(), ainda no estado fechado, e só no frame seguinte muda para X enquanto o painel inicia a entrada off-canvas.",
-        "Um placeholder invisível de 44 por 44 píxeis preserva o espaço original do botão no topbar durante a abertura, impedindo que o título ou o cabeçalho saltem lateralmente.",
-        "A abertura deixa de reutilizar a mutação visual imediata do openMobileDrawer legado e estabelece primeiro um estado CSS fechado real, reduzindo o flash de reparenting no Safari/iPhone.",
-        "O swipe da margem esquerda continua a usar o mesmo drawer e o mesmo botão, preservando scroll vertical, backdrop, Escape, navegação, foco, aria-expanded e prefers-reduced-motion.",
-        "A alteração é exclusivamente de interface e movimento: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+        "Um placeholder invisível de 44 por 44 píxeis preserva o espaço original do botão no topbar durante a abertura, impedindo que o título ou o cabeçalho saltem lateralmente."
       ]
     },
     {
@@ -37,16 +46,9 @@
       "date": "8 de setembro de 2026",
       "title": "Menu lateral suave e controlado pelo gesto",
       "items": [
-        "O painel do menu deixa de surgir com um pequeno salto visual e passa a entrar como uma superfície off-canvas completa, deslizando suavemente da esquerda para a posição final.",
-        "No telemóvel, o drawer passa a acompanhar diretamente o dedo durante o gesto horizontal: é possível arrastar para a esquerda para fechar e iniciar junto à margem esquerda para o puxar para dentro do ecrã.",
-        "O gesto só é capturado depois de existir intenção horizontal clara, preservando o scroll vertical normal dos itens; ao soltar, o painel decide abrir ou fechar pela distância percorrida e pela velocidade do movimento.",
-        "A abertura usa apenas transform e uma variação mínima de opacidade, evitando animar largura, margens ou layout e reduzindo repaints no Safari/iPhone.",
-        "O fundo escurecido acompanha a posição do dedo durante o arrasto e evolui de transparente para um nível discreto, com blur muito ligeiro.",
-        "O fecho aguarda a transição lateral do painel antes de fechar efetivamente o dialog, evitando desaparecimento seco; o mesmo botão hambúrguer/X só regressa ao topbar depois do evento close.",
-        "A abertura automática dura cerca de 280 ms e o fecho cerca de 240 ms; quando existe arrasto, a superfície segue o dedo sem atraso e anima apenas o percurso restante depois de o utilizador soltar.",
-        "prefers-reduced-motion continua respeitado; nesse modo o gesto adicional não é capturado e as transições automáticas são eliminadas.",
-        "A largura responsiva, safe areas, scroll interno, alvos tácteis, tema claro/escuro, ARIA, foco, Escape, backdrop e navegação existente são preservados.",
-        "A alteração é exclusivamente de interface e movimento: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+        "O painel do menu passa a entrar como uma superfície off-canvas completa e acompanha diretamente o dedo durante o gesto horizontal.",
+        "O gesto só é capturado depois de existir intenção horizontal clara, preservando o scroll vertical normal dos itens.",
+        "prefers-reduced-motion, safe areas, scroll interno, ARIA, foco, Escape e backdrop continuam preservados."
       ]
     },
     {
@@ -54,14 +56,9 @@
       "date": "8 de setembro de 2026",
       "title": "Movimento visível do menu hambúrguer ao tocar",
       "items": [
-        "A validação real no iPhone confirmou que os estados hambúrguer e X já estavam corretos, mas a transformação podia parecer instantânea porque o mesmo botão é movido entre o cabeçalho e o dialog durante a abertura e o Safari pode consumir a transição CSS nesse reparenting.",
-        "O controlo passa a executar keyframes explícitos com Web Animations no frame seguinte à mudança de posição, tornando visível o movimento das três linhas no hardware real sem criar um segundo ícone.",
-        "Ao abrir, as linhas deslocam-se para o centro, a superior roda 45 graus, a inferior roda -45 graus e a linha central colapsa enquanto o glifo faz um micro movimento discreto de escala e inclinação.",
-        "Ao fechar pelo X, a animação inversa é executada já na posição final do cabeçalho para regressar de forma perceptível ao hambúrguer sem salto visual.",
-        "A duração foi ajustada para cerca de 240 ms com uma curva suave, mantendo a interação curta, natural e sem efeitos exagerados.",
-        "prefers-reduced-motion continua respeitado; em sistemas com redução de movimento os keyframes adicionais não são executados e o estado acessível permanece correto.",
-        "O mesmo #mobileMenuBtn, #mobileDrawer, estados aria-expanded/data-menu-state, foco por teclado, dimensões, breakpoints, safe areas e navegação existente são preservados.",
-        "A alteração é exclusivamente de interface e movimento: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+        "O controlo passa a executar keyframes explícitos com Web Animations no frame seguinte à mudança de posição.",
+        "Ao abrir, as linhas deslocam-se para o centro, a superior roda 45 graus, a inferior roda -45 graus e a linha central colapsa.",
+        "prefers-reduced-motion continua respeitado e o mesmo #mobileMenuBtn é reutilizado."
       ]
     },
     {
@@ -69,13 +66,8 @@
       "date": "7 de setembro de 2026",
       "title": "Animação hambúrguer para X corrigida no iPhone",
       "items": [
-        "Corrigido um conflito entre o sistema Lucide e o controlo móvel que substituía as três linhas animáveis por um SVG estático sempre que o estado aria-expanded mudava.",
-        "O mesmo botão passa a manter as três linhas proporcionais no estado fechado e a transformá-las efetivamente num X ao abrir o menu, regressando ao hambúrguer quando o menu fecha.",
-        "O estado visual usa aria-expanded e data-menu-state em conjunto, mantendo o X sincronizado com o estado real do drawer.",
-        "O foco programático depois de toque ou rato deixa de desenhar a moldura visual observada no Safari; a indicação de foco por teclado continua preservada.",
-        "A animação permanece curta e discreta, com cerca de 190 ms, e continua a respeitar prefers-reduced-motion.",
-        "A correção reutiliza o mesmo #mobileMenuBtn, o mesmo #mobileDrawer e o fluxo de navegação existente; não cria um segundo controlo nem altera o tamanho global da aplicação.",
-        "A alteração é exclusivamente de interface e navegação: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+        "Corrigido um conflito entre o sistema Lucide e o controlo móvel que substituía as três linhas animáveis por um SVG estático.",
+        "O estado visual usa aria-expanded e data-menu-state em conjunto, mantendo o X sincronizado com o estado real do drawer."
       ]
     },
     {
@@ -83,13 +75,8 @@
       "date": "7 de setembro de 2026",
       "title": "Menu lateral mais moderno, compacto e responsivo",
       "items": [
-        "O painel aberto pelo hambúrguer foi refinado com uma largura fluida e limitada, mantendo espaço visível para o backdrop sem ocupar desnecessariamente todo o ecrã.",
-        "Cabeçalho, marca, grupos de navegação e ações inferiores passam a usar espaçamentos, alinhamentos e hierarquia tipográfica mais consistentes no telemóvel e tablet.",
-        "Os itens do menu mantêm os mesmos destinos da navegação desktop, mas passam a ter alvos tácteis de 48 píxeis, estados hover, active, focus e página atual mais discretos e legíveis.",
-        "O mesmo botão continua a transformar as três linhas do hambúrguer num X e a regressar ao estado inicial ao fechar, com o estado visual sincronizado com o drawer e com aria-expanded.",
-        "A animação do ícone e do painel foi mantida curta e natural, com movimento reduzido respeitado quando essa preferência está ativa no sistema.",
-        "O drawer impede overflow lateral, contém o seu próprio scroll quando necessário e respeita safe areas, tema claro e tema escuro sem alterar o tamanho global da aplicação.",
-        "A alteração é exclusivamente de interface e navegação: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+        "O painel aberto pelo hambúrguer foi refinado com largura fluida e limitada e alvos tácteis de 48 píxeis.",
+        "O drawer impede overflow lateral, contém o seu próprio scroll e respeita safe areas, tema claro e tema escuro."
       ]
     },
     {
@@ -97,12 +84,8 @@
       "date": "7 de setembro de 2026",
       "title": "Menu móvel animado e mais limpo",
       "items": [
-        "O botão hambúrguer do cabeçalho passa a transformar-se suavemente num X quando o menu lateral é aberto e regressa ao hambúrguer quando o menu fecha.",
-        "O mesmo controlo abre e fecha o menu, eliminando o X visual duplicado que existia no cabeçalho interno do drawer.",
-        "O ícone usa três traços proporcionais, sem moldura branca ou estado verde de seleção, mantendo uma apresentação mais limpa e coerente com o cabeçalho global.",
-        "A área tátil permanece com 44 por 44 píxeis e o estado acessível alterna entre Abrir menu e Fechar menu através de aria-expanded e aria-label.",
-        "A animação respeita a preferência de movimento reduzido do sistema e mantém o fecho por Escape, backdrop e restantes fluxos existentes do drawer.",
-        "A alteração é exclusivamente de navegação e apresentação: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem ou sincronização."
+        "O botão hambúrguer transforma-se suavemente num X quando o menu lateral é aberto e regressa ao hambúrguer quando fecha.",
+        "A área tátil permanece com 44 por 44 píxeis e o estado acessível alterna através de aria-expanded e aria-label."
       ]
     },
     {
@@ -110,12 +93,8 @@
       "date": "7 de setembro de 2026",
       "title": "Cabeçalho móvel com fundo uniforme",
       "items": [
-        "O fundo do cabeçalho, da safe area, das margens laterais e do conteúdo móvel passa a usar a mesma cor, eliminando a diferença visual entre branco e azul observada no iPhone.",
-        "Na Lista de compras, o degradê azul histórico do Mercado deixa de aparecer por baixo e ao lado do cabeçalho no mobile; a identidade do módulo continua nos controlos e no conteúdo.",
-        "O cabeçalho móvel deixa de usar transparência e blur sobre o fundo da página, evitando variações de cor provocadas pela composição do Safari.",
-        "O tema claro usa o mesmo tom de shell já anunciado pelo theme-color da aplicação, e o tema escuro mantém um fundo único coerente com o respetivo theme-color.",
-        "A correção é apenas visual e responsiva: não altera faturas, pagamentos, Lista de compras, estimatedCents, actualCents, scanner, cofre, IndexedDB ou sincronização.",
-        "A versão desktop mantém o fundo e a identidade visual existentes; a alteração está limitada ao shell da aplicação até 820 px."
+        "O fundo do cabeçalho, da safe area, das margens laterais e do conteúdo móvel passa a usar a mesma cor.",
+        "O cabeçalho móvel deixa de usar transparência e blur sobre o fundo da página no iPhone."
       ]
     },
     {
@@ -123,15 +102,9 @@
       "date": "7 de setembro de 2026",
       "title": "Lista de compras mais rápida e focada no supermercado",
       "items": [
-        "No telemóvel, a Lista de compras passa a começar por um resumo compacto com quantos itens faltam comprar, quantos já foram comprados e o total previsto.",
-        "Os quatro cartões financeiros deixam de ocupar o primeiro ecrã no mobile; estimado, contabilizado, por comprar e diferença continuam disponíveis em Resumo financeiro.",
-        "O botão + do cabeçalho passa a abrir diretamente Adicionar produto quando a Lista de compras está ativa, reutilizando a ação existente e evitando um segundo botão de adição no mobile.",
-        "Estado, Categoria e Ordenar passam a usar controlos compactos; Limpar filtros só aparece quando pesquisa, estado, categoria ou ordenação diferem do padrão.",
-        "Categorias que ainda têm produtos por comprar permanecem abertas e mostram apenas a contagem pendente para reduzir ruído durante a compra.",
-        "Produtos já comprados são reunidos numa secção Comprados recolhida por padrão, deixando a lista principal progressivamente mais curta.",
-        "Cada produto móvel prioriza checkbox, nome, quantidade e preço; preço real, diferença, edição e eliminação ficam disponíveis em Detalhes.",
-        "A alteração é exclusivamente de apresentação: não modifica estimatedCents, actualCents, quantidade, cofre, scanner, faturas, persistência ou sincronização.",
-        "A tabela e os resumos completos do desktop são preservados, e os novos controlos mantêm alvos tácteis, nomes acessíveis e suporte a movimento reduzido."
+        "No telemóvel, a Lista de compras começa por um resumo compacto com itens por comprar, comprados e total previsto.",
+        "Categorias pendentes permanecem abertas e produtos comprados são reunidos numa secção recolhida por padrão.",
+        "Preço real, diferença, edição e eliminação ficam em Detalhes sem alterar estimatedCents, actualCents ou persistência."
       ]
     },
     {
@@ -139,83 +112,11 @@
       "date": "7 de setembro de 2026",
       "title": "Scanner preciso, novas faturas limpas e cabeçalho móvel uniforme",
       "items": [
-        "O leitor de código de barras passa a exigir um único supermercado para evitar misturar preços entre lojas e memoriza a última seleção individual.",
-        "Depois de identificar o GTIN, a aplicação compara nome, marca, embalagem e loja; só adiciona automaticamente quando a correspondência atinge confiança elevada.",
-        "Ao ler novamente o mesmo GTIN ainda pendente, a quantidade é incrementada em vez de criar uma linha duplicada, e o preço estimado é atualizado com o valor encontrado nessa leitura.",
-        "Se a correspondência do produto ou da embalagem não for suficientemente segura, a aplicação não contabiliza automaticamente e pede confirmação manual do resultado.",
-        "O preço encontrado pelo supermercado continua registado como estimado; o valor efetivamente pago permanece separado até existir confirmação de compra ou talão.",
-        "As próximas ocorrências de faturas recorrentes deixam de herdar o valor, referência e observações do mês anterior: ficam como Por preencher até chegar a nova fatura.",
-        "Descrição, fornecedor, categoria, método, recorrência e vencimento previsto continuam disponíveis para reduzir trabalho repetitivo sem transportar valores antigos.",
-        "Ocorrências recorrentes futuras geradas automaticamente e ainda não editadas são migradas para o novo estado Por preencher sem alterar faturas já confirmadas ou com pagamentos.",
-        "O cabeçalho móvel passa a respeitar uma margem superior mínima e a safe area do iPhone, deixando o menu hambúrguer e as ações do topo fora da zona difícil de tocar.",
-        "Início, Faturas, Lista de compras e Relatórios passam a usar exatamente a mesma composição do cabeçalho móvel: mesmo tamanho de título, menu, botão + e controlo Sync; o carrinho extra, o botão ampliado e o chevron exclusivo de Compras deixam de aparecer no topo.",
-        "A v64 mantém cofre, PIN, pagamentos, faturas confirmadas e dados financeiros cifrados separados do mecanismo de atualização."
-      ]
-    },
-    {
-      "version": "v63",
-      "date": "6 de setembro de 2026",
-      "title": "Compras organizadas e interface visual consistente",
-      "items": [
-        "A Lista de compras passa a ficar organizada por categoria, com grupos recolhíveis em telemóvel e separadores de categoria no computador.",
-        "O conteúdo dos produtos fica alinhado de forma consistente à esquerda: nome, quantidade, estado, valores e ações passam a seguir a mesma margem visual.",
-        "A categoria Mercearia / Despensa deixa de usar o ícone de carrinho e passa a usar um símbolo local mais neutro de organização/despensa.",
-        "Os ícones da aplicação passam a usar uma métrica visual única, com SVG Lucide de espessura, alinhamento e dimensões contextuais consistentes.",
-        "A navegação inferior passa a apresentar apenas um indicador azul no item ativo, eliminando a dupla barra que aparecia no Safari/iPhone.",
-        "Os cartões-resumo do Mercado deixam de sobrepor a faixa colorida ao pseudo-elemento do ícone; a faixa superior passa a ser contínua e sólida.",
-        "O Centro de Atualização passa a consultar este histórico de versões da própria aplicação e a indicar claramente quando existe uma versão nova.",
-        "Ao carregar em Atualizar agora, a nova versão é instalada pelo Service Worker e a aplicação reinicia para concluir a atualização.",
-        "O histórico de alterações de cada versão fica registado em release-manifest.json e no controlo de versões do projeto.",
-        "A atualização não altera nem apaga o cofre, PIN, faturas, compras ou restantes dados financeiros locais."
-      ]
-    },
-    {
-      "version": "v62",
-      "date": "6 de setembro de 2026",
-      "title": "Mercado text-first e correções no iPhone",
-      "items": [
-        "As fotografias de produto deixaram de ocupar espaço na experiência principal do Mercado; nome, embalagem, loja e preço passam a ser a identificação principal.",
-        "Foi corrigida a coluna fantasma que comprimira os resultados do browser do Mercado no Safari/iPhone.",
-        "Metadados técnicos antigos de imagem e código de barras deixam de gerar conflitos manuais de sincronização com zero diferenças financeiras.",
-        "A identidade visual do módulo Compras foi consolidada com hierarquia, espaçamentos, estados financeiros e navegação móvel mais consistentes."
-      ]
-    },
-    {
-      "version": "v61",
-      "date": "6 de setembro de 2026",
-      "title": "Imagens oficiais no browser real",
-      "items": [
-        "Corrigida a integração entre os cartões reais do Mercado e o resolvedor de fotografias oficiais.",
-        "A imagem oficial passou a ser associada pelo identificador exato do produto devolvido pelo catálogo.",
-        "A leitura da página oficial passou a usar pedidos compatíveis com Safari e a origem do produto ficou separada da origem visual."
-      ]
-    },
-    {
-      "version": "v60",
-      "date": "6 de setembro de 2026",
-      "title": "Imagens oficiais e catálogo alargado",
-      "items": [
-        "As fotografias passaram a dar prioridade ao SKU exato das páginas oficiais do Continente e Pingo Doce.",
-        "A pesquisa do Mercado passou a solicitar mais resultados por cadeia e a validar a ligação oficial antes de aceitar uma imagem."
-      ]
-    },
-    {
-      "version": "v59",
-      "date": "5 de setembro de 2026",
-      "title": "Imagens de produto e ampliação",
-      "items": [
-        "As miniaturas de produto passaram a permitir ampliação ao toque ou clique.",
-        "Produtos sem fotografia passaram a usar correspondência assistida por nome, embalagem e, quando existente, código de barras."
-      ]
-    },
-    {
-      "version": "v58",
-      "date": "5 de setembro de 2026",
-      "title": "Centro de Atualização de Software",
-      "items": [
-        "Foi criado o ecrã Atualização de Software nas Definições.",
-        "A aplicação passou a poder verificar a versão pública através do Service Worker same-origin.",
-        "As notas das versões passaram a ficar disponíveis em Mais detalhes."
+        "O leitor de código de barras passa a exigir um único supermercado e só adiciona automaticamente quando a correspondência atinge confiança elevada.",
+        "Ao ler novamente o mesmo GTIN ainda pendente, a quantidade é incrementada em vez de criar uma linha duplicada.",
+        "O preço encontrado pelo supermercado continua registado como estimado; o valor efetivamente pago permanece separado até confirmação.",
+        "As próximas ocorrências de faturas recorrentes deixam de herdar valor, referência e observações do mês anterior e ficam como Por preencher.",
+        "O cabeçalho móvel passa a respeitar uma margem superior mínima e a safe area do iPhone."
       ]
     }
   ]

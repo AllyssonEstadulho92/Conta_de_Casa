@@ -1,105 +1,154 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 8 de setembro de 2026
-Build público atual: `v73`
-Branch pública: `main`
+Release candidata: `v74`
+Branch: `redesign/v74-prototipo-conta-de-casa`
 
-## Visão geral
+## 1. Visão geral
 
-**Conta de Casa** é uma PWA estática distribuída por GitHub Pages. A arquitetura mantém-se local-first: estado financeiro, regras de negócio, formulários, cifragem e persistência executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
+**Conta de Casa** é uma PWA estática distribuída por GitHub Pages. A arquitetura continua local-first: estado financeiro, regras de negócio, formulários, cifragem e persistência executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
 
-## Persistência e segurança
+A v74 introduz uma nova camada de experiência e consolida o sistema visual sem substituir o núcleo funcional existente.
 
-- `core.js`: estado, normalização, IndexedDB e cifragem;
+## 2. Persistência, dinheiro e segurança
+
+- `core.js`: estado, normalização, IndexedDB, sanitização e cifragem;
 - cofre: PBKDF2-SHA-256 + AES-GCM;
+- schema financeiro: `STATE_VERSION = 5`;
 - valores monetários: inteiros em cêntimos;
-- schema: `STATE_VERSION = 5`;
+- `finance.js`: regras e cálculos financeiros;
 - sincronização: envelope cifrado opcional via GitHub;
-- sem segredos, PIN ou credenciais embutidas no código público.
+- sem PIN, palavra-passe, token ou chave embutidos no repositório público;
+- nenhuma alteração v74 exige migração de dados.
 
-## Navegação
+## 3. Camadas de apresentação v74
 
-A navegação continua a ter uma única fonte funcional:
+### `design-system.css`
 
-- `core.js` mantém `PAGE_META` e `NAV_GROUPS`;
-- `render.js::renderNav()` preenche desktop, drawer e navegação móvel a partir dessa fonte;
-- `events.js` mantém os fluxos históricos de abertura/fecho, backdrop, Escape e breakpoints;
-- `mobile-menu-toggle.js` coordena animação, reparenting do mesmo botão e gesto horizontal;
-- `mobile-menu-toggle.css` é a camada final de apresentação da navegação.
+Sistema visual canónico da aplicação:
 
-Não existe uma segunda implementação do menu.
+- claro: `#f4f8f8` / `#ffffff` / `#0c2830`;
+- primário: `#075b63`;
+- acento: `#17b890`;
+- tema escuro preservado;
+- tipografia: `Inter` com fallbacks nativos;
+- métricas comuns para botões, formulários, cartões, estados, foco e ícones;
+- safe areas, header móvel e navegação inferior consolidados.
 
-## Direção visual v73
+### `v74-experience.css`
 
-### Desktop / Web
+Camada de composição do protótipo, principalmente até `820px`:
 
-Acima de `820px`:
+- topbar verde-petróleo em largura total;
+- shell móvel `#f2f5f6`;
+- cartões compactos e hierarquia equivalente ao protótipo;
+- cinco destinos na navegação inferior;
+- composições específicas para Início, Despesas, Mercado, Planeamento, Relatórios e Mais;
+- onboarding visual sem substituir a autenticação local real.
 
-- `.sidebar` fica fixa no lado direito;
-- a borda estrutural passa de `border-right` para `border-left`;
-- `.main` deixa de usar `margin-left` e reserva a sidebar com `margin-right: var(--sidebar-current)`;
-- largura e `max-width` continuam a descontar `--sidebar-current`;
-- o modo `sidebar-collapsed` continua a usar a mesma variável de largura;
-- o indicador do item ativo passa para a margem direita do item e o gradiente é espelhado.
+### `v74-experience.js`
 
-### Mobile / Tablet
+Camada de orquestração visual. Reutiliza o DOM, estado e handlers existentes e não grava diretamente valores financeiros.
+
+Responsabilidades:
+
+- montar saudação e seletor mensal móvel;
+- compor resumo mensal e categorias usando dados existentes;
+- expor ações rápidas que chamam fluxos reais (`openBillForm`, captura de fatura, Mercado);
+- compor feeds/listas móveis a partir do estado já renderizado;
+- adaptar Planeamento, Relatórios e Mais ao modelo visual;
+- manter a fonte funcional existente em vez de criar uma segunda aplicação.
+
+## 4. Navegação
+
+A fonte de navegação continua centralizada:
+
+- `core.js`: `PAGE_META` e `NAV_GROUPS`;
+- `render.js::renderNav()`: desktop, drawer e navegação móvel;
+- `events.js`: navegação, backdrop, Escape e breakpoints;
+- `mobile-menu-toggle.js`: animação, reparenting do mesmo botão e gestos;
+- `mobile-menu-toggle.css`: apresentação final da sidebar/drawer à direita.
+
+Na v74, a barra inferior móvel prioriza:
+
+1. Início;
+2. Despesas;
+3. Mercado;
+4. Planeamento;
+5. Mais.
+
+O drawer mantém acesso à arquitetura completa de páginas.
+
+## 5. Cabeçalho e viewport móvel
 
 Até `820px`:
 
-- `#mobileDrawer` continua um `<dialog>` modal;
-- a superfície fica ancorada com `inset: 0 0 0 auto`;
-- estado fechado: `translate3d(calc(100% + 8px),0,0)`;
-- estado aberto: `translate3d(0,0,0)`;
-- abertura ~`300ms`, fecho ~`250ms`;
-- apenas `transform`, opacidade e backdrop são animados;
-- largura normal: `min(364px, calc(100vw - 24px))`;
-- abaixo de `360px`: `calc(100vw - 20px)`;
-- altura: `100dvh`;
-- safe areas superior e inferior preservadas;
-- `.drawer-nav` mantém scroll vertical próprio e `overflow-x:hidden`.
+- topbar é `fixed`;
+- `env(safe-area-inset-top)` é respeitado;
+- `.main` recebe `padding-top` correspondente ao header;
+- conteúdo recebe espaço inferior para a navegação e `safe-area-inset-bottom`;
+- títulos continuam truncáveis sem provocar overflow;
+- `VisualViewport` permanece reservado a gestão de teclado/diálogos em `events.js`;
+- não se usa `zoom` CSS como correção de layout.
 
-## Cabeçalho
+## 6. Hambúrguer / X e drawer
 
-O header móvel continua fixed através de `v64-runtime.css`:
+A v74 preserva o controlador validado da v73:
 
-- usa `--mobile-top-safe` com `env(safe-area-inset-top)`;
-- largura é calculada entre os gutters existentes;
-- `main` recebe `padding-top: var(--header-height)` para compensar o elemento fora do fluxo;
-- títulos continuam truncados com ellipsis quando necessário;
-- o botão hambúrguer mantém alvo tátil de `44x44px`.
+- sidebar desktop à direita;
+- drawer móvel à direita;
+- um único `#mobileMenuBtn` muda de hambúrguer para X;
+- o botão acompanha o drawer sem duplicar controlos;
+- abertura e fecho usam transform/opacidade;
+- gesto abre da margem direita para a esquerda e fecha para a direita;
+- `prefers-reduced-motion`, Escape, foco e ARIA continuam suportados.
 
-## Hambúrguer / X
+## 7. Faturas e captura por QR
 
-`#mobileMenuBtn` continua a ser um único nó DOM. Ao abrir:
+O redesign não altera a semântica financeira:
 
-1. é preparado dentro do cabeçalho do drawer;
-2. o dialog é mostrado ainda no estado visual fechado;
-3. no frame seguinte o drawer começa a entrar e as três linhas formam o X;
-4. ao fechar, a animação é invertida e o botão regressa ao topbar apenas depois do `close` real.
+- criação/edição continua nos formulários existentes;
+- QR é preenchimento assistido;
+- informação extraída é revista antes de guardar;
+- o sistema não inventa linhas de artigos não comprovadas pelo conteúdo da fatura/QR;
+- pagamentos e estados continuam a usar os mesmos modelos e testes.
 
-O SVG sentinela oculto continua a impedir que `ui-icons.js` substitua destrutivamente o glifo animado.
+## 8. Mercado
 
-## Gesto horizontal v73
+A arquitetura do Mercado continua isolada do núcleo financeiro:
 
-- fechado: o gesto candidato começa nos últimos `30px` da margem direita;
-- abertura: movimento horizontal para a esquerda;
-- fecho: movimento horizontal para a direita;
-- threshold de intenção: `8px`;
-- snap por progresso: `34%` / `66%`;
-- fling: `0.45px/ms`;
-- durante o arrasto, `--drawer-drag-x`, `--drawer-drag-alpha` e `--drawer-drag-blur` seguem o dedo diretamente;
-- `prefers-reduced-motion` mantém a remoção das transições adicionais.
+- preço pesquisado → `estimatedCents`;
+- preço confirmado/pago → `actualCents`;
+- GTIN identifica produto, não prova preço pago;
+- imagens são opcionais e apenas mostradas quando passam validação das fontes autorizadas;
+- Continente/Pingo Doce e Open Facts permanecem sujeitos às políticas de sanitização e correspondência existentes;
+- scanner não grava vídeo nem cria credenciais.
 
-## Temas, ícones e tipografia
+## 9. Ícones e acessibilidade
 
-Tipografia, sistema Lucide, tema claro/escuro e alvos tácteis existentes foram preservados. Não foram introduzidas novas bibliotecas de ícones ou fontes.
+- Lucide local continua o sistema vetorial oficial;
+- métricas SVG normalizadas em `design-system.css`;
+- foco visível preservado;
+- contraste claro/escuro validado automaticamente;
+- controlos principais mantêm alvos de 44 px ou superiores; controlos compactos permanecem acima do mínimo WCAG aplicável;
+- pinch zoom não é bloqueado;
+- `aria-current`, `aria-live`, labels e estados do drawer são preservados.
 
-## Distribuição v73
+## 10. Distribuição pública
 
-- build: `v73`;
-- revisão do menu: `73-menu8`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v73-menu8`;
-- PR funcional: `#62`;
-- merge: `fb5c1b975b6494590eb16a3ab09762218e135299`;
-- CI de `main`: `34180397609` — sucesso;
-- Pages: `34180421362` — sucesso.
+Build candidato:
+
+- `BUILD = v74`;
+- `UI_REV = 74-ui1`;
+- `SHOPPING_REV = 74-shopping2`;
+- `MENU_REV = 73-menu8`;
+- `EXPERIENCE_REV = 74-experience2`;
+- cache: `conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience2`.
+
+`ui-consistency.css` e `v64-runtime.css` deixaram de ser copiados para `dist`; as regras visuais necessárias foram consolidadas. `v64-runtime.js` permanece porque contém comportamento funcional ainda em uso.
+
+## 11. QA
+
+CI candidata `34209567627` / `#1435`: sucesso integral em sintaxe, finanças, isolamento, QR, Mercado, imagens, scanner, atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade e sincronização.
+
+Validação física pós-publicação continua recomendada em iPhone, Android/tablet e desktop.

@@ -3,11 +3,14 @@ const fs=require('node:fs');
 
 const js=fs.readFileSync('ui-icons.js','utf8');
 const css=fs.readFileSync('ui-icons.css','utf8');
-const consistency=fs.readFileSync('ui-consistency.css','utf8');
-const runtime=fs.readFileSync('v64-runtime.css','utf8');
+const design=fs.readFileSync('design-system.css','utf8');
+const experience=fs.readFileSync('v74-experience.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const pages=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
+const publicFilesStart=pages.indexOf('const PUBLIC_FILES');
+const publicFilesEnd=pages.indexOf(']);',publicFilesStart);
+const publicFilesBlock=pages.slice(publicFilesStart,publicFilesEnd+3);
 const license=fs.readFileSync('LUCIDE_LICENSE.txt','utf8');
 
 assert.match(js,/LUCIDE_SOURCE_COMMIT='94e4cb9d9db5907053ebf3636a97c45529cf776b'/,'Lucide source snapshot must be pinned and auditable');
@@ -36,10 +39,10 @@ assert.match(css,/input\[type="search"\]::\-webkit-search-decoration/,'Safari na
 assert.match(css,/\.ui-select-control>select[\s\S]*appearance:none!important/,'platform-specific select arrows must be suppressed');
 assert.match(css,/bill-new-btn\[data-ui-iconized="true"\]::before[\s\S]*content:none!important/,'legacy CSS plus must not duplicate the Lucide add icon');
 assert.match(css,/\.sync-header-status \.sync-dot[\s\S]*width:18px!important/,'sync dot slot must become a proper icon slot');
-assert.match(css,/html\.market-prototype-active \.page-heading h1::before/,'market heading must carry the shopping icon hierarchy from the approved prototype');
+assert.match(css,/html\.market-prototype-active \.page-heading h1::before/,'market heading keeps the historical icon anchor before the v74 shell suppresses page-specific topbar decoration on mobile');
 assert.match(css,/#page-market #newMarketBtn\[data-ui-iconized="true"\]::after/,'secondary market action must be represented as a scan control');
-assert.match(css,/#page-market \.market-summary-item::before/,'market summary cards must retain semantic icon anchors');
-assert.match(css,/#page-market \.market-mobile-head::before/,'market mobile cards keep the legacy avatar rule overridden later by the real-image layer');
+assert.match(css,/#page-market \.market-summary-item::before/,'market summary cards retain semantic icon anchors');
+assert.match(css,/#page-market \.market-mobile-head::before/,'market mobile cards keep the historical avatar rule overridden by the verified-image layer');
 assert.match(css,/market-mobile-card:not\(\.purchased\) \.market-mobile-real\{display:none!important/,'pending items must not expose unnecessary real-price controls');
 assert.match(css,/market-browser \.svg-icon[\s\S]*stroke-width:2/,'legacy contextual SVGs must visually align to the Lucide metric');
 assert.match(css,/vector-effect:non-scaling-stroke/);
@@ -47,11 +50,16 @@ assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/ui-icon-spin/);
 assert.match(css,/ui-alert-pulse/);
 
-assert.match(consistency,/\.mobile-nav \.nav-btn\.active::after[\s\S]*content:none!important/,'final layer must suppress the duplicate active underline');
-assert.match(consistency,/\.mobile-nav \.nav-btn\.active::before[\s\S]*background:var\(--primary\)!important/,'final layer must keep one active underline');
-assert.match(consistency,/\.ui-icon-svg,[\s\S]*\.svg-icon\{[\s\S]*stroke-width:2!important/,'final layer must normalize all application SVG metrics');
-assert.match(consistency,/#page-market \.market-summary-item\{[\s\S]*inset 0 3px 0 var\(--market-summary-accent\)/,'summary accent must be solid and independent from the icon pseudo-element');
-assert.match(runtime,/safe-area-inset-top/,'v64 runtime must preserve the unified icon header inside the iPhone safe area');
+/* v74 consolidates the old ui-consistency.css and v64-runtime.css visual rules. */
+assert.match(design,/Conta de Casa v74/);
+assert.match(design,/\.ui-icon-svg,\.svg-icon\{[\s\S]*stroke-width:2!important/,'v74 design system must normalize all application SVG metrics');
+assert.match(design,/vector-effect:non-scaling-stroke/);
+assert.match(design,/safe-area-inset-top/,'v74 design system must preserve the unified icon header inside the iPhone safe area');
+assert.match(design,/position:fixed!important/,'mobile topbar remains fixed in v74');
+assert.match(design,/\.mobile-nav \.nav-btn\.active::before[\s\S]*background:var\(--primary\)!important/,'v74 keeps one canonical active indicator');
+assert.doesNotMatch(design,/\.mobile-nav \.nav-btn\.active::after[\s\S]*background:/,'v74 must not reintroduce a duplicate active underline');
+assert.match(experience,/Conta de Casa v74/);
+assert.match(experience,/\.cdc-quick-action-icon/,'prototype action tiles must use the shared vector icon language');
 
 assert.match(css,/v56 — modern secure vault/,'modern secure vault layer must be present');
 assert.match(css,/\.vault-screen\{[\s\S]*safe-area-inset-top[\s\S]*safe-area-inset-bottom/,'vault must respect iPhone safe areas');
@@ -70,11 +78,15 @@ assert.match(license,/Lucide Icons and Contributors/);
 assert.match(license,/The MIT License \(MIT\)/);
 assert.match(license,/Cole Bemis/);
 assert.match(pages,/LUCIDE_LICENSE\.txt/,'Pages distribution must include the Lucide notice');
-assert.match(pages,/ui-consistency\.css/,'Pages distribution must include the final visual normalization layer');
-assert.match(pages,/v64-runtime\.css/,'Pages distribution must include the v64 safe-area layer');
+assert.match(publicFilesBlock,/design-system\.css/,'Pages distribution must include the consolidated v74 visual system');
+assert.match(publicFilesBlock,/v74-experience\.css/,'Pages distribution must include the prototype composition layer');
+assert.doesNotMatch(publicFilesBlock,/ui-consistency\.css/,'obsolete visual normalization layer must not ship');
+assert.doesNotMatch(publicFilesBlock,/v64-runtime\.css/,'obsolete v64 shell CSS must not ship');
 assert.match(sw,/LUCIDE_LICENSE\.txt/,'offline/public asset allowlist must include the Lucide notice');
-assert.match(sw,/ui-consistency\.css/,'offline/public asset allowlist must include the visual normalization layer');
-assert.match(sw,/v64-runtime\.css/,'offline/public asset allowlist must include the v64 safe-area layer');
-assert.match(sw,/conta-de-casa-public-v64-runtime1/,'service worker cache must refresh for the v64 runtime update');
+assert.match(sw,/design-system\.css/,'offline/public asset allowlist must include the consolidated v74 visual system');
+assert.match(sw,/v74-experience\.css/,'offline/public asset allowlist must include the prototype composition layer');
+assert.doesNotMatch(sw,/['"]\.\/ui-consistency\.css['"]/,'service worker must not cache obsolete visual normalization CSS');
+assert.doesNotMatch(sw,/['"]\.\/v64-runtime\.css['"]/,'service worker must not cache obsolete v64 shell CSS');
+assert.match(sw,/conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/,'service worker cache must refresh for the v74 prototype');
 
-console.log('Lucide UI icon, final visual consistency and v64 safe-area tests: OK');
+console.log('Lucide UI icons and consolidated v74 visual system: OK');
