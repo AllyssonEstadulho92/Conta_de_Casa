@@ -5,7 +5,7 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const BUILD = 'v71';
+const BUILD = 'v72';
 const UI_REV = '64-ui1';
 const CATEGORY_REV = '64-ui1';
 const VISUAL_REV = '64-ui1';
@@ -13,6 +13,7 @@ const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '65-shopping1';
 const SHELL_REV = '66-shell1';
 const MENU_REV = '71-menu5';
+const ICON_REV = '72-icons1';
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -72,6 +73,8 @@ let index=fs.readFileSync(distIndex,'utf8');
 index=index.replace(/<meta name="app-build" content="[^"]+"\s*\/>/,`<meta name="app-build" content="${BUILD}" />`);
 index=index.replace(/<meta name="theme-color" content="[^"]+"\s*\/>/,'<meta name="theme-color" content="#f5f7fa" />');
 index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
+index=index.replace(/ui-icons\.css\?v=[^"']+/,`ui-icons.css?v=${ICON_REV}`);
+index=index.replace(/ui-icons\.js\?v=[^"']+/,`ui-icons.js?v=${ICON_REV}`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${BUILD}</strong>`);
 
 // Compatibilidade histórica do pipeline de imagens. A experiência atual é text-first,
@@ -91,7 +94,7 @@ if(!index.includes('ui-consistency.css')) index=index.replace('</head>',`  <link
 if(!index.includes('v64-runtime.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v64-runtime.css?v=${SHELL_REV}" />\n</head>`);
 // Camada v65: densidade e prioridade operacional exclusivas da Lista de compras.
 if(!index.includes('market-shopping-focus.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-shopping-focus.css?v=${SHOPPING_REV}" />\n</head>`);
-// Camada v71: mantém o glifo animado da v70 e acrescenta entrada/saída off-canvas suave do drawer.
+// Camada v71 do menu preservada: a v72 atua no proprietário global de ícones, não no drawer.
 if(!index.includes('mobile-menu-toggle.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./mobile-menu-toggle.css?v=${MENU_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
@@ -121,4 +124,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; visuals ${VISUAL_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; shell ${SHELL_REV}; menu ${MENU_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; visuals ${VISUAL_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; shell ${SHELL_REV}; menu ${MENU_REV}; icons ${ICON_REV}).`);
