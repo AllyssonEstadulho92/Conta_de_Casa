@@ -56,7 +56,7 @@ Estado: aceite. Módulos não dependem de estado privado de outros módulos.
 Estado: aceite no pipeline de resultados vivos.
 
 ## D-018 — Mercado é `text-first`; fotografia é opcional
-Data: 6 de setembro de 2026 · Estado: aceite e refinada pela D-039. Nome, embalagem, loja, categoria, estado e preço são suficientes para identificar o artigo; fotografia verificada pode ser apoio visual, nunca requisito nem prova de preço.
+Data: 6 de setembro de 2026 · Estado: aceite. Nome, embalagem, loja, categoria, estado e preço identificam o artigo; fotografia verificada é apoio visual, nunca requisito nem prova de preço.
 
 ## D-019 — Browser do Mercado usa posições explícitas em mobile
 Estado: aceite. Grid evita compressão de nome/preço e abaixo de 360 px permite reflow controlado.
@@ -68,7 +68,7 @@ Estado: aceite. `sync-conflict-policy.js` pode ignorar apenas metadados visuais 
 Estado: aceite. Agrupamento e disclosures reutilizam os mesmos itens, IDs e handlers.
 
 ## D-022 — Colisões visuais devem ser consolidadas
-Estado: aceite e refinada pela D-039. Na v74, as regras necessárias foram consolidadas em `design-system.css`; `ui-consistency.css` deixou de ser distribuído.
+Estado: aceite. `design-system.css` é a base consolidada; `ui-consistency.css` deixou de ser distribuído.
 
 ## D-023 — Cada alteração pública relevante gera versão e validação
 Estado: aceite. Fluxo oficial: alteração → versão → `release-manifest.json` → CI → `main` → Pages → instalação/atualização.
@@ -83,7 +83,7 @@ Estado: aceite. Ocorrências novas não inventam montantes variáveis e ficam fo
 Estado: aceite. Safe area e offset do conteúdo são obrigatórios.
 
 ## D-027 — Topbar móvel mantém geometria global
-Estado: aceite e refinada pela D-039. O modelo v74 altera a apresentação global do topbar, sem criar implementações divergentes por página.
+Estado: aceite. A apresentação pode mudar por release, mas deve existir um único modelo por viewport.
 
 ## D-028 — Redeploy repete verificações da release
 Estado: aceite. Build público só deve ser preparado após testes de sintaxe e regressões críticas.
@@ -95,7 +95,7 @@ Estado: aceite. Resumo, checkbox, nome, quantidade e preço têm prioridade; det
 Estado: aceite. Uma release pode reutilizar módulos funcionais validados com revisões anteriores.
 
 ## D-031 — Shell móvel usa identidade canónica por release
-Estado: aceite e substituída visualmente pela D-039 para a v74. A cor do shell deve existir numa única camada final, evitando overrides concorrentes.
+Estado: aceite. A cor e as superfícies do shell devem existir numa única camada final, evitando overrides concorrentes.
 
 ## D-032 — O botão móvel é um único controlo
 Estado: aceite. `#mobileMenuBtn` é o mesmo nó nos estados hambúrguer e X.
@@ -118,48 +118,31 @@ Estado: aceite. Swipe é progressivo, preserva scroll vertical e usa thresholds/
 ## D-038 — Navegação lateral usa o lado direito como direção canónica
 Data: 8 de setembro de 2026 · Estado: aceite e publicada na v73. Desktop reserva sidebar com `margin-right`; drawer abre da direita; swipe de abertura começa na margem direita e move-se para a esquerda.
 
-## D-039 — v74 aplica o novo protótipo como camada de experiência sem migrar o núcleo
+## D-039 — v74 aplica o primeiro protótipo como camada de experiência sem migrar o núcleo
 Data: 8 de setembro de 2026 · Estado: aceite e publicada.
 
-### Decisão
-
-1. Preservar `core.js`, `finance.js`, IndexedDB, `STATE_VERSION = 5`, cofre, pagamentos e sincronização.
-2. Consolidar o sistema visual em `design-system.css`.
-3. Usar `v74-experience.css/js` como camada de composição que reutiliza IDs, dados e handlers existentes.
-4. Priorizar no mobile Início, Despesas, Mercado, Planeamento e Mais.
-5. Não inventar dados para imitar o protótipo.
-6. Fotografias do Mercado são opcionais e verificadas.
-7. Preservar a navegação v73 à direita e o mesmo hambúrguer/X.
-8. Publicar apenas com regressões críticas verdes.
-
 ## D-040 — v75 torna o protótipo a referência visual final sem transformar demonstração em funcionalidade
-Data: 8 de setembro de 2026 · Estado: aceite como candidata.
-
-### Contexto
-
-A primeira implementação v74 preservou a funcionalidade, mas a composição final ainda divergia significativamente do protótipo em densidade, navegação, formulários, scanner, Planeamento, Mais, Sincronização e cofre. Existia ainda uma regra histórica que podia ocultar o terceiro destino da navegação móvel.
+Data: 8 de setembro de 2026 · Estado: aceite e publicada.
 
 ### Decisão
 
 1. Carregar `v75-architecture.css/js` depois da experiência v74 como camada final versionada.
 2. Usar a identidade do protótipo — verde-petróleo, teal, superfícies claras, cartões compactos e hierarquia móvel — de forma uniforme também no desktop.
-3. Garantir explicitamente cinco destinos móveis visíveis: **Início, Despesas, Mercado, Planeamento e Mais**.
-4. Reutilizar o formulário real de despesas e acrescentar apenas apresentação para **Manual / Ler fatura / QR Code**.
-5. Reutilizar `invoice-capture.js` para fotografia e QR e tornar apenas a composição do scanner full-screen.
-6. Não inventar linhas de artigos a partir do QR fiscal, porque o QR não fornece catálogo detalhado de produtos.
+3. Garantir cinco destinos móveis visíveis: **Início, Despesas, Mercado, Planeamento e Mais**.
+4. Reutilizar o formulário real de despesas e acrescentar apresentação para **Manual / Ler fatura / QR Code**.
+5. Reutilizar `invoice-capture.js` para fotografia e QR; a composição do scanner é full-screen.
+6. Não inventar linhas de artigos a partir do QR fiscal.
 7. Não adicionar lojas que o pipeline atual não suporta; a experiência permanece limitada a Continente e Pingo Doce.
-8. Reorganizar Planeamento, Relatórios, Mais e Sincronização sem alterar os cálculos nem o estado persistido.
+8. Reorganizar Planeamento, Relatórios, Mais e Sincronização sem alterar cálculos nem estado persistido.
 9. Reutilizar `icon.svg` local no onboarding/cofre; não introduzir dependência visual externa.
 10. Manter PIN/palavra-passe, PBKDF2-SHA-256, AES-GCM, `STATE_VERSION = 5`, pagamentos, IndexedDB e sincronização intactos.
 11. A camada v75 não pode chamar `saveState()` nem escrever diretamente `estimatedCents` ou `actualCents`.
-12. Publicar apenas depois de CI completo, PR, CI do PR, merge e confirmação de Pages.
+12. Cache e assets da release final usam `75-architecture2`.
 
-### Versionamento candidato
+### Publicação
 
-- build: `v75`;
-- UI base: `74-ui1`;
-- Mercado: `74-shopping2`;
-- menu: `73-menu8`;
-- experiência: `74-experience2`;
-- arquitetura: `75-architecture2`;
-- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2`.
+- CI final da branch: `34226581162` / `#1488` — sucesso;
+- PR `#65`;
+- merge: `40fe62f8140f1f58af9e9ab8d8c8b642695b7cf3`;
+- CI `main`: `34226711267` / `#1490` — sucesso;
+- Pages: `34226749117` / `#1483` — sucesso.

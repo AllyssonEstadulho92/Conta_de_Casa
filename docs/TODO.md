@@ -2,7 +2,7 @@
 
 Atualizado: 8 de setembro de 2026
 
-## P0 — Candidata v75 alinhada ao protótipo
+## P0 — Publicação v75 alinhada ao protótipo
 
 - [x] Analisar o protótipo e separar referência visual de funcionalidades realmente suportadas.
 - [x] Criar branch isolada `redesign/v75-prototipo-fiel`.
@@ -16,26 +16,27 @@ Atualizado: 8 de setembro de 2026
 - [x] Adicionar modos **Manual / Ler fatura / QR Code** reutilizando componentes existentes.
 - [x] Transformar scanner QR em composição full-screen sem alterar a extração fiscal.
 - [x] Reestruturar Mercado em pesquisa, produtos e lojas compactas.
-- [x] Limitar o protótipo do Mercado às lojas realmente suportadas: Continente e Pingo Doce.
+- [x] Limitar Mercado às lojas realmente suportadas: Continente e Pingo Doce.
 - [x] Reestruturar Planeamento com mês, orçamento, gasto, disponível e categorias.
 - [x] Reestruturar Relatórios, Mais e Sincronização com a mesma linguagem visual.
 - [x] Alinhar onboarding/cofre com `icon.svg` local e teclado PIN de três colunas.
 - [x] Preservar drawer à direita e hambúrguer ↔ X da v73.
 - [x] Atualizar build para `v75` e arquitetura para `75-architecture2`.
-- [x] Atualizar Service Worker/cache da candidata.
-- [x] Atualizar testes do Mercado e sistema visual para a revisão final.
+- [x] Atualizar Service Worker/cache e asset versioning.
 - [x] Atualizar `release-manifest.json`.
-- [x] Atualizar documentação técnica obrigatória.
-- [ ] Confirmar suite CI completa verde na branch.
-- [ ] Abrir PR para `main`.
-- [ ] Confirmar CI do PR.
-- [ ] Integrar em `main` apenas com CI verde.
-- [ ] Confirmar CI de `main`.
-- [ ] Confirmar GitHub Pages.
+- [x] Atualizar testes de regressão sem remover invariantes funcionais.
+- [x] Confirmar suite CI completa verde na branch: `34226581162` / `#1488`.
+- [x] Abrir PR `#65` para `main`.
+- [x] Integrar o head validado em `main`: `40fe62f8140f1f58af9e9ab8d8c8b642695b7cf3`.
+- [x] Confirmar CI de `main`: `34226711267` / `#1490`.
+- [x] Confirmar GitHub Pages: `34226749117` / `#1483`.
+- [x] Confirmar que o artefacto Pages contém `v75-architecture.css/js` e 43 assets públicos.
+- [x] Atualizar documentação técnica obrigatória para estado publicado.
 
 ## P1 — Validação física v75
 
-- [ ] iPhone/Safari/PWA: onboarding, cofre, topbar e safe area.
+- [ ] iPhone/Safari/PWA: confirmar que a instância recebe v75 após atualização do Service Worker.
+- [ ] iPhone: onboarding, cofre, topbar e safe area.
 - [ ] iPhone: barra inferior com os cinco destinos e Mercado visível.
 - [ ] iPhone: hambúrguer → X → hambúrguer e swipe do drawer pela direita.
 - [ ] iPhone: Adicionar despesa em Manual / Ler fatura / QR Code.
