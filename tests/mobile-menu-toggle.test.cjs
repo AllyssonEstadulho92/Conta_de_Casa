@@ -5,6 +5,7 @@ const vm = require('node:vm');
 const js = fs.readFileSync('mobile-menu-toggle.js','utf8');
 const css = fs.readFileSync('mobile-menu-toggle.css','utf8');
 const icons = fs.readFileSync('ui-icons.js','utf8');
+const architecture = fs.readFileSync('v75-architecture.js','utf8');
 const prepare = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
 const manifest = JSON.parse(fs.readFileSync('release-manifest.json','utf8'));
@@ -62,18 +63,23 @@ assert.match(css, /\.drawer-nav \.nav-btn\{[\s\S]*min-height:48px/);
 assert.match(css, /@media\(prefers-reduced-motion:reduce\)[\s\S]*transition:none!important/);
 assert.doesNotMatch(css, /background:\s*(?:green|#0f0|#00ff00)/i);
 
-/* v74 changes the visual composition, not the validated v73 menu controller. */
-assert.match(prepare, /const BUILD = 'v74'/);
+/* v75 keeps the validated v73 controller and changes only the information architecture above it. */
+assert.match(prepare, /const BUILD = 'v75'/);
 assert.match(prepare, /const MENU_REV = '73-menu8'/);
 assert.match(prepare, /const EXPERIENCE_REV = '74-experience2'/);
+assert.match(prepare, /const ARCHITECTURE_REV = '75-architecture1'/);
 assert.match(sw, /v73-menu8/);
 assert.match(sw, /v74-experience2/);
+assert.match(sw, /v75-architecture1/);
 assert.ok(sw.includes("'./v74-experience.css'"));
-assert.equal(manifest.latestVersion,'v74');
+assert.ok(sw.includes("'./v75-architecture.css'"));
+assert.match(architecture,/DRAWER_GROUPS/,'v75 must simplify the existing drawer instead of replacing its controller');
+assert.doesNotMatch(architecture,/showModal\(|drawer\.close=|touchmove/,'v75 architecture must not duplicate the v73 drawer controller');
+assert.equal(manifest.latestVersion,'v75');
 const v73=manifest.releases.find(release=>release.version==='v73');
 assert.ok(v73,'v73 navigation notes must remain in release history');
 assert.ok(v73.items.some(item=>/lado direito|direita/i.test(item)));
 assert.ok(v73.items.some(item=>/swipe|gesto/i.test(item)));
 assert.ok(v73.items.some(item=>/cabeçalho|header/i.test(item)));
 
-console.log('v73 right-side navigation remains protected inside the v74 experience2 release.');
+console.log('v73 right-side drawer controller remains protected inside the v75 information architecture release.');
