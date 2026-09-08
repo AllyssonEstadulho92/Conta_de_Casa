@@ -49,7 +49,7 @@ for(const marker of ['.cdc-mobile-greeting','.cdc-mobile-month','.cdc-expense-fe
 /* v75 explicitly repairs the hidden Mercado destination and theme consistency. */
 assert.match(legacyCss,/\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:hidden\}/,'legacy hidden third destination is the regression being repaired');
 assert.match(architectureCss,/Conta de Casa v75/);
-assert.match(architectureCss,/\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:visible!important;display:grid!important\}/,'Mercado must be visible');
+assert.match(architectureCss,/(?:html\.cdc-v75\s+)?\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:visible!important;display:grid!important\}/,'Mercado must be visible');
 assert.match(architectureCss,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/);
 assert.match(architectureCss,/\.v75-budget-summary/);
 assert.match(architectureCss,/\.v75-more-group/);
@@ -107,7 +107,7 @@ assert.match(index,/manifest\.webmanifest\?v=53/);
 for(const asset of ['core','finance','render','forms','sync','events'])assert.match(index,new RegExp(`${asset}\\.js\\?v=53`));
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture1-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
 for(const asset of ['./design-system.css','./v74-experience.css','./v75-architecture.css','./market-experience.css','./market-experience.js','./v64-runtime.js','./app-update.css','./app-update.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be available offline`);
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
@@ -116,7 +116,7 @@ assert.match(sw,/url\.searchParams\.has\('ts'\)/);
 
 assert.match(prepare,/const BUILD = 'v75'/);
 assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture1'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -126,8 +126,8 @@ try{
   assert.match(builtIndex,/design-system\.css\?v=75/);
   assert.match(builtIndex,/v74-experience\.css\?v=74-experience2/);
   assert.match(builtIndex,/v74-experience\.js\?v=74-experience2/);
-  assert.match(builtIndex,/v75-architecture\.css\?v=75-architecture1/);
-  assert.match(builtIndex,/v75-architecture\.js\?v=75-architecture1/);
+  assert.match(builtIndex,/v75-architecture\.css\?v=75-architecture2/);
+  assert.match(builtIndex,/v75-architecture\.js\?v=75-architecture2/);
   assert.match(builtIndex,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.doesNotMatch(builtIndex,/ui-consistency\.css/);
   assert.doesNotMatch(builtIndex,/v64-runtime\.css/);
