@@ -1,9 +1,23 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v71",
+  "latestVersion": "v72",
   "publishedAt": "2026-09-08",
   "releases": [
+    {
+      "version": "v72",
+      "date": "8 de setembro de 2026",
+      "title": "Fechar o menu deslizando na página",
+      "items": [
+        "Com o menu lateral aberto, o gesto de fechar deixa de depender de começar em cima do próprio painel: também pode começar na área visível da página à direita do menu.",
+        "Ao deslizar horizontalmente para a esquerda sobre a página exposta, o drawer acompanha diretamente o dedo e regressa à página sem ficar preso ou desaparecer de forma abrupta.",
+        "O mesmo gesto continua disponível sobre a superfície do menu; ambos usam a mesma lógica de progresso, velocidade e snap, sem criar uma segunda implementação de navegação.",
+        "Movimentos verticais continuam livres e o gesto só é capturado depois de existir intenção horizontal clara, reduzindo fechamentos acidentais.",
+        "Ao soltar, o painel anima apenas o percurso restante e o backdrop acompanha o mesmo progresso até desaparecer.",
+        "O botão hambúrguer/X, aria-expanded, foco, Escape, toque no backdrop, seleção de página, safe areas, responsividade e prefers-reduced-motion permanecem preservados.",
+        "A alteração é exclusivamente de interface e gesto: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, autenticação, APIs ou sincronização."
+      ]
+    },
     {
       "version": "v71",
       "date": "8 de setembro de 2026",
