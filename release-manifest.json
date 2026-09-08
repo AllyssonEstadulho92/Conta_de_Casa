@@ -1,9 +1,23 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v71",
+  "latestVersion": "v72",
   "publishedAt": "2026-09-08",
   "releases": [
+    {
+      "version": "v72",
+      "date": "8 de setembro de 2026",
+      "title": "Ícones estáveis sem interferência entre componentes",
+      "items": [
+        "O sistema Lucide deixa de reprocessar toda a interface quando classes, aria-label ou aria-expanded mudam, reduzindo substituições inesperadas durante animações e navegação.",
+        "A hidratação dinâmica passa a observar apenas novos elementos adicionados e a alteração global de tema, processando a subárvore necessária em vez do documento inteiro.",
+        "Controlos com desenho próprio podem declarar propriedade do ícone, e o hambúrguer animado é protegido explicitamente para que as três linhas não sejam substituídas por um SVG estático.",
+        "O renderizador semântico passa a consultar diretamente o registo Lucide autoritativo; o registo histórico permanece apenas como ponte de compatibilidade para chamadas antigas.",
+        "O módulo de ícones expõe operações explícitas para hidratar uma área, atualizar o tema e definir um ícone, reduzindo dependência de observação implícita do DOM.",
+        "A revisão mantém dimensões, contraste, foco, navegação, tema claro/escuro, menu lateral e acessibilidade existentes sem alterar a geometria validada dos restantes componentes.",
+        "A alteração é exclusivamente de interface e runtime visual: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, autenticação, APIs ou sincronização."
+      ]
+    },
     {
       "version": "v71",
       "date": "8 de setembro de 2026",
