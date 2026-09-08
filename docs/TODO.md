@@ -2,7 +2,7 @@
 
 Atualizado: 8 de setembro de 2026
 
-## P0 — v75 publicada e refinamento de cabeçalho
+## P0 — v75 publicada e estabilidade transversal
 
 - [x] Publicar v75 em `main` com Início / Despesas / Mercado / Planeamento / Mais.
 - [x] Preservar `core.js`, `finance.js`, `STATE_VERSION = 5`, IndexedDB, pagamentos, cifragem e sincronização.
@@ -11,33 +11,50 @@ Atualizado: 8 de setembro de 2026
 - [x] Remover do topbar móvel o bloco `Olá, Utilizador / Bem-vindo de volta!` e o avatar.
 - [x] Manter `#notificationsBtn` como única ação à direita.
 - [x] Refinar topbar para `75-header2`: 60 px + safe area, gradiente discreto, título compacto, foco e estados de toque.
-- [x] Atualizar asset versioning do cabeçalho para `75-header2`.
-- [x] Atualizar nome do cache do Service Worker para invalidar a revisão anterior.
+- [x] Criar `75-stability1` para corrigir tipografia, overflow, safe areas, formulários, navegação e diálogos sem alterar o núcleo.
+- [x] Estabilizar alvos móveis principais em 44 px.
+- [x] Evitar zoom automático do Safari em inputs/selects/textarea mobile.
+- [x] Sincronizar `theme-color` com tema e cabeçalho visível.
+- [x] Atualizar asset versioning e cache para `-stability1`.
+- [x] Alinhar validação CI e Pages para v74/v75.
 - [x] Atualizar documentação técnica obrigatória.
 
-## P1 — Validação física do cabeçalho `75-header2`
+## P1 — Validação física de `75-header2` + `75-stability1`
 
 - [ ] iPhone/Safari/PWA: confirmar atualização do Service Worker e carregamento da revisão nova.
-- [ ] iPhone: safe area sem faixa duplicada ou salto vertical.
+- [ ] iPhone: safe area superior e laterais sem faixa duplicada ou salto vertical.
 - [ ] iPhone: hambúrguer, título e sino alinhados numa única linha.
 - [ ] iPhone: título longo com ellipsis sem colisão com o sino.
 - [ ] iPhone: badge visível e centrado sem cortar no canto.
 - [ ] iPhone: hambúrguer → X → hambúrguer sem deslocamento.
-- [ ] Android/tablet: largura, orientação e alinhamento do cabeçalho.
-- [ ] Tema escuro: contraste e consistência do cabeçalho.
-- [ ] Desktop: confirmar ausência de regressão, porque o refinamento é mobile-only.
+- [ ] iPhone: focar inputs/selects sem zoom automático do Safari.
+- [ ] iPhone/Android: navegação inferior com cinco destinos sem corte de labels.
+- [ ] Android/tablet: largura, orientação e alinhamento do cabeçalho/conteúdo.
+- [ ] Tema escuro: contraste, `theme-color` e consistência geral.
+- [ ] Desktop: confirmar painéis, tabelas e sidebar sem regressão.
+- [ ] 320/375/390/430 px: confirmar ausência de overflow horizontal.
 
 ## P1 — Mercado
 
-- [ ] Implementar fallback robusto quando `imageUrl` existe mas a imagem remota falha.
-- [ ] Manter área da fotografia estável, sem cartão vazio ou deformado.
-- [ ] Adicionar skeleton discreto durante carregamento.
-- [ ] Usar fallback visual por categoria com texto `Imagem indisponível` quando necessário.
-- [ ] Rever cartões em 3 colunas e reflow para 2 colunas quando a largura não permitir leitura confortável.
+- [x] Implementar fallback quando `imageUrl` existe mas a imagem remota falha.
+- [x] Manter área da fotografia estável, sem cartão vazio ou deformado.
+- [x] Adicionar skeleton discreto durante carregamento.
+- [x] Usar fallback visual com texto `Imagem indisponível` nas miniaturas móveis adequadas.
+- [ ] Validar em hardware imagens oficiais Continente/Pingo Doce com rede lenta, offline e URL quebrado.
+- [ ] Rever cartões de catálogo em 3 colunas e reflow para 2 colunas quando a largura real não permitir leitura confortável.
+
+## P1 — QA e publicação
+
+- [x] Adicionar `tests/v75-stability.test.cjs`.
+- [x] Sintaxe CI: incluir `v74-experience.js`, `v75-architecture.js` e `v75-stability.js`.
+- [x] Verificação Pages: incluir `v75-architecture.test.cjs` e `v75-stability.test.cjs`.
+- [ ] Confirmar CI completo verde no commit/PR final.
+- [ ] Confirmar deploy Pages concluído sobre o SHA integrado em `main`.
 
 ## P2 — Consolidação posterior
 
 - [ ] Rever CSS histórico restante numa release própria, sem misturar regras financeiras.
+- [ ] Depois da validação real, absorver `v75-stability.css` no sistema visual consolidado de uma release futura, em vez de acumular camadas indefinidamente.
 - [ ] Remover resíduos apenas após confirmar que não existem referências funcionais.
 - [ ] Rever pipeline externo do Mercado separadamente.
 - [ ] Manter `PROJECT_STATE.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md` e `CHANGELOG.md` sincronizados em cada alteração relevante.
