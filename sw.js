@@ -19,6 +19,7 @@ const PUBLIC_ASSETS = [
   './market-image-audit.css',
   './v74-experience.css',
   './v75-architecture.css',
+  './v75-header-refinement.css',
   './core.js',
   './finance.js',
   './render.js',
