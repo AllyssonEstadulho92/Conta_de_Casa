@@ -1,6 +1,6 @@
 'use strict';
 
-/* Conta de Casa v71 — hambúrguer/X animado, drawer off-canvas e gesto horizontal que acompanha o dedo. */
+/* Conta de Casa v72 — hambúrguer/X animado, drawer off-canvas e abertura sem salto visual no Safari. */
 (function installAnimatedMobileMenu(root){
   let installed=false;
 
@@ -15,6 +15,7 @@
 
     const homeAnchor=document.createComment('mobile-menu-toggle-home');
     button.parentNode?.insertBefore(homeAnchor,button);
+    let homePlaceholder=null;
 
     button.classList.add('animated-mobile-menu-toggle');
 
@@ -150,15 +151,32 @@
       };
     }
 
+    function ensureHomePlaceholder(){
+      if(homePlaceholder?.isConnected)return homePlaceholder;
+      const placeholder=document.createElement('span');
+      placeholder.className='mobile-menu-home-placeholder';
+      placeholder.setAttribute('aria-hidden','true');
+      if(homeAnchor.parentNode)homeAnchor.parentNode.insertBefore(placeholder,homeAnchor.nextSibling);
+      homePlaceholder=placeholder;
+      return placeholder;
+    }
+
     function restoreButtonHome(){
-      if(homeAnchor.parentNode&&button.parentNode!==homeAnchor.parentNode){
-        homeAnchor.parentNode.insertBefore(button,homeAnchor.nextSibling);
+      const parent=homeAnchor.parentNode;
+      if(parent){
+        const reference=homePlaceholder?.parentNode===parent?homePlaceholder:homeAnchor.nextSibling;
+        if(button.parentNode!==parent||button.nextSibling!==reference)parent.insertBefore(button,reference);
       }
+      homePlaceholder?.remove();
+      homePlaceholder=null;
       button.classList.remove('drawer-menu-control');
     }
 
     function placeButtonInDrawer(){
-      if(button.parentNode!==drawerHead)drawerHead.insertBefore(button,drawerHead.firstChild);
+      if(button.parentNode!==drawerHead){
+        ensureHomePlaceholder();
+        drawerHead.insertBefore(button,drawerHead.firstChild);
+      }
       button.classList.add('drawer-menu-control');
     }
 
@@ -217,6 +235,20 @@
       // assumir o transform final e executa apenas o pequeno percurso restante.
       shell.getBoundingClientRect();
       requestAnimationFrame(()=>shell.style.removeProperty('transform'));
+    }
+
+    // Abre a superfície ainda no estado visual fechado. O botão é transferido para o dialog
+    // antes de showModal(), enquanto um placeholder conserva exatamente o espaço no topbar.
+    // Assim o Safari nunca pinta o botão numa posição, remove-o e volta a pintá-lo noutra no
+    // mesmo gesto; a primeira imagem visível do dialog já contém o mesmo controlo dentro do drawer.
+    function showDrawerClosedSurface(){
+      if(drawer.open)return;
+      cancelMenuMotion();
+      setButtonState(false);
+      placeButtonInDrawer();
+      drawer.classList.remove('open');
+      drawer.showModal();
+      drawerShell()?.getBoundingClientRect();
     }
 
     // O código legado fecha o dialog imediatamente. Intercetamos apenas esta instância para
@@ -294,13 +326,17 @@
 
     function openDrawer(keyboard=false){
       if(drawer.dataset.closing==='true')return;
-      if(typeof root.openMobileDrawer==='function')root.openMobileDrawer();
-      else if(!drawer.open){drawer.showModal();requestAnimationFrame(()=>drawer.classList.add('open'));}
-      syncButton(drawer.open);
-      // O botão é movido para dentro do <dialog>. CSS transitions do glifo podem ser consumidas
-      // pelo reparenting no Safari; os keyframes explícitos garantem o movimento visível.
-      requestAnimationFrame(()=>animateMenuGlyph(true));
-      focusButton(keyboard);
+      if(!drawer.open)showDrawerClosedSurface();
+
+      // Separamos a montagem do dialog da mudança de estado visual. O style flush acima cria
+      // um estado inicial real; no frame seguinte o painel entra e as mesmas três linhas formam o X.
+      requestAnimationFrame(()=>{
+        if(!drawer.open||drawer.dataset.closing==='true')return;
+        setButtonState(true);
+        drawer.classList.add('open');
+        animateMenuGlyph(true);
+        focusButton(keyboard);
+      });
     }
 
     function closeDrawer(keyboard=false){
@@ -316,12 +352,11 @@
       setFocusOrigin(false);
 
       if(gesture.mode==='opening'){
-        if(typeof root.openMobileDrawer==='function')root.openMobileDrawer();
-        else if(!drawer.open)drawer.showModal();
+        if(!drawer.open)showDrawerClosedSurface();
         // O estado .open representa o destino final; data-dragging sobrepõe o transform enquanto
         // o dedo está no ecrã, por isso o painel acompanha a posição real sem saltar para o fim.
         drawer.classList.add('open');
-        syncButton(true);
+        setButtonState(true);
       }else if(!drawer.open){
         return false;
       }

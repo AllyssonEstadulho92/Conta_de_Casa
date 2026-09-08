@@ -1,9 +1,23 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v71",
+  "latestVersion": "v72",
   "publishedAt": "2026-09-08",
   "releases": [
+    {
+      "version": "v72",
+      "date": "8 de setembro de 2026",
+      "title": "Menu hambúrguer sem desaparecimento ao abrir",
+      "items": [
+        "Corrigido o salto visual observado no iPhone em que o botão hambúrguer desaparecia do cabeçalho e surgia de imediato dentro do menu lateral.",
+        "A causa era a ordem de abertura: o dialog tornava-se modal e alterava aria-expanded antes de o mesmo botão ser transferido para o cabeçalho do drawer, fazendo o Safari compor duas posições do controlo no mesmo gesto.",
+        "O mesmo #mobileMenuBtn passa a ser preparado dentro do drawer antes de showModal(), ainda no estado fechado, e só no frame seguinte muda para X enquanto o painel inicia a entrada off-canvas.",
+        "Um placeholder invisível de 44 por 44 píxeis preserva o espaço original do botão no topbar durante a abertura, impedindo que o título ou o cabeçalho saltem lateralmente.",
+        "A abertura deixa de reutilizar a mutação visual imediata do openMobileDrawer legado e estabelece primeiro um estado CSS fechado real, reduzindo o flash de reparenting no Safari/iPhone.",
+        "O swipe da margem esquerda continua a usar o mesmo drawer e o mesmo botão, preservando scroll vertical, backdrop, Escape, navegação, foco, aria-expanded e prefers-reduced-motion.",
+        "A alteração é exclusivamente de interface e movimento: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+      ]
+    },
     {
       "version": "v71",
       "date": "8 de setembro de 2026",
