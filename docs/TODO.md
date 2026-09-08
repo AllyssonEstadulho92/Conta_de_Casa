@@ -2,39 +2,46 @@
 
 Atualizado: 8 de setembro de 2026
 
-## P0 — v71 drawer off-canvas suave
+## P0 — v71 drawer off-canvas suave com swipe interativo
 
 ### Observação física v70
 
 - [x] Confirmar que o drawer abre no lado correto e mantém a navegação funcional.
 - [x] Confirmar que hambúrguer/X está correto.
 - [x] Identificar que o painel entra de forma demasiado seca.
-- [x] Confirmar no código que a v70 desloca a superfície apenas `-18px` antes de abrir.
-- [x] Confirmar que o backdrop surge já escurecido.
-- [x] Confirmar que `drawer.close()` nativo imediato impede uma animação de saída completa.
+- [x] Confirmar que a experiência pretendida exige o painel acompanhar o dedo, não apenas alternar entre dois estados.
 
 ### Implementação candidata v71
 
 - [x] Manter o mesmo `#mobileDrawer`, `#mobileMenuBtn` e `NAV_GROUPS`.
 - [x] Preservar Web Animations do hambúrguer/X da v70.
 - [x] Alterar a superfície fechada para `translate3d(calc(-100% - 8px),0,0)`.
-- [x] Usar abertura de aproximadamente `280 ms` com easing de desaceleração natural.
-- [x] Usar fecho de aproximadamente `240 ms`.
-- [x] Fazer o backdrop evoluir de transparente para escurecimento discreto.
-- [x] Limitar o blur do backdrop a `1.5px`.
+- [x] Usar abertura automática de aproximadamente `280 ms` com `cubic-bezier(.32,.72,0,1)`.
+- [x] Usar fecho automático de aproximadamente `240 ms`.
+- [x] Fazer o backdrop evoluir de transparente para `rgba(10,18,30,.34)` com blur máximo de `1px`.
 - [x] Animar apenas `transform`, opacidade e composição visual, sem largura/margens/layout.
+- [x] Permitir swipe de abertura iniciado nos primeiros `30 px` da margem esquerda.
+- [x] Permitir swipe para a esquerda em qualquer ponto da superfície do drawer aberto.
+- [x] Esperar pelo menos `8 px` e confirmar intenção horizontal antes de capturar o gesto.
+- [x] Preservar o scroll vertical da lista com `touch-action:pan-y`.
+- [x] Fazer `--drawer-drag-x`, `--drawer-drag-alpha` e `--drawer-drag-blur` acompanhar o dedo em tempo real.
+- [x] Desativar transições apenas durante `data-dragging="true"`.
+- [x] Decidir snap por progresso (`34%` / `66%`) e velocidade de fling (`0.45 px/ms`).
+- [x] Animar apenas o percurso restante depois de o utilizador soltar o dedo.
+- [x] Bloquear clique sintetizado pós-swipe durante `320 ms`.
+- [x] Restaurar o estado estável anterior em `touchcancel` para evitar drawer preso.
 - [x] Coordenar a instância `drawer.close()` com `transitionend` do `transform`.
 - [x] Manter fallback temporal de `360 ms` para evitar dialog preso.
 - [x] Manter o mesmo botão dentro do drawer até ao `close` real.
 - [x] Preservar fecho por X, Escape, backdrop, item de navegação e breakpoint.
-- [x] Preservar `prefers-reduced-motion` com fecho imediato.
+- [x] Preservar `prefers-reduced-motion` sem captura do gesto adicional.
 - [x] Preservar ARIA, foco, safe areas, largura responsiva e alvos tácteis.
 - [x] Versionar como `v71` / `71-menu5`.
 - [x] Atualizar `release-manifest.json`, `scripts/prepare-pages.cjs` e `sw.js`.
 - [x] Atualizar regressões do menu e testes de distribuição relacionados.
-- [x] Atualizar `PROJECT_STATE.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md` e `CHANGELOG.md` para estado candidato.
-- [ ] Abrir PR da v71.
-- [ ] Confirmar CI verde do PR.
+- [x] Atualizar `PROJECT_STATE.md` e `ARCHITECTURE.md` com o swipe interativo.
+- [x] Abrir PR #60.
+- [x] Confirmar CI verde do PR: run #1325 (`34171997598`).
 - [ ] Rever diff final e escopo.
 - [ ] Integrar em `main` apenas com CI verde.
 - [ ] Confirmar CI de `main`.
@@ -43,7 +50,13 @@ Atualizado: 8 de setembro de 2026
 
 ### Validação física prioritária v71
 
-- [ ] iPhone/Safari: tocar no hambúrguer e confirmar que o painel entra claramente da esquerda para a direita.
+- [ ] iPhone/Safari: arrastar da margem esquerda para a direita e confirmar que o painel acompanha o dedo.
+- [ ] Com o menu aberto, arrastar para a esquerda e confirmar que o painel acompanha o dedo até fechar ou regressar.
+- [ ] Confirmar que um gesto curto regressa ao estado anterior sem ficar preso a meio.
+- [ ] Confirmar snap por velocidade com um gesto rápido curto.
+- [ ] Fazer scroll vertical dentro do menu e confirmar que o drawer não tenta deslizar lateralmente.
+- [ ] Confirmar que não abre nenhuma opção acidentalmente depois de um swipe.
+- [ ] Tocar no hambúrguer e confirmar abertura automática suave.
 - [ ] Tocar no X e confirmar saída suave para a esquerda antes de desaparecer.
 - [ ] Selecionar uma opção e confirmar a mesma saída suave.
 - [ ] Fechar pelo backdrop e confirmar a mesma saída suave.
@@ -65,7 +78,7 @@ Atualizado: 8 de setembro de 2026
 - [x] Preservar `prefers-reduced-motion`.
 - [x] Publicar v70 / `70-menu4` pelo PR #58.
 - [x] CI e Pages verdes.
-- [x] Validação física mostrou o drawer funcional e revelou apenas a necessidade de suavizar a própria superfície, tratada na v71.
+- [x] Validação física mostrou o drawer funcional e revelou a necessidade de tornar a própria superfície interativa, tratada na v71.
 
 ## P0 — regressões essenciais que não podem quebrar
 
