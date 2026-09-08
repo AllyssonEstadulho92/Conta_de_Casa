@@ -10,14 +10,25 @@ const sw=fs.readFileSync('sw.js','utf8');
 const pages=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const license=fs.readFileSync('LUCIDE_LICENSE.txt','utf8');
 
+assert.match(js,/Conta de Casa v72/,'icon runtime change must be traceable');
 assert.match(js,/LUCIDE_SOURCE_COMMIT='94e4cb9d9db5907053ebf3636a97c45529cf776b'/,'Lucide source snapshot must be pinned and auditable');
-assert.match(js,/Object\.assign\(ICONS,LUCIDE_ICONS\)/,'Lucide registry must extend the existing application registry without changing callers');
+assert.match(js,/Object\.assign\(ICONS,LUCIDE_ICONS\)/,'legacy callers may receive the Lucide geometry through one compatibility handoff');
+assert.match(js,/const path=LUCIDE_ICONS\[name\]\|\|LUCIDE_ICONS\.more/,'the authoritative renderer must read from the Lucide registry directly');
 assert.match(js,/globalThis\.CDCIcons/,'shared icon renderer must remain available to contextual modules');
+assert.match(js,/hydrate,/,'controlled hydration must be exposed for modules that add UI intentionally');
+assert.match(js,/refreshTheme:updateThemeIcon/,'theme changes must have an explicit refresh path');
+assert.match(js,/setIcon:fillIcon/,'modules must have an explicit semantic icon setter');
 assert.match(js,/source:'Lucide'/);
 assert.match(js,/stroke-width="2"/,'Lucide stroke weight must remain consistent');
 for(const name of ['home','bill','calendar','plan','market','report','goal','shield','settings','search','eye','eyeOff','sun','moon','camera','qr','receipt','close','plus','edit','trash','filter','scan','cloudCheck','cloudOff']){
   assert.match(js,new RegExp(`\\b${name}:`),`missing Lucide semantic icon ${name}`);
 }
+
+assert.match(js,/function isCustomOwned\(target\)/,'custom-drawn controls must be protected from generic hydration');
+assert.match(js,/uiIconOwner==='custom'/,'components may explicitly claim icon ownership');
+assert.match(js,/mobile-menu-glyph/,'the animated hamburger must be recognized as a custom-drawn control');
+assert.match(js,/if\(!target\|\|isCustomOwned\(target\)\)return;/,'fillIcon must not destroy a custom component');
+assert.match(js,/if\(!button\|\|isCustomOwned\(button\)\)return;/,'text-button iconization must respect custom ownership');
 
 assert.match(js,/input\[type="search"\]/,'search controls must receive the shared Lucide search icon');
 assert.match(js,/function decorateSelect/,'native select arrows must be normalized by the icon layer');
@@ -25,7 +36,12 @@ assert.match(js,/\.ui-select-control/);
 assert.match(js,/TEXT_BUTTON_RULES/,'common action buttons must be iconized centrally');
 assert.match(js,/\[data-delete-market\]/);
 assert.match(js,/updateSyncIcon/,'sync status must use a contextual icon instead of only a generic dot');
-assert.match(js,/MutationObserver/,'dynamic dialogs and rendered lists must be hydrated');
+assert.match(js,/MutationObserver/,'dynamic dialogs and rendered lists must still be hydrated');
+assert.match(js,/const pendingRoots=new Set\(\)/,'dynamic hydration must be scoped instead of reprocessing the whole document for every mutation');
+assert.match(js,/for\(const node of mutation\.addedNodes\|\|\[\]\)/,'only newly inserted UI must schedule subtree hydration');
+assert.match(js,/attributeFilter:\['data-theme'\]/,'observer attributes must be limited to the one icon-relevant global theme state');
+assert.doesNotMatch(js,/attributeFilter:\[[^\]]*(?:aria-label|aria-expanded|class)/,'generic ARIA/class changes must never retrigger the icon system');
+assert.doesNotMatch(js,/mutations\.some\(m=>m\.type==='childList'\|\|m\.type==='attributes'\)/,'v54 global rehydration loop must be retired');
 assert.doesNotMatch(js,/https?:\/\//,'runtime icon code must remain local and add no icon CDN/font dependency');
 assert.doesNotMatch(js,/[⌂◉⌁☼☾×]/,'icon runtime must not depend on legacy Unicode glyphs');
 
@@ -77,4 +93,4 @@ assert.match(sw,/ui-consistency\.css/,'offline/public asset allowlist must inclu
 assert.match(sw,/v64-runtime\.css/,'offline/public asset allowlist must include the v64 safe-area layer');
 assert.match(sw,/conta-de-casa-public-v64-runtime1/,'service worker cache must refresh for the v64 runtime update');
 
-console.log('Lucide UI icon, final visual consistency and v64 safe-area tests: OK');
+console.log('Lucide v72 ownership, scoped hydration, final visual consistency and safe-area tests: OK');
