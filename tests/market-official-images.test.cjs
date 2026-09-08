@@ -14,22 +14,22 @@ const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
 
 assert.match(js,/bridge de imagens oficiais do Mercado \(v61\)/);
-assert.match(js,/\[data-market-add-product\]/,'bridge must use the real add-button selector from market-experience.js');
-assert.match(js,/\.market-result-source/,'bridge must use the real retailer source control class');
+assert.match(js,/\[data-market-add-product\]/);
+assert.match(js,/\.market-result-source/);
 assert.match(js,/data-market-product-card/);
 assert.match(js,/parseCardId/);
 assert.match(js,/safeProductUrl/);
 assert.match(js,/safeOfficialImageUrl/);
 assert.match(js,/Sites-col-master-catalog/);
 assert.match(js,/Sites-pingo-doce-master/);
-assert.match(js,/Ver no \$\{label\}/,'retailer-page wording must be distinct from image provenance');
-assert.match(js,/headers:\{Accept:'application\/json'\}/,'Safari reader request must be a simple CORS GET');
-assert.doesNotMatch(js,/headers:\{[^}]*['"]X-(?:With-Images-Summary|Retain-Images)/,'reader request must not send custom image X-* headers');
+assert.match(js,/Ver no \$\{label\}/);
+assert.match(js,/headers:\{Accept:'application\/json'\}/);
+assert.doesNotMatch(js,/headers:\{[^}]*['"]X-(?:With-Images-Summary|Retain-Images)/);
 assert.match(js,/credentials:'omit'/);
 assert.match(js,/referrerPolicy:'no-referrer'/);
 assert.match(js,/MAX_CONCURRENT=3/);
-assert.match(js,/canLoadImage/,'official CDN image must be verified as renderable before replacing the placeholder');
-assert.match(js,/persistResolvedItem/,'official image must be persisted after the real add flow');
+assert.match(js,/canLoadImage/);
+assert.match(js,/persistResolvedItem/);
 assert.match(js,/imageSource=result\.source/);
 assert.match(js,/saveState/);
 assert.doesNotMatch(js,/Authorization|api[_-]?key/i);
@@ -65,10 +65,8 @@ assert.equal(sandbox.CDCOfficialMarketImages.safeOfficialImageUrl(pingoImage,'pi
 assert.equal(sandbox.CDCOfficialMarketImages.safeOfficialImageUrl(pingoImage,'pingo-doce','123456'),'');
 
 const catalogue=[
-  '- Pingo Doce · Arroz Carolino Cigala · 1 Kg · 1,49€ · pid 739490',
-  pingoProduct,
-  '- Continente · Compressas Gaze · 20 Un · 2,99€ · pid 8167440',
-  continenteProduct
+  '- Pingo Doce · Arroz Carolino Cigala · 1 Kg · 1,49€ · pid 739490',pingoProduct,
+  '- Continente · Compressas Gaze · 20 Un · 2,99€ · pid 8167440',continenteProduct
 ].join('\n');
 const parsed=JSON.parse(JSON.stringify(sandbox.CDCOfficialMarketImages.parseCatalogRecords(catalogue)));
 assert.equal(parsed.length,2);
@@ -77,45 +75,36 @@ assert.equal(parsed[0].sourceUrl,pingoProduct);
 assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
-assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v73-menu8/);
-assert.ok(sw.includes("'./market-retailer-image-policy.js'"));
-assert.ok(sw.includes("'./market-official-images.js'"));
-assert.ok(sw.includes("'./v64-runtime.js'"));
-assert.ok(sw.includes("'./market-shopping-focus.js'"));
-assert.ok(sw.includes("'./mobile-menu-toggle.js'"));
-assert.match(prepare,/const BUILD = 'v73'/);
+assert.match(sw,/conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+for(const asset of ['./market-retailer-image-policy.js','./market-official-images.js','./v64-runtime.js','./market-shopping-focus.js','./mobile-menu-toggle.js','./v74-experience.css','./v74-experience.js'])assert.ok(sw.includes(`'${asset}'`));
+assert.ok(!sw.includes("'./v64-runtime.css'"));
+assert.match(prepare,/const BUILD = 'v74'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
-assert.match(prepare,/const SHOPPING_REV = '65-shopping1'/);
-assert.match(prepare,/const SHELL_REV = '66-shell1'/);
+assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
-assert.ok(prepare.includes("'market-retailer-image-policy.js'"));
-assert.ok(prepare.includes("'market-official-images.js'"));
-assert.ok(prepare.includes("'v64-runtime.js'"));
-assert.ok(prepare.includes("'market-shopping-focus.js'"));
-assert.ok(prepare.includes("'mobile-menu-toggle.js'"));
+assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-retailer-image-policy\.js\?v=73/);
-  assert.match(index,/market-official-images\.js\?v=73/);
-  assert.match(index,/v64-runtime\.css\?v=66-shell1/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=74/);
+  assert.match(index,/market-official-images\.js\?v=74/);
+  assert.doesNotMatch(index,/v64-runtime\.css/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
-  assert.match(index,/market-shopping-focus\.js\?v=65-shopping1/);
+  assert.match(index,/market-shopping-focus\.js\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.js\?v=73-menu8/);
+  assert.match(index,/v74-experience\.css\?v=74-experience2/);
+  assert.match(index,/v74-experience\.js\?v=74-experience2/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.ok(index.indexOf('market-official-images.js')<index.indexOf('v64-runtime.js'));
   assert.ok(index.indexOf('v64-runtime.js')<index.indexOf('market-shopping-focus.js'));
   assert.ok(index.indexOf('market-shopping-focus.js')<index.indexOf('mobile-menu-toggle.js'));
-  assert.ok(fs.existsSync(path.join(dist,'market-retailer-image-policy.js')));
-  assert.ok(fs.existsSync(path.join(dist,'market-official-images.js')));
-  assert.ok(fs.existsSync(path.join(dist,'v64-runtime.css')));
-  assert.ok(fs.existsSync(path.join(dist,'v64-runtime.js')));
-  assert.ok(fs.existsSync(path.join(dist,'market-shopping-focus.js')));
-  assert.ok(fs.existsSync(path.join(dist,'mobile-menu-toggle.js')));
+  assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v74-experience.js'));
+  for(const asset of ['market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','market-shopping-focus.js','mobile-menu-toggle.js','v74-experience.css','v74-experience.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market browser official-image bridge, v64 runtime, v65 shopping, v66 shell and v73 navigation build expectations: OK');
+console.log('Market official-image bridge remains safe under the v74 experience2 build: OK');
