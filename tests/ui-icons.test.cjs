@@ -5,6 +5,7 @@ const js=fs.readFileSync('ui-icons.js','utf8');
 const css=fs.readFileSync('ui-icons.css','utf8');
 const design=fs.readFileSync('design-system.css','utf8');
 const experience=fs.readFileSync('v74-experience.css','utf8');
+const architecture=fs.readFileSync('v75-architecture.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const pages=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
@@ -50,43 +51,50 @@ assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/ui-icon-spin/);
 assert.match(css,/ui-alert-pulse/);
 
-/* v74 consolidates the old ui-consistency.css and v64-runtime.css visual rules. */
+/* v74 remains the consolidated visual base; v75 adds information architecture. */
 assert.match(design,/Conta de Casa v74/);
 assert.match(design,/\.ui-icon-svg,\.svg-icon\{[\s\S]*stroke-width:2!important/,'v74 design system must normalize all application SVG metrics');
 assert.match(design,/vector-effect:non-scaling-stroke/);
-assert.match(design,/safe-area-inset-top/,'v74 design system must preserve the unified icon header inside the iPhone safe area');
-assert.match(design,/position:fixed!important/,'mobile topbar remains fixed in v74');
-assert.match(design,/\.mobile-nav \.nav-btn\.active::before[\s\S]*background:var\(--primary\)!important/,'v74 keeps one canonical active indicator');
-assert.doesNotMatch(design,/\.mobile-nav \.nav-btn\.active::after[\s\S]*background:/,'v74 must not reintroduce a duplicate active underline');
+assert.match(design,/safe-area-inset-top/,'design system must preserve the unified icon header inside the iPhone safe area');
+assert.match(design,/position:fixed!important/,'mobile topbar remains fixed');
+assert.match(design,/\.mobile-nav \.nav-btn\.active::before[\s\S]*background:var\(--primary\)!important/,'design system keeps one canonical active indicator');
+assert.doesNotMatch(design,/\.mobile-nav \.nav-btn\.active::after[\s\S]*background:/,'must not reintroduce a duplicate active underline');
 assert.match(experience,/Conta de Casa v74/);
 assert.match(experience,/\.cdc-quick-action-icon/,'prototype action tiles must use the shared vector icon language');
+assert.match(architecture,/Conta de Casa v75/);
+assert.match(architecture,/\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:visible!important;display:grid!important\}/,'Mercado icon must be visible as the third mobile destination');
+assert.match(architecture,/\.v75-more-icon/,'secondary navigation keeps the shared vector icon language');
 
+/* The legacy icon CSS still contains the secure-vault base; v75 overrides geometry only. */
 assert.match(css,/v56 — modern secure vault/,'modern secure vault layer must be present');
 assert.match(css,/\.vault-screen\{[\s\S]*safe-area-inset-top[\s\S]*safe-area-inset-bottom/,'vault must respect iPhone safe areas');
-assert.match(css,/\.vault-card\{[\s\S]*border-radius:32px/,'vault card must use the new rounded visual hierarchy');
-assert.match(css,/\.vault-key,.vault-key-spacer\{[\s\S]*width:70px/,'desktop keypad must use balanced circular controls');
-assert.match(css,/\.vault-key\{[\s\S]*border-radius:50%/,'PIN keys must be circular');
-assert.match(css,/@media\(max-width:820px\)[\s\S]*\.vault-key,.vault-key-spacer\{[\s\S]*width:58px/,'mobile keypad must remain compact enough for iPhone Safari');
+assert.match(css,/\.vault-card\{[\s\S]*border-radius:32px/,'vault base must retain its rounded hierarchy');
+assert.match(css,/\.vault-key,.vault-key-spacer\{[\s\S]*width:70px/,'legacy desktop keypad metrics remain available beneath the v75 overlay');
+assert.match(css,/\.vault-key\{[\s\S]*border-radius:50%/,'legacy PIN base remains intact');
+assert.match(css,/@media\(max-width:820px\)[\s\S]*\.vault-key,.vault-key-spacer\{[\s\S]*width:58px/,'legacy mobile keypad remains bounded before v75 override');
 assert.match(css,/\.vault-enter-btn\{[\s\S]*linear-gradient/,'primary unlock action must have a clear visual anchor');
+assert.match(architecture,/\.vault-keypad\{display:grid!important;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/,'v75 must make the PIN keypad conventional and clear');
 assert.match(index,/class="brand brand-large vault-brand"/);
 assert.match(index,/id="vaultUnlockHint"/);
 assert.match(index,/aria-describedby="vaultUnlockHint"/);
-assert.doesNotMatch(index,/passkey|biometria/i,'modern secure vault must retain the real PIN/password model instead of presenting unsupported biometric controls');
+assert.doesNotMatch(index,/passkey|biometria/i,'secure vault must retain the real PIN/password model instead of presenting unsupported biometric controls');
 
 assert.match(license,/ISC License/);
 assert.match(license,/Lucide Icons and Contributors/);
 assert.match(license,/The MIT License \(MIT\)/);
 assert.match(license,/Cole Bemis/);
 assert.match(pages,/LUCIDE_LICENSE\.txt/,'Pages distribution must include the Lucide notice');
-assert.match(publicFilesBlock,/design-system\.css/,'Pages distribution must include the consolidated v74 visual system');
+assert.match(publicFilesBlock,/design-system\.css/,'Pages distribution must include the consolidated visual system');
 assert.match(publicFilesBlock,/v74-experience\.css/,'Pages distribution must include the prototype composition layer');
+assert.match(publicFilesBlock,/v75-architecture\.css/,'Pages distribution must include the v75 architecture overlay');
 assert.doesNotMatch(publicFilesBlock,/ui-consistency\.css/,'obsolete visual normalization layer must not ship');
 assert.doesNotMatch(publicFilesBlock,/v64-runtime\.css/,'obsolete v64 shell CSS must not ship');
 assert.match(sw,/LUCIDE_LICENSE\.txt/,'offline/public asset allowlist must include the Lucide notice');
-assert.match(sw,/design-system\.css/,'offline/public asset allowlist must include the consolidated v74 visual system');
+assert.match(sw,/design-system\.css/,'offline/public asset allowlist must include the consolidated visual system');
 assert.match(sw,/v74-experience\.css/,'offline/public asset allowlist must include the prototype composition layer');
+assert.match(sw,/v75-architecture\.css/,'offline/public asset allowlist must include the architecture overlay');
 assert.doesNotMatch(sw,/['"]\.\/ui-consistency\.css['"]/,'service worker must not cache obsolete visual normalization CSS');
 assert.doesNotMatch(sw,/['"]\.\/v64-runtime\.css['"]/,'service worker must not cache obsolete v64 shell CSS');
-assert.match(sw,/conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/,'service worker cache must refresh for the v74 prototype');
+assert.match(sw,/conta-de-casa-public-v75-architecture1-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/,'service worker cache must refresh for the v75 architecture release');
 
-console.log('Lucide UI icons and consolidated v74 visual system: OK');
+console.log('Lucide UI icons, v74 visual base and v75 information architecture: OK');
