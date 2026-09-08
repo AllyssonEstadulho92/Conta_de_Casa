@@ -75,7 +75,7 @@ assert.equal(parsed[0].sourceUrl,pingoProduct);
 assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture1-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
 for(const asset of ['./market-retailer-image-policy.js','./market-official-images.js','./v64-runtime.js','./market-shopping-focus.js','./mobile-menu-toggle.js','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.match(prepare,/const BUILD = 'v75'/);
@@ -83,7 +83,7 @@ assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
 assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture1'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -97,8 +97,8 @@ try{
   assert.match(index,/mobile-menu-toggle\.js\?v=73-menu8/);
   assert.match(index,/v74-experience\.css\?v=74-experience2/);
   assert.match(index,/v74-experience\.js\?v=74-experience2/);
-  assert.match(index,/v75-architecture\.css\?v=75-architecture1/);
-  assert.match(index,/v75-architecture\.js\?v=75-architecture1/);
+  assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
+  assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.ok(index.indexOf('market-official-images.js')<index.indexOf('v64-runtime.js'));
   assert.ok(index.indexOf('v64-runtime.js')<index.indexOf('market-shopping-focus.js'));
@@ -111,4 +111,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official-image bridge remains safe under the v75 architecture release: OK');
+console.log('Market official-image bridge remains safe under the final v75 prototype architecture: OK');
