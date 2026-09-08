@@ -40,34 +40,42 @@ assert.match(runtimeCss,/\.status-chip\.draft/);
 assert.match(runtimeCss,/\.bill-draft-card/);
 assert.match(runtimeCss,/html\.market-prototype-active \.page-heading h1::before\{[\s\S]*content:none!important/,'market-specific cart decoration must not alter the global mobile header');
 assert.match(runtimeCss,/html\.market-prototype-active \.sync-header-status::after\{[\s\S]*content:none!important/,'market-specific Sync chevron must be disabled');
+assert.match(runtimeCss,/html\.app-active \.topbar,[\s\S]*position:fixed!important/,'mobile header must remain fixed');
 assert.match(shoppingCss,/Conta de Casa v65/);
 assert.match(shoppingCss,/#page-market/,'v65 shopping focus must remain scoped to the market page');
-assert.match(menuCss,/Conta de Casa v72/);
-assert.match(menuCss,/\.mobile-menu-btn\[aria-expanded="true"\]/,'v72 menu visual state must remain driven by the accessible expanded state');
-assert.match(menuCss,/data-menu-state="open"/,'v72 menu must retain an observable state fallback');
+
+assert.match(menuCss,/Conta de Casa v73/);
+assert.match(menuCss,/\.mobile-menu-btn\[aria-expanded="true"\]/,'v73 menu visual state must remain driven by the accessible expanded state');
+assert.match(menuCss,/data-menu-state="open"/,'v73 menu must retain an observable state fallback');
 assert.match(menuCss,/\.mobile-menu-icon-sentinel\{display:none!important\}/,'Lucide compatibility sentinel must never be visible');
-assert.match(menuCss,/\.mobile-menu-home-placeholder\{[\s\S]*visibility:hidden/,'v72 must preserve topbar geometry while the control is inside the drawer');
+assert.match(menuCss,/\.mobile-menu-home-placeholder\{[\s\S]*visibility:hidden/,'v73 must preserve topbar geometry while the control is inside the drawer');
 assert.match(menuJs,/button\.dataset\.uiIconSlot='menu'/,'animated button must keep the Lucide hydration slot stable');
 assert.match(menuJs,/line\.animate\(frames/,'explicit line keyframes must keep hamburger/X motion visible');
-assert.match(menuJs,/drawer\.close=animatedDrawerClose/,'v72 must preserve the dialog during the off-canvas exit transition');
-assert.match(menuJs,/showDrawerClosedSurface/,'v72 must stage the modal before switching visual state');
-assert.match(menuJs,/prefersReducedMotion/,'v72 JS motion must respect reduced-motion preference');
-assert.match(menuCss,/translate3d\(calc\(-100% - 8px\),0,0\)/,'v72 drawer must begin fully off-canvas');
-assert.match(menuCss,/\.nav-drawer\.open::backdrop/,'v72 backdrop must fade with the drawer');
-assert.match(menuCss,/\.nav-drawer\{[\s\S]*width:min\(364px,calc\(100vw - 24px\)\)/,'v72 drawer must preserve bounded responsive sizing');
-assert.match(menuCss,/\.drawer-nav \.nav-btn\{[\s\S]*min-height:48px/,'v72 drawer navigation must preserve touch target quality');
+assert.match(menuJs,/drawer\.close=animatedDrawerClose/,'v73 must preserve the dialog during the off-canvas exit transition');
+assert.match(menuJs,/showDrawerClosedSurface/,'v73 must stage the modal before switching visual state');
+assert.match(menuJs,/prefersReducedMotion/,'v73 JS motion must respect reduced-motion preference');
+assert.match(menuJs,/touch\.clientX>=root\.innerWidth-swipeEdgeWidth/,'v73 swipe opening must originate from the right edge');
 
-assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v72-menu7/);
+assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 0 0 auto!important/,'desktop sidebar must be right-anchored');
+assert.match(menuCss,/\.main\{[\s\S]*margin-right:var\(--sidebar-current\)!important/,'desktop content must reserve the right-side navigation');
+assert.match(menuCss,/\.nav-drawer\{[\s\S]*inset:0 0 0 auto/,'v73 drawer must be right-anchored');
+assert.match(menuCss,/translate3d\(calc\(100% \+ 8px\),0,0\)/,'v73 drawer must begin fully off-canvas on the right');
+assert.match(menuCss,/\.nav-drawer\.open::backdrop/,'v73 backdrop must fade with the drawer');
+assert.match(menuCss,/\.nav-drawer\{[\s\S]*width:min\(364px,calc\(100vw - 24px\)\)/,'v73 drawer must preserve bounded responsive sizing');
+assert.match(menuCss,/\.drawer-nav \.nav-btn\{[\s\S]*min-height:48px/,'v73 drawer navigation must preserve touch target quality');
+assert.match(menuCss,/\.drawer-nav \.nav-btn::before\{[\s\S]*inset:10px 0 10px auto/,'v73 active indicator must be mirrored to the right');
+
+assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v73-menu8/);
 assert.ok(sw.includes("'./ui-consistency.css'"));
 assert.ok(sw.includes("'./v64-runtime.css'"));
 assert.ok(sw.includes("'./market-shopping-focus.css'"));
 assert.ok(sw.includes("'./mobile-menu-toggle.css'"));
-assert.match(prepare,/const BUILD = 'v72'/);
+assert.match(prepare,/const BUILD = 'v73'/);
 assert.match(prepare,/const VISUAL_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const SHOPPING_REV = '65-shopping1'/);
 assert.match(prepare,/const SHELL_REV = '66-shell1'/);
-assert.match(prepare,/const MENU_REV = '72-menu7'/);
+assert.match(prepare,/const MENU_REV = '73-menu8'/);
 assert.ok(prepare.includes("'ui-consistency.css'"));
 assert.ok(prepare.includes("'v64-runtime.css'"));
 assert.ok(prepare.includes("'market-shopping-focus.css'"));
@@ -80,12 +88,12 @@ try{
   assert.match(index,/ui-consistency\.css\?v=64-ui1/);
   assert.match(index,/v64-runtime\.css\?v=66-shell1/);
   assert.match(index,/market-shopping-focus\.css\?v=65-shopping1/);
-  assert.match(index,/mobile-menu-toggle\.css\?v=72-menu7/);
+  assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/<meta name="theme-color" content="#f5f7fa"/,'public HTML theme-color must match the v66 light shell');
   assert.ok(index.indexOf('market-category-groups.css')<index.indexOf('ui-consistency.css'),'visual consistency CSS must load after market/category layers');
   assert.ok(index.indexOf('ui-consistency.css')<index.indexOf('v64-runtime.css'),'v66 shell correction must follow prior visual normalization');
   assert.ok(index.indexOf('v64-runtime.css')<index.indexOf('market-shopping-focus.css'),'v65 shopping focus may override only market-page presentation after the global shell layer');
-  assert.ok(index.indexOf('market-shopping-focus.css')<index.indexOf('mobile-menu-toggle.css'),'v72 global menu styling must remain the final mobile-menu layer');
+  assert.ok(index.indexOf('market-shopping-focus.css')<index.indexOf('mobile-menu-toggle.css'),'v73 global navigation styling must remain the final navigation layer');
   assert.ok(fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(fs.existsSync(path.join(dist,'v64-runtime.css')));
   assert.ok(fs.existsSync(path.join(dist,'market-shopping-focus.css')));
@@ -94,4 +102,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Authoritative typography, Lucide, navigation, v66 shell, v65 market focus and v72 stable mobile menu consistency expectations: OK');
+console.log('Authoritative typography, Lucide, fixed header, v66 shell, v65 market focus and v73 right-side navigation expectations: OK');

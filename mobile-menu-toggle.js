@@ -1,6 +1,6 @@
 'use strict';
 
-/* Conta de Casa v72 — hambúrguer/X animado, drawer off-canvas e abertura sem salto visual no Safari. */
+/* Conta de Casa v73 — hambúrguer/X animado, drawer à direita e gesto horizontal coerente com a nova direção. */
 (function installAnimatedMobileMenu(root){
   let installed=false;
 
@@ -50,9 +50,9 @@
     const motionEase='cubic-bezier(.32,.72,0,1)';
     const drawerCloseFallback=360;
 
-    // Gesto horizontal: começa junto à margem esquerda quando fechado e em qualquer ponto
-    // da superfície do drawer quando aberto. Só assume o gesto depois de confirmar intenção
-    // horizontal, para não bloquear o scroll vertical dos itens.
+    // Gesto horizontal: quando fechado começa junto à margem direita; quando aberto pode começar
+    // em qualquer ponto da superfície do drawer. Só assume o gesto depois de confirmar intenção
+    // horizontal, preservando o scroll vertical normal dos itens.
     const swipeEdgeWidth=30;
     const swipeIntentThreshold=8;
     const swipeHorizontalBias=1.08;
@@ -231,16 +231,13 @@
 
     function releasePinnedTransform(shell){
       if(!shell)return;
-      // Um frame mantém exatamente a posição alcançada pelo dedo; no seguinte o CSS volta a
-      // assumir o transform final e executa apenas o pequeno percurso restante.
       shell.getBoundingClientRect();
       requestAnimationFrame(()=>shell.style.removeProperty('transform'));
     }
 
     // Abre a superfície ainda no estado visual fechado. O botão é transferido para o dialog
     // antes de showModal(), enquanto um placeholder conserva exatamente o espaço no topbar.
-    // Assim o Safari nunca pinta o botão numa posição, remove-o e volta a pintá-lo noutra no
-    // mesmo gesto; a primeira imagem visível do dialog já contém o mesmo controlo dentro do drawer.
+    // A primeira imagem visível do dialog já contém o mesmo controlo no cabeçalho do drawer.
     function showDrawerClosedSurface(){
       if(drawer.open)return;
       cancelMenuMotion();
@@ -252,7 +249,7 @@
     }
 
     // O código legado fecha o dialog imediatamente. Intercetamos apenas esta instância para
-    // permitir que a superfície termine a transição para a esquerda antes do close nativo.
+    // permitir que a superfície termine a transição para a direita antes do close nativo.
     const nativeDrawerClose=drawer.close.bind(drawer);
 
     function clearDrawerCloseWait(){
@@ -328,8 +325,6 @@
       if(drawer.dataset.closing==='true')return;
       if(!drawer.open)showDrawerClosedSurface();
 
-      // Separamos a montagem do dialog da mudança de estado visual. O style flush acima cria
-      // um estado inicial real; no frame seguinte o painel entra e as mesmas três linhas formam o X.
       requestAnimationFrame(()=>{
         if(!drawer.open||drawer.dataset.closing==='true')return;
         setButtonState(true);
@@ -353,8 +348,6 @@
 
       if(gesture.mode==='opening'){
         if(!drawer.open)showDrawerClosedSurface();
-        // O estado .open representa o destino final; data-dragging sobrepõe o transform enquanto
-        // o dedo está no ecrã, por isso o painel acompanha a posição real sem saltar para o fim.
         drawer.classList.add('open');
         setButtonState(true);
       }else if(!drawer.open){
@@ -381,8 +374,6 @@
         return;
       }
 
-      // animatedDrawerClose reutiliza a posição fixa acabada de criar e anima apenas o percurso
-      // restante até fora do ecrã, depois fecha realmente o <dialog>.
       drawer.close();
     }
 
@@ -402,7 +393,7 @@
         return;
       }
 
-      if(touch.clientX<=swipeEdgeWidth){
+      if(touch.clientX>=root.innerWidth-swipeEdgeWidth){
         touchGesture={
           mode:'opening',identifier:touch.identifier,startX:touch.clientX,startY:touch.clientY,
           lastX:touch.clientX,lastTime:time,velocity:0,progress:0,width:0,dragging:false
@@ -427,8 +418,8 @@
           touchGesture=null;
           return;
         }
-        if(gesture.mode==='opening'&&dx<=0){touchGesture=null;return;}
-        if(gesture.mode==='closing'&&dx>=0){touchGesture=null;return;}
+        if(gesture.mode==='opening'&&dx>=0){touchGesture=null;return;}
+        if(gesture.mode==='closing'&&dx<=0){touchGesture=null;return;}
         if(!beginTouchDrag(gesture)){touchGesture=null;return;}
       }
 
@@ -441,9 +432,9 @@
 
       const width=Math.max(1,gesture.width||measuredDrawerWidth());
       const offset=gesture.mode==='opening'
-        ? clamp(-width+Math.max(0,dx),-width,0)
-        : clamp(Math.min(0,dx),-width,0);
-      const progress=clamp(1+(offset/width),0,1);
+        ? clamp(width+Math.min(0,dx),0,width)
+        : clamp(Math.max(0,dx),0,width);
+      const progress=clamp(1-(offset/width),0,1);
       gesture.progress=progress;
       gesture.offset=offset;
       setDragVisual(offset,progress);
@@ -463,8 +454,8 @@
       if(event.cancelable)event.preventDefault();
       const velocity=(nowMs()-gesture.lastTime)<=120?gesture.velocity:0;
       const keepOpen=gesture.mode==='opening'
-        ? (gesture.progress>=swipeOpenThreshold||velocity>=swipeFlingVelocity)
-        : !(gesture.progress<=swipeKeepOpenThreshold||velocity<=-swipeFlingVelocity);
+        ? (gesture.progress>=swipeOpenThreshold||velocity<=-swipeFlingVelocity)
+        : !(gesture.progress<=swipeKeepOpenThreshold||velocity>=swipeFlingVelocity);
       settleTouchDrag(keepOpen);
     }
 
@@ -472,7 +463,6 @@
       const gesture=touchGesture;
       if(!gesture)return;
       if(!gesture.dragging){touchGesture=null;return;}
-      // Um cancel do sistema regressa ao estado anterior para não deixar o drawer num ponto intermédio.
       settleTouchDrag(gesture.mode==='closing');
     }
 
@@ -482,8 +472,6 @@
     });
     button.addEventListener('blur',()=>delete button.dataset.focusOrigin);
 
-    // Regista também a origem de interações dentro do drawer para devolver o foco corretamente
-    // quando o utilizador fecha por backdrop, Escape ou escolhe uma opção de navegação.
     drawer.addEventListener('pointerdown',()=>setFocusOrigin(false),{capture:true,passive:true});
     drawer.addEventListener('keydown',event=>{
       if(event.key==='Enter'||event.key===' '||event.key==='Escape')setFocusOrigin(true);
@@ -499,7 +487,6 @@
       event.stopImmediatePropagation();
     },true);
 
-    // Captura o gesto do botão antes do listener legado: abrir e fechar passam a usar o mesmo botão.
     button.addEventListener('click',event=>{
       event.preventDefault();
       event.stopImmediatePropagation();

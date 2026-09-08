@@ -198,3 +198,29 @@ O utilizador recebe feedback cinestésico imediato e previsível sem reflow, sem
 ### Versionamento
 
 Permanece `v71` / `71-menu5`; o refinamento foi incorporado no mesmo PR candidato antes da publicação.
+
+## D-038 — A navegação lateral usa o lado direito como direção canónica
+Data: 8 de setembro de 2026 · Estado: aceite como candidata v73.
+
+### Contexto
+
+A aplicação tinha sidebar desktop e drawer móvel ancorados à esquerda. A direção pretendida passa a usar o lado direito, mantendo o hambúrguer no cabeçalho móvel, o mesmo conjunto `NAV_GROUPS` e a mesma arquitetura funcional.
+
+### Decisão
+
+- no desktop, fixar `.sidebar` à direita e reservar espaço com `margin-right: var(--sidebar-current)`;
+- espelhar borda, sombra, gradiente e indicador ativo para a margem direita da navegação;
+- no mobile, ancorar `#mobileDrawer` com `inset:0 0 0 auto`;
+- usar estado fechado positivo `translate3d(calc(100% + 8px),0,0)` e estado aberto `translate3d(0,0,0)`;
+- manter a entrada composta apenas por `transform`/opacidade, com cerca de `300 ms`, e o fecho ligeiramente mais rápido;
+- inverter o gesto: abertura a partir dos últimos `30 px` da margem direita com movimento para a esquerda; fecho com movimento para a direita;
+- manter thresholds, scroll vertical, `prefers-reduced-motion`, ARIA, o mesmo botão e o mesmo `<dialog>`;
+- preservar o header móvel fixed e as safe areas definidas em D-026.
+
+### Motivo
+
+A alteração muda a direção visual sem duplicar navegação, sem alterar dados e sem introduzir um novo componente. O mesmo sistema funciona em mobile e desktop com menos divergência estrutural.
+
+### Versionamento
+
+Candidata `v73` / `73-menu8`; cache `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v73-menu8`.

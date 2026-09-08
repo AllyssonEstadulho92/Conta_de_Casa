@@ -84,30 +84,30 @@ assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://world.openbeautyfacts
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/products/123/front.jpg'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/images/large/739490_test.jpg'),'');
 
-assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v72-menu7/);
+assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v73-menu8/);
 for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','ui-consistency.css','v64-runtime.css','v64-runtime.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(prepare.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
 }
-assert.match(prepare,/const BUILD = 'v72'/);
+assert.match(prepare,/const BUILD = 'v73'/);
 assert.match(prepare,/const VISUAL_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const SHELL_REV = '66-shell1'/);
-assert.match(prepare,/const MENU_REV = '72-menu7'/);
+assert.match(prepare,/const MENU_REV = '73-menu8'/);
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-image-audit\.css\?v=72/);
-  assert.match(index,/market-retailer-image-policy\.js\?v=72/);
-  assert.match(index,/market-image-audit\.js\?v=72/);
-  assert.match(index,/market-official-images\.js\?v=72/);
+  assert.match(index,/market-image-audit\.css\?v=73/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=73/);
+  assert.match(index,/market-image-audit\.js\?v=73/);
+  assert.match(index,/market-official-images\.js\?v=73/);
   assert.match(index,/ui-consistency\.css\?v=64-ui1/);
   assert.match(index,/v64-runtime\.css\?v=66-shell1/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
-  assert.match(index,/mobile-menu-toggle\.css\?v=72-menu7/);
-  assert.match(index,/mobile-menu-toggle\.js\?v=72-menu7/);
+  assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
+  assert.match(index,/mobile-menu-toggle\.js\?v=73-menu8/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.match(index,/https:\/\/www\.continente\.pt/);
   assert.match(index,/https:\/\/static\.pingodoce\.pt/);
@@ -119,4 +119,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official retailer image, fallback, safe-source, zoom and v72 menu build expectations: OK');
+console.log('Market official retailer image, fallback, safe-source, zoom and v73 navigation build expectations: OK');

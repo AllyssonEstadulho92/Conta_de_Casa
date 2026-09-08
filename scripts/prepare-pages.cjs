@@ -5,14 +5,14 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const BUILD = 'v72';
+const BUILD = 'v73';
 const UI_REV = '64-ui1';
 const CATEGORY_REV = '64-ui1';
 const VISUAL_REV = '64-ui1';
 const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '65-shopping1';
 const SHELL_REV = '66-shell1';
-const MENU_REV = '72-menu7';
+const MENU_REV = '73-menu8';
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -85,13 +85,10 @@ if(!index.includes('app-update.css')) index=index.replace('</head>',`  <link rel
 if(!index.includes('market-image-audit.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-image-audit.css?v=${BUILD.slice(1)}" />\n</head>`);
 if(!index.includes('market-brand.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-brand.css?v=${UI_REV}" />\n</head>`);
 if(!index.includes('market-category-groups.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-category-groups.css?v=${CATEGORY_REV}" />\n</head>`);
-// Consolidação visual global da v63, mantida antes dos ajustes de runtime da v64.
 if(!index.includes('ui-consistency.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./ui-consistency.css?v=${VISUAL_REV}" />\n</head>`);
-// Base v64 do cabeçalho/recorrências; a folha recebeu revisão v66 apenas para uniformizar o shell móvel.
 if(!index.includes('v64-runtime.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v64-runtime.css?v=${SHELL_REV}" />\n</head>`);
-// Camada v65: densidade e prioridade operacional exclusivas da Lista de compras.
 if(!index.includes('market-shopping-focus.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-shopping-focus.css?v=${SHOPPING_REV}" />\n</head>`);
-// Camada v72: preserva o drawer suave e elimina o salto visual do controlo ao entrar no dialog.
+// Camada v73: navegação lateral passa para a direita em desktop e mobile, preservando o header fixo móvel.
 if(!index.includes('mobile-menu-toggle.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./mobile-menu-toggle.css?v=${MENU_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;

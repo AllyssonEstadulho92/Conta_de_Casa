@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v72-menu7';
+const CACHE = 'conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v73-menu8';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
