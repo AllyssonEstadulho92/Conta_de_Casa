@@ -1,9 +1,23 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v72",
+  "latestVersion": "v73",
   "publishedAt": "2026-09-08",
   "releases": [
+    {
+      "version": "v73",
+      "date": "8 de setembro de 2026",
+      "title": "Navegação lateral reposicionada para a direita",
+      "items": [
+        "A navegação lateral passa a ocupar o lado direito no desktop e o drawer móvel passa a entrar naturalmente a partir da direita.",
+        "O cabeçalho móvel continua fixo e responsivo; o botão hambúrguer mantém a posição no cabeçalho e transforma as mesmas três linhas num X quando o menu abre.",
+        "A entrada do drawer usa transform composto com cerca de 300 ms e uma curva de desaceleração suave; o fecho é ligeiramente mais rápido para manter a interação natural.",
+        "O gesto horizontal foi invertido para corresponder à nova direção: o drawer pode ser puxado a partir da margem direita e fechado deslizando para a direita.",
+        "A sidebar desktop passa a reservar espaço através de margin-right, preservando a largura útil do conteúdo, o modo recolhido e os breakpoints existentes.",
+        "Indicadores de item ativo, borda lateral e sombra foram também espelhados para que a composição pareça nativa do lado direito, sem alterar tipografia ou sistema de ícones.",
+        "A alteração é exclusivamente de interface e navegação: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+      ]
+    },
     {
       "version": "v72",
       "date": "8 de setembro de 2026",
