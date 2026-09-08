@@ -11,7 +11,7 @@ URL pública: `https://allyssonestadulho92.github.io/Conta_de_Casa/`
 
 A v75 mantém arquitetura PWA estática/local-first, com estado financeiro em IndexedDB, valores em cêntimos, cofre PBKDF2-SHA-256 + AES-GCM, sincronização GitHub opcional apenas sobre envelope cifrado e `STATE_VERSION = 5`.
 
-A revisão `75-stability1` é uma camada final exclusivamente de apresentação. Foi criada para corrigir inconsistências transversais de tipografia, alinhamento, overflow, safe areas, formulários, navegação, diálogos e estados visuais do Mercado sem reescrever `core.js`, `finance.js`, persistência, cifragem ou regras financeiras.
+A revisão `75-stability1` está integrada em `main`, validada pelo pipeline completo e distribuída por GitHub Pages. É uma camada final exclusivamente de apresentação para corrigir inconsistências transversais de tipografia, alinhamento, overflow, safe areas, formulários, navegação, diálogos e estados visuais do Mercado sem reescrever `core.js`, `finance.js`, persistência, cifragem ou regras financeiras.
 
 ## Cabeçalho móvel `75-header2`
 
@@ -27,7 +27,7 @@ O cabeçalho móvel continua minimalista:
 
 ## Estabilidade transversal `75-stability1`
 
-A nova revisão acrescenta:
+A revisão acrescenta:
 
 - stack tipográfica nativa consistente em iOS, Android, macOS e Windows;
 - `min-width: 0`, controlo de overflow e wrapping defensivo em flex/grid;
@@ -81,12 +81,14 @@ Continuam preservados:
 - `estimatedCents` / `actualCents`;
 - sincronização cifrada.
 
-## Pipeline
+## Pipeline e publicação
 
-CI e Pages passam a verificar também `v74-experience.js`, `v75-architecture.js`, `v75-stability.js`, `v75-architecture.test.cjs` e `v75-stability.test.cjs`, eliminando a diferença que existia entre a validação principal e a verificação anterior ao deploy.
+A revisão integrada em `main` concluiu com sucesso o pipeline completo: sintaxe, finanças, auditoria financeira, invariantes de contagem, isolamento do cofre, datas, faturas, QR, Mercado, imagens, código de barras, runtime, ícones, consistência visual, arquitetura v75, estabilidade v75, menu, centro de atualização, segurança, responsividade, regressão mobile, navegação, acessibilidade, sincronização e manifesto.
 
-As notas públicas de `release-manifest.json` foram alinhadas com `75-header2` e `75-stability1`, removendo a referência obsoleta à saudação dentro do cabeçalho global.
+O workflow GitHub Pages verificou novamente a revisão testada, preparou a allowlist pública, carregou o artefacto e concluiu o deploy com sucesso.
+
+As notas públicas de `release-manifest.json` estão alinhadas com `75-header2` e `75-stability1`, sem a referência obsoleta à saudação dentro do cabeçalho global.
 
 ## Próximo passo
 
-Depois de CI verde e publicação, fazer validação física em iPhone/Safari/PWA e Android/Chrome: safe areas, títulos longos, badge, hambúrguer/X, rotação, tema escuro, formulários sem zoom, navegação inferior, ausência de overflow e fallback de imagens do Mercado. Qualquer regressão encontrada deve ser corrigida na camada de apresentação antes de tocar no núcleo financeiro.
+A parte automatizável e publicável desta revisão está concluída. Falta apenas validação física em dispositivos reais: iPhone/Safari/PWA e Android/Chrome para safe areas, títulos longos, badge, hambúrguer/X, rotação, tema escuro, formulários sem zoom, navegação inferior, ausência de overflow e fallback de imagens do Mercado. Qualquer regressão observada em hardware deve ser corrigida na camada de apresentação antes de tocar no núcleo financeiro.
