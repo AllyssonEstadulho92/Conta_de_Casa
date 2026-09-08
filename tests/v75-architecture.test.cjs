@@ -8,11 +8,13 @@ const ROOT=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const js=read('v75-architecture.js');
 const css=read('v75-architecture.css');
+const usability=read('v76-usability.css');
 const legacy=read('styles.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 const release=JSON.parse(read('release-manifest.json'));
 
+/* v75 remains the information-architecture base. */
 assert.match(js,/Conta de Casa v75/);
 assert.match(js,/bills:\['Despesas','Movimentos'\]/);
 assert.match(js,/market:\['Mercado','Compras'\]/);
@@ -48,16 +50,27 @@ assert.match(css,/\.v75-sync-hero/);
 assert.match(css,/background:var\(--v75-surface\)!important/,'v75 must use coherent surfaces instead of mixed hard-coded cards');
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-assert.match(prepare,/const BUILD = 'v75'/);
+/* v76 is intentionally presentation-only and repairs usability over v75. */
+assert.match(usability,/Conta de Casa v76/);
+assert.match(usability,/#page-planning > \.cdc-planning-overview/);
+assert.match(usability,/\.cdc-planning-categories > div[\s\S]*grid-template-areas:/);
+assert.doesNotMatch(usability,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/,'v76 usability layer must not mutate financial state');
+
+assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
+assert.match(prepare,/const USABILITY_REV = '76-usability1'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
-assert.match(sw,/conta-de-casa-public-v75-architecture2/);
+assert.ok(prepare.includes("'v76-usability.css'"));
+assert.match(sw,/conta-de-casa-public-v76-usability1/);
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
-assert.equal(release.latestVersion,'v75');
-assert.equal(release.releases[0].version,'v75');
-assert.ok(release.releases[0].items.some(item=>/Mercado.*barra inferior|barra inferior.*Mercado/i.test(item)));
-assert.ok(release.releases[0].items.some(item=>/PIN|cofre/i.test(item)));
+assert.ok(sw.includes("'./v76-usability.css'"));
+assert.equal(release.latestVersion,'v76');
+assert.equal(release.releases[0].version,'v76');
+const v75=release.releases.find(item=>item.version==='v75');
+assert.ok(v75,'v75 release history must be preserved');
+assert.ok(v75.items.some(item=>/Mercado.*barra inferior|barra inferior.*Mercado/i.test(item)));
+assert.ok(v75.items.some(item=>/PIN|cofre/i.test(item)));
 
-console.log('v75 prototype fidelity, information architecture, expense flow, sync hierarchy and navigation tests: OK');
+console.log('v75 information architecture preserved under v76 usability corrections: OK');
