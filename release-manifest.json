@@ -1,9 +1,22 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v75",
+  "latestVersion": "v76",
   "publishedAt": "2026-09-08",
   "releases": [
+    {
+      "version": "v76",
+      "date": "8 de setembro de 2026",
+      "title": "Auditoria de usabilidade e correção do Planeamento",
+      "items": [
+        "O Planeamento deixa de cortar categorias, barras e valores em ecrãs estreitos; a grelha passa a adaptar-se ao espaço disponível e empilha o resumo financeiro quando necessário.",
+        "O resumo de Planeamento passa também a ser apresentado no desktop/web, mantendo mês, gasto, orçamento, disponível e distribuição por categoria coerentes entre dispositivos.",
+        "Títulos longos do cabeçalho móvel deixam de ser truncados e podem ocupar duas linhas sem sair da área segura do ecrã.",
+        "Os principais alvos tácteis voltam a ter pelo menos 44 píxeis, incluindo menu, notificações, fecho de formulário e fecho do scanner; a navegação inferior recupera 58 píxeis de altura útil.",
+        "Despesas, Mercado e Mais recebem ajustes de leitura: descrições deixam de desaparecer prematuramente, textos secundários ficam maiores e cartões de produtos passam a duas colunas no telemóvel.",
+        "A correção é exclusivamente de apresentação e responsividade; cálculos financeiros, valores em cêntimos, IndexedDB, cofre, PIN, pagamentos, scanner, QR e sincronização permanecem inalterados."
+      ]
+    },
     {
       "version": "v75",
       "date": "8 de setembro de 2026",
