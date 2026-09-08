@@ -38,6 +38,8 @@ A nova revisão acrescenta:
 - foco visível coerente, suporte a `forced-colors` e redução de movimento;
 - sincronização da cor do browser/PWA com o tema e o cabeçalho visível;
 - estados `loading`, `loaded`, `error` e `empty` para fotografias do Mercado, com skeleton e fallback `Imagem indisponível`;
+- ampliação de fotografia desativada enquanto a imagem está inválida e restaurada quando a imagem volta a carregar;
+- grelha de produtos do Mercado reduzida de três para duas colunas até 430 px para preservar leitura e área tátil;
 - observação de re-renderizações para que falhas de imagem remota não deixem cartões vazios/deformados.
 
 ## Arquitetura v75 preservada
@@ -82,6 +84,8 @@ Continuam preservados:
 ## Pipeline
 
 CI e Pages passam a verificar também `v74-experience.js`, `v75-architecture.js`, `v75-stability.js`, `v75-architecture.test.cjs` e `v75-stability.test.cjs`, eliminando a diferença que existia entre a validação principal e a verificação anterior ao deploy.
+
+As notas públicas de `release-manifest.json` foram alinhadas com `75-header2` e `75-stability1`, removendo a referência obsoleta à saudação dentro do cabeçalho global.
 
 ## Próximo passo
 
