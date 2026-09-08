@@ -15,9 +15,9 @@ const EXPERIENCE_REV = '74-experience2';
 const ARCHITECTURE_REV = '75-architecture2';
 const USABILITY_REV = '76-usability1';
 
-/* Bundle público v76: mantém a arquitetura v75 e aplica por último uma camada
-   pequena de correção de usabilidade/responsividade. O núcleo funcional e as
-   camadas históricas excluídas da distribuição permanecem inalterados. */
+/* Bundle público v76: mantém a arquitetura v75 e aplica por último as camadas
+   pequenas de correção de usabilidade/responsividade e acessibilidade. O núcleo
+   funcional e as camadas históricas excluídas permanecem inalterados. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -36,6 +36,7 @@ const PUBLIC_FILES = Object.freeze([
   'v74-experience.css',
   'v75-architecture.css',
   'v76-usability.css',
+  'v76-accessibility.css',
   'core.js',
   'finance.js',
   'render.js',
@@ -95,6 +96,7 @@ if(!index.includes('mobile-menu-toggle.css')) index=index.replace('</head>',`  <
 if(!index.includes('v74-experience.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v74-experience.css?v=${EXPERIENCE_REV}" />\n</head>`);
 if(!index.includes('v75-architecture.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-architecture.css?v=${ARCHITECTURE_REV}" />\n</head>`);
 if(!index.includes('v76-usability.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-usability.css?v=${USABILITY_REV}" />\n</head>`);
+if(!index.includes('v76-accessibility.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-accessibility.css?v=${USABILITY_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
 if(!index.includes('sync-conflict-policy.js')) index=index.replace(syncScript,`${syncScript}<script src="./sync-conflict-policy.js?v=${UI_REV}" defer></script>`);
