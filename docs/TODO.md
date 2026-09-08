@@ -40,8 +40,9 @@ Atualizado: 8 de setembro de 2026
 - [x] Manter área da fotografia estável, sem cartão vazio ou deformado.
 - [x] Adicionar skeleton discreto durante carregamento.
 - [x] Usar fallback visual com texto `Imagem indisponível` nas miniaturas móveis adequadas.
+- [x] Desativar ampliação quando a fotografia remota falha e restaurar o controlo quando a imagem volta a ficar válida.
+- [x] Reflow da grelha de produtos para 2 colunas até 430 px, evitando cartões demasiado estreitos.
 - [ ] Validar em hardware imagens oficiais Continente/Pingo Doce com rede lenta, offline e URL quebrado.
-- [ ] Rever cartões de catálogo em 3 colunas e reflow para 2 colunas quando a largura real não permitir leitura confortável.
 
 ## P1 — QA e publicação
 
