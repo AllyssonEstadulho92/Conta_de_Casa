@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2';
+const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -20,6 +20,7 @@ const PUBLIC_ASSETS = [
   './v74-experience.css',
   './v75-architecture.css',
   './v75-header-refinement.css',
+  './v75-stability.css',
   './core.js',
   './finance.js',
   './render.js',
@@ -42,6 +43,7 @@ const PUBLIC_ASSETS = [
   './market-shopping-focus.js',
   './v74-experience.js',
   './v75-architecture.js',
+  './v75-stability.js',
   './release-manifest.json',
   './manifest.webmanifest',
   './icon.svg',
