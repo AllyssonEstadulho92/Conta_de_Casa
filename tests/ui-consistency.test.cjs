@@ -14,6 +14,7 @@ const experience=read('v74-experience.js');
 const experienceCss=read('v74-experience.css');
 const architecture=read('v75-architecture.js');
 const architectureCss=read('v75-architecture.css');
+const headerCss=read('v75-header-refinement.css');
 const menuCss=read('mobile-menu-toggle.css');
 const menuJs=read('mobile-menu-toggle.js');
 const sw=read('sw.js');
@@ -56,6 +57,12 @@ assert.match(architectureCss,/\.invoice-scan-overlay[\s\S]*inset:0!important/);
 assert.match(architectureCss,/background:var\(--v75-surface\)!important/);
 assert.match(architectureCss,/prefers-reduced-motion:reduce/);
 
+assert.match(headerCss,/refinamento premium do cabeçalho móvel/);
+assert.match(headerCss,/#cdcMobileGreeting[\s\S]*display:none!important/);
+assert.match(headerCss,/#notificationsBtn[\s\S]*order:99!important/);
+assert.match(headerCss,/--v75-header-row:60px/);
+assert.match(headerCss,/prefers-reduced-motion:reduce/);
+
 assert.match(marketBrand,/Conta de Casa v74/);
 assert.match(marketBrand,/\.market-product-photo[\s\S]*display:grid!important/);
 assert.doesNotMatch(marketBrand,/\.market-product-photo[^\{]*\{[^}]*display:none!important/);
@@ -93,8 +100,8 @@ assert.match(menuJs,/drawer\.close=animatedDrawerClose/);
 assert.match(menuJs,/touch\.clientX>=root\.innerWidth-swipeEdgeWidth/);
 assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 0 0 auto!important/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
-for(const asset of ['./design-system.css','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`));
+assert.match(sw,/conta-de-casa-public-v75-architecture2-header2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+for(const asset of ['./design-system.css','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js','./v75-header-refinement.css'])assert.ok(sw.includes(`'${asset}'`));
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 
@@ -103,9 +110,10 @@ assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
+assert.match(prepare,/const HEADER_REV = '75-header2'/);
 assert.doesNotMatch(publicFilesBlock,/'ui-consistency\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'v64-runtime\.css'/);
-for(const asset of ['v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js'])assert.ok(publicFilesBlock.includes(`'${asset}'`));
+for(const asset of ['v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-header-refinement.css'])assert.ok(publicFilesBlock.includes(`'${asset}'`));
 
 assert.equal(manifest.background_color,'#f4f8f8');
 assert.equal(manifest.theme_color,'#f4f8f8');
@@ -120,14 +128,15 @@ try{
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/v74-experience\.css\?v=74-experience2/);
   assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
+  assert.match(index,/v75-header-refinement\.css\?v=75-header2/);
   assert.match(index,/v74-experience\.js\?v=74-experience2/);
   assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
   assert.match(index,/<meta name="theme-color" content="#f4f8f8"/);
-  for(const asset of ['design-system.css','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  for(const asset of ['design-system.css','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-header-refinement.css'])assert.ok(fs.existsSync(path.join(dist,asset)));
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Conta de Casa final v75 prototype architecture, v74 functional base and lean public bundle: OK');
+console.log('Conta de Casa v75 architecture and premium mobile header refinement: OK');

@@ -43,26 +43,8 @@ Estado: aceite. Imagem nunca prova preço nem transação.
 ## D-013 — Atualização usa Service Worker same-origin
 Estado: aceite. Releases são distribuídas pela própria PWA e instaladas de forma controlada.
 
-## D-014 — Imagens por SKU exigem validação estrita
-Estado: aceite para compatibilidade. Imagem oficial exige cadeia e identificador correspondentes.
-
-## D-015 — Reader externo restrito a páginas públicas validadas
-Estado: aceite enquanto o pipeline de imagens estiver distribuído.
-
-## D-016 — Integrações visuais usam o contrato público do DOM
-Estado: aceite. Módulos não dependem de estado privado de outros módulos.
-
-## D-017 — Cartões vivos de retalhista usam política `official-only`
-Estado: aceite no pipeline de resultados vivos.
-
 ## D-018 — Mercado é `text-first`; fotografia é opcional
-Data: 6 de setembro de 2026 · Estado: aceite. Nome, embalagem, loja, categoria, estado e preço identificam o artigo; fotografia verificada é apoio visual, nunca requisito nem prova de preço.
-
-## D-019 — Browser do Mercado usa posições explícitas em mobile
-Estado: aceite. Grid evita compressão de nome/preço e abaixo de 360 px permite reflow controlado.
-
-## D-020 — Metadados visuais do Mercado são conflitos técnicos
-Estado: aceite. `sync-conflict-policy.js` pode ignorar apenas metadados visuais definidos; dados de negócio continuam protegidos.
+Estado: aceite. Nome, embalagem, loja, categoria, estado e preço identificam o artigo; fotografia verificada é apoio visual.
 
 ## D-021 — Lista de compras é agrupada sem alterar o modelo
 Estado: aceite. Agrupamento e disclosures reutilizam os mesmos itens, IDs e handlers.
@@ -70,79 +52,45 @@ Estado: aceite. Agrupamento e disclosures reutilizam os mesmos itens, IDs e hand
 ## D-022 — Colisões visuais devem ser consolidadas
 Estado: aceite. `design-system.css` é a base consolidada; `ui-consistency.css` deixou de ser distribuído.
 
-## D-023 — Cada alteração pública relevante gera versão e validação
-Estado: aceite. Fluxo oficial: alteração → versão → `release-manifest.json` → CI → `main` → Pages → instalação/atualização.
+## D-023 — Cada alteração pública relevante gera revisão validável
+Estado: aceite. Alterações visuais podem usar revisão interna dentro do mesmo build quando não existe mudança funcional; cache e asset versioning têm de permitir atualização real.
 
 ## D-024 — Auto-adição por código de barras é conservadora
-Estado: aceite. Exige loja compatível, score `>=0.84`, margem `>=0.10`; ambiguidade exige confirmação. Só estimativas podem ser atualizadas automaticamente.
+Estado: aceite. Exige correspondência forte; ambiguidade exige confirmação. Só estimativas podem ser atualizadas automaticamente.
 
 ## D-025 — Faturas recorrentes futuras começam como `Por preencher`
-Estado: aceite. Ocorrências novas não inventam montantes variáveis e ficam fora de pendentes/atrasos até preenchimento.
+Estado: aceite. Ocorrências novas não inventam montantes variáveis.
 
 ## D-026 — Cabeçalho móvel é fixed; `.main` continua o scroller
 Estado: aceite. Safe area e offset do conteúdo são obrigatórios.
 
-## D-027 — Topbar móvel mantém geometria global
-Estado: aceite. A apresentação pode mudar por release, mas deve existir um único modelo por viewport.
-
-## D-028 — Redeploy repete verificações da release
-Estado: aceite. Build público só deve ser preparado após testes de sintaxe e regressões críticas.
-
-## D-029 — Lista móvel prioriza execução
-Estado: aceite. Resumo, checkbox, nome, quantidade e preço têm prioridade; detalhe financeiro pode ficar em disclosure. A camada de apresentação não escreve em estado financeiro.
-
 ## D-030 — Versão pública e revisões internas são distintas
-Estado: aceite. Uma release pode reutilizar módulos funcionais validados com revisões anteriores.
-
-## D-031 — Shell móvel usa identidade canónica por release
-Estado: aceite. A cor e as superfícies do shell devem existir numa única camada final, evitando overrides concorrentes.
+Estado: aceite. Uma release pode reutilizar módulos funcionais validados com revisões visuais posteriores.
 
 ## D-032 — O botão móvel é um único controlo
 Estado: aceite. `#mobileMenuBtn` é o mesmo nó nos estados hambúrguer e X.
 
 ## D-033 — Refinar o drawer sem criar segunda navegação
-Estado: aceite. `NAV_GROUPS`, drawer, eventos e renderização continuam únicos.
-
-## D-034 — O controlador animado é proprietário do glifo do menu
-Estado: aceite. `mobile-menu-toggle.js` controla o glifo animado e impede substituição destrutiva pelo hidratador de ícones.
-
-## D-035 — Movimento do glifo usa animação explícita após reparenting
-Estado: aceite. Web Animations complementa o estado CSS, respeitando `prefers-reduced-motion` e fallback.
-
-## D-036 — Drawer fecha apenas depois da transição off-canvas
-Estado: aceite. O wrapper do `dialog.close()` espera pelo fim da transição ou fallback temporal.
-
-## D-037 — Drawer acompanha o dedo e só captura intenção horizontal
-Estado: aceite. Swipe é progressivo, preserva scroll vertical e usa thresholds/velocidade para snap.
+Estado: aceite. Drawer, eventos e renderização continuam únicos.
 
 ## D-038 — Navegação lateral usa o lado direito como direção canónica
-Data: 8 de setembro de 2026 · Estado: aceite e publicada na v73. Desktop reserva sidebar com `margin-right`; drawer abre da direita; swipe de abertura começa na margem direita e move-se para a esquerda.
+Estado: aceite. Desktop e drawer móvel permanecem alinhados com a decisão da v73.
 
-## D-039 — v74 aplica o primeiro protótipo como camada de experiência sem migrar o núcleo
-Data: 8 de setembro de 2026 · Estado: aceite e publicada.
+## D-040 — v75 usa o protótipo como referência visual sem transformar demonstração em funcionalidade
+Estado: aceite e publicada. A fidelidade visual não autoriza preços, lojas, artigos ou capacidades fictícias.
 
-## D-040 — v75 torna o protótipo a referência visual final sem transformar demonstração em funcionalidade
-Data: 8 de setembro de 2026 · Estado: aceite e publicada.
+## D-041 — Cabeçalho móvel minimalista e orientado à tarefa
+Data: 8 de setembro de 2026 · Estado: aceite.
 
 ### Decisão
 
-1. Carregar `v75-architecture.css/js` depois da experiência v74 como camada final versionada.
-2. Usar a identidade do protótipo — verde-petróleo, teal, superfícies claras, cartões compactos e hierarquia móvel — de forma uniforme também no desktop.
-3. Garantir cinco destinos móveis visíveis: **Início, Despesas, Mercado, Planeamento e Mais**.
-4. Reutilizar o formulário real de despesas e acrescentar apresentação para **Manual / Ler fatura / QR Code**.
-5. Reutilizar `invoice-capture.js` para fotografia e QR; a composição do scanner é full-screen.
-6. Não inventar linhas de artigos a partir do QR fiscal.
-7. Não adicionar lojas que o pipeline atual não suporta; a experiência permanece limitada a Continente e Pingo Doce.
-8. Reorganizar Planeamento, Relatórios, Mais e Sincronização sem alterar cálculos nem estado persistido.
-9. Reutilizar `icon.svg` local no onboarding/cofre; não introduzir dependência visual externa.
-10. Manter PIN/palavra-passe, PBKDF2-SHA-256, AES-GCM, `STATE_VERSION = 5`, pagamentos, IndexedDB e sincronização intactos.
-11. A camada v75 não pode chamar `saveState()` nem escrever diretamente `estimatedCents` ou `actualCents`.
-12. Cache e assets da release final usam `75-architecture2`.
-
-### Publicação
-
-- CI final da branch: `34226581162` / `#1488` — sucesso;
-- PR `#65`;
-- merge: `40fe62f8140f1f58af9e9ab8d8c8b642695b7cf3`;
-- CI `main`: `34226711267` / `#1490` — sucesso;
-- Pages: `34226749117` / `#1483` — sucesso.
+1. O cabeçalho móvel deve mostrar apenas navegação, contexto atual e notificações.
+2. O bloco `Olá, Utilizador / Bem-vindo de volta!` e o avatar não pertencem ao topbar global e ficam ocultos.
+3. Hambúrguer + título ficam à esquerda; `#notificationsBtn` fica como única ação à direita.
+4. O sino mantém handler, badge, ARIA e semântica existentes; a alteração é visual.
+5. A linha visual do header usa 60 px mais safe area superior.
+6. Gradiente, sombra e efeitos devem ser discretos; evitar cartões ou ornamentos dentro da topbar.
+7. O título deve truncar com ellipsis em ecrãs estreitos, sem empurrar notificações para fora do viewport.
+8. Hambúrguer e sino mantêm área de toque >= 42 px, foco visível e `prefers-reduced-motion`.
+9. `v75-header-refinement.css` é carregado depois de `v75-architecture.css` e não pode alterar estado da aplicação.
+10. A revisão pública do cabeçalho é `75-header2`; o Service Worker usa cache distinto para invalidar a revisão anterior.

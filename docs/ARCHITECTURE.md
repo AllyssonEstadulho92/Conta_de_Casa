@@ -7,9 +7,9 @@ Distribuição: GitHub Pages / PWA
 
 ## 1. Visão geral
 
-**Conta de Casa** é uma PWA estática distribuída por GitHub Pages. O modelo continua local-first: regras de negócio, persistência, formulários, cifragem e estado financeiro executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
+Conta de Casa é uma PWA estática distribuída por GitHub Pages. O modelo continua local-first: regras de negócio, persistência, formulários, cifragem e estado financeiro executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
 
-A v75 acrescenta uma camada final de arquitetura de informação e composição visual sobre a base funcional v74, sem substituir o núcleo financeiro.
+A v75 usa camadas de apresentação versionadas sobre o núcleo funcional, evitando reescrever lógica financeira por motivos visuais.
 
 ## 2. Núcleo preservado
 
@@ -28,35 +28,28 @@ A v75 acrescenta uma camada final de arquitetura de informação e composição 
 
 - `design-system.css`: tokens e normalização visual;
 - `v74-experience.css/js`: composição funcional de Início, Despesas, Mercado, Planeamento, Relatórios e Mais;
-- `mobile-menu-toggle.css/js`: controlador v73 do drawer à direita e hambúrguer ↔ X;
+- `mobile-menu-toggle.css/js`: drawer à direita e hambúrguer ↔ X;
 - `v64-runtime.js`: comportamento funcional ainda necessário.
 
-### Camada final v75
+### Arquitetura v75
 
-`v75-architecture.css` é carregado depois da base e define:
+`v75-architecture.css/js` define a composição final de páginas, navegação, formulários mobile full-screen, scanner QR, Planeamento, Relatórios, Mais, Sincronização e cofre, sem escrever diretamente em estado financeiro.
 
-- identidade teal/verde-petróleo consistente;
-- superfícies, bordas, raios, sombras e tipografia comuns;
-- topbar móvel fixed e safe areas;
-- cinco destinos móveis sempre visíveis;
-- formulários mobile full-screen;
-- scanner QR full-screen;
-- composição compacta de Mercado, Planeamento, Relatórios, Mais e Sincronização;
-- cofre/onboarding alinhados com `icon.svg` local;
-- tema escuro equivalente.
+### Refinamento de cabeçalho `75-header2`
 
-`v75-architecture.js` é uma camada de orquestração visual que:
+`v75-header-refinement.css` é carregado depois de `v75-architecture.css` e tem responsabilidade exclusivamente visual sobre a topbar móvel.
 
-- ajusta nomes e contexto de páginas;
-- simplifica drawer e navegação secundária;
-- integra a saudação no cabeçalho do Início;
-- reorganiza Planeamento com métricas reais;
-- cria a hierarquia de Mais;
-- acrescenta **Manual / Ler fatura / QR Code** ao formulário real de nova despesa;
-- apresenta o estado de sincronização antes da configuração técnica;
-- reutiliza handlers e componentes existentes.
+Contrato:
 
-A camada não chama `saveState()` nem altera diretamente valores financeiros.
+- `#mobileMenuBtn` continua a ser o mesmo controlo funcional;
+- `#notificationsBtn` continua a usar os mesmos handlers e `#alertBadge`;
+- `#cdcMobileGreeting` fica oculto no topbar;
+- hambúrguer e título ficam à esquerda;
+- notificações ficam isoladas à direita;
+- safe area, foco e `prefers-reduced-motion` são preservados;
+- a camada não altera rotas, dados, IndexedDB, cofre, QR ou sincronização.
+
+A geometria móvel usa 60 px de linha visual mais `env(safe-area-inset-top)`.
 
 ## 4. Navegação
 
@@ -68,15 +61,11 @@ Navegação primária móvel:
 4. Planeamento;
 5. Mais.
 
-A v75 anula explicitamente a regra histórica de `styles.css` que ocultava o terceiro item da barra inferior. O Mercado fica sempre visível.
-
-O drawer fica reduzido a grupos coerentes de Principal, Análise e Conta/sistema. `mobile-menu-toggle.js` continua responsável pelo mesmo `#mobileMenuBtn`, animação hambúrguer/X, Escape, foco e swipe da direita.
+O drawer mantém grupos Principal, Análise e Conta/sistema. `mobile-menu-toggle.js` continua responsável pelo mesmo `#mobileMenuBtn`, animação hambúrguer/X, Escape, foco e swipe da direita.
 
 ## 5. Despesas, faturas e QR
 
-O formulário continua a ser criado por `forms.js` e preserva os IDs, campos e handlers existentes. Na criação de nova despesa, a camada v75 apresenta três modos: Manual, Ler fatura e QR Code.
-
-Fotografia e QR continuam a usar `invoice-capture.js`. O QR fiscal é preenchimento assistido e os dados são revistos antes de guardar. Não são inventadas linhas de produtos que o QR não forneça.
+O formulário continua a ser criado por `forms.js`. Na criação de nova despesa, a camada v75 apresenta Manual, Ler fatura e QR Code. Fotografia e QR continuam a usar `invoice-capture.js`; o utilizador revê os dados antes de guardar.
 
 ## 6. Mercado
 
@@ -84,52 +73,43 @@ Fotografia e QR continuam a usar `invoice-capture.js`. O QR fiscal é preenchime
 - preço confirmado/pago → `actualCents`;
 - GTIN identifica artigo, não prova preço;
 - fotografia validada é apoio visual;
-- lojas suportadas na experiência atual: Continente e Pingo Doce;
-- outras cadeias do protótipo não são apresentadas sem suporte real.
+- lojas suportadas: Continente e Pingo Doce;
+- outras cadeias não são apresentadas sem suporte real.
 
 ## 7. Planeamento, Relatórios e Mais
 
-Planeamento prioriza mês, orçamento, gasto, disponível e categorias antes da edição detalhada. Relatórios reutiliza os cálculos existentes. Mais concentra navegação secundária e evita duplicar Mercado e Planeamento.
+Planeamento prioriza mês, orçamento, gasto, disponível e categorias. Relatórios reutiliza cálculos existentes. Mais concentra navegação secundária e evita duplicar os destinos principais.
 
-## 8. Sincronização
+## 8. Sincronização e segurança
 
-O painel técnico real continua em `#syncPanel`. A v75 apenas acrescenta uma introdução visual baseada no estado já renderizado. A sincronização continua opcional e cifrada.
+O painel real permanece em `#syncPanel`; a v75 apenas acrescenta apresentação. A sincronização continua opcional e cifrada. PIN, palavra-passe, PBKDF2-SHA-256 e AES-GCM permanecem inalterados.
 
 ## 9. Responsividade e acessibilidade
 
 - breakpoint principal: `820px`;
 - safe areas iOS em topbar, drawer, scanner, formulários e navegação inferior;
-- alvos principais próximos ou superiores a 44 px;
+- alvos principais de 42–48 px;
 - `prefers-reduced-motion` respeitado;
 - foco e ARIA preservados;
-- pinch zoom não é bloqueado;
-- sem `zoom:` CSS como remendo de layout.
+- pinch zoom não é bloqueado.
 
-## 10. Distribuição pública v75
+## 10. Distribuição pública
 
 - `BUILD = v75`;
 - `UI_REV = 74-ui1`;
-- `CATEGORY_REV = 64-ui1`;
-- `RUNTIME_REV = 64-runtime1`;
 - `SHOPPING_REV = 74-shopping2`;
 - `MENU_REV = 73-menu8`;
 - `EXPERIENCE_REV = 74-experience2`;
 - `ARCHITECTURE_REV = 75-architecture2`;
-- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2`.
+- `HEADER_REV = 75-header2`;
+- cache: `conta-de-casa-public-v75-architecture2-header2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2`.
 
-`ui-consistency.css` e `v64-runtime.css` continuam fora de `dist`. O bundle Pages publicado contém 43 assets, incluindo `v75-architecture.css` e `v75-architecture.js`.
+`ui-consistency.css` e `v64-runtime.css` continuam fora de `dist`. `v75-header-refinement.css` integra o bundle Pages e recebe query de revisão própria para invalidação de cache.
 
 ## 11. Atualização e cache
 
-`sw.js` utiliza um nome de cache versionado. Na ativação elimina caches diferentes do atual. `events.js` regista `./sw.js?v=75` com `updateViaCache:'none'`. O centro de atualização usa `registration.update()`, `APPLY_UPDATE`, `controllerchange` e reload controlado para promover a nova versão.
+`sw.js` utiliza cache versionado e elimina caches antigos na ativação. O bundle público carrega `v75-header-refinement.css?v=75-header2`, garantindo que a revisão visual do cabeçalho não fica presa à folha anterior.
 
-## 12. Publicação
+## 12. Validação manual ainda necessária
 
-- CI final da branch: `34226581162` / `#1488` — sucesso;
-- PR `#65`;
-- merge: `40fe62f8140f1f58af9e9ab8d8c8b642695b7cf3`;
-- CI de `main`: `34226711267` / `#1490` — sucesso;
-- GitHub Pages: `34226749117` / `#1483` — sucesso;
-- URL: `https://allyssonestadulho92.github.io/Conta_de_Casa/`.
-
-A única validação ainda manual é a inspeção física em dispositivos reais para confirmar composição visual, teclado, câmara e comportamento do browser/PWA.
+Confirmar em dispositivo real: safe area, títulos longos, badge de notificação, animação hambúrguer/X, orientação, tema escuro e ausência de overflow.
