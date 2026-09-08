@@ -5,7 +5,7 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const BUILD = 'v75';
+const BUILD = 'v76';
 const UI_REV = '74-ui1';
 const CATEGORY_REV = '64-ui1';
 const RUNTIME_REV = '64-runtime1';
@@ -13,10 +13,11 @@ const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const EXPERIENCE_REV = '74-experience2';
 const ARCHITECTURE_REV = '75-architecture2';
+const USABILITY_REV = '76-usability1';
 
-/* Bundle público v75: mantém a experiência v74 como base funcional de apresentação
-   e aplica por último a camada final v75 alinhada com o protótipo. Camadas visuais
-   históricas ui-consistency.css e v64-runtime.css continuam fora da distribuição. */
+/* Bundle público v76: mantém a arquitetura v75 e aplica por último uma camada
+   pequena de correção de usabilidade/responsividade. O núcleo funcional e as
+   camadas históricas excluídas da distribuição permanecem inalterados. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -34,6 +35,7 @@ const PUBLIC_FILES = Object.freeze([
   'market-image-audit.css',
   'v74-experience.css',
   'v75-architecture.css',
+  'v76-usability.css',
   'core.js',
   'finance.js',
   'render.js',
@@ -92,6 +94,7 @@ if(!index.includes('market-shopping-focus.css')) index=index.replace('</head>',`
 if(!index.includes('mobile-menu-toggle.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./mobile-menu-toggle.css?v=${MENU_REV}" />\n</head>`);
 if(!index.includes('v74-experience.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v74-experience.css?v=${EXPERIENCE_REV}" />\n</head>`);
 if(!index.includes('v75-architecture.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-architecture.css?v=${ARCHITECTURE_REV}" />\n</head>`);
+if(!index.includes('v76-usability.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-usability.css?v=${USABILITY_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
 if(!index.includes('sync-conflict-policy.js')) index=index.replace(syncScript,`${syncScript}<script src="./sync-conflict-policy.js?v=${UI_REV}" defer></script>`);
@@ -122,4 +125,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; usability ${USABILITY_REV}).`);
