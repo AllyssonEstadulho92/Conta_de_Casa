@@ -1,90 +1,80 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 8 de setembro de 2026
-Build público atual: `v70`
-Build candidato: `v71`
+Build público atual: `v71`
+Build candidato: `v72`
 Branch pública: `main`
-Branch candidata: `ui/v71-smooth-drawer`
+Branch candidata: `ui/v72-swipe-page-close`
 Distribuição: GitHub Pages / PWA
 
 ## Estado atual
 
-A aplicação continua uma PWA estática/local-first. O estado financeiro permanece no navegador/IndexedDB e o cofre continua cifrado com PBKDF2-SHA-256 + AES-GCM. A sincronização GitHub permanece opcional e transfere apenas o envelope cifrado. O schema financeiro base continua `STATE_VERSION = 5`.
+A aplicação continua uma PWA estática/local-first. O estado financeiro permanece no navegador/IndexedDB e o cofre continua cifrado com PBKDF2-SHA-256 + AES-GCM. A sincronização GitHub é opcional e transfere apenas o envelope cifrado. O schema financeiro base continua `STATE_VERSION = 5`.
 
-A **v70 continua pública e funcional**. A validação física no iPhone confirmou que o painel abre, os destinos estão corretos e o hambúrguer/X funciona. A observação remanescente é exclusivamente de interação: o drawer deve comportar-se como uma superfície móvel, acompanhando o dedo lateralmente em vez de parecer preso a estados fechado/aberto.
+A **v71 está publicada**. O PR #60 foi integrado em `main` no commit `39a842ee6138277d50decdb38bb87e8ad5a0f110`; a CI de `main` run #1332 (`34172134225`) terminou com sucesso e o Deploy Pages run #1325 (`34172194595`) terminou com sucesso.
 
-## Problema identificado pela validação física
+A v71 já permite:
 
-### Factos observáveis
+- abrir o drawer pelo hambúrguer ou por swipe iniciado junto da margem esquerda;
+- fechar por X, Escape, backdrop, seleção de página ou swipe para a esquerda iniciado sobre a própria superfície do drawer;
+- fazer o painel e o backdrop acompanharem o dedo durante o arrasto;
+- preservar scroll vertical, ARIA, foco, safe areas, tema claro/escuro e `prefers-reduced-motion`.
 
-- o drawer abre no lado correto e mantém a hierarquia visual;
-- a página selecionada e os restantes itens continuam funcionais;
-- o `X` está corretamente integrado no cabeçalho do drawer;
-- a entrada automática ainda pode parecer seca se o painel apenas saltar entre estados;
-- ao arrastar horizontalmente, a experiência pretendida é o painel acompanhar o dedo em tempo real e só decidir abrir/fechar quando o gesto termina.
+## Pedido atual e problema identificado
+
+### Facto observado
+
+O comportamento pretendido é semelhante ao padrão mostrado no ChatGPT: com o menu aberto, o utilizador deve poder simplesmente passar o dedo horizontalmente sobre a parte visível da página e regressar ao conteúdo, sem precisar iniciar o gesto em cima do drawer ou tocar no X.
 
 ### Causa técnica
 
-A implementação anterior trabalha essencialmente com dois estados CSS: fechado e aberto. Mesmo com uma boa transição automática, isso não cria uma interação direta de arrasto. Para obter comportamento semelhante ao drawer do ChatGPT é necessário calcular a posição do painel a partir do deslocamento real do toque e desligar temporariamente a transição enquanto o dedo está no ecrã.
+Na v71, `mobile-menu-toggle.js::onTouchStart()` cria um gesto de fecho apenas quando `event.target` pertence a `.nav-drawer-shell`. Um toque na área de página/backdrop visível à direita é rejeitado antes de a lógica de intenção horizontal começar. Portanto o painel já sabe seguir o dedo, mas a área de início do gesto é demasiado restrita.
 
-## v71 — correção candidata
+## v72 — correção candidata
 
-A v71 preserva a arquitetura e transforma o drawer existente num off-canvas completo com gesto horizontal interativo:
+A v72 reutiliza integralmente o controlador e o mesmo `<dialog>`:
 
-- o mesmo `#mobileDrawer` e o mesmo `#mobileMenuBtn` são reutilizados;
-- o painel fechado começa em `translate3d(calc(-100% - 8px),0,0)` e termina em `translate3d(0,0,0)`;
-- abertura automática do painel: aproximadamente `280 ms` com `cubic-bezier(.32,.72,0,1)`;
-- fecho automático: aproximadamente `240 ms`, ligeiramente mais rápido;
-- backdrop parte de transparente e chega a `rgba(10,18,30,.34)` com blur discreto de `1px`;
-- apenas `transform`, opacidade e composição visual são animados; largura, margens e layout não são animados;
-- quando o drawer está aberto, um swipe horizontal para a esquerda faz o painel acompanhar diretamente o dedo;
-- quando está fechado, um gesto iniciado nos primeiros `30 px` da margem esquerda permite puxar o drawer para dentro do ecrã;
-- o gesto só é capturado depois de pelo menos `8 px` de movimento e depois de confirmar predominância horizontal, preservando o scroll vertical normal da lista;
-- a posição durante o arrasto é calculada diretamente a partir do delta do toque e aplicada por `--drawer-drag-x`, sem transição intermédia;
-- o backdrop também acompanha o progresso do gesto através de `--drawer-drag-alpha` e `--drawer-drag-blur`;
-- ao soltar, o drawer decide o destino por progresso (`34%` para abrir; abaixo de `66%` para fechar quando já estava aberto) e por velocidade de fling (`0.45 px/ms`);
-- depois de soltar, anima apenas o pequeno percurso restante até totalmente aberto ou fechado;
-- cliques sintetizados imediatamente após um swipe são bloqueados durante `320 ms` para evitar abrir uma opção por acidente;
-- a instância de `drawer.close` continua coordenada por `mobile-menu-toggle.js`: os fluxos existentes chamam o mesmo método, mas o `close()` nativo só é executado depois do `transitionend` do `transform`, com fallback de `360 ms`;
-- durante o fecho, o botão permanece no cabeçalho do drawer e regressa ao topbar apenas no evento `close`, evitando salto de layout;
-- `prefers-reduced-motion` elimina as transições e desativa a captura do gesto adicional;
-- Escape, backdrop, seleção de item, mudança de breakpoint e fecho pelo X continuam a passar pelos fluxos existentes;
-- ARIA, foco, safe areas, largura responsiva, scroll interno, temas e alvos tácteis permanecem preservados.
+- quando o drawer está aberto, `onTouchStart()` aceita tanto origem `drawer` como origem `page`;
+- a área de página/backdrop deixa de ser rejeitada;
+- um swipe predominantemente horizontal para a esquerda iniciado nessa área usa exatamente o mesmo `beginTouchDrag()`, `setDragVisual()` e `settleTouchDrag()` da v71;
+- o drawer acompanha o dedo no mesmo frame e o backdrop perde intensidade proporcionalmente;
+- ao soltar, a mesma decisão por progresso/velocidade determina se fecha ou regressa ao estado aberto;
+- `data-drag-source` identifica apenas para diagnóstico se o gesto começou em `drawer`, `page` ou `edge` e é removido no fim;
+- o gesto vertical continua não capturado;
+- nenhum segundo menu, rota ou fluxo de navegação foi criado.
 
 ## Versionamento candidato
 
-- build: `v71`;
-- revisão do menu: `71-menu5`;
+- build: `v72`;
+- revisão do menu: `72-menu6`;
 - shell preservado: `66-shell1`;
 - Compras preservada: `65-shopping1`;
 - runtime funcional preservado: `64-runtime1`;
-- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v71-menu5`.
+- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v72-menu6`.
 
 ## Segurança e escopo
 
-A v71 não altera `appState`, `STATE_VERSION`, faturas, pagamentos, `estimatedCents`, `actualCents`, scanner, recorrências, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB, autenticação, APIs ou sincronização.
+A v72 não altera `appState`, `STATE_VERSION`, faturas, pagamentos, `estimatedCents`, `actualCents`, scanner, recorrências, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB, autenticação, APIs ou sincronização.
 
-Não foram adicionados segredos, tokens, chaves, endpoints externos ou armazenamento novo. `events.js` e `render.js` não são reescritos; o controlador do menu coordena somente a instância real do `<dialog>` existente e eventos de toque locais.
+Não foram adicionados segredos, tokens, chaves, endpoints ou armazenamento. `events.js`, `render.js`, `NAV_GROUPS` e a estrutura do drawer permanecem preservados.
 
 ## QA necessário antes de publicar
 
 1. CI do PR totalmente verde;
-2. validar parser e regressões específicas do drawer off-canvas;
-3. validar swipe da margem esquerda para abrir;
-4. validar swipe para a esquerda para fechar;
-5. validar que o scroll vertical da lista não fica bloqueado;
-6. validar snap por distância e por velocidade;
-7. validar abertura e fecho por X, Escape, backdrop e seleção de item;
-8. validar `prefers-reduced-motion` e ausência de estado preso;
-9. validar build/manifest/cache `v71` / `71-menu5`;
-10. integrar em `main` apenas com CI verde;
-11. confirmar CI de `main` e Deploy GitHub Pages;
-12. repetir a validação física no mesmo iPhone.
+2. validar sintaxe e regressão específica do swipe iniciado na página/backdrop;
+3. validar que swipe vertical na página não fecha o drawer;
+4. validar swipe curto que regressa ao estado aberto;
+5. validar swipe longo/rápido que fecha;
+6. validar X, Escape, backdrop e seleção de página;
+7. validar build/manifest/cache `v72` / `72-menu6`;
+8. integrar em `main` apenas com CI verde;
+9. confirmar CI de `main` e Deploy GitHub Pages;
+10. repetir no iPhone/Safari.
 
 ## Última alteração
 
-A candidata v71 passou de uma animação off-canvas apenas automática para um drawer realmente interativo: durante o swipe, a superfície e o backdrop seguem o dedo em tempo real e só completam o percurso depois de o gesto terminar.
+O controlador candidato v72 passou a aceitar o mesmo gesto de fecho também quando o toque começa na página/backdrop visível, mantendo uma única implementação de swipe.
 
 ## Próximo passo
 
-Obter CI verde da v71 e confirmar no iPhone que o drawer pode ser puxado e empurrado lateralmente sem sensação de bloqueio, mantendo o scroll vertical natural e sem abrir itens acidentalmente.
+Executar CI completa da v72, publicar apenas se verde e confirmar no iPhone que é possível fechar o menu apenas passando o dedo para a esquerda sobre a página visível.
