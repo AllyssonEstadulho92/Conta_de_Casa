@@ -57,7 +57,6 @@
     let motionAnimations=[];
     let motionRun=0;
     let buttonMoveAnimation=null;
-    let pendingHomeRect=null;
     let lastFocusKeyboard=false;
     let drawerCloseTimer=0;
     let drawerCloseTarget=null;
@@ -181,14 +180,12 @@
       };
     }
 
-    function restoreButtonHome(fromRect=pendingHomeRect){
-      const sourceRect=fromRect||button.getBoundingClientRect();
+    function restoreButtonHome(){
+      cancelButtonReparent();
       if(homeAnchor.parentNode&&button.parentNode!==homeAnchor.parentNode){
         homeAnchor.parentNode.insertBefore(button,homeAnchor.nextSibling);
       }
       button.classList.remove('drawer-menu-control');
-      pendingHomeRect=null;
-      animateButtonReparent(sourceRect);
     }
 
     function placeButtonInDrawer(){
@@ -291,7 +288,6 @@
       delete drawer.dataset.closing;
       const returnValue=drawerCloseReturnValue;
       drawerCloseReturnValue=undefined;
-      pendingHomeRect=button.getBoundingClientRect();
       if(returnValue===undefined)nativeDrawerClose();
       else nativeDrawerClose(returnValue);
     }
