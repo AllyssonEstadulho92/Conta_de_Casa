@@ -7,20 +7,22 @@
     {
       "version": "v75",
       "date": "8 de setembro de 2026",
-      "title": "Reestruturação total da interface alinhada com o protótipo aprovado",
+      "title": "Reestruturação da interface e estabilização transversal",
       "items": [
-        "A interface móvel passa a seguir uma composição única e coerente com o protótipo: cabeçalho verde-petróleo, superfícies claras, cartões compactos, tipografia consistente, espaçamento regular e navegação inferior com Início, Despesas, Mercado, Planeamento e Mais.",
+        "A interface móvel segue uma composição única e coerente com o protótipo: cabeçalho verde-petróleo, superfícies claras, cartões compactos, tipografia consistente, espaçamento regular e navegação inferior com Início, Despesas, Mercado, Planeamento e Mais.",
+        "A revisão 75-stability1 uniformiza tipografia, safe areas, overflow, formulários, navegação e diálogos entre iPhone, Android, tablet e desktop sem reescrever o núcleo financeiro.",
+        "O cabeçalho móvel foi simplificado: hambúrguer e título ficam à esquerda e notificações à direita, sem saudação ou avatar duplicados no topbar global.",
         "O Mercado permanece visível como terceiro destino da barra inferior; a regra histórica que ocultava esse item é explicitamente anulada pela camada final v75.",
-        "O Início integra a saudação no cabeçalho e organiza mês, resumo de despesas, orçamento, ações rápidas e categorias na mesma hierarquia visual do protótipo, usando apenas dados reais da aplicação.",
-        "Despesas passa a usar uma lista móvel compacta com Todas, Entradas e Saídas, pesquisa e botão flutuante para adicionar uma despesa, preservando os mesmos registos e handlers financeiros.",
-        "Adicionar despesa passa a abrir em ecrã completo no telemóvel e apresenta os modos Manual, Ler fatura e QR Code; os modos reutilizam o formulário, fotografia local e scanner QR já existentes em vez de criar fluxos paralelos.",
-        "A leitura QR passa a usar uma composição de câmara em ecrã completo com guia de enquadramento, safe areas e estado de leitura; apenas campos comprovados pelo QR são apresentados para revisão antes de guardar.",
-        "O Mercado é reorganizado em pesquisa, produtos e lojas com cartões compactos; apenas Continente e Pingo Doce são apresentados como lojas suportadas e fotografias continuam opcionais e sujeitas à validação existente.",
-        "Planeamento passa a priorizar mês, anel de orçamento, gasto, orçamento, disponível e distribuição real por categoria; Relatórios, Mais e Sincronização recebem a mesma linguagem visual e hierarquia de informação.",
+        "O Início organiza mês, resumo de despesas, orçamento, ações rápidas e categorias numa hierarquia compacta, usando apenas dados reais da aplicação.",
+        "Despesas usa uma lista móvel compacta com Todas, Entradas e Saídas, pesquisa e botão flutuante para adicionar uma despesa, preservando os mesmos registos e handlers financeiros.",
+        "Adicionar despesa abre em ecrã completo no telemóvel e apresenta os modos Manual, Ler fatura e QR Code; os modos reutilizam o formulário, fotografia local e scanner QR já existentes em vez de criar fluxos paralelos.",
+        "A leitura QR usa uma composição de câmara em ecrã completo com guia de enquadramento, safe areas e estado de leitura; apenas campos comprovados pelo QR são apresentados para revisão antes de guardar.",
+        "O Mercado é reorganizado em pesquisa, produtos e lojas; apenas Continente e Pingo Doce são apresentados como lojas suportadas, fotografias remotas têm skeleton e fallback Imagem indisponível e a grelha passa para duas colunas em ecrãs até 430 px.",
+        "Planeamento prioriza mês, anel de orçamento, gasto, orçamento, disponível e distribuição real por categoria; Relatórios, Mais e Sincronização recebem a mesma linguagem visual e hierarquia de informação.",
         "O ecrã Mais deixa de duplicar Mercado e Planeamento e agrupa Relatórios, Metas, Sincronização, Segurança, Diagnóstico, Aparência e Definições por contexto.",
-        "O cofre e o onboarding passam a utilizar a identidade local icon.svg e o teclado PIN usa três colunas, sem alterar PIN, palavra-passe, PBKDF2-SHA-256 ou AES-GCM.",
+        "O cofre e o onboarding utilizam a identidade local icon.svg e o teclado PIN usa três colunas, sem alterar PIN, palavra-passe, PBKDF2-SHA-256 ou AES-GCM.",
         "A v75 não inventa lojas, preços, artigos de fatura ou capacidades ausentes para imitar o protótipo; a fidelidade visual é aplicada apenas sobre funcionalidades e dados realmente suportados.",
-        "A reestruturação é de arquitetura de informação e apresentação: STATE_VERSION 5, valores em cêntimos, IndexedDB, pagamentos, QR, scanner, Mercado, sincronização cifrada e núcleo financeiro não são migrados nem reescritos."
+        "STATE_VERSION 5, valores em cêntimos, IndexedDB, pagamentos, QR, scanner, Mercado, sincronização cifrada e núcleo financeiro permanecem sem migração ou reescrita nesta revisão visual."
       ]
     },
     {
