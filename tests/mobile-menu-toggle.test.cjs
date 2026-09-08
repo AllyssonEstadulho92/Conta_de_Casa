@@ -10,7 +10,7 @@ const sw = fs.readFileSync('sw.js','utf8');
 const manifest = JSON.parse(fs.readFileSync('release-manifest.json','utf8'));
 
 assert.doesNotThrow(()=>new vm.Script(js), 'mobile menu runtime must parse');
-assert.match(js, /Conta de Casa v71/);
+assert.match(js, /Conta de Casa v72/);
 assert.match(js, /button\.addEventListener\('click',[\s\S]*stopImmediatePropagation\(\)[\s\S]*drawer\.open[\s\S]*closeDrawer\(keyboard\)[\s\S]*openDrawer\(keyboard\)[\s\S]*,true\)/);
 assert.match(js, /drawerHead\.insertBefore\(button,drawerHead\.firstChild\)/, 'same menu button must move into the modal drawer');
 assert.match(js, /homeAnchor\.parentNode\.insertBefore\(button,homeAnchor\.nextSibling\)/, 'same menu button must return to the topbar');
@@ -20,26 +20,42 @@ assert.match(js, /setAttribute\('aria-expanded',String\(expanded\)\)/);
 assert.match(js, /button\.dataset\.menuState=state/);
 assert.match(js, /drawer\.dataset\.menuState=state/);
 
-// Regression v69 retained: Lucide must not replace the three animated spans.
-assert.match(icons, /fillIcon\(document\.querySelector\('#mobileMenuBtn'\),'menu',22\)/, 'Lucide hydrator interaction must stay visible to this regression test');
-assert.match(js, /button\.querySelector\(':scope > svg\.ui-icon-svg'\)/);
-assert.match(js, /mobile-menu-icon-sentinel/);
-assert.match(js, /button\.dataset\.uiIconSlot='menu'/);
-assert.match(js, /button\.replaceChildren\(glyph,iconSentinel\)/);
+// v72 icon ownership: custom hamburger geometry must not be reconstructed by the Lucide hydrator.
+assert.match(icons, /function isCustomOwned\(target\)/);
+assert.match(icons, /uiIconOwner==='custom'/);
+assert.match(js, /button\.dataset\.uiIconOwner='custom'/);
+assert.match(js, /button\.replaceChildren\(glyph\)/);
 assert.match(js, /glyph\.append\(document\.createElement\('span'\),document\.createElement\('span'\),document\.createElement\('span'\)\)/);
+assert.doesNotMatch(js, /mobile-menu-icon-sentinel|iconSentinel/, 'obsolete Lucide sentinel must be removed after explicit custom ownership');
+assert.doesNotMatch(css, /mobile-menu-icon-sentinel/, 'obsolete hidden sentinel CSS must be removed');
 
-// Regression v70 retained: explicit Web Animations keep hamburger/X movement visible after reparenting.
-assert.match(js, /const motionDuration=240/);
+// v72 continuity: the same button must remain visually continuous while it is reparented.
+assert.match(js, /const motionOpenDuration=300/);
+assert.match(js, /const motionCloseDuration=240/);
+assert.match(js, /const motionOpenDelay=60/);
+assert.match(js, /const buttonReparentDuration=280/);
 assert.match(js, /const motionEase='cubic-bezier\(\.32,\.72,0,1\)'/);
+assert.match(js, /function animateButtonReparent\(fromRect\)/);
+assert.match(js, /const toRect=button\.getBoundingClientRect\(\)/);
+assert.match(js, /const dx=fromRect\.left-toRect\.left/);
+assert.match(js, /const dy=fromRect\.top-toRect\.top/);
+assert.match(js, /translate3d\(\$\{dx\}px,\$\{dy\}px,0\)/);
+assert.match(js, /duration:buttonReparentDuration/);
+assert.match(js, /if\(!touchGesture\)animateButtonReparent\(sourceRect\)/, 'direct swipe must not receive a second competing translation');
+assert.match(js, /pendingHomeRect=button\.getBoundingClientRect\(\)/, 'closing must retain the last visible drawer-button geometry for the return home');
+assert.match(css, /data-reparenting="true"/);
+
+// Explicit Web Animations keep hamburger/X movement visible after reparenting and while the drawer enters.
 assert.match(js, /typeof glyph\.animate!=='function'/);
-assert.match(js, /motionAnimations\.push\(line\.animate\(frames,/);
+assert.match(js, /const timing=\{duration,delay,easing:motionEase,fill:open\?'backwards':'none'\}/, 'opening must hold the hamburger first frame during the short visibility delay');
+assert.match(js, /motionAnimations\.push\(line\.animate\(frames,timing\)\)/);
 assert.match(js, /const glyphMotion=glyph\.animate\(/);
 assert.match(js, /rotate\(45deg\)/);
 assert.match(js, /rotate\(-45deg\)/);
 assert.match(js, /scaleX\(\.18\)/);
 assert.match(js, /requestAnimationFrame\(\(\)=>animateMenuGlyph\(true\)\)/);
 
-// Regression v71: the dialog must stay open until the off-canvas close transition finishes.
+// Regression v71 retained: the dialog must stay open until the off-canvas close transition finishes.
 assert.match(js, /const drawerCloseFallback=360/);
 assert.match(js, /const nativeDrawerClose=drawer\.close\.bind\(drawer\)/);
 assert.match(js, /function animatedDrawerClose\(returnValue\)/);
@@ -52,7 +68,7 @@ assert.match(js, /if\(returnValue===undefined\)nativeDrawerClose\(\)/);
 assert.match(js, /drawer\.addEventListener\('close',[\s\S]*syncButton\(false\)/, 'button must return home only after the dialog really closes');
 assert.match(js, /prefersReducedMotion\(\)\|\|!mobile[\s\S]*finishDrawerClose\(\)/, 'reduced motion and desktop must not wait on mobile transitions');
 
-// v71 interactive swipe: drawer follows the finger and snaps by progress/velocity.
+// v71 interactive swipe retained: drawer follows the finger and snaps by progress/velocity.
 assert.match(js, /const swipeEdgeWidth=30/,'closed drawer swipe must start from a narrow left edge');
 assert.match(js, /const swipeIntentThreshold=8/,'gesture must wait for deliberate movement');
 assert.match(js, /const swipeHorizontalBias=1\.08/,'horizontal intent must win over vertical scroll before capture');
@@ -74,8 +90,7 @@ assert.match(js, /document\.addEventListener\('touchend',onTouchEnd,\{capture:tr
 assert.match(js, /Date\.now\(\)\+swipeClickGuardMs/,'a completed swipe must suppress the synthesized click');
 assert.match(js, /settleTouchDrag\(gesture\.mode==='closing'\)/,'system touch cancel must restore the previous stable state');
 
-assert.match(css, /Conta de Casa v71/);
-assert.match(css, /\.mobile-menu-icon-sentinel\{display:none!important\}/);
+assert.match(css, /Conta de Casa v72/);
 assert.match(css, /\.mobile-menu-glyph>span:nth-child\(1\)\{top:1px;width:22px\}/);
 assert.match(css, /\.mobile-menu-glyph>span:nth-child\(2\)\{top:8px;width:18px\}/);
 assert.match(css, /\.mobile-menu-glyph>span:nth-child\(3\)\{top:15px;width:14px\}/);
@@ -90,7 +105,7 @@ assert.match(css, /\.nav-drawer::backdrop\{[\s\S]*background:rgba\(10,18,30,0\)[
 assert.match(css, /\.nav-drawer\.open::backdrop\{[\s\S]*background:rgba\(10,18,30,\.34\)[\s\S]*blur\(1px\)/, 'open backdrop must remain restrained');
 assert.match(css, /transform:translate3d\(calc\(-100% - 8px\),0,0\)/, 'closed drawer shell must be fully off-canvas');
 assert.match(css, /\.nav-drawer\.open \.nav-drawer-shell\{[\s\S]*translate3d\(0,0,0\)/, 'open drawer shell must settle at its natural position');
-assert.match(css, /transform \.28s cubic-bezier\(\.32,\.72,0,1\)/, 'opening must use the canonical spring-like deceleration');
+assert.match(css, /transform \.28s cubic-bezier\(\.32,\.72,0,1\)/, 'opening must use the canonical deceleration');
 assert.match(css, /touch-action:pan-y/,'drawer must preserve vertical scrolling while reserving horizontal dragging');
 assert.match(css, /\.nav-drawer\[data-dragging="true"\] \.nav-drawer-shell\{[\s\S]*var\(--drawer-drag-x,-100%\)[\s\S]*transition:none!important/, 'dragging shell must follow the live CSS variable without transition lag');
 assert.match(css, /\.nav-drawer\[data-dragging="true"\]::backdrop\{[\s\S]*--drawer-drag-alpha[\s\S]*--drawer-drag-blur[\s\S]*transition:none!important/, 'backdrop must follow drag progress continuously');
@@ -103,22 +118,20 @@ assert.match(css, /@media\(max-width:359px\)\{[\s\S]*\.nav-drawer\{width:calc\(1
 assert.match(css, /@media\(prefers-reduced-motion:reduce\)[\s\S]*\.nav-drawer::backdrop[\s\S]*transition:none!important/, 'reduced motion must also disable backdrop motion');
 assert.doesNotMatch(css, /background:\s*(?:green|#0f0|#00ff00)/i);
 
-assert.match(prepare, /const BUILD = 'v71'/);
+assert.match(prepare, /const BUILD = 'v72'/);
 assert.match(prepare, /const MENU_REV = '71-menu5'/);
+assert.match(prepare, /const ICON_REV = '72-icons1'/);
 assert.match(prepare, /'mobile-menu-toggle\.css'/);
 assert.match(prepare, /'mobile-menu-toggle\.js'/);
 assert.match(prepare, /mobile-menu-toggle\.css\?v=\$\{MENU_REV\}/);
 assert.match(prepare, /mobile-menu-toggle\.js\?v=\$\{MENU_REV\}/);
-assert.match(sw, /v71-menu5/);
+assert.match(sw, /v71-menu5-v72-icons1/);
 assert.match(sw, /'\.\/mobile-menu-toggle\.css'/);
 assert.match(sw, /'\.\/mobile-menu-toggle\.js'/);
-assert.equal(manifest.latestVersion,'v71');
-assert.equal(manifest.releases[0]?.version,'v71');
-assert.ok(manifest.releases[0].items.some(item=>/off-canvas|deslizando|esquerda/i.test(item)));
-assert.ok(manifest.releases[0].items.some(item=>/dedo|arrastar|swipe|gesto/i.test(item)),'v71 release notes must expose the interactive swipe');
-assert.ok(manifest.releases[0].items.some(item=>/backdrop|fundo|blur/i.test(item)));
-assert.ok(manifest.releases[0].items.some(item=>/280|240|dura/i.test(item)));
-assert.ok(manifest.releases[0].items.some(item=>/reduced-motion|movimento reduzido/i.test(item)));
+assert.equal(manifest.latestVersion,'v72');
+assert.equal(manifest.releases[0]?.version,'v72');
+assert.ok(manifest.releases[0].items.some(item=>/ícone|Lucide|hidrata/i.test(item)));
+assert.ok(manifest.releases[0].items.some(item=>/hambúrguer|custom|desenho próprio/i.test(item)));
 assert.ok(manifest.releases[0].items.some(item=>/não modifica|exclusivamente|não altera/i.test(item)));
 
-console.log('v71 finger-tracking swipe, smooth off-canvas drawer and animated hamburger/X tests: OK');
+console.log('v72 icon ownership, continuous reparenting, visible hamburger/X motion and v71 drawer gesture tests: OK');
