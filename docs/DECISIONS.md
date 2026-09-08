@@ -91,6 +91,28 @@ Data: 8 de setembro de 2026 · Estado: aceite.
 5. A linha visual do header usa 60 px mais safe area superior.
 6. Gradiente, sombra e efeitos devem ser discretos; evitar cartões ou ornamentos dentro da topbar.
 7. O título deve truncar com ellipsis em ecrãs estreitos, sem empurrar notificações para fora do viewport.
-8. Hambúrguer e sino mantêm área de toque >= 42 px, foco visível e `prefers-reduced-motion`.
+8. Hambúrguer e sino mantêm área de toque >= 44 px, foco visível e `prefers-reduced-motion`.
 9. `v75-header-refinement.css` é carregado depois de `v75-architecture.css` e não pode alterar estado da aplicação.
 10. A revisão pública do cabeçalho é `75-header2`; o Service Worker usa cache distinto para invalidar a revisão anterior.
+
+## D-042 — Correções transversais da v75 ficam numa camada final de estabilidade
+Data: 8 de setembro de 2026 · Estado: aceite.
+
+### Problema
+
+A v75 acumulou camadas funcionais e visuais válidas, mas continuavam possíveis colisões entre breakpoints, métricas de tipografia, safe areas, controlos mobile, tabelas, diálogos e imagens remotas do Mercado. Corrigir estes problemas diretamente em `core.js` ou `finance.js` aumentaria risco sem relação com a causa.
+
+### Decisão
+
+1. Criar `v75-stability.css/js` como última camada do bundle v75.
+2. Limitar a camada a apresentação, responsividade, acessibilidade e estados visuais.
+3. Não ler nem escrever `appState`, montantes, `estimatedCents`, `actualCents`, IndexedDB, cofre ou sincronização.
+4. Uniformizar tipografia com a stack nativa do sistema para evitar dependência de fontes não distribuídas.
+5. Em mobile, inputs/selects/textarea usam 16 px para evitar zoom automático do Safari.
+6. Safe areas horizontais passam a ser consideradas no header, conteúdo e navegação inferior, além das áreas superior/inferior já existentes.
+7. A barra inferior preserva exatamente cinco destinos e alvos de toque adequados.
+8. Falha de fotografia remota no Mercado é um estado visual explícito (`Imagem indisponível`), nunca remoção do artigo nem alteração de preço.
+9. `theme-color` acompanha tema e cabeçalho visível para reduzir discrepâncias entre Safari/PWA e a aplicação.
+10. A revisão é `75-stability1`; o cache recebe o sufixo `-stability1`.
+11. CI e verificação pré-deploy devem cobrir a mesma arquitetura v74/v75, incluindo a nova camada e respetivo teste.
+12. A camada deve ser consolidada numa futura release apenas depois de validação real em hardware; não remover regras históricas sem prova de que deixaram de ser referenciadas.
