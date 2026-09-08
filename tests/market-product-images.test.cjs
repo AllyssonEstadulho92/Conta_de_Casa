@@ -64,10 +64,11 @@ assert.match(css,/object-fit:contain/);
 assert.match(brandCss,/fotografias[\s\S]*verificadas/);
 assert.match(brandCss,/\.market-product-photo[\s\S]*display:grid!important/);
 assert.match(experienceCss,/\.cdc-product-image img\{width:100%;height:100%;object-fit:contain/);
-assert.match(architectureCss,/\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:visible!important;display:grid!important\}/);
+assert.match(architectureCss,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/);
+assert.match(architectureCss,/\.cdc-product-image img[\s\S]*object-fit:contain!important/,'v75 prototype must preserve uncropped verified product photos');
 
 assert.match(index,/img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org;/);
-assert.match(sw,/conta-de-casa-public-v75-architecture1-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
 assert.match(sw,/\.\/market-retailer-image-policy\.js/);
 assert.match(sw,/\.\/market-official-images\.js/);
 assert.match(sw,/\.\/v74-experience\.css/);
@@ -80,4 +81,4 @@ assert.match(sw,/\.\/v75-architecture\.js/);
 assert.match(runtime,/productCode=scan\.code/);
 assert.doesNotMatch(runtime,/imageUrl\s*=/);
 
-console.log('Market real/official images remain isolated and visible under the v75 architecture bundle: OK');
+console.log('Market real/official images remain isolated and visible under the final v75 prototype architecture: OK');
