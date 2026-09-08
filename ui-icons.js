@@ -1,6 +1,6 @@
 'use strict';
 
-/* Conta de Casa — sistema de ícones Lucide local (v54).
+/* Conta de Casa v72 — sistema de ícones Lucide local com propriedade estável.
  * Fonte: Lucide Icons, snapshot 94e4cb9d9db5907053ebf3636a97c45529cf776b.
  * Licença: ISC; alguns glifos derivados de Feather mantêm também o aviso MIT.
  * O aviso integral é distribuído em LUCIDE_LICENSE.txt.
@@ -11,6 +11,9 @@
  * - funcionamento offline;
  * - CSP mínima;
  * - controlo exato de dimensões, contraste e acessibilidade.
+ *
+ * v72: o hidratador deixa de reagir a class/ARIA genéricos e respeita controlos
+ * com desenho próprio, evitando que alterações de estado reconstruam ícones animados.
  */
 (function installLucideIconSystem(){
   if(typeof ICONS==='undefined'||typeof icon!=='function') return;
@@ -69,6 +72,8 @@
     key:'<path d="m15.5 7.5 2 2L22 5l-3-3-4.5 4.5"/><circle cx="8.5" cy="15.5" r="5.5"/><path d="m14 12 1.5-1.5"/>'
   });
 
+  // Compatibilidade controlada: os chamadores históricos passam a renderizar a
+  // geometria Lucide, mas a autoridade visual fica neste módulo.
   Object.assign(ICONS,LUCIDE_ICONS);
 
   function sizeClass(size){
@@ -81,7 +86,7 @@
 
   function appIcon(name,size=20){
     const safeSize=Math.max(12,Math.min(30,Number(size)||20));
-    const path=ICONS[name]||ICONS.more;
+    const path=LUCIDE_ICONS[name]||LUCIDE_ICONS.more;
     return `<svg class="svg-icon ui-icon-svg ${sizeClass(safeSize)}" width="${safeSize}" height="${safeSize}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${path}</svg>`;
   }
 
@@ -95,8 +100,14 @@
     return node;
   }
 
+  function isCustomOwned(target){
+    if(!target)return false;
+    if(target.dataset?.uiIconOwner==='custom')return true;
+    return Boolean(target.querySelector?.(':scope > .mobile-menu-glyph'));
+  }
+
   function fillIcon(target,name,size=20){
-    if(!target)return;
+    if(!target||isCustomOwned(target))return;
     const existing=target.querySelector?.(':scope > svg.ui-icon-svg');
     if(target.dataset.uiIconSlot===name&&existing)return;
     target.replaceChildren(svgNode(name,size));
@@ -114,7 +125,7 @@
   }
 
   function iconizeTextButton(button,name,size=18){
-    if(!button)return;
+    if(!button||isCustomOwned(button))return;
     const direct=button.querySelector?.(':scope > svg.ui-icon-svg');
     if(button.dataset.uiActionIcon===name&&direct)return;
     const label=cleanButtonLabel(button);
@@ -128,7 +139,7 @@
   }
 
   function appendNavigationIcon(button,name='arrowRight',size=16){
-    if(!button||button.dataset.uiTrailingIcon===name)return;
+    if(!button||isCustomOwned(button)||button.dataset.uiTrailingIcon===name)return;
     const trailing=svgNode(name,size);
     trailing.classList.add('ui-icon-trailing');
     button.appendChild(trailing);
@@ -192,7 +203,7 @@
   }
 
   function preserveBadgeIcon(button,name,size=20){
-    if(!button)return;
+    if(!button||isCustomOwned(button))return;
     const badge=button.querySelector('.badge-dot');
     const existing=button.querySelector(':scope > svg');
     if(existing)replaceSvg(existing,name,size);
@@ -267,25 +278,53 @@
 
   globalThis.CDCIcons=Object.freeze({
     markup:appIcon,
+    hydrate,
+    refreshTheme:updateThemeIcon,
+    setIcon:fillIcon,
     source:'Lucide',
     sourceCommit:LUCIDE_SOURCE_COMMIT
   });
 
   let queued=false;
-  function scheduleHydrate(){
+  const pendingRoots=new Set();
+
+  function normalizedHydrationRoot(node){
+    if(!node)return document;
+    if(node.nodeType===1)return node.parentElement||node;
+    return node.parentElement||document;
+  }
+
+  function scheduleHydrate(root=document){
+    pendingRoots.add(normalizedHydrationRoot(root));
     if(queued)return;
     queued=true;
-    requestAnimationFrame(()=>{queued=false;hydrate(document);});
+    requestAnimationFrame(()=>{
+      queued=false;
+      const roots=[...pendingRoots];
+      pendingRoots.clear();
+      roots.forEach(scope=>hydrate(scope));
+    });
   }
 
   const observer=new MutationObserver(mutations=>{
-    if(mutations.some(m=>m.type==='childList'||m.type==='attributes'))scheduleHydrate();
+    let themeChanged=false;
+    for(const mutation of mutations){
+      if(mutation.type==='attributes'){
+        if(mutation.attributeName==='data-theme')themeChanged=true;
+        continue;
+      }
+      for(const node of mutation.addedNodes||[]){
+        scheduleHydrate(node);
+      }
+    }
+    if(themeChanged)updateThemeIcon();
   });
+
   observer.observe(document.documentElement,{
     subtree:true,
     childList:true,
     attributes:true,
-    attributeFilter:['aria-label','aria-expanded','data-theme','class']
+    attributeFilter:['data-theme']
   });
 
   hydrate(document);
