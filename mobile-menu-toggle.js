@@ -1,6 +1,6 @@
 'use strict';
 
-/* Conta de Casa v71 — hambúrguer/X animado, drawer off-canvas e gesto horizontal que acompanha o dedo. */
+/* Conta de Casa v72 — hambúrguer/X animado, drawer off-canvas e gesto horizontal que acompanha o dedo também sobre a página exposta. */
 (function installAnimatedMobileMenu(root){
   let installed=false;
 
@@ -49,9 +49,9 @@
     const motionEase='cubic-bezier(.32,.72,0,1)';
     const drawerCloseFallback=360;
 
-    // Gesto horizontal: começa junto à margem esquerda quando fechado e em qualquer ponto
-    // da superfície do drawer quando aberto. Só assume o gesto depois de confirmar intenção
-    // horizontal, para não bloquear o scroll vertical dos itens.
+    // O drawer acompanha o dedo. Fechado, o gesto nasce na margem esquerda. Aberto, pode começar
+    // tanto na superfície do menu como na página/backdrop visível à direita, permitindo "voltar"
+    // com um swipe sem ter de acertar no X.
     const swipeEdgeWidth=30;
     const swipeIntentThreshold=8;
     const swipeHorizontalBias=1.08;
@@ -204,6 +204,7 @@
       }
       delete drawer.dataset.dragging;
       delete drawer.dataset.dragDirection;
+      delete drawer.dataset.dragSource;
       delete drawer.dataset.dragProgress;
       drawer.style.removeProperty('--drawer-drag-x');
       drawer.style.removeProperty('--drawer-drag-alpha');
@@ -328,6 +329,7 @@
 
       drawer.dataset.dragging='true';
       drawer.dataset.dragDirection=gesture.mode;
+      drawer.dataset.dragSource=gesture.source||gesture.mode;
       gesture.dragging=true;
       gesture.width=measuredDrawerWidth();
       return true;
@@ -359,9 +361,10 @@
 
       if(drawer.open){
         const shell=drawerShell();
-        if(!shell?.contains(event.target))return;
+        if(!shell)return;
+        const source=shell.contains(event.target)?'drawer':'page';
         touchGesture={
-          mode:'closing',identifier:touch.identifier,startX:touch.clientX,startY:touch.clientY,
+          mode:'closing',source,identifier:touch.identifier,startX:touch.clientX,startY:touch.clientY,
           lastX:touch.clientX,lastTime:time,velocity:0,progress:1,width:measuredDrawerWidth(shell),dragging:false
         };
         return;
@@ -369,7 +372,7 @@
 
       if(touch.clientX<=swipeEdgeWidth){
         touchGesture={
-          mode:'opening',identifier:touch.identifier,startX:touch.clientX,startY:touch.clientY,
+          mode:'opening',source:'edge',identifier:touch.identifier,startX:touch.clientX,startY:touch.clientY,
           lastX:touch.clientX,lastTime:time,velocity:0,progress:0,width:0,dragging:false
         };
       }
