@@ -19,8 +19,11 @@ Corrigir inconsistências ainda existentes entre páginas, tipografia, ícones, 
 - diálogos respeitam `100dvh`, safe areas e scroll próprio;
 - tabelas ficam confinadas ao próprio scroll no desktop e deixam de duplicar cartões no mobile;
 - fotografias do Mercado recebem `loading`, `loaded`, `error` e `empty`, skeleton e fallback `Imagem indisponível`;
+- a ampliação de fotografia fica desativada durante falha remota e é restaurada quando o recurso volta a carregar corretamente;
+- a grelha de produtos passa de três para duas colunas até 430 px para evitar cartões demasiado estreitos;
 - falhas de imagem remota não removem artigos nem alteram preços;
 - foco, `forced-colors` e `prefers-reduced-motion` foram reforçados;
+- `release-manifest.json` foi alinhado com `75-header2` e `75-stability1`, removendo a descrição obsoleta da saudação no topbar;
 - CI e Pages passam a validar a mesma arquitetura v74/v75, incluindo `v74-experience.js`, `v75-architecture.js`, `v75-stability.js`, `v75-architecture.test.cjs` e `v75-stability.test.cjs`.
 
 ### Distribuição
