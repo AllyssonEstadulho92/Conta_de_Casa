@@ -67,10 +67,10 @@ assert.doesNotMatch(css, /background:\s*(?:green|#0f0|#00ff00)/i);
 assert.match(prepare, /const BUILD = 'v75'/);
 assert.match(prepare, /const MENU_REV = '73-menu8'/);
 assert.match(prepare, /const EXPERIENCE_REV = '74-experience2'/);
-assert.match(prepare, /const ARCHITECTURE_REV = '75-architecture1'/);
+assert.match(prepare, /const ARCHITECTURE_REV = '75-architecture2'/);
 assert.match(sw, /v73-menu8/);
 assert.match(sw, /v74-experience2/);
-assert.match(sw, /v75-architecture1/);
+assert.match(sw, /v75-architecture2/);
 assert.ok(sw.includes("'./v74-experience.css'"));
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.match(architecture,/DRAWER_GROUPS/,'v75 must simplify the existing drawer instead of replacing its controller');
@@ -82,4 +82,4 @@ assert.ok(v73.items.some(item=>/lado direito|direita/i.test(item)));
 assert.ok(v73.items.some(item=>/swipe|gesto/i.test(item)));
 assert.ok(v73.items.some(item=>/cabeçalho|header/i.test(item)));
 
-console.log('v73 right-side drawer controller remains protected inside the v75 information architecture release.');
+console.log('v73 right-side drawer controller remains protected inside the final v75 prototype architecture.');
