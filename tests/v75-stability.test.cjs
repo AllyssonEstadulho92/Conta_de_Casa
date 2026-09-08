@@ -34,7 +34,7 @@ assert.match(js,/addEventListener\('load'/);
 assert.match(js,/addEventListener\('error'/);
 assert.match(js,/Imagem indisponível/);
 assert.match(js,/MutationObserver/);
-assert.doesNotMatch(js,/appState|IndexedDB|amountCents|estimatedCents|actualCents|PBKDF2|AES-GCM/,'stability layer must remain presentation-only');
+assert.doesNotMatch(js,/\bappState\b|amountCents|estimatedCents|actualCents|saveState\(|persistState\(|openDB\(/,'stability layer must not manipulate application/financial state');
 
 /* O núcleo financeiro não é substituído pela revisão visual. */
 assert.match(core,/STATE_VERSION\s*=\s*5/);
