@@ -1,9 +1,8 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 8 de setembro de 2026
-Build público atual: `v72`
-Build candidato: `v73`
-Branch candidata: `ui/v73-right-navigation`
+Build público atual: `v73`
+Branch pública: `main`
 
 ## Visão geral
 
@@ -82,13 +81,10 @@ O SVG sentinela oculto continua a impedir que `ui-icons.js` substitua destrutiva
 
 ## Gesto horizontal v73
 
-A direção foi invertida para acompanhar o novo lado do drawer:
-
 - fechado: o gesto candidato começa nos últimos `30px` da margem direita;
 - abertura: movimento horizontal para a esquerda;
 - fecho: movimento horizontal para a direita;
 - threshold de intenção: `8px`;
-- predominância horizontal continua obrigatória;
 - snap por progresso: `34%` / `66%`;
 - fling: `0.45px/ms`;
 - durante o arrasto, `--drawer-drag-x`, `--drawer-drag-alpha` e `--drawer-drag-blur` seguem o dedo diretamente;
@@ -96,15 +92,14 @@ A direção foi invertida para acompanhar o novo lado do drawer:
 
 ## Temas, ícones e tipografia
 
-- tipografia existente preservada;
-- sistema Lucide existente preservado;
-- tema claro/escuro preservado;
-- não foram introduzidas novas bibliotecas de ícones ou fontes;
-- alvos de navegação do drawer permanecem com `min-height:48px`.
+Tipografia, sistema Lucide, tema claro/escuro e alvos tácteis existentes foram preservados. Não foram introduzidas novas bibliotecas de ícones ou fontes.
 
 ## Distribuição v73
 
 - build: `v73`;
 - revisão do menu: `73-menu8`;
 - cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v73-menu8`;
-- `scripts/prepare-pages.cjs` continua a carregar `mobile-menu-toggle.css/.js` como camada final de navegação.
+- PR funcional: `#62`;
+- merge: `fb5c1b975b6494590eb16a3ab09762218e135299`;
+- CI de `main`: `34180397609` — sucesso;
+- Pages: `34180421362` — sucesso.

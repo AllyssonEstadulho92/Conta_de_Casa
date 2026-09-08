@@ -200,7 +200,7 @@ O utilizador recebe feedback cinestésico imediato e previsível sem reflow, sem
 Permanece `v71` / `71-menu5`; o refinamento foi incorporado no mesmo PR candidato antes da publicação.
 
 ## D-038 — A navegação lateral usa o lado direito como direção canónica
-Data: 8 de setembro de 2026 · Estado: aceite como candidata v73.
+Data: 8 de setembro de 2026 · Estado: aceite e publicada na v73 através do PR #62.
 
 ### Contexto
 
@@ -221,6 +221,10 @@ A aplicação tinha sidebar desktop e drawer móvel ancorados à esquerda. A dir
 
 A alteração muda a direção visual sem duplicar navegação, sem alterar dados e sem introduzir um novo componente. O mesmo sistema funciona em mobile e desktop com menos divergência estrutural.
 
-### Versionamento
+### Publicação
 
-Candidata `v73` / `73-menu8`; cache `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v73-menu8`.
+- release: `v73` / `73-menu8`;
+- merge: `fb5c1b975b6494590eb16a3ab09762218e135299`;
+- CI automática do PR `#1383` (`34180312212`): sucesso;
+- CI automática de `main` `#1384` (`34180397609`): sucesso;
+- GitHub Pages `#1377` (`34180421362`): sucesso.
