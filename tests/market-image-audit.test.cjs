@@ -84,25 +84,28 @@ assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://world.openbeautyfacts
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/products/123/front.jpg'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/images/large/739490_test.jpg'),'');
 
-assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v71-menu5/);
+assert.match(sw,/conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v71-menu5-v72-icons1/);
 for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','ui-consistency.css','v64-runtime.css','v64-runtime.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(prepare.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
 }
-assert.match(prepare,/const BUILD = 'v71'/);
+assert.match(prepare,/const BUILD = 'v72'/);
 assert.match(prepare,/const VISUAL_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const SHELL_REV = '66-shell1'/);
 assert.match(prepare,/const MENU_REV = '71-menu5'/);
+assert.match(prepare,/const ICON_REV = '72-icons1'/);
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-image-audit\.css\?v=71/);
-  assert.match(index,/market-retailer-image-policy\.js\?v=71/);
-  assert.match(index,/market-image-audit\.js\?v=71/);
-  assert.match(index,/market-official-images\.js\?v=71/);
+  assert.match(index,/market-image-audit\.css\?v=72/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=72/);
+  assert.match(index,/market-image-audit\.js\?v=72/);
+  assert.match(index,/market-official-images\.js\?v=72/);
+  assert.match(index,/ui-icons\.css\?v=72-icons1/);
+  assert.match(index,/ui-icons\.js\?v=72-icons1/);
   assert.match(index,/ui-consistency\.css\?v=64-ui1/);
   assert.match(index,/v64-runtime\.css\?v=66-shell1/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
@@ -119,4 +122,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official retailer image, fallback, safe-source, zoom and v71 menu build tests: OK');
+console.log('Market official retailer image, fallback, safe-source, zoom and v72 icon-system build tests: OK');
