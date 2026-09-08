@@ -36,7 +36,7 @@ assert.match(css,/\.market-category-items \.status-chip\{[\s\S]*justify-self:sta
 assert.match(css,/\.market-category-items \.market-mobile-actions\{[\s\S]*justify-content:flex-start/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture1-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
 assert.ok(sw.includes("'./market-category-groups.css'"));
 assert.ok(sw.includes("'./market-category-groups.js'"));
 assert.ok(sw.includes("'./design-system.css'"));
@@ -53,7 +53,7 @@ assert.match(prepare,/const CATEGORY_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
 assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture1'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 assert.doesNotMatch(publicFilesBlock,/'ui-consistency\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'v64-runtime\.css'/);
 assert.ok(publicFilesBlock.includes("'v64-runtime.js'"));
@@ -75,8 +75,8 @@ try{
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/v74-experience\.css\?v=74-experience2/);
   assert.match(index,/v74-experience\.js\?v=74-experience2/);
-  assert.match(index,/v75-architecture\.css\?v=75-architecture1/);
-  assert.match(index,/v75-architecture\.js\?v=75-architecture1/);
+  assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
+  assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
   assert.ok(index.indexOf('market-brand.css')<index.indexOf('market-category-groups.css'));
   assert.ok(index.indexOf('market-category-groups.css')<index.indexOf('market-shopping-focus.css'));
   assert.ok(index.indexOf('mobile-menu-toggle.css')<index.indexOf('v74-experience.css'));
@@ -93,4 +93,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market category grouping preserved under the v75 architecture release: OK');
+console.log('Market category grouping preserved under the final v75 prototype architecture: OK');
