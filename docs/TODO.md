@@ -49,8 +49,8 @@ Atualizado: 8 de setembro de 2026
 - [x] Adicionar `tests/v75-stability.test.cjs`.
 - [x] Sintaxe CI: incluir `v74-experience.js`, `v75-architecture.js` e `v75-stability.js`.
 - [x] Verificação Pages: incluir `v75-architecture.test.cjs` e `v75-stability.test.cjs`.
-- [ ] Confirmar CI completo verde no commit/PR final.
-- [ ] Confirmar deploy Pages concluído sobre o SHA integrado em `main`.
+- [x] Confirmar CI completo verde sobre a revisão integrada em `main`.
+- [x] Confirmar deploy Pages concluído com sucesso sobre a revisão integrada em `main`.
 
 ## P2 — Consolidação posterior
 
