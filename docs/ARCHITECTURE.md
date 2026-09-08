@@ -66,6 +66,8 @@ Responsabilidades:
 - garantir scroll local das tabelas no desktop e evitar duplicação tabela/cartão em mobile;
 - sincronizar `theme-color` com o tema/cabeçalho visível;
 - gerir visualmente `loading`, `loaded`, `error` e `empty` de imagens do Mercado;
+- impedir abertura/ampliação de imagem quando o recurso remoto falha, restaurando o controlo após carregamento válido;
+- adaptar a grelha de produtos de três para duas colunas até 430 px;
 - apresentar skeleton e fallback sem alterar o produto, preço ou estado financeiro;
 - respeitar `prefers-reduced-motion` e `forced-colors`.
 
@@ -95,7 +97,8 @@ O formulário continua a ser criado por `forms.js`. Na criação de nova despesa
 - fotografia validada é apoio visual;
 - lojas suportadas: Continente e Pingo Doce;
 - outras cadeias não são apresentadas sem suporte real;
-- falhas de imagem remota não alteram o artigo: a área passa a `Imagem indisponível` e mantém geometria estável.
+- falhas de imagem remota não alteram o artigo: a área passa a `Imagem indisponível`, a ampliação fica desativada enquanto o recurso está inválido e a geometria permanece estável;
+- a grelha de produtos usa três colunas quando existe largura confortável e duas colunas até 430 px.
 
 ## 7. Planeamento, Relatórios e Mais
 
@@ -116,7 +119,8 @@ O painel real permanece em `#syncPanel`; a v75 apenas acrescenta apresentação.
 - `forced-colors` recebe foco/bordas compatíveis;
 - foco e ARIA preservados;
 - pinch zoom não é bloqueado;
-- tabelas ficam confinadas ao próprio scroll no desktop.
+- tabelas ficam confinadas ao próprio scroll no desktop;
+- a grelha móvel de produtos reduz densidade em ecrãs até 430 px.
 
 ## 10. Distribuição pública
 
@@ -138,7 +142,7 @@ O painel real permanece em `#syncPanel`; a v75 apenas acrescenta apresentação.
 
 ## 12. CI e deploy
 
-A validação de CI e a verificação pré-Pages passam a cobrir o mesmo conjunto crítico de camadas v74/v75:
+A validação de CI e a verificação pré-Pages cobrem o mesmo conjunto crítico de camadas v74/v75:
 
 - sintaxe de `v74-experience.js`, `v75-architecture.js` e `v75-stability.js`;
 - `tests/v75-architecture.test.cjs`;
