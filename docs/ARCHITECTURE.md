@@ -1,7 +1,8 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 8 de setembro de 2026
-Build público atual: `v75`
+Build público: `v75`
+Revisão transversal: `75-stability1`
 Branch pública: `main`
 Distribuição: GitHub Pages / PWA
 
@@ -51,6 +52,25 @@ Contrato:
 
 A geometria móvel usa 60 px de linha visual mais `env(safe-area-inset-top)`.
 
+### Estabilidade transversal `75-stability1`
+
+`v75-stability.css/js` é carregado por último. É uma camada de correção defensiva transversal e não uma segunda arquitetura.
+
+Responsabilidades:
+
+- uniformizar tipografia através da stack nativa do sistema;
+- impedir overflow causado por filhos flex/grid sem `min-width: 0`;
+- estabilizar safe areas horizontais e verticais;
+- manter controlos mobile com dimensão e texto adequados ao Safari;
+- consolidar métricas da navegação inferior e dos diálogos;
+- garantir scroll local das tabelas no desktop e evitar duplicação tabela/cartão em mobile;
+- sincronizar `theme-color` com o tema/cabeçalho visível;
+- gerir visualmente `loading`, `loaded`, `error` e `empty` de imagens do Mercado;
+- apresentar skeleton e fallback sem alterar o produto, preço ou estado financeiro;
+- respeitar `prefers-reduced-motion` e `forced-colors`.
+
+A camada não referencia `appState`, montantes, `estimatedCents`, `actualCents`, IndexedDB ou operações de persistência.
+
 ## 4. Navegação
 
 Navegação primária móvel:
@@ -74,7 +94,8 @@ O formulário continua a ser criado por `forms.js`. Na criação de nova despesa
 - GTIN identifica artigo, não prova preço;
 - fotografia validada é apoio visual;
 - lojas suportadas: Continente e Pingo Doce;
-- outras cadeias não são apresentadas sem suporte real.
+- outras cadeias não são apresentadas sem suporte real;
+- falhas de imagem remota não alteram o artigo: a área passa a `Imagem indisponível` e mantém geometria estável.
 
 ## 7. Planeamento, Relatórios e Mais
 
@@ -88,10 +109,14 @@ O painel real permanece em `#syncPanel`; a v75 apenas acrescenta apresentação.
 
 - breakpoint principal: `820px`;
 - safe areas iOS em topbar, drawer, scanner, formulários e navegação inferior;
-- alvos principais de 42–48 px;
+- safe areas laterais também são aplicadas ao conteúdo e header;
+- alvos principais de 44–48 px;
+- inputs/selects/textarea usam 16 px no mobile para evitar zoom de foco no Safari;
 - `prefers-reduced-motion` respeitado;
+- `forced-colors` recebe foco/bordas compatíveis;
 - foco e ARIA preservados;
-- pinch zoom não é bloqueado.
+- pinch zoom não é bloqueado;
+- tabelas ficam confinadas ao próprio scroll no desktop.
 
 ## 10. Distribuição pública
 
@@ -102,14 +127,26 @@ O painel real permanece em `#syncPanel`; a v75 apenas acrescenta apresentação.
 - `EXPERIENCE_REV = 74-experience2`;
 - `ARCHITECTURE_REV = 75-architecture2`;
 - `HEADER_REV = 75-header2`;
-- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2`.
+- `STABILITY_REV = 75-stability1`;
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1`.
 
-`ui-consistency.css` e `v64-runtime.css` continuam fora de `dist`. `v75-header-refinement.css` integra o bundle Pages e recebe query de revisão própria para invalidação de cache.
+`ui-consistency.css` e `v64-runtime.css` continuam fora de `dist`. `v75-header-refinement.css` e `v75-stability.css/js` integram o bundle Pages com query de revisão própria.
 
 ## 11. Atualização e cache
 
-`sw.js` utiliza cache versionado e elimina caches antigos na ativação. O bundle público carrega `v75-header-refinement.css?v=75-header2`, garantindo que a revisão visual do cabeçalho não fica presa à folha anterior. O identificador do cache mantém a assinatura-base da v75 e acrescenta `-header2` como revisão visual.
+`sw.js` utiliza cache versionado e elimina caches antigos na ativação. O bundle público carrega `v75-stability.css/js?v=75-stability1` depois das camadas anteriores, garantindo que a revisão transversal não fica presa ao cache `header2`.
 
-## 12. Validação manual ainda necessária
+## 12. CI e deploy
 
-Confirmar em dispositivo real: safe area, títulos longos, badge de notificação, animação hambúrguer/X, orientação, tema escuro e ausência de overflow.
+A validação de CI e a verificação pré-Pages passam a cobrir o mesmo conjunto crítico de camadas v74/v75:
+
+- sintaxe de `v74-experience.js`, `v75-architecture.js` e `v75-stability.js`;
+- `tests/v75-architecture.test.cjs`;
+- `tests/v75-stability.test.cjs`;
+- regressões financeiras, segurança, sincronização, mobile e acessibilidade já existentes.
+
+O deploy Pages continua condicionado a CI concluído com sucesso em `main`.
+
+## 13. Validação manual ainda necessária
+
+Confirmar em dispositivo real: safe area, títulos longos, badge de notificação, animação hambúrguer/X, orientação, tema escuro, formulários sem zoom, navegação inferior, ausência de overflow e fallback de imagens do Mercado.
