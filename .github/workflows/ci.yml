@@ -111,6 +111,9 @@ jobs:
       - name: v75 information architecture tests
         run: node tests/v75-architecture.test.cjs
 
+      - name: v76 usability and planning tests
+        run: node tests/v76-usability.test.cjs
+
       - name: Animated mobile menu tests
         run: node tests/mobile-menu-toggle.test.cjs
 
@@ -129,7 +132,7 @@ jobs:
       - name: Navigation architecture tests
         run: node tests/navigation.test.cjs
 
-      - name: Accessibility foundation tests
+      - name: Accessibility foundation and final-cascade tests
         run: node tests/accessibility.test.cjs
 
       - name: Sync safety tests
