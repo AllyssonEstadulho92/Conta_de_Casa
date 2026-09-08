@@ -1,4 +1,4 @@
-/* Conta de Casa v71 — botão hambúrguer/X animado, drawer off-canvas suave e gesto horizontal contínuo. */
+/* Conta de Casa v72 — botão hambúrguer/X animado, drawer off-canvas suave e abertura sem salto visual. */
 
 @media(max-width:820px){
   .mobile-menu-btn,
@@ -20,6 +20,17 @@
     -webkit-tap-highlight-color:transparent;
     touch-action:manipulation;
     transition:background-color .16s ease,color .16s ease,transform .16s ease;
+  }
+
+  .mobile-menu-home-placeholder{
+    display:block;
+    width:44px;
+    min-width:44px;
+    height:44px;
+    min-height:44px;
+    flex:0 0 44px;
+    pointer-events:none;
+    visibility:hidden;
   }
 
   .mobile-menu-btn[aria-expanded="true"],
@@ -364,6 +375,8 @@
   .nav-drawer-shell,
   .nav-drawer::backdrop,
   .drawer-nav .nav-btn,
-  .drawer-nav .nav-btn::before,
-  .drawer-footer .icon-text-btn{transition:none!important}
+  .drawer-footer .icon-text-btn{
+    transition:none!important;
+    animation:none!important;
+  }
 }
