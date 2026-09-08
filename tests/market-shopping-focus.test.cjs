@@ -10,6 +10,7 @@ const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const js=read('market-shopping-focus.js');
 const css=read('market-shopping-focus.css');
 const brand=read('market-brand.css');
+const experience=read('v74-experience.css');
 const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
 const manifest=JSON.parse(read('release-manifest.json'));
@@ -33,11 +34,12 @@ assert.match(css,/#page-market #marketSummary\{display:none!important\}/);
 assert.match(css,/#page-market \.market-new-btn\{display:none!important\}/);
 assert.match(css,/\.market-filter-clear\[hidden\]\{display:none!important\}/);
 assert.match(css,/\.market-mobile-quick-price/);
-assert.match(css,/grid-template-columns:38px 54px minmax\(0,1fr\) auto!important/,'v74 cards must reserve space for a verified product photo');
+assert.match(css,/grid-template-columns:38px 54px minmax\(0,1fr\) auto!important/);
 assert.match(css,/\.market-item-details>summary/);
 assert.match(css,/min-height:44px/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(brand,/\.market-product-photo[\s\S]*display:grid!important/);
+assert.match(experience,/\.cdc-market-home/,'v74 experience must place the shopping list inside the prototype market screen');
 
 assert.equal(manifest.latestVersion,'v74');
 const v65=manifest.releases.find(release=>release.version==='v65');
@@ -48,15 +50,14 @@ assert.ok(v65.items.some(item=>/comprados/i));
 
 assert.ok(sw.includes("'./market-shopping-focus.css'"));
 assert.ok(sw.includes("'./market-shopping-focus.js'"));
+assert.ok(sw.includes("'./v74-experience.css'"));
 assert.match(sw,/v74-shopping2/);
 assert.match(sw,/v73-menu8/);
-assert.match(sw,/v74-experience1/);
+assert.match(sw,/v74-experience2/);
 assert.match(prepare,/const BUILD = 'v74'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
-assert.match(prepare,/const EXPERIENCE_REV = '74-experience1'/);
-assert.ok(prepare.includes("'market-shopping-focus.css'"));
-assert.ok(prepare.includes("'market-shopping-focus.js'"));
+assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -67,15 +68,16 @@ try{
   assert.match(index,/market-shopping-focus\.js\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/mobile-menu-toggle\.js\?v=73-menu8/);
-  assert.match(index,/v74-experience\.js\?v=74-experience1/);
+  assert.match(index,/v74-experience\.css\?v=74-experience2/);
+  assert.match(index,/v74-experience\.js\?v=74-experience2/);
   assert.ok(index.indexOf('market-shopping-focus.css')<index.indexOf('mobile-menu-toggle.css'));
+  assert.ok(index.indexOf('mobile-menu-toggle.css')<index.indexOf('v74-experience.css'));
   assert.ok(index.indexOf('market-category-groups.js')<index.indexOf('market-shopping-focus.js'));
   assert.ok(index.indexOf('market-shopping-focus.js')<index.indexOf('mobile-menu-toggle.js'));
   assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v74-experience.js'));
-  assert.ok(fs.existsSync(path.join(dist,'market-shopping-focus.css')));
-  assert.ok(fs.existsSync(path.join(dist,'market-shopping-focus.js')));
+  for(const asset of ['market-shopping-focus.css','market-shopping-focus.js','v74-experience.css','v74-experience.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Mobile shopping focus preserved and adapted to the v74 prototype: OK');
+console.log('Mobile shopping focus preserved and adapted to the v74 experience2 prototype: OK');
