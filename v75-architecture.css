@@ -1,0 +1,204 @@
+/* Conta de Casa v75 — arquitetura visual clara e consistente.
+   Corrige redundância de navegação, contraste, hierarquia e mistura de temas da v74.
+   Não altera dados, cálculos, segurança, cofre, IndexedDB ou sincronização. */
+
+:root{
+  --v75-surface:var(--surface);
+  --v75-surface-soft:var(--surface-2);
+  --v75-text:var(--text);
+  --v75-muted:var(--muted);
+  --v75-border:var(--border);
+  --v75-primary:var(--primary);
+  --v75-accent:var(--accent);
+  --v75-shadow:0 4px 18px color-mix(in srgb,var(--text) 7%,transparent);
+}
+
+/* Drawer e sidebar: menos grupos, mesma linguagem visual da aplicação. */
+.v75-nav-group{gap:5px!important}
+.v75-nav-group+.v75-nav-group{margin-top:6px}
+.v75-nav-group .nav-group-label{color:var(--v75-muted)!important;font-size:.69rem!important;letter-spacing:.09em!important}
+
+@media(min-width:821px){
+  .sidebar{background:var(--v75-surface)!important}
+  .sidebar .nav-list{gap:10px!important}
+}
+
+@media(max-width:820px){
+  /* Corrige a regra histórica que ocultava o terceiro item da barra inferior. */
+  .mobile-nav .nav-btn:nth-child(3){visibility:visible!important;display:grid!important}
+  .mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr))!important;background:var(--v75-surface)!important;border-color:var(--v75-border)!important}
+  .mobile-nav .nav-btn{color:var(--v75-muted)!important}
+  .mobile-nav .nav-btn.active{color:var(--v75-primary)!important}
+  .mobile-nav .nav-btn span{font-size:11px!important;line-height:1.15!important;font-weight:600!important}
+  .mobile-nav .ui-icon-svg,.mobile-nav .svg-icon{width:20px!important;height:20px!important}
+
+  .nav-drawer-shell{background:var(--v75-surface)!important;color:var(--v75-text)!important;border-left-color:var(--v75-border)!important;box-shadow:-18px 0 44px color-mix(in srgb,#000 16%,transparent)!important}
+  .drawer-head{border-bottom-color:var(--v75-border)!important}
+  .drawer-head .brand strong{color:var(--v75-text)!important}
+  .drawer-head .brand small{color:var(--v75-muted)!important}
+  .drawer-nav{gap:10px!important;padding-block:10px!important}
+  .drawer-nav .nav-btn{min-height:48px!important;border-radius:12px!important;color:var(--v75-muted)!important;font-size:.9rem!important}
+  .drawer-nav .nav-btn:hover{background:var(--v75-surface-soft)!important;color:var(--v75-text)!important}
+  .drawer-nav .nav-btn.active{background:var(--primary-2)!important;color:var(--v75-primary)!important}
+  .drawer-footer{border-top-color:var(--v75-border)!important}
+  .drawer-footer .icon-text-btn{color:var(--v75-muted)!important}
+
+  /* Cabeçalho: título forte, contexto simples e sem ruído. */
+  .page-heading h1{font-size:20px!important;font-weight:680!important;letter-spacing:-.02em!important}
+
+  /* Uniformização de superfícies: evita o efeito “meio claro/meio escuro”. */
+  .cdc-mobile-month,.cdc-month-hero,.cdc-quick-action,.cdc-category-row,
+  .cdc-movement-row,.cdc-market-search,.cdc-product-card,.cdc-store-card,
+  .cdc-planning-month,.cdc-planning-categories>div,.cdc-profile-card,
+  .cdc-more-list,.cdc-more-list button,.cdc-preferences-details,
+  .v75-more-group>div,.v75-budget-summary,.v75-budget-metrics>div{
+    background:var(--v75-surface)!important;
+    border-color:var(--v75-border)!important;
+    color:var(--v75-text)!important;
+  }
+  .cdc-month-hero,.cdc-quick-action,.cdc-category-row,.cdc-movement-row,
+  .cdc-product-card,.cdc-store-card,.cdc-profile-card,.v75-more-group>div,
+  .v75-budget-summary{box-shadow:var(--v75-shadow)!important}
+
+  .cdc-mobile-month>strong,.cdc-month-hero-main>span,.cdc-month-hero-main>strong,
+  .cdc-budget-head>strong,.cdc-quick-action,.cdc-category-row>div>strong,
+  .cdc-category-row>strong,.cdc-movement-copy strong,.cdc-movement-value strong,
+  .cdc-product-card>strong,.cdc-product-card>b,.cdc-store-card>strong,
+  .cdc-planning-month strong,.cdc-planning-categories strong,.cdc-planning-categories b,
+  .cdc-profile-card strong{color:var(--v75-text)!important}
+  .cdc-month-hero-main>small,.cdc-budget-head>span,.cdc-budget-box>small,
+  .cdc-category-row>small,.cdc-movement-copy small,.cdc-movement-value small,
+  .cdc-product-card>small,.cdc-profile-card small,.cdc-planning-categories small{
+    color:var(--v75-muted)!important;
+  }
+
+  /* Alertas: informação importante sem dominar visualmente o ecrã. */
+  .alert{border-radius:14px!important;padding:12px 14px!important;box-shadow:none!important;font-size:.82rem!important;line-height:1.45!important}
+  .alert.warning{background:var(--warning-bg)!important;color:var(--v75-text)!important;border-color:color-mix(in srgb,var(--warning) 22%,var(--v75-border))!important}
+  .alert.danger{background:var(--danger-bg)!important;color:var(--v75-text)!important;border-color:color-mix(in srgb,var(--danger) 22%,var(--v75-border))!important}
+  .alert .link-btn{min-width:max-content!important;color:var(--v75-primary)!important}
+
+  /* Início: legibilidade acima da densidade excessiva. */
+  .cdc-mobile-greeting{padding:11px 12px!important;margin-bottom:10px!important}
+  .cdc-mobile-greeting>div span{font-size:.78rem!important}
+  .cdc-mobile-greeting>div strong{font-size:.86rem!important}
+  .cdc-mobile-month{min-height:46px!important;margin-bottom:10px!important}
+  .cdc-mobile-month>strong{font-size:.84rem!important}
+  .cdc-month-hero{padding:15px!important;gap:11px!important;margin-bottom:10px!important}
+  .cdc-month-hero-main>span{font-size:.8rem!important}
+  .cdc-month-hero-main>strong{font-size:1.7rem!important}
+  .cdc-month-hero-main>small,.cdc-budget-head,.cdc-budget-box>small{font-size:.74rem!important}
+  .cdc-quick-actions{gap:9px!important;margin-bottom:16px!important}
+  .cdc-quick-action{min-height:92px!important;padding:10px 7px!important}
+  .cdc-quick-action strong{font-size:.76rem!important;line-height:1.2!important}
+  .cdc-section-title>strong{font-size:.9rem!important}
+  .cdc-category-row{min-height:56px!important;padding:8px 10px!important}
+  .cdc-category-row>div>strong,.cdc-category-row>strong{font-size:.76rem!important}
+  .cdc-category-row>small{font-size:.7rem!important}
+
+  /* Despesas: título semântico e movimentos fáceis de digitalizar. */
+  .cdc-segmented{background:var(--v75-surface-soft)!important;border-color:var(--v75-border)!important;padding:4px!important;border-radius:12px!important}
+  .cdc-segmented button{min-height:40px!important;color:var(--v75-muted)!important;font-size:.8rem!important}
+  .cdc-segmented button.active{background:var(--v75-surface)!important;color:var(--v75-primary)!important}
+  .bill-search-wrap input{min-height:44px!important;background:var(--v75-surface-soft)!important;color:var(--v75-text)!important;font-size:.8rem!important}
+  .cdc-movement-day>h3{font-size:.76rem!important;color:var(--v75-muted)!important;margin:4px 6px!important}
+  .cdc-movement-row{min-height:62px!important;padding:9px 10px!important}
+  .cdc-movement-copy strong,.cdc-movement-value strong{font-size:.8rem!important}
+  .cdc-movement-copy small,.cdc-movement-value small{font-size:.7rem!important;color:var(--v75-muted)!important}
+
+  /* Planeamento: tabs claros, resumo primeiro, formulário depois. */
+  #page-planning>.section-tabs,#page-goals>.section-tabs{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:4px!important;
+    padding:4px!important;
+    margin-bottom:12px!important;
+    border:1px solid var(--v75-border)!important;
+    border-radius:13px!important;
+    background:var(--v75-surface-soft)!important;
+  }
+  #page-planning>.section-tabs .section-tab,#page-goals>.section-tabs .section-tab{
+    min-height:42px!important;
+    border:0!important;
+    border-radius:10px!important;
+    background:transparent!important;
+    color:var(--v75-muted)!important;
+    box-shadow:none!important;
+    font-size:.84rem!important;
+    font-weight:600!important;
+  }
+  #page-planning>.section-tabs .section-tab.active,#page-goals>.section-tabs .section-tab.active{
+    background:var(--v75-surface)!important;
+    color:var(--v75-primary)!important;
+    box-shadow:0 2px 8px color-mix(in srgb,var(--text) 8%,transparent)!important;
+  }
+  .cdc-planning-overview{gap:12px!important;margin-bottom:14px!important}
+  .cdc-planning-month{min-height:46px!important}
+  .cdc-planning-month strong{font-size:.82rem!important;color:var(--v75-text)!important}
+  .v75-budget-summary{display:grid;grid-template-columns:124px minmax(0,1fr);gap:14px;align-items:center;padding:14px;border:1px solid var(--v75-border);border-radius:16px}
+  .cdc-budget-ring{width:116px!important;height:116px!important;margin:0!important;background:conic-gradient(var(--v75-accent) calc(var(--pct,0)*1%),var(--v75-surface-soft) 0)!important}
+  .cdc-budget-ring::after{background:var(--v75-surface)!important}
+  .cdc-budget-ring strong{font-size:1.35rem!important;color:var(--v75-text)!important}
+  .cdc-budget-ring span{font-size:.72rem!important;color:var(--v75-muted)!important}
+  .v75-budget-metrics{display:grid;gap:8px}
+  .v75-budget-metrics>div{display:grid;gap:2px;padding:8px 10px;border:1px solid var(--v75-border);border-radius:11px}
+  .v75-budget-metrics small{font-size:.68rem!important;color:var(--v75-muted)!important}
+  .v75-budget-metrics strong{font-size:.82rem!important;color:var(--v75-text)!important}
+  .v75-section-heading{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:2px 2px 0}
+  .v75-section-heading>strong{font-size:.86rem}
+  .v75-section-heading>small{font-size:.67rem!important;color:var(--v75-muted)!important;text-align:right}
+  .cdc-planning-categories>div{min-height:50px!important;padding:7px 9px!important}
+  .cdc-planning-categories strong,.cdc-planning-categories b{font-size:.74rem!important}
+  #page-planning>.two-col{display:grid!important;grid-template-columns:1fr!important;gap:12px!important}
+  #page-planning>.two-col .panel{background:var(--v75-surface)!important;color:var(--v75-text)!important;border-color:var(--v75-border)!important}
+
+  /* Mais: deixa de repetir Mercado/Planeamento e passa a ser hub secundário. */
+  .cdc-more-menu{display:grid!important;gap:12px!important}
+  .v75-profile-card{min-height:68px!important;padding:10px 12px!important}
+  .v75-more-group{display:grid;gap:6px}
+  .v75-more-group>h2{margin:0 4px!important;color:var(--v75-muted)!important;font-size:.7rem!important;line-height:1.4!important;font-weight:700!important;letter-spacing:.08em!important;text-transform:uppercase}
+  .v75-more-group>div{overflow:hidden;border:1px solid var(--v75-border);border-radius:14px}
+  .v75-more-row{width:100%;min-height:54px;display:grid;grid-template-columns:34px minmax(0,1fr) 18px;align-items:center;gap:9px;padding:8px 12px;border:0;border-bottom:1px solid var(--v75-border);background:var(--v75-surface);color:var(--v75-text);text-align:left}
+  .v75-more-row:last-child{border-bottom:0}
+  .v75-more-icon{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:var(--primary-2);color:var(--v75-primary)}
+  .v75-more-row>span:nth-child(2){display:grid;gap:1px;min-width:0}
+  .v75-more-row strong{font-size:.8rem;font-weight:600}
+  .v75-more-row small{font-size:.68rem!important;color:var(--v75-muted)!important}
+  .v75-more-row>i{font-size:18px;font-style:normal;color:var(--v75-muted)}
+  .cdc-preferences-details{margin-top:12px!important}
+  .cdc-preferences-details>summary{min-height:48px!important;font-size:.78rem!important}
+
+  /* PIN/cofre: mesma identidade e teclado numérico convencional 3x4. */
+  .vault-screen{align-items:start!important;padding:max(22px,env(safe-area-inset-top,0px)) 14px max(24px,env(safe-area-inset-bottom,0px))!important;background:var(--bg)!important}
+  .vault-card{width:min(430px,100%)!important;padding:24px 20px!important;border-radius:24px!important;background:var(--v75-surface)!important;color:var(--v75-text)!important;border-color:var(--v75-border)!important;box-shadow:0 18px 50px color-mix(in srgb,#000 10%,transparent)!important}
+  .vault-brand{margin-bottom:22px!important}
+  .vault-brand strong{font-size:1.1rem!important;color:var(--v75-text)!important}
+  .vault-brand small{color:var(--v75-muted)!important}
+  .vault-unlock-intro{margin-top:8px!important}
+  .vault-unlock-intro h1{font-size:1.75rem!important;line-height:1.12!important;color:var(--v75-text)!important}
+  .vault-unlock-intro p,.vault-unlock-input-label{color:var(--v75-muted)!important}
+  #unlockPassphrase{min-height:52px!important;border:1px solid var(--v75-border)!important;border-radius:14px!important;background:var(--v75-surface-soft)!important;color:var(--v75-text)!important;box-shadow:none!important;text-align:center!important;letter-spacing:.18em!important}
+  #unlockPassphrase:focus{border-color:var(--v75-primary)!important;box-shadow:0 0 0 3px var(--focus-ring)!important}
+  .vault-keypad{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;width:min(320px,100%)!important;margin:12px auto 0!important}
+  .vault-key{min-height:62px!important;width:100%!important;border:1px solid var(--v75-border)!important;border-radius:18px!important;background:var(--v75-surface-soft)!important;color:var(--v75-text)!important;box-shadow:none!important}
+  .vault-key strong{font-size:1.25rem!important;color:var(--v75-text)!important}
+  .vault-key small{font-size:.58rem!important;color:var(--v75-muted)!important;letter-spacing:.08em!important}
+  .vault-key:active{background:var(--primary-2)!important;color:var(--v75-primary)!important}
+  .vault-key-spacer{display:block!important}
+  .vault-enter-btn{min-height:52px!important;margin-top:16px!important;border-radius:14px!important;background:linear-gradient(90deg,var(--v75-primary),color-mix(in srgb,var(--v75-primary) 68%,var(--v75-accent)))!important}
+  .vault-keyboard-toggle{min-height:48px!important;border-radius:14px!important;background:var(--v75-surface)!important;color:var(--v75-primary)!important;border-color:var(--v75-border)!important}
+
+  /* Formulários e diálogos mantêm o mesmo tema do restante shell. */
+  .dialog-shell,.invoice-capture,.invoice-capture-preview{background:var(--v75-surface)!important;color:var(--v75-text)!important}
+  .dialog #billForm>label input,.dialog #billForm>label select,.dialog #billForm>label textarea{background:var(--v75-surface)!important;color:var(--v75-text)!important;border-color:var(--v75-border)!important}
+}
+
+@media(max-width:390px){
+  .v75-budget-summary{grid-template-columns:104px minmax(0,1fr);gap:10px;padding:11px}
+  .cdc-budget-ring{width:100px!important;height:100px!important}
+  .mobile-nav .nav-btn span{font-size:10px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .v75-more-row,.v75-budget-summary,.vault-key{transition:none!important}
+}
