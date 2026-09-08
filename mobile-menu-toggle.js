@@ -1,6 +1,6 @@
 'use strict';
 
-/* Conta de Casa v71 — hambúrguer/X animado, drawer off-canvas e gesto horizontal que acompanha o dedo. */
+/* Conta de Casa v72 — hambúrguer/X contínuo, drawer off-canvas e gesto horizontal que acompanha o dedo. */
 (function installAnimatedMobileMenu(root){
   let installed=false;
 
@@ -17,26 +17,15 @@
     button.parentNode?.insertBefore(homeAnchor,button);
 
     button.classList.add('animated-mobile-menu-toggle');
+    button.dataset.uiIconOwner='custom';
 
-    // ui-icons.js hidrata #mobileMenuBtn com o SVG Lucide "menu". Mantemos um SVG-sentinela
-    // oculto e o mesmo data-ui-icon-slot para que essa hidratação reconheça o controlo como
-    // já tratado e não substitua as três linhas animáveis sempre que aria-expanded muda.
-    let iconSentinel=button.querySelector(':scope > svg.ui-icon-svg');
-    if(!iconSentinel){
-      iconSentinel=document.createElementNS('http://www.w3.org/2000/svg','svg');
-      iconSentinel.classList.add('ui-icon-svg');
-    }
-    iconSentinel.classList.add('mobile-menu-icon-sentinel');
-    iconSentinel.hidden=true;
-    iconSentinel.setAttribute('aria-hidden','true');
-    iconSentinel.setAttribute('focusable','false');
-
+    // O botão móvel possui desenho e animação próprios. O sistema Lucide v72 respeita
+    // data-ui-icon-owner="custom", por isso já não é necessária uma sentinela SVG escondida.
     const glyph=document.createElement('span');
     glyph.className='mobile-menu-glyph';
     glyph.setAttribute('aria-hidden','true');
     glyph.append(document.createElement('span'),document.createElement('span'),document.createElement('span'));
-    button.dataset.uiIconSlot='menu';
-    button.replaceChildren(glyph,iconSentinel);
+    button.replaceChildren(glyph);
 
     // Mantém o botão histórico no DOM para não quebrar wiring legado, mas remove o X duplicado da interface.
     if(legacyClose){
@@ -45,8 +34,11 @@
       legacyClose.setAttribute('aria-hidden','true');
     }
 
-    const motionDuration=240;
+    const motionOpenDuration=300;
+    const motionCloseDuration=240;
+    const motionOpenDelay=60;
     const motionEase='cubic-bezier(.32,.72,0,1)';
+    const buttonReparentDuration=280;
     const drawerCloseFallback=360;
 
     // Gesto horizontal: começa junto à margem esquerda quando fechado e em qualquer ponto
@@ -64,6 +56,8 @@
 
     let motionAnimations=[];
     let motionRun=0;
+    let buttonMoveAnimation=null;
+    let pendingHomeRect=null;
     let lastFocusKeyboard=false;
     let drawerCloseTimer=0;
     let drawerCloseTarget=null;
@@ -114,6 +108,40 @@
       delete glyph.dataset.motion;
     }
 
+    function cancelButtonReparent(){
+      if(!buttonMoveAnimation)return;
+      try{buttonMoveAnimation.cancel();}catch(_error){}
+      buttonMoveAnimation=null;
+      delete button.dataset.reparenting;
+    }
+
+    function animateButtonReparent(fromRect){
+      if(!fromRect||prefersReducedMotion()||typeof button.animate!=='function')return;
+      const toRect=button.getBoundingClientRect();
+      if(!fromRect.width||!fromRect.height||!toRect.width||!toRect.height)return;
+      const dx=fromRect.left-toRect.left;
+      const dy=fromRect.top-toRect.top;
+      if(Math.abs(dx)<.5&&Math.abs(dy)<.5)return;
+
+      cancelButtonReparent();
+      button.dataset.reparenting='true';
+      const animation=button.animate([
+        {transform:`translate3d(${dx}px,${dy}px,0)`},
+        {transform:'translate3d(0,0,0)'}
+      ],{
+        duration:buttonReparentDuration,
+        easing:motionEase,
+        fill:'none'
+      });
+      buttonMoveAnimation=animation;
+      const finish=()=>{
+        if(buttonMoveAnimation===animation)buttonMoveAnimation=null;
+        delete button.dataset.reparenting;
+      };
+      animation.onfinish=finish;
+      animation.oncancel=finish;
+    }
+
     function animateMenuGlyph(open){
       if(prefersReducedMotion()||typeof glyph.animate!=='function')return;
       cancelMenuMotion();
@@ -131,10 +159,13 @@
         {top:'8px',width:'18px',transform:'translateX(-50%) rotate(0deg) scaleX(.18)',opacity:0},
         {top:'8px',width:'22px',transform:'translateX(-50%) rotate(-45deg) scaleX(1)',opacity:1}
       ];
+      const duration=open?motionOpenDuration:motionCloseDuration;
+      const delay=open?motionOpenDelay:0;
+      const timing={duration,delay,easing:motionEase,fill:open?'backwards':'none'};
       const lines=[...glyph.children];
       lines.forEach((line,index)=>{
         const frames=open?[closed[index],opened[index]]:[opened[index],closed[index]];
-        motionAnimations.push(line.animate(frames,{duration:motionDuration,easing:motionEase,fill:'none'}));
+        motionAnimations.push(line.animate(frames,timing));
       });
 
       const lean=open?-5:5;
@@ -143,23 +174,33 @@
         {transform:`scale(.92) rotate(${lean}deg)`},
         {transform:`scale(1.035) rotate(${settle}deg)`,offset:.68},
         {transform:'scale(1) rotate(0deg)'}
-      ],{duration:motionDuration,easing:motionEase,fill:'none'});
+      ],timing);
       motionAnimations.push(glyphMotion);
       glyphMotion.onfinish=()=>{
         if(run===motionRun)delete glyph.dataset.motion;
       };
     }
 
-    function restoreButtonHome(){
+    function restoreButtonHome(fromRect=pendingHomeRect){
+      const sourceRect=fromRect||button.getBoundingClientRect();
       if(homeAnchor.parentNode&&button.parentNode!==homeAnchor.parentNode){
         homeAnchor.parentNode.insertBefore(button,homeAnchor.nextSibling);
       }
       button.classList.remove('drawer-menu-control');
+      pendingHomeRect=null;
+      animateButtonReparent(sourceRect);
     }
 
     function placeButtonInDrawer(){
-      if(button.parentNode!==drawerHead)drawerHead.insertBefore(button,drawerHead.firstChild);
+      if(button.parentNode===drawerHead){
+        button.classList.add('drawer-menu-control');
+        return;
+      }
+      const sourceRect=button.getBoundingClientRect();
+      drawerHead.insertBefore(button,drawerHead.firstChild);
       button.classList.add('drawer-menu-control');
+      // Num swipe o painel já segue diretamente o dedo; não somamos uma segunda translação.
+      if(!touchGesture)animateButtonReparent(sourceRect);
     }
 
     function setButtonState(open){
@@ -250,6 +291,7 @@
       delete drawer.dataset.closing;
       const returnValue=drawerCloseReturnValue;
       drawerCloseReturnValue=undefined;
+      pendingHomeRect=button.getBoundingClientRect();
       if(returnValue===undefined)nativeDrawerClose();
       else nativeDrawerClose(returnValue);
     }
@@ -297,8 +339,9 @@
       if(typeof root.openMobileDrawer==='function')root.openMobileDrawer();
       else if(!drawer.open){drawer.showModal();requestAnimationFrame(()=>drawer.classList.add('open'));}
       syncButton(drawer.open);
-      // O botão é movido para dentro do <dialog>. CSS transitions do glifo podem ser consumidas
-      // pelo reparenting no Safari; os keyframes explícitos garantem o movimento visível.
+      // O botão muda de contexto DOM para permanecer clicável dentro do dialog modal. A transição
+      // FLIP mantém a sua posição visual contínua enquanto o drawer entra; o pequeno atraso do
+      // glifo faz a transformação hambúrguer → X acontecer já numa zona visível do ecrã.
       requestAnimationFrame(()=>animateMenuGlyph(true));
       focusButton(keyboard);
     }
@@ -313,6 +356,7 @@
 
     function beginTouchDrag(gesture){
       cancelMenuMotion();
+      cancelButtonReparent();
       setFocusOrigin(false);
 
       if(gesture.mode==='opening'){
