@@ -46,6 +46,7 @@ jobs:
           node --check market-image-audit.js
           node --check market-official-images.js
           node --check v64-runtime.js
+          node --check v74-experience.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
 
@@ -97,13 +98,13 @@ jobs:
       - name: Market quantity and accounting tests
         run: node tests/market-live-accounting.test.cjs
 
-      - name: v64 scanner, billing-cycle and safe-area tests
+      - name: v64 scanner, billing-cycle and v74 shell tests
         run: node tests/v64-runtime.test.cjs
 
       - name: Unified icon audit tests
         run: node tests/ui-icons.test.cjs
 
-      - name: Visual consistency regression tests
+      - name: Visual consistency and v74 prototype tests
         run: node tests/ui-consistency.test.cjs
 
       - name: Animated mobile menu tests
