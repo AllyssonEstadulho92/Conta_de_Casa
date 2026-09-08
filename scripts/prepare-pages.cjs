@@ -11,12 +11,11 @@ const CATEGORY_REV = '64-ui1';
 const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
-const EXPERIENCE_REV = '74-experience1';
+const EXPERIENCE_REV = '74-experience2';
 
-/* O bundle público deixa de copiar ui-consistency.css e v64-runtime.css.
-   As regras visuais/safe-area relevantes foram consolidadas em design-system.css v74.
-   Os ficheiros funcionais continuam separados quando representam capacidades reais
-   (scanner, sincronização, atualização, pesquisa de mercado e navegação). */
+/* Bundle público v74: as camadas visuais antigas ui-consistency/v64-runtime.css
+   continuam fora da distribuição. v74-experience.css contém apenas a composição
+   específica do protótipo; design-system.css mantém os tokens e componentes globais. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -32,6 +31,7 @@ const PUBLIC_FILES = Object.freeze([
   'invoice-capture.css',
   'app-update.css',
   'market-image-audit.css',
+  'v74-experience.css',
   'core.js',
   'finance.js',
   'render.js',
@@ -76,7 +76,6 @@ index=index.replace(/<meta name="theme-color" content="[^"]+"\s*\/>/,'<meta name
 index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${BUILD}</strong>`);
 
-/* Compatibilidade das fontes de mercado atualmente aprovadas. */
 index=index.replace(
   "img-src 'self' data: blob: https://images.openfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://world.openfoodfacts.org;",
   "img-src 'self' data: blob: https://www.continente.pt https://static.pingodoce.pt https://*.openfoodfacts.org https://*.openbeautyfacts.org https://*.openproductsfacts.org https://*.openpetfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://r.jina.ai https://world.openfoodfacts.org https://world.openbeautyfacts.org https://world.openproductsfacts.org https://world.openpetfoodfacts.org;"
@@ -88,6 +87,7 @@ if(!index.includes('market-brand.css')) index=index.replace('</head>',`  <link r
 if(!index.includes('market-category-groups.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-category-groups.css?v=${CATEGORY_REV}" />\n</head>`);
 if(!index.includes('market-shopping-focus.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-shopping-focus.css?v=${SHOPPING_REV}" />\n</head>`);
 if(!index.includes('mobile-menu-toggle.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./mobile-menu-toggle.css?v=${MENU_REV}" />\n</head>`);
+if(!index.includes('v74-experience.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v74-experience.css?v=${EXPERIENCE_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
 if(!index.includes('sync-conflict-policy.js')) index=index.replace(syncScript,`${syncScript}<script src="./sync-conflict-policy.js?v=${UI_REV}" defer></script>`);
