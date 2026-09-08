@@ -50,7 +50,7 @@ for(const marker of ['.cdc-mobile-greeting','.cdc-mobile-month','.cdc-expense-fe
 assert.match(legacyCss,/\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:hidden\}/,'legacy hidden third destination is the regression being repaired');
 assert.match(architectureCss,/Conta de Casa v75/);
 assert.match(architectureCss,/html\.cdc-v75 \.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:visible!important;display:grid!important/,'Mercado must be visible');
-assert.match(architectureCss,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/);
+assert.match(architectureCss,/html\.cdc-v75 \.mobile-nav\{[\s\S]*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/);
 assert.match(architectureCss,/\.v75-budget-summary/);
 assert.match(architectureCss,/\.v75-more-group/);
 assert.match(architectureCss,/\.vault-keypad\{display:grid!important;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
