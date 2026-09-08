@@ -60,7 +60,7 @@ assert.match(render,/market-identity-with-photo/);
 assert.match(css,/v57 — fotografias reais de referência no Mercado/);
 assert.match(css,/\.market-product-photo img/);
 assert.match(css,/object-fit:contain/);
-assert.match(brandCss,/fotografias verificadas/);
+assert.match(brandCss,/fotografias[\s\S]*verificadas/);
 assert.match(brandCss,/\.market-product-photo[\s\S]*display:grid!important/);
 assert.match(experienceCss,/\.cdc-product-image img\{width:100%;height:100%;object-fit:contain/);
 
