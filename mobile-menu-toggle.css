@@ -168,7 +168,6 @@
   .nav-drawer[data-dragging="true"] .nav-drawer-shell{
     transform:translate3d(var(--drawer-drag-x,-100%),0,0)!important;
     transition:none!important;
-    pointer-events:none;
   }
 
   .nav-drawer[data-dragging="true"]::backdrop{
