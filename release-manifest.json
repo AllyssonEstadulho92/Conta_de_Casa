@@ -1,9 +1,24 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v74",
+  "latestVersion": "v75",
   "publishedAt": "2026-09-08",
   "releases": [
+    {
+      "version": "v75",
+      "date": "8 de setembro de 2026",
+      "title": "Arquitetura mais clara, navegação coerente e interface refinada",
+      "items": [
+        "A navegação móvel passa a mostrar os cinco destinos principais de forma visível: Início, Despesas, Mercado, Planeamento e Mais; a regra histórica que ocultava o terceiro item deixa de afetar o Mercado.",
+        "Os nomes das áreas são alinhados com a função real: Faturas passa a apresentar-se como Despesas, Lista de compras como Mercado e Definições como Mais na navegação de utilização diária.",
+        "O menu lateral é simplificado para três grupos — Principal, Análise e Conta e sistema — reduzindo duplicações e mantendo os mesmos destinos e handlers existentes.",
+        "A página Mais deixa de repetir Mercado e Planeamento e passa a organizar Relatórios, Metas, Segurança, Sincronização, Diagnóstico, Aparência e Definições da aplicação por contexto.",
+        "Planeamento recebe uma hierarquia mais clara: mês, resumo do orçamento, gasto, disponível, distribuição por categoria e só depois o formulário de planeamento mensal.",
+        "A camada v75 passa a usar superfícies dependentes do tema, evitando a mistura visual entre cartões claros e painéis escuros observada quando o tema escuro estava ativo.",
+        "O ecrã de PIN/cofre mantém a autenticação existente, mas recebe a mesma identidade visual da aplicação e um teclado numérico convencional de três colunas.",
+        "A alteração é exclusivamente de arquitetura de informação e apresentação; cálculos, STATE_VERSION 5, IndexedDB, cifragem, pagamentos, QR, scanner e sincronização não são migrados nem reescritos."
+      ]
+    },
     {
       "version": "v74",
       "date": "8 de setembro de 2026",
