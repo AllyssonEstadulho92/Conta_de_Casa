@@ -12,11 +12,11 @@ const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const EXPERIENCE_REV = '74-experience2';
-const ARCHITECTURE_REV = '75-architecture1';
+const ARCHITECTURE_REV = '75-architecture2';
 
 /* Bundle público v75: mantém a experiência v74 como base funcional de apresentação
-   e aplica por último a camada de arquitetura v75. Camadas visuais históricas
-   ui-consistency.css e v64-runtime.css continuam fora da distribuição. */
+   e aplica por último a camada final v75 alinhada com o protótipo. Camadas visuais
+   históricas ui-consistency.css e v64-runtime.css continuam fora da distribuição. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
