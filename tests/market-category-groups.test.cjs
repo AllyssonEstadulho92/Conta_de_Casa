@@ -36,25 +36,29 @@ assert.match(css,/\.market-category-items \.status-chip\{[\s\S]*justify-self:sta
 assert.match(css,/\.market-category-items \.market-mobile-actions\{[\s\S]*justify-content:flex-start/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-assert.match(sw,/conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
 assert.ok(sw.includes("'./market-category-groups.css'"));
 assert.ok(sw.includes("'./market-category-groups.js'"));
 assert.ok(sw.includes("'./design-system.css'"));
 assert.ok(sw.includes("'./v74-experience.css'"));
+assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.ok(sw.includes("'./v64-runtime.js'"));
 assert.ok(sw.includes("'./v74-experience.js'"));
-assert.match(prepare,/const BUILD = 'v74'/);
+assert.ok(sw.includes("'./v75-architecture.js'"));
+assert.match(prepare,/const BUILD = 'v75'/);
 assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const CATEGORY_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
 assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 assert.doesNotMatch(publicFilesBlock,/'ui-consistency\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'v64-runtime\.css'/);
 assert.ok(publicFilesBlock.includes("'v64-runtime.js'"));
 assert.ok(publicFilesBlock.includes("'v74-experience.css'"));
+assert.ok(publicFilesBlock.includes("'v75-architecture.css'"));
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -71,18 +75,22 @@ try{
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/v74-experience\.css\?v=74-experience2/);
   assert.match(index,/v74-experience\.js\?v=74-experience2/);
+  assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
+  assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
   assert.ok(index.indexOf('market-brand.css')<index.indexOf('market-category-groups.css'));
   assert.ok(index.indexOf('market-category-groups.css')<index.indexOf('market-shopping-focus.css'));
   assert.ok(index.indexOf('mobile-menu-toggle.css')<index.indexOf('v74-experience.css'));
+  assert.ok(index.indexOf('v74-experience.css')<index.indexOf('v75-architecture.css'));
   assert.ok(index.indexOf('market-branding.js')<index.indexOf('market-category-groups.js'));
   assert.ok(index.indexOf('market-category-groups.js')<index.indexOf('v64-runtime.js'));
   assert.ok(index.indexOf('market-shopping-focus.js')<index.indexOf('mobile-menu-toggle.js'));
   assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v74-experience.js'));
-  for(const asset of ['market-category-groups.css','market-category-groups.js','design-system.css','v64-runtime.js','v74-experience.css','v74-experience.js','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  assert.ok(index.indexOf('v74-experience.js')<index.indexOf('v75-architecture.js'));
+  for(const asset of ['market-category-groups.css','market-category-groups.js','design-system.css','v64-runtime.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market category grouping preserved under the consolidated v74 experience2 build: OK');
+console.log('Market category grouping preserved under the final v75 prototype architecture: OK');

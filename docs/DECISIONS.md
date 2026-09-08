@@ -124,31 +124,42 @@ Data: 8 de setembro de 2026 · Estado: aceite e publicada.
 ### Decisão
 
 1. Preservar `core.js`, `finance.js`, IndexedDB, `STATE_VERSION = 5`, cofre, pagamentos e sincronização.
-2. Consolidar o sistema visual em `design-system.css` com fundo `#f4f8f8`, texto `#0c2830`, primário `#075b63` e acento `#17b890`.
-3. Usar `v74-experience.css/js` como camada de composição que reutiliza IDs, dados e handlers existentes e não escreve diretamente valores financeiros.
-4. Priorizar no mobile Início, Despesas, Mercado, Planeamento e Mais; o drawer mantém a arquitetura completa.
-5. “Adicionar despesa” chama o formulário existente; “Ler fatura” usa captura QR/fotografia existente; Mercado reutiliza pesquisa/scanner e preços existentes.
-6. Não inventar dados para imitar o protótipo.
-7. Fotografias do Mercado são opcionais e verificadas.
-8. `ui-consistency.css` e `v64-runtime.css` deixam de ser distribuídos; `v64-runtime.js` permanece funcional.
-9. Preservar a navegação v73 à direita e o mesmo hambúrguer/X.
-10. Publicar apenas com finanças, isolamento, QR, Mercado, scanner, atualização, segurança, responsividade, acessibilidade e sincronização verdes.
+2. Consolidar o sistema visual em `design-system.css`.
+3. Usar `v74-experience.css/js` como camada de composição que reutiliza IDs, dados e handlers existentes.
+4. Priorizar no mobile Início, Despesas, Mercado, Planeamento e Mais.
+5. Não inventar dados para imitar o protótipo.
+6. Fotografias do Mercado são opcionais e verificadas.
+7. Preservar a navegação v73 à direita e o mesmo hambúrguer/X.
+8. Publicar apenas com regressões críticas verdes.
 
-### Versionamento
+## D-040 — v75 torna o protótipo a referência visual final sem transformar demonstração em funcionalidade
+Data: 8 de setembro de 2026 · Estado: aceite como candidata.
 
-- build: `v74`;
-- UI: `74-ui1`;
+### Contexto
+
+A primeira implementação v74 preservou a funcionalidade, mas a composição final ainda divergia significativamente do protótipo em densidade, navegação, formulários, scanner, Planeamento, Mais, Sincronização e cofre. Existia ainda uma regra histórica que podia ocultar o terceiro destino da navegação móvel.
+
+### Decisão
+
+1. Carregar `v75-architecture.css/js` depois da experiência v74 como camada final versionada.
+2. Usar a identidade do protótipo — verde-petróleo, teal, superfícies claras, cartões compactos e hierarquia móvel — de forma uniforme também no desktop.
+3. Garantir explicitamente cinco destinos móveis visíveis: **Início, Despesas, Mercado, Planeamento e Mais**.
+4. Reutilizar o formulário real de despesas e acrescentar apenas apresentação para **Manual / Ler fatura / QR Code**.
+5. Reutilizar `invoice-capture.js` para fotografia e QR e tornar apenas a composição do scanner full-screen.
+6. Não inventar linhas de artigos a partir do QR fiscal, porque o QR não fornece catálogo detalhado de produtos.
+7. Não adicionar lojas que o pipeline atual não suporta; a experiência permanece limitada a Continente e Pingo Doce.
+8. Reorganizar Planeamento, Relatórios, Mais e Sincronização sem alterar os cálculos nem o estado persistido.
+9. Reutilizar `icon.svg` local no onboarding/cofre; não introduzir dependência visual externa.
+10. Manter PIN/palavra-passe, PBKDF2-SHA-256, AES-GCM, `STATE_VERSION = 5`, pagamentos, IndexedDB e sincronização intactos.
+11. A camada v75 não pode chamar `saveState()` nem escrever diretamente `estimatedCents` ou `actualCents`.
+12. Publicar apenas depois de CI completo, PR, CI do PR, merge e confirmação de Pages.
+
+### Versionamento candidato
+
+- build: `v75`;
+- UI base: `74-ui1`;
 - Mercado: `74-shopping2`;
 - menu: `73-menu8`;
 - experiência: `74-experience2`;
-- cache: `conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience2`.
-
-### Publicação
-
-- PR `#64`;
-- CI PR `34210060213` / `#1441`: sucesso;
-- merge `a1974860755d70e7abf30ed93cee7220f5e65409`;
-- CI `main` `34210146307` / `#1442`: sucesso;
-- Pages `34210213884` / `#1435`: sucesso.
-
-A validação física pós-publicação permanece como controlo adicional, não como substituto do CI.
+- arquitetura: `75-architecture2`;
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2`.

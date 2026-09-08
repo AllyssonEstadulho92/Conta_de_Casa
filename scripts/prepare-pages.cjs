@@ -5,17 +5,18 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const BUILD = 'v74';
+const BUILD = 'v75';
 const UI_REV = '74-ui1';
 const CATEGORY_REV = '64-ui1';
 const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const EXPERIENCE_REV = '74-experience2';
+const ARCHITECTURE_REV = '75-architecture2';
 
-/* Bundle público v74: as camadas visuais antigas ui-consistency/v64-runtime.css
-   continuam fora da distribuição. v74-experience.css contém apenas a composição
-   específica do protótipo; design-system.css mantém os tokens e componentes globais. */
+/* Bundle público v75: mantém a experiência v74 como base funcional de apresentação
+   e aplica por último a camada final v75 alinhada com o protótipo. Camadas visuais
+   históricas ui-consistency.css e v64-runtime.css continuam fora da distribuição. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -32,6 +33,7 @@ const PUBLIC_FILES = Object.freeze([
   'app-update.css',
   'market-image-audit.css',
   'v74-experience.css',
+  'v75-architecture.css',
   'core.js',
   'finance.js',
   'render.js',
@@ -53,6 +55,7 @@ const PUBLIC_FILES = Object.freeze([
   'v64-runtime.js',
   'market-shopping-focus.js',
   'v74-experience.js',
+  'v75-architecture.js',
   'release-manifest.json',
   'sw.js',
   'manifest.webmanifest',
@@ -88,6 +91,7 @@ if(!index.includes('market-category-groups.css')) index=index.replace('</head>',
 if(!index.includes('market-shopping-focus.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-shopping-focus.css?v=${SHOPPING_REV}" />\n</head>`);
 if(!index.includes('mobile-menu-toggle.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./mobile-menu-toggle.css?v=${MENU_REV}" />\n</head>`);
 if(!index.includes('v74-experience.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v74-experience.css?v=${EXPERIENCE_REV}" />\n</head>`);
+if(!index.includes('v75-architecture.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-architecture.css?v=${ARCHITECTURE_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
 if(!index.includes('sync-conflict-policy.js')) index=index.replace(syncScript,`${syncScript}<script src="./sync-conflict-policy.js?v=${UI_REV}" defer></script>`);
@@ -102,6 +106,7 @@ if(!index.includes('v64-runtime.js')) index=index.replace('</body>',`  <script s
 if(!index.includes('market-shopping-focus.js')) index=index.replace('</body>',`  <script src="./market-shopping-focus.js?v=${SHOPPING_REV}" defer></script>\n</body>`);
 if(!index.includes('mobile-menu-toggle.js')) index=index.replace('</body>',`  <script src="./mobile-menu-toggle.js?v=${MENU_REV}" defer></script>\n</body>`);
 if(!index.includes('v74-experience.js')) index=index.replace('</body>',`  <script src="./v74-experience.js?v=${EXPERIENCE_REV}" defer></script>\n</body>`);
+if(!index.includes('v75-architecture.js')) index=index.replace('</body>',`  <script src="./v75-architecture.js?v=${ARCHITECTURE_REV}" defer></script>\n</body>`);
 fs.writeFileSync(distIndex,index);
 
 const distEvents=path.join(DIST,'events.js');
@@ -117,4 +122,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}).`);

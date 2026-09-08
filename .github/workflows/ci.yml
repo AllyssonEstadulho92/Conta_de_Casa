@@ -47,6 +47,7 @@ jobs:
           node --check market-official-images.js
           node --check v64-runtime.js
           node --check v74-experience.js
+          node --check v75-architecture.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
 
@@ -104,8 +105,11 @@ jobs:
       - name: Unified icon audit tests
         run: node tests/ui-icons.test.cjs
 
-      - name: Visual consistency and v74 prototype tests
+      - name: Visual consistency and v74 base tests
         run: node tests/ui-consistency.test.cjs
+
+      - name: v75 information architecture tests
+        run: node tests/v75-architecture.test.cjs
 
       - name: Animated mobile menu tests
         run: node tests/mobile-menu-toggle.test.cjs

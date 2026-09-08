@@ -2,42 +2,52 @@
 
 Atualizado: 8 de setembro de 2026
 
-## P0 — Publicação do novo modelo v74
+## P0 — Candidata v75 alinhada ao protótipo
 
-- [x] Analisar o protótipo e mapear os ecrãs para fluxos reais.
-- [x] Consolidar identidade em `design-system.css`.
-- [x] Criar `v74-experience.css` e `v74-experience.js`.
-- [x] Implementar navegação móvel **Início / Despesas / Mercado / Planeamento / Mais**.
-- [x] Implementar novo Início, Despesas, Mercado, Planeamento, Relatórios e Mais.
-- [x] Ligar **Adicionar despesa** ao formulário existente.
-- [x] Ligar **Ler fatura** ao fluxo real de QR/fotografia e revisão.
-- [x] Preservar estimativa/valor real no Mercado e fotografias apenas quando verificadas.
-- [x] Preservar sidebar/drawer à direita e hambúrguer ↔ X.
-- [x] Retirar `ui-consistency.css` e `v64-runtime.css` do bundle público após consolidação.
-- [x] Manter `v64-runtime.js` funcional.
-- [x] Atualizar build, manifesto e Service Worker para `v74` / `74-experience2`.
-- [x] Atualizar testes de regressão para a arquitetura v74.
-- [x] Validar finanças, cofre, QR, Mercado, scanner, segurança, responsividade, acessibilidade e sincronização.
-- [x] Atualizar documentação técnica.
-- [x] Abrir PR `#64` para `main`.
-- [x] Confirmar CI do PR `34210060213` / `#1441`.
-- [x] Integrar em `main` — merge `a1974860755d70e7abf30ed93cee7220f5e65409`.
-- [x] Confirmar CI de `main` `34210146307` / `#1442`.
-- [x] Confirmar GitHub Pages `34210213884` / `#1435`.
+- [x] Analisar o protótipo e separar referência visual de funcionalidades realmente suportadas.
+- [x] Criar branch isolada `redesign/v75-prototipo-fiel`.
+- [x] Manter `core.js`, `finance.js`, `STATE_VERSION = 5`, IndexedDB, pagamentos, cifragem e sincronização sem migração.
+- [x] Reestruturar a identidade visual em `v75-architecture.css`.
+- [x] Implementar topbar móvel verde-petróleo e safe areas.
+- [x] Garantir **Início / Despesas / Mercado / Planeamento / Mais** visíveis na barra inferior.
+- [x] Integrar saudação do Início no cabeçalho.
+- [x] Reestruturar Despesas com filtros, pesquisa, movimentos e FAB.
+- [x] Transformar nova despesa em fluxo mobile full-screen.
+- [x] Adicionar modos **Manual / Ler fatura / QR Code** reutilizando componentes existentes.
+- [x] Transformar scanner QR em composição full-screen sem alterar a extração fiscal.
+- [x] Reestruturar Mercado em pesquisa, produtos e lojas compactas.
+- [x] Limitar o protótipo do Mercado às lojas realmente suportadas: Continente e Pingo Doce.
+- [x] Reestruturar Planeamento com mês, orçamento, gasto, disponível e categorias.
+- [x] Reestruturar Relatórios, Mais e Sincronização com a mesma linguagem visual.
+- [x] Alinhar onboarding/cofre com `icon.svg` local e teclado PIN de três colunas.
+- [x] Preservar drawer à direita e hambúrguer ↔ X da v73.
+- [x] Atualizar build para `v75` e arquitetura para `75-architecture2`.
+- [x] Atualizar Service Worker/cache da candidata.
+- [x] Atualizar testes do Mercado e sistema visual para a revisão final.
+- [x] Atualizar `release-manifest.json`.
+- [x] Atualizar documentação técnica obrigatória.
+- [ ] Confirmar suite CI completa verde na branch.
+- [ ] Abrir PR para `main`.
+- [ ] Confirmar CI do PR.
+- [ ] Integrar em `main` apenas com CI verde.
+- [ ] Confirmar CI de `main`.
+- [ ] Confirmar GitHub Pages.
 
-## P1 — Validação física pós-publicação
+## P1 — Validação física v75
 
-- [ ] iPhone/Safari/PWA: onboarding, cabeçalho, safe area, navegação inferior e teclado.
-- [ ] iPhone: hambúrguer → X → hambúrguer e swipe do drawer à direita.
-- [ ] iPhone: Despesas, formulário, QR/fotografia e retorno ao ecrã anterior.
-- [ ] iPhone: Mercado com/sem fotografia verificada e textos longos.
-- [ ] Android/tablet: largura, orientação horizontal, teclado e drawer.
-- [ ] Desktop: sidebar direita expandida/recolhida, densidade e ausência de overflow horizontal.
+- [ ] iPhone/Safari/PWA: onboarding, cofre, topbar e safe area.
+- [ ] iPhone: barra inferior com os cinco destinos e Mercado visível.
+- [ ] iPhone: hambúrguer → X → hambúrguer e swipe do drawer pela direita.
+- [ ] iPhone: Adicionar despesa em Manual / Ler fatura / QR Code.
+- [ ] iPhone: scanner QR, permissão de câmara, teclado e retorno ao ecrã anterior.
+- [ ] iPhone: Mercado com fotografia verificada e textos longos.
+- [ ] Android/tablet: largura, orientação, teclado, formulários e drawer.
+- [ ] Desktop: sidebar direita, densidade, formulários e ausência de overflow horizontal.
 - [ ] Tema escuro em mobile e desktop.
 
-## P2 — Consolidação técnica posterior
+## P2 — Consolidação posterior
 
-- [ ] Remover `#drawerCloseBtn` histórico apenas quando referências em `events.js`/ícones puderem ser eliminadas sem regressão.
-- [ ] Rever módulos CSS históricos restantes numa release própria, sem misturar com mudanças funcionais.
-- [ ] Rever pipeline externo do Mercado numa tarefa dedicada e sem alterar regras financeiras.
-- [ ] Manter documentação e manifesto sincronizados após cada release.
+- [ ] Rever CSS histórico restante numa release própria, sem misturar com regras financeiras.
+- [ ] Remover `#drawerCloseBtn` histórico apenas quando referências funcionais puderem desaparecer sem regressão.
+- [ ] Rever pipeline externo do Mercado separadamente.
+- [ ] Manter manifesto e os cinco documentos técnicos sincronizados em cada release.

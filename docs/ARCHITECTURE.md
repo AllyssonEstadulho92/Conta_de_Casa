@@ -2,74 +2,65 @@
 
 Atualizado: 8 de setembro de 2026
 Build público atual: `v74`
-Branch pública: `main`
+Candidata: `v75`
+Branch de trabalho: `redesign/v75-prototipo-fiel`
 
 ## 1. Visão geral
 
-**Conta de Casa** é uma PWA estática distribuída por GitHub Pages. A arquitetura continua local-first: estado financeiro, regras de negócio, formulários, cifragem e persistência executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
+**Conta de Casa** é uma PWA estática distribuída por GitHub Pages. O modelo continua local-first: regras de negócio, persistência, formulários, cifragem e estado financeiro executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
 
-A v74 introduz uma nova camada de experiência e consolida o sistema visual sem substituir o núcleo funcional existente.
+A v75 não substitui o núcleo. Acrescenta uma camada final de arquitetura de informação e composição visual sobre a base v74 para alinhar a aplicação com o protótipo aprovado.
 
-## 2. Persistência, dinheiro e segurança
+## 2. Núcleo preservado
 
 - `core.js`: estado, normalização, IndexedDB, sanitização e cifragem;
-- cofre: PBKDF2-SHA-256 + AES-GCM;
-- schema financeiro: `STATE_VERSION = 5`;
-- valores monetários: inteiros em cêntimos;
-- `finance.js`: regras e cálculos financeiros;
-- sincronização: envelope cifrado opcional via GitHub;
-- sem PIN, palavra-passe, token ou chave embutidos no repositório público;
-- v74 não exige migração de dados.
+- `finance.js`: cálculos e regras financeiras;
+- `STATE_VERSION = 5`;
+- valores monetários em inteiros de cêntimos;
+- cofre PBKDF2-SHA-256 + AES-GCM;
+- pagamentos e histórico existentes;
+- sincronização opcional sobre envelope cifrado;
+- sem credenciais, tokens ou segredos embutidos.
 
-## 3. Camadas de apresentação v74
+## 3. Camadas de apresentação
 
-### `design-system.css`
+### Base v74
 
-Sistema visual canónico:
+- `design-system.css`: tokens e normalização visual;
+- `v74-experience.css/js`: composição funcional do Início, Despesas, Mercado, Planeamento, Relatórios e Mais;
+- `mobile-menu-toggle.css/js`: controlador v73 do drawer à direita e hambúrguer ↔ X;
+- `v64-runtime.js`: comportamento funcional ainda necessário.
 
-- claro: `#f4f8f8` / `#ffffff` / `#0c2830`;
-- primário: `#075b63`;
-- acento: `#17b890`;
-- tema escuro preservado;
-- tipografia `Inter` com fallbacks nativos;
-- métricas comuns para botões, formulários, cartões, foco e ícones;
-- safe areas, header móvel e navegação inferior consolidados.
+### Final v75
 
-### `v74-experience.css`
+`v75-architecture.css` é a camada visual final e deve ser carregada depois da v74. Define:
 
-Camada de composição do protótipo, sobretudo até `820px`:
+- identidade teal/verde-petróleo consistente;
+- superfícies, bordas, raios, sombras e tipografia comuns;
+- topbar móvel fixed e safe areas;
+- cinco destinos móveis sempre visíveis;
+- formulários mobile full-screen;
+- scanner QR full-screen;
+- composição compacta de Mercado, Planeamento, Relatórios, Mais e Sincronização;
+- cofre/onboarding alinhados com `icon.svg` local;
+- tema escuro equivalente.
 
-- topbar verde-petróleo em largura total;
-- shell móvel `#f2f5f6`;
-- cartões compactos e hierarquia equivalente ao protótipo;
-- cinco destinos na navegação inferior;
-- composições para Início, Despesas, Mercado, Planeamento, Relatórios e Mais;
-- onboarding visual sem substituir a autenticação local real.
+`v75-architecture.js` é uma camada de orquestração visual. Responsabilidades:
 
-### `v74-experience.js`
+- ajustar nomes e contexto de páginas;
+- simplificar drawer e navegação secundária;
+- integrar saudação no cabeçalho do Início;
+- reorganizar Planeamento com métricas reais;
+- criar a hierarquia de Mais;
+- adicionar os modos Manual/Ler fatura/QR ao formulário real de nova despesa;
+- apresentar o estado de sincronização antes da configuração técnica;
+- reutilizar handlers e componentes existentes.
 
-Camada de orquestração visual. Reutiliza DOM, estado e handlers existentes e não grava diretamente valores financeiros.
-
-Responsabilidades:
-
-- saudação e seletor mensal móvel;
-- resumo mensal e categorias a partir de dados existentes;
-- ações rápidas que chamam fluxos reais (`openBillForm`, captura de fatura, Mercado);
-- feeds/listas móveis a partir do estado já renderizado;
-- adaptação de Planeamento, Relatórios e Mais;
-- manutenção de uma única aplicação funcional.
+A camada não chama `saveState()` nem altera diretamente valores financeiros.
 
 ## 4. Navegação
 
-A fonte continua centralizada:
-
-- `core.js`: `PAGE_META` e `NAV_GROUPS`;
-- `render.js::renderNav()`: desktop, drawer e navegação móvel;
-- `events.js`: navegação, backdrop, Escape e breakpoints;
-- `mobile-menu-toggle.js`: animação, reparenting do mesmo botão e gestos;
-- `mobile-menu-toggle.css`: sidebar/drawer à direita.
-
-A barra inferior móvel prioriza:
+Navegação primária móvel:
 
 1. Início;
 2. Despesas;
@@ -77,73 +68,71 @@ A barra inferior móvel prioriza:
 4. Planeamento;
 5. Mais.
 
-O drawer mantém acesso à arquitetura completa.
+A v75 anula explicitamente uma regra histórica em `styles.css` que ocultava o terceiro item. O Mercado permanece visível.
 
-## 5. Cabeçalho e viewport móvel
+O drawer é reduzido para:
 
-Até `820px`:
+- Principal: Início, Despesas, Mercado, Planeamento;
+- Análise: Relatórios, Metas;
+- Conta e sistema: Segurança, Diagnóstico, Mais.
 
-- topbar `fixed`;
-- `env(safe-area-inset-top)` respeitado;
-- `.main` compensado com `padding-top`;
-- espaço inferior para navegação e `safe-area-inset-bottom`;
-- títulos truncáveis sem overflow;
-- `VisualViewport` reservado a teclado/diálogos em `events.js`;
-- sem uso de `zoom` CSS como correção de layout.
+`mobile-menu-toggle.js` continua responsável pelo mesmo `#mobileMenuBtn`, animação hambúrguer/X, Escape, foco e swipe da direita.
 
-## 6. Hambúrguer / X e drawer
+## 5. Adicionar despesa e faturas
 
-O controlador validado da v73 permanece:
+O formulário de faturas/despesas continua a ser criado por `forms.js` e mantém os mesmos campos, IDs e handlers.
 
-- sidebar desktop à direita;
-- drawer móvel à direita;
-- um único `#mobileMenuBtn` muda de hambúrguer para X;
-- abertura/fecho usam transform/opacidade;
-- swipe abre da margem direita para a esquerda e fecha para a direita;
-- `prefers-reduced-motion`, Escape, foco e ARIA preservados.
+Na v75, apenas para nova despesa, a camada visual adiciona três modos:
 
-## 7. Faturas e QR
+- Manual;
+- Ler fatura;
+- QR Code.
 
-- criação/edição continua nos formulários existentes;
-- QR é preenchimento assistido;
-- informação extraída é revista antes de guardar;
-- não são inventadas linhas de artigos não comprovadas;
-- pagamentos e estados mantêm os mesmos modelos.
+A fotografia e o QR continuam a usar `invoice-capture.js`. O QR fiscal é preenchimento assistido; os dados são revistos antes de guardar. Não são inventadas linhas de produtos que o QR não forneça.
 
-## 8. Mercado
+## 6. Mercado
 
 - preço pesquisado → `estimatedCents`;
 - preço confirmado/pago → `actualCents`;
-- GTIN identifica produto, não prova preço;
-- imagens são opcionais e mostradas apenas após validação;
-- scanner não grava vídeo nem cria credenciais.
+- GTIN identifica artigo, não prova preço;
+- fotografia validada é apoio visual;
+- lojas suportadas na experiência v75: Continente e Pingo Doce;
+- o protótipo pode mostrar outras cadeias, mas não são apresentadas sem suporte real.
 
-## 9. Ícones e acessibilidade
+## 7. Planeamento, Relatórios e Mais
 
-- Lucide local continua o sistema vetorial oficial;
-- métricas SVG normalizadas em `design-system.css`;
-- foco visível e contraste claro/escuro validados;
-- controlos principais mantêm alvos adequados;
-- pinch zoom não é bloqueado;
-- `aria-current`, `aria-live`, labels e estados do drawer preservados.
+Planeamento prioriza a leitura antes da edição: mês, orçamento, gasto, disponível e categorias. O formulário detalhado permanece abaixo.
 
-## 10. Distribuição pública v74
+Relatórios reutiliza os cálculos existentes e apenas reorganiza cartões/gráficos.
 
-- `BUILD = v74`;
+Mais é navegação secundária agrupada e não duplica Mercado nem Planeamento.
+
+## 8. Sincronização
+
+O painel técnico real continua em `#syncPanel`. A v75 adiciona uma introdução visual baseada exclusivamente no estado já renderizado pelo sistema. A sincronização continua opcional e cifrada.
+
+## 9. Responsividade e acessibilidade
+
+- breakpoint principal: `820px`;
+- safe areas iOS em topbar, drawer, scanner, formulários e navegação inferior;
+- alvos principais próximos ou superiores a 44 px;
+- `prefers-reduced-motion` respeitado;
+- foco e ARIA existentes preservados;
+- sem bloqueio de pinch zoom;
+- sem `zoom:` CSS como remendo.
+
+## 10. Distribuição candidata v75
+
+- `BUILD = v75`;
 - `UI_REV = 74-ui1`;
 - `SHOPPING_REV = 74-shopping2`;
 - `MENU_REV = 73-menu8`;
 - `EXPERIENCE_REV = 74-experience2`;
-- cache: `conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience2`.
+- `ARCHITECTURE_REV = 75-architecture2`;
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2`.
 
-`ui-consistency.css` e `v64-runtime.css` deixaram de ser copiados para `dist`; `v64-runtime.js` permanece por conter comportamento funcional.
+`ui-consistency.css` e `v64-runtime.css` continuam fora de `dist`.
 
-## 11. QA e publicação
+## 11. Publicação
 
-- PR `#64`;
-- CI PR `34210060213` / `#1441`: sucesso;
-- merge `a1974860755d70e7abf30ed93cee7220f5e65409`;
-- CI `main` `34210146307` / `#1442`: sucesso;
-- Pages `34210213884` / `#1435`: sucesso.
-
-Validação física pós-publicação continua recomendada em iPhone, Android/tablet e desktop.
+A v75 permanece candidata até CI completo. A versão pública continua v74 até PR, validação, merge em `main` e confirmação de GitHub Pages.
