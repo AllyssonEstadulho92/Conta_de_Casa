@@ -55,6 +55,8 @@ jobs:
           node --check market-image-audit.js
           node --check market-official-images.js
           node --check v64-runtime.js
+          node --check v74-experience.js
+          node --check v75-architecture.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
           node tests/finance.test.cjs
@@ -76,6 +78,8 @@ jobs:
           node tests/v64-runtime.test.cjs
           node tests/ui-icons.test.cjs
           node tests/ui-consistency.test.cjs
+          node tests/v75-architecture.test.cjs
+          node tests/v76-usability.test.cjs
           node tests/mobile-menu-toggle.test.cjs
           node tests/app-update.test.cjs
           node tests/security.test.cjs
