@@ -48,6 +48,7 @@ jobs:
           node --check v64-runtime.js
           node --check v74-experience.js
           node --check v75-architecture.js
+          node --check v75-stability.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
 
@@ -110,6 +111,9 @@ jobs:
 
       - name: v75 information architecture tests
         run: node tests/v75-architecture.test.cjs
+
+      - name: v75 cross-application stability tests
+        run: node tests/v75-stability.test.cjs
 
       - name: Animated mobile menu tests
         run: node tests/mobile-menu-toggle.test.cjs
