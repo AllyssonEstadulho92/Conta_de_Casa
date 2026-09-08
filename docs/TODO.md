@@ -14,8 +14,9 @@ Atualizado: 8 de setembro de 2026
 - [x] Preservar o mesmo hambúrguer/X, ARIA, backdrop, Escape e `prefers-reduced-motion`.
 - [x] Preservar o header móvel fixed e as safe areas existentes.
 - [x] Atualizar build, manifesto e cache para `v73` / `73-menu8`.
-- [ ] Integrar a branch `ui/v73-right-navigation` em `main`.
-- [ ] Confirmar deploy GitHub Pages.
+- [x] Integrar PR `#62` em `main` (`fb5c1b975b6494590eb16a3ab09762218e135299`).
+- [x] Confirmar CI automática de `main` (`34180397609`) com sucesso.
+- [x] Confirmar Deploy GitHub Pages (`34180421362`) com sucesso.
 - [ ] Validar fisicamente no iPhone: entrada da direita, fecho suave e swipe.
 - [ ] Validar Android/tablet: largura, safe areas e orientação horizontal.
 - [ ] Validar desktop: sidebar direita em estado expandido e recolhido, sem overflow horizontal.
