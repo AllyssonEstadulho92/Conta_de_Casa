@@ -28,8 +28,29 @@
     if(meta.getAttribute('content')!==color)meta.setAttribute('content',color);
   }
 
+  function isInteractivePhoto(photo){return photo.matches('button,a,[role="button"]');}
+
+  function rememberInteractiveLabel(photo){
+    if(!isInteractivePhoto(photo)||photo.dataset.v75OriginalLabel!==undefined)return;
+    photo.dataset.v75OriginalLabel=photo.getAttribute('aria-label')||'';
+  }
+
   function setPhotoSemantics(photo,available){
-    if(photo.matches('button,a,[role="button"]'))return;
+    if(isInteractivePhoto(photo)){
+      rememberInteractiveLabel(photo);
+      if(available){
+        const original=photo.dataset.v75OriginalLabel||'';
+        if(original)photo.setAttribute('aria-label',original);
+        else photo.removeAttribute('aria-label');
+        photo.removeAttribute('aria-disabled');
+        if(photo instanceof HTMLButtonElement)photo.disabled=false;
+      }else{
+        photo.setAttribute('aria-label','Imagem indisponível');
+        photo.setAttribute('aria-disabled','true');
+        if(photo instanceof HTMLButtonElement)photo.disabled=true;
+      }
+      return;
+    }
     if(available){
       photo.setAttribute('aria-hidden','true');
       photo.removeAttribute('role');
@@ -61,6 +82,7 @@
     photo.classList.remove('is-loaded','is-error','is-empty');
     photo.classList.add('is-loading');
     photo.dataset.imageState='loading';
+    rememberInteractiveLabel(photo);
   }
 
   function bindPhoto(photo){
