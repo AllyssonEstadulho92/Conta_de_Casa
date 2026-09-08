@@ -20,6 +20,8 @@ const experienceJs = read('v74-experience.js');
 const experienceCss = read('v74-experience.css');
 const architectureJs = read('v75-architecture.js');
 const architectureCss = read('v75-architecture.css');
+const stabilityJs = read('v75-stability.js');
+const stabilityCss = read('v75-stability.css');
 const sw = read('sw.js');
 const prepare = read('scripts/prepare-pages.cjs');
 const publicFilesStart=prepare.indexOf('const PUBLIC_FILES');
@@ -49,7 +51,9 @@ assert.ok(releaseManifest.releases.some(release=>release.version==='v73'));
 assert.ok(releaseManifest.releases.some(release=>release.version==='v64'));
 assert.ok(releaseManifest.releases[0].items.some(item=>/barra inferior|Mercado/i.test(item)));
 assert.ok(releaseManifest.releases[0].items.some(item=>/PIN|cofre/i.test(item)));
-assert.ok(releaseManifest.releases[0].items.some(item=>/não.*migrados|não.*reescritos/i.test(item)));
+assert.ok(releaseManifest.releases[0].items.some(item=>/não.*migrados|não.*reescritos|sem migração|sem reescrita/i.test(item)));
+assert.ok(releaseManifest.releases[0].items.some(item=>/75-stability1/i.test(item)));
+assert.ok(releaseManifest.releases[0].items.some(item=>/sem saudação|saudação.*duplicad/i.test(item)));
 assert.equal(webManifest.background_color,'#f4f8f8');
 assert.equal(webManifest.theme_color,'#f4f8f8');
 
@@ -66,9 +70,11 @@ assert.match(experienceJs,/Conta de Casa v74/);
 assert.match(experienceCss,/Conta de Casa v74/);
 assert.match(architectureJs,/Conta de Casa v75/);
 assert.match(architectureCss,/Conta de Casa v75/);
+assert.match(stabilityJs,/revision:'75-stability1'/);
+assert.match(stabilityCss,/revisão transversal de estabilidade visual/i);
 
 assert.match(sw, /conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
-for(const asset of ['./app-update.css','./app-update.js','./design-system.css','./v64-runtime.js','./market-shopping-focus.css','./market-shopping-focus.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js','./release-manifest.json'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be cached`);
+for(const asset of ['./app-update.css','./app-update.js','./design-system.css','./v64-runtime.js','./market-shopping-focus.css','./market-shopping-focus.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js','./v75-stability.css','./v75-stability.js','./release-manifest.json'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be cached`);
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.match(sw, /APPLY_UPDATE/);
@@ -85,7 +91,9 @@ assert.match(prepare, /const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare, /const MENU_REV = '73-menu8'/);
 assert.match(prepare, /const EXPERIENCE_REV = '74-experience2'/);
 assert.match(prepare, /const ARCHITECTURE_REV = '75-architecture2'/);
-for(const asset of ['app-update.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','release-manifest.json'])assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be copied to dist`);
+assert.match(prepare, /const HEADER_REV = '75-header2'/);
+assert.match(prepare, /const STABILITY_REV = '75-stability1'/);
+for(const asset of ['app-update.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-stability.css','v75-stability.js','release-manifest.json'])assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be copied to dist`);
 assert.doesNotMatch(publicFilesBlock,/'ui-consistency\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'v64-runtime\.css'/);
 assert.match(prepare, /manifest\.latestVersion!==BUILD/);
@@ -107,8 +115,11 @@ try {
   assert.match(index, /mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index, /v74-experience\.css\?v=74-experience2/);
   assert.match(index, /v75-architecture\.css\?v=75-architecture2/);
+  assert.match(index, /v75-header-refinement\.css\?v=75-header2/);
+  assert.match(index, /v75-stability\.css\?v=75-stability1/);
   assert.match(index, /v74-experience\.js\?v=74-experience2/);
   assert.match(index, /v75-architecture\.js\?v=75-architecture2/);
+  assert.match(index, /v75-stability\.js\?v=75-stability1/);
   assert.doesNotMatch(index, /ui-consistency\.css/);
   assert.doesNotMatch(index, /v64-runtime\.css/);
   assert.doesNotMatch(index, /\?v=53/);
@@ -121,13 +132,15 @@ try {
   assert.ok(index.indexOf('market-shopping-focus.js?v=74-shopping2') < index.indexOf('mobile-menu-toggle.js?v=73-menu8'));
   assert.ok(index.indexOf('mobile-menu-toggle.js?v=73-menu8') < index.indexOf('v74-experience.js?v=74-experience2'));
   assert.ok(index.indexOf('v74-experience.js?v=74-experience2') < index.indexOf('v75-architecture.js?v=75-architecture2'));
+  assert.ok(index.indexOf('v75-architecture.js?v=75-architecture2') < index.indexOf('v75-stability.js?v=75-stability1'));
   assert.ok(index.indexOf('mobile-menu-toggle.css?v=73-menu8') < index.indexOf('v74-experience.css?v=74-experience2'));
   assert.ok(index.indexOf('v74-experience.css?v=74-experience2') < index.indexOf('v75-architecture.css?v=75-architecture2'));
-  for(const asset of ['app-update.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  assert.ok(index.indexOf('v75-header-refinement.css?v=75-header2') < index.indexOf('v75-stability.css?v=75-stability1'));
+  for(const asset of ['app-update.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-stability.css','v75-stability.js','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 } finally {
   fs.rmSync(dist, { recursive:true, force:true });
 }
 
-console.log('Versioned v75 architecture release, controlled installation and lean public bundle expectations: OK');
+console.log('Versioned v75 architecture release, controlled installation and stability1 expectations: OK');
