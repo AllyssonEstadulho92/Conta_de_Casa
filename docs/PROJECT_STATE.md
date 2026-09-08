@@ -2,85 +2,89 @@
 
 Atualizado: 8 de setembro de 2026
 Build público atual: `v70`
+Build candidato: `v71`
 Branch pública: `main`
-Release pública integrada: PR #58
-Commit público: `f4144bff69a3b46e0f6ec78a00af50d29b704578`
+Branch candidata: `ui/v71-smooth-drawer`
 Distribuição: GitHub Pages / PWA
 
 ## Estado atual
 
 A aplicação continua uma PWA estática/local-first. O estado financeiro permanece no navegador/IndexedDB e o cofre continua cifrado com PBKDF2-SHA-256 + AES-GCM. A sincronização GitHub permanece opcional e transfere apenas o envelope cifrado. O schema financeiro base continua `STATE_VERSION = 5`.
 
-A **v70 está publicada**. A alteração foi integrada apenas depois da CI do PR terminar com sucesso; a CI de `main` e o Deploy GitHub Pages também concluíram com sucesso.
+A **v70 continua pública e funcional**. A validação física no iPhone confirmou que o painel abre, os destinos estão corretos e o hambúrguer/X funciona. A observação remanescente é exclusivamente de interação: o drawer deve comportar-se como uma superfície móvel, acompanhando o dedo lateralmente em vez de parecer preso a estados fechado/aberto.
 
-Referências de publicação:
+## Problema identificado pela validação física
 
-- PR funcional: #58 — `v70: tornar visível o movimento do menu hambúrguer no iPhone`;
-- merge em `main`: `f4144bff69a3b46e0f6ec78a00af50d29b704578`;
-- CI final do PR: run #1279 (`34170191884`) — sucesso;
-- CI de `main`: run #1280 (`34170229908`) — sucesso;
-- Deploy GitHub Pages: run #1273 (`34170256426`) — sucesso.
+### Factos observáveis
 
-## Problema confirmado pela validação física da v69
+- o drawer abre no lado correto e mantém a hierarquia visual;
+- a página selecionada e os restantes itens continuam funcionais;
+- o `X` está corretamente integrado no cabeçalho do drawer;
+- a entrada automática ainda pode parecer seca se o painel apenas saltar entre estados;
+- ao arrastar horizontalmente, a experiência pretendida é o painel acompanhar o dedo em tempo real e só decidir abrir/fechar quando o gesto termina.
 
-No iPhone, a v69 já apresentava corretamente hambúrguer no estado fechado e `X` no estado aberto. O problema remanescente era de movimento percebido: a transformação podia parecer instantânea porque o mesmo `#mobileMenuBtn` é movido entre o topbar e `.drawer-head` durante a abertura/fecho do `<dialog>`.
+### Causa técnica
 
-A v69 dependia principalmente de CSS transitions. Durante esse reparenting, Safari pode recalcular o elemento já no estado final sem apresentar frames intermédios suficientes para tornar a interpolação perceptível.
+A implementação anterior trabalha essencialmente com dois estados CSS: fechado e aberto. Mesmo com uma boa transição automática, isso não cria uma interação direta de arrasto. Para obter comportamento semelhante ao drawer do ChatGPT é necessário calcular a posição do painel a partir do deslocamento real do toque e desligar temporariamente a transição enquanto o dedo está no ecrã.
 
-## v70 — correção publicada
+## v71 — correção candidata
 
-A v70 preserva a arquitetura existente e acrescenta movimento explícito depois do reparenting:
+A v71 preserva a arquitetura e transforma o drawer existente num off-canvas completo com gesto horizontal interativo:
 
-- mantém o mesmo `#mobileMenuBtn` e o mesmo `#mobileDrawer`;
-- mantém as três linhas `22 / 18 / 14 px` e o X de `45deg / -45deg`;
-- mantém a sentinela Lucide oculta e `data-ui-icon-slot="menu"`;
-- mantém `aria-expanded`, `aria-label`, `title` e `data-menu-state` sincronizados;
-- usa Web Animations com keyframes explícitos no frame seguinte à mudança de posição do botão;
-- ao abrir, as linhas convergem e rodam até formar o X;
-- ao fechar pelo X, a sequência inversa é executada depois de o botão regressar ao topbar;
-- o glifo recebe apenas um micro movimento discreto de escala/inclinação, sem deslocar layout;
-- duração aproximada: `240 ms`, easing `cubic-bezier(.22,.8,.2,1)`;
-- CSS transition permanece como fallback;
-- `prefers-reduced-motion` impede os keyframes adicionais;
-- Escape, backdrop, foco, safe areas, largura do drawer, breakpoints e alvos de toque permanecem preservados.
+- o mesmo `#mobileDrawer` e o mesmo `#mobileMenuBtn` são reutilizados;
+- o painel fechado começa em `translate3d(calc(-100% - 8px),0,0)` e termina em `translate3d(0,0,0)`;
+- abertura automática do painel: aproximadamente `280 ms` com `cubic-bezier(.32,.72,0,1)`;
+- fecho automático: aproximadamente `240 ms`, ligeiramente mais rápido;
+- backdrop parte de transparente e chega a `rgba(10,18,30,.34)` com blur discreto de `1px`;
+- apenas `transform`, opacidade e composição visual são animados; largura, margens e layout não são animados;
+- quando o drawer está aberto, um swipe horizontal para a esquerda faz o painel acompanhar diretamente o dedo;
+- quando está fechado, um gesto iniciado nos primeiros `30 px` da margem esquerda permite puxar o drawer para dentro do ecrã;
+- o gesto só é capturado depois de pelo menos `8 px` de movimento e depois de confirmar predominância horizontal, preservando o scroll vertical normal da lista;
+- a posição durante o arrasto é calculada diretamente a partir do delta do toque e aplicada por `--drawer-drag-x`, sem transição intermédia;
+- o backdrop também acompanha o progresso do gesto através de `--drawer-drag-alpha` e `--drawer-drag-blur`;
+- ao soltar, o drawer decide o destino por progresso (`34%` para abrir; abaixo de `66%` para fechar quando já estava aberto) e por velocidade de fling (`0.45 px/ms`);
+- depois de soltar, anima apenas o pequeno percurso restante até totalmente aberto ou fechado;
+- cliques sintetizados imediatamente após um swipe são bloqueados durante `320 ms` para evitar abrir uma opção por acidente;
+- a instância de `drawer.close` continua coordenada por `mobile-menu-toggle.js`: os fluxos existentes chamam o mesmo método, mas o `close()` nativo só é executado depois do `transitionend` do `transform`, com fallback de `360 ms`;
+- durante o fecho, o botão permanece no cabeçalho do drawer e regressa ao topbar apenas no evento `close`, evitando salto de layout;
+- `prefers-reduced-motion` elimina as transições e desativa a captura do gesto adicional;
+- Escape, backdrop, seleção de item, mudança de breakpoint e fecho pelo X continuam a passar pelos fluxos existentes;
+- ARIA, foco, safe areas, largura responsiva, scroll interno, temas e alvos tácteis permanecem preservados.
 
-## Versionamento público
+## Versionamento candidato
 
-- build: `v70`;
-- revisão do menu: `70-menu4`;
+- build: `v71`;
+- revisão do menu: `71-menu5`;
 - shell preservado: `66-shell1`;
 - Compras preservada: `65-shopping1`;
 - runtime funcional preservado: `64-runtime1`;
-- cache: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v70-menu4`.
+- cache candidato: `conta-de-casa-public-v64-runtime1-v65-shopping1-v66-shell1-v71-menu5`.
 
-## QA automatizado
+## Segurança e escopo
 
-A CI validou com sucesso sintaxe, finanças, auditoria, invariantes, isolamento do cofre, datas, formulários, QR, Mercado, scanner, contabilidade, ícones, consistência visual, menu animado, Centro de Atualização, segurança, responsividade, viewport móvel, navegação, acessibilidade e sincronização.
+A v71 não altera `appState`, `STATE_VERSION`, faturas, pagamentos, `estimatedCents`, `actualCents`, scanner, recorrências, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB, autenticação, APIs ou sincronização.
 
-A regressão específica da v70 cobre os keyframes por linha, o micro movimento do glifo, abertura/fecho no frame seguinte ao reparenting, fallback, movimento reduzido e sincronização de estado.
+Não foram adicionados segredos, tokens, chaves, endpoints externos ou armazenamento novo. `events.js` e `render.js` não são reescritos; o controlador do menu coordena somente a instância real do `<dialog>` existente e eventos de toque locais.
 
-## Segurança e compatibilidade
+## QA necessário antes de publicar
 
-A v70 não altera `appState`, `STATE_VERSION`, faturas, pagamentos, `estimatedCents`, `actualCents`, scanner, recorrências, PIN, PBKDF2-SHA-256, AES-GCM, IndexedDB, autenticação, APIs ou sincronização.
-
-Não foram adicionados segredos, tokens, chaves, endpoints externos ou armazenamento novo.
-
-## Validação física ainda necessária
-
-A publicação técnica está concluída. Falta confirmar no iPhone/Safari que o movimento agora é efetivamente perceptível:
-
-- hambúrguer → movimento → `X`;
-- `X` → movimento inverso → hambúrguer;
-- abrir/fechar repetidamente sem estado preso;
-- ausência de salto de layout e moldura grande após toque;
-- Escape, backdrop e seleção de item;
-- portrait/landscape;
-- Android/Chrome, tablet, tema claro/escuro e VoiceOver/TalkBack quando possível.
+1. CI do PR totalmente verde;
+2. validar parser e regressões específicas do drawer off-canvas;
+3. validar swipe da margem esquerda para abrir;
+4. validar swipe para a esquerda para fechar;
+5. validar que o scroll vertical da lista não fica bloqueado;
+6. validar snap por distância e por velocidade;
+7. validar abertura e fecho por X, Escape, backdrop e seleção de item;
+8. validar `prefers-reduced-motion` e ausência de estado preso;
+9. validar build/manifest/cache `v71` / `71-menu5`;
+10. integrar em `main` apenas com CI verde;
+11. confirmar CI de `main` e Deploy GitHub Pages;
+12. repetir a validação física no mesmo iPhone.
 
 ## Última alteração
 
-Publicada a v70 para tornar visível o movimento do mesmo botão hambúrguer ↔ `X` no Safari/iPhone, preservando drawer, navegação, acessibilidade e dados.
+A candidata v71 passou de uma animação off-canvas apenas automática para um drawer realmente interativo: durante o swipe, a superfície e o backdrop seguem o dedo em tempo real e só completam o percurso depois de o gesto terminar.
 
 ## Próximo passo
 
-Instalar a v70 pelo Centro de Atualização no iPhone e validar visualmente o movimento de abertura e fecho.
+Obter CI verde da v71 e confirmar no iPhone que o drawer pode ser puxado e empurrado lateralmente sem sensação de bloqueio, mantendo o scroll vertical natural e sem abrir itens acidentalmente.

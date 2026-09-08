@@ -125,14 +125,9 @@ Manter CSS como estado/fallback e acrescentar Web Animations explícitas no cont
 - após `syncButton(false)` e o regresso ao topbar, executar `animateMenuGlyph(false)` no frame seguinte;
 - animar as três linhas com keyframes completos de `top`, `width`, `transform` e `opacity`;
 - acrescentar micro movimento de escala/inclinação do glifo sem deslocar layout;
-- duração `240 ms`, easing `cubic-bezier(.22,.8,.2,1)`;
-- cancelar animações pendentes quando necessário, sem cancelar a sequência inversa iniciada pelo próprio X;
+- duração `240 ms`;
 - não executar keyframes adicionais quando `prefers-reduced-motion` estiver ativo;
 - manter funcionamento sem `Element.animate`, usando o estado CSS como fallback.
-
-### Motivo
-
-A solução atua sobre a causa da falta de movimento percebido sem alterar `events.js`, drawer, rotas, medidas, dados ou sistema global de ícones. Preserva um único botão e torna a animação independente da capacidade do Safari de interpolar CSS através do reparenting.
 
 ### Publicação
 
@@ -141,5 +136,65 @@ A solução atua sobre a causa da falta de movimento percebido sem alterar `even
 - merge: `f4144bff69a3b46e0f6ec78a00af50d29b704578`;
 - CI final do PR #1279 (`34170191884`): sucesso;
 - CI de `main` #1280 (`34170229908`): sucesso;
-- Deploy Pages #1273 (`34170256426`): sucesso;
-- revisões `64-runtime1`, `65-shopping1` e `66-shell1` permanecem preservadas.
+- Deploy Pages #1273 (`34170256426`): sucesso.
+
+## D-036 — Drawer móvel usa off-canvas completo e só fecha depois da transição
+Data: 8 de setembro de 2026 · Estado: aceite como candidata v71.
+
+### Contexto
+
+A validação física da v70 mostrou o drawer correto em conteúdo, estado e hierarquia, mas a entrada permanecia visualmente seca. Um fecho nativo imediato de `<dialog>` também inviabilizava uma saída lateral completa.
+
+### Decisão
+
+Manter o mesmo `<dialog>`, a mesma navegação e os mesmos métodos públicos, mas coordenar a apresentação dentro do controlador já existente:
+
+- estado fechado da superfície: `translate3d(calc(-100% - 8px),0,0)`;
+- estado aberto: `translate3d(0,0,0)`;
+- abertura: `280 ms` com `cubic-bezier(.32,.72,0,1)`;
+- fecho: `240 ms`, ligeiramente mais rápido;
+- backdrop: transparente → `rgba(10,18,30,.34)` com blur máximo de `1px`;
+- não animar largura, `left`, margens ou outros valores que causem reflow;
+- preservar uma referência ao `drawer.close` nativo e substituir apenas o método da instância por um wrapper coordenador;
+- o wrapper remove `.open`, espera `transitionend` do `transform` e só então executa o close nativo;
+- usar fallback temporal de `360 ms` para impedir estado preso se `transitionend` não ocorrer;
+- deixar o mesmo botão dentro de `.drawer-head` até ao evento `close` real, regressando ao topbar apenas depois;
+- em `prefers-reduced-motion` ou fora do breakpoint mobile, não esperar pela animação;
+- todos os fluxos existentes (`X`, backdrop, Escape, seleção de página e breakpoint) continuam a usar `drawer.close()` sem duplicação.
+
+### Motivo
+
+A solução produz um movimento off-canvas claro e composto principalmente por `transform`, evita alterações de layout, mantém um único drawer e evita tocar em `events.js` e `render.js`.
+
+## D-037 — O drawer móvel acompanha o dedo e só captura intenção horizontal
+Data: 8 de setembro de 2026 · Estado: aceite como refinamento da candidata v71.
+
+### Contexto
+
+A animação automática resolve a transição entre estados, mas não reproduz a interação direta observada no ChatGPT: durante um swipe o painel deve mover-se na mesma proporção do dedo, sem parecer travado até ao `touchend`.
+
+### Decisão
+
+Adicionar um controlador de gesto exclusivamente em `mobile-menu-toggle.js`, preservando o drawer e a navegação existentes:
+
+- quando fechado, aceitar candidato apenas nos primeiros `30 px` da margem esquerda;
+- quando aberto, aceitar candidato em qualquer ponto dentro de `.nav-drawer-shell`;
+- exigir pelo menos `8 px` de deslocamento e predominância horizontal antes de capturar o gesto;
+- preservar scroll vertical através de `touch-action:pan-y` e abandonar o candidato quando o eixo vertical domina;
+- durante o arrasto, definir `data-dragging="true"` e desligar temporariamente as transitions do shell/backdrop;
+- derivar `--drawer-drag-x` diretamente de `deltaX`, limitado entre totalmente fechado e aberto;
+- derivar opacidade e blur do backdrop do mesmo progresso do gesto;
+- ao soltar, confirmar abertura a partir de `34%` de progresso ou velocidade `>= 0.45 px/ms` para a direita;
+- num drawer aberto, confirmar fecho quando o progresso cai para `66%` ou menos, ou quando a velocidade é `<= -0.45 px/ms`;
+- fixar o transform atual durante um frame e depois devolver o controlo ao CSS para animar apenas a distância restante;
+- bloquear o clique sintetizado por `320 ms` depois de um swipe completo;
+- se ocorrer `touchcancel`, regressar ao estado estável anterior;
+- em `prefers-reduced-motion`, não capturar o gesto adicional.
+
+### Motivo
+
+O utilizador recebe feedback cinestésico imediato e previsível sem reflow, sem uma segunda navegação e sem interferir no scroll vertical. O gesto atua apenas sobre apresentação e não altera qualquer dado da aplicação.
+
+### Versionamento
+
+Permanece `v71` / `71-menu5`; o refinamento foi incorporado no mesmo PR candidato antes da publicação.

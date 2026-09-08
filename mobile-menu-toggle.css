@@ -1,4 +1,4 @@
-/* Conta de Casa v70 — botão hambúrguer/X com movimento visível e painel móvel refinado. */
+/* Conta de Casa v71 — botão hambúrguer/X animado, drawer off-canvas suave e gesto horizontal contínuo. */
 
 @media(max-width:820px){
   .mobile-menu-btn,
@@ -40,8 +40,6 @@
     outline-offset:2px;
   }
 
-  /* Em toque/rato o foco é reposto programaticamente para manter o controlo acessível,
-     mas sem desenhar a moldura de foco observada no Safari. Teclado mantém focus-visible. */
   .mobile-menu-btn[data-focus-origin="pointer"]:focus,
   .mobile-menu-btn[data-focus-origin="pointer"]:focus-visible{
     outline:none!important;
@@ -69,10 +67,10 @@
     transform-origin:center;
     will-change:top,width,transform,opacity;
     transition:
-      top .24s cubic-bezier(.22,.8,.2,1),
-      width .24s cubic-bezier(.22,.8,.2,1),
-      transform .24s cubic-bezier(.22,.8,.2,1),
-      opacity .12s ease;
+      top .24s cubic-bezier(.32,.72,0,1),
+      width .24s cubic-bezier(.32,.72,0,1),
+      transform .24s cubic-bezier(.32,.72,0,1),
+      opacity .12s ease-out;
   }
 
   .mobile-menu-glyph>span:nth-child(1){top:1px;width:22px}
@@ -99,7 +97,6 @@
     transform:translateX(-50%) rotate(-45deg) scaleX(1);
   }
 
-  /* Painel: largura fluida sem ocupar desnecessariamente o ecrã. */
   .nav-drawer{
     width:min(364px,calc(100vw - 24px));
     max-width:none;
@@ -111,9 +108,19 @@
   }
 
   .nav-drawer::backdrop{
-    background:rgba(10,18,30,.40);
-    backdrop-filter:blur(2px);
-    -webkit-backdrop-filter:blur(2px);
+    background:rgba(10,18,30,0);
+    backdrop-filter:blur(0);
+    -webkit-backdrop-filter:blur(0);
+    transition:
+      background-color .22s ease-out,
+      backdrop-filter .22s ease-out,
+      -webkit-backdrop-filter .22s ease-out;
+  }
+
+  .nav-drawer.open::backdrop{
+    background:rgba(10,18,30,.34);
+    backdrop-filter:blur(1px);
+    -webkit-backdrop-filter:blur(1px);
   }
 
   .nav-drawer-shell{
@@ -125,20 +132,59 @@
     flex-direction:column;
     background:var(--surface);
     border-right:1px solid color-mix(in srgb,var(--border) 82%,transparent);
-    box-shadow:18px 0 48px rgba(20,35,60,.14);
-    transform:translateX(-18px);
-    opacity:.82;
-    transition:transform .2s cubic-bezier(.2,.8,.2,1),opacity .16s ease;
+    box-shadow:18px 0 40px rgba(20,35,60,.10);
+    transform:translate3d(calc(-100% - 8px),0,0);
+    opacity:.995;
+    transform-origin:left center;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    will-change:transform,opacity;
+    touch-action:pan-y;
+    overscroll-behavior-x:contain;
+    transition:
+      transform .28s cubic-bezier(.32,.72,0,1),
+      opacity .18s ease-out,
+      box-shadow .28s ease-out;
   }
 
   html[data-theme="dark"] .nav-drawer-shell{
     border-right-color:color-mix(in srgb,var(--border) 72%,transparent);
-    box-shadow:18px 0 48px rgba(0,0,0,.34);
+    box-shadow:18px 0 40px rgba(0,0,0,.26);
   }
 
   .nav-drawer.open .nav-drawer-shell{
-    transform:translateX(0);
+    transform:translate3d(0,0,0);
     opacity:1;
+  }
+
+  /* Enquanto existe gesto horizontal, o transform segue a posição real do dedo. As transições
+     ficam desligadas apenas durante o arrasto; ao soltar, o CSS volta a assumir o pequeno percurso
+     restante até totalmente aberto ou fechado. */
+  .nav-drawer[data-dragging="true"]{
+    user-select:none;
+    -webkit-user-select:none;
+  }
+
+  .nav-drawer[data-dragging="true"] .nav-drawer-shell{
+    transform:translate3d(var(--drawer-drag-x,-100%),0,0)!important;
+    transition:none!important;
+  }
+
+  .nav-drawer[data-dragging="true"]::backdrop{
+    background:rgba(10,18,30,var(--drawer-drag-alpha,0))!important;
+    backdrop-filter:blur(var(--drawer-drag-blur,0px))!important;
+    -webkit-backdrop-filter:blur(var(--drawer-drag-blur,0px))!important;
+    transition:none!important;
+  }
+
+  .nav-drawer[data-closing="true"] .nav-drawer-shell{
+    pointer-events:none;
+    transition-duration:.24s,.16s,.24s;
+    transition-timing-function:cubic-bezier(.4,0,.2,1),ease-out,ease-out;
+  }
+
+  .nav-drawer[data-closing="true"]::backdrop{
+    transition-duration:.18s,.18s,.18s;
   }
 
   .drawer-head{
@@ -316,6 +362,7 @@
   .mobile-menu-btn,
   .mobile-menu-glyph>span,
   .nav-drawer-shell,
+  .nav-drawer::backdrop,
   .drawer-nav .nav-btn,
   .drawer-nav .nav-btn::before,
   .drawer-footer .icon-text-btn{transition:none!important}

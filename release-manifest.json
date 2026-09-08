@@ -1,9 +1,26 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v70",
+  "latestVersion": "v71",
   "publishedAt": "2026-09-08",
   "releases": [
+    {
+      "version": "v71",
+      "date": "8 de setembro de 2026",
+      "title": "Menu lateral suave e controlado pelo gesto",
+      "items": [
+        "O painel do menu deixa de surgir com um pequeno salto visual e passa a entrar como uma superfície off-canvas completa, deslizando suavemente da esquerda para a posição final.",
+        "No telemóvel, o drawer passa a acompanhar diretamente o dedo durante o gesto horizontal: é possível arrastar para a esquerda para fechar e iniciar junto à margem esquerda para o puxar para dentro do ecrã.",
+        "O gesto só é capturado depois de existir intenção horizontal clara, preservando o scroll vertical normal dos itens; ao soltar, o painel decide abrir ou fechar pela distância percorrida e pela velocidade do movimento.",
+        "A abertura usa apenas transform e uma variação mínima de opacidade, evitando animar largura, margens ou layout e reduzindo repaints no Safari/iPhone.",
+        "O fundo escurecido acompanha a posição do dedo durante o arrasto e evolui de transparente para um nível discreto, com blur muito ligeiro.",
+        "O fecho aguarda a transição lateral do painel antes de fechar efetivamente o dialog, evitando desaparecimento seco; o mesmo botão hambúrguer/X só regressa ao topbar depois do evento close.",
+        "A abertura automática dura cerca de 280 ms e o fecho cerca de 240 ms; quando existe arrasto, a superfície segue o dedo sem atraso e anima apenas o percurso restante depois de o utilizador soltar.",
+        "prefers-reduced-motion continua respeitado; nesse modo o gesto adicional não é capturado e as transições automáticas são eliminadas.",
+        "A largura responsiva, safe areas, scroll interno, alvos tácteis, tema claro/escuro, ARIA, foco, Escape, backdrop e navegação existente são preservados.",
+        "A alteração é exclusivamente de interface e movimento: não modifica faturas, pagamentos, Lista de compras, scanner, cofre, IndexedDB, cifragem, APIs ou sincronização."
+      ]
+    },
     {
       "version": "v70",
       "date": "8 de setembro de 2026",
