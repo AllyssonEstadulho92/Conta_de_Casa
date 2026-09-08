@@ -6,6 +6,7 @@ const market=fs.readFileSync('market-experience.js','utf8');
 const barcode=fs.readFileSync('market-barcode.js','utf8');
 const render=fs.readFileSync('render.js','utf8');
 const css=fs.readFileSync('ui-icons.css','utf8');
+const brandCss=fs.readFileSync('market-brand.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const runtime=fs.readFileSync('v64-runtime.js','utf8');
@@ -21,8 +22,6 @@ assert.match(core,/imageSource: cleanString\(i\.imageSource, 60\)/);
 assert.match(core,/ALLOWED_TAGS[^\n]*'img'/);
 assert.match(core,/tag === 'img' && !safeProductImageUrl/);
 
-// O lookup legado continua disponível para outros fluxos, mas a política official-only
-// permanece como compatibilidade histórica mesmo com a apresentação text-first atual.
 assert.match(market,/OFF_IMAGE_SEARCH_URL='https:\/\/world\.openfoodfacts\.org\/cgi\/search\.pl'/);
 assert.match(market,/searchProductImages/);
 assert.match(market,/imageCandidateScore/);
@@ -72,15 +71,18 @@ assert.match(css,/v57 — fotografias reais de referência no Mercado/);
 assert.match(css,/\.market-product-photo img/);
 assert.match(css,/object-fit:contain/);
 assert.match(css,/market-mobile-head::before\{content:none!important/);
+assert.match(brandCss,/fotografias verificadas/);
+assert.match(brandCss,/\.market-product-photo[\s\S]*display:grid!important/,'v74 presentation must expose verified product photos');
 
 // index.html remains the stable source template; the Pages build expands CSP at release time.
 assert.match(index,/img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org;/);
-assert.match(sw,/conta-de-casa-public-v64-runtime1/);
+assert.match(sw,/conta-de-casa-public-v74-ui1-v74-shopping2-v73-menu8-v74-experience1/);
 assert.match(sw,/\.\/market-retailer-image-policy\.js/);
 assert.match(sw,/\.\/market-official-images\.js/);
-assert.match(sw,/\.\/ui-consistency\.css/);
+assert.doesNotMatch(sw,/\.\/ui-consistency\.css/,'obsolete visual layer must not ship in v74');
 assert.match(sw,/\.\/v64-runtime\.js/);
+assert.match(sw,/\.\/v74-experience\.js/);
 assert.match(runtime,/productCode=scan\.code/,'v64 may attach a GTIN only after a high-confidence barcode match');
 assert.doesNotMatch(runtime,/imageUrl\s*=/,'v64 barcode automation must not create a new image source');
 
-console.log('Market real/official image compatibility and v64 barcode isolation tests: OK');
+console.log('Market real/official images remain isolated and visible under the v74 bundle: OK');
