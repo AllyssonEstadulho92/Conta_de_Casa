@@ -24,6 +24,8 @@ assert.match(css,/safe-area-inset-right/);
 assert.match(css,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/);
 assert.match(css,/Imagem indisponível/);
 assert.match(css,/\.market-product-photo\.is-loading::before/);
+assert.match(css,/\.market-product-photo-button:disabled/);
+assert.match(css,/@media\(max-width:430px\)[\s\S]*\.cdc-product-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/,'compact phones must use two product columns');
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/forced-colors:active/);
 
@@ -33,6 +35,8 @@ assert.match(js,/\.market-product-photo/);
 assert.match(js,/addEventListener\('load'/);
 assert.match(js,/addEventListener\('error'/);
 assert.match(js,/Imagem indisponível/);
+assert.match(js,/aria-disabled/);
+assert.match(js,/photo instanceof HTMLButtonElement/);
 assert.match(js,/MutationObserver/);
 assert.doesNotMatch(js,/\bappState\b|amountCents|estimatedCents|actualCents|saveState\(|persistState\(|openDB\(/,'stability layer must not manipulate application/financial state');
 
