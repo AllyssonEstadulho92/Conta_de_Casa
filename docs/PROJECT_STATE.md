@@ -1,9 +1,13 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 9 de setembro de 2026
-Build público atual: `v75`
-Revisões publicadas: `75-header2`, `75-stability1`, `75-layout1`, `75-drawer2`, `75-featured1`, `75-image-library1`
-Revisão em validação: `75-catalog1`
+Build público: `v75`
+Revisão transversal: `75-stability1`
+Revisão de geometria: `75-layout1`
+Revisão do drawer móvel: `75-drawer2`
+Revisão dos destaques do Mercado: `75-featured1`
+Revisão da biblioteca de imagens: `75-image-library1`
+Revisão do catálogo visual em validação: `75-catalog1`
 Branch pública: `main`
 Branch de trabalho: `feat/v75-visual-market-catalog`
 Distribuição: GitHub Pages / PWA
@@ -11,11 +15,37 @@ URL pública: `https://allyssonestadulho92.github.io/Conta_de_Casa/`
 
 ## Estado atual
 
-A aplicação continua como PWA estática/local-first. O estado financeiro permanece em IndexedDB, os valores monetários usam inteiros de cêntimos, o cofre usa PBKDF2-SHA-256 + AES-GCM, a sincronização GitHub é opcional e transfere apenas o envelope cifrado, e `STATE_VERSION = 5` permanece inalterado.
+A aplicação mantém arquitetura PWA estática/local-first, com estado financeiro em IndexedDB, valores em cêntimos, cofre PBKDF2-SHA-256 + AES-GCM, sincronização GitHub opcional apenas sobre envelope cifrado e `STATE_VERSION = 5`.
 
-`75-image-library1` está publicada e guarda apenas referências oficiais validadas de fotografias por `marketId|pid`. A nova revisão `75-catalog1` acrescenta um catálogo visual progressivo sobre essa biblioteca, sem alterar preços, quantidades, faturas, pagamentos ou regras financeiras.
+A revisão `75-featured1` mantém o bloco móvel **Produtos em destaque** em carrossel largo e alinhado com o protótipo. A revisão `75-image-library1` está integrada em `main` e publicada por GitHub Pages, acrescentando uma biblioteca persistente separada para fotografias oficiais do Mercado, sem alterar o estado financeiro.
 
-## `75-catalog1` — catálogo visual progressivo
+`75-catalog1` está implementada e validada na branch de trabalho. Acrescenta um catálogo visual progressivo por categorias, com SKUs reais do Continente/Pingo Doce e enriquecimento limitado, mas ainda não deve ser considerada publicada enquanto não for integrada em `main` e distribuída por Pages.
+
+## Biblioteca de imagens `75-image-library1`
+
+Foi criado `market-image-library.js` com uma base IndexedDB própria: `conta-de-casa-market-image-library`.
+
+Objetivo:
+
+- guardar e reutilizar fotografias oficiais já validadas de produtos Continente e Pingo Doce;
+- indexar por `marketId|pid`, evitando correspondências apenas por nome;
+- restaurar a fotografia de um SKU quando o mesmo produto volta a aparecer no catálogo;
+- capturar automaticamente fotografias oficiais que os módulos atuais consigam resolver;
+- reduzir cartões vazios e consultas repetidas às páginas dos retalhistas;
+- manter os dados financeiros completamente isolados.
+
+Contrato de segurança:
+
+- aceita Continente apenas em `www.continente.pt` e paths `/Sites-col-master-catalog/` com o PID exato;
+- aceita Pingo Doce apenas em `static.pingodoce.pt`, `/Sites-pingo-doce-master/` e `images/large|medium|small` com o PID exato;
+- URLs de página também são validados pelo retalhista e PID;
+- não guarda passwords, PIN, tokens, faturas, preços ou dados do cofre;
+- não copia ficheiros binários das lojas para o repositório: guarda apenas a referência oficial validada;
+- entradas positivas expiram ao fim de 45 dias e são reavaliadas quando necessário.
+
+A biblioteca observa os cartões reais do catálogo. Quando encontra uma imagem oficial válida, guarda os metadados; quando volta a encontrar o mesmo SKU, pode repor a imagem a partir da biblioteca. O fallback `Imagem indisponível` continua ativo quando não existe fotografia oficial válida.
+
+## Catálogo visual `75-catalog1`
 
 Novos assets:
 
@@ -24,104 +54,117 @@ Novos assets:
 - `market-catalog-image-resolver.js`;
 - `tests/market-visual-catalog.test.cjs`.
 
-O catálogo cria a IndexedDB separada `conta-de-casa-market-visual-catalog` com stores `products` e `meta`. Cada produto é identificado por `marketId|pid`, guarda apenas nome, embalagem, categorias, URL oficial da página e timestamps. **Não guarda preço.**
+Foi criada uma segunda base IndexedDB exclusivamente para o índice visual: `conta-de-casa-market-visual-catalog`, com stores `products` e `meta`. Cada SKU usa a chave `marketId|pid` e guarda apenas nome, embalagem, categorias, URL oficial e timestamps. O catálogo **não guarda preços**.
 
-Categorias iniciais:
+Categorias iniciais: Bebidas, Lacticínios e ovos, Frutas e legumes, Carne e peixe, Padaria e pastelaria, Mercearia/Despensa, Congelados, Snacks e doces, Higiene pessoal, Limpeza, Bebé e Animais.
 
-- Bebidas;
-- Lacticínios e ovos;
-- Frutas e legumes;
-- Carne e peixe;
-- Padaria e pastelaria;
-- Mercearia / Despensa;
-- Congelados;
-- Snacks e doces;
-- Higiene pessoal;
-- Limpeza;
-- Bebé;
-- Animais.
+A descoberta usa `cesta.pt` apenas para Continente e Pingo Doce. Só entram no índice resultados com PID e página oficial coerentes. Ao tocar em **Ver preço atual**, o cartão reutiliza `#marketCatalogSearch` e o fluxo vivo já existente; o preço é consultado novamente em vez de ser lido do catálogo local.
 
-O catálogo usa pesquisas reais de Continente e Pingo Doce através do pipeline `cesta.pt` já existente. Os SKUs encontrados são acumulados gradualmente e deduplicados por loja + PID. Ao tocar num cartão, o nome é enviado para o campo de pesquisa existente e o preço atual é novamente consultado pelo fluxo normal do Mercado; o catálogo não apresenta preço armazenado.
+### Acumulação automática limitada
 
-## Acumulação automática controlada
-
-Para evitar crawling agressivo e carga desnecessária, `75-catalog1` aplica limites explícitos:
-
-- máximo de 18 pesquisas de enriquecimento por sessão;
-- máximo de 48 pesquisas de enriquecimento por dia;
+- máximo de 18 pesquisas por sessão;
+- máximo de 48 pesquisas por dia;
 - intervalo mínimo de 15 segundos entre passos automáticos;
+- apenas uma pesquisa Cesta em voo;
 - máximo de 20 tentativas de enriquecimento de imagem por sessão;
-- imagens são processadas de forma espaçada, com concorrência limitada;
-- enriquecimento automático não corre offline, com a página oculta ou quando `Save-Data` está ativo.
+- intervalo de 8 segundos entre passos de imagem;
+- resolução direta de imagem com concorrência máxima 2;
+- enriquecimento suspenso quando offline, página oculta ou `Save-Data` ativo;
+- cursor persistente permite continuar por outros termos em sessões seguintes.
 
-O objetivo é permitir que a base local cresça para centenas ou milhares de SKUs ao longo de utilizações sucessivas, sem alegar cobertura integral instantânea dos catálogos dinâmicos dos retalhistas.
+A arquitetura permite crescimento gradual para centenas/milhares de SKUs ao longo do uso, sem declarar cobertura integral instantânea dos catálogos dinâmicos.
 
-## Fotografias
+## Fontes oficiais verificadas
 
-`market-catalog-image-resolver.js` usa a URL oficial exata do produto já encontrada pelo catálogo para tentar localizar a fotografia oficial, evitando repetir desnecessariamente uma pesquisa por nome. Continua a validar a fotografia através das regras de `CDCOfficialMarketImages`:
+A estrutura atual dos retalhistas continua compatível com o pipeline existente:
 
-- Continente: `www.continente.pt`, `Sites-col-master-catalog`, PID correspondente;
-- Pingo Doce: `static.pingodoce.pt`, `Sites-pingo-doce-master`, PID correspondente.
+- Continente: páginas de produto `continente.pt/produto/...-<pid>.html` e imagens no catálogo oficial `Sites-col-master-catalog`;
+- Pingo Doce: páginas `pingodoce.pt/home/produtos/...-<pid>.html` e imagens em `static.pingodoce.pt/Sites-pingo-doce-master`.
 
-A imagem validada é entregue a `market-image-library.js`, que mantém TTL de 45 dias. Nenhum binário é copiado para o repositório.
+O sistema não considera uma fotografia como prova de preço ou transação.
 
-## Interface
+`market-catalog-image-resolver.js` aproveita a URL oficial exata de um SKU já descoberto para tentar localizar a fotografia sem repetir uma pesquisa por nome. A imagem continua a passar pelos validadores estritos de retalhista/PID e, quando válida, é persistida pela `75-image-library1`.
 
-No browser do Mercado surge uma secção **Catálogo visual / Produtos por categoria** com:
+## Cabeçalho, drawer e navegação
 
-- categorias horizontais;
-- filtro Todos / Continente / Pingo Doce;
-- contador de produtos indexados e imagens validadas;
-- grelha responsiva de produtos;
-- fallback local quando a fotografia ainda não está validada;
-- ação **Ver preço atual**, que reutiliza a pesquisa real existente.
+O cabeçalho móvel mantém hambúrguer + título à esquerda e notificações à direita. O drawer continua a abrir exclusivamente pela direita, com a paleta `#003f4c → #005965 → #087a78`, menta `#5be0c2` como acento e página clara visível à esquerda.
 
-A grelha usa 3 colunas em desktop, 2 em larguras até 680 px e 1 coluna em ecrãs muito estreitos até 350 px. Fotografias usam `object-fit: contain`.
+A navegação móvel continua **Início / Despesas / Mercado / Planeamento / Mais**.
 
 ## Integridade funcional preservada
 
-`75-catalog1` não modifica:
+`75-image-library1` e `75-catalog1` não alteram:
 
-- `core.js`;
-- `finance.js`;
+- `core.js` / persistência financeira;
+- `finance.js` / cálculos;
 - `STATE_VERSION = 5`;
-- IndexedDB financeira;
-- `estimatedCents` / `actualCents`;
-- pagamentos;
-- faturas;
-- PIN/palavra-passe;
+- IndexedDB financeiro existente;
+- pagamentos e histórico;
+- PIN e palavra-passe;
 - PBKDF2-SHA-256 + AES-GCM;
-- QR fiscal e scanner;
-- sincronização cifrada.
+- QR fiscal e scanner de código de barras;
+- `estimatedCents` / `actualCents`;
+- sincronização cifrada;
+- regras de cálculo ou confirmação de preços.
 
-Os novos módulos não referenciam `appState`, `saveState()` ou `commit()`.
+Os novos módulos `75-catalog1` não referenciam `appState`, `saveState()`, `commit()`, `estimatedCents`, `actualCents` ou `amountCents`.
 
-## Versionamento esperado para publicação
+## Versionamento público / esperado
 
 - build: `v75`;
-- biblioteca de imagens: `75-image-library1`;
-- catálogo visual: `75-catalog1`;
-- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog1`.
+- UI base: `74-ui1`;
+- Mercado: `74-shopping2`;
+- menu funcional: `73-menu8`;
+- experiência base: `74-experience2`;
+- arquitetura: `75-architecture2`;
+- cabeçalho: `75-header2`;
+- estabilidade: `75-stability1`;
+- geometria: `75-layout1`;
+- drawer visual: `75-drawer2`;
+- destaques Mercado: `75-featured1`;
+- biblioteca imagens: `75-image-library1`;
+- catálogo visual em validação: `75-catalog1`;
+- cache esperado depois da publicação: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog1`.
 
-## QA
+`market-image-library.js?v=75-image-library1` integra a allowlist Pages e o Service Worker. `market-visual-catalog.css`, `market-catalog-image-resolver.js` e `market-visual-catalog.js` entram no bundle com `?v=75-catalog1` na revisão em validação.
 
-O primeiro CI de `75-catalog1` revelou apenas uma expressão regular incorreta no novo teste, não um erro funcional. A asserção foi corrigida. O CI seguinte da branch, no SHA `8e5d61c3c68771cd3e1cd5990cbe201e30fb7baa`, terminou integralmente com sucesso, incluindo:
+## QA e publicação
 
-- prova das fontes vivas Continente/Pingo Doce;
-- sintaxe dos novos módulos;
-- teste específico do catálogo progressivo;
-- finanças e auditoria;
-- isolamento e segurança;
-- Mercado, imagens e código de barras;
-- responsividade e mobile viewport;
-- acessibilidade;
-- navegação;
-- sincronização.
+`tests/market-image-library.test.cjs` continua a cobrir validação de PID/retalhista, persistência isolada, TTL, ausência de acesso ao estado financeiro, distribuição e cache.
 
-## Estado de publicação
+`tests/market-visual-catalog.test.cjs` cobre categorias, identidade `marketId|pid`, rejeição de URL não oficial, limites de rede, ausência de estado financeiro, resolvedor direto de imagem, breakpoints, ordem do bundle e cache.
 
-`75-catalog1` está tecnicamente validada na branch de trabalho, mas ainda não deve ser considerada publicada enquanto não for integrada em `main`, o CI de `main` terminar com sucesso e o GitHub Pages concluir o deploy do SHA integrado.
+Validação confirmada da biblioteca publicada:
+
+- CI final da branch `feat/v75-market-image-library`: sucesso no SHA `5f7b051c2b767c71581b4dc86054f502629a54cd`;
+- integração em `main`: fast-forward no mesmo SHA;
+- CI de `main`: sucesso no mesmo SHA;
+- GitHub Pages: deploy concluído com sucesso sobre o mesmo SHA.
+
+Validação confirmada do catálogo em branch:
+
+- primeiro CI encontrou apenas uma regex incorreta no novo teste; a asserção foi corrigida;
+- CI técnico verde no SHA `8e5d61c3c68771cd3e1cd5990cbe201e30fb7baa`;
+- CI final depois de documentação e `release-manifest.json`: sucesso no SHA `c45b7be38748c22f21c8168fd0edced8c8cc0987`.
+
+Os testes incluem finanças, auditoria, contagem, isolamento, datas, faturas, QR, Mercado, imagens, barcode, arquitetura v75, segurança, responsividade, navegação, acessibilidade e sincronização.
+
+## Validação manual necessária
+
+No iPhone/Safari/PWA, confirmar:
+
+- uma fotografia oficial encontrada permanece disponível quando o mesmo SKU volta a aparecer;
+- Continente e Pingo Doce não trocam imagens entre SKUs;
+- cartão continua estável quando a URL expira ou falha;
+- fallback `Imagem indisponível` permanece limpo;
+- catálogo visual aparece uma única vez;
+- categorias/filtros funcionam sem overflow;
+- produtos vão surgindo progressivamente entre sessões;
+- **Ver preço atual** dispara a pesquisa viva existente;
+- offline/Save-Data/página oculta não fazem enriquecimento automático;
+- `75-featured1` continua com cartão largo e swipe natural;
+- ausência de regressão de navegação ou alteração de valores.
 
 ## Próximo passo
 
-Atualizar documentação/release, executar o CI final da branch, integrar por fast-forward em `main`, validar CI + Pages e depois testar fisicamente no iPhone/Safari/PWA: crescimento progressivo, filtros, imagens, Save-Data, rede lenta/offline e ausência de alteração de valores financeiros.
+Comparar a branch `feat/v75-visual-market-catalog` com `main`, integrar `75-catalog1` por fast-forward sem force, confirmar CI de `main` e GitHub Pages no SHA integrado e só depois fechar a revisão como publicada. Depois, validar fisicamente no iPhone/Safari/PWA e medir o crescimento real da base por categoria.
