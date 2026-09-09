@@ -24,7 +24,7 @@ assert.match(catalog,/navigator\.connection\?\.saveData/);
 assert.match(catalog,/document\.visibilityState==='hidden'/);
 assert.match(catalog,/queryInFlight/);
 assert.match(catalog,/stores:\['pingodoce','continente'\],limit:20/);
-assert.match(catalog,/marketId\|\$\{pid\}/);
+assert.match(catalog,/\$\{marketId\}\|\$\{pid\}/);
 assert.match(catalog,/createIndex\('categories','categories',\{unique:false,multiEntry:true\}\)/);
 assert.match(catalog,/Ver preço atual/);
 assert.match(catalog,/dispatchEvent\(new Event\('input'/);
