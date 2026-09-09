@@ -1,0 +1,60 @@
+/* Conta de Casa — biblioteca Pingo Doce 75-pd-photo1 */
+.pingo-doce-photo-library-status{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:10px 0 16px;
+  padding:12px 14px;
+  border:1px solid color-mix(in srgb,var(--line,#d9e4e4) 78%,transparent);
+  border-radius:16px;
+  background:color-mix(in srgb,var(--surface,#fff) 94%,#eefaf7 6%);
+  box-shadow:0 8px 24px rgba(0,63,76,.06);
+}
+.pingo-doce-photo-library-copy{
+  display:grid;
+  gap:2px;
+  min-width:0;
+}
+.pingo-doce-photo-library-copy strong{
+  color:var(--text,#183436);
+  font-size:.92rem;
+  font-weight:700;
+  line-height:1.25;
+}
+.pingo-doce-photo-library-metrics{
+  color:var(--muted,#6b7f80);
+  font-size:.79rem;
+  line-height:1.35;
+}
+.pingo-doce-photo-library-sync{
+  min-height:42px;
+  flex:0 0 auto;
+  border:1px solid rgba(8,122,120,.22);
+  border-radius:12px;
+  padding:0 14px;
+  background:rgba(91,224,194,.14);
+  color:#005965;
+  font:inherit;
+  font-size:.82rem;
+  font-weight:700;
+  cursor:pointer;
+  transition:background .18s ease,border-color .18s ease,transform .18s ease;
+}
+.pingo-doce-photo-library-sync:hover{background:rgba(91,224,194,.22);border-color:rgba(8,122,120,.36)}
+.pingo-doce-photo-library-sync:active{transform:translateY(1px)}
+.pingo-doce-photo-library-sync:disabled{opacity:.58;cursor:progress}
+.pingo-doce-photo-library-sync:focus-visible{outline:3px solid rgba(91,224,194,.55);outline-offset:2px}
+[data-theme="dark"] .pingo-doce-photo-library-status{
+  background:color-mix(in srgb,var(--surface,#10282b) 92%,#005965 8%);
+  border-color:rgba(91,224,194,.16);
+  box-shadow:none;
+}
+[data-theme="dark"] .pingo-doce-photo-library-sync{color:#bff7ea;background:rgba(91,224,194,.1)}
+@media(max-width:540px){
+  .pingo-doce-photo-library-status{align-items:stretch;flex-direction:column;padding:12px}
+  .pingo-doce-photo-library-sync{width:100%;min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+  .pingo-doce-photo-library-sync{transition:none}
+}
