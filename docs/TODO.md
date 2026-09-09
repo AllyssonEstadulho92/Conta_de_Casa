@@ -40,6 +40,42 @@ Atualizado: 9 de setembro de 2026
 - [x] Confirmar CI de `main` no SHA funcional `998bb19476e175647d4aad395008b8188e9c13f1`.
 - [x] Confirmar GitHub Pages concluído sobre o mesmo SHA funcional.
 
+## P0 — `75-image-library1`: biblioteca persistente de fotografias oficiais
+
+- [x] Rever o pipeline real de Continente/Pingo Doce antes de alterar a arquitetura.
+- [x] Criar `market-image-library.js` numa camada separada do estado financeiro.
+- [x] Criar IndexedDB própria `conta-de-casa-market-image-library`.
+- [x] Indexar cada fotografia por `marketId|pid`, nunca apenas pelo nome do produto.
+- [x] Validar estritamente URLs oficiais do Continente por host, catálogo e PID.
+- [x] Validar estritamente URLs oficiais do Pingo Doce por host, catálogo, tamanho e PID.
+- [x] Guardar apenas metadados/URL oficial validado, sem copiar binários dos retalhistas para o repositório.
+- [x] Definir expiração de 45 dias para revalidar referências antigas.
+- [x] Capturar automaticamente imagens oficiais já resolvidas nos cartões do catálogo.
+- [x] Reutilizar a imagem da biblioteca quando o mesmo SKU volta a aparecer.
+- [x] Manter fallback `Imagem indisponível` quando a fotografia não existe, expira ou falha.
+- [x] Garantir ausência de acesso a `appState`, `saveState()`, `commit()`, montantes, cofre e sincronização financeira.
+- [x] Criar `IMAGE_LIBRARY_REV = 75-image-library1`.
+- [x] Adicionar `market-image-library.js` ao bundle público antes da política/bridge de imagens.
+- [x] Atualizar Service Worker para cache `-image-library1`.
+- [x] Criar `tests/market-image-library.test.cjs`.
+- [x] Atualizar CI e Pages para validar sintaxe, isolamento, distribuição e cache.
+- [x] Confirmar CI completo verde na branch no SHA técnico `6d48c2d300e20343a1abaf7046f8f59e78a2181f`.
+- [ ] Confirmar CI final verde depois da documentação/release manifest.
+- [ ] Integrar `75-image-library1` em `main`.
+- [ ] Confirmar CI de `main` no SHA integrado.
+- [ ] Confirmar GitHub Pages concluído sobre o SHA integrado.
+
+## P1 — Validação física de `75-image-library1`
+
+- [ ] iPhone/Safari/PWA: confirmar instalação do novo Service Worker/cache.
+- [ ] Pesquisar um SKU com fotografia oficial e voltar a pesquisá-lo depois de reabrir a aplicação.
+- [ ] Confirmar que a fotografia reaparece para o mesmo PID sem troca entre produtos.
+- [ ] Confirmar que Continente e Pingo Doce permanecem isolados por `marketId|pid`.
+- [ ] Confirmar que URL inválida/expirada regressa ao fallback sem cartão quebrado.
+- [ ] Confirmar funcionamento aceitável em rede lenta e offline parcial.
+- [ ] Confirmar que o armazenamento indisponível/privado não bloqueia a pesquisa do Mercado.
+- [ ] Confirmar que nenhum preço, quantidade ou estado de compra é alterado pela biblioteca.
+
 ## P1 — Validação física de `75-featured1`
 
 - [ ] iPhone/Safari/PWA: confirmar atualização do Service Worker e carregamento de `75-featured1`.
@@ -91,7 +127,9 @@ Atualizado: 9 de setembro de 2026
 - [x] Ampliação desativada quando a imagem falha.
 - [x] Grelha do catálogo a duas colunas até 430 px.
 - [x] Destaques móveis com fallback próprio em `75-featured1`.
+- [x] Biblioteca persistente de metadados oficiais por SKU em `75-image-library1`.
 - [ ] Validar Continente/Pingo Doce em rede lenta, offline e URL quebrado.
+- [ ] Avaliar futuramente uma fonte oficial/autorizada exaustiva se for necessária cobertura integral antecipada do catálogo, sem crawling agressivo.
 
 ## P1 — QA e publicação
 
@@ -99,7 +137,8 @@ Atualizado: 9 de setembro de 2026
 - [x] `tests/v75-layout-polish.test.cjs`.
 - [x] `tests/v75-drawer-theme.test.cjs`.
 - [x] `tests/v75-market-featured.test.cjs`.
-- [x] CI cobre arquitetura, estabilidade, layout, drawer e destaques.
+- [x] `tests/market-image-library.test.cjs`.
+- [x] CI cobre arquitetura, estabilidade, layout, drawer, destaques e biblioteca de imagens.
 - [x] Pages repete a validação antes do deploy.
 
 ## P2 — Consolidação posterior
