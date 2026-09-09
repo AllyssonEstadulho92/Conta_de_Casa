@@ -10,78 +10,64 @@ Atualizado: 9 de setembro de 2026
 - [x] Manter drawer no lado direito e cabeçalho `75-header2`.
 - [x] Manter `75-stability1`, `75-layout1`, `75-drawer2` e `75-featured1`.
 
-## P0 — Biblioteca e catálogo
+## P0 — Pipeline de imagens anterior
 
 - [x] Biblioteca persistente por `marketId|pid` em `75-image-library1`.
-- [x] Catálogo visual progressivo por categorias em `75-catalog1`.
+- [x] Catálogo visual progressivo.
 - [x] Biblioteca dedicada Pingo Doce em `75-pd-photo1`.
-- [x] Mais de 200 termos / 15 famílias para descoberta Pingo Doce.
-- [x] Não guardar preços no catálogo visual.
+- [x] Resolver oficial não bloqueante `75-catalog2`.
+- [x] Carregador prioritário `75-photo-loader2`.
 - [x] Manter limites de rede e suspensão offline/Save-Data/visibilidade.
 
-## P0 — Bug real iPhone: `0 fotografias oficiais`
+## P0 — Bug novo: fotografias/cartões a piscar
 
-Evidência física: 285 SKUs Pingo Doce indexados, 0 fotografias oficiais e cartões presos em **A carregar fotografia…**.
+Evidência: captura física no iPhone mostra a zona da fotografia a piscar enquanto o catálogo continua a trabalhar em background.
 
-- [x] Inspecionar pipeline real desde catálogo → página oficial → resolver → biblioteca → cartão.
-- [x] Confirmar que a sonda CI encontra resultado Pingo Doce e imagem exata em fonte conhecida.
-- [x] Identificar preflight visual bloqueante de até 10 s no resolvedor direto.
-- [x] Identificar que `75-photo-loader1` não priorizava cartões visíveis.
-- [x] Identificar risco de orçamento persistido `imagesToday` esgotado por falsos negativos antigos.
+- [x] Inspecionar o renderer real do catálogo e não assumir causa CSS.
+- [x] Confirmar que `scheduleImageWarm()` chamava `renderProducts()` depois de cada fotografia.
+- [x] Confirmar que `renderProducts()` eliminava a grelha com `grid.replaceChildren()`.
+- [x] Confirmar impacto: `<img>` já carregados eram destruídos e recriados.
+- [x] Criar revisão `75-catalog3`.
+- [x] Reconciliar cartões por `marketId|pid`.
+- [x] Preservar o mesmo nó DOM/media para produtos ainda presentes.
+- [x] Remover apenas cartões obsoletos.
+- [x] Criar apenas cartões realmente novos.
+- [x] Retirar `renderProducts()` do aquecimento periódico de imagens.
+- [x] Emitir `cdc:market-photo-ready` quando background persiste uma fotografia.
+- [x] Reutilizar `75-photo-loader2` para hidratar o cartão existente.
+- [x] Atualizar `CATALOG_REV` para `75-catalog3`.
+- [x] Atualizar cache do Service Worker para `catalog3`.
+- [x] Adicionar regressão que impede reconstrução destrutiva da grelha.
+- [x] Atualizar teste Pingo Doce para o novo identificador de cache.
+- [x] Confirmar CI completo da branch no SHA `501c21dca60cffc32489768238c5f308e1785e34`.
 
-## P0 — `75-catalog2`
+## P0 — Documentação da correção
 
-- [x] Manter `safeProductUrl()` antes de qualquer resolução.
-- [x] Manter `safeOfficialImageUrl()` com host/path/PID exatos.
-- [x] Reduzir timeout do reader direto para 8 s.
-- [x] Remover o segundo preflight visual bloqueante do resolvedor direto.
-- [x] Transferir a prova de transporte real para o componente que apresenta `<img>`.
-- [x] Atualizar teste para garantir ausência do preflight e preservação dos validadores oficiais.
-- [x] Atualizar versão de distribuição `CATALOG_REV=75-catalog2`.
-
-## P0 — `75-photo-loader2`
-
-- [x] Trabalhar apenas quando `#page-market.page.active` está ativo.
-- [x] Priorizar até 6 cartões visíveis.
-- [x] Obter registos por `CDCMarketVisualCatalog.listCategory()`.
-- [x] Consultar primeiro `CDCMarketImageLibrary`.
-- [x] Resolver imediatamente SKU visível sem cache através de `CDCOfficialMarketImages.resolve()`.
-- [x] Persistir apenas resultado aceite pela biblioteca geral.
-- [x] Usar `loading='eager'` para fotografia visível resolvida.
-- [x] Emitir/escutar `cdc:market-photo-ready` para atualizar a UI sem esperar pelo próximo ciclo.
-- [x] Reduzir intervalo visual para 500 ms e limitar a 24 ciclos.
-- [x] Após 12 s, substituir spinner contínuo por **Fotografia a validar…**.
-- [x] Aplicar cooldown de 30 s por SKU.
-- [x] Se `<img>` falhar, remover referência da biblioteca com `forget()`.
-- [x] Libertar uma única vez `imagesToday` herdado do runtime antigo, marcado por `photoRuntimeRevision=75-photo-loader2`.
-- [x] Garantir que essa recuperação só toca na store `meta` da base Pingo Doce.
-- [x] Manter loader sem `fetch()` próprio e sem referências financeiras.
-- [x] Atualizar testes do loader2.
-
-## P0 — Distribuição e QA desta correção
-
-- [x] Atualizar Service Worker para `...-catalog2-pd-photo1-photo-loader2`.
-- [x] Atualizar `scripts/prepare-pages.cjs` para `75-catalog2` / `75-photo-loader2`.
-- [x] Atualizar testes do catálogo, loader e biblioteca Pingo Doce para o novo cache.
 - [x] Atualizar `PROJECT_STATE.md`.
 - [x] Atualizar `ARCHITECTURE.md`.
 - [x] Atualizar `DECISIONS.md`.
 - [x] Atualizar `TODO.md`.
 - [x] Atualizar `CHANGELOG.md`.
-- [x] Confirmar CI final verde da branch `fix/v75-market-photo-runtime` no SHA `f485fd4317ad0acbd2475f9ca86efed5b413bb76`.
-- [x] Comparar branch final com `main`: `ahead`, `behind 0` antes da integração.
-- [x] Integrar por fast-forward sem force.
-- [x] Confirmar CI de `main` no SHA integrado `f485fd4317ad0acbd2475f9ca86efed5b413bb76`.
-- [x] Confirmar GitHub Pages no mesmo SHA.
+
+## P0 — Integração/publicação `75-catalog3`
+
+- [ ] Reconfirmar CI da branch depois dos commits documentais.
+- [ ] Comparar branch com `main` e confirmar `behind 0` antes da integração.
+- [ ] Integrar por fast-forward sem force.
+- [ ] Confirmar CI completo de `main` no SHA integrado.
+- [ ] Confirmar GitHub Pages no SHA integrado.
+- [ ] Atualizar documentação com o SHA de publicação confirmado.
 
 ## P1 — Revalidação física iPhone/Safari/PWA
 
-- [ ] Confirmar novo cache `catalog2-pd-photo1-photo-loader2`.
-- [ ] Confirmar que **A carregar fotografia…** surge de imediato apenas enquanto necessário.
-- [ ] Confirmar que os primeiros cartões visíveis são os primeiros a resolver.
-- [ ] Confirmar que **Fotografia a validar…** substitui o spinner após janela máxima.
+- [ ] Confirmar novo cache `catalog3-pd-photo1-photo-loader2`.
+- [ ] Confirmar que fotografias já visíveis não desaparecem/reaparecem durante atualização de fundo.
+- [ ] Confirmar ausência de flicker ao permanecer no Mercado por pelo menos 30–60 s.
+- [ ] Trocar categorias e filtros repetidamente e confirmar estabilidade dos cartões.
+- [ ] Confirmar que os primeiros cartões continuam a receber prioridade de fotografia.
+- [ ] Confirmar que **Fotografia a validar…** substitui o spinner após a janela máxima quando necessário.
 - [ ] Confirmar que o contador Pingo Doce deixa `0` quando existem fotografias oficiais válidas.
-- [ ] Confirmar que fotografia em cache surge sem atraso perceptível.
+- [ ] Confirmar que imagem em cache surge sem atraso perceptível.
 - [ ] Confirmar que imagem quebrada é expurgada e não prende o cartão.
 - [ ] Confirmar que Pingo Doce nunca recebe fotografia de outro PID.
 - [ ] Confirmar que Continente continua correto.
@@ -92,14 +78,15 @@ Evidência física: 285 SKUs Pingo Doce indexados, 0 fotografias oficiais e cart
 
 ## P1 — Cobertura do catálogo
 
-- [ ] Medir SKUs Pingo Doce `ready/pending/missing` depois do runtime2.
+- [ ] Medir SKUs Pingo Doce `ready/pending/missing` depois do runtime atualizado.
 - [ ] Medir fotografias gerais e Pingo Doce por sessão.
-- [ ] Identificar categorias com baixo recall apenas depois de corrigido o pipeline de resolução.
+- [ ] Identificar categorias com baixo recall só depois de estabilizado o pipeline visual.
 - [ ] Revalidar `missing` com política de retry/backoff quando necessário.
 - [ ] Não declarar 100% do catálogo sem fonte exaustiva/autorizada.
 
 ## P2 — Consolidação
 
-- [ ] Após validação física, avaliar absorção de `75-catalog2`/`75-photo-loader2` numa camada de Mercado consolidada.
+- [ ] Após validação física, avaliar consolidação de `75-catalog2`/`75-catalog3`/`75-photo-loader2` numa camada de Mercado única e mais simples.
 - [ ] Remover código histórico apenas com prova de ausência de referências.
+- [ ] Avaliar serialização explícita de renderizações concorrentes se a validação física ou profiling mostrar chamadas sobrepostas.
 - [ ] Manter documentação sincronizada em cada alteração relevante.
