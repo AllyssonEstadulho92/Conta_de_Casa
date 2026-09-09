@@ -1,14 +1,14 @@
 'use strict';
 
-/* Conta de Casa — carregamento visual prioritário e limitado das fotografias do Mercado (75-photo-loader3). */
+/* Conta de Casa — carregamento visual estável e limitado das fotografias do Mercado (75-photo-loader4). */
 (function installMarketPhotoLoader(root){
-  const REVISION='75-photo-loader3';
-  const POLL_MS=1200;
-  const MAX_POLLS=10;
+  const REVISION='75-photo-loader4';
+  const POLL_MS=1400;
+  const MAX_POLLS=8;
   const MOBILE_PRIORITY_LIMIT=2;
   const DESKTOP_PRIORITY_LIMIT=4;
   const RETRY_AFTER_MS=30000;
-  const LOADER_SETTLE_MS=12000;
+  const ACTIVE_ANIMATION_MS=3200;
   const VIEWPORT_MARGIN_PX=160;
   const PINGO_DB_NAME='conta-de-casa-pingo-doce-photo-library';
   const PINGO_META_STORE='meta';
@@ -20,6 +20,7 @@
   const warming=new Map();
   const attemptedAt=new Map();
   const failedUntil=new Map();
+  const startedAtByKey=new Map();
 
   const clean=(value,max=140)=>String(value??'').replace(/\s+/g,' ').trim().slice(0,max);
 
@@ -29,14 +30,8 @@
     return match?{marketId:match[1].toLowerCase(),pid:match[2],key:`${match[1].toLowerCase()}|${match[2]}`} : null;
   }
 
-  function marketIsActive(){
-    return Boolean(document.querySelector('#page-market.page.active'));
-  }
-
-  function compactViewport(){
-    return Number(root.innerWidth||document.documentElement?.clientWidth||0)<=820;
-  }
-
+  function marketIsActive(){return Boolean(document.querySelector('#page-market.page.active'));}
+  function compactViewport(){return Number(root.innerWidth||document.documentElement?.clientWidth||0)<=820;}
   function priorityLimit(){return compactViewport()?MOBILE_PRIORITY_LIMIT:DESKTOP_PRIORITY_LIMIT;}
 
   function viewportCards(limit=priorityLimit()){
@@ -52,10 +47,17 @@
     return (visible.length?visible:cards).slice(0,limit);
   }
 
-  function loaderAge(card){
-    const started=Number(card?.dataset?.photoLoaderStartedAt)||0;
-    return started?Date.now()-started:0;
+  function loadingStartedAt(id,card){
+    const remembered=Number(startedAtByKey.get(id.key))||0;
+    if(remembered){card.dataset.photoLoaderStartedAt=String(remembered);return remembered;}
+    const existing=Number(card.dataset.photoLoaderStartedAt)||0;
+    const started=existing||Date.now();
+    startedAtByKey.set(id.key,started);
+    card.dataset.photoLoaderStartedAt=String(started);
+    return started;
   }
+
+  function loaderAge(id,card){return Math.max(0,Date.now()-loadingStartedAt(id,card));}
 
   function installLoaderNode(media){
     let loader=media.querySelector('.market-photo-loader');
@@ -68,10 +70,11 @@
     return loader;
   }
 
-  function setWaitingUi(card,label='Fotografia a validar…'){
+  function setWaitingUi(card,label='Fotografia a validar em segundo plano…'){
     const media=card?.querySelector?.('.market-visual-product-media');if(!media)return;
     const loader=installLoaderNode(media);
-    card.classList.add('is-photo-loading','is-photo-waiting');
+    card.classList.remove('is-photo-loading');
+    card.classList.add('is-photo-waiting');
     const spinner=loader.querySelector('.market-photo-loader-spinner');
     const text=loader.querySelector('.market-photo-loader-label');
     if(spinner)spinner.hidden=true;
@@ -83,6 +86,7 @@
     const media=card.querySelector('.market-visual-product-media');if(!media)return;
     if(media.querySelector('img')){
       card.classList.remove('is-photo-loading','is-photo-waiting');
+      startedAtByKey.delete(id.key);
       delete card.dataset.photoLoaderStartedAt;
       return;
     }
@@ -91,23 +95,22 @@
       setWaitingUi(card,'Fotografia temporariamente indisponível');
       return;
     }
-    if(!card.dataset.photoLoaderStartedAt)card.dataset.photoLoaderStartedAt=String(Date.now());
-    card.classList.add('is-photo-loading');
-    const loader=installLoaderNode(media);
-    if(loaderAge(card)>=LOADER_SETTLE_MS){
-      card.classList.add('is-photo-waiting');
-      const spinner=loader.querySelector('.market-photo-loader-spinner');
-      const label=loader.querySelector('.market-photo-loader-label');
-      if(spinner)spinner.hidden=true;
-      if(label)label.textContent='Fotografia a validar…';
+    const age=loaderAge(id,card);
+    installLoaderNode(media);
+    if(age>=ACTIVE_ANIMATION_MS){
+      setWaitingUi(card,'Fotografia a validar em segundo plano…');
+      return;
     }
+    card.classList.remove('is-photo-waiting');
+    card.classList.add('is-photo-loading');
   }
 
   function quarantineFailure(card,id,media){
     const until=Date.now()+RETRY_AFTER_MS;
     failedUntil.set(id.key,until);
+    startedAtByKey.set(id.key,Date.now()-ACTIVE_ANIMATION_MS);
     card.dataset.photoLoaderFailureUntil=String(until);
-    card.dataset.photoLoaderStartedAt=String(Date.now()-LOADER_SETTLE_MS);
+    card.dataset.photoLoaderStartedAt=String(startedAtByKey.get(id.key));
     card.classList.remove('is-photo-loading');
     card.classList.add('is-photo-waiting');
     void root.CDCMarketImageLibrary?.forget?.(id);
@@ -125,6 +128,7 @@
     const media=card.querySelector('.market-visual-product-media');if(!media)return false;
     if(media.querySelector('img')){
       card.classList.remove('is-photo-loading','is-photo-waiting');
+      startedAtByKey.delete(id.key);
       delete card.dataset.photoLoaderStartedAt;
       return true;
     }
@@ -140,9 +144,10 @@
     image.alt='';image.loading='eager';image.decoding='async';image.referrerPolicy='no-referrer';
     image.addEventListener('load',()=>{
       failedUntil.delete(id.key);
+      startedAtByKey.delete(id.key);
       delete card.dataset.photoLoaderFailureUntil;
-      card.classList.remove('is-photo-loading','is-photo-waiting');
       delete card.dataset.photoLoaderStartedAt;
+      card.classList.remove('is-photo-loading','is-photo-waiting');
     },{once:true});
     image.addEventListener('error',()=>quarantineFailure(card,id,media),{once:true});
     image.src=record.imageUrl;
@@ -184,9 +189,7 @@
     if(!official?.resolve||!library?.remember)return null;
     attemptedAt.set(id.key,Date.now());
     const promise=(async()=>{
-      const result=await official.resolve({
-        marketId:id.marketId,pid:id.pid,name:record.name,pack:record.pack,sourceUrl:record.sourceUrl
-      }).catch(()=>null);
+      const result=await official.resolve({marketId:id.marketId,pid:id.pid,name:record.name,pack:record.pack,sourceUrl:record.sourceUrl}).catch(()=>null);
       if(!result?.imageUrl)return null;
       const stored=await library.remember({...result,marketId:id.marketId,pid:id.pid,name:record.name,pack:record.pack},record).catch(()=>null);
       if(stored&&typeof root.CustomEvent==='function'&&root.dispatchEvent){
@@ -206,7 +209,8 @@
     for(const card of cards){
       const id=cardIdentity(card);if(!id)continue;
       const record=records.get(id.key);if(!record)continue;
-      await warmRecord(record);
+      const stored=await warmRecord(record);
+      if(!stored&&loaderAge(id,card)>=ACTIVE_ANIMATION_MS)setWaitingUi(card,'Fotografia a validar em segundo plano…');
       await hydrateCard(card);
     }
   }
@@ -273,18 +277,14 @@
 
   function scheduleScan(){
     if(scanFrame)return;
-    if(typeof root.requestAnimationFrame==='function'){
-      scanFrame=root.requestAnimationFrame(scan)||1;
-    }else{
-      scanFrame=setTimeout(scan,0)||1;
-    }
+    if(typeof root.requestAnimationFrame==='function')scanFrame=root.requestAnimationFrame(scan)||1;
+    else scanFrame=setTimeout(scan,0)||1;
   }
 
   function mutationTouchesMarket(mutation){
     if(mutation.type==='attributes')return mutation.target?.id==='page-market';
     if(mutation.type!=='childList'||!mutation.addedNodes.length)return false;
-    const target=mutation.target;
-    if(target?.id==='marketVisualCatalogGrid'||target?.closest?.('#marketVisualCatalogGrid'))return true;
+    if(mutation.target?.id==='marketVisualCatalogGrid')return true;
     return [...mutation.addedNodes].some(node=>node?.nodeType===1&&(node.matches?.('[data-visual-catalog-product],#marketVisualCatalog')||node.querySelector?.('[data-visual-catalog-product]')));
   }
 
@@ -292,9 +292,7 @@
     scan();
     const marketPage=document.querySelector('#page-market');
     if(marketPage&&!observer){
-      observer=new MutationObserver(mutations=>{
-        if(mutations.some(mutationTouchesMarket))scheduleScan();
-      });
+      observer=new MutationObserver(mutations=>{if(mutations.some(mutationTouchesMarket))scheduleScan();});
       observer.observe(marketPage,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
     }
     document.addEventListener('click',event=>{
