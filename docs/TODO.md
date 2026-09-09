@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 8 de setembro de 2026
+Atualizado: 9 de setembro de 2026
 
 ## P0 — v75 publicada e estabilidade transversal
 
@@ -17,11 +17,30 @@ Atualizado: 8 de setembro de 2026
 - [x] Sincronizar `theme-color` com tema e cabeçalho visível.
 - [x] Atualizar asset versioning e cache para `-stability1`.
 - [x] Alinhar validação CI e Pages para v74/v75.
-- [x] Atualizar documentação técnica obrigatória.
 
-## P1 — Validação física de `75-header2` + `75-stability1`
+## P0 — `75-layout1`: geometria e proporção entre páginas
 
-- [ ] iPhone/Safari/PWA: confirmar atualização do Service Worker e carregamento da revisão nova.
+- [x] Criar `v75-layout-polish.css` como camada CSS-only, sem acesso a estado financeiro.
+- [x] Uniformizar largura útil, ritmo vertical, padding e proporção dos painéis.
+- [x] Ajustar Início para desktop largo e web compacto sem esmagar cartões/KPIs.
+- [x] Ajustar Despesas e Mercado: pesquisa, ações, filtros e resumos por largura disponível.
+- [x] Preservar sete colunas do Calendário com densidade adaptativa em mobile.
+- [x] Ajustar Planeamento, Relatórios, Metas, Segurança, Diagnóstico e Definições aos breakpoints adequados.
+- [x] Fazer formulários e button rows refluírem para uma coluna antes de ficarem apertados.
+- [x] Corrigir categorias do Planeamento em ecrãs até 430 px.
+- [x] Adicionar `LAYOUT_REV = 75-layout1` ao bundle Pages.
+- [x] Atualizar Service Worker para cache `-stability1-layout1`.
+- [x] Adicionar `tests/v75-layout-polish.test.cjs`.
+- [x] Incluir o teste de layout no CI e na verificação pré-deploy Pages.
+- [x] Atualizar `release-manifest.json` e documentação técnica obrigatória.
+- [ ] Confirmar CI completo verde na branch `fix/v75-layout-proportions`.
+- [ ] Integrar a revisão validada em `main`.
+- [ ] Confirmar CI verde no SHA integrado em `main`.
+- [ ] Confirmar GitHub Pages concluído sobre o SHA integrado.
+
+## P1 — Validação física de `75-header2` + `75-stability1` + `75-layout1`
+
+- [ ] iPhone/Safari/PWA: confirmar atualização do Service Worker e carregamento da revisão `75-layout1`.
 - [ ] iPhone: safe area superior e laterais sem faixa duplicada ou salto vertical.
 - [ ] iPhone: hambúrguer, título e sino alinhados numa única linha.
 - [ ] iPhone: título longo com ellipsis sem colisão com o sino.
@@ -29,10 +48,15 @@ Atualizado: 8 de setembro de 2026
 - [ ] iPhone: hambúrguer → X → hambúrguer sem deslocamento.
 - [ ] iPhone: focar inputs/selects sem zoom automático do Safari.
 - [ ] iPhone/Android: navegação inferior com cinco destinos sem corte de labels.
-- [ ] Android/tablet: largura, orientação e alinhamento do cabeçalho/conteúdo.
-- [ ] Tema escuro: contraste, `theme-color` e consistência geral.
-- [ ] Desktop: confirmar painéis, tabelas e sidebar sem regressão.
-- [ ] 320/375/390/430 px: confirmar ausência de overflow horizontal.
+- [ ] iPhone/Android: comparar Início, Despesas, Mercado, Planeamento e Mais para confirmar margens e largura iguais.
+- [ ] 320/350/375/390/430 px: confirmar Calendário sem overflow e células proporcionais.
+- [ ] 320/375/390/430 px: confirmar categorias do Planeamento sem texto/valor sobreposto.
+- [ ] Android/tablet: confirmar mudança natural entre uma e duas colunas sem cartões espremidos.
+- [ ] Desktop 821–1120 px: confirmar grelhas reduzidas e filtros sem compressão.
+- [ ] Desktop >=1121 px: confirmar KPIs, Relatórios, Metas, Segurança e Definições proporcionais.
+- [ ] Tema escuro: contraste, `theme-color`, painéis, filtros e consistência geral.
+- [ ] Desktop: confirmar tabelas, sidebar e diálogos sem regressão.
+- [ ] Confirmar ausência de overflow horizontal em todas as páginas principais.
 
 ## P1 — Mercado
 
@@ -46,16 +70,16 @@ Atualizado: 8 de setembro de 2026
 
 ## P1 — QA e publicação
 
-- [x] Adicionar `tests/v75-stability.test.cjs`.
-- [x] Sintaxe CI: incluir `v74-experience.js`, `v75-architecture.js` e `v75-stability.js`.
-- [x] Verificação Pages: incluir `v75-architecture.test.cjs` e `v75-stability.test.cjs`.
-- [x] Confirmar CI completo verde sobre a revisão integrada em `main`.
-- [x] Confirmar deploy Pages concluído com sucesso sobre a revisão integrada em `main`.
+- [x] `tests/v75-stability.test.cjs` mantém cobertura da camada transversal.
+- [x] `tests/v75-layout-polish.test.cjs` cobre distribuição, ordem de CSS, cache e proibição de acesso ao estado financeiro.
+- [x] Sintaxe CI cobre `v74-experience.js`, `v75-architecture.js` e `v75-stability.js`.
+- [x] Verificação Pages repete arquitetura, estabilidade e layout antes do deploy.
+- [ ] Confirmar execução completa da revisão `75-layout1` sem regressões nos testes financeiros, segurança, responsividade, navegação e sincronização.
 
 ## P2 — Consolidação posterior
 
 - [ ] Rever CSS histórico restante numa release própria, sem misturar regras financeiras.
-- [ ] Depois da validação real, absorver `v75-stability.css` no sistema visual consolidado de uma release futura, em vez de acumular camadas indefinidamente.
+- [ ] Depois da validação real, absorver `v75-stability.css` e `v75-layout-polish.css` no sistema visual consolidado de uma release futura, evitando acumulação indefinida de camadas.
 - [ ] Remover resíduos apenas após confirmar que não existem referências funcionais.
 - [ ] Rever pipeline externo do Mercado separadamente.
 - [ ] Manter `PROJECT_STATE.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md` e `CHANGELOG.md` sincronizados em cada alteração relevante.
