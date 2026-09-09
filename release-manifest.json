@@ -7,8 +7,10 @@
     {
       "version": "v75",
       "date": "9 de setembro de 2026",
-      "title": "Reestruturação da interface, estabilidade e alinhamento proporcional",
+      "title": "Reestruturação da interface, estabilidade e destaques do Mercado",
       "items": [
+        "A revisão 75-featured1 aproxima Produtos em destaque do protótipo aprovado: no telemóvel, os cartões deixam a grelha de três colunas e passam para um carrossel horizontal largo, com imagem estável, nome em duas linhas, preço isolado, categoria e navegação por swipe/indicadores.",
+        "Quando uma fotografia não existe ou falha, 75-featured1 usa um fallback vetorial local por categoria em vez de mostrar um cartão vazio ou um ícone de imagem quebrada; quando existe GTIN válido, pode tentar recuperar uma fotografia de referência no Open Food Facts apenas por esse código, sem alterar preço nem persistir a imagem pela camada.",
         "A revisão 75-drawer2 alinha o menu móvel com a identidade visual da própria aplicação: a página permanece clara e visível ao fundo, enquanto a navegação abre pelo lado direito num gradiente verde-petróleo/teal igual à família cromática do cabeçalho.",
         "O drawer 75-drawer2 mantém o mesmo botão hambúrguer/X, os mesmos destinos, handlers, foco, Escape, swipe pela margem direita, safe areas e alvos tácteis; a alteração é exclusivamente visual e usa menta apenas como acento de foco/seleção.",
         "A revisão 75-layout1 uniformiza proporções, margens, grelhas, alinhamentos e ritmo vertical entre as páginas sem alterar o núcleo financeiro, persistência, cofre ou sincronização.",
