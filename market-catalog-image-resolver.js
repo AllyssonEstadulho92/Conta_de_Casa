@@ -1,0 +1,105 @@
+'use strict';
+
+/* Conta de Casa — resolvedor direto e limitado de fotografias oficiais (75-catalog1). */
+(function installCatalogImageResolver(root){
+  const REVISION='75-catalog1';
+  const JINA_READER_ORIGIN='https://r.jina.ai';
+  const REQUEST_TIMEOUT_MS=12000;
+  const IMAGE_TIMEOUT_MS=10000;
+  const MAX_CONCURRENT=2;
+  const queue=[];
+  const inFlight=new Map();
+  let active=0;
+
+  const clean=(value,max=180)=>String(value??'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,max);
+
+  function identity(target={}){
+    const marketId=clean(target.marketId,24).toLowerCase();
+    const pid=String(target.pid??'').replace(/\D/g,'').slice(0,32);
+    if(!pid||!['continente','pingo-doce'].includes(marketId))return null;
+    return {marketId,pid,key:`${marketId}|${pid}`};
+  }
+
+  function extractUrls(value){
+    const source=String(value||'').replace(/\\\//g,'/').replace(/&amp;/g,'&');
+    const found=source.match(/https?:\/\/[^\s"'<>\\)]+/g)||[];
+    return [...new Set(found.map(item=>item.replace(/[},\]]+$/g,'')))].slice(0,260);
+  }
+
+  function selectOfficialImage(body,target){
+    const official=root.CDCOfficialMarketImages;
+    if(!official?.safeOfficialImageUrl)return '';
+    const candidates=[];
+    for(const raw of extractUrls(body)){
+      const safe=official.safeOfficialImageUrl(raw,target.marketId,target.pid);
+      if(!safe)continue;
+      let priority=0;
+      if(target.marketId==='continente'){
+        if(/-frente\./i.test(safe))priority+=8;
+        if(/[?&]sw=2000\b/i.test(safe))priority+=3;
+        if(/\/dw\/image\/v2\//i.test(safe))priority+=2;
+      }else{
+        if(/\/images\/large\//i.test(safe))priority+=8;
+        if(/\/images\/medium\//i.test(safe))priority+=3;
+      }
+      candidates.push({url:safe,priority});
+    }
+    candidates.sort((a,b)=>b.priority-a.priority||a.url.length-b.url.length);
+    return candidates[0]?.url||'';
+  }
+
+  async function timedFetch(url){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),REQUEST_TIMEOUT_MS);
+    try{
+      return await fetch(url,{method:'GET',headers:{Accept:'application/json'},signal:controller.signal,credentials:'omit',referrerPolicy:'no-referrer',cache:'no-store'});
+    }finally{clearTimeout(timer);}
+  }
+
+  function canLoadImage(url){
+    if(typeof Image!=='function')return Promise.resolve(true);
+    return new Promise(resolve=>{
+      const image=new Image();
+      let done=false;
+      const finish=value=>{if(done)return;done=true;clearTimeout(timer);image.onload=null;image.onerror=null;resolve(value);};
+      const timer=setTimeout(()=>finish(false),IMAGE_TIMEOUT_MS);
+      image.referrerPolicy='no-referrer';image.decoding='async';
+      image.onload=()=>finish(true);image.onerror=()=>finish(false);image.src=url;
+    });
+  }
+
+  function queued(task){return new Promise((resolve,reject)=>{queue.push({task,resolve,reject});runQueue();});}
+  function runQueue(){
+    while(active<MAX_CONCURRENT&&queue.length){
+      const entry=queue.shift();active+=1;
+      Promise.resolve().then(entry.task).then(entry.resolve,entry.reject).finally(()=>{active-=1;runQueue();});
+    }
+  }
+
+  async function resolveUnqueued(target){
+    const id=identity(target);if(!id)return null;
+    const official=root.CDCOfficialMarketImages;
+    if(!official?.safeProductUrl||!official?.safeOfficialImageUrl)return null;
+    const sourceUrl=official.safeProductUrl(target.sourceUrl,id.marketId,id.pid);
+    if(!sourceUrl)return null;
+    const response=await timedFetch(`${JINA_READER_ORIGIN}/${sourceUrl}`);
+    if(!response.ok)throw new Error(`catalog-image-reader-${response.status}`);
+    const imageUrl=selectOfficialImage(await response.text(),id);
+    if(!imageUrl||!(await canLoadImage(imageUrl)))return null;
+    return {
+      imageUrl,sourceUrl,marketId:id.marketId,pid:id.pid,
+      name:clean(target.name,140),pack:clean(target.pack,100),
+      source:`${id.marketId==='continente'?'Continente':'Pingo Doce'} · imagem oficial`
+    };
+  }
+
+  function resolve(target={}){
+    const id=identity(target);if(!id)return Promise.resolve(null);
+    if(inFlight.has(id.key))return inFlight.get(id.key);
+    const promise=queued(()=>resolveUnqueued(target)).catch(()=>null).finally(()=>inFlight.delete(id.key));
+    inFlight.set(id.key,promise);
+    return promise;
+  }
+
+  root.CDCMarketCatalogImageResolver=Object.freeze({revision:REVISION,resolve,identity,selectOfficialImage});
+})(globalThis);
