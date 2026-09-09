@@ -43,7 +43,6 @@
 
   const categoryById=id=>CATEGORIES.find(category=>category.id===id)||CATEGORIES[0];
   const clean=(value,max=180)=>String(value??'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,max);
-  const norm=value=>clean(value,260).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-PT');
   const memoryProducts=new Map();
   const memoryMeta=new Map();
   const imageQueue=[];
@@ -60,6 +59,7 @@
   let backgroundTimer=0;
   let imageTimer=0;
   let mounting=false;
+  let queryInFlight=false;
 
   function identity(value={}){
     const marketId=clean(value.marketId,24).toLowerCase();
@@ -310,18 +310,21 @@
   }
 
   async function runSeed(entry,{interactive=false}={}){
-    if(!entry||sessionQueries>=SESSION_QUERY_BUDGET)return [];
+    if(!entry||queryInFlight||sessionQueries>=SESSION_QUERY_BUDGET)return [];
     const state=await schedulerState();
     if(Number(state.queriesToday)>=DAILY_QUERY_BUDGET)return [];
     if(!interactive&&Date.now()-Number(state.lastQueryAt||0)<BACKGROUND_QUERY_INTERVAL_MS)return [];
-    const records=await searchSeed(entry.term,entry.categoryId);
-    sessionQueries+=1;
-    state.queriesToday=Number(state.queriesToday||0)+1;
-    state.lastQueryAt=Date.now();
-    await putMeta(state);
-    const stored=await ingest(records);
-    enqueueImages(stored.slice(0,6));
-    return stored;
+    queryInFlight=true;
+    try{
+      const records=await searchSeed(entry.term,entry.categoryId);
+      sessionQueries+=1;
+      state.queriesToday=Number(state.queriesToday||0)+1;
+      state.lastQueryAt=Date.now();
+      await putMeta(state);
+      const stored=await ingest(records);
+      enqueueImages(stored.slice(0,6));
+      return stored;
+    }finally{queryInFlight=false;}
   }
 
   async function refreshCategory(categoryId=activeCategory,{seeds=2}={}){
@@ -374,7 +377,8 @@
 
   async function backgroundStep(){
     backgroundTimer=0;
-    if(!backgroundAllowed()||sessionQueries>=SESSION_QUERY_BUDGET)return;
+    if(sessionQueries>=SESSION_QUERY_BUDGET)return;
+    if(!backgroundAllowed()){scheduleBackground(30000);return;}
     const state=await schedulerState();
     if(Number(state.queriesToday)>=DAILY_QUERY_BUDGET)return;
     const cursor=Math.abs(Number(state.cursor)||0)%seedPlan.length;
@@ -515,10 +519,10 @@
 
   async function mount(){
     if(typeof document==='undefined'||mounting)return;
-    const browser=document.querySelector('.market-browser');if(!browser)return;
+    const browser=document.querySelector('.market-browser');if(!browser||browser.querySelector('#marketVisualCatalog'))return;
     mounting=true;
     try{
-      if(!browser.querySelector('#marketVisualCatalog'))buildSection(browser);
+      buildSection(browser);
       updateSelection();
       await renderProducts();
       await renderStats();
@@ -543,7 +547,8 @@
     void mount();
     if(document.body&&!mutationObserver){
       mutationObserver=new MutationObserver(mutations=>{
-        if(mutations.some(mutation=>mutation.type==='childList'&&mutation.addedNodes.length))void mount();
+        if(document.querySelector('.market-browser #marketVisualCatalog'))return;
+        if(mutations.some(mutation=>mutation.type==='childList'&&mutation.addedNodes.length)&&document.querySelector('.market-browser'))void mount();
       });
       mutationObserver.observe(document.body,{subtree:true,childList:true});
     }
