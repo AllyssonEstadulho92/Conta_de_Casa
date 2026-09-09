@@ -1,0 +1,352 @@
+/* Conta de Casa v75 — revisão 75-layout1.
+   Camada final de geometria, proporção e alinhamento entre páginas.
+   Não altera dados, cálculos, persistência, cifragem, QR, Mercado ou sincronização. */
+
+:root{
+  --v75-content-max:1280px;
+  --v75-page-pad-desktop:clamp(22px,2.8vw,42px);
+  --v75-section-gap:16px;
+  --v75-panel-pad:clamp(15px,1.6vw,20px);
+  --v75-mobile-gap:10px;
+  --v75-mobile-panel-pad:13px;
+}
+
+/* Ritmo estrutural comum: cada página ocupa a mesma coluna útil e segue a mesma grelha vertical. */
+html.cdc-v75 .main>.page{
+  width:min(100%,var(--v75-content-max))!important;
+  margin-inline:auto!important;
+}
+html.cdc-v75 .page.active{
+  display:grid!important;
+  align-content:start!important;
+  gap:var(--v75-section-gap)!important;
+}
+html.cdc-v75 .page.active>:is(.section-tabs,.section-toolbar,.bill-command-bar,.bill-filter-grid,.bill-summary-grid,.market-command-bar,.market-filter-grid,.market-summary-grid,.market-results-head,.two-col,.dashboard-grid,.kpi-grid,.goal-grid,.panel,.cdc-market-home,.cdc-planning-overview,.cdc-report-summary,.cdc-more-menu,.cdc-expense-feed){
+  margin-top:0!important;
+  margin-bottom:0!important;
+}
+html.cdc-v75 :is(.panel,.kpi,.goal-card,.detail-item,.security-item,.bill-summary-item,.market-summary-item,.market-mobile-card,.bill-mobile-card){
+  min-width:0!important;
+}
+
+/* Títulos, cartões e conteúdo partilham proporções e espaçamento coerentes. */
+html.cdc-v75 .panel{
+  padding:var(--v75-panel-pad)!important;
+  border-radius:16px!important;
+}
+html.cdc-v75 .panel-head{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  margin-bottom:14px!important;
+}
+html.cdc-v75 .panel-head>div{min-width:0!important;flex:1 1 auto!important}
+html.cdc-v75 .panel-head h2,
+html.cdc-v75 .section-toolbar h2{
+  margin:0!important;
+  font-size:1rem!important;
+  line-height:1.22!important;
+  letter-spacing:-.012em!important;
+}
+html.cdc-v75 .panel-head p,
+html.cdc-v75 .section-toolbar p{
+  margin:4px 0 0!important;
+  max-width:70ch!important;
+  line-height:1.45!important;
+}
+html.cdc-v75 .panel>h2{margin-bottom:8px!important}
+html.cdc-v75 .panel>p{line-height:1.5!important}
+html.cdc-v75 .section-gap{margin-top:16px!important}
+html.cdc-v75 hr{margin:18px 0!important;border-color:var(--v75-border)!important}
+
+/* Controlos: mesma altura, distribuição previsível e botões sem apertos laterais. */
+html.cdc-v75 .section-toolbar,
+html.cdc-v75 .button-row{
+  min-width:0!important;
+}
+html.cdc-v75 .section-toolbar{
+  gap:12px!important;
+  align-items:center!important;
+}
+html.cdc-v75 .button-row{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex-wrap:wrap!important;
+}
+html.cdc-v75 .button-row>.btn,
+html.cdc-v75 .button-row>label.btn{min-width:132px!important}
+html.cdc-v75 .form-grid{gap:10px!important}
+html.cdc-v75 .form-grid label{margin:0!important}
+html.cdc-v75 .form-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))!important;column-gap:12px!important}
+html.cdc-v75 :is(input,select,textarea){max-width:100%!important}
+
+/* Tabs: mesma largura visual e sem saltos entre páginas relacionadas. */
+html.cdc-v75 .section-tabs{
+  width:min(100%,460px)!important;
+  min-width:0!important;
+  margin-inline:0!important;
+}
+html.cdc-v75 .section-tabs .section-tab{min-width:0!important}
+
+/* Listas e estados compactos mantêm colunas alinhadas. */
+html.cdc-v75 .list-row{
+  min-height:56px!important;
+  gap:14px!important;
+}
+html.cdc-v75 .list-main{flex:1 1 auto!important;min-width:0!important}
+html.cdc-v75 .list-side{flex:0 1 auto!important;max-width:44%!important}
+html.cdc-v75 .detail-grid,
+html.cdc-v75 .security-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+html.cdc-v75 .detail-item,
+html.cdc-v75 .security-item{height:100%!important}
+
+@media(min-width:821px){
+  html.cdc-v75 .main>.page{
+    padding-inline:var(--v75-page-pad-desktop)!important;
+    padding-top:22px!important;
+    padding-bottom:38px!important;
+  }
+
+  /* Início: painel principal com 2/3 e apoio com 1/3, sem cartões esmagados. */
+  html.cdc-v75 #page-dashboard .dashboard-grid{
+    grid-template-columns:minmax(0,1.22fr) minmax(240px,.89fr) minmax(240px,.89fr)!important;
+    gap:16px!important;
+  }
+  html.cdc-v75 #page-dashboard .dashboard-grid>.panel{height:100%!important}
+  html.cdc-v75 #page-dashboard .kpi-grid{gap:12px!important}
+
+  /* Faturas e Mercado: pesquisa ocupa a largura restante; ação mantém largura natural. */
+  html.cdc-v75 .bill-command-bar,
+  html.cdc-v75 .market-command-bar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:10px!important;
+  }
+  html.cdc-v75 .bill-command-bar .btn,
+  html.cdc-v75 .market-command-bar .btn{min-width:150px!important}
+  html.cdc-v75 .bill-filter-grid{
+    display:grid!important;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important;
+    align-items:end!important;
+    gap:10px!important;
+  }
+  html.cdc-v75 .market-filter-grid{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(160px,1fr)) auto!important;
+    align-items:end!important;
+    gap:10px!important;
+  }
+  html.cdc-v75 :is(.bill-filter-grid,.market-filter-grid) label{margin:0!important}
+  html.cdc-v75 :is(.bill-filter-clear,.market-filter-clear){align-self:end!important;white-space:nowrap!important}
+  html.cdc-v75 :is(.bill-summary-grid,.market-summary-grid){
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr))!important;
+    gap:10px!important;
+  }
+
+  /* Calendário: células proporcionais e agenda separada visualmente. */
+  html.cdc-v75 #page-calendar>.panel{padding:18px!important}
+  html.cdc-v75 .calendar-grid{gap:8px!important;margin-bottom:14px!important}
+  html.cdc-v75 .calendar-day{min-height:86px!important;padding:9px!important}
+
+  /* Planeamento, Relatórios, Segurança e Diagnóstico usam uma grelha 56/44 equilibrada. */
+  html.cdc-v75 #page-planning>.two-col,
+  html.cdc-v75 #page-reports>.two-col,
+  html.cdc-v75 #page-diagnostics>.two-col{
+    grid-template-columns:minmax(0,1.12fr) minmax(300px,.88fr)!important;
+    gap:16px!important;
+  }
+  html.cdc-v75 #page-security>.two-col{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:16px!important;
+  }
+  html.cdc-v75 #page-security #syncPanel{grid-column:1/-1!important}
+  html.cdc-v75 #page-security .panel.span-2{grid-column:1/-1!important}
+
+  /* Relatórios e objetivos mantêm densidade estável em ecrãs grandes. */
+  html.cdc-v75 #page-reports #reportCards{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+  html.cdc-v75 .goal-grid{
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr))!important;
+    gap:12px!important;
+  }
+  html.cdc-v75 .goal-card{height:100%!important;padding:16px!important;border-radius:16px!important}
+
+  /* Definições ficam centradas em vez de encostadas a um lado. */
+  html.cdc-v75 #page-settings>.panel.narrow{width:min(100%,720px)!important;margin-inline:auto!important}
+
+  /* Sincronização: detalhes e formulários permanecem legíveis sem linhas muito longas. */
+  html.cdc-v75 #syncPanel>.form-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  html.cdc-v75 #syncPanel>p.muted{max-width:78ch!important}
+
+  /* Diálogos desktop mantêm largura útil sem ocuparem o ecrã inteiro. */
+  html.cdc-v75 #quickDialog .dialog-shell.small{width:min(440px,100%)!important}
+  html.cdc-v75 #quickDialog .quick-grid{gap:10px!important}
+  html.cdc-v75 #quickDialog .quick-grid button{min-height:96px!important;padding:18px 12px!important}
+}
+
+/* Tablet/web compacto: reduz número de colunas antes de comprometer leitura. */
+@media(min-width:821px) and (max-width:1120px){
+  html.cdc-v75 #page-dashboard .dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  html.cdc-v75 #page-dashboard .dashboard-grid>.panel.span-2{grid-column:1/-1!important}
+  html.cdc-v75 #page-dashboard .kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  html.cdc-v75 #page-reports #reportCards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  html.cdc-v75 .market-filter-grid{grid-template-columns:repeat(2,minmax(160px,1fr))!important}
+  html.cdc-v75 .market-filter-clear{width:100%!important}
+}
+
+@media(min-width:1121px){
+  html.cdc-v75 #page-dashboard .kpi-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+}
+
+@media(max-width:820px){
+  :root{
+    --v75-section-gap:var(--v75-mobile-gap);
+  }
+
+  html.cdc-v75 .page.active{
+    gap:var(--v75-mobile-gap)!important;
+  }
+  html.cdc-v75 .page.active>:is(.section-tabs,.section-toolbar,.bill-command-bar,.market-command-bar,.market-results-head,.panel,.two-col,.goal-grid,.cdc-market-home,.cdc-planning-overview,.cdc-more-menu,.cdc-expense-feed){
+    width:100%!important;
+    max-width:100%!important;
+  }
+
+  /* Cartões mobile: padding e raio únicos para reduzir desalinhamentos entre páginas. */
+  html.cdc-v75 .panel{
+    padding:var(--v75-mobile-panel-pad)!important;
+    border-radius:14px!important;
+  }
+  html.cdc-v75 .panel-head{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:start!important;
+    gap:8px!important;
+    margin-bottom:10px!important;
+  }
+  html.cdc-v75 .panel-head h2,
+  html.cdc-v75 .section-toolbar h2{font-size:.86rem!important}
+  html.cdc-v75 .panel-head p,
+  html.cdc-v75 .section-toolbar p{font-size:.66rem!important;line-height:1.4!important}
+  html.cdc-v75 .panel-head>.btn,
+  html.cdc-v75 .panel-head>.link-btn{align-self:start!important}
+
+  /* Ferramentas e botões empilham de forma previsível no telefone. */
+  html.cdc-v75 .section-toolbar{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    align-items:stretch!important;
+    gap:8px!important;
+  }
+  html.cdc-v75 .section-toolbar>.btn{width:100%!important}
+  html.cdc-v75 .button-row{
+    display:grid!important;
+    grid-template-columns:repeat(auto-fit,minmax(136px,1fr))!important;
+    align-items:stretch!important;
+    gap:8px!important;
+  }
+  html.cdc-v75 .button-row>.btn,
+  html.cdc-v75 .button-row>label.btn{width:100%!important;min-width:0!important}
+  html.cdc-v75 .form-grid.two{grid-template-columns:1fr!important}
+  html.cdc-v75 .form-grid.two>*{grid-column:1!important}
+  html.cdc-v75 .two-col{grid-template-columns:1fr!important;gap:var(--v75-mobile-gap)!important}
+
+  /* Tabs relacionadas ocupam exatamente a largura disponível. */
+  html.cdc-v75 .section-tabs{width:100%!important;max-width:none!important}
+
+  /* Calendário mantém 7 dias, mas reduz densidade em vez de criar scroll lateral. */
+  html.cdc-v75 .calendar-grid{
+    grid-template-columns:repeat(7,minmax(0,1fr))!important;
+    gap:4px!important;
+    margin-bottom:10px!important;
+  }
+  html.cdc-v75 .calendar-head{padding:3px 1px!important;font-size:.58rem!important}
+  html.cdc-v75 .calendar-day{
+    min-height:58px!important;
+    padding:5px!important;
+    border-radius:9px!important;
+    font-size:.72rem!important;
+  }
+  html.cdc-v75 .calendar-day small{margin-top:5px!important;font-size:.52rem!important;line-height:1.1!important}
+
+  /* Objetivos, segurança, diagnóstico e definições ficam sempre numa única coluna útil. */
+  html.cdc-v75 .goal-grid{grid-template-columns:1fr!important;gap:8px!important}
+  html.cdc-v75 .goal-card{padding:13px!important;border-radius:14px!important}
+  html.cdc-v75 #page-security>.two-col,
+  html.cdc-v75 #page-diagnostics>.two-col{grid-template-columns:1fr!important}
+  html.cdc-v75 #syncPanel{padding:var(--v75-mobile-panel-pad)!important}
+  html.cdc-v75 #syncPanel .form-grid.two{grid-template-columns:1fr!important}
+  html.cdc-v75 #syncPanel .form-grid.two>*{grid-column:1!important}
+
+  /* Resumos e grelhas de detalhe preservam proporção sem textos espremidos. */
+  html.cdc-v75 :is(.detail-grid,.security-grid){grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  html.cdc-v75 .detail-item,
+  html.cdc-v75 .security-item{padding:9px!important;border-radius:10px!important}
+
+  /* Mercado e movimentos: cartões com alturas naturais, sem esticar conteúdo curto. */
+  html.cdc-v75 .cdc-product-card,
+  html.cdc-v75 .cdc-store-card,
+  html.cdc-v75 .cdc-movement-row{height:auto!important}
+  html.cdc-v75 .cdc-product-card{align-content:start!important}
+  html.cdc-v75 .market-results-head{min-height:28px!important;align-items:center!important}
+
+  /* Mais: grupos respiram igual e setas não deslocam o texto. */
+  html.cdc-v75 .cdc-more-menu{gap:10px!important}
+  html.cdc-v75 .v75-more-group{gap:4px!important}
+  html.cdc-v75 .v75-more-row{min-height:54px!important;grid-template-columns:32px minmax(0,1fr) 16px!important}
+  html.cdc-v75 .v75-profile-card{min-height:66px!important}
+
+  /* Quick actions/dialog compacto. */
+  html.cdc-v75 #quickDialog .dialog-shell.small{width:min(100%,420px)!important}
+  html.cdc-v75 #quickDialog .quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  html.cdc-v75 #quickDialog .quick-grid button{min-height:88px!important;padding:14px 8px!important}
+
+  /* Cofre: controlos e textos seguem a mesma coluna visual do resto da aplicação. */
+  html.cdc-v75 .vault-card{width:min(100%,430px)!important;padding:clamp(18px,5vw,24px)!important}
+  html.cdc-v75 #vaultCreate,
+  html.cdc-v75 #vaultUnlock{min-width:0!important}
+  html.cdc-v75 .vault-card label{margin:10px 0!important}
+}
+
+@media(max-width:540px){
+  html.cdc-v75 :is(.detail-grid,.security-grid){grid-template-columns:1fr!important}
+  html.cdc-v75 .panel-head{grid-template-columns:1fr!important}
+  html.cdc-v75 .panel-head>.btn,
+  html.cdc-v75 .panel-head>.link-btn{justify-self:start!important}
+  html.cdc-v75 .button-row{grid-template-columns:1fr!important}
+  html.cdc-v75 #quickDialog .quick-grid{grid-template-columns:1fr 1fr!important}
+}
+
+@media(max-width:430px){
+  /* Planeamento: valor fica na primeira linha e a barra usa a largura inteira abaixo. */
+  html.cdc-v75 .cdc-planning-categories>div{
+    grid-template-columns:30px minmax(0,1fr) auto!important;
+    column-gap:7px!important;
+    row-gap:5px!important;
+  }
+  html.cdc-v75 .cdc-planning-categories .cdc-plan-track{grid-column:2/4!important;width:100%!important}
+  html.cdc-v75 .cdc-planning-categories b{justify-self:end!important;white-space:nowrap!important}
+
+  html.cdc-v75 .cdc-category-row{
+    grid-template-columns:34px minmax(0,1fr) auto!important;
+  }
+  html.cdc-v75 .cdc-category-row>small{display:none!important}
+}
+
+@media(max-width:350px){
+  html.cdc-v75 .calendar-day{min-height:52px!important;padding:4px 3px!important}
+  html.cdc-v75 .calendar-day small{display:none!important}
+  html.cdc-v75 .v75-budget-summary{grid-template-columns:1fr!important;justify-items:center!important}
+  html.cdc-v75 .v75-budget-metrics{width:100%!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html.cdc-v75 .page.active{scroll-behavior:auto!important}
+}
