@@ -20,78 +20,20 @@ const DRAWER_REV = '75-drawer2';
 const FEATURED_REV = '75-featured1';
 const IMAGE_LIBRARY_REV = '75-image-library1';
 const CATALOG_REV = '75-catalog2';
-const PD_PHOTO_REV = '75-pd-photo1';
+const PD_PHOTO_REV = '75-pd-photo2';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 
 /* Bundle público v75: mantém a experiência v74 como base funcional de apresentação,
    aplica arquitetura, cabeçalho, estabilidade, geometria, biblioteca/destaques/catálogo
-   visual do Mercado, biblioteca progressiva Pingo Doce, carregador prioritário limitado
+   visual do Mercado, biblioteca Pingo Doce abrível/local, carregador prioritário limitado
    de fotografias e a revisão visual do drawer petróleo/teal à direita. Camadas históricas
    ui-consistency.css e v64-runtime.css continuam fora da distribuição. */
 const PUBLIC_FILES = Object.freeze([
-  'index.html',
-  'styles.css',
-  'design-system.css',
-  'mobile-layout.css',
-  'market-experience.css',
-  'market-brand.css',
-  'market-category-groups.css',
-  'market-barcode.css',
-  'ui-icons.css',
-  'market-shopping-focus.css',
-  'mobile-menu-toggle.css',
-  'invoice-capture.css',
-  'app-update.css',
-  'market-image-audit.css',
-  'v74-experience.css',
-  'v75-architecture.css',
-  'v75-header-refinement.css',
-  'v75-stability.css',
-  'v75-layout-polish.css',
-  'v75-market-featured.css',
-  'market-visual-catalog.css',
-  'pingo-doce-photo-library.css',
-  'market-photo-loader.css',
-  'v75-drawer-theme.css',
-  'core.js',
-  'finance.js',
-  'render.js',
-  'forms.js',
-  'sync.js',
-  'sync-conflict-policy.js',
-  'events.js',
-  'mobile-menu-toggle.js',
-  'market-experience.js',
-  'market-branding.js',
-  'market-category-groups.js',
-  'market-barcode.js',
-  'ui-icons.js',
-  'invoice-capture.js',
-  'app-update.js',
-  'market-image-library.js',
-  'market-retailer-image-policy.js',
-  'market-image-audit.js',
-  'market-official-images.js',
-  'market-catalog-image-resolver.js',
-  'market-visual-catalog.js',
-  'pingo-doce-photo-library.js',
-  'market-photo-loader.js',
-  'v64-runtime.js',
-  'market-shopping-focus.js',
-  'v74-experience.js',
-  'v75-architecture.js',
-  'v75-stability.js',
-  'v75-market-featured.js',
-  'release-manifest.json',
-  'sw.js',
-  'manifest.webmanifest',
-  'icon.svg',
-  'LUCIDE_LICENSE.txt'
+  'index.html','styles.css','design-system.css','mobile-layout.css','market-experience.css','market-brand.css','market-category-groups.css','market-barcode.css','ui-icons.css','market-shopping-focus.css','mobile-menu-toggle.css','invoice-capture.css','app-update.css','market-image-audit.css','v74-experience.css','v75-architecture.css','v75-header-refinement.css','v75-stability.css','v75-layout-polish.css','v75-market-featured.css','market-visual-catalog.css','pingo-doce-photo-library.css','market-photo-loader.css','v75-drawer-theme.css','core.js','finance.js','render.js','forms.js','sync.js','sync-conflict-policy.js','events.js','mobile-menu-toggle.js','market-experience.js','market-branding.js','market-category-groups.js','market-barcode.js','ui-icons.js','invoice-capture.js','app-update.js','market-image-library.js','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','market-catalog-image-resolver.js','market-visual-catalog.js','pingo-doce-photo-library.js','market-photo-loader.js','v64-runtime.js','market-shopping-focus.js','v74-experience.js','v75-architecture.js','v75-stability.js','v75-market-featured.js','release-manifest.json','sw.js','manifest.webmanifest','icon.svg','LUCIDE_LICENSE.txt'
 ]);
 
 fs.rmSync(DIST,{recursive:true,force:true});
 fs.mkdirSync(DIST,{recursive:true});
-
 for(const name of PUBLIC_FILES){
   const source=path.join(ROOT,name);
   if(!fs.existsSync(source)||!fs.statSync(source).isFile()) throw new Error(`Public Pages asset missing: ${name}`);
@@ -104,7 +46,6 @@ index=index.replace(/<meta name="app-build" content="[^"]+"\s*\/>/,`<meta name="
 index=index.replace(/<meta name="theme-color" content="[^"]+"\s*\/>/,'<meta name="theme-color" content="#f4f8f8" />');
 index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${BUILD}</strong>`);
-
 index=index.replace(
   "img-src 'self' data: blob: https://images.openfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://world.openfoodfacts.org;",
   "img-src 'self' data: blob: https://www.continente.pt https://static.pingodoce.pt https://*.openfoodfacts.org https://*.openbeautyfacts.org https://*.openproductsfacts.org https://*.openpetfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://r.jina.ai https://world.openfoodfacts.org https://world.openbeautyfacts.org https://world.openproductsfacts.org https://world.openpetfoodfacts.org;"
@@ -129,7 +70,6 @@ if(!index.includes('v75-drawer-theme.css')) index=index.replace('</head>',`  <li
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
 if(!index.includes('sync-conflict-policy.js')) index=index.replace(syncScript,`${syncScript}<script src="./sync-conflict-policy.js?v=${UI_REV}" defer></script>`);
-
 if(!index.includes('app-update.js')) index=index.replace('</body>',`  <script src="./app-update.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 if(!index.includes('market-image-library.js')) index=index.replace('</body>',`  <script src="./market-image-library.js?v=${IMAGE_LIBRARY_REV}" defer></script>\n</body>`);
 if(!index.includes('market-retailer-image-policy.js')) index=index.replace('</body>',`  <script src="./market-retailer-image-policy.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
@@ -157,10 +97,6 @@ fs.writeFileSync(distEvents,events);
 
 const manifest=JSON.parse(fs.readFileSync(path.join(DIST,'release-manifest.json'),'utf8'));
 if(manifest.latestVersion!==BUILD) throw new Error(`Release manifest latestVersion ${manifest.latestVersion} does not match ${BUILD}`);
-
 const forbidden=['README.md','SECURITY.md','PRIVACY.md','SPEC.md','CHANGELOG.md','.git','.github','tests','scripts','downloads','ui-consistency.css','v64-runtime.css','v75-drawer-blue.css'];
-for(const entry of forbidden){
-  if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
-}
-
+for(const entry of forbidden){if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);}
 console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; layout ${LAYOUT_REV}; drawer ${DRAWER_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
