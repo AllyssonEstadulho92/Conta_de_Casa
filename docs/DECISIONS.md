@@ -70,18 +70,18 @@ Fluxo obrigatório: CI verde da branch → fast-forward para `main` sem force �
 
 ## D-052 — Separar validade oficial de transporte e priorizar cartões visíveis
 
-Data: 9 de setembro de 2026 · Estado: aceite para validação.
+Data: 9 de setembro de 2026 · Estado: aceite e publicada.
 
 ### Factos que motivaram a decisão
 
 A validação real no iPhone mostrou `285 SKUs indexados · 0 fotografias oficiais` na Biblioteca Pingo Doce e cartões presos em **A carregar fotografia…**. Em paralelo, a sonda de CI conseguia obter, para um SKU Pingo Doce conhecido, resposta do reader e URL de imagem com PID exato.
 
-O runtime anterior fazia ainda um segundo `new Image()` com timeout de 10 s antes de permitir persistência e processava imagens Pingo Doce em fila lenta. O orçamento diário de tentativas também era persistido, pelo que falhas anteriores podiam bloquear novas tentativas até ao dia seguinte.
+O runtime anterior fazia ainda um segundo preflight visual com timeout de 10 s antes de permitir persistência e processava imagens Pingo Doce em fila lenta. O orçamento diário de tentativas também era persistido, pelo que falhas anteriores podiam bloquear novas tentativas até ao dia seguinte.
 
 ### Decisão
 
 1. Criar revisão de distribuição/resolvedor `75-catalog2`.
-2. Depois de validar **página oficial + host/path de imagem + PID exato**, não executar um segundo `new Image()` bloqueante no resolvedor direto.
+2. Depois de validar **página oficial + host/path de imagem + PID exato**, não executar um segundo preflight visual bloqueante no resolvedor direto.
 3. Tratar disponibilidade de transporte no componente que realmente apresenta a imagem.
 4. Se `<img>` falhar no browser, remover a referência da biblioteca com `forget()` e manter fallback/retry.
 5. Criar `75-photo-loader2` para priorizar até 6 cartões visíveis, em vez de depender somente da fila de fundo.
@@ -111,3 +111,11 @@ Testes unitários que confirmam presença de spinner/cache não são prova sufic
 2. testes unitários/regressão;
 3. deploy no SHA testado;
 4. validação física no iPhone/Safari/PWA com contador e cartões reais.
+
+## D-054 — Runtime2 publicado, eficácia depende de revalidação física
+
+Data: 9 de setembro de 2026 · Estado: aceite.
+
+`75-catalog2` + `75-photo-loader2` passou CI na branch, foi integrado por fast-forward sem force e passou CI completo de `main` e GitHub Pages no SHA `f485fd4317ad0acbd2475f9ca86efed5b413bb76`.
+
+A publicação técnica está concluída. Contudo, não se considera demonstrado que o contador Pingo Doce sai de zero no iPhone até repetir o cenário real que revelou o erro. Se continuar em zero com o novo cache ativo, a próxima investigação deve focar transporte/CSP/cache/Safari no dispositivo e não apenas testes sintéticos.
