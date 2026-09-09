@@ -57,6 +57,8 @@ jobs:
           node --check market-official-images.js
           node --check market-catalog-image-resolver.js
           node --check market-visual-catalog.js
+          node --check pingo-doce-photo-library.js
+          node --check market-photo-loader.js
           node --check v64-runtime.js
           node --check v74-experience.js
           node --check v75-architecture.js
@@ -80,6 +82,8 @@ jobs:
           node tests/market-official-images.test.cjs
           node tests/market-image-library.test.cjs
           node tests/market-visual-catalog.test.cjs
+          node tests/pingo-doce-photo-library.test.cjs
+          node tests/market-photo-loader.test.cjs
           node tests/market-barcode.test.cjs
           node tests/market-live-accounting.test.cjs
           node tests/v64-runtime.test.cjs
