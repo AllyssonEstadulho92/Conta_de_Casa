@@ -164,3 +164,25 @@ A validação visual mostrou que o drawer azul de `75-drawer1`, embora próximo 
 9. `DRAWER_REV = 75-drawer2` e o Service Worker recebe novo cache para impedir reutilização da revisão azul.
 10. CI e Pages passam a executar `tests/v75-drawer-theme.test.cjs`, incluindo uma verificação explícita de correspondência entre a paleta do drawer e a do cabeçalho.
 11. A camada continua proibida de aceder a `appState`, montantes, IndexedDB, persistência, cifragem, QR, Mercado ou sincronização.
+
+## D-046 — Destaques do Mercado usam carrossel largo e fallback local, sem inventar imagens
+Data: 9 de setembro de 2026 · Estado: aceite.
+
+### Problema
+
+O bloco móvel **Produtos em destaque** continuava a usar a grelha histórica de três colunas e uma área de imagem de 66 px. Em iPhone, nomes reais ficavam partidos verticalmente, preço e categoria perdiam hierarquia e a ausência de fotografia deixava o cartão visualmente vazio. Isto não correspondia ao protótipo aprovado.
+
+### Decisão
+
+1. Criar `v75-market-featured.css/js` com revisão `75-featured1`, sem reescrever `v74-experience.js` nem o núcleo financeiro.
+2. Reutilizar os mesmos itens pendentes, `data-edit-market` e `data-v74-market-browser`; não criar catálogo ou handlers paralelos.
+3. Em mobile, substituir a grelha de três colunas por carrossel horizontal com cartão de cerca de 78–84% do viewport e `scroll-snap`.
+4. Reservar 140–154 px para a imagem, manter nome em no máximo duas linhas, preço em linha própria e categoria em pill.
+5. Como os destaques atuais já pertencem à lista, o rodapé indica **Na sua lista** em vez de simular **Adicionar à lista**.
+6. Se existir URL de imagem válida, mostrar a fotografia com `object-fit: contain` e skeleton durante o carregamento.
+7. Se a imagem falhar ou não existir, mostrar fallback vetorial local por categoria; nunca mostrar broken-image icon nem deixar o cartão deformado.
+8. Se houver `productCode` GTIN válido, a camada pode consultar o Open Food Facts apenas por esse GTIN para tentar recuperar uma imagem. A imagem recuperada é apenas de apresentação e não é persistida pela camada.
+9. Não enviar automaticamente nomes da lista para serviços externos para procurar fotografias.
+10. Aceitar apenas hosts de imagem explicitamente validados: `images.openfoodfacts.org`, paths oficiais do Continente em `www.continente.pt` e paths oficiais do Pingo Doce em `static.pingodoce.pt`.
+11. `v75-market-featured.js` pode ler `appState.market` para compor o cartão, mas não pode chamar `commit()`, `saveState()`, substituir `appState` ou escrever montantes.
+12. Adicionar `FEATURED_REV = 75-featured1`, novo sufixo de cache e `tests/v75-market-featured.test.cjs`; CI e Pages devem validar a revisão antes da publicação.
