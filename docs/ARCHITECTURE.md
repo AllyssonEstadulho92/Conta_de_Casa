@@ -6,13 +6,14 @@ Revisão transversal: `75-stability1`
 Revisão de geometria: `75-layout1`
 Revisão visual do drawer: `75-drawer2`
 Revisão dos destaques do Mercado: `75-featured1`
+Revisão da biblioteca de imagens: `75-image-library1`
 Distribuição: GitHub Pages / PWA
 
 ## 1. Visão geral
 
 Conta de Casa é uma PWA estática distribuída por GitHub Pages. O modelo continua local-first: regras de negócio, persistência, formulários, cifragem e estado financeiro executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
 
-A v75 usa camadas de apresentação versionadas sobre o núcleo funcional para evitar reescrever lógica financeira por motivos visuais.
+A v75 usa camadas de apresentação e apoio versionadas sobre o núcleo funcional para evitar reescrever lógica financeira por motivos visuais ou de catálogo.
 
 ## 2. Núcleo preservado
 
@@ -25,9 +26,9 @@ A v75 usa camadas de apresentação versionadas sobre o núcleo funcional para e
 - sincronização opcional sobre envelope cifrado;
 - sem credenciais, tokens ou segredos embutidos.
 
-`75-featured1` não altera nenhum destes componentes.
+`75-image-library1` não altera nenhum destes componentes.
 
-## 3. Camadas de apresentação
+## 3. Camadas de apresentação e apoio
 
 ### Base funcional
 
@@ -45,6 +46,21 @@ A v75 usa camadas de apresentação versionadas sobre o núcleo funcional para e
 - `v75-market-featured.css/js`: bloco móvel **Produtos em destaque**;
 - `v75-drawer-theme.css`: aparência final do drawer à direita.
 
+### Biblioteca de imagens `75-image-library1`
+
+`market-image-library.js` cria uma base IndexedDB separada, `conta-de-casa-market-image-library`, com store `images` e chave canónica `marketId|pid`.
+
+Responsabilidades:
+
+- guardar metadados de fotografias oficiais já validadas;
+- reusar a imagem do mesmo SKU em futuras renderizações;
+- observar cartões do catálogo para capturar imagens oficiais resolvidas pelos módulos existentes;
+- restaurar a fotografia quando existe entrada válida na biblioteca;
+- expirar entradas positivas após 45 dias;
+- não armazenar binários, preços, transações ou dados do cofre.
+
+A biblioteca é carregada antes de `market-retailer-image-policy.js`, `market-image-audit.js` e `market-official-images.js`, para que possa cooperar com o pipeline atual sem criar uma segunda pesquisa de mercado.
+
 ## 4. Mercado
 
 ### Contrato funcional
@@ -52,6 +68,7 @@ A v75 usa camadas de apresentação versionadas sobre o núcleo funcional para e
 - preço pesquisado → `estimatedCents`;
 - preço confirmado/pago → `actualCents`;
 - GTIN identifica artigo, não prova preço;
+- PID do retalhista identifica o SKU na loja;
 - fotografia é apoio visual, não prova preço ou transação;
 - lojas suportadas: Continente e Pingo Doce;
 - falha de imagem não remove artigo nem altera montante.
@@ -59,10 +76,26 @@ A v75 usa camadas de apresentação versionadas sobre o núcleo funcional para e
 ### Pesquisa e imagens
 
 - `market-experience.js`: pesquisa atual através de `cesta.pt`;
-- Open Food Facts pode fornecer fotografia de referência quando existe correspondência forte;
+- Open Food Facts pode fornecer fotografia de referência quando existe correspondência forte em fluxos compatíveis;
 - `market-official-images.js` valida fotografias oficiais do Continente/Pingo Doce quando existe PID compatível;
+- `market-retailer-image-policy.js` impede imagem aproximada em cartões de resultados vivos quando o SKU oficial não é comprovado;
+- `market-image-library.js` guarda/reutiliza imagens oficiais validadas por `marketId|pid`;
 - `v75-stability.js` trata estados de imagem do catálogo tradicional;
 - `v75-market-featured.js` trata apenas os cartões de destaque móveis.
+
+### Fontes oficiais observadas
+
+Continente:
+
+- página de produto: `https://www.continente.pt/produto/...-<pid>.html`;
+- imagem oficial aceite apenas em `www.continente.pt` com path `Sites-col-master-catalog` e PID correspondente.
+
+Pingo Doce:
+
+- página de produto: `https://www.pingodoce.pt/home/produtos/...-<pid>.html`;
+- imagem oficial aceite apenas em `static.pingodoce.pt`, path `Sites-pingo-doce-master`, tamanho `large|medium|small` e PID correspondente.
+
+A biblioteca não presume que todos os produtos do retalhista estão permanentemente disponíveis. O catálogo é dinâmico; a biblioteca cresce com os SKUs efetivamente encontrados e validados.
 
 ### Destaques `75-featured1`
 
@@ -80,21 +113,6 @@ Estrutura visual:
 - rodapé **Na sua lista**;
 - controlos anterior/seguinte e indicadores de posição.
 
-Política de imagem:
-
-1. tenta usar a imagem já existente no item/DOM, apenas se o URL passar validação de host e caminho;
-2. se não existir ou falhar e houver `productCode` GTIN válido, consulta apenas esse GTIN no Open Food Facts;
-3. a imagem recuperada é usada só na apresentação e não é persistida por esta camada;
-4. se continuar indisponível, mostra fallback local por categoria, sem broken-image icon e sem deformar o cartão.
-
-Hosts aceites pela camada de destaque:
-
-- `images.openfoodfacts.org`;
-- `www.continente.pt` apenas em paths de catálogo oficial compatíveis;
-- `static.pingodoce.pt` apenas em paths oficiais de imagens de produto.
-
-A camada não envia nomes da lista para um serviço externo para obter imagem; a recuperação automática usa apenas GTIN já existente.
-
 ## 5. Ordem do CSS público
 
 1. base histórica necessária;
@@ -108,14 +126,19 @@ A camada não envia nomes da lista para um serviço externo para obter imagem; a
 
 ## 6. Ordem dos scripts relevantes
 
-A base funcional e Mercado carregam primeiro. Depois:
+A base funcional e Mercado carregam primeiro. Na cadeia de imagens:
 
-1. `v74-experience.js`;
-2. `v75-architecture.js`;
-3. `v75-stability.js`;
-4. `v75-market-featured.js`.
+1. `market-image-library.js`;
+2. `market-retailer-image-policy.js`;
+3. `market-image-audit.js`;
+4. `market-official-images.js`;
+5. restante runtime Mercado;
+6. `v74-experience.js`;
+7. `v75-architecture.js`;
+8. `v75-stability.js`;
+9. `v75-market-featured.js`.
 
-`v75-market-featured.js` usa `MutationObserver` para reaplicar a composição quando `v74-experience.js` recria `#cdcMarketHome`, sem escrever no estado.
+`market-image-library.js` usa `MutationObserver` sobre os cartões do catálogo. Não reescreve handlers da pesquisa nem estado financeiro.
 
 ## 7. Navegação
 
@@ -139,13 +162,23 @@ O drawer permanece do lado direito e `mobile-menu-toggle.js` continua responsáv
 - alvos principais de 44–48 px;
 - `prefers-reduced-motion` respeitado;
 - pinch zoom não bloqueado;
-- carrossel usa scroll horizontal próprio e não deve causar overflow da página.
+- carrossel usa scroll horizontal próprio e não deve causar overflow da página;
+- fotografia usa `object-fit: contain` e fallback explícito quando indisponível.
 
-## 9. Segurança
+## 9. Segurança e privacidade
 
-`75-featured1` é read-only relativamente ao estado. Não chama `commit()`, `saveState()`, não substitui `appState` e não altera `estimatedCents` ou `actualCents`.
+`75-image-library1` é isolada do modelo financeiro. O módulo não referencia `appState`, `saveState()` ou `commit()`.
 
-A recuperação de imagem por GTIN usa `https://world.openfoodfacts.org/api/v2/product/<GTIN>.json` com `credentials: omit`, `referrerPolicy: no-referrer` e CSP já compatível com o domínio.
+A store contém apenas:
+
+- `marketId`;
+- `pid`;
+- nome/embalagem para diagnóstico visual;
+- `imageUrl` oficial validado;
+- `sourceUrl` oficial validado quando disponível;
+- origem, timestamps e expiração.
+
+Não contém montantes, PIN, palavra-passe, chaves, tokens, faturas ou dados pessoais. URLs não oficiais e imagens cujo PID não corresponda ao cartão são rejeitadas.
 
 ## 10. Versionamento público
 
@@ -160,22 +193,30 @@ A recuperação de imagem por GTIN usa `https://world.openfoodfacts.org/api/v2/p
 - `LAYOUT_REV = 75-layout1`;
 - `DRAWER_REV = 75-drawer2`;
 - `FEATURED_REV = 75-featured1`;
-- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1`.
+- `IMAGE_LIBRARY_REV = 75-image-library1`;
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1`.
 
 ## 11. QA e deploy
 
-`tests/v75-market-featured.test.cjs` verifica estrutura do carrossel, fallback, segurança read-only, distribuição, ordem dos assets e cache. CI valida ainda a sintaxe de `v75-market-featured.js`; GitHub Pages repete o teste antes do deploy.
+`tests/market-image-library.test.cjs` verifica:
+
+- identidade `marketId|pid`;
+- validação estrita de URLs de produto e imagem;
+- memória/persistência isolada;
+- expiração;
+- ausência de escrita no estado financeiro;
+- distribuição no bundle;
+- ordem do script e cache.
+
+CI valida também a sintaxe de `market-image-library.js`; GitHub Pages repete o teste antes do deploy.
 
 ## 12. Validação manual
 
 Confirmar em iPhone/Safari/PWA:
 
-- cartão largo e swipe natural;
-- fotografia quando disponível;
-- fallback elegante quando não disponível;
-- nome em duas linhas no máximo;
-- preço isolado;
-- controlos do carrossel;
-- **Ver todos** e abertura dos detalhes sem regressão;
+- imagem oficial encontrada numa pesquisa é reutilizada quando o mesmo SKU volta a surgir;
+- nenhum SKU recebe fotografia de outro PID;
+- falha/expiração de URL regressa ao fallback sem deformar cartão;
+- `75-featured1` mantém cartão largo, nome em duas linhas e preço isolado;
 - ausência de overflow lateral da página;
 - tema escuro e safe areas.
