@@ -140,25 +140,27 @@ As páginas já partilhavam identidade visual e regras de estabilidade, mas os c
 12. Esta camada não substitui a validação em hardware real; qualquer consolidação futura em `design-system.css` só deve ocorrer depois de testes físicos e prova de ausência de regressões.
 
 ## D-044 — Drawer móvel usa painel azul à direita com página clara visível
+Data: 9 de setembro de 2026 · Estado: substituída por D-045.
+
+A revisão `75-drawer1` estabeleceu a composição espacial correta: página clara visível, drawer à direita, largura limitada, X no canto superior direito, rodapé integrado e sem segunda navegação. O azul saturado foi posteriormente substituído para recuperar coerência cromática com o resto da aplicação.
+
+## D-045 — Drawer móvel partilha a paleta do cabeçalho
 Data: 9 de setembro de 2026 · Estado: aceite.
 
 ### Problema
 
-A validação em iPhone mostrou que o drawer branco ocupava demasiado espaço visual e não correspondia ao protótipo de referência apresentado pelo utilizador. A referência separa claramente duas superfícies: página branca e menu azul. A direção canónica do projeto, contudo, é a direita desde a v73.
+A validação visual mostrou que o drawer azul de `75-drawer1`, embora próximo da referência estrutural, destoava do cabeçalho e da identidade verde-petróleo/teal já consolidada na aplicação. O menu passava a parecer um produto visual diferente.
 
 ### Decisão
 
-1. Manter o drawer no lado direito; não regressar ao padrão esquerdo do protótipo original.
-2. Criar `v75-drawer-blue.css` como camada CSS-only carregada depois de `v75-layout-polish.css`.
-3. A revisão chama-se `75-drawer1` e não altera `mobile-menu-toggle.js`.
-4. A página principal deve continuar clara e parcialmente visível quando o drawer está aberto.
-5. O drawer usa largura `min(320px, calc(100vw - 72px))` em mobile para preservar uma faixa perceptível da página sem comprimir excessivamente a navegação.
-6. O painel usa azul saturado/gradiente, ícones e labels claros e item ativo translúcido; não usar cartões brancos dentro do menu.
-7. O mesmo `#mobileMenuBtn` continua a ser reutilizado e transforma-se em X; no estado aberto fica visualmente no canto superior direito do drawer.
-8. O cabeçalho do drawer usa `icon.svg`, nome do produto e subtítulo de navegação; não introduzir fotografia de perfil fictícia.
-9. `Ocultar valores` e `Bloquear` permanecem no rodapé do mesmo drawer.
-10. Backdrop deve ser leve e sem blur forte para não transformar a página branca em fundo cinzento pesado.
-11. Safe areas, foco, ARIA, Escape, scroll interno, swipe da direita e `prefers-reduced-motion` são requisitos obrigatórios.
-12. A camada não pode ler ou escrever `appState`, montantes, IndexedDB, cifragem, QR, Mercado ou sincronização.
-13. `DRAWER_REV = 75-drawer1`, Service Worker e Pages devem versionar explicitamente a nova camada.
-14. CI e Pages devem executar `tests/v75-drawer-blue.test.cjs` antes da publicação.
+1. Manter integralmente a estrutura espacial aprovada em `75-drawer1`: lado direito, página clara visível, largura limitada, cantos internos arredondados e backdrop leve.
+2. Substituir a camada por `v75-drawer-theme.css` com revisão `75-drawer2`.
+3. Usar exatamente a mesma família cromática de `75-header2`: `#003f4c`, `#005965` e `#087a78`.
+4. Usar `#5be0c2` apenas como acento de foco, seleção e detalhe; não transformar o menu num painel verde claro.
+5. Manter ícones e labels em branco/opacidades controladas para contraste consistente.
+6. Manter item ativo translúcido e evitar cartões brancos dentro do drawer.
+7. `mobile-menu-toggle.js` não é alterado; hambúrguer/X, swipe pela direita, Escape, foco, ARIA e scroll interno continuam a ser o contrato funcional.
+8. `v75-drawer-blue.css` deixa de integrar o bundle público e é substituído pela camada neutra `v75-drawer-theme.css`.
+9. `DRAWER_REV = 75-drawer2` e o Service Worker recebe novo cache para impedir reutilização da revisão azul.
+10. CI e Pages passam a executar `tests/v75-drawer-theme.test.cjs`, incluindo uma verificação explícita de correspondência entre a paleta do drawer e a do cabeçalho.
+11. A camada continua proibida de aceder a `appState`, montantes, IndexedDB, persistência, cifragem, QR, Mercado ou sincronização.
