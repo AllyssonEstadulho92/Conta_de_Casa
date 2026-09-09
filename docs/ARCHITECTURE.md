@@ -4,13 +4,14 @@ Atualizado: 9 de setembro de 2026
 Build: `v75`
 Revisão transversal publicada: `75-stability1`
 Revisão de geometria: `75-layout1`
+Revisão visual do drawer: `75-drawer1`
 Distribuição: GitHub Pages / PWA
 
 ## 1. Visão geral
 
 Conta de Casa é uma PWA estática distribuída por GitHub Pages. O modelo continua local-first: regras de negócio, persistência, formulários, cifragem e estado financeiro executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
 
-A v75 usa camadas de apresentação versionadas sobre o núcleo funcional, evitando reescrever lógica financeira por motivos visuais. A revisão `75-layout1` acrescenta uma camada CSS final dedicada a geometria, proporção e alinhamento de páginas.
+A v75 usa camadas de apresentação versionadas sobre o núcleo funcional, evitando reescrever lógica financeira por motivos visuais. `75-layout1` trata geometria das páginas e `75-drawer1` trata apenas o aspecto do menu lateral móvel.
 
 ## 2. Núcleo preservado
 
@@ -23,7 +24,7 @@ A v75 usa camadas de apresentação versionadas sobre o núcleo funcional, evita
 - sincronização opcional sobre envelope cifrado;
 - sem credenciais, tokens ou segredos embutidos.
 
-Nenhum destes componentes é alterado por `75-layout1`.
+Nenhum destes componentes é alterado por `75-layout1` ou `75-drawer1`.
 
 ## 3. Camadas de apresentação
 
@@ -31,7 +32,7 @@ Nenhum destes componentes é alterado por `75-layout1`.
 
 - `design-system.css`: tokens e normalização visual;
 - `v74-experience.css/js`: composição funcional de Início, Despesas, Mercado, Planeamento, Relatórios e Mais;
-- `mobile-menu-toggle.css/js`: drawer à direita e hambúrguer ↔ X;
+- `mobile-menu-toggle.css/js`: drawer funcional à direita e hambúrguer ↔ X;
 - `v64-runtime.js`: comportamento funcional ainda necessário.
 
 ### Arquitetura v75
@@ -74,16 +75,39 @@ Responsabilidades:
 - tornar Metas `auto-fit` no desktop e coluna única em mobile;
 - centrar Definições numa coluna de leitura adequada;
 - reorganizar categorias de Planeamento em ecrãs estreitos;
-- preservar layouts já específicos de Mercado, QR, cofre, drawer e navegação.
+- preservar layouts específicos de Mercado, QR, cofre, drawer e navegação.
 
-Contrato de segurança da camada:
+### Drawer móvel `75-drawer1`
 
-- não lê nem escreve `appState`;
-- não contém `estimatedCents`, `actualCents` ou `amountCents`;
-- não abre IndexedDB;
-- não invoca persistência;
-- não altera autenticação, PIN, cifragem, QR ou sincronização;
-- não cria dados, preços, lojas ou funcionalidades.
+`v75-drawer-blue.css` é a última camada CSS do bundle e atua apenas em `max-width: 820px`.
+
+Objectivo visual:
+
+- manter a página principal clara/branca perceptível;
+- apresentar a navegação num painel azul inspirado no protótipo fornecido;
+- manter o drawer no **lado direito**, em coerência com a decisão v73;
+- reduzir a sensação de painel branco pesado existente na revisão anterior.
+
+Contrato espacial e visual:
+
+- `.nav-drawer` continua com `inset: 0 0 0 auto`;
+- largura canónica: `min(320px, calc(100vw - 72px))`;
+- em ecrãs muito estreitos existe refinamento específico para manter uma margem visível da página;
+- `.nav-drawer-shell` usa gradiente azul e `border-radius: 28px 0 0 28px`;
+- o backdrop é leve, sem blur, para preservar a leitura da página clara ao fundo;
+- ícones e labels usam branco com opacidades controladas;
+- item ativo usa superfície translúcida, não cartão branco;
+- o mesmo `#mobileMenuBtn` é movido para o drawer por `mobile-menu-toggle.js` e, visualmente, fica no canto superior direito;
+- `icon.svg` continua a representar a identidade da aplicação no cabeçalho do drawer;
+- rodapé `Ocultar valores` / `Bloquear` permanece no mesmo drawer e usa a mesma linguagem azul.
+
+Contrato funcional:
+
+- não cria outra navegação;
+- não altera `mobile-menu-toggle.js`;
+- não muda swipe, Escape, foco, `aria-expanded` ou `aria-current`;
+- não lê/escreve `appState`;
+- não altera `core.js`, `finance.js`, IndexedDB, cofre, QR, Mercado ou sincronização.
 
 ## 4. Ordem do CSS público
 
@@ -94,9 +118,10 @@ A ordem relevante é:
 3. `v75-architecture.css`;
 4. `v75-header-refinement.css`;
 5. `v75-stability.css`;
-6. `v75-layout-polish.css`.
+6. `v75-layout-polish.css`;
+7. `v75-drawer-blue.css`.
 
-A nova camada fica por último porque resolve apenas geometria final depois de todas as composições anteriores estarem definidas.
+`v75-drawer-blue.css` fica por último para garantir que apenas o drawer móvel substitui as superfícies brancas definidas pelas camadas anteriores.
 
 ## 5. Navegação
 
@@ -108,9 +133,9 @@ Navegação primária móvel:
 4. Planeamento;
 5. Mais.
 
-O drawer mantém grupos Principal, Análise e Conta/sistema. `mobile-menu-toggle.js` continua responsável pelo mesmo `#mobileMenuBtn`, animação hambúrguer/X, Escape, foco e swipe da direita.
+O drawer mantém a arquitetura real da navegação. `mobile-menu-toggle.js` continua responsável pelo mesmo `#mobileMenuBtn`, animação hambúrguer/X, Escape, foco e swipe da direita.
 
-`75-layout1` não cria outra navegação.
+`75-drawer1` não cria rotas, não altera labels funcionais e não muda a direção canónica do drawer.
 
 ## 6. Geometria por página
 
@@ -176,7 +201,7 @@ O drawer mantém grupos Principal, Análise e Conta/sistema. `mobile-menu-toggle
 
 O formulário continua a ser criado por `forms.js`. Na criação de nova despesa, a camada v75 apresenta Manual, Ler fatura e QR Code. Fotografia e QR continuam a usar `invoice-capture.js`; o utilizador revê os dados antes de guardar.
 
-`75-layout1` não modifica handlers, campos, validação ou conteúdo do QR.
+`75-layout1` e `75-drawer1` não modificam handlers, campos, validação ou conteúdo do QR.
 
 ## 8. Mercado
 
@@ -192,21 +217,21 @@ O formulário continua a ser criado por `forms.js`. Na criação de nova despesa
 
 O painel real permanece em `#syncPanel`. A sincronização continua opcional e cifrada. PIN, palavra-passe, PBKDF2-SHA-256 e AES-GCM permanecem inalterados.
 
-A camada de geometria apenas reorganiza colunas e largura dos elementos existentes.
+As camadas visuais apenas reorganizam ou estilizam os elementos existentes.
 
 ## 10. Responsividade e acessibilidade
 
 - breakpoint principal funcional: `820px`;
 - faixa adicional de web compacto: `821–1120px`;
 - desktop largo: `>=1121px`;
-- refinamentos compactos: `540px`, `430px` e `350px`;
+- refinamentos compactos: `540px`, `430px`, `359px` e `350px`;
 - safe areas iOS continuam em topbar, drawer, scanner, formulários e navegação inferior;
 - alvos principais de 44–48 px;
 - inputs/selects/textarea mantêm 16 px no mobile;
 - `prefers-reduced-motion` respeitado;
 - `forced-colors` continua tratado pela estabilidade;
 - pinch zoom não é bloqueado;
-- redução de colunas é preferida a compressão excessiva.
+- drawer mantém scroll interno e foco visível.
 
 ## 11. Distribuição pública
 
@@ -219,9 +244,10 @@ A camada de geometria apenas reorganiza colunas e largura dos elementos existent
 - `HEADER_REV = 75-header2`;
 - `STABILITY_REV = 75-stability1`;
 - `LAYOUT_REV = 75-layout1`;
-- cache preparado: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1`.
+- `DRAWER_REV = 75-drawer1`;
+- cache preparado: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer1`.
 
-`v75-layout-polish.css` integra a allowlist Pages e o Service Worker com revisão própria.
+`v75-drawer-blue.css` integra a allowlist Pages e o Service Worker com revisão própria.
 
 ## 12. CI e deploy
 
@@ -230,22 +256,23 @@ A validação cobre:
 - testes financeiros, segurança, isolamento, datas, faturas, QR e sincronização existentes;
 - arquitetura v75;
 - estabilidade v75;
-- `tests/v75-layout-polish.test.cjs` para o contrato de geometria, distribuição, cache e proibição de acesso ao estado financeiro;
+- `tests/v75-layout-polish.test.cjs`;
+- `tests/v75-drawer-blue.test.cjs`, que valida lado direito, proporção, gradiente, ordem do CSS, cache e proibição de acesso ao estado financeiro;
 - responsividade, mobile, navegação e acessibilidade já existentes.
 
-O workflow Pages repete o teste de `75-layout1` antes de preparar o artefacto público.
+O workflow Pages repete o teste de `75-drawer1` antes de preparar o artefacto público.
 
 ## 13. Validação manual ainda necessária
 
 Após publicação, confirmar em dispositivo real:
 
-- proporções das páginas;
-- alinhamento de títulos, cartões, filtros e botões;
-- calendário em 320/375/390/430 px;
-- Planeamento e Segurança sem elementos espremidos;
+- drawer entra pela direita;
+- página clara permanece visível à esquerda;
+- largura do painel azul não comprime labels longos;
+- contraste de todos os ícones e grupos;
+- X no canto superior direito;
+- gesto de abrir/fechar pela direita;
 - safe areas;
-- drawer e navegação inferior;
+- scroll interno do drawer;
 - tema escuro;
-- formulários sem zoom;
-- ausência de overflow horizontal;
-- estados do Mercado com rede lenta/offline.
+- ausência de overflow horizontal.
