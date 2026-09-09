@@ -26,7 +26,7 @@ Uniformizar a geometria da aplicação depois da estabilização v75: largura ú
 - adicionada revisão `LAYOUT_REV = 75-layout1` ao `scripts/prepare-pages.cjs`;
 - Service Worker passa a usar cache com sufixo `-stability1-layout1`;
 - criado `tests/v75-layout-polish.test.cjs` para validar geometria, distribuição e proibição de acesso ao estado financeiro;
-- CI e Pages passam a executar o novo teste.
+- CI e Pages executam o novo teste antes da publicação.
 
 ### Segurança e integridade
 
@@ -34,12 +34,15 @@ Uniformizar a geometria da aplicação depois da estabilização v75: largura ú
 - `core.js`, `finance.js`, `STATE_VERSION = 5`, PIN, PBKDF2-SHA-256, AES-GCM, pagamentos, QR e sincronização não foram modificados;
 - preços, lojas, artigos e capacidades do Mercado não são criados nem alterados por esta revisão.
 
-### Distribuição preparada
+### Distribuição
 
 - `LAYOUT_REV`: `75-layout1`;
 - cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1`;
 - `v75-layout-polish.css?v=75-layout1` é carregado depois de `v75-stability.css?v=75-stability1`;
-- publicação depende de CI verde, integração em `main` e deploy Pages concluído.
+- CI completo da branch de trabalho terminou com sucesso;
+- a revisão foi integrada por fast-forward em `main`;
+- CI completo de `main` terminou com sucesso;
+- GitHub Pages verificou o SHA integrado e concluiu o deploy com sucesso.
 
 ## 2026-09-08 — v75 `75-stability1`: estabilização transversal da aplicação
 
