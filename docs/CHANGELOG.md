@@ -6,14 +6,14 @@
 
 Validação física no iPhone/Safari mostrou `Biblioteca Pingo Doce: 285 SKUs indexados · 0 fotografias oficiais` e vários cartões presos em **A carregar fotografia…**. O problema deixou de ser tratado como simples questão visual.
 
-A sonda de CI já conseguia, para um SKU conhecido, obter resposta do reader e localizar uma imagem Pingo Doce com PID exato. A investigação concentrou-se por isso no runtime entre a URL oficial encontrada e a persistência/apresentação no cartão.
+A sonda de CI conseguia, para um SKU conhecido, obter resposta do reader e localizar uma imagem Pingo Doce com PID exato. A investigação concentrou-se por isso no runtime entre a URL oficial encontrada e a persistência/apresentação no cartão.
 
 ### `75-catalog2`
 
 - `market-catalog-image-resolver.js` passa para revisão `75-catalog2`;
 - timeout do reader reduzido para 8 s;
 - mantém validação estrita de página oficial, retalhista, path de imagem e PID;
-- removido o segundo `new Image()` bloqueante de até 10 s antes de devolver a referência;
+- removido o segundo preflight visual bloqueante de até 10 s antes de devolver a referência;
 - a referência validada pode ser persistida imediatamente;
 - o carregamento real passa a ser comprovado no cartão que efetivamente apresenta a imagem;
 - uma falha de transporte já não transforma automaticamente uma URL oficialmente identificada num falso negativo antes de a UI a tentar usar.
@@ -50,7 +50,12 @@ A sonda de CI já conseguia, para um SKU conhecido, obter resposta do reader e l
 - `PHOTO_LOADER_REV` passa a `75-photo-loader2`;
 - cache passa para `...-image-library1-catalog2-pd-photo1-photo-loader2`;
 - `tests/market-visual-catalog.test.cjs`, `tests/market-photo-loader.test.cjs` e `tests/pingo-doce-photo-library.test.cjs` atualizados;
-- publicação continua condicionada a CI verde da branch, fast-forward, CI de `main`, Pages no mesmo SHA e nova validação física.
+- CI final da branch `fix/v75-market-photo-runtime`: sucesso no SHA `f485fd4317ad0acbd2475f9ca86efed5b413bb76`;
+- integração em `main`: fast-forward sem force no mesmo SHA;
+- CI de `main`: sucesso no mesmo SHA;
+- GitHub Pages: deploy concluído com sucesso no mesmo SHA;
+- commits documentais posteriores não alteram o runtime publicado;
+- eficácia no Safari/iPhone permanece dependente de nova validação física do cenário que mostrou `0 fotografias oficiais`.
 
 ---
 
