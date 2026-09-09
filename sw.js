@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1';
+const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1';
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -39,6 +39,7 @@ const PUBLIC_ASSETS = [
   './ui-icons.js',
   './invoice-capture.js',
   './app-update.js',
+  './market-image-library.js',
   './market-retailer-image-policy.js',
   './market-image-audit.js',
   './market-official-images.js',
