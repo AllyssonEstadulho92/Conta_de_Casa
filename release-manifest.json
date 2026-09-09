@@ -9,8 +9,8 @@
       "date": "9 de setembro de 2026",
       "title": "Reestruturação da interface, estabilidade e alinhamento proporcional",
       "items": [
-        "A revisão 75-drawer1 aproxima o menu móvel do protótipo de referência: a página permanece clara e visível ao fundo, enquanto a navegação abre num painel azul pelo lado direito, com proporção mais equilibrada e cantos internos arredondados.",
-        "O drawer azul mantém o mesmo botão hambúrguer/X, os mesmos destinos, handlers, foco, Escape, swipe pela margem direita, safe areas e alvos tácteis; a alteração é exclusivamente visual e não cria uma segunda navegação.",
+        "A revisão 75-drawer2 alinha o menu móvel com a identidade visual da própria aplicação: a página permanece clara e visível ao fundo, enquanto a navegação abre pelo lado direito num gradiente verde-petróleo/teal igual à família cromática do cabeçalho.",
+        "O drawer 75-drawer2 mantém o mesmo botão hambúrguer/X, os mesmos destinos, handlers, foco, Escape, swipe pela margem direita, safe areas e alvos tácteis; a alteração é exclusivamente visual e usa menta apenas como acento de foco/seleção.",
         "A revisão 75-layout1 uniformiza proporções, margens, grelhas, alinhamentos e ritmo vertical entre as páginas sem alterar o núcleo financeiro, persistência, cofre ou sincronização.",
         "No desktop, Início, Despesas, Mercado, Planeamento, Relatórios, Metas, Segurança, Diagnóstico e Definições usam uma coluna de conteúdo comum e grelhas que redistribuem espaço antes de comprimir cartões ou controlos.",
         "Em tablet e telemóvel, formulários, barras de ações, cartões, calendário, objetivos, segurança, sincronização e detalhes passam para menos colunas quando necessário, mantendo safe areas, leitura e alvos tácteis.",
