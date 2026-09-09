@@ -104,7 +104,7 @@ Entrada mínima:
 
 ### Alteração face a `75-catalog1`
 
-Foi removido o segundo `new Image()` bloqueante antes de devolver a referência. Essa etapa duplicava a validação de transporte e, no Safari, podia ficar até 10 s à espera ou produzir falso negativo apesar de a URL já estar validada por página oficial + host/path/PID.
+Foi removido o segundo preflight visual bloqueante antes de devolver a referência. Essa etapa duplicava a validação de transporte e, no Safari, podia ficar até 10 s à espera ou produzir falso negativo apesar de a URL já estar validada por página oficial + host/path/PID.
 
 A segurança de identidade não é relaxada: a referência só entra na biblioteca depois de passar os mesmos validadores estritos. O carregamento real é testado no cartão; uma imagem que falhe é removida da biblioteca por `75-photo-loader2`.
 
@@ -170,7 +170,7 @@ O loader não cria polling infinito e não altera a altura estrutural do cartão
 
 ## 8. Separação entre validação de origem e disponibilidade de transporte
 
-A arquitetura passa a distinguir explicitamente:
+A arquitetura distingue explicitamente:
 
 - **validade da referência**: comprovada pela página oficial, domínio/path autorizado e PID exato;
 - **disponibilidade de transporte**: comprovada quando o browser efetivamente carrega a imagem.
@@ -185,7 +185,7 @@ Scripts relevantes:
 2. política/auditoria;
 3. `market-official-images.js`;
 4. `market-catalog-image-resolver.js?v=75-catalog2`;
-5. `market-visual-catalog.js?v=75-catalog2` (asset versionado com o bundle do catálogo; contrato interno base permanece compatível);
+5. `market-visual-catalog.js?v=75-catalog2`;
 6. `pingo-doce-photo-library.js?v=75-pd-photo1`;
 7. `market-photo-loader.js?v=75-photo-loader2`;
 8. runtime/apresentação restantes.
@@ -222,11 +222,11 @@ Continente: regras oficiais já existentes permanecem inalteradas.
 - resolvedor/distribuição catálogo: `75-catalog2`;
 - Pingo Doce: `75-pd-photo1`;
 - loader: `75-photo-loader2`;
-- cache esperado: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog2-pd-photo1-photo-loader2`.
+- cache publicado: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog2-pd-photo1-photo-loader2`.
 
 ## 13. QA
 
-CI/Pages devem executar:
+CI/Pages executam:
 
 - `tests/market-image-library.test.cjs`;
 - `tests/market-official-images.test.cjs`;
@@ -235,4 +235,18 @@ CI/Pages devem executar:
 - `tests/market-photo-loader.test.cjs`;
 - regressões de finanças, segurança, responsividade, navegação, acessibilidade e sync.
 
-A validação em hardware real é obrigatória porque o problema atual foi observado especificamente no Safari/iPhone e envolve transporte de imagens/cache/runtime.
+A validação em hardware real é obrigatória porque o problema foi observado especificamente no Safari/iPhone e envolve transporte de imagens/cache/runtime.
+
+## 14. Publicação da correção
+
+A revisão funcional `75-catalog2` + `75-photo-loader2` foi integrada em `main` por fast-forward sem force no SHA `f485fd4317ad0acbd2475f9ca86efed5b413bb76`.
+
+Nesse mesmo SHA:
+
+- CI de `main`: sucesso;
+- probe de fontes: sucesso para Continente e Pingo Doce;
+- testes de catálogo visual, biblioteca Pingo Doce e photo loader: sucesso;
+- regressões financeiras, segurança, responsividade, navegação, acessibilidade e sincronização: sucesso;
+- GitHub Pages: deploy concluído com sucesso.
+
+Os commits documentais posteriores não alteram o runtime público. A eficácia da correção no Safari só fica fechada depois de repetir a validação física que originalmente mostrou `0 fotografias oficiais`.
