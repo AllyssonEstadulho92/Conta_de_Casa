@@ -55,6 +55,8 @@ jobs:
           node --check market-retailer-image-policy.js
           node --check market-image-audit.js
           node --check market-official-images.js
+          node --check market-catalog-image-resolver.js
+          node --check market-visual-catalog.js
           node --check v64-runtime.js
           node --check v74-experience.js
           node --check v75-architecture.js
@@ -77,6 +79,7 @@ jobs:
           node tests/market-image-audit.test.cjs
           node tests/market-official-images.test.cjs
           node tests/market-image-library.test.cjs
+          node tests/market-visual-catalog.test.cjs
           node tests/market-barcode.test.cjs
           node tests/market-live-accounting.test.cjs
           node tests/v64-runtime.test.cjs
