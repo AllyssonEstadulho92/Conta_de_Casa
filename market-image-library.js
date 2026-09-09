@@ -13,8 +13,11 @@
   const DB_VERSION=1;
   const STORE='images';
   const POSITIVE_TTL_MS=45*24*60*60*1000;
+  const CARD_SELECTOR='#marketCatalogResults [data-market-product-card]';
   const memory=new Map();
   let dbPromise=null;
+  let observer=null;
+  let scanQueued=false;
 
   const clean=(value,max=180)=>String(value??'')
     .replace(/[\u0000-\u001f\u007f]/g,' ')
@@ -27,6 +30,11 @@
     const pid=String(target.pid??'').replace(/\D/g,'').slice(0,32);
     if(!pid||!['continente','pingo-doce'].includes(marketId))return null;
     return {marketId,pid,key:`${marketId}|${pid}`};
+  }
+
+  function identityFromCard(card){
+    const match=/^cesta-(continente|pingo-doce)-(\d{4,32})$/i.exec(clean(card?.dataset?.marketProductCard||'',100));
+    return match?identity({marketId:match[1].toLowerCase(),pid:match[2]}):null;
   }
 
   function safeProductUrl(value,marketId='',pid=''){
@@ -204,9 +212,106 @@
     });
   }
 
-  if(root.addEventListener)root.addEventListener('pageshow',()=>{void prune();},{once:true});
+  function targetFromCard(card){
+    const id=identityFromCard(card);if(!id)return null;
+    const name=clean(card.querySelector('.market-product-copy h3')?.textContent||'',140);
+    const rawPack=clean(card.querySelector('.market-product-copy>p')?.textContent||'',100);
+    const pack=rawPack.replace(/\s*·\s*(Pingo Doce|Continente)\s*$/i,'').trim();
+    const sourceLink=card.querySelector('.market-result-source[href]');
+    const sourceUrl=safeProductUrl(sourceLink?.href||'',id.marketId,id.pid);
+    return {...id,name,pack,sourceUrl,label:id.marketId==='continente'?'Continente':'Pingo Doce'};
+  }
+
+  function applyRecordToCard(card,target,record){
+    if(!card?.isConnected||!record?.imageUrl)return false;
+    let photo=card.querySelector('.market-product-photo');
+    if(!photo)return false;
+    let button=photo.matches?.('button.market-product-photo')?photo:null;
+    if(!button){
+      button=document.createElement('button');
+      button.type='button';
+      button.className=`${photo.className||'market-product-photo'} market-product-photo-button`.replace(/\bis-empty\b/g,'').replace(/\s+/g,' ').trim();
+      photo.replaceWith(button);
+      photo=button;
+    }
+    button.classList.remove('is-empty');
+    button.dataset.marketImageOpen=record.imageUrl;
+    button.dataset.marketImageTitle=clean(target.name||record.name,140);
+    button.dataset.marketImageSource=record.source;
+    button.dataset.marketImageOfficial='1';
+    button.setAttribute('aria-label',`Ampliar imagem oficial de ${clean(target.name||record.name,110)||'produto'}`);
+    let image=button.querySelector('img');
+    if(!image){image=document.createElement('img');button.replaceChildren(image);}
+    image.src=record.imageUrl;
+    image.alt='';
+    image.loading='lazy';
+    image.decoding='async';
+    image.referrerPolicy='no-referrer';
+    card.dataset.marketOfficialImage='done';
+    card.dataset.marketImageLibrary='hit';
+    return true;
+  }
+
+  async function captureCard(card,target){
+    const image=card.querySelector('.market-product-photo img');
+    if(!image)return null;
+    const imageUrl=safeOfficialImageUrl(image.currentSrc||image.src,target.marketId,target.pid);
+    if(!imageUrl)return null;
+    const sourceLink=card.querySelector('.market-result-source[href]');
+    const sourceUrl=safeProductUrl(sourceLink?.href||target.sourceUrl,target.marketId,target.pid);
+    const stored=await remember({
+      marketId:target.marketId,pid:target.pid,name:target.name,pack:target.pack,
+      imageUrl,sourceUrl,source:`${target.label} · imagem oficial`
+    },target);
+    if(stored)card.dataset.marketImageLibrary='stored';
+    return stored;
+  }
+
+  async function auditCard(card){
+    const target=targetFromCard(card);if(!target)return;
+    const current=card.querySelector('.market-product-photo img');
+    const official=safeOfficialImageUrl(current?.currentSrc||current?.src||'',target.marketId,target.pid);
+    if(official){await captureCard(card,target);return;}
+    const cached=await get(target);
+    if(cached)applyRecordToCard(card,target,cached);
+  }
+
+  function scan(){
+    document.querySelectorAll(CARD_SELECTOR).forEach(card=>{void auditCard(card);});
+  }
+
+  function scheduleScan(){
+    if(scanQueued)return;
+    scanQueued=true;
+    requestAnimationFrame(()=>{scanQueued=false;scan();});
+  }
+
+  function install(){
+    void prune();
+    scan();
+    if(document.body&&!observer){
+      observer=new MutationObserver(mutations=>{
+        let needsScan=false;
+        for(const mutation of mutations){
+          if(mutation.type==='attributes'){
+            const card=mutation.target?.closest?.('[data-market-product-card]');
+            if(card){void auditCard(card);continue;}
+          }
+          if(mutation.type==='childList'&&mutation.addedNodes.length)needsScan=true;
+        }
+        if(needsScan)scheduleScan();
+      });
+      observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['src']});
+    }
+  }
+
+  if(typeof document!=='undefined'){
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});
+    else install();
+  }
+  if(root.addEventListener)root.addEventListener('pageshow',()=>{void prune();});
 
   root.CDCMarketImageLibrary=Object.freeze({
-    revision:REVISION,get,remember,forget,stats,prune,identity,safeProductUrl,safeOfficialImageUrl
+    revision:REVISION,get,remember,forget,stats,prune,identity,safeProductUrl,safeOfficialImageUrl,audit:scheduleScan
   });
 })(globalThis);
