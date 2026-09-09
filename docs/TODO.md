@@ -15,7 +15,6 @@ Atualizado: 9 de setembro de 2026
 - [x] Estabilizar alvos móveis principais em 44 px.
 - [x] Evitar zoom automático do Safari em inputs/selects/textarea mobile.
 - [x] Sincronizar `theme-color` com tema e cabeçalho visível.
-- [x] Atualizar asset versioning e cache para `-stability1`.
 - [x] Alinhar validação CI e Pages para v74/v75.
 
 ## P0 — `75-layout1`: geometria e proporção entre páginas
@@ -38,14 +37,40 @@ Atualizado: 9 de setembro de 2026
 - [x] Confirmar CI verde no SHA integrado em `main`.
 - [x] Confirmar GitHub Pages concluído sobre o SHA integrado.
 
-## P1 — Validação física de `75-header2` + `75-stability1` + `75-layout1`
+## P0 — `75-drawer1`: menu azul inspirado no protótipo
 
-- [ ] iPhone/Safari/PWA: confirmar atualização do Service Worker e carregamento da revisão `75-layout1`.
-- [ ] iPhone: safe area superior e laterais sem faixa duplicada ou salto vertical.
-- [ ] iPhone: hambúrguer, título e sino alinhados numa única linha.
-- [ ] iPhone: título longo com ellipsis sem colisão com o sino.
-- [ ] iPhone: badge visível e centrado sem cortar no canto.
+- [x] Rever o menu real no iPhone a partir da captura fornecida pelo utilizador.
+- [x] Preservar a direção canónica do drawer no lado direito.
+- [x] Criar `v75-drawer-blue.css` como camada visual isolada.
+- [x] Manter página clara/branca visível atrás do drawer.
+- [x] Reduzir a largura do menu para deixar uma faixa perceptível da página sem comprimir labels.
+- [x] Aplicar painel azul com ícones/textos claros e item ativo translúcido.
+- [x] Manter o mesmo `#mobileMenuBtn` e a animação hambúrguer ↔ X.
+- [x] Colocar o X no canto superior direito quando o drawer está aberto.
+- [x] Usar `icon.svg` e identidade real da Conta de Casa; não inventar fotografia de perfil.
+- [x] Manter `Ocultar valores` e `Bloquear` no mesmo drawer.
+- [x] Preservar swipe pela direita, Escape, foco, safe areas, scroll interno e `prefers-reduced-motion`.
+- [x] Adicionar `DRAWER_REV = 75-drawer1` ao bundle Pages.
+- [x] Atualizar Service Worker para cache `-stability1-layout1-drawer1`.
+- [x] Adicionar `tests/v75-drawer-blue.test.cjs`.
+- [x] Incluir o teste do drawer no CI e Pages.
+- [x] Confirmar CI completo verde na branch `fix/v75-blue-right-drawer`.
+- [x] Integrar a revisão validada em `main` por fast-forward.
+- [ ] Confirmar CI de `main` no SHA final com toda a documentação atualizada.
+- [ ] Confirmar GitHub Pages concluído sobre o SHA final.
+
+## P1 — Validação física de `75-header2` + `75-stability1` + `75-layout1` + `75-drawer1`
+
+- [ ] iPhone/Safari/PWA: confirmar atualização do Service Worker e carregamento de `75-drawer1`.
+- [ ] iPhone: confirmar drawer azul a abrir exclusivamente pela direita.
+- [ ] iPhone: confirmar que a página branca permanece visível à esquerda do drawer.
+- [ ] iPhone: verificar se a largura do painel é equilibrada para labels longos.
+- [ ] iPhone: confirmar logo/nome/X alinhados no cabeçalho do menu.
 - [ ] iPhone: hambúrguer → X → hambúrguer sem deslocamento.
+- [ ] iPhone: swipe pela margem direita continua funcional.
+- [ ] iPhone: scroll do drawer permite chegar a todos os itens e ao rodapé.
+- [ ] iPhone: safe area superior/inferior sem corte.
+- [ ] iPhone: backdrop leve, sem transformar a página em fundo cinzento pesado.
 - [ ] iPhone: focar inputs/selects sem zoom automático do Safari.
 - [ ] iPhone/Android: navegação inferior com cinco destinos sem corte de labels.
 - [ ] iPhone/Android: comparar Início, Despesas, Mercado, Planeamento e Mais para confirmar margens e largura iguais.
@@ -72,14 +97,14 @@ Atualizado: 9 de setembro de 2026
 
 - [x] `tests/v75-stability.test.cjs` mantém cobertura da camada transversal.
 - [x] `tests/v75-layout-polish.test.cjs` cobre distribuição, ordem de CSS, cache e proibição de acesso ao estado financeiro.
+- [x] `tests/v75-drawer-blue.test.cjs` cobre lado direito, proporção, gradiente, ordem de distribuição e proibição de acesso ao estado financeiro.
 - [x] Sintaxe CI cobre `v74-experience.js`, `v75-architecture.js` e `v75-stability.js`.
-- [x] Verificação Pages repete arquitetura, estabilidade e layout antes do deploy.
-- [x] Execução completa da revisão `75-layout1` terminou sem regressões nos testes financeiros, segurança, responsividade, navegação e sincronização.
+- [x] Verificação Pages repete arquitetura, estabilidade, layout e drawer antes do deploy.
 
 ## P2 — Consolidação posterior
 
 - [ ] Rever CSS histórico restante numa release própria, sem misturar regras financeiras.
-- [ ] Depois da validação real, absorver `v75-stability.css` e `v75-layout-polish.css` no sistema visual consolidado de uma release futura, evitando acumulação indefinida de camadas.
+- [ ] Depois da validação real, absorver `v75-stability.css`, `v75-layout-polish.css` e `v75-drawer-blue.css` no sistema visual consolidado de uma release futura, evitando acumulação indefinida de camadas.
 - [ ] Remover resíduos apenas após confirmar que não existem referências funcionais.
 - [ ] Rever pipeline externo do Mercado separadamente.
 - [ ] Manter `PROJECT_STATE.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md` e `CHANGELOG.md` sincronizados em cada alteração relevante.
