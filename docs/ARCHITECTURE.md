@@ -5,13 +5,14 @@ Build: `v75`
 Revisão transversal: `75-stability1`
 Revisão de geometria: `75-layout1`
 Revisão visual do drawer: `75-drawer2`
+Revisão dos destaques do Mercado: `75-featured1`
 Distribuição: GitHub Pages / PWA
 
 ## 1. Visão geral
 
 Conta de Casa é uma PWA estática distribuída por GitHub Pages. O modelo continua local-first: regras de negócio, persistência, formulários, cifragem e estado financeiro executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
 
-A v75 usa camadas de apresentação versionadas sobre o núcleo funcional, evitando reescrever lógica financeira por motivos visuais. `75-layout1` trata geometria das páginas e `75-drawer2` trata apenas o aspecto do menu lateral móvel.
+A v75 usa camadas de apresentação versionadas sobre o núcleo funcional para evitar reescrever lógica financeira por motivos visuais.
 
 ## 2. Núcleo preservado
 
@@ -24,7 +25,7 @@ A v75 usa camadas de apresentação versionadas sobre o núcleo funcional, evita
 - sincronização opcional sobre envelope cifrado;
 - sem credenciais, tokens ou segredos embutidos.
 
-Nenhum destes componentes é alterado por `75-layout1` ou `75-drawer2`.
+`75-featured1` não altera nenhum destes componentes.
 
 ## 3. Camadas de apresentação
 
@@ -37,71 +38,86 @@ Nenhum destes componentes é alterado por `75-layout1` ou `75-drawer2`.
 
 ### Arquitetura v75
 
-`v75-architecture.css/js` define composição de páginas, navegação, formulários mobile full-screen, scanner QR, Planeamento, Relatórios, Mais, Sincronização e cofre sem escrever diretamente em estado financeiro.
+- `v75-architecture.css/js`: estrutura de páginas e fluxos v75;
+- `v75-header-refinement.css`: topbar móvel;
+- `v75-stability.css/js`: estabilidade visual, tipografia, overflow, safe areas e estados de imagem do catálogo;
+- `v75-layout-polish.css`: geometria e proporção das páginas;
+- `v75-market-featured.css/js`: bloco móvel **Produtos em destaque**;
+- `v75-drawer-theme.css`: aparência final do drawer à direita.
 
-### Cabeçalho `75-header2`
+## 4. Mercado
 
-`v75-header-refinement.css` define a topbar móvel. O contrato cromático oficial usa:
+### Contrato funcional
 
-- `#003f4c` como verde-petróleo base;
-- `#005965` como tom intermédio;
-- `#087a78` como teal;
-- `#5be0c2` como acento menta.
+- preço pesquisado → `estimatedCents`;
+- preço confirmado/pago → `actualCents`;
+- GTIN identifica artigo, não prova preço;
+- fotografia é apoio visual, não prova preço ou transação;
+- lojas suportadas: Continente e Pingo Doce;
+- falha de imagem não remove artigo nem altera montante.
 
-O cabeçalho mantém hambúrguer + título à esquerda, notificações à direita, safe area, foco e `prefers-reduced-motion`.
+### Pesquisa e imagens
 
-### Estabilidade `75-stability1`
+- `market-experience.js`: pesquisa atual através de `cesta.pt`;
+- Open Food Facts pode fornecer fotografia de referência quando existe correspondência forte;
+- `market-official-images.js` valida fotografias oficiais do Continente/Pingo Doce quando existe PID compatível;
+- `v75-stability.js` trata estados de imagem do catálogo tradicional;
+- `v75-market-featured.js` trata apenas os cartões de destaque móveis.
 
-`v75-stability.css/js` corrige tipografia, overflow, safe areas, controlos mobile, navegação inferior, diálogos, tabelas, `theme-color` e estados visuais do Mercado, sem aceder a estado financeiro.
+### Destaques `75-featured1`
 
-### Geometria `75-layout1`
+O bloco antigo vinha de `v74-experience.js` e usava três colunas mobile com área de imagem de 66 px. `75-featured1` não cria uma segunda página Mercado: atua sobre o DOM já gerado e mantém os mesmos `data-edit-market` e `data-v74-market-browser`.
 
-`v75-layout-polish.css` é CSS-only e define largura útil, ritmo vertical, proporções de painéis, formulários, grelhas e breakpoints entre desktop, web compacto, tablet e smartphone.
+Estrutura visual:
 
-### Drawer móvel `75-drawer2`
+- cabeçalho com ícone, título, subtítulo e **Ver todos**;
+- carrossel horizontal com `scroll-snap-type: x mandatory`;
+- cartão com largura aproximada de 78–84% do viewport móvel;
+- área de imagem estável de 140–154 px;
+- categoria em pill;
+- nome limitado a duas linhas;
+- preço em linha própria;
+- rodapé **Na sua lista**;
+- controlos anterior/seguinte e indicadores de posição.
 
-`v75-drawer-theme.css` é a última camada CSS do bundle e atua apenas em `max-width: 820px`.
+Política de imagem:
 
-Objectivo visual:
+1. tenta usar a imagem já existente no item/DOM, apenas se o URL passar validação de host e caminho;
+2. se não existir ou falhar e houver `productCode` GTIN válido, consulta apenas esse GTIN no Open Food Facts;
+3. a imagem recuperada é usada só na apresentação e não é persistida por esta camada;
+4. se continuar indisponível, mostra fallback local por categoria, sem broken-image icon e sem deformar o cartão.
 
-- manter a página principal clara/branca perceptível;
-- apresentar a navegação pelo lado direito;
-- usar a **mesma família cromática do cabeçalho**, em vez do azul saturado da revisão anterior;
-- manter o protótipo como referência de composição, sem copiar a direção esquerda.
+Hosts aceites pela camada de destaque:
 
-Contrato espacial e visual:
+- `images.openfoodfacts.org`;
+- `www.continente.pt` apenas em paths de catálogo oficial compatíveis;
+- `static.pingodoce.pt` apenas em paths oficiais de imagens de produto.
 
-- `.nav-drawer` mantém `inset: 0 0 0 auto`;
-- largura canónica: `min(320px, calc(100vw - 72px))`;
-- `.nav-drawer-shell` usa `#003f4c → #005965 → #087a78` com radial teal subtil;
-- canto interno: `border-radius: 28px 0 0 28px`;
-- backdrop leve e sem blur;
-- ícones e labels em branco/opacidades controladas;
-- item ativo usa menta translúcida e não cartão branco;
-- `#mobileMenuBtn` continua a ser o mesmo nó e, no estado aberto, aparece como X no canto superior direito;
-- `icon.svg`, **Conta de Casa**, `Ocultar valores` e `Bloquear` permanecem integrados.
+A camada não envia nomes da lista para um serviço externo para obter imagem; a recuperação automática usa apenas GTIN já existente.
 
-Contrato funcional:
+## 5. Ordem do CSS público
 
-- não cria outra navegação;
-- não altera `mobile-menu-toggle.js`;
-- não muda swipe, Escape, foco, `aria-expanded` ou `aria-current`;
-- não lê/escreve `appState`;
-- não altera `core.js`, `finance.js`, IndexedDB, cofre, QR, Mercado ou sincronização.
-
-## 4. Ordem do CSS público
-
-1. base histórica necessária (`styles.css`, `design-system.css`, `mobile-layout.css` e módulos específicos);
+1. base histórica necessária;
 2. `v74-experience.css`;
 3. `v75-architecture.css`;
 4. `v75-header-refinement.css`;
 5. `v75-stability.css`;
 6. `v75-layout-polish.css`;
-7. `v75-drawer-theme.css`.
+7. `v75-market-featured.css`;
+8. `v75-drawer-theme.css`.
 
-`v75-drawer-blue.css` deixa de integrar o bundle público.
+## 6. Ordem dos scripts relevantes
 
-## 5. Navegação
+A base funcional e Mercado carregam primeiro. Depois:
+
+1. `v74-experience.js`;
+2. `v75-architecture.js`;
+3. `v75-stability.js`;
+4. `v75-market-featured.js`.
+
+`v75-market-featured.js` usa `MutationObserver` para reaplicar a composição quando `v74-experience.js` recria `#cdcMarketHome`, sem escrever no estado.
+
+## 7. Navegação
 
 Navegação primária móvel:
 
@@ -111,39 +127,9 @@ Navegação primária móvel:
 4. Planeamento;
 5. Mais.
 
-O drawer mantém a arquitetura real da navegação. `mobile-menu-toggle.js` continua responsável pelo mesmo `#mobileMenuBtn`, animação hambúrguer/X, Escape, foco e swipe da direita.
+O drawer permanece do lado direito e `mobile-menu-toggle.js` continua responsável por hambúrguer/X, Escape, foco e swipe.
 
-## 6. Geometria por página
-
-- **Início:** grelhas proporcionais e redução de colunas em web compacto;
-- **Despesas:** pesquisa, filtros e ações refluem pela largura disponível;
-- **Calendário:** sete colunas preservadas, com densidade progressiva em mobile;
-- **Mercado:** pesquisa/ação/filtros refluem sem alterar preços ou estado de compra;
-- **Planeamento:** duas colunas no desktop e uma no mobile;
-- **Relatórios:** KPIs e painéis adaptativos;
-- **Metas:** `auto-fit` no desktop e uma coluna no telemóvel;
-- **Segurança/Sincronização:** duas colunas apenas quando há largura suficiente;
-- **Diagnóstico:** duas colunas no desktop e uma no mobile;
-- **Definições:** coluna centrada no desktop e largura total disponível no mobile.
-
-## 7. Despesas, faturas e QR
-
-O formulário continua a ser criado por `forms.js`. Manual, Ler fatura e QR Code reutilizam `invoice-capture.js`; o utilizador revê os dados antes de guardar. `75-drawer2` não modifica handlers, campos, validação ou conteúdo do QR.
-
-## 8. Mercado
-
-- preço pesquisado → `estimatedCents`;
-- preço confirmado/pago → `actualCents`;
-- GTIN identifica artigo, não prova preço;
-- fotografia validada é apoio visual;
-- lojas suportadas: Continente e Pingo Doce;
-- falha de imagem remota não altera artigo ou preço.
-
-## 9. Sincronização e segurança
-
-O painel real permanece em `#syncPanel`. A sincronização continua opcional e cifrada. PIN, palavra-passe, PBKDF2-SHA-256 e AES-GCM permanecem inalterados.
-
-## 10. Responsividade e acessibilidade
+## 8. Responsividade e acessibilidade
 
 - breakpoint principal: `820px`;
 - web compacto: `821–1120px`;
@@ -151,12 +137,17 @@ O painel real permanece em `#syncPanel`. A sincronização continua opcional e c
 - refinamentos compactos: `540px`, `430px`, `359px` e `350px`;
 - safe areas iOS preservadas;
 - alvos principais de 44–48 px;
-- inputs/selects/textarea a 16 px no mobile;
 - `prefers-reduced-motion` respeitado;
 - pinch zoom não bloqueado;
-- drawer mantém scroll interno e foco visível.
+- carrossel usa scroll horizontal próprio e não deve causar overflow da página.
 
-## 11. Distribuição pública
+## 9. Segurança
+
+`75-featured1` é read-only relativamente ao estado. Não chama `commit()`, `saveState()`, não substitui `appState` e não altera `estimatedCents` ou `actualCents`.
+
+A recuperação de imagem por GTIN usa `https://world.openfoodfacts.org/api/v2/product/<GTIN>.json` com `credentials: omit`, `referrerPolicy: no-referrer` e CSP já compatível com o domínio.
+
+## 10. Versionamento público
 
 - `BUILD = v75`;
 - `UI_REV = 74-ui1`;
@@ -168,32 +159,23 @@ O painel real permanece em `#syncPanel`. A sincronização continua opcional e c
 - `STABILITY_REV = 75-stability1`;
 - `LAYOUT_REV = 75-layout1`;
 - `DRAWER_REV = 75-drawer2`;
-- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2`.
+- `FEATURED_REV = 75-featured1`;
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1`.
 
-`v75-drawer-theme.css` integra a allowlist Pages e o Service Worker com revisão própria.
+## 11. QA e deploy
 
-## 12. CI e deploy
+`tests/v75-market-featured.test.cjs` verifica estrutura do carrossel, fallback, segurança read-only, distribuição, ordem dos assets e cache. CI valida ainda a sintaxe de `v75-market-featured.js`; GitHub Pages repete o teste antes do deploy.
 
-A validação cobre testes financeiros, segurança, isolamento, datas, faturas, QR, Mercado, arquitetura v75, estabilidade, geometria, menu animado, responsividade, navegação, acessibilidade e sincronização.
+## 12. Validação manual
 
-`tests/v75-drawer-theme.test.cjs` valida:
+Confirmar em iPhone/Safari/PWA:
 
-- lado direito;
-- proporção do drawer;
-- correspondência cromática com `75-header2`;
-- ordem do CSS;
-- cache e distribuição;
-- ausência de acesso ao estado financeiro.
-
-## 13. Validação manual ainda necessária
-
-Confirmar em dispositivo real:
-
-- drawer entra pela direita;
-- página clara permanece visível à esquerda;
-- gradiente petróleo/teal corresponde ao cabeçalho;
-- contraste de ícones e labels;
-- X no canto superior direito;
-- swipe, safe areas e scroll interno;
-- tema escuro;
-- ausência de overflow horizontal.
+- cartão largo e swipe natural;
+- fotografia quando disponível;
+- fallback elegante quando não disponível;
+- nome em duas linhas no máximo;
+- preço isolado;
+- controlos do carrossel;
+- **Ver todos** e abertura dos detalhes sem regressão;
+- ausência de overflow lateral da página;
+- tema escuro e safe areas.
