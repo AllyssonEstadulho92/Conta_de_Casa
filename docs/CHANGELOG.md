@@ -1,5 +1,46 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-09 — v75 `75-layout1`: proporção e alinhamento transversal das páginas
+
+### Objetivo
+
+Uniformizar a geometria da aplicação depois da estabilização v75: largura útil, margens, ritmo vertical, grelhas, cartões, filtros, formulários e distribuição de colunas passam a adaptar-se ao tipo de página e à largura disponível sem alterar estado financeiro, persistência, cofre, QR ou sincronização.
+
+### Alterações
+
+- criada `v75-layout-polish.css` como camada CSS-only carregada depois de `v75-stability.css`;
+- coluna útil desktop passa a ter máximo comum de 1280 px com padding fluido;
+- `.page.active` usa ritmo vertical comum, eliminando diferenças de espaçamento entre páginas;
+- painéis, cabeçalhos, toolbars, tabs, formulários, button rows, listas e detail grids recebem proporções coerentes;
+- Início redistribui os painéis no desktop e reduz colunas em web compacto antes de comprimir conteúdo;
+- KPIs do Início usam seis colunas em desktop largo e três entre 821–1120 px;
+- Despesas e Mercado passam a distribuir pesquisa, botão de ação e filtros conforme a largura disponível;
+- Calendário preserva sete dias, com células maiores no desktop e densidade reduzida progressivamente em smartphone;
+- Planeamento, Relatórios e Diagnóstico usam duas colunas proporcionais no desktop e uma coluna no mobile;
+- Metas usa `auto-fit` no desktop e uma coluna no telemóvel;
+- Segurança mantém dois painéis principais no desktop e coloca Sincronização/painéis `span-2` a toda a largura; mobile usa uma coluna;
+- Definições fica centrada numa coluna de leitura adequada no desktop;
+- formulários de duas colunas passam para uma coluna antes de ficarem apertados;
+- categorias do Planeamento reorganizam nome, valor e barra até 430 px para impedir sobreposição;
+- quick dialog, cofre e cartões mobile passam a seguir a mesma coluna espacial do restante produto;
+- adicionada revisão `LAYOUT_REV = 75-layout1` ao `scripts/prepare-pages.cjs`;
+- Service Worker passa a usar cache com sufixo `-stability1-layout1`;
+- criado `tests/v75-layout-polish.test.cjs` para validar geometria, distribuição e proibição de acesso ao estado financeiro;
+- CI e Pages passam a executar o novo teste.
+
+### Segurança e integridade
+
+- `v75-layout-polish.css` não referencia `appState`, montantes, `estimatedCents`, `actualCents`, IndexedDB ou funções de persistência;
+- `core.js`, `finance.js`, `STATE_VERSION = 5`, PIN, PBKDF2-SHA-256, AES-GCM, pagamentos, QR e sincronização não foram modificados;
+- preços, lojas, artigos e capacidades do Mercado não são criados nem alterados por esta revisão.
+
+### Distribuição preparada
+
+- `LAYOUT_REV`: `75-layout1`;
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1`;
+- `v75-layout-polish.css?v=75-layout1` é carregado depois de `v75-stability.css?v=75-stability1`;
+- publicação depende de CI verde, integração em `main` e deploy Pages concluído.
+
 ## 2026-09-08 — v75 `75-stability1`: estabilização transversal da aplicação
 
 ### Objetivo
@@ -8,7 +49,7 @@ Corrigir inconsistências ainda existentes entre páginas, tipografia, ícones, 
 
 ### Alterações
 
-- criada `v75-stability.css` como última camada visual do bundle;
+- criada `v75-stability.css` como camada visual de estabilidade;
 - criada `v75-stability.js` para estados visuais de imagens e sincronização de `theme-color`;
 - stack tipográfica passa a usar fontes nativas do sistema, evitando depender de uma fonte não distribuída;
 - flex/grid recebem contenção defensiva contra overflow e textos longos;
@@ -62,7 +103,7 @@ Reduzir ruído visual no topo da aplicação e aproximar a composição do padr�
 
 ### Compatibilidade de atualização
 
-O sufixo `header2` foi colocado no final da assinatura-base. A revisão `75-stability1` acrescenta depois o seu próprio sufixo sem reordenar a assinatura histórica.
+O sufixo `header2` foi colocado no final da assinatura-base. A revisão `75-stability1` acrescenta depois o seu próprio sufixo sem reordenar a assinatura histórica. `75-layout1` acrescenta um novo sufixo no fim, preservando a sequência de invalidação.
 
 ## 2026-09-08 — v75 publicada: reestruturação total alinhada com o protótipo
 
