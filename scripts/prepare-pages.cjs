@@ -19,14 +19,14 @@ const LAYOUT_REV = '75-layout1';
 const DRAWER_REV = '75-drawer2';
 const FEATURED_REV = '75-featured1';
 const IMAGE_LIBRARY_REV = '75-image-library1';
-const CATALOG_REV = '75-catalog1';
+const CATALOG_REV = '75-catalog2';
 const PD_PHOTO_REV = '75-pd-photo1';
-const PHOTO_LOADER_REV = '75-photo-loader1';
+const PHOTO_LOADER_REV = '75-photo-loader2';
 
 /* Bundle público v75: mantém a experiência v74 como base funcional de apresentação,
    aplica arquitetura, cabeçalho, estabilidade, geometria, biblioteca/destaques/catálogo
-   visual do Mercado, biblioteca progressiva Pingo Doce, carregador de fotografias e
-   a revisão visual do drawer petróleo/teal à direita. Camadas históricas
+   visual do Mercado, biblioteca progressiva Pingo Doce, carregador prioritário de
+   fotografias e a revisão visual do drawer petróleo/teal à direita. Camadas históricas
    ui-consistency.css e v64-runtime.css continuam fora da distribuição. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
