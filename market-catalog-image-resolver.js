@@ -102,4 +102,16 @@
   }
 
   root.CDCMarketCatalogImageResolver=Object.freeze({revision:REVISION,resolve,identity,selectOfficialImage});
+
+  const base=root.CDCOfficialMarketImages;
+  if(base?.resolve&&base?.safeProductUrl&&base?.safeOfficialImageUrl&&!base.catalogDirectResolver){
+    root.CDCOfficialMarketImages=Object.freeze({
+      ...base,
+      catalogDirectResolver:REVISION,
+      resolve(target={}){
+        if(!target?.sourceUrl)return base.resolve(target);
+        return resolve(target).then(result=>result||base.resolve(target));
+      }
+    });
+  }
 })(globalThis);
