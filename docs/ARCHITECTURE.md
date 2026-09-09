@@ -1,16 +1,16 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 8 de setembro de 2026
-Build público: `v75`
-Revisão transversal: `75-stability1`
-Branch pública: `main`
+Atualizado: 9 de setembro de 2026
+Build: `v75`
+Revisão transversal publicada: `75-stability1`
+Revisão de geometria: `75-layout1`
 Distribuição: GitHub Pages / PWA
 
 ## 1. Visão geral
 
 Conta de Casa é uma PWA estática distribuída por GitHub Pages. O modelo continua local-first: regras de negócio, persistência, formulários, cifragem e estado financeiro executam no cliente. A sincronização GitHub é opcional e transfere apenas o envelope cifrado.
 
-A v75 usa camadas de apresentação versionadas sobre o núcleo funcional, evitando reescrever lógica financeira por motivos visuais.
+A v75 usa camadas de apresentação versionadas sobre o núcleo funcional, evitando reescrever lógica financeira por motivos visuais. A revisão `75-layout1` acrescenta uma camada CSS final dedicada a geometria, proporção e alinhamento de páginas.
 
 ## 2. Núcleo preservado
 
@@ -23,6 +23,8 @@ A v75 usa camadas de apresentação versionadas sobre o núcleo funcional, evita
 - sincronização opcional sobre envelope cifrado;
 - sem credenciais, tokens ou segredos embutidos.
 
+Nenhum destes componentes é alterado por `75-layout1`.
+
 ## 3. Camadas de apresentação
 
 ### Base funcional
@@ -34,9 +36,9 @@ A v75 usa camadas de apresentação versionadas sobre o núcleo funcional, evita
 
 ### Arquitetura v75
 
-`v75-architecture.css/js` define a composição final de páginas, navegação, formulários mobile full-screen, scanner QR, Planeamento, Relatórios, Mais, Sincronização e cofre, sem escrever diretamente em estado financeiro.
+`v75-architecture.css/js` define a composição de páginas, navegação, formulários mobile full-screen, scanner QR, Planeamento, Relatórios, Mais, Sincronização e cofre, sem escrever diretamente em estado financeiro.
 
-### Refinamento de cabeçalho `75-header2`
+### Cabeçalho `75-header2`
 
 `v75-header-refinement.css` é carregado depois de `v75-architecture.css` e tem responsabilidade exclusivamente visual sobre a topbar móvel.
 
@@ -44,36 +46,59 @@ Contrato:
 
 - `#mobileMenuBtn` continua a ser o mesmo controlo funcional;
 - `#notificationsBtn` continua a usar os mesmos handlers e `#alertBadge`;
-- `#cdcMobileGreeting` fica oculto no topbar;
+- a saudação/avatar não pertencem ao topbar global;
 - hambúrguer e título ficam à esquerda;
-- notificações ficam isoladas à direita;
+- notificações ficam à direita;
 - safe area, foco e `prefers-reduced-motion` são preservados;
 - a camada não altera rotas, dados, IndexedDB, cofre, QR ou sincronização.
 
-A geometria móvel usa 60 px de linha visual mais `env(safe-area-inset-top)`.
-
 ### Estabilidade transversal `75-stability1`
 
-`v75-stability.css/js` é carregado por último. É uma camada de correção defensiva transversal e não uma segunda arquitetura.
+`v75-stability.css/js` corrige defensivamente tipografia, overflow, safe areas, controlos mobile, navegação inferior, diálogos, tabelas, `theme-color` e estados de imagens do Mercado.
+
+A camada de estabilidade não referencia `appState`, montantes, `estimatedCents`, `actualCents`, IndexedDB ou operações de persistência.
+
+### Geometria e proporção `75-layout1`
+
+`v75-layout-polish.css` é carregado depois de `v75-stability.css`. É CSS-only e tem responsabilidade exclusivamente espacial.
 
 Responsabilidades:
 
-- uniformizar tipografia através da stack nativa do sistema;
-- impedir overflow causado por filhos flex/grid sem `min-width: 0`;
-- estabilizar safe areas horizontais e verticais;
-- manter controlos mobile com dimensão e texto adequados ao Safari;
-- consolidar métricas da navegação inferior e dos diálogos;
-- garantir scroll local das tabelas no desktop e evitar duplicação tabela/cartão em mobile;
-- sincronizar `theme-color` com o tema/cabeçalho visível;
-- gerir visualmente `loading`, `loaded`, `error` e `empty` de imagens do Mercado;
-- impedir abertura/ampliação de imagem quando o recurso remoto falha, restaurando o controlo após carregamento válido;
-- adaptar a grelha de produtos de três para duas colunas até 430 px;
-- apresentar skeleton e fallback sem alterar o produto, preço ou estado financeiro;
-- respeitar `prefers-reduced-motion` e `forced-colors`.
+- definir uma coluna de conteúdo comum (`max-width: 1280px`) no desktop;
+- uniformizar ritmo vertical, padding e raio de painéis;
+- dimensionar cabeçalhos de painel, toolbars, tabs, forms e button rows de forma consistente;
+- redistribuir colunas antes de qualquer cartão ou campo ficar demasiado estreito;
+- adaptar cada página ao seu tipo de informação em desktop, web compacto, tablet e smartphone;
+- manter calendário com sete dias sem gerar scroll lateral desnecessário;
+- alinhar grelhas de detalhes e segurança;
+- tornar Metas `auto-fit` no desktop e coluna única em mobile;
+- centrar Definições numa coluna de leitura adequada;
+- reorganizar categorias de Planeamento em ecrãs estreitos;
+- preservar layouts já específicos de Mercado, QR, cofre, drawer e navegação.
 
-A camada não referencia `appState`, montantes, `estimatedCents`, `actualCents`, IndexedDB ou operações de persistência.
+Contrato de segurança da camada:
 
-## 4. Navegação
+- não lê nem escreve `appState`;
+- não contém `estimatedCents`, `actualCents` ou `amountCents`;
+- não abre IndexedDB;
+- não invoca persistência;
+- não altera autenticação, PIN, cifragem, QR ou sincronização;
+- não cria dados, preços, lojas ou funcionalidades.
+
+## 4. Ordem do CSS público
+
+A ordem relevante é:
+
+1. base histórica necessária (`styles.css`, `design-system.css`, `mobile-layout.css` e módulos específicos);
+2. `v74-experience.css`;
+3. `v75-architecture.css`;
+4. `v75-header-refinement.css`;
+5. `v75-stability.css`;
+6. `v75-layout-polish.css`.
+
+A nova camada fica por último porque resolve apenas geometria final depois de todas as composições anteriores estarem definidas.
+
+## 5. Navegação
 
 Navegação primária móvel:
 
@@ -85,44 +110,105 @@ Navegação primária móvel:
 
 O drawer mantém grupos Principal, Análise e Conta/sistema. `mobile-menu-toggle.js` continua responsável pelo mesmo `#mobileMenuBtn`, animação hambúrguer/X, Escape, foco e swipe da direita.
 
-## 5. Despesas, faturas e QR
+`75-layout1` não cria outra navegação.
+
+## 6. Geometria por página
+
+### Início
+
+- desktop largo: grelha principal proporcional, sem cartões espremidos;
+- web compacto: duas colunas e painéis `span-2` ocupam largura total;
+- KPIs: seis colunas em desktop largo e três no web compacto;
+- mobile: mantém a composição compacta já gerada pela experiência v74/v75.
+
+### Despesas
+
+- pesquisa usa a largura flexível e o botão de ação mantém largura natural no desktop;
+- filtros usam `auto-fit` com largura mínima;
+- em mobile, filtros e comandos seguem os fluxos específicos já existentes, sem duplicar tabela e cartões.
+
+### Calendário
+
+- sete colunas permanecem canónicas;
+- células crescem no desktop;
+- no mobile reduzem padding/tipografia antes de provocar overflow;
+- abaixo de 350 px, detalhe secundário dentro da célula é reduzido para preservar a grelha.
+
+### Mercado
+
+- pesquisa/ação/filtros refluem por largura;
+- imagens e cartões continuam regidos por `75-stability1` e módulos do Mercado;
+- `75-layout1` só ajusta encaixe espacial, não preços nem estados de compra.
+
+### Planeamento
+
+- desktop: duas colunas com proporção aproximada 56/44;
+- mobile: uma coluna;
+- categorias reestruturam nome, valor e barra em ecrãs estreitos para manter legibilidade.
+
+### Relatórios
+
+- KPIs: quatro colunas em desktop largo e duas em web compacto;
+- painéis analíticos usam duas colunas no desktop e uma em mobile.
+
+### Metas
+
+- desktop: `auto-fit` com mínimo de 240 px por cartão;
+- mobile: coluna única.
+
+### Segurança e Sincronização
+
+- desktop: dois painéis principais, com sincronização e painéis `span-2` a ocupar toda a linha;
+- mobile: uma coluna;
+- formulários de sincronização deixam de usar duas colunas quando não há espaço.
+
+### Diagnóstico
+
+- desktop: duas colunas equilibradas;
+- mobile: uma coluna.
+
+### Definições
+
+- painel `narrow` centrado no desktop, com largura máxima de 720 px;
+- mobile ocupa a coluna disponível.
+
+## 7. Despesas, faturas e QR
 
 O formulário continua a ser criado por `forms.js`. Na criação de nova despesa, a camada v75 apresenta Manual, Ler fatura e QR Code. Fotografia e QR continuam a usar `invoice-capture.js`; o utilizador revê os dados antes de guardar.
 
-## 6. Mercado
+`75-layout1` não modifica handlers, campos, validação ou conteúdo do QR.
+
+## 8. Mercado
 
 - preço pesquisado → `estimatedCents`;
 - preço confirmado/pago → `actualCents`;
 - GTIN identifica artigo, não prova preço;
 - fotografia validada é apoio visual;
 - lojas suportadas: Continente e Pingo Doce;
-- outras cadeias não são apresentadas sem suporte real;
-- falhas de imagem remota não alteram o artigo: a área passa a `Imagem indisponível`, a ampliação fica desativada enquanto o recurso está inválido e a geometria permanece estável;
-- a grelha de produtos usa três colunas quando existe largura confortável e duas colunas até 430 px.
+- falha de imagem remota não altera artigo ou preço;
+- a grelha móvel de produtos continua a reduzir densidade em ecrãs compactos.
 
-## 7. Planeamento, Relatórios e Mais
+## 9. Sincronização e segurança
 
-Planeamento prioriza mês, orçamento, gasto, disponível e categorias. Relatórios reutiliza cálculos existentes. Mais concentra navegação secundária e evita duplicar os destinos principais.
+O painel real permanece em `#syncPanel`. A sincronização continua opcional e cifrada. PIN, palavra-passe, PBKDF2-SHA-256 e AES-GCM permanecem inalterados.
 
-## 8. Sincronização e segurança
+A camada de geometria apenas reorganiza colunas e largura dos elementos existentes.
 
-O painel real permanece em `#syncPanel`; a v75 apenas acrescenta apresentação. A sincronização continua opcional e cifrada. PIN, palavra-passe, PBKDF2-SHA-256 e AES-GCM permanecem inalterados.
+## 10. Responsividade e acessibilidade
 
-## 9. Responsividade e acessibilidade
-
-- breakpoint principal: `820px`;
-- safe areas iOS em topbar, drawer, scanner, formulários e navegação inferior;
-- safe areas laterais também são aplicadas ao conteúdo e header;
+- breakpoint principal funcional: `820px`;
+- faixa adicional de web compacto: `821–1120px`;
+- desktop largo: `>=1121px`;
+- refinamentos compactos: `540px`, `430px` e `350px`;
+- safe areas iOS continuam em topbar, drawer, scanner, formulários e navegação inferior;
 - alvos principais de 44–48 px;
-- inputs/selects/textarea usam 16 px no mobile para evitar zoom de foco no Safari;
+- inputs/selects/textarea mantêm 16 px no mobile;
 - `prefers-reduced-motion` respeitado;
-- `forced-colors` recebe foco/bordas compatíveis;
-- foco e ARIA preservados;
+- `forced-colors` continua tratado pela estabilidade;
 - pinch zoom não é bloqueado;
-- tabelas ficam confinadas ao próprio scroll no desktop;
-- a grelha móvel de produtos reduz densidade em ecrãs até 430 px.
+- redução de colunas é preferida a compressão excessiva.
 
-## 10. Distribuição pública
+## 11. Distribuição pública
 
 - `BUILD = v75`;
 - `UI_REV = 74-ui1`;
@@ -132,25 +218,34 @@ O painel real permanece em `#syncPanel`; a v75 apenas acrescenta apresentação.
 - `ARCHITECTURE_REV = 75-architecture2`;
 - `HEADER_REV = 75-header2`;
 - `STABILITY_REV = 75-stability1`;
-- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1`.
+- `LAYOUT_REV = 75-layout1`;
+- cache preparado: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1`.
 
-`ui-consistency.css` e `v64-runtime.css` continuam fora de `dist`. `v75-header-refinement.css` e `v75-stability.css/js` integram o bundle Pages com query de revisão própria.
-
-## 11. Atualização e cache
-
-`sw.js` utiliza cache versionado e elimina caches antigos na ativação. O bundle público carrega `v75-stability.css/js?v=75-stability1` depois das camadas anteriores, garantindo que a revisão transversal não fica presa ao cache `header2`.
+`v75-layout-polish.css` integra a allowlist Pages e o Service Worker com revisão própria.
 
 ## 12. CI e deploy
 
-A validação de CI e a verificação pré-Pages cobrem o mesmo conjunto crítico de camadas v74/v75:
+A validação cobre:
 
-- sintaxe de `v74-experience.js`, `v75-architecture.js` e `v75-stability.js`;
-- `tests/v75-architecture.test.cjs`;
-- `tests/v75-stability.test.cjs`;
-- regressões financeiras, segurança, sincronização, mobile e acessibilidade já existentes.
+- testes financeiros, segurança, isolamento, datas, faturas, QR e sincronização existentes;
+- arquitetura v75;
+- estabilidade v75;
+- `tests/v75-layout-polish.test.cjs` para o contrato de geometria, distribuição, cache e proibição de acesso ao estado financeiro;
+- responsividade, mobile, navegação e acessibilidade já existentes.
 
-O deploy Pages continua condicionado a CI concluído com sucesso em `main`.
+O workflow Pages repete o teste de `75-layout1` antes de preparar o artefacto público.
 
 ## 13. Validação manual ainda necessária
 
-Confirmar em dispositivo real: safe area, títulos longos, badge de notificação, animação hambúrguer/X, orientação, tema escuro, formulários sem zoom, navegação inferior, ausência de overflow e fallback de imagens do Mercado.
+Após publicação, confirmar em dispositivo real:
+
+- proporções das páginas;
+- alinhamento de títulos, cartões, filtros e botões;
+- calendário em 320/375/390/430 px;
+- Planeamento e Segurança sem elementos espremidos;
+- safe areas;
+- drawer e navegação inferior;
+- tema escuro;
+- formulários sem zoom;
+- ausência de overflow horizontal;
+- estados do Mercado com rede lenta/offline.
