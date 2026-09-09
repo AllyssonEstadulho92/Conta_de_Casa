@@ -186,3 +186,26 @@ O bloco móvel **Produtos em destaque** continuava a usar a grelha histórica de
 10. Aceitar apenas hosts de imagem explicitamente validados: `images.openfoodfacts.org`, paths oficiais do Continente em `www.continente.pt` e paths oficiais do Pingo Doce em `static.pingodoce.pt`.
 11. `v75-market-featured.js` pode ler `appState.market` para compor o cartão, mas não pode chamar `commit()`, `saveState()`, substituir `appState` ou escrever montantes.
 12. Adicionar `FEATURED_REV = 75-featured1`, novo sufixo de cache e `tests/v75-market-featured.test.cjs`; CI e Pages devem validar a revisão antes da publicação.
+
+## D-047 — Fotografias oficiais são indexadas por retalhista + PID numa biblioteca separada
+Data: 9 de setembro de 2026 · Estado: aceite.
+
+### Problema
+
+O pipeline conseguia resolver fotografias oficiais do Continente e Pingo Doce, mas cada nova sessão/pesquisa podia voltar a consultar as fontes e cartões anteriormente resolvidos podiam regressar a placeholder até a imagem ser novamente encontrada. Copiar em massa imagens dos retalhistas para o repositório também criaria problemas de manutenção, escala e direitos de utilização.
+
+### Decisão
+
+1. Criar `market-image-library.js` com revisão `75-image-library1`.
+2. Usar uma base IndexedDB própria, `conta-de-casa-market-image-library`, separada do estado financeiro.
+3. A chave canónica é `marketId|pid`; não usar nome textual como identidade da fotografia.
+4. Guardar apenas metadados e URL oficial validado, nunca binários copiados dos retalhistas.
+5. Continente só é aceite em `www.continente.pt`, catálogo `Sites-col-master-catalog` e PID correspondente.
+6. Pingo Doce só é aceite em `static.pingodoce.pt`, catálogo `Sites-pingo-doce-master`, tamanho oficial `large|medium|small` e PID correspondente.
+7. A biblioteca observa o catálogo real: captura imagens oficiais resolvidas e restaura-as quando o mesmo SKU reaparece.
+8. Entradas positivas expiram ao fim de 45 dias para reduzir URLs obsoletos.
+9. Falha ou expiração regressa ao pipeline normal/fallback; nunca altera o artigo, preço, quantidade ou estado de compra.
+10. O módulo não pode referenciar `appState`, `saveState()`, `commit()`, cofre, pagamentos ou sincronização financeira.
+11. `IMAGE_LIBRARY_REV = 75-image-library1`; o asset deve carregar antes da política/auditoria/bridge de imagens e ter cache próprio no Service Worker.
+12. CI e Pages devem executar `tests/market-image-library.test.cjs` e validar sintaxe, isolamento, hosts/PID, distribuição e cache.
+13. “Biblioteca de todas as imagens” significa biblioteca extensível de todos os SKUs oficiais encontrados/validados; não se declara cobertura integral do catálogo dinâmico dos retalhistas sem uma fonte oficial exaustiva e autorizada.
