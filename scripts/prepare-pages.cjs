@@ -17,11 +17,12 @@ const HEADER_REV = '75-header2';
 const STABILITY_REV = '75-stability1';
 const LAYOUT_REV = '75-layout1';
 const DRAWER_REV = '75-drawer2';
+const FEATURED_REV = '75-featured1';
 
 /* Bundle público v75: mantém a experiência v74 como base funcional de apresentação,
-   aplica arquitetura, cabeçalho, estabilidade, geometria e, por último, a revisão visual
-   do drawer petróleo/teal à direita. Camadas históricas ui-consistency.css e v64-runtime.css
-   continuam fora da distribuição. */
+   aplica arquitetura, cabeçalho, estabilidade, geometria, destaques do Mercado e a revisão
+   visual do drawer petróleo/teal à direita. Camadas históricas ui-consistency.css e
+   v64-runtime.css continuam fora da distribuição. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -42,6 +43,7 @@ const PUBLIC_FILES = Object.freeze([
   'v75-header-refinement.css',
   'v75-stability.css',
   'v75-layout-polish.css',
+  'v75-market-featured.css',
   'v75-drawer-theme.css',
   'core.js',
   'finance.js',
@@ -66,6 +68,7 @@ const PUBLIC_FILES = Object.freeze([
   'v74-experience.js',
   'v75-architecture.js',
   'v75-stability.js',
+  'v75-market-featured.js',
   'release-manifest.json',
   'sw.js',
   'manifest.webmanifest',
@@ -105,6 +108,7 @@ if(!index.includes('v75-architecture.css')) index=index.replace('</head>',`  <li
 if(!index.includes('v75-header-refinement.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-header-refinement.css?v=${HEADER_REV}" />\n</head>`);
 if(!index.includes('v75-stability.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-stability.css?v=${STABILITY_REV}" />\n</head>`);
 if(!index.includes('v75-layout-polish.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-layout-polish.css?v=${LAYOUT_REV}" />\n</head>`);
+if(!index.includes('v75-market-featured.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-market-featured.css?v=${FEATURED_REV}" />\n</head>`);
 if(!index.includes('v75-drawer-theme.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-drawer-theme.css?v=${DRAWER_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
@@ -122,6 +126,7 @@ if(!index.includes('mobile-menu-toggle.js')) index=index.replace('</body>',`  <s
 if(!index.includes('v74-experience.js')) index=index.replace('</body>',`  <script src="./v74-experience.js?v=${EXPERIENCE_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-architecture.js')) index=index.replace('</body>',`  <script src="./v75-architecture.js?v=${ARCHITECTURE_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-stability.js')) index=index.replace('</body>',`  <script src="./v75-stability.js?v=${STABILITY_REV}" defer></script>\n</body>`);
+if(!index.includes('v75-market-featured.js')) index=index.replace('</body>',`  <script src="./v75-market-featured.js?v=${FEATURED_REV}" defer></script>\n</body>`);
 fs.writeFileSync(distIndex,index);
 
 const distEvents=path.join(DIST,'events.js');
@@ -137,4 +142,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; layout ${LAYOUT_REV}; drawer ${DRAWER_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; layout ${LAYOUT_REV}; drawer ${DRAWER_REV}; featured ${FEATURED_REV}).`);
