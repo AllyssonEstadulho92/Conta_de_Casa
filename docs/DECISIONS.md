@@ -1,6 +1,6 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 8 de setembro de 2026
+Atualizado: 9 de setembro de 2026
 
 Este ficheiro mantém as decisões vigentes necessárias para continuidade. O detalhe histórico permanece no Git e em `release-manifest.json`.
 
@@ -104,7 +104,7 @@ A v75 acumulou camadas funcionais e visuais válidas, mas continuavam possíveis
 
 ### Decisão
 
-1. Criar `v75-stability.css/js` como última camada do bundle v75.
+1. Criar `v75-stability.css/js` como camada de estabilidade do bundle v75.
 2. Limitar a camada a apresentação, responsividade, acessibilidade e estados visuais.
 3. Não ler nem escrever `appState`, montantes, `estimatedCents`, `actualCents`, IndexedDB, cofre ou sincronização.
 4. Uniformizar tipografia com a stack nativa do sistema para evitar dependência de fontes não distribuídas.
@@ -114,5 +114,27 @@ A v75 acumulou camadas funcionais e visuais válidas, mas continuavam possíveis
 8. Falha de fotografia remota no Mercado é um estado visual explícito (`Imagem indisponível`), nunca remoção do artigo nem alteração de preço.
 9. `theme-color` acompanha tema e cabeçalho visível para reduzir discrepâncias entre Safari/PWA e a aplicação.
 10. A revisão é `75-stability1`; o cache recebe o sufixo `-stability1`.
-11. CI e verificação pré-deploy devem cobrir a mesma arquitetura v74/v75, incluindo a nova camada e respetivo teste.
+11. CI e verificação pré-deploy devem cobrir a mesma arquitetura v74/v75, incluindo a camada e respetivo teste.
 12. A camada deve ser consolidada numa futura release apenas depois de validação real em hardware; não remover regras históricas sem prova de que deixaram de ser referenciadas.
+
+## D-043 — Geometria de páginas é uma responsabilidade CSS separada
+Data: 9 de setembro de 2026 · Estado: aceite.
+
+### Problema
+
+As páginas já partilhavam identidade visual e regras de estabilidade, mas os componentes continuavam a herdar grelhas genéricas de épocas diferentes. Isso podia produzir páginas com larguras, proporções e densidades diferentes, sobretudo entre desktop largo, web compacto e telemóvel. Alterar lógica de renderização ou núcleo financeiro para corrigir geometria seria risco desnecessário.
+
+### Decisão
+
+1. Criar `v75-layout-polish.css` como camada CSS-only carregada depois de `v75-stability.css`.
+2. A revisão chama-se `75-layout1` e não altera o build funcional `v75`.
+3. Todas as páginas usam uma coluna de conteúdo comum no desktop, com máximo de 1280 px e padding fluido.
+4. Grelhas reduzem colunas antes de comprimir cartões, formulários ou textos abaixo de uma largura útil adequada.
+5. Início, Despesas, Calendário, Mercado, Planeamento, Relatórios, Metas, Segurança, Diagnóstico e Definições recebem regras espaciais específicas quando a estrutura de informação o exige.
+6. Tablet/web compacto (`821–1120px`) é tratado separadamente do desktop largo para evitar saltos bruscos de densidade.
+7. Mobile continua a usar o breakpoint funcional de 820 px, com refinamentos adicionais em 540, 430 e 350 px.
+8. A camada não pode referenciar `appState`, montantes, `estimatedCents`, `actualCents`, IndexedDB ou operações de persistência.
+9. A camada não cria rotas, dados, preços, lojas, handlers ou capacidades; só altera geometria e apresentação.
+10. O Service Worker e `prepare-pages.cjs` devem versionar e distribuir `v75-layout-polish.css` explicitamente para evitar cache antigo.
+11. CI e Pages devem executar `tests/v75-layout-polish.test.cjs` antes de publicação.
+12. Esta camada não substitui a validação em hardware real; qualquer consolidação futura em `design-system.css` só deve ocorrer depois de testes físicos e prova de ausência de regressões.
