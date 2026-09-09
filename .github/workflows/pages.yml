@@ -51,6 +51,7 @@ jobs:
           node --check ui-icons.js
           node --check invoice-capture.js
           node --check app-update.js
+          node --check market-image-library.js
           node --check market-retailer-image-policy.js
           node --check market-image-audit.js
           node --check market-official-images.js
@@ -75,6 +76,7 @@ jobs:
           node tests/market-product-images.test.cjs
           node tests/market-image-audit.test.cjs
           node tests/market-official-images.test.cjs
+          node tests/market-image-library.test.cjs
           node tests/market-barcode.test.cjs
           node tests/market-live-accounting.test.cjs
           node tests/v64-runtime.test.cjs
