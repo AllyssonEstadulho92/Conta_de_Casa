@@ -8,6 +8,8 @@
   const PRIORITY_VISIBLE_LIMIT=6;
   const RETRY_AFTER_MS=30000;
   const LOADER_SETTLE_MS=12000;
+  const PINGO_DB_NAME='conta-de-casa-pingo-doce-photo-library';
+  const PINGO_META_STORE='meta';
   let observer=null;
   let pollTimer=0;
   let polls=0;
@@ -148,14 +150,41 @@
     }));
   }
 
+  async function resetPingoImageBudgetOnce(){
+    if(!root.indexedDB)return false;
+    return new Promise(resolve=>{
+      let request;
+      try{request=root.indexedDB.open(PINGO_DB_NAME);}catch(_error){resolve(false);return;}
+      request.onerror=()=>resolve(false);
+      request.onupgradeneeded=()=>{try{request.transaction.abort();}catch(_error){}resolve(false);};
+      request.onsuccess=()=>{
+        const db=request.result;
+        if(!db.objectStoreNames.contains(PINGO_META_STORE)){db.close();resolve(false);return;}
+        let tx;try{tx=db.transaction(PINGO_META_STORE,'readwrite');}catch(_error){db.close();resolve(false);return;}
+        const store=tx.objectStore(PINGO_META_STORE);
+        const get=store.get('scheduler');
+        get.onerror=()=>{};
+        get.onsuccess=()=>{
+          const current=get.result||{key:'scheduler'};
+          if(current.photoRuntimeRevision===REVISION)return;
+          store.put({...current,key:'scheduler',imagesToday:0,lastImageAt:0,photoRuntimeRevision:REVISION});
+        };
+        tx.oncomplete=()=>{db.close();resolve(true);};
+        tx.onerror=()=>{db.close();resolve(false);};
+        tx.onabort=()=>{db.close();resolve(false);};
+      };
+    });
+  }
+
   async function warmOnMarketEntry(){
     if(enteredMarket||!marketIsActive())return;
     enteredMarket=true;
     document.documentElement.classList.add('market-photos-warming');
     try{
-      const pending=root.CDCPingoDocePhotoLibrary?.warmPending?.();
+      await Promise.resolve(root.CDCPingoDocePhotoLibrary?.warmPending?.());
+      await resetPingoImageBudgetOnce();
       const sync=root.CDCPingoDocePhotoLibrary?.syncNow?.({seeds:2});
-      await Promise.allSettled([Promise.resolve(pending),Promise.resolve(sync),warmVisibleCards()]);
+      await Promise.allSettled([Promise.resolve(sync),warmVisibleCards()]);
     }catch(_error){}
     finally{
       document.documentElement.classList.remove('market-photos-warming');
