@@ -19,15 +19,14 @@ const LAYOUT_REV = '75-layout1';
 const DRAWER_REV = '75-drawer2';
 const FEATURED_REV = '75-featured1';
 const IMAGE_LIBRARY_REV = '75-image-library1';
-const CATALOG_REV = '75-catalog2';
+const CATALOG_REV = '75-catalog3';
 const PD_PHOTO_REV = '75-pd-photo2';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 
 /* Bundle público v75: mantém a experiência v74 como base funcional de apresentação,
    aplica arquitetura, cabeçalho, estabilidade, geometria, biblioteca/destaques/catálogo
-   visual do Mercado, biblioteca Pingo Doce abrível/local, carregador prioritário limitado
-   de fotografias e a revisão visual do drawer petróleo/teal à direita. Camadas históricas
-   ui-consistency.css e v64-runtime.css continuam fora da distribuição. */
+   visual estável do Mercado, biblioteca Pingo Doce abrível/local, carregador prioritário
+   limitado de fotografias e a revisão visual do drawer petróleo/teal à direita. */
 const PUBLIC_FILES = Object.freeze([
   'index.html','styles.css','design-system.css','mobile-layout.css','market-experience.css','market-brand.css','market-category-groups.css','market-barcode.css','ui-icons.css','market-shopping-focus.css','mobile-menu-toggle.css','invoice-capture.css','app-update.css','market-image-audit.css','v74-experience.css','v75-architecture.css','v75-header-refinement.css','v75-stability.css','v75-layout-polish.css','v75-market-featured.css','market-visual-catalog.css','pingo-doce-photo-library.css','market-photo-loader.css','v75-drawer-theme.css','core.js','finance.js','render.js','forms.js','sync.js','sync-conflict-policy.js','events.js','mobile-menu-toggle.js','market-experience.js','market-branding.js','market-category-groups.js','market-barcode.js','ui-icons.js','invoice-capture.js','app-update.js','market-image-library.js','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','market-catalog-image-resolver.js','market-visual-catalog.js','pingo-doce-photo-library.js','market-photo-loader.js','v64-runtime.js','market-shopping-focus.js','v74-experience.js','v75-architecture.js','v75-stability.js','v75-market-featured.js','release-manifest.json','sw.js','manifest.webmanifest','icon.svg','LUCIDE_LICENSE.txt'
 ]);
