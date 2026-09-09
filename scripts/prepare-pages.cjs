@@ -19,7 +19,7 @@ const LAYOUT_REV = '75-layout1';
 const DRAWER_REV = '75-drawer2';
 const FEATURED_REV = '75-featured1';
 const IMAGE_LIBRARY_REV = '75-image-library1';
-const CATALOG_REV = '75-catalog2';
+const CATALOG_REV = '75-catalog3';
 const PD_PHOTO_REV = '75-pd-photo1';
 const PHOTO_LOADER_REV = '75-photo-loader2';
 
