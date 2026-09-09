@@ -6,116 +6,94 @@ Este ficheiro mantém as decisões vigentes necessárias para continuidade. O hi
 
 ## Decisões estruturais vigentes
 
-- O estado financeiro continua local-first e separado das camadas visuais/de catálogo.
-- Valores monetários são guardados em cêntimos; `STATE_VERSION = 5` permanece estável.
+- Estado financeiro local-first e separado das camadas visuais/de catálogo.
+- Valores monetários em cêntimos; `STATE_VERSION = 5` permanece estável.
 - Fotografias nunca são prova de preço ou transação.
 - Preço pesquisado é estimativa; `actualCents` representa valor confirmado/pago.
 - GTIN/PID identifica o artigo, não prova o preço.
 - Mercado não pode reescrever cofre, cálculos ou sincronização por motivos visuais.
 - Drawer móvel e sidebar permanecem no lado direito.
-- Cabeçalho móvel permanece minimalista: hambúrguer+título à esquerda, notificações à direita.
-- A aplicação usa Lucide local como sistema de ícones.
+- Cabeçalho móvel permanece minimalista.
 - Falhas de imagem têm fallback visual e nunca removem o artigo.
 - Releases públicas relevantes usam revisão própria e cache invalidável.
 
 ## D-046 — Destaques do Mercado em carrossel largo
 
-Estado: aceite.
-
-`75-featured1` substitui a grelha mobile apertada por carrossel horizontal, reserva área estável para a fotografia, limita o nome a duas linhas e usa fallback local quando a fotografia não existe.
+Estado: aceite. `75-featured1` usa carrossel horizontal no telemóvel, reserva área estável para fotografia e mantém fallback local.
 
 ## D-047 — Biblioteca geral por retalhista + PID
 
-Estado: aceite.
-
-`75-image-library1` usa IndexedDB separada e chave `marketId|pid`. Guarda apenas metadados e URL oficial validado. Não copia binários para o GitHub e não usa o nome textual como identidade suficiente da fotografia.
+Estado: aceite. `75-image-library1` usa IndexedDB separada e chave `marketId|pid`; guarda metadados e URL oficial validado, não binários.
 
 ## D-048 — Catálogo visual é progressivo e não guarda preços
 
-Data: 9 de setembro de 2026 · Estado: aceite.
+Estado: aceite. O catálogo guarda SKU, categoria, página oficial e timestamps. **Ver preço atual** volta à fonte viva.
 
-1. `75-catalog1` mantém um índice local separado de SKUs reais.
-2. A identidade continua `marketId|pid`.
-3. O catálogo guarda nome, embalagem, categoria, URL oficial e timestamps, mas não persiste preço.
-4. **Ver preço atual** reutiliza a pesquisa viva existente.
-5. A descoberta é limitada por sessão/dia e suspensa offline, em página oculta ou com `Save-Data`.
-6. Fotografias são resolvidas pela página oficial exata quando possível e persistidas apenas depois da validação existente.
-7. “Catálogo completo” é objetivo de cobertura progressiva, nunca afirmação automática de 100%.
+## D-049 — Biblioteca Pingo Doce dedicada
 
-## D-049 — Biblioteca Pingo Doce dedicada aumenta cobertura sem duplicar estado financeiro
+Estado: aceite. `75-pd-photo1` mantém inventário `pending|ready|missing` por `pingo-doce|pid`, com descoberta limitada e sem dados financeiros.
 
-Data: 9 de setembro de 2026 · Estado: aceite.
+## D-050 — Feedback imediato de carregamento
 
-1. `pingo-doce-photo-library.js` usa revisão `75-pd-photo1` e IndexedDB própria.
-2. Descoberta é feita exclusivamente por `search_products` com `stores:['pingodoce']`.
-3. Só entra produto com PID e URL oficial `pingodoce.pt/home/produtos/...-<pid>.html` coerentes.
-4. O inventário mantém `pending|ready|missing`.
-5. A fotografia é persistida na biblioteca geral `75-image-library1`.
-6. A base dedicada não guarda preços, quantidades, faturas, cofre ou credenciais.
-7. Mais de 200 termos em 15 famílias aumentam recall.
-8. Rede permanece limitada e suspensa offline/oculta/Save-Data.
-9. Não se declara cobertura integral sem fonte exaustiva que a prove.
+Estado: substituída parcialmente. `75-photo-loader1` introduziu skeleton/spinner, mas hardware real mostrou que feedback visual sem priorização efetiva não resolvia latência.
 
-## D-050 — Carregamento de fotografia deve ter feedback imediato
+## D-051 — Publicação exige CI e Pages
 
-Data: 9 de setembro de 2026 · Estado: substituída parcialmente por D-052.
+Estado: aceite. Fluxo obrigatório: CI verde da branch → fast-forward para `main` sem force → CI verde de `main` → Pages no mesmo SHA → validação física quando relevante.
 
-`75-photo-loader1` introduziu skeleton, spinner, texto **A carregar fotografia…**, consulta de cache e janela curta de polling. A validação física mostrou que feedback sem priorização real não era suficiente: a UI podia continuar a indicar carregamento enquanto a fila de resolução avançava lentamente por outros SKUs.
+## D-052 — Separar validade oficial de transporte
 
-## D-051 — Publicação exige CI da branch, CI de main e Pages
+Estado: aceite. `75-catalog2` valida página/host/path/PID e deixa o `<img>` comprovar transporte real; URL quebrado é expurgado.
 
-Estado: aceite.
+## D-053 — Evidência em hardware prevalece sobre teste sintético
 
-Fluxo obrigatório: CI verde da branch → fast-forward para `main` sem force → CI verde de `main` → GitHub Pages concluído no SHA integrado → validação física quando relevante.
+Estado: aceite. Testes unitários não provam estabilidade do WebKit; alterações de imagens remotas exigem validação física no iPhone/Safari/PWA.
 
-## D-052 — Separar validade oficial de transporte e priorizar cartões visíveis
+## D-054 — Loader do Mercado deve ser limitado pelo viewport
 
-Data: 9 de setembro de 2026 · Estado: aceite e publicada.
+Data: 9 de setembro de 2026 · Estado: aceite para publicação.
 
-### Factos que motivaram a decisão
+### Factos
 
-A validação real no iPhone mostrou `285 SKUs indexados · 0 fotografias oficiais` na Biblioteca Pingo Doce e cartões presos em **A carregar fotografia…**. Em paralelo, a sonda de CI conseguia obter, para um SKU Pingo Doce conhecido, resposta do reader e URL de imagem com PID exato.
+Depois de `75-photo-loader2`, o iPhone/Safari apresentou **“Um problema ocorreu repetidamente”** em `/#market`. Auditoria encontrou que o loader hidratava os primeiros 18 cartões do DOM, usava até 6 resoluções prioritárias, polling de 500 ms por 24 ciclos, observava toda a `document.body` e ainda disparava `warmPending()` + `syncNow()` na entrada do Mercado.
 
-O runtime anterior fazia ainda um segundo preflight visual com timeout de 10 s antes de permitir persistência e processava imagens Pingo Doce em fila lenta. O orçamento diário de tentativas também era persistido, pelo que falhas anteriores podiam bloquear novas tentativas até ao dia seguinte.
+Não existe perfil de memória WebKit, portanto não se atribui o crash a um único ponto. A causa provável é pressão combinada de DOM, imagens, polling, observers e resolução concorrente.
 
 ### Decisão
 
-1. Criar revisão de distribuição/resolvedor `75-catalog2`.
-2. Depois de validar **página oficial + host/path de imagem + PID exato**, não executar um segundo preflight visual bloqueante no resolvedor direto.
-3. Tratar disponibilidade de transporte no componente que realmente apresenta a imagem.
-4. Se `<img>` falhar no browser, remover a referência da biblioteca com `forget()` e manter fallback/retry.
-5. Criar `75-photo-loader2` para priorizar até 6 cartões visíveis, em vez de depender somente da fila de fundo.
-6. Obter o registo do cartão através da API pública `CDCMarketVisualCatalog.listCategory()`, preservando encapsulamento da IndexedDB.
-7. Para cartão visível sem cache, chamar imediatamente `CDCOfficialMarketImages.resolve()` com `marketId|pid|sourceUrl` exatos e persistir apenas resultado que continue a passar pelo validador oficial.
-8. Reavaliar UI a cada 500 ms por no máximo 24 ciclos; depois de 12 s mudar para **Fotografia a validar…**, sem spinner infinito.
-9. Aplicar cooldown de 30 s por SKU para evitar repetição agressiva.
-10. Libertar uma única vez o contador `imagesToday` herdado do runtime antigo quando `photoRuntimeRevision` ainda não for `75-photo-loader2`, para que um orçamento esgotado por falsos negativos não bloqueie a correção até ao dia seguinte.
-11. Esta recuperação de orçamento só pode tocar na store `meta` da IndexedDB Pingo Doce; não pode alterar produtos, preços, faturas ou estado financeiro.
-12. O loader continua proibido de fazer `fetch()` direto; rede permanece centralizada nos resolvers existentes.
+`75-photo-loader3`:
 
-### Consequências
+1. usa `getBoundingClientRect()` para selecionar apenas cartões realmente visíveis;
+2. limita prioridade a 2 cartões em mobile e 4 em desktop;
+3. remove hidratação eager dos primeiros 18 cartões;
+4. processa o pequeno conjunto prioritário sequencialmente;
+5. reduz polling para 1200 ms e 10 ciclos;
+6. observa apenas `#page-market` e alterações relevantes;
+7. coalesca scans com `requestAnimationFrame`;
+8. deixa a biblioteca Pingo Doce usar o scheduler próprio, sem `warmPending()+syncNow()` automático na entrada;
+9. põe URL quebrado em quarentena local de 30 s e remove-o da biblioteca antes de nova tentativa;
+10. não toca no estado financeiro.
 
-- melhora a latência dos produtos que o utilizador está efetivamente a ver;
-- reduz falso negativo de Safari causado por dupla validação de transporte;
-- mantém validação estrita de identidade/origem;
-- uma imagem remota que deixou de existir não fica permanentemente presa na cache;
-- nenhuma promessa de 100% de cobertura ou tempo fixo de carregamento é feita, porque disponibilidade do retalhista/rede continua externa.
+## D-055 — “Biblioteca Pingo Doce” precisa de uma vista abrível independente da sincronização
 
-## D-053 — Evidência em hardware prevalece sobre teste sintético de loader
+Data: 9 de setembro de 2026 · Estado: aceite para publicação.
 
-Data: 9 de setembro de 2026 · Estado: aceite.
+### Facto confirmado
 
-Testes unitários que confirmam presença de spinner/cache não são prova suficiente de que fotografias reais chegam ao estado `ready` no Safari. Para alterações de imagens remotas, a conclusão só é fechada depois de:
+O componente existente chamado **Biblioteca Pingo Doce** não tinha qualquer ação para abrir uma biblioteca. O único botão era **Atualizar biblioteca**, cujo handler executava sincronização de rede e podia permanecer ocupado durante chamadas externas. Portanto, “carrega e não abre” era coerente com o código: não existia vista de abertura.
 
-1. probe de fonte em CI;
-2. testes unitários/regressão;
-3. deploy no SHA testado;
-4. validação física no iPhone/Safari/PWA com contador e cartões reais.
+### Decisão
 
-## D-054 — Runtime2 publicado, eficácia depende de revalidação física
+Criar `75-pd-view1` como camada apenas de leitura/apresentação:
 
-Data: 9 de setembro de 2026 · Estado: aceite.
+- botão **Abrir biblioteca** separado de **Atualizar**;
+- abertura imediata a partir da IndexedDB local, sem `fetch()`;
+- painel/dialog acessível, ecrã completo no mobile;
+- paginação de 12 produtos por vez;
+- pesquisa local por nome/PID;
+- filtros Todos / Com fotografia / Pendentes / Sem fotografia;
+- imagens apenas da `75-image-library1`, com `loading='lazy'`;
+- nenhum resolvedor de rede é disparado ao abrir;
+- nenhum acesso a preços, faturas, PIN, cofre, tokens ou estado financeiro.
 
-`75-catalog2` + `75-photo-loader2` passou CI na branch, foi integrado por fast-forward sem force e passou CI completo de `main` e GitHub Pages no SHA `f485fd4317ad0acbd2475f9ca86efed5b413bb76`.
-
-A publicação técnica está concluída. Contudo, não se considera demonstrado que o contador Pingo Doce sai de zero no iPhone até repetir o cenário real que revelou o erro. Se continuar em zero com o novo cache ativo, a próxima investigação deve focar transporte/CSP/cache/Safari no dispositivo e não apenas testes sintéticos.
+Esta separação impede que o utilizador confunda “abrir” com “sincronizar” e reduz carga no Safari.
