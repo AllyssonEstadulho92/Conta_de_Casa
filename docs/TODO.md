@@ -59,11 +59,10 @@ Atualizado: 9 de setembro de 2026
 - [x] Atualizar Service Worker para cache `-image-library1`.
 - [x] Criar `tests/market-image-library.test.cjs`.
 - [x] Atualizar CI e Pages para validar sintaxe, isolamento, distribuição e cache.
-- [x] Confirmar CI completo verde na branch no SHA técnico `6d48c2d300e20343a1abaf7046f8f59e78a2181f`.
-- [ ] Confirmar CI final verde depois da documentação/release manifest.
-- [ ] Integrar `75-image-library1` em `main`.
-- [ ] Confirmar CI de `main` no SHA integrado.
-- [ ] Confirmar GitHub Pages concluído sobre o SHA integrado.
+- [x] Confirmar CI final verde na branch no SHA `5f7b051c2b767c71581b4dc86054f502629a54cd`.
+- [x] Integrar `75-image-library1` em `main` por fast-forward no mesmo SHA.
+- [x] Confirmar CI de `main` concluído com sucesso no SHA `5f7b051c2b767c71581b4dc86054f502629a54cd`.
+- [x] Confirmar GitHub Pages concluído com sucesso sobre o mesmo SHA.
 
 ## P1 — Validação física de `75-image-library1`
 
