@@ -70,7 +70,7 @@ assert.equal(sandbox.CDCPingoDocePhotoLibrary.identity({pid:'739490'}).key,'ping
 
 assert.match(prepare,/const PD_PHOTO_REV = '75-pd-photo1'/);
 for(const asset of ['pingo-doce-photo-library.css','pingo-doce-photo-library.js'])assert.ok(prepare.includes(`'${asset}'`));
-assert.match(sw,/catalog1-pd-photo1/);
+assert.match(sw,/catalog2-pd-photo1/);
 for(const asset of ['./pingo-doce-photo-library.css','./pingo-doce-photo-library.js'])assert.ok(sw.includes(`'${asset}'`));
 
 const dist=path.join(ROOT,'dist');
