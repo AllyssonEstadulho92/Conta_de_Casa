@@ -13,23 +13,34 @@ const css=read('pingo-doce-photo-library.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 
-assert.match(source,/75-pd-photo1/);
+assert.match(source,/75-pd-photo2/);
 assert.match(source,/conta-de-casa-pingo-doce-photo-library/);
 assert.match(source,/const MARKET_ID='pingo-doce'/);
 assert.match(source,/const STORE_ID='pingodoce'/);
-assert.match(source,/SESSION_QUERY_BUDGET=24/);
-assert.match(source,/DAILY_QUERY_BUDGET=72/);
-assert.match(source,/SESSION_IMAGE_BUDGET=30/);
-assert.match(source,/DAILY_IMAGE_BUDGET=120/);
-assert.match(source,/BACKGROUND_QUERY_INTERVAL_MS=20000/);
-assert.match(source,/BACKGROUND_IMAGE_INTERVAL_MS=7000/);
+assert.match(source,/REQUEST_TIMEOUT_MS=8000/);
+assert.match(source,/SESSION_QUERY_BUDGET=18/);
+assert.match(source,/DAILY_QUERY_BUDGET=60/);
+assert.match(source,/SESSION_IMAGE_BUDGET=20/);
+assert.match(source,/DAILY_IMAGE_BUDGET=80/);
+assert.match(source,/BACKGROUND_QUERY_INTERVAL_MS=24000/);
+assert.match(source,/BACKGROUND_IMAGE_INTERVAL_MS=9000/);
+assert.match(source,/LIBRARY_RENDER_LIMIT=12/);
 assert.match(source,/stores:\[STORE_ID\],limit:20/);
 assert.match(source,/navigator\.connection\?\.saveData/);
 assert.match(source,/document\.visibilityState==='hidden'/);
+assert.match(source,/marketIsActive/);
 assert.match(source,/CDCMarketImageLibrary/);
 assert.match(source,/CDCOfficialMarketImages/);
 assert.match(source,/Biblioteca Pingo Doce/);
-assert.match(source,/Atualizar biblioteca/);
+assert.match(source,/Abrir biblioteca/);
+assert.match(source,/Pré-visualização local/);
+assert.match(source,/data\.pingoDocePhotoOpen|dataset\.pingoDocePhotoOpen/);
+assert.match(source,/noteImageResult/);
+assert.match(source,/reconcileCachedImages/);
+assert.match(source,/listProducts/);
+assert.match(source,/syncNow\(\{seeds:1\}\)/);
+assert.match(source,/observer\.observe\(page,/);
+assert.doesNotMatch(source,/observer\.observe\(document\.body/);
 assert.doesNotMatch(source,/\bappState\b/);
 assert.doesNotMatch(source,/\bsaveState\b/);
 assert.doesNotMatch(source,/\bcommit\s*\(/);
@@ -37,6 +48,8 @@ assert.doesNotMatch(source,/estimatedCents|actualCents|amountCents/);
 assert.doesNotMatch(source,/Authorization|api[_-]?key|tokenGitHub/i);
 
 assert.match(css,/\.pingo-doce-photo-library-status/);
+assert.match(css,/\.pingo-doce-photo-library-panel/);
+assert.match(css,/\.pingo-doce-photo-library-item/);
 assert.match(css,/@media\(max-width:540px\)/);
 assert.match(css,/focus-visible/);
 assert.match(css,/prefers-reduced-motion/);
@@ -46,9 +59,13 @@ sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:'pingo-doce-photo-library.js'});
 assert.ok(sandbox.CDCPingoDocePhotoLibrary);
-assert.equal(sandbox.CDCPingoDocePhotoLibrary.revision,'75-pd-photo1');
+assert.equal(sandbox.CDCPingoDocePhotoLibrary.revision,'75-pd-photo2');
 assert.ok(sandbox.CDCPingoDocePhotoLibrary.categories.length>=15);
 assert.ok(sandbox.CDCPingoDocePhotoLibrary.seedCount>=200);
+assert.equal(typeof sandbox.CDCPingoDocePhotoLibrary.listProducts,'function');
+assert.equal(typeof sandbox.CDCPingoDocePhotoLibrary.noteImageResult,'function');
+assert.equal(typeof sandbox.CDCPingoDocePhotoLibrary.reconcileCachedImages,'function');
+assert.equal(typeof sandbox.CDCPingoDocePhotoLibrary.open,'function');
 
 const sample=[
   '- Pingo Doce · Arroz Carolino Cigala · 1 Kg · 1,49€ · pid 739490',
@@ -68,17 +85,17 @@ assert.equal(sandbox.CDCPingoDocePhotoLibrary.safeProductUrl('https://evil.examp
 assert.equal(sandbox.CDCPingoDocePhotoLibrary.safeProductUrl('https://www.pingodoce.pt/home/produtos/x-739491.html','739490'),'');
 assert.equal(sandbox.CDCPingoDocePhotoLibrary.identity({pid:'739490'}).key,'pingo-doce|739490');
 
-assert.match(prepare,/const PD_PHOTO_REV = '75-pd-photo1'/);
+assert.match(prepare,/const PD_PHOTO_REV = '75-pd-photo2'/);
 for(const asset of ['pingo-doce-photo-library.css','pingo-doce-photo-library.js'])assert.ok(prepare.includes(`'${asset}'`));
-assert.match(sw,/catalog2-pd-photo1/);
+assert.match(sw,/catalog2-pd-photo2-photo-loader3/);
 for(const asset of ['./pingo-doce-photo-library.css','./pingo-doce-photo-library.js'])assert.ok(sw.includes(`'${asset}'`));
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/pingo-doce-photo-library\.css\?v=75-pd-photo1/);
-  assert.match(index,/pingo-doce-photo-library\.js\?v=75-pd-photo1/);
+  assert.match(index,/pingo-doce-photo-library\.css\?v=75-pd-photo2/);
+  assert.match(index,/pingo-doce-photo-library\.js\?v=75-pd-photo2/);
   assert.ok(index.indexOf('market-visual-catalog.css')<index.indexOf('pingo-doce-photo-library.css'));
   assert.ok(index.indexOf('market-visual-catalog.js')<index.indexOf('pingo-doce-photo-library.js'));
   assert.ok(index.indexOf('pingo-doce-photo-library.js')<index.indexOf('v64-runtime.js'));
@@ -87,4 +104,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Pingo Doce progressive photo library remains exact-SKU, bounded, isolated and distributable: OK');
+console.log('Pingo Doce library opens locally, reconciles image state, stays bounded and isolated: OK');
