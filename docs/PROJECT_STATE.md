@@ -3,8 +3,8 @@
 Atualizado: 9 de setembro de 2026
 Build: `v75`
 Branch pública: `main`
-Branch em validação: `feat/v75-pingo-doce-photo-library`
 Distribuição: GitHub Pages / PWA
+Estado: `75-catalog1`, `75-pd-photo1` e `75-photo-loader1` publicados
 
 ## Revisões vigentes
 
@@ -37,85 +37,85 @@ A aplicação continua PWA estática/local-first. O estado financeiro permanece 
 
 ### Biblioteca Pingo Doce `75-pd-photo1`
 
-Foi criada `pingo-doce-photo-library.js` com IndexedDB própria `conta-de-casa-pingo-doce-photo-library`.
+`pingo-doce-photo-library.js` usa IndexedDB própria `conta-de-casa-pingo-doce-photo-library`.
 
-Objetivo:
+Contrato:
 
-- aumentar especificamente a cobertura de SKUs Pingo Doce;
-- descobrir produtos apenas através da fonte de pesquisa já usada pelo Mercado, restringida a `stores:['pingodoce']`;
-- validar PID e página oficial `pingodoce.pt/home/produtos/...-<pid>.html`;
-- resolver fotografia pela página oficial exata do SKU;
-- aceitar fotografia apenas depois da validação existente para `static.pingodoce.pt/Sites-pingo-doce-master` e PID correspondente;
-- alimentar `75-image-library1` através da chave `pingo-doce|pid`;
-- manter estados `pending`, `ready` e `missing` sem tocar no estado financeiro.
+- descoberta apenas pela fonte de pesquisa já usada pelo Mercado, restringida a `stores:['pingodoce']`;
+- PID e página oficial `pingodoce.pt/home/produtos/...-<pid>.html` obrigatoriamente coerentes;
+- fotografia resolvida pela página oficial exata do SKU;
+- fotografia aceite apenas depois da validação existente para `static.pingodoce.pt/Sites-pingo-doce-master` e PID correspondente;
+- resultado persistido na `75-image-library1` através de `pingo-doce|pid`;
+- estados do inventário: `pending`, `ready` e `missing`;
+- nenhuma escrita no estado financeiro.
 
-A biblioteca possui 15 grupos de descoberta e mais de 200 termos de pesquisa, cobrindo Bebidas, Lacticínios e ovos, Fruta e legumes, Carne e charcutaria, Peixe e marisco, Padaria e pastelaria, Mercearia, Congelados, Snacks e doces, Refeições, Higiene pessoal, Limpeza, Bebé, Animais e Casa/utilidades.
+A biblioteca possui 15 famílias de descoberta e mais de 200 termos, cobrindo Bebidas, Lacticínios e ovos, Fruta e legumes, Carne e charcutaria, Peixe e marisco, Padaria e pastelaria, Mercearia, Congelados, Snacks e doces, Refeições, Higiene pessoal, Limpeza, Bebé, Animais e Casa/utilidades.
 
 ### Limites de rede
 
-Para não transformar a aplicação num crawler agressivo:
-
-- máximo 24 pesquisas por sessão;
-- máximo 72 pesquisas por dia;
+- 24 pesquisas por sessão;
+- 72 pesquisas por dia;
 - intervalo automático mínimo 20 s;
-- máximo 30 tentativas de fotografia por sessão;
-- máximo 120 tentativas de fotografia por dia;
+- 30 tentativas de fotografia por sessão;
+- 120 tentativas de fotografia por dia;
 - fila pendente limitada;
-- trabalho suspenso quando offline, página oculta ou `Save-Data` ativo;
-- fotografias são guardadas pela biblioteca geral, não duplicadas em binário.
+- trabalho suspenso offline, com página oculta ou `Save-Data` ativo;
+- fotografias guardadas pela biblioteca geral, sem duplicação binária.
 
-Isto permite crescimento progressivo para centenas/milhares de SKUs, mas não autoriza afirmar que o catálogo dinâmico do Pingo Doce foi copiado integralmente num instante. “Todas as fotografias” é tratado como objetivo de cobertura progressiva de todos os SKUs reais que as fontes disponíveis conseguirem descobrir e validar.
+A cobertura é progressiva. Não se declara que 100% do catálogo dinâmico do Pingo Doce foi copiado, porque o projeto não possui uma API oficial exaustiva que permita provar isso.
 
 ## Carregador visual `75-photo-loader1`
 
-Foi criado `market-photo-loader.js/css` para melhorar a experiência quando a fotografia ainda não está em cache.
+`market-photo-loader.js/css` melhora a percepção de velocidade enquanto a fotografia ainda não está em cache.
 
-Ao aparecer um cartão sem fotografia:
+Comportamento:
 
-- surge imediatamente skeleton/shimmer;
-- aparece spinner e texto **A carregar fotografia…**;
-- a biblioteca existente é consultada primeiro;
-- fotografias já guardadas são apresentadas imediatamente com `loading='eager'` nos cartões visíveis;
-- ao entrar no Mercado é efetuado um aquecimento inicial limitado da biblioteca Pingo Doce;
-- os cartões visíveis são reavaliados em intervalos curtos durante a janela inicial, sem polling infinito;
-- `prefers-reduced-motion` e tema escuro são respeitados.
+- skeleton/shimmer imediato;
+- spinner e **A carregar fotografia…**;
+- consulta da biblioteca persistente antes de qualquer novo trabalho;
+- fotografia já guardada aplicada com `loading='eager'` nos cartões visíveis;
+- aquecimento inicial limitado da biblioteca Pingo Doce;
+- reavaliação curta dos cartões, sem polling infinito;
+- tema escuro e `prefers-reduced-motion` suportados.
 
-O carregador não contacta fontes externas diretamente e não conhece montantes ou estado financeiro.
+O loader não faz chamadas externas diretamente e não conhece montantes ou estado financeiro.
 
 ## Segurança
 
-Os módulos `pingo-doce-photo-library.js` e `market-photo-loader.js` não referenciam `appState`, `saveState()`, `commit()`, `estimatedCents`, `actualCents`, `amountCents`, PIN, palavras-passe, tokens ou chaves.
+`pingo-doce-photo-library.js` e `market-photo-loader.js` não referenciam `appState`, `saveState()`, `commit()`, `estimatedCents`, `actualCents`, `amountCents`, PIN, passwords, tokens ou chaves.
 
-URLs de produto Pingo Doce só são aceites em HTTPS e com PID coerente. A fotografia final continua a passar pelo validador estrito já existente antes de ser persistida.
-
-## Cache esperado após publicação
+## Cache público
 
 `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog1-pd-photo1-photo-loader1`
 
-## QA
+## QA e publicação
 
 Novos testes:
 
 - `tests/pingo-doce-photo-library.test.cjs`
 - `tests/market-photo-loader.test.cjs`
 
-Cobrem identidade exata `pingo-doce|pid`, rejeição de URLs não oficiais, limites de rede, isolamento financeiro, distribuição Pages, Service Worker, loading state, skeleton, `prefers-reduced-motion` e ordem dos assets.
+Validação confirmada no SHA funcional/documental `7a59ae017a4640cfa3ad5ec357cd99425ca9ee71`:
 
-CI da branch passou com sucesso no SHA `3cd7a98acaa7979ea87bd0f3b090992afe79404c` antes da atualização final desta documentação. Um novo CI deve validar o SHA documental final antes da integração.
+- CI final da branch: sucesso;
+- integração em `main`: fast-forward sem force;
+- CI de `main`: sucesso;
+- GitHub Pages: deploy concluído com sucesso;
+- testes incluíram finanças, segurança, Mercado, imagens, responsividade, navegação, acessibilidade e sincronização.
 
 ## Validação física necessária
 
 No iPhone/Safari/PWA confirmar:
 
-- o texto **A carregar fotografia…** aparece imediatamente quando necessário;
+- **A carregar fotografia…** aparece imediatamente quando necessário;
 - fotografias já em cache surgem sem atraso perceptível;
-- uma fotografia resolvida substitui o skeleton sem deslocar o cartão;
+- fotografia resolvida substitui o skeleton sem deformar o cartão;
 - nenhum SKU recebe fotografia de outro PID;
 - itens sem fotografia continuam utilizáveis;
 - não existe overflow ou bloqueio de scroll;
-- rede lenta/offline não bloqueiam o Mercado;
+- rede lenta/offline não bloqueia o Mercado;
 - valores financeiros permanecem inalterados.
 
 ## Próximo passo
 
-Executar CI final da branch, integrar por fast-forward em `main`, confirmar CI de `main` e GitHub Pages no mesmo SHA e depois validar em hardware real.
+Validar fisicamente a revisão publicada no iPhone/Safari/PWA e medir o crescimento real da biblioteca Pingo Doce por categoria e por sessão.
