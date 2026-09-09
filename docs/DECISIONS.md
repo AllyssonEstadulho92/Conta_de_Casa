@@ -56,7 +56,7 @@ Fluxo obrigatório: CI verde da branch → integração fast-forward em `main` s
 
 ## D-052 — Separar validade oficial de transporte e priorizar cartões visíveis
 
-Estado: aceite e publicada na baseline anterior.
+Estado: aceite e publicada.
 
 `75-catalog2` elimina o segundo preflight visual bloqueante depois de a referência já ter sido validada por página oficial + host/path + PID. `75-photo-loader2` prioriza até 6 cartões, testa disponibilidade no `<img>`, expurga URL quebrado, limita polling/retry e preserva a separação do estado financeiro.
 
@@ -74,11 +74,11 @@ Estado: aceite.
 
 ## D-055 — O catálogo não pode destruir cartões estáveis durante atualizações de fundo
 
-Data: 9 de setembro de 2026 · Estado: aceite na branch de correção.
+Data: 9 de setembro de 2026 · Estado: aceite, integrada e publicada.
 
 ### Factos observados
 
-A nova captura em hardware mostrou a zona da fotografia a piscar. A inspeção do código confirmou que não era apenas uma animação CSS:
+A captura em hardware mostrou a zona da fotografia a piscar. A inspeção do código confirmou que não era apenas uma animação CSS:
 
 1. `scheduleImageWarm()` chamava `renderProducts()` depois de resolver uma imagem;
 2. `renderProducts()` começava por `grid.replaceChildren()`;
@@ -111,6 +111,10 @@ A identidade do produto já é estável (`marketId|pid`). Destruir um componente
 - regressões financeiras, segurança, Mercado, responsividade, acessibilidade e sync permanecem verdes;
 - confirmação final no iPhone/Safari/PWA sem flicker.
 
-### Evidência de QA
+### Evidência de publicação
 
-A branch `fix/v75-market-photo-flicker` passou CI completo no SHA `501c21dca60cffc32489768238c5f308e1785e34`. Um CI anterior falhou apenas por expectativa de teste desatualizada do nome de cache (`catalog2`), corrigida para `catalog3` antes do CI verde.
+- branch validada com CI completo;
+- fast-forward de `main` sem force para `6dd4eafa947bf83e847f657ab9e155717d3971bc`;
+- CI `main` run `34414686159`: sucesso;
+- GitHub Pages run `34414730220`: sucesso;
+- encerramento funcional continua dependente da revalidação física definida em D-053.

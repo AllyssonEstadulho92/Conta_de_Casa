@@ -3,6 +3,7 @@
 Atualizado: 9 de setembro de 2026
 Build: `v75`
 Distribuição: GitHub Pages / PWA
+Runtime publicado: `75-catalog3`
 
 ## 1. Princípios e invariantes
 
@@ -96,29 +97,29 @@ A remoção do preflight visual duplicado continua vigente. `75-catalog3` não a
 
 ## 5. Renderer incremental `75-catalog3`
 
-### Problema que substitui o comportamento de `75-catalog1`
+### Problema substituído
 
 O renderer anterior executava `grid.replaceChildren()` sempre que `renderProducts()` corria. Como a fila de imagens chamava essa função depois de aquecer uma fotografia, os cartões e `<img>` existentes eram periodicamente removidos e recriados. No iPhone/Safari isto produzia flicker visível.
 
-### Novo contrato de renderização
+### Contrato de renderização
 
-`renderProducts()` passa a reconciliar a grelha pela identidade canónica `marketId|pid`:
+`renderProducts()` reconcilia a grelha pela identidade canónica `marketId|pid`:
 
 1. obtém a lista atual da categoria/loja;
-2. cria mapa dos cartões DOM já existentes por `data-visual-catalog-product`;
+2. cria mapa dos cartões DOM existentes por `data-visual-catalog-product`;
 3. remove apenas chaves que deixaram de pertencer ao resultado;
 4. reutiliza o mesmo nó DOM para a mesma chave;
 5. atualiza loja, nome, embalagem, `aria-label` e fallback sem substituir a área de fotografia;
 6. cria um cartão novo apenas para uma chave nova;
-7. reposiciona nós existentes apenas quando a ordem realmente mudou.
+7. reposiciona nós existentes apenas quando a ordem mudou.
 
 Consequência: uma atualização de catálogo não reinicia uma fotografia já carregada.
 
 ### Atualização de imagens em background
 
-`scheduleImageWarm()` deixou de executar `renderProducts()` após cada resolução de fotografia. Quando `warmOneImage()` persiste uma imagem válida, emite `cdc:market-photo-ready` com `key`, `marketId` e `pid`.
+`scheduleImageWarm()` não executa `renderProducts()` após cada resolução de fotografia. Quando `warmOneImage()` persiste uma imagem válida, emite `cdc:market-photo-ready` com `key`, `marketId` e `pid`.
 
-O `75-photo-loader2` já escuta esse evento e hidrata o cartão montado. O fluxo passa portanto de “resolver → reconstruir grelha” para “resolver → persistir → sinalizar → hidratar nó existente”.
+O `75-photo-loader2` escuta esse evento e hidrata o cartão montado. O fluxo é “resolver → persistir → sinalizar → hidratar nó existente”.
 
 ## 6. Biblioteca Pingo Doce `75-pd-photo1`
 
@@ -164,7 +165,7 @@ Continente: regras oficiais existentes permanecem inalteradas.
 - refinamentos 540/430/350 px;
 - safe areas iOS preservadas;
 - loader não altera geometria estrutural do cartão;
-- `prefers-reduced-motion` continua respeitado;
+- `prefers-reduced-motion` respeitado;
 - foco e navegação não são bloqueados;
 - a reconciliação DOM reduz alterações visuais desnecessárias e preserva contexto do utilizador.
 
@@ -179,16 +180,19 @@ Continente: regras oficiais existentes permanecem inalteradas.
 7. `market-photo-loader.js?v=75-photo-loader2`;
 8. runtime/apresentação restantes.
 
-## 11. Cache e distribuição candidatos
+## 11. Cache e distribuição
 
-Cache da correção:
+Cache publicado:
 
 `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog3-pd-photo1-photo-loader2`
 
 O Service Worker continua network-first para assets públicos com fallback para cache e invalida caches antigos quando a nova revisão é ativada.
 
-## 12. QA
+## 12. QA e publicação
 
-A branch `fix/v75-market-photo-flicker` passou CI completo no SHA `501c21dca60cffc32489768238c5f308e1785e34`, incluindo fontes reais, finanças, segurança, imagens, catálogo, Pingo Doce, loader, responsividade, navegação, acessibilidade e sincronização.
+- branch de correção: CI completo verde;
+- integração em `main`: fast-forward sem force para `6dd4eafa947bf83e847f657ab9e155717d3971bc`;
+- CI de `main` run `34414686159`: sucesso;
+- Pages run `34414730220`: sucesso no mesmo runtime testado.
 
-A validação em hardware real continua obrigatória antes de encerrar o defeito porque o flicker foi observado no iPhone/Safari/PWA e depende do comportamento efetivo do DOM/browser.
+A validação em hardware real continua obrigatória para encerrar o defeito porque o flicker foi observado no iPhone/Safari/PWA e depende do comportamento efetivo do DOM/browser.

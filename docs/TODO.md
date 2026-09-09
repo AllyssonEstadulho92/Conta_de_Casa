@@ -21,8 +21,6 @@ Atualizado: 9 de setembro de 2026
 
 ## P0 — Bug novo: fotografias/cartões a piscar
 
-Evidência: captura física no iPhone mostra a zona da fotografia a piscar enquanto o catálogo continua a trabalhar em background.
-
 - [x] Inspecionar o renderer real do catálogo e não assumir causa CSS.
 - [x] Confirmar que `scheduleImageWarm()` chamava `renderProducts()` depois de cada fotografia.
 - [x] Confirmar que `renderProducts()` eliminava a grelha com `grid.replaceChildren()`.
@@ -39,9 +37,9 @@ Evidência: captura física no iPhone mostra a zona da fotografia a piscar enqua
 - [x] Atualizar cache do Service Worker para `catalog3`.
 - [x] Adicionar regressão que impede reconstrução destrutiva da grelha.
 - [x] Atualizar teste Pingo Doce para o novo identificador de cache.
-- [x] Confirmar CI completo da branch no SHA `501c21dca60cffc32489768238c5f308e1785e34`.
+- [x] Confirmar CI completo da branch.
 
-## P0 — Documentação da correção
+## P0 — Documentação
 
 - [x] Atualizar `PROJECT_STATE.md`.
 - [x] Atualizar `ARCHITECTURE.md`.
@@ -51,12 +49,12 @@ Evidência: captura física no iPhone mostra a zona da fotografia a piscar enqua
 
 ## P0 — Integração/publicação `75-catalog3`
 
-- [ ] Reconfirmar CI da branch depois dos commits documentais.
-- [ ] Comparar branch com `main` e confirmar `behind 0` antes da integração.
-- [ ] Integrar por fast-forward sem force.
-- [ ] Confirmar CI completo de `main` no SHA integrado.
-- [ ] Confirmar GitHub Pages no SHA integrado.
-- [ ] Atualizar documentação com o SHA de publicação confirmado.
+- [x] Reconfirmar CI da branch depois dos commits documentais.
+- [x] Comparar branch com `main` e confirmar `behind 0` antes da integração.
+- [x] Integrar por fast-forward sem force para `6dd4eafa947bf83e847f657ab9e155717d3971bc`.
+- [x] Confirmar CI completo de `main` — run `34414686159`.
+- [x] Confirmar GitHub Pages — run `34414730220`.
+- [x] Atualizar documentação com a publicação confirmada.
 
 ## P1 — Revalidação física iPhone/Safari/PWA
 

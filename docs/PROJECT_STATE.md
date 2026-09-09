@@ -3,8 +3,8 @@
 Atualizado: 9 de setembro de 2026
 Build: `v75`
 Branch pública: `main`
-Branch de correção atual: `fix/v75-market-photo-flicker`
 Distribuição: GitHub Pages / PWA
+Runtime publicado: `75-catalog3` sobre SHA `6dd4eafa947bf83e847f657ab9e155717d3971bc`
 
 ## Baseline preservada
 
@@ -20,7 +20,7 @@ Distribuição: GitHub Pages / PWA
 - destaques Mercado: `75-featured1`
 - biblioteca geral de imagens: `75-image-library1`
 - resolvedor oficial de imagens: `75-catalog2`
-- catálogo visual / renderer candidato: `75-catalog3`
+- catálogo visual / renderer: `75-catalog3`
 - biblioteca Pingo Doce: `75-pd-photo1`
 - carregador visual: `75-photo-loader2`
 
@@ -40,9 +40,9 @@ A validação física no iPhone/Safari tinha mostrado:
 
 Esse problema originou `75-catalog2` + `75-photo-loader2`: foi removido o segundo preflight visual bloqueante, os cartões visíveis passaram a ser priorizados, o retry ficou limitado e a UI deixou de manter spinner infinito.
 
-## Novo bug confirmado: fotografias a piscar
+## Bug confirmado: fotografias a piscar
 
-A nova evidência visual mostrou fotografias/cartões do catálogo a piscar durante atualizações de fundo.
+A evidência visual seguinte mostrou fotografias/cartões do catálogo a piscar durante atualizações de fundo.
 
 ### Causa confirmada no código
 
@@ -55,9 +55,9 @@ A nova evidência visual mostrou fotografias/cartões do catálogo a piscar dura
 
 O efeito era visualmente semelhante a uma fotografia que desaparece e reaparece. Não era apenas animação CSS nem falha da imagem remota.
 
-## Correção `75-catalog3`
+## Correção publicada `75-catalog3`
 
-Na branch `fix/v75-market-photo-flicker` foi implementada uma renderização incremental por chave `marketId|pid`:
+Foi implementada uma renderização incremental por chave `marketId|pid`:
 
 - cartões existentes são reutilizados em vez de destruídos;
 - apenas cartões que deixaram de pertencer ao resultado atual são removidos;
@@ -65,13 +65,16 @@ Na branch `fix/v75-market-photo-flicker` foi implementada uma renderização inc
 - texto/metadados do cartão são sincronizados sem substituir a área de fotografia;
 - a fila de aquecimento de fotografias deixou de chamar `renderProducts()` após cada imagem;
 - uma fotografia resolvida em background emite `cdc:market-photo-ready`, permitindo ao `75-photo-loader2` hidratar o cartão já existente;
-- o cache de distribuição candidato passa para `...-image-library1-catalog3-pd-photo1-photo-loader2`.
+- o cache de distribuição passa para `...-image-library1-catalog3-pd-photo1-photo-loader2`.
 
 O resolvedor de origem continua `75-catalog2`; `75-catalog3` altera o catálogo/renderer, não relaxa a validação de host, path ou PID.
 
-## QA da branch
+## QA e publicação
 
-CI da branch no SHA `501c21dca60cffc32489768238c5f308e1785e34`: **sucesso completo**.
+- CI completo da branch: sucesso;
+- integração em `main`: fast-forward sem force para `6dd4eafa947bf83e847f657ab9e155717d3971bc`;
+- CI de `main` run `34414686159`: sucesso completo;
+- GitHub Pages run `34414730220`: sucesso, incluindo checkout da revisão testada, preparação da allowlist, upload e deploy.
 
 Passaram, entre outros:
 
@@ -90,19 +93,12 @@ Passaram, entre outros:
 - sincronização;
 - validação do manifest.
 
-Um primeiro CI falhou apenas porque `tests/pingo-doce-photo-library.test.cjs` ainda esperava o identificador de cache `catalog2`; o teste de distribuição foi atualizado para `catalog3` e o CI seguinte ficou totalmente verde.
+Um primeiro CI da branch falhou apenas porque `tests/pingo-doce-photo-library.test.cjs` ainda esperava o identificador de cache `catalog2`; o teste de distribuição foi atualizado para `catalog3` e os ciclos seguintes ficaram totalmente verdes.
 
-## Estado de publicação
+## Estado atual
 
-A correção `75-catalog3` está validada na branch, mas ainda não deve ser considerada produto final até concluir:
-
-1. integração fast-forward em `main`, sem force;
-2. CI completo de `main`;
-3. GitHub Pages no SHA integrado;
-4. revalidação física no mesmo iPhone/Safari/PWA que mostrou o flicker.
-
-Até essa integração, a versão pública confirmada permanece a baseline anterior `75-catalog2` + `75-photo-loader2`.
+A correção está integrada e publicada. Ainda não é correto declarar o defeito encerrado apenas com CI/Pages, porque ele foi observado em hardware real e depende do comportamento do Safari/PWA.
 
 ## Próximo passo
 
-Integrar a branch validada em `main`, confirmar CI/Pages e repetir no iPhone o cenário exato da captura. A validação física deve confirmar simultaneamente ausência de flicker, carregamento estável, ausência de troca de PID e preservação dos valores financeiros.
+Repetir no mesmo iPhone/Safari/PWA o cenário exato da captura durante 30–60 segundos. A validação física deve confirmar simultaneamente ausência de flicker, carregamento estável, ausência de troca de PID e preservação dos valores financeiros. Se o flicker persistir, recolher nova captura e tempo aproximado entre piscadelas antes de alterar outra camada.

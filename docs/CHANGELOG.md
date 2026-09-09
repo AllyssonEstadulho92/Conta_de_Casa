@@ -24,7 +24,7 @@ A análise confirmou uma causa estrutural no renderer, distinta do problema de t
 ### Distribuição
 
 - `CATALOG_REV` passa para `75-catalog3`;
-- cache candidato passa para `...-image-library1-catalog3-pd-photo1-photo-loader2`;
+- cache passa para `...-image-library1-catalog3-pd-photo1-photo-loader2`;
 - teste do catálogo impede regressão para `grid.replaceChildren()` vazio no caminho normal e impede `renderProducts()` dentro do aquecimento periódico;
 - teste da biblioteca Pingo Doce foi alinhado ao identificador `catalog3`.
 
@@ -35,13 +35,15 @@ A análise confirmou uma causa estrutural no renderer, distinta do problema de t
 - `core.js`, `finance.js`, pagamentos, faturas, PIN, cifragem e sincronização não foram alterados;
 - a mudança é limitada à estratégia de renderização e propagação de estado visual.
 
-### QA
+### QA e publicação
 
 - primeiro CI da branch confirmou sintaxe, finanças e o novo teste `75-catalog3`, mas parou num teste de distribuição Pingo Doce que ainda esperava o nome de cache `catalog2`;
 - a expectativa foi atualizada para `catalog3`;
-- CI completo da branch `fix/v75-market-photo-flicker`: sucesso no SHA `501c21dca60cffc32489768238c5f308e1785e34`;
-- passaram finanças, segurança, imagens, catálogo, Pingo Doce, loader, responsividade, viewport móvel, navegação, acessibilidade, sync e manifest;
-- integração em `main`, Pages e revalidação física permanecem pendentes no momento deste registo.
+- CI completo da branch: sucesso;
+- integração em `main`: fast-forward sem force para `6dd4eafa947bf83e847f657ab9e155717d3971bc`;
+- CI de `main` run `34414686159`: sucesso;
+- GitHub Pages run `34414730220`: sucesso no runtime testado;
+- permanecem pendentes apenas os testes físicos no mesmo iPhone/Safari/PWA para encerrar o defeito.
 
 ---
 
