@@ -4,7 +4,7 @@ Atualizado: 9 de setembro de 2026
 Build público: `v75`
 Revisão transversal: `75-stability1`
 Revisão de geometria: `75-layout1`
-Revisão do drawer móvel: `75-drawer1`
+Revisão do drawer móvel: `75-drawer2`
 Branch pública: `main`
 Distribuição: GitHub Pages / PWA
 URL pública: `https://allyssonestadulho92.github.io/Conta_de_Casa/`
@@ -13,27 +13,25 @@ URL pública: `https://allyssonestadulho92.github.io/Conta_de_Casa/`
 
 A aplicação mantém arquitetura PWA estática/local-first, com estado financeiro em IndexedDB, valores em cêntimos, cofre PBKDF2-SHA-256 + AES-GCM, sincronização GitHub opcional apenas sobre envelope cifrado e `STATE_VERSION = 5`.
 
-A revisão `75-drawer1` está integrada em `main` sobre `75-layout1`. É uma camada CSS-only inspirada no protótipo visual fornecido: a página principal continua clara/branca e o menu móvel abre num painel azul pelo **lado direito**, mantendo uma faixa visível da página ao fundo.
+A revisão `75-drawer2` substitui a experiência azul de `75-drawer1` por uma composição alinhada com o padrão visual já usado no cabeçalho móvel. A página principal continua clara/branca e o menu continua a abrir pelo **lado direito**.
 
-## Revisão `75-drawer1`
+## Revisão `75-drawer2`
 
-A nova camada `v75-drawer-blue.css` é carregada depois de `v75-layout-polish.css` e modifica exclusivamente a apresentação do drawer móvel.
+A camada final passa a ser `v75-drawer-theme.css`, carregada depois de `v75-layout-polish.css` e com responsabilidade exclusivamente visual sobre o drawer móvel.
 
 Principais alterações:
 
 - drawer continua ancorado à direita (`inset: 0 0 0 auto`);
-- largura passa a `min(320px, calc(100vw - 72px))`, deixando parte da página clara visível à esquerda;
-- painel usa gradiente azul com profundidade discreta, sem superfície branca pesada;
-- cantos internos do drawer recebem arredondamento, mantendo a extremidade direita alinhada ao ecrã;
-- cabeçalho usa `icon.svg`, nome **Conta de Casa** e subtítulo **Navegação** em branco;
-- o mesmo `#mobileMenuBtn` continua a mover-se para o drawer e transforma-se em X; dentro do drawer fica no canto superior direito;
-- grupos, ícones e labels usam branco/transparências controladas;
-- item ativo usa realce translúcido em vez de cartão branco;
-- `Ocultar valores` e `Bloquear` permanecem integrados no plano azul;
-- backdrop é muito leve e sem blur, para que a página clara continue perceptível;
-- `prefers-reduced-motion`, foco visível e safe areas continuam preservados.
+- largura mantém `min(320px, calc(100vw - 72px))`, preservando uma faixa visível da página à esquerda;
+- paleta passa a usar a mesma família cromática do cabeçalho `75-header2`: `#003f4c`, `#005965` e `#087a78`;
+- menta `#5be0c2` passa a ser usada apenas como acento de foco/seleção;
+- gradiente, sombras e backdrop deixam de usar azul saturado e passam para verde-petróleo/teal;
+- item ativo mantém superfície translúcida, sem cartão branco interno;
+- `icon.svg`, nome **Conta de Casa**, subtítulo e X continuam no cabeçalho do drawer;
+- `Ocultar valores` e `Bloquear` permanecem no mesmo painel;
+- safe areas, foco, scroll interno, `prefers-reduced-motion`, Escape e swipe da direita continuam preservados.
 
-A revisão não cria uma segunda navegação nem muda destinos, rotas, gestos ou handlers.
+A revisão não cria uma segunda navegação nem altera destinos, rotas, gestos ou handlers.
 
 ## Revisões anteriores preservadas
 
@@ -48,13 +46,14 @@ O cabeçalho móvel mantém:
 - sem saudação/avatar duplicados no topbar;
 - 60 px de linha útil mais safe area;
 - alvos tácteis de 44 px;
-- título com ellipsis em ecrãs estreitos.
+- título com ellipsis em ecrãs estreitos;
+- gradiente `#003f4c → #005965 → #087a78`.
 
 A navegação móvel continua **Início / Despesas / Mercado / Planeamento / Mais**. O drawer continua a abrir e fechar pela direita e o gesto horizontal continua a usar a margem direita.
 
 ## Integridade funcional preservada
 
-Não foram modificados por `75-drawer1`:
+Não foram modificados por `75-drawer2`:
 
 - `core.js` / persistência;
 - `finance.js` / cálculos;
@@ -69,7 +68,7 @@ Não foram modificados por `75-drawer1`:
 - regras e dados do Mercado;
 - `mobile-menu-toggle.js` e a lógica de swipe/hambúrguer/X.
 
-O teste `tests/v75-drawer-blue.test.cjs` impede que a camada visual passe a aceder ao estado financeiro ou persistência.
+O teste `tests/v75-drawer-theme.test.cjs` valida direção, proporção, correspondência cromática com o cabeçalho, distribuição pública, cache e ausência de acesso ao estado financeiro.
 
 ## Versionamento público
 
@@ -82,30 +81,32 @@ O teste `tests/v75-drawer-blue.test.cjs` impede que a camada visual passe a aced
 - cabeçalho: `75-header2`;
 - estabilidade: `75-stability1`;
 - geometria: `75-layout1`;
-- drawer visual: `75-drawer1`;
-- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer1`.
+- drawer visual: `75-drawer2`;
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2`.
 
-`v75-drawer-blue.css?v=75-drawer1` integra a allowlist Pages e o cache do Service Worker.
+`v75-drawer-theme.css?v=75-drawer2` integra a allowlist Pages e o cache do Service Worker. `v75-drawer-blue.css` deixa de integrar a distribuição pública.
 
 ## Pipeline
 
-A revisão passou o CI completo na branch `fix/v75-blue-right-drawer`, incluindo testes financeiros, auditoria, isolamento, QR, Mercado, arquitetura, estabilidade, geometria, menu animado, segurança, responsividade, acessibilidade, sincronização e o teste específico do novo drawer.
+A revisão deve passar primeiro o CI completo na branch `fix/v75-drawer-teal`, incluindo testes financeiros, auditoria, isolamento, QR, Mercado, arquitetura, estabilidade, geometria, menu animado, segurança, responsividade, acessibilidade, sincronização e o teste específico `v75-drawer-theme.test.cjs`.
 
-Depois da integração em `main`, o pipeline público deve validar novamente o mesmo SHA antes do deploy Pages.
+Depois da integração em `main`, o mesmo conjunto de regressões deve voltar a passar antes do deploy Pages.
 
 ## Validação manual necessária
 
-A referência visual foi implementada por código, mas a validação final deve ser feita em iPhone/Safari/PWA real para confirmar:
+Validar em iPhone/Safari/PWA real:
 
+- cor do drawer igual ao padrão do cabeçalho;
 - largura do menu e quantidade de página branca visível;
-- azul e contraste dos labels/ícones;
-- posição do X no canto superior direito do drawer;
+- posição do X no canto superior direito;
+- contraste de labels e ícones;
+- item ativo em menta/transparência sem excesso de brilho;
 - animação hambúrguer → X → hambúrguer;
 - safe area superior/inferior;
-- scroll do menu quando todo o conteúdo não couber;
+- scroll do menu;
 - swipe pela direita;
 - ausência de colisão com a barra inferior e Safari.
 
 ## Próximo passo
 
-Validar `75-drawer1` no iPhone real. Se a proporção ou o tom de azul precisar de ajuste, a correção deve permanecer em `v75-drawer-blue.css`, sem tocar no núcleo financeiro.
+Confirmar CI da branch, integrar `75-drawer2` em `main`, validar CI público e GitHub Pages e depois confirmar visualmente no iPhone real.
