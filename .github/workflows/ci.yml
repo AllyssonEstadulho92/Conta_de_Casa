@@ -46,6 +46,8 @@ jobs:
           node --check market-retailer-image-policy.js
           node --check market-image-audit.js
           node --check market-official-images.js
+          node --check market-catalog-image-resolver.js
+          node --check market-visual-catalog.js
           node --check v64-runtime.js
           node --check v74-experience.js
           node --check v75-architecture.js
@@ -98,6 +100,9 @@ jobs:
 
       - name: Market persistent image library tests
         run: node tests/market-image-library.test.cjs
+
+      - name: Market progressive visual catalog tests
+        run: node tests/market-visual-catalog.test.cjs
 
       - name: Market barcode scanner tests
         run: node tests/market-barcode.test.cjs
