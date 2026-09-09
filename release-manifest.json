@@ -2,13 +2,16 @@
   "schemaVersion": 1,
   "channel": "stable",
   "latestVersion": "v75",
-  "publishedAt": "2026-09-08",
+  "publishedAt": "2026-09-09",
   "releases": [
     {
       "version": "v75",
-      "date": "8 de setembro de 2026",
-      "title": "Reestruturação da interface e estabilização transversal",
+      "date": "9 de setembro de 2026",
+      "title": "Reestruturação da interface, estabilidade e alinhamento proporcional",
       "items": [
+        "A revisão 75-layout1 uniformiza proporções, margens, grelhas, alinhamentos e ritmo vertical entre as páginas sem alterar o núcleo financeiro, persistência, cofre ou sincronização.",
+        "No desktop, Início, Despesas, Mercado, Planeamento, Relatórios, Metas, Segurança, Diagnóstico e Definições usam uma coluna de conteúdo comum e grelhas que redistribuem espaço antes de comprimir cartões ou controlos.",
+        "Em tablet e telemóvel, formulários, barras de ações, cartões, calendário, objetivos, segurança, sincronização e detalhes passam para menos colunas quando necessário, mantendo safe areas, leitura e alvos tácteis.",
         "A interface móvel segue uma composição única e coerente com o protótipo: cabeçalho verde-petróleo, superfícies claras, cartões compactos, tipografia consistente, espaçamento regular e navegação inferior com Início, Despesas, Mercado, Planeamento e Mais.",
         "A revisão 75-stability1 uniformiza tipografia, safe areas, overflow, formulários, navegação e diálogos entre iPhone, Android, tablet e desktop sem reescrever o núcleo financeiro.",
         "O cabeçalho móvel foi simplificado: hambúrguer e título ficam à esquerda e notificações à direita, sem saudação ou avatar duplicados no topbar global.",
