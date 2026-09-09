@@ -48,6 +48,8 @@ jobs:
           node --check market-official-images.js
           node --check market-catalog-image-resolver.js
           node --check market-visual-catalog.js
+          node --check pingo-doce-photo-library.js
+          node --check market-photo-loader.js
           node --check v64-runtime.js
           node --check v74-experience.js
           node --check v75-architecture.js
@@ -103,6 +105,12 @@ jobs:
 
       - name: Market progressive visual catalog tests
         run: node tests/market-visual-catalog.test.cjs
+
+      - name: Pingo Doce progressive photo library tests
+        run: node tests/pingo-doce-photo-library.test.cjs
+
+      - name: Market photo loader tests
+        run: node tests/market-photo-loader.test.cjs
 
       - name: Market barcode scanner tests
         run: node tests/market-barcode.test.cjs
