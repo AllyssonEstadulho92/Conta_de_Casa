@@ -38,6 +38,7 @@
 
   function marketPage(){return document.querySelector('#page-market');}
   function marketIsActive(){return Boolean(document.querySelector('#page-market.page.active'));}
+  function notePingo(id,state){if(id?.marketId==='pingo-doce')void root.CDCPingoDocePhotoLibrary?.noteImageResult?.(id,state);}
 
   function loaderAge(card){
     const started=Number(card?.dataset?.photoLoaderStartedAt)||0;
@@ -77,12 +78,14 @@
     if(media.querySelector('img')){
       card.classList.remove('is-photo-loading','is-photo-waiting');
       delete card.dataset.photoLoaderStartedAt;
+      notePingo(id,'ready');
       return true;
     }
 
     let record=null;
     try{record=await root.CDCMarketImageLibrary?.get?.(id);}catch(_error){}
     if(!record?.imageUrl){ensureLoadingUi(card);return false;}
+    notePingo(id,'ready');
 
     const image=document.createElement('img');
     image.alt='';
@@ -92,9 +95,11 @@
     image.addEventListener('load',()=>{
       card.classList.remove('is-photo-loading','is-photo-waiting');
       delete card.dataset.photoLoaderStartedAt;
+      notePingo(id,'ready');
     },{once:true});
     image.addEventListener('error',()=>{
       void root.CDCMarketImageLibrary?.forget?.(id);
+      notePingo(id,'pending');
       card.classList.remove('is-photo-loading');
       card.classList.add('is-photo-waiting');
       media.replaceChildren();
@@ -137,7 +142,7 @@
     const id=cardIdentity({dataset:{visualCatalogProduct:record?.key||''}});if(!id)return null;
     let cached=null;
     try{cached=await root.CDCMarketImageLibrary?.get?.(id);}catch(_error){}
-    if(cached?.imageUrl)return cached;
+    if(cached?.imageUrl){notePingo(id,'ready');return cached;}
 
     const recent=Number(attemptedAt.get(id.key))||0;
     if(recent&&Date.now()-recent<RETRY_AFTER_MS)return null;
@@ -154,8 +159,11 @@
       }).catch(()=>null);
       if(!result?.imageUrl)return null;
       const stored=await library.remember({...result,marketId:id.marketId,pid:id.pid,name:record.name,pack:record.pack},record).catch(()=>null);
-      if(stored&&typeof root.CustomEvent==='function'&&root.dispatchEvent){
-        root.dispatchEvent(new CustomEvent('cdc:market-photo-ready',{detail:{key:id.key,marketId:id.marketId,pid:id.pid}}));
+      if(stored){
+        notePingo(id,'ready');
+        if(typeof root.CustomEvent==='function'&&root.dispatchEvent){
+          root.dispatchEvent(new CustomEvent('cdc:market-photo-ready',{detail:{key:id.key,marketId:id.marketId,pid:id.pid}}));
+        }
       }
       return stored;
     })().finally(()=>warming.delete(id.key));
@@ -226,6 +234,7 @@
       document.documentElement.classList.add('market-photos-warming');
       try{
         await resetPingoImageBudgetOnce();
+        await root.CDCPingoDocePhotoLibrary?.reconcileCachedImages?.(8);
         await warmVisibleCards();
         scheduleDeferredPingoSync();
       }catch(_error){}
@@ -279,7 +288,7 @@
 
   function mutationTouchesLoader(mutation){
     const target=mutation?.target;
-    return Boolean(target?.closest?.('.market-visual-product-media,#pingoDocePhotoLibraryStatus,.pingo-doce-photo-library-status'));
+    return Boolean(target?.closest?.('.market-visual-product-media,#pingoDocePhotoLibraryStatus,.pingo-doce-photo-library-status,.pingo-doce-photo-library-panel'));
   }
 
   function relevantMutation(mutation){
