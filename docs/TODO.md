@@ -64,11 +64,11 @@ Atualizado: 9 de setembro de 2026
 - [x] Atualizar `DECISIONS.md`.
 - [x] Atualizar `TODO.md`.
 - [x] Atualizar `CHANGELOG.md`.
-- [ ] Confirmar CI final verde da branch após documentação.
-- [ ] Comparar branch final com `main`.
-- [ ] Integrar por fast-forward sem force.
-- [ ] Confirmar CI de `main` no SHA integrado.
-- [ ] Confirmar GitHub Pages no mesmo SHA.
+- [x] Confirmar CI final verde da branch no SHA `7a59ae017a4640cfa3ad5ec357cd99425ca9ee71`.
+- [x] Comparar branch final com `main`: ahead, behind 0.
+- [x] Integrar por fast-forward sem force.
+- [x] Confirmar CI de `main` no SHA integrado.
+- [x] Confirmar GitHub Pages no SHA integrado.
 
 ## P1 — Validação física iPhone/Safari/PWA
 
