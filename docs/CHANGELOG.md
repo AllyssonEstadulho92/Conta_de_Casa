@@ -1,5 +1,44 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-09 — v75 `75-photo-loader3`: hotfix de estabilidade Safari no Mercado
+
+### Evidência
+
+Depois da publicação de `75-photo-loader2`, a validação física no iPhone mostrou a mensagem nativa do Safari **“Um problema ocorreu repetidamente”** ao abrir `#market`.
+
+Sem crash log WebKit do dispositivo, a exceção interna exata não é declarada como confirmada. A inspeção encontrou, contudo, pressão desnecessária no runtime do loader: observer global, scans não coalescidos, operações assíncronas sobrepostas, polling agressivo e sincronização Pingo Doce em paralelo na entrada.
+
+### Alterações em `market-photo-loader.js`
+
+- revisão passa para `75-photo-loader3`;
+- `MutationObserver` deixa de observar `document.body` inteiro e passa a observar apenas `#page-market`;
+- mutações geradas pelo próprio loader na media/status são ignoradas;
+- scans passam a ser coalescidos com `scanQueued`, `scanRunning` e `scanPending`;
+- hidratação global passa a ter exclusão mútua via `refreshPromise`;
+- resolução prioritária passa a ter exclusão mútua via `warmPromise`;
+- hidratação reduzida de até 18 para 8 cartões por passagem;
+- prioridade reduzida de 6 para 4 cartões;
+- os cartões prioritários são resolvidos sequencialmente para reduzir picos de CPU/rede;
+- polling reduzido de 500 ms/24 para 1000 ms/12;
+- sincronização Pingo Doce deixa de arrancar em paralelo: é adiada 5 s/idle e limitada a 1 seed;
+- `warmPending()` deixa de ser chamado pelo loader na entrada;
+- cooldown de 30 s, `loading='eager'`, `forget()` em erro e **Fotografia a validar…** aos 12 s permanecem;
+- loader continua sem `fetch()` próprio e sem acesso ao estado financeiro.
+
+### Distribuição
+
+- `PHOTO_LOADER_REV=75-photo-loader3`;
+- Service Worker usa cache `...-catalog2-pd-photo1-photo-loader3`;
+- `tests/market-photo-loader.test.cjs` passa a verificar limites, coalescência e ausência do observer global;
+- `PROJECT_STATE.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md` e `CHANGELOG.md` atualizados;
+- integração/publicação permanece condicionada a CI verde da branch, fast-forward, CI de `main`, Pages e nova validação física no iPhone.
+
+### Critério de aceitação físico
+
+Primeiro: `#market` deve abrir e permanecer estável no Safari. Só depois se mede throughput/contador de fotografias Pingo Doce. Estabilidade passa a ter prioridade sobre velocidade de enriquecimento visual.
+
+---
+
 ## 2026-09-09 — v75 `75-catalog2` + `75-photo-loader2`: correção do pipeline real de fotografias
 
 ### Evidência que originou a correção
@@ -32,7 +71,7 @@ A sonda de CI conseguia, para um SKU conhecido, obter resposta do reader e local
 - após 12 s, o spinner deixa de rodar indefinidamente e o texto passa a **Fotografia a validar…**;
 - retry por SKU limitado a 30 s;
 - se o `<img>` falhar, a referência é removida de `75-image-library1` para permitir nova tentativa limpa;
-- no primeiro carregamento desta revisão, `imagesToday` da biblioteca Pingo Doce é reposto uma única vez e marcado com `photoRuntimeRevision=75-photo-loader2`, evitando que falhas do runtime antigo bloqueiem a correção até ao dia seguinte;
+- no primeiro carregamento desta revisão, `imagesToday` da biblioteca Pingo Doce é reposto uma única vez e marcado com `photoRuntimeRevision=75-photo-loader2`;
 - esta recuperação toca apenas na store `meta` de `conta-de-casa-pingo-doce-photo-library`.
 
 ### Segurança e dados
@@ -41,7 +80,7 @@ A sonda de CI conseguia, para um SKU conhecido, obter resposta do reader e local
 - `STATE_VERSION = 5` permanece;
 - nenhum preço, fatura, pagamento, PIN, token ou chave é lido/escrito pelo loader;
 - identidade de fotografia continua `marketId|pid`;
-- Pingo Doce continua restrito a URL oficial e imagem `static.pingodoce.pt/Sites-pingo-doce-master` com PID exato;
+- Pingo Doce continua restrito a URL oficial e imagem oficial com PID exato;
 - o loader não faz `fetch()` próprio.
 
 ### Distribuição/QA
@@ -49,13 +88,8 @@ A sonda de CI conseguia, para um SKU conhecido, obter resposta do reader e local
 - `CATALOG_REV` passa a `75-catalog2`;
 - `PHOTO_LOADER_REV` passa a `75-photo-loader2`;
 - cache passa para `...-image-library1-catalog2-pd-photo1-photo-loader2`;
-- `tests/market-visual-catalog.test.cjs`, `tests/market-photo-loader.test.cjs` e `tests/pingo-doce-photo-library.test.cjs` atualizados;
-- CI final da branch `fix/v75-market-photo-runtime`: sucesso no SHA `f485fd4317ad0acbd2475f9ca86efed5b413bb76`;
-- integração em `main`: fast-forward sem force no mesmo SHA;
-- CI de `main`: sucesso no mesmo SHA;
-- GitHub Pages: deploy concluído com sucesso no mesmo SHA;
-- commits documentais posteriores não alteram o runtime publicado;
-- eficácia no Safari/iPhone permanece dependente de nova validação física do cenário que mostrou `0 fotografias oficiais`.
+- CI da branch, integração fast-forward, CI de `main` e GitHub Pages concluíram com sucesso no runtime SHA `f485fd4317ad0acbd2475f9ca86efed5b413bb76`;
+- a validação física posterior revelou o crash do Safari, originando `75-photo-loader3`.
 
 ---
 
@@ -67,8 +101,7 @@ A sonda de CI conseguia, para um SKU conhecido, obter resposta do reader e local
 - estados `pending|ready|missing`;
 - limites de rede por sessão/dia;
 - criado primeiro `market-photo-loader.js/css` com skeleton, spinner e **A carregar fotografia…**;
-- fotografias em cache usam `loading='eager'`;
-- revisão publicada e tecnicamente verde, mas a validação física posterior mostrou que a fila/resolução não produzia fotografias Pingo Doce `ready` de forma aceitável no iPhone, levando a `75-catalog2`/`75-photo-loader2`.
+- fotografias em cache usam `loading='eager'`.
 
 ## 2026-09-09 — v75 `75-catalog1`: catálogo visual progressivo por categorias
 
@@ -78,9 +111,7 @@ A sonda de CI conseguia, para um SKU conhecido, obter resposta do reader e local
 - categorias de supermercado disponíveis antes de pesquisa manual;
 - descoberta limitada de SKUs reais de Continente/Pingo Doce;
 - preços não são persistidos no catálogo;
-- **Ver preço atual** reutiliza a pesquisa viva existente;
-- fotografias oficiais são resolvidas e entregues a `75-image-library1`;
-- CI específico em `tests/market-visual-catalog.test.cjs`.
+- **Ver preço atual** reutiliza a pesquisa viva existente.
 
 ## 2026-09-09 — v75 `75-image-library1`: biblioteca persistente de fotografias oficiais
 
@@ -89,7 +120,6 @@ A sonda de CI conseguia, para um SKU conhecido, obter resposta do reader e local
 - identidade estrita `marketId|pid`;
 - guarda apenas metadados e URL oficial validado;
 - TTL de 45 dias;
-- Continente e Pingo Doce validados por host/path/PID;
 - nenhuma alteração ao estado financeiro.
 
 ## 2026-09-09 — v75 `75-featured1`: destaques do Mercado
@@ -98,27 +128,23 @@ A sonda de CI conseguia, para um SKU conhecido, obter resposta do reader e local
 - área de fotografia estável;
 - nome em duas linhas;
 - preço isolado;
-- fallback vetorial quando imagem não existe;
-- controlos anterior/seguinte e indicadores.
+- fallback vetorial quando imagem não existe.
 
 ## 2026-09-09 — v75 `75-drawer2`: drawer alinhado com a identidade
 
 - drawer mantém lado direito;
 - gradiente petróleo/teal alinhado com o cabeçalho;
-- menta usada apenas como acento;
 - hambúrguer/X, swipe, Escape, foco e ARIA preservados.
 
 ## 2026-09-09 — v75 `75-layout1`: geometria transversal
 
 - largura, margens, grelhas e ritmo vertical uniformizados;
-- desktop compacto e largo tratados separadamente;
-- formulários/cartões reduzem colunas antes de comprimir conteúdo;
 - sem alteração ao núcleo financeiro.
 
 ## 2026-09-08 — v75 `75-stability1` e `75-header2`
 
-- tipografia, safe areas, overflow, formulários, navegação, diálogos e estados de imagem estabilizados;
-- cabeçalho móvel simplificado para hambúrguer+título e notificações;
+- tipografia, safe areas, overflow, formulários, navegação e diálogos estabilizados;
+- cabeçalho móvel simplificado;
 - Mercado permanece terceiro destino da navegação inferior.
 
 ## Histórico anterior
