@@ -115,6 +115,9 @@ jobs:
       - name: v75 cross-application stability tests
         run: node tests/v75-stability.test.cjs
 
+      - name: v75 page proportion and alignment tests
+        run: node tests/v75-layout-polish.test.cjs
+
       - name: Animated mobile menu tests
         run: node tests/mobile-menu-toggle.test.cjs
 
