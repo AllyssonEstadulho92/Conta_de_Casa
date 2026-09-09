@@ -7,8 +7,14 @@
     {
       "version": "v75",
       "date": "9 de setembro de 2026",
-      "title": "Reestruturação da interface, estabilidade e destaques do Mercado",
+      "title": "Reestruturação da interface, estabilidade e Mercado visual progressivo",
       "items": [
+        "A revisão 75-catalog1 acrescenta ao Mercado um catálogo visual progressivo organizado em Bebidas, Lacticínios e ovos, Frutas e legumes, Carne e peixe, Padaria e pastelaria, Mercearia/Despensa, Congelados, Snacks e doces, Higiene pessoal, Limpeza, Bebé e Animais.",
+        "O catálogo visual acumula apenas SKUs reais encontrados para Continente e Pingo Doce, deduplicados pela chave marketId|pid e com página oficial coerente; o índice local guarda nome, embalagem, categoria e origem, mas não guarda preço.",
+        "Ao tocar em Ver preço atual, 75-catalog1 reutiliza a pesquisa viva existente do Mercado para consultar novamente a fonte atual, impedindo que um preço observado anteriormente seja apresentado como preço corrente.",
+        "A acumulação automática é deliberadamente limitada: até 18 pesquisas por sessão, 48 por dia, intervalo mínimo de 15 segundos, uma pesquisa Cesta em voo e suspensão quando a aplicação está offline, oculta ou com Save-Data ativo.",
+        "O enriquecimento de fotografias também é limitado e reutiliza 75-image-library1: a URL exata do produto pode ser usada para procurar a imagem oficial, sempre validada por retalhista e PID, sem copiar binários dos sites para o GitHub.",
+        "A arquitetura permite que a biblioteca local cresça para centenas ou milhares de SKUs ao longo de utilizações sucessivas, mas não declara uma cobertura integral instantânea dos catálogos dinâmicos dos retalhistas.",
         "A revisão 75-featured1 aproxima Produtos em destaque do protótipo aprovado: no telemóvel, os cartões deixam a grelha de três colunas e passam para um carrossel horizontal largo, com imagem estável, nome em duas linhas, preço isolado, categoria e navegação por swipe/indicadores.",
         "Quando uma fotografia não existe ou falha, 75-featured1 usa um fallback vetorial local por categoria em vez de mostrar um cartão vazio ou um ícone de imagem quebrada; quando existe GTIN válido, pode tentar recuperar uma fotografia de referência no Open Food Facts apenas por esse código, sem alterar preço nem persistir a imagem pela camada.",
         "A revisão 75-drawer2 alinha o menu móvel com a identidade visual da própria aplicação: a página permanece clara e visível ao fundo, enquanto a navegação abre pelo lado direito num gradiente verde-petróleo/teal igual à família cromática do cabeçalho.",
