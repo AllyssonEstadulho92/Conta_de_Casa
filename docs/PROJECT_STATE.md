@@ -2,8 +2,8 @@
 
 Atualizado: 9 de setembro de 2026
 Build: `v75`
-Branch pública: `main`
-Distribuição: GitHub Pages / PWA
+Branch de correção: `fix/v75-safari-market-crash`
+Distribuição pública atual antes da integração: GitHub Pages / PWA
 
 ## Revisões vigentes
 
@@ -21,120 +21,62 @@ Distribuição: GitHub Pages / PWA
 - catálogo visual base: `75-catalog1`
 - resolvedor oficial/distribuição catálogo: `75-catalog2`
 - biblioteca Pingo Doce: `75-pd-photo1`
-- carregador visual: `75-photo-loader2`
+- carregador visual proposto: `75-photo-loader3`
 
-## Estado funcional
+## Invariantes preservados
 
-A aplicação continua PWA estática/local-first. O estado financeiro permanece em IndexedDB, os montantes são inteiros em cêntimos, `STATE_VERSION = 5`, o cofre usa PBKDF2-SHA-256 + AES-GCM e a sincronização GitHub opcional continua limitada ao envelope cifrado.
+A aplicação continua PWA estática/local-first. O estado financeiro permanece em IndexedDB, valores monetários continuam em cêntimos, `STATE_VERSION = 5`, o cofre usa PBKDF2-SHA-256 + AES-GCM e a sincronização GitHub opcional continua limitada ao envelope cifrado.
 
-A correção de fotografias não alterou `core.js`, `finance.js`, pagamentos, faturas, QR, scanner, PIN, cifragem, `estimatedCents`, `actualCents` ou sincronização.
+A correção atual não altera `core.js`, `finance.js`, pagamentos, faturas, QR, scanner, PIN, cifragem, `estimatedCents`, `actualCents` ou sincronização.
 
-## Problema confirmado em hardware real
+## Problema físico confirmado
 
-A validação física no iPhone/Safari mostrou:
+Depois da publicação de `75-photo-loader2`, a validação real no iPhone/Safari mostrou a página `/#market` a terminar com a mensagem do Safari **“Um problema ocorreu repetidamente”**. Isto é evidência de falha do processo da página no dispositivo; não é apenas um estado visual de carregamento.
 
-- `566 produtos indexados · 57 imagens validadas` no catálogo geral;
-- `Biblioteca Pingo Doce: 285 SKUs indexados · 0 fotografias oficiais`;
-- cartões visíveis permaneceram durante demasiado tempo em **A carregar fotografia…**.
+Antes desse crash, a mesma validação já tinha mostrado `285 SKUs indexados · 0 fotografias oficiais` no Pingo Doce e cartões demorados em **A carregar fotografia…**.
 
-A captura provou que o inventário de SKUs estava a crescer, mas o pipeline Pingo Doce não estava a converter esses SKUs em entradas `ready` na biblioteca de fotografias.
+## Factos encontrados no código de `75-photo-loader2`
 
-A sonda CI confirmou na correção que `cesta.pt` respondia para Continente/Pingo Doce e que o reader encontrava imagem exata em ambos os retalhistas. A falha foi tratada no runtime de resolução/orquestração, não como ausência geral da fonte.
+- `refreshVisibleCards()` hidratava os primeiros 18 cartões do DOM, embora o nome indicasse “visíveis”;
+- as imagens hidratadas eram marcadas `loading='eager'`;
+- `warmVisibleCards()` podia priorizar até 6 cartões;
+- o polling era de 500 ms por até 24 ciclos;
+- a entrada no Mercado chamava adicionalmente `warmPending()` e `syncNow()` da biblioteca Pingo Doce;
+- o `MutationObserver` observava toda a `document.body`;
+- uma imagem remota quebrada podia voltar a ser consultada durante a janela de eliminação da IndexedDB.
 
-## Causa provável corrigida
+Não foi obtido um perfil de memória do WebKit, portanto não é possível afirmar qual destes pontos isoladamente causou o crash. A causa provável é pressão excessiva combinada de DOM, imagens, polling, observers e resolução concorrente no iPhone.
 
-Foram encontrados três pontos:
+## Correção `75-photo-loader3`
 
-1. `market-catalog-image-resolver.js` fazia um segundo carregamento visual bloqueante, com timeout de até 10 s, depois de a URL já ter sido obtida da página oficial e validada por host/path/PID. No Safari isto podia produzir falso negativo antes da persistência.
-2. `75-photo-loader1` apenas consultava cache; não priorizava os cartões que o utilizador estava a ver.
-3. O orçamento diário persistido de tentativas (`imagesToday`) podia ficar esgotado por falhas antigas e bloquear o novo runtime até à mudança do dia.
+A estratégia passa de “processar muitos cartões rapidamente” para “processar apenas o que o utilizador realmente vê”:
 
-## Correção publicada
+- deteção real por `getBoundingClientRect()` com margem de 160 px;
+- máximo de 2 cartões no viewport móvel e 4 no desktop;
+- hidratação deixa de percorrer os primeiros 18 cartões;
+- aquecimento dos cartões é sequencial dentro do pequeno conjunto prioritário;
+- polling reduzido para 1200 ms, no máximo 10 ciclos;
+- a entrada no Mercado deixa de disparar `warmPending()` e `syncNow()` em paralelo; a biblioteca Pingo Doce mantém o seu próprio scheduler limitado;
+- `MutationObserver` passa a observar apenas `#page-market` e alterações relevantes do catálogo;
+- scans são coalescidos por `requestAnimationFrame`;
+- URL que falhe no `<img>` entra em quarentena local de 30 s, é removida da biblioteca e não é recriada imediatamente;
+- o estado visual passa a **Fotografia temporariamente indisponível** durante a quarentena;
+- `photoRuntimeRevision` passa a `75-photo-loader3` e o orçamento Pingo Doce é libertado uma única vez para esta revisão.
 
-### `75-catalog2`
+## Cache esperado após publicação
 
-`market-catalog-image-resolver.js` mantém validação estrita da página oficial e da imagem por retalhista/PID, mas elimina o segundo preflight visual bloqueante.
+`conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog2-pd-photo1-photo-loader3`
 
-Fluxo:
+## QA atual
 
-1. validar `sourceUrl` oficial e PID;
-2. ler a página oficial exata via reader;
-3. extrair URL da fotografia;
-4. validar host/path/PID com `safeOfficialImageUrl()`;
-5. devolver imediatamente a referência validada à biblioteca;
-6. o cartão testa o carregamento real; se falhar, a referência é expurgada e o fallback permanece.
+A branch `fix/v75-safari-market-crash` passou o CI completo no SHA `f0540603b815d414e954db2103b0a4170032898d`. Passaram probe das fontes do Mercado, sintaxe, finanças, auditoria, QR, catálogo visual, biblioteca Pingo Doce, `market-photo-loader`, segurança, responsividade, navegação, acessibilidade e sincronização.
 
-Timeout do reader direto: 8 s.
-
-### `75-photo-loader2`
-
-O loader passa a priorizar até 6 cartões visíveis:
-
-- consulta primeiro `75-image-library1`;
-- obtém o registo exato através de `CDCMarketVisualCatalog.listCategory()`;
-- chama o resolvedor oficial para os SKUs visíveis sem cache;
-- persiste resultado validado e hidrata o cartão imediatamente;
-- usa `loading='eager'` nas imagens visíveis;
-- reavalia a cada 500 ms, no máximo 24 ciclos;
-- após 12 s muda de **A carregar fotografia…** para **Fotografia a validar…**, evitando spinner infinito;
-- imagem quebrada é removida com `CDCMarketImageLibrary.forget()`;
-- retry do mesmo SKU usa cooldown de 30 s;
-- no primeiro carregamento da revisão, `imagesToday` Pingo Doce é libertado uma única vez e marcado por `photoRuntimeRevision=75-photo-loader2`.
-
-O loader continua sem `fetch()` próprio e sem acesso ao estado financeiro.
-
-## Bibliotecas preservadas
-
-### Geral `75-image-library1`
-
-Base `conta-de-casa-market-image-library`, chave `marketId|pid`, metadados + URL oficial validado, TTL 45 dias.
-
-### Catálogo visual `75-catalog1`
-
-Base `conta-de-casa-market-visual-catalog`. Guarda SKUs/categorias/página oficial, não preços. **Ver preço atual** continua a usar pesquisa viva.
-
-### Pingo Doce `75-pd-photo1`
-
-Base `conta-de-casa-pingo-doce-photo-library`, mais de 200 termos em 15 famílias e estados `pending|ready|missing` por `pingo-doce|pid`.
-
-## Segurança
-
-Mantidos:
-
-- HTTPS obrigatório;
-- página oficial com PID coerente;
-- imagem apenas em host/path oficial autorizado;
-- identidade por `marketId|pid`, nunca apenas por nome;
-- nenhuma credencial/token/chave no código;
-- nenhum acesso a montantes ou estado financeiro.
-
-Eliminar o preflight duplicado não elimina validação de origem/PID. Disponibilidade real da imagem é verificada no ponto de apresentação; URL que falhe é removido da cache.
-
-## Cache publicado
-
-`conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog2-pd-photo1-photo-loader2`
-
-## QA e publicação
-
-A correção foi validada na branch `fix/v75-market-photo-runtime`, integrada em `main` por fast-forward sem force e publicada no runtime SHA `f485fd4317ad0acbd2475f9ca86efed5b413bb76`.
-
-CI de `main` nesse SHA: sucesso, incluindo probe de fontes, finanças, auditoria, QR, Mercado, imagens, `market-visual-catalog`, biblioteca Pingo Doce, `market-photo-loader`, segurança, responsividade, navegação, acessibilidade e sincronização.
-
-GitHub Pages no mesmo SHA: sucesso.
-
-## Validação física ainda necessária
-
-No mesmo iPhone/Safari/PWA que expôs o erro, confirmar:
-
-- o contador Pingo Doce começa a sair de `0 fotografias oficiais` quando existirem SKUs com imagem válida;
-- os primeiros cartões visíveis recebem prioridade;
-- imagem em cache aparece sem atraso perceptível;
-- spinner não permanece indefinidamente;
-- URL quebrado é removido e não prende o cartão;
-- Continente/Pingo Doce nunca trocam imagens entre PIDs;
-- rede lenta/offline mantém cartões utilizáveis;
-- valores financeiros permanecem inalterados.
+A validação física ainda é obrigatória porque o erro é específico do Safari/iPhone e não é reproduzido por testes Node.
 
 ## Próximo passo
 
-Reabrir/atualizar a PWA no iPhone, entrar no Mercado e repetir exatamente o cenário da captura. Se o contador Pingo Doce continuar em zero depois do novo cache estar ativo, recolher nova captura/estado e tratar como falha de transporte específica do dispositivo/host, não como problema de layout.
+1. fechar documentação da correção;
+2. comparar a branch com `main` e integrar apenas por fast-forward sem force;
+3. confirmar CI de `main` no SHA integrado;
+4. confirmar GitHub Pages no mesmo SHA;
+5. reabrir a aplicação no mesmo iPhone e verificar primeiro estabilidade de `/#market` e só depois a evolução das fotografias.
