@@ -1,16 +1,17 @@
 'use strict';
 
 /*
- * Conta de Casa — catálogo visual progressivo do Mercado (75-catalog1)
+ * Conta de Casa — catálogo visual progressivo do Mercado (75-catalog3)
  *
  * Objetivo:
  * - apresentar categorias úteis antes de existir uma pesquisa manual;
  * - acumular, de forma lenta e limitada, SKUs reais devolvidos por cesta.pt;
  * - reutilizar apenas fotografias oficiais validadas pela biblioteca existente;
+ * - preservar os nós dos cartões quando apenas a fotografia muda, evitando flicker;
  * - nunca escrever preços, quantidades, faturas ou estado financeiro.
  */
 (function installMarketVisualCatalog(root){
-  const REVISION='75-catalog1';
+  const REVISION='75-catalog3';
   const DB_NAME='conta-de-casa-market-visual-catalog';
   const DB_VERSION=1;
   const PRODUCT_STORE='products';
@@ -60,6 +61,7 @@
   let imageTimer=0;
   let mounting=false;
   let queryInFlight=false;
+  let renderSignature='';
 
   function identity(value={}){
     const marketId=clean(value.marketId,24).toLowerCase();
@@ -67,6 +69,8 @@
     if(!pid||!STORE_IDS[marketId])return null;
     return {marketId,pid,key:`${marketId}|${pid}`};
   }
+
+  function marketIsActive(){return Boolean(document.querySelector('#page-market.page.active'));}
 
   function safeProductUrl(value,marketId='',pid=''){
     const official=root.CDCOfficialMarketImages?.safeProductUrl;
@@ -274,7 +278,7 @@
   function ensureCestaReady(){
     if(cestaReadyPromise)return cestaReadyPromise;
     cestaReadyPromise=(async()=>{
-      await cestaRpc({jsonrpc:'2.0',id:7501,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Conta de Casa visual catalog',version:'75-catalog1'}}});
+      await cestaRpc({jsonrpc:'2.0',id:7501,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Conta de Casa visual catalog',version:REVISION}}});
       await cestaRpc({jsonrpc:'2.0',method:'notifications/initialized'}).catch(()=>null);
       return true;
     })().catch(error=>{cestaReadyPromise=null;throw error;});
@@ -305,7 +309,10 @@
       if(navigator.onLine===false)return false;
       if(navigator.connection?.saveData)return false;
     }
-    if(typeof document!=='undefined'&&document.visibilityState==='hidden')return false;
+    if(typeof document!=='undefined'){
+      if(document.visibilityState==='hidden')return false;
+      if(!marketIsActive())return false;
+    }
     return true;
   }
 
@@ -362,14 +369,25 @@
     return library.remember({...result,pack:record.pack},record).catch(()=>null);
   }
 
+  function announcePhotoReady(record,stored){
+    if(!record||!stored)return;
+    if(record.marketId==='pingo-doce')void root.CDCPingoDocePhotoLibrary?.noteImageResult?.(record,'ready');
+    if(typeof root.CustomEvent==='function'&&root.dispatchEvent){
+      root.dispatchEvent(new CustomEvent('cdc:market-photo-ready',{detail:{key:record.key,marketId:record.marketId,pid:record.pid}}));
+    }
+  }
+
   function scheduleImageWarm(delay=BACKGROUND_IMAGE_INTERVAL_MS){
     if(imageTimer||!imageQueue.length||sessionImages>=SESSION_IMAGE_BUDGET)return;
     imageTimer=setTimeout(async()=>{
       imageTimer=0;
-      if(!backgroundAllowed()){scheduleImageWarm(BACKGROUND_IMAGE_INTERVAL_MS);return;}
+      if(!backgroundAllowed())return;
       const record=imageQueue.shift();
-      if(record){imageQueued.delete(record.key);await warmOneImage(record);}
-      await renderProducts();
+      if(record){
+        imageQueued.delete(record.key);
+        const stored=await warmOneImage(record);
+        announcePhotoReady(record,stored);
+      }
       await renderStats();
       scheduleImageWarm(BACKGROUND_IMAGE_INTERVAL_MS);
     },Math.max(500,delay));
@@ -377,8 +395,7 @@
 
   async function backgroundStep(){
     backgroundTimer=0;
-    if(sessionQueries>=SESSION_QUERY_BUDGET)return;
-    if(!backgroundAllowed()){scheduleBackground(30000);return;}
+    if(sessionQueries>=SESSION_QUERY_BUDGET||!backgroundAllowed())return;
     const state=await schedulerState();
     if(Number(state.queriesToday)>=DAILY_QUERY_BUDGET)return;
     const cursor=Math.abs(Number(state.cursor)||0)%seedPlan.length;
@@ -393,8 +410,10 @@
   }
 
   function scheduleBackground(delay=2500){
-    if(backgroundTimer||sessionQueries>=SESSION_QUERY_BUDGET)return;
+    if(backgroundTimer||sessionQueries>=SESSION_QUERY_BUDGET||!marketIsActive())return;
     backgroundTimer=setTimeout(()=>{
+      backgroundTimer=0;
+      if(!backgroundAllowed())return;
       if(typeof root.requestIdleCallback==='function')root.requestIdleCallback(()=>{void backgroundStep();},{timeout:4000});
       else void backgroundStep();
     },Math.max(1000,delay));
@@ -427,7 +446,11 @@
     if(cached?.imageUrl){
       const image=document.createElement('img');
       image.src=cached.imageUrl;image.alt='';image.loading='lazy';image.decoding='async';image.referrerPolicy='no-referrer';
-      image.addEventListener('error',()=>{media.replaceChildren();imageFallback(media,category);},{once:true});
+      image.addEventListener('error',()=>{
+        void root.CDCMarketImageLibrary?.forget?.(record);
+        if(record.marketId==='pingo-doce')void root.CDCPingoDocePhotoLibrary?.noteImageResult?.(record,'pending');
+        media.replaceChildren();imageFallback(media,category);
+      },{once:true});
       media.append(image);
     }else imageFallback(media,category);
 
@@ -445,6 +468,13 @@
     const grid=document.querySelector('#marketVisualCatalogGrid');if(!grid)return;
     const category=categoryById(activeCategory);
     const records=await listCategory(category.id,activeStore,CATEGORY_RENDER_LIMIT);
+    const signature=`${category.id}|${activeStore}|${records.map(record=>record.key).join(',')}`;
+    const hasStableCards=grid.querySelector('[data-visual-catalog-product]');
+    if(signature===renderSignature&&hasStableCards){
+      enqueueImages(records.filter(record=>!imageQueued.has(record.key)).slice(0,4));
+      return;
+    }
+    renderSignature=signature;
     grid.replaceChildren();
     if(!records.length){
       const empty=el('div','market-visual-catalog-empty');
@@ -513,6 +543,7 @@
 
     const before=browser.querySelector('.market-browser-results-head');
     if(before)browser.insertBefore(section,before);else browser.append(section);
+    renderSignature='';
     updateSelection();
     return section;
   }
@@ -534,9 +565,9 @@
 
   function onClick(event){
     const categoryButton=event.target.closest?.('[data-visual-catalog-category]');
-    if(categoryButton){activeCategory=categoryById(categoryButton.dataset.visualCatalogCategory).id;updateSelection();void renderProducts();void refreshCategory(activeCategory,{seeds:1});return;}
+    if(categoryButton){activeCategory=categoryById(categoryButton.dataset.visualCatalogCategory).id;renderSignature='';updateSelection();void renderProducts();void refreshCategory(activeCategory,{seeds:1});return;}
     const storeButton=event.target.closest?.('[data-visual-catalog-store]');
-    if(storeButton){activeStore=['all','continente','pingo-doce'].includes(storeButton.dataset.visualCatalogStore)?storeButton.dataset.visualCatalogStore:'all';updateSelection();void renderProducts();return;}
+    if(storeButton){activeStore=['all','continente','pingo-doce'].includes(storeButton.dataset.visualCatalogStore)?storeButton.dataset.visualCatalogStore:'all';renderSignature='';updateSelection();void renderProducts();return;}
     if(event.target.closest?.('[data-visual-catalog-refresh]')){void refreshCategory(activeCategory,{seeds:3});return;}
     const productButton=event.target.closest?.('[data-visual-catalog-product]');
     if(productButton){void getProduct(productButton.dataset.visualCatalogProduct).then(record=>{if(record)activateLiveSearch(record);});}
@@ -545,14 +576,15 @@
   function install(){
     document.addEventListener('click',onClick);
     void mount();
-    if(document.body&&!mutationObserver){
+    const page=document.querySelector('#page-market');
+    if(page&&!mutationObserver){
       mutationObserver=new MutationObserver(mutations=>{
         if(document.querySelector('.market-browser #marketVisualCatalog'))return;
-        if(mutations.some(mutation=>mutation.type==='childList'&&mutation.addedNodes.length)&&document.querySelector('.market-browser'))void mount();
+        if(mutations.some(mutation=>mutation.type==='childList'&&mutation.addedNodes.length)&&page.querySelector('.market-browser'))void mount();
       });
-      mutationObserver.observe(document.body,{subtree:true,childList:true});
+      mutationObserver.observe(page,{subtree:true,childList:true});
     }
-    scheduleBackground(3500);
+    if(marketIsActive())scheduleBackground(3500);
   }
 
   if(typeof document!=='undefined'){
