@@ -60,7 +60,7 @@ Data: 9 de setembro de 2026 · Estado: aceite.
 
 Data: 9 de setembro de 2026 · Estado: substituída parcialmente por D-052.
 
-`75-photo-loader1` introduziu skeleton, spinner, texto **A carregar fotografia…**, consulta de cache e janela curta de polling. A validação física mostrou que feedback sem priorização real não era suficiente: a UI podia continuar a indicar carregamento enquanto a fila de resolução avançava lentamente por outros SKUs.
+`75-photo-loader1` introduziu skeleton, spinner, texto **A carregar fotografia…**, consulta de cache e janela curta de polling. A validação física mostrou que feedback sem priorização real não era suficiente.
 
 ## D-051 — Publicação exige CI da branch, CI de main e Pages
 
@@ -72,50 +72,65 @@ Fluxo obrigatório: CI verde da branch → fast-forward para `main` sem force �
 
 Data: 9 de setembro de 2026 · Estado: aceite e publicada.
 
-### Factos que motivaram a decisão
-
-A validação real no iPhone mostrou `285 SKUs indexados · 0 fotografias oficiais` na Biblioteca Pingo Doce e cartões presos em **A carregar fotografia…**. Em paralelo, a sonda de CI conseguia obter, para um SKU Pingo Doce conhecido, resposta do reader e URL de imagem com PID exato.
-
-O runtime anterior fazia ainda um segundo preflight visual com timeout de 10 s antes de permitir persistência e processava imagens Pingo Doce em fila lenta. O orçamento diário de tentativas também era persistido, pelo que falhas anteriores podiam bloquear novas tentativas até ao dia seguinte.
-
-### Decisão
-
-1. Criar revisão de distribuição/resolvedor `75-catalog2`.
-2. Depois de validar **página oficial + host/path de imagem + PID exato**, não executar um segundo preflight visual bloqueante no resolvedor direto.
-3. Tratar disponibilidade de transporte no componente que realmente apresenta a imagem.
-4. Se `<img>` falhar no browser, remover a referência da biblioteca com `forget()` e manter fallback/retry.
-5. Criar `75-photo-loader2` para priorizar até 6 cartões visíveis, em vez de depender somente da fila de fundo.
-6. Obter o registo do cartão através da API pública `CDCMarketVisualCatalog.listCategory()`, preservando encapsulamento da IndexedDB.
-7. Para cartão visível sem cache, chamar imediatamente `CDCOfficialMarketImages.resolve()` com `marketId|pid|sourceUrl` exatos e persistir apenas resultado que continue a passar pelo validador oficial.
-8. Reavaliar UI a cada 500 ms por no máximo 24 ciclos; depois de 12 s mudar para **Fotografia a validar…**, sem spinner infinito.
-9. Aplicar cooldown de 30 s por SKU para evitar repetição agressiva.
-10. Libertar uma única vez o contador `imagesToday` herdado do runtime antigo quando `photoRuntimeRevision` ainda não for `75-photo-loader2`, para que um orçamento esgotado por falsos negativos não bloqueie a correção até ao dia seguinte.
-11. Esta recuperação de orçamento só pode tocar na store `meta` da IndexedDB Pingo Doce; não pode alterar produtos, preços, faturas ou estado financeiro.
-12. O loader continua proibido de fazer `fetch()` direto; rede permanece centralizada nos resolvers existentes.
-
-### Consequências
-
-- melhora a latência dos produtos que o utilizador está efetivamente a ver;
-- reduz falso negativo de Safari causado por dupla validação de transporte;
-- mantém validação estrita de identidade/origem;
-- uma imagem remota que deixou de existir não fica permanentemente presa na cache;
-- nenhuma promessa de 100% de cobertura ou tempo fixo de carregamento é feita, porque disponibilidade do retalhista/rede continua externa.
+1. `75-catalog2` mantém validação de página oficial + host/path de imagem + PID exato.
+2. O segundo preflight visual bloqueante foi removido do resolvedor.
+3. Disponibilidade real é tratada no `<img>` que apresenta a fotografia.
+4. Erro de imagem remove a referência com `forget()` sem apagar o produto.
+5. `75-photo-loader2` introduziu prioridade de cartões visíveis.
+6. `CDCMarketVisualCatalog.listCategory()` é a API pública de leitura dos registos.
+7. O loader permanece sem `fetch()` próprio e sem estado financeiro.
 
 ## D-053 — Evidência em hardware prevalece sobre teste sintético de loader
 
 Data: 9 de setembro de 2026 · Estado: aceite.
 
-Testes unitários que confirmam presença de spinner/cache não são prova suficiente de que fotografias reais chegam ao estado `ready` no Safari. Para alterações de imagens remotas, a conclusão só é fechada depois de:
-
-1. probe de fonte em CI;
-2. testes unitários/regressão;
-3. deploy no SHA testado;
-4. validação física no iPhone/Safari/PWA com contador e cartões reais.
+Testes unitários não são prova suficiente de estabilidade ou carregamento real no Safari. Para alterações de imagens remotas, a conclusão exige probe de fonte, CI, deploy no SHA testado e validação física no iPhone/Safari/PWA.
 
 ## D-054 — Runtime2 publicado, eficácia depende de revalidação física
 
 Data: 9 de setembro de 2026 · Estado: aceite.
 
-`75-catalog2` + `75-photo-loader2` passou CI na branch, foi integrado por fast-forward sem force e passou CI completo de `main` e GitHub Pages no SHA `f485fd4317ad0acbd2475f9ca86efed5b413bb76`.
+`75-catalog2` + `75-photo-loader2` passou CI e Pages. A publicação técnica ficou concluída, mas a eficácia física permaneceu pendente.
 
-A publicação técnica está concluída. Contudo, não se considera demonstrado que o contador Pingo Doce sai de zero no iPhone até repetir o cenário real que revelou o erro. Se continuar em zero com o novo cache ativo, a próxima investigação deve focar transporte/CSP/cache/Safari no dispositivo e não apenas testes sintéticos.
+## D-055 — Estabilidade do Safari tem prioridade sobre throughput de fotografias
+
+Data: 9 de setembro de 2026 · Estado: aceite para validação.
+
+### Factos
+
+Após a publicação de `75-photo-loader2`, o iPhone/Safari apresentou a mensagem nativa **“Um problema ocorreu repetidamente”** ao abrir `#market`.
+
+Não há crash log de WebKit disponível, portanto a exceção interna exata não pode ser afirmada.
+
+A inspeção do runtime encontrou, contudo, estes riscos concretos:
+
+1. `MutationObserver` em `document.body` com `subtree:true`;
+2. scans não coalescidos por mutações de DOM;
+3. hidratação e resolução assíncronas sem exclusão mútua;
+4. até 18 hidratações por passagem e 6 resoluções prioritárias;
+5. polling de 500 ms/24 ciclos;
+6. sincronização Pingo Doce iniciada em paralelo no primeiro acesso.
+
+### Decisão
+
+Criar `75-photo-loader3` com os seguintes limites:
+
+1. observar apenas `#page-market`;
+2. ignorar mutações geradas pelo próprio loader na media/status;
+3. coalescer scans com `scanQueued`, `scanRunning` e `scanPending`;
+4. permitir uma única operação global de hidratação (`refreshPromise`) e uma de resolução (`warmPromise`);
+5. limitar hidratação a 8 cartões;
+6. limitar prioridade a 4 cartões processados sequencialmente;
+7. reduzir polling para 1 s/12 ciclos;
+8. adiar a sincronização Pingo Doce 5 s/idle e usar 1 seed;
+9. deixar de chamar `warmPending()` na entrada do Mercado;
+10. manter cooldown de 30 s e estado **Fotografia a validar…** aos 12 s;
+11. manter validação estrita por retalhista/PID e isolamento financeiro.
+
+### Consequências
+
+- menor pressão de CPU, DOM, IndexedDB e rede no iPhone;
+- menor probabilidade de tarefas assíncronas sobrepostas;
+- potencialmente menos fotografias resolvidas por unidade de tempo, deliberadamente;
+- estabilidade do ecrã Mercado torna-se critério P0 antes de aumentar novamente o throughput;
+- qualquer aumento futuro de concorrência exige validação física no iPhone antes de publicação.
