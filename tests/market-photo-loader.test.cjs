@@ -30,6 +30,8 @@ assert.match(source,/CDCMarketImageLibrary\?\.get/);
 assert.match(source,/CDCMarketImageLibrary\?\.forget/);
 assert.match(source,/CDCOfficialMarketImages/);
 assert.match(source,/CDCMarketVisualCatalog/);
+assert.match(source,/noteImageResult/);
+assert.match(source,/reconcileCachedImages/);
 assert.match(source,/warmVisibleCards/);
 assert.match(source,/photoRuntimeRevision/);
 assert.match(source,/imagesToday:0/);
@@ -50,8 +52,10 @@ assert.doesNotMatch(source,/https?:\/\//);
 assert.doesNotMatch(source,/\bfetch\s*\(/);
 
 assert.match(css,/\.market-photo-loader/);
-assert.match(css,/marketPhotoShimmer/);
 assert.match(css,/marketPhotoSpin/);
+assert.doesNotMatch(css,/marketPhotoShimmer/);
+assert.match(css,/opacity:1!important/);
+assert.match(css,/transition:none!important/);
 assert.match(css,/a carregar fotografias/);
 assert.match(css,/prefers-reduced-motion/);
 
@@ -65,7 +69,7 @@ assert.equal(typeof sandbox.CDCMarketPhotoLoader.warmVisible,'function');
 
 assert.match(prepare,/const PHOTO_LOADER_REV = '75-photo-loader3'/);
 for(const asset of ['market-photo-loader.css','market-photo-loader.js'])assert.ok(prepare.includes(`'${asset}'`));
-assert.match(sw,/pd-photo1-photo-loader3/);
+assert.match(sw,/pd-photo2-photo-loader3/);
 for(const asset of ['./market-photo-loader.css','./market-photo-loader.js'])assert.ok(sw.includes(`'${asset}'`));
 
 const dist=path.join(ROOT,'dist');
@@ -82,4 +86,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market photo loader limits Safari work, coalesces scans and remains non-financial: OK');
+console.log('Market photo loader limits Safari work, prevents shimmer flicker and remains non-financial: OK');
