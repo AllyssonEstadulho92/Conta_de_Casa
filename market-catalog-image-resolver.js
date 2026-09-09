@@ -1,11 +1,10 @@
 'use strict';
 
-/* Conta de Casa — resolvedor direto e limitado de fotografias oficiais (75-catalog1). */
+/* Conta de Casa — resolvedor direto e limitado de fotografias oficiais (75-catalog2). */
 (function installCatalogImageResolver(root){
-  const REVISION='75-catalog1';
+  const REVISION='75-catalog2';
   const JINA_READER_ORIGIN='https://r.jina.ai';
-  const REQUEST_TIMEOUT_MS=12000;
-  const IMAGE_TIMEOUT_MS=10000;
+  const REQUEST_TIMEOUT_MS=8000;
   const MAX_CONCURRENT=2;
   const queue=[];
   const inFlight=new Map();
@@ -56,18 +55,6 @@
     }finally{clearTimeout(timer);}
   }
 
-  function canLoadImage(url){
-    if(typeof Image!=='function')return Promise.resolve(true);
-    return new Promise(resolve=>{
-      const image=new Image();
-      let done=false;
-      const finish=value=>{if(done)return;done=true;clearTimeout(timer);image.onload=null;image.onerror=null;resolve(value);};
-      const timer=setTimeout(()=>finish(false),IMAGE_TIMEOUT_MS);
-      image.referrerPolicy='no-referrer';image.decoding='async';
-      image.onload=()=>finish(true);image.onerror=()=>finish(false);image.src=url;
-    });
-  }
-
   function queued(task){return new Promise((resolve,reject)=>{queue.push({task,resolve,reject});runQueue();});}
   function runQueue(){
     while(active<MAX_CONCURRENT&&queue.length){
@@ -85,7 +72,15 @@
     const response=await timedFetch(`${JINA_READER_ORIGIN}/${sourceUrl}`);
     if(!response.ok)throw new Error(`catalog-image-reader-${response.status}`);
     const imageUrl=selectOfficialImage(await response.text(),id);
-    if(!imageUrl||!(await canLoadImage(imageUrl)))return null;
+    if(!imageUrl)return null;
+
+    /*
+     * Não fazemos aqui um segundo carregamento bloqueante da imagem com new Image().
+     * O URL já foi obtido da página oficial exata e passou host/path/PID. No Safari,
+     * esse preflight visual podia ficar até 10 s à espera e transformar uma fotografia
+     * válida num falso negativo. O componente visual é quem testa o carregamento real;
+     * se falhar, a biblioteca elimina a entrada e mantém o fallback.
+     */
     return {
       imageUrl,sourceUrl,marketId:id.marketId,pid:id.pid,
       name:clean(target.name,140),pack:clean(target.pack,100),
