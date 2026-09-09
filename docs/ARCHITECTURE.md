@@ -6,7 +6,7 @@ Distribuição: GitHub Pages / PWA
 
 ## 1. Princípios
 
-A aplicação é uma PWA estática/local-first. Apresentação, Mercado e catálogos são camadas separadas do núcleo financeiro. Alterações visuais ou de imagens não podem reescrever persistência, cálculos, cofre ou sincronização.
+A aplicação é uma PWA estática/local-first. Apresentação, Mercado e catálogos são camadas separadas do núcleo financeiro.
 
 Invariantes:
 
@@ -47,10 +47,10 @@ Invariantes:
 - `market-retailer-image-policy.js`: política contra correspondência aproximada;
 - `market-official-images.js`: bridge e validadores oficiais;
 - `market-image-library.js`: cache persistente por `marketId|pid`;
-- `market-catalog-image-resolver.js`: leitura da página oficial exata e resolução direta da imagem (`75-catalog2`);
+- `market-catalog-image-resolver.js`: resolução direta de fotografia oficial (`75-catalog2`);
 - `market-visual-catalog.js`: catálogo visual progressivo (`75-catalog1` base);
-- `pingo-doce-photo-library.js`: expansão dedicada do inventário Pingo Doce (`75-pd-photo1`);
-- `market-photo-loader.js`: prioridade aos cartões visíveis e feedback de carregamento (`75-photo-loader2`).
+- `pingo-doce-photo-library.js`: inventário Pingo Doce (`75-pd-photo1`);
+- `market-photo-loader.js`: orquestração visual limitada (`75-photo-loader3` em validação).
 
 ## 3. Biblioteca geral `75-image-library1`
 
@@ -58,16 +58,7 @@ Base: `conta-de-casa-market-image-library`.
 
 Chave canónica: `marketId|pid`.
 
-A store guarda:
-
-- mercado;
-- PID;
-- nome/embalagem apenas para diagnóstico;
-- URL oficial validado da fotografia;
-- URL oficial do produto quando disponível;
-- timestamps/expiração.
-
-Não guarda binários, preços, faturas, dados pessoais ou credenciais. TTL positivo: 45 dias.
+Guarda apenas metadados e URL oficial validado. Não guarda binários, preços, faturas, dados pessoais ou credenciais. TTL positivo: 45 dias.
 
 ## 4. Catálogo visual `75-catalog1`
 
@@ -78,35 +69,20 @@ Stores:
 - `products`: `marketId|pid`, nome, embalagem, categorias, página oficial, timestamps;
 - `meta`: cursor e orçamento de descoberta.
 
-O catálogo usa `cesta.pt` para descobrir produtos reais de Continente/Pingo Doce e não persiste preço. O clique em **Ver preço atual** transfere o nome para `#marketCatalogSearch` e aciona a pesquisa viva existente.
-
-O objeto público `CDCMarketVisualCatalog` expõe `listCategory()`. `75-photo-loader2` reutiliza este contrato para localizar os registos exatos correspondentes aos cartões visíveis, sem aceder diretamente à IndexedDB do catálogo.
+Não persiste preço. **Ver preço atual** reutiliza a pesquisa viva existente. `CDCMarketVisualCatalog.listCategory()` é o contrato público usado pelo loader para obter o registo exato do SKU.
 
 ## 5. Resolvedor direto `75-catalog2`
 
-### Contrato de identidade
-
-Entrada mínima:
-
-- `marketId` = `continente|pingo-doce`;
-- `pid` numérico;
-- `sourceUrl` da página oficial exata;
-- nome/embalagem opcionais para UI/diagnóstico.
-
-### Fluxo
+Fluxo:
 
 1. `safeProductUrl()` confirma HTTPS, retalhista, path oficial e PID final;
-2. `r.jina.ai` lê a página oficial exata sem credenciais;
+2. o reader lê a página oficial exata;
 3. são extraídos URLs candidatos;
 4. `safeOfficialImageUrl()` exige host/path oficial e PID correspondente;
-5. é escolhida a variante de maior prioridade (`large` no Pingo Doce, `frente` no Continente quando disponível);
-6. a referência validada é devolvida imediatamente à biblioteca.
+5. é escolhida a variante de maior prioridade;
+6. a referência validada é devolvida à biblioteca.
 
-### Alteração face a `75-catalog1`
-
-Foi removido o segundo preflight visual bloqueante antes de devolver a referência. Essa etapa duplicava a validação de transporte e, no Safari, podia ficar até 10 s à espera ou produzir falso negativo apesar de a URL já estar validada por página oficial + host/path/PID.
-
-A segurança de identidade não é relaxada: a referência só entra na biblioteca depois de passar os mesmos validadores estritos. O carregamento real é testado no cartão; uma imagem que falhe é removida da biblioteca por `75-photo-loader2`.
+O segundo preflight visual bloqueante foi removido porque duplicava a validação de transporte e podia produzir falso negativo no Safari. A disponibilidade real é comprovada pelo `<img>` do cartão; se falhar, a referência é removida da biblioteca.
 
 Timeout do reader: 8 s. Concorrência direta: 2.
 
@@ -119,67 +95,60 @@ Stores:
 - `products` com chave `pingo-doce|pid`;
 - `meta` para cursor, orçamento diário e timestamps.
 
-Campos principais:
+Estados: `pending | ready | missing`.
 
-- `marketId = pingo-doce`;
-- `pid`;
-- `name`;
-- `pack`;
-- `categoryId`;
-- `sourceUrl` oficial;
-- `imageState = pending | ready | missing`;
-- `firstSeenAt`, `lastSeenAt`, `imageCheckedAt`.
+A descoberta tem 15 grupos e mais de 200 termos. Limites: 24 pesquisas/sessão, 72/dia, 30 tentativas de imagem/sessão, 120/dia, com suspensão offline/oculta/Save-Data.
 
-A descoberta tem 15 grupos e mais de 200 termos. Limites históricos mantidos: 24 pesquisas/sessão, 72/dia, 30 tentativas de imagem/sessão, 120/dia e suspensão offline/oculta/Save-Data.
+## 7. Incidente Safari após `75-photo-loader2`
 
-## 7. Carregador prioritário `75-photo-loader2`
+A captura física do iPhone mostrou a mensagem nativa do Safari **“Um problema ocorreu repetidamente”** ao abrir `#market`.
 
-`market-photo-loader.js` continua uma camada de apresentação/orquestração sem `fetch()` próprio.
+Sem crash log de WebKit não é possível provar a exceção interna. A inspeção, porém, encontrou um padrão de risco em `75-photo-loader2`:
+
+- `MutationObserver` global em `document.body` com `subtree:true`;
+- scans agendados sem coalescência por mutações de DOM;
+- hidratação, resolução e trabalho de entrada potencialmente sobrepostos;
+- polling de 500 ms/24 ciclos;
+- sincronização Pingo Doce iniciada em paralelo ao aquecimento de cartões.
+
+## 8. Carregador limitado `75-photo-loader3`
+
+`market-photo-loader.js` permanece uma camada de apresentação/orquestração sem `fetch()` próprio.
+
+### Limites de trabalho
+
+- observer apenas em `#page-market`;
+- mutações do próprio loader em `.market-visual-product-media` e no estado Pingo Doce são ignoradas;
+- `scheduleScan()` é coalescido com `scanQueued`, `scanRunning` e `scanPending`;
+- `refreshPromise` impede hidratações globais concorrentes;
+- `warmPromise` impede aquecimentos concorrentes;
+- até 8 cartões são hidratados por passagem;
+- até 4 cartões recebem resolução prioritária;
+- os 4 são processados sequencialmente para reduzir picos de CPU/rede;
+- polling: 1 s, máximo 12 ciclos;
+- retry do mesmo SKU: 30 s;
+- após 12 s, o estado passa para **Fotografia a validar…**.
 
 ### Entrada no Mercado
 
-O loader só trabalha quando `#page-market.page.active` está realmente ativo. Ao primeiro acesso:
+1. o loader só trabalha se `#page-market.page.active` estiver ativo;
+2. repõe uma única vez o orçamento antigo através de `photoRuntimeRevision=75-photo-loader3`;
+3. aquece apenas os cartões prioritários;
+4. a sincronização Pingo Doce deixa de arrancar em paralelo: é adiada 5 s e usa 1 seed;
+5. `warmPending()` deixa de ser chamado pelo loader na entrada.
 
-1. consulta a biblioteca persistente para os cartões já renderizados;
-2. garante que a base Pingo Doce já foi aberta;
-3. liberta **uma única vez nesta revisão** o contador diário `imagesToday` do runtime antigo, gravando `photoRuntimeRevision=75-photo-loader2`;
-4. inicia atualização limitada Pingo Doce;
-5. em paralelo, prioriza os cartões visíveis.
+### Erro de imagem
 
-A recuperação de `imagesToday` existe apenas para impedir que falhas acumuladas por `75-photo-loader1` mantenham o novo runtime bloqueado até à mudança do dia. Não altera contadores financeiros ou dados de produtos.
+Se `<img>` falhar, `CDCMarketImageLibrary.forget()` remove a referência e o cartão mantém estado utilizável/fallback. Nenhum produto é apagado.
 
-### Prioridade visível
+## 9. Separação entre origem e transporte
 
-- até 6 cartões visíveis por ciclo;
-- identifica cada cartão por `marketId|pid`;
-- usa `CDCMarketVisualCatalog.listCategory()` para obter `sourceUrl`/metadados do SKU;
-- verifica primeiro `CDCMarketImageLibrary.get()`;
-- se não houver cache, chama `CDCOfficialMarketImages.resolve()` imediatamente para o SKU visível;
-- resultado válido é persistido e o cartão é hidratado com `loading='eager'`;
-- evento `cdc:market-photo-ready` acelera atualização da UI.
+- **validade da referência**: página oficial + domínio/path autorizado + PID exato;
+- **disponibilidade de transporte**: carregamento real pelo browser.
 
-### Estados visuais
+Estas duas responsabilidades permanecem separadas para não confundir falha transitória de rede com identidade incorreta do produto.
 
-- `A carregar fotografia…` aparece imediatamente;
-- poll: 500 ms, máximo 24 ciclos;
-- após 12 s sem resolução, o spinner para e o texto passa a **Fotografia a validar…**;
-- retry do mesmo SKU: cooldown de 30 s;
-- erro real de `<img>` chama `CDCMarketImageLibrary.forget()` e mantém o cartão utilizável.
-
-O loader não cria polling infinito e não altera a altura estrutural do cartão.
-
-## 8. Separação entre validação de origem e disponibilidade de transporte
-
-A arquitetura distingue explicitamente:
-
-- **validade da referência**: comprovada pela página oficial, domínio/path autorizado e PID exato;
-- **disponibilidade de transporte**: comprovada quando o browser efetivamente carrega a imagem.
-
-Uma falha transitória de transporte não deve tornar uma referência oficialmente identificada num produto diferente. Também não deve prender a UI indefinidamente: a referência quebrada é expurgada e pode ser reavaliada mais tarde.
-
-## 9. Ordem de assets
-
-Scripts relevantes:
+## 10. Ordem de assets
 
 1. `market-image-library.js`;
 2. política/auditoria;
@@ -187,10 +156,10 @@ Scripts relevantes:
 4. `market-catalog-image-resolver.js?v=75-catalog2`;
 5. `market-visual-catalog.js?v=75-catalog2`;
 6. `pingo-doce-photo-library.js?v=75-pd-photo1`;
-7. `market-photo-loader.js?v=75-photo-loader2`;
+7. `market-photo-loader.js?v=75-photo-loader3`;
 8. runtime/apresentação restantes.
 
-## 10. Segurança
+## 11. Segurança
 
 As camadas de imagem não podem aceder a:
 
@@ -202,51 +171,37 @@ As camadas de imagem não podem aceder a:
 - `amountCents`;
 - PIN/passwords/tokens.
 
-Pingo Doce: página HTTPS `pingodoce.pt|www.pingodoce.pt`, path `/home/produtos/`, PID final correspondente; imagem apenas `static.pingodoce.pt/Sites-pingo-doce-master/.../images/(large|medium|small)/...` com PID correspondente.
+Pingo Doce: página HTTPS oficial com path `/home/produtos/` e PID final correspondente; imagem apenas em host/path oficial permitido com PID coerente. Continente mantém as regras oficiais existentes.
 
-Continente: regras oficiais já existentes permanecem inalteradas.
-
-## 11. Responsividade/acessibilidade
+## 12. Responsividade/acessibilidade
 
 - mobile principal <=820 px;
 - refinamentos 540/430/350 px;
 - safe areas iOS preservadas;
-- loader não altera geometria do cartão;
-- texto de estado substitui animação prolongada;
-- `prefers-reduced-motion` continua a remover animações CSS;
+- loader não altera geometria estrutural do cartão;
+- `prefers-reduced-motion` continua respeitado;
 - foco e navegação não são bloqueados.
 
-## 12. Versionamento e cache
+## 13. Versionamento e cache
 
 - base visual: `75-catalog1`;
 - resolvedor/distribuição catálogo: `75-catalog2`;
 - Pingo Doce: `75-pd-photo1`;
-- loader: `75-photo-loader2`;
-- cache publicado: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog2-pd-photo1-photo-loader2`.
+- loader em validação: `75-photo-loader3`;
+- cache esperado: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog2-pd-photo1-photo-loader3`.
 
-## 13. QA
+## 14. QA obrigatório
 
-CI/Pages executam:
+CI deve cobrir:
 
-- `tests/market-image-library.test.cjs`;
-- `tests/market-official-images.test.cjs`;
-- `tests/market-visual-catalog.test.cjs`;
-- `tests/pingo-doce-photo-library.test.cjs`;
-- `tests/market-photo-loader.test.cjs`;
-- regressões de finanças, segurança, responsividade, navegação, acessibilidade e sync.
+- sintaxe;
+- finanças/auditoria;
+- QR/faturas;
+- Mercado/fontes;
+- biblioteca geral;
+- catálogo visual;
+- biblioteca Pingo Doce;
+- `tests/market-photo-loader.test.cjs` com garantias de coalescência/limites;
+- segurança, responsividade, navegação, acessibilidade e sync.
 
-A validação em hardware real é obrigatória porque o problema foi observado especificamente no Safari/iPhone e envolve transporte de imagens/cache/runtime.
-
-## 14. Publicação da correção
-
-A revisão funcional `75-catalog2` + `75-photo-loader2` foi integrada em `main` por fast-forward sem force no SHA `f485fd4317ad0acbd2475f9ca86efed5b413bb76`.
-
-Nesse mesmo SHA:
-
-- CI de `main`: sucesso;
-- probe de fontes: sucesso para Continente e Pingo Doce;
-- testes de catálogo visual, biblioteca Pingo Doce e photo loader: sucesso;
-- regressões financeiras, segurança, responsividade, navegação, acessibilidade e sincronização: sucesso;
-- GitHub Pages: deploy concluído com sucesso.
-
-Os commits documentais posteriores não alteram o runtime público. A eficácia da correção no Safari só fica fechada depois de repetir a validação física que originalmente mostrou `0 fotografias oficiais`.
+A validação física no iPhone continua obrigatória. Para este incidente, o primeiro critério é **#market abrir e permanecer estável**; o segundo é a evolução das fotografias oficiais.
