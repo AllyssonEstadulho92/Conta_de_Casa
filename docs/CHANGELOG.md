@@ -1,5 +1,42 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-09 — v75 `75-drawer1`: drawer azul à direita inspirado no protótipo
+
+### Objetivo
+
+Substituir a sensação de painel branco pesado observada no menu móvel por uma composição mais próxima do protótipo fornecido: página clara visível e navegação num painel azul, mantendo a decisão estrutural do projeto de abrir o drawer pelo lado direito.
+
+### Alterações
+
+- criada `v75-drawer-blue.css` como camada CSS-only carregada depois de `v75-layout-polish.css`;
+- drawer móvel continua ancorado à direita com `inset: 0 0 0 auto`;
+- largura passa a `min(320px, calc(100vw - 72px))`, deixando uma faixa visível da página clara à esquerda;
+- painel usa gradiente azul e cantos internos arredondados, sem cartões brancos internos;
+- backdrop passa a ser muito leve e sem blur, preservando a leitura da página branca ao fundo;
+- cabeçalho do drawer usa `icon.svg`, **Conta de Casa** e **Navegação**;
+- o mesmo `#mobileMenuBtn` continua a ser reutilizado e, quando aberto, aparece no canto superior direito como X;
+- grupos, ícones e labels usam branco/opacidades controladas;
+- item ativo usa realce translúcido;
+- `Ocultar valores` e `Bloquear` permanecem no rodapé do mesmo painel azul;
+- `prefers-reduced-motion`, foco visível, safe areas, scroll interno e tema escuro foram preservados;
+- `mobile-menu-toggle.js` não foi alterado, portanto swipe pela direita, Escape, foco e wiring existente continuam iguais;
+- criada `DRAWER_REV = 75-drawer1` em `scripts/prepare-pages.cjs`;
+- Service Worker passa a usar cache com sufixo `-stability1-layout1-drawer1`;
+- criado `tests/v75-drawer-blue.test.cjs`;
+- CI e Pages passam a validar a nova camada antes da publicação.
+
+### Segurança e integridade
+
+- `v75-drawer-blue.css` não referencia `appState`, montantes, `estimatedCents`, `actualCents`, IndexedDB ou funções de persistência;
+- `core.js`, `finance.js`, `STATE_VERSION = 5`, PIN, PBKDF2-SHA-256, AES-GCM, pagamentos, QR, Mercado e sincronização não foram modificados;
+- a alteração não cria rotas, labels funcionais paralelos nem uma segunda navegação.
+
+### Validação
+
+- CI completo da branch `fix/v75-blue-right-drawer` terminou com sucesso;
+- a revisão foi integrada em `main` por fast-forward;
+- validação final de `main` e GitHub Pages deve corresponder ao SHA final com a documentação atualizada.
+
 ## 2026-09-09 — v75 `75-layout1`: proporção e alinhamento transversal das páginas
 
 ### Objetivo
@@ -106,7 +143,7 @@ Reduzir ruído visual no topo da aplicação e aproximar a composição do padr�
 
 ### Compatibilidade de atualização
 
-O sufixo `header2` foi colocado no final da assinatura-base. A revisão `75-stability1` acrescenta depois o seu próprio sufixo sem reordenar a assinatura histórica. `75-layout1` acrescenta um novo sufixo no fim, preservando a sequência de invalidação.
+O sufixo `header2` foi colocado no final da assinatura-base. A revisão `75-stability1` acrescenta depois o seu próprio sufixo sem reordenar a assinatura histórica. `75-layout1` acrescenta um novo sufixo no fim, preservando a sequência de invalidação; `75-drawer1` acrescenta o último sufixo da revisão atual.
 
 ## 2026-09-08 — v75 publicada: reestruturação total alinhada com o protótipo
 
