@@ -118,8 +118,8 @@ jobs:
       - name: v75 page proportion and alignment tests
         run: node tests/v75-layout-polish.test.cjs
 
-      - name: v75 right blue drawer tests
-        run: node tests/v75-drawer-blue.test.cjs
+      - name: v75 right teal drawer tests
+        run: node tests/v75-drawer-theme.test.cjs
 
       - name: Animated mobile menu tests
         run: node tests/mobile-menu-toggle.test.cjs
