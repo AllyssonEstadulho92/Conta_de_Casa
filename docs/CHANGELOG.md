@@ -1,5 +1,40 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-09 — v75 `75-drawer2`: drawer alinhado com a paleta oficial da aplicação
+
+### Objetivo
+
+Corrigir a inconsistência cromática observada no iPhone: o drawer `75-drawer1` tinha a composição espacial correta, mas o azul saturado destoava do cabeçalho e da identidade verde-petróleo/teal já consolidada na Conta de Casa.
+
+### Alterações
+
+- criada `v75-drawer-theme.css` como nova camada visual final;
+- mantido o drawer no lado direito e a página clara visível à esquerda;
+- mantida a largura `min(320px, calc(100vw - 72px))`;
+- gradiente passa a usar `#003f4c → #005965 → #087a78`, a mesma família do cabeçalho `75-header2`;
+- menta `#5be0c2` fica reservada para foco, seleção e detalhe;
+- sombra e backdrop passam de azul para petróleo/teal;
+- item ativo continua translúcido, sem cartão branco interno;
+- `icon.svg`, Conta de Casa, X, Ocultar valores e Bloquear permanecem no mesmo drawer;
+- `mobile-menu-toggle.js` não foi alterado, preservando swipe pela direita, Escape, foco, ARIA e hambúrguer ↔ X;
+- `v75-drawer-blue.css` deixa de integrar o bundle público;
+- `DRAWER_REV` passa a `75-drawer2`;
+- Service Worker passa a usar cache com sufixo `-drawer2`;
+- criado `tests/v75-drawer-theme.test.cjs`, incluindo verificação explícita da correspondência cromática entre drawer e cabeçalho;
+- CI e Pages passam a executar o novo teste antes da publicação.
+
+### Segurança e integridade
+
+- `v75-drawer-theme.css` não referencia `appState`, montantes, `estimatedCents`, `actualCents`, IndexedDB ou persistência;
+- `core.js`, `finance.js`, `STATE_VERSION = 5`, PIN, PBKDF2-SHA-256, AES-GCM, pagamentos, QR, Mercado e sincronização não foram modificados;
+- a revisão não cria rotas, handlers ou uma segunda navegação.
+
+### Distribuição
+
+- revisão: `75-drawer2`;
+- asset: `v75-drawer-theme.css?v=75-drawer2`;
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2`.
+
 ## 2026-09-09 — v75 `75-drawer1`: drawer azul à direita inspirado no protótipo
 
 ### Objetivo
@@ -35,7 +70,7 @@ Substituir a sensação de painel branco pesado observada no menu móvel por uma
 
 - CI completo da branch `fix/v75-blue-right-drawer` terminou com sucesso;
 - a revisão foi integrada em `main` por fast-forward;
-- validação final de `main` e GitHub Pages deve corresponder ao SHA final com a documentação atualizada.
+- CI de `main` e GitHub Pages terminaram com sucesso antes da revisão cromática `75-drawer2`.
 
 ## 2026-09-09 — v75 `75-layout1`: proporção e alinhamento transversal das páginas
 
@@ -143,7 +178,7 @@ Reduzir ruído visual no topo da aplicação e aproximar a composição do padr�
 
 ### Compatibilidade de atualização
 
-O sufixo `header2` foi colocado no final da assinatura-base. A revisão `75-stability1` acrescenta depois o seu próprio sufixo sem reordenar a assinatura histórica. `75-layout1` acrescenta um novo sufixo no fim, preservando a sequência de invalidação; `75-drawer1` acrescenta o último sufixo da revisão atual.
+O sufixo `header2` foi colocado no final da assinatura-base. `75-stability1`, `75-layout1` e `75-drawer2` acrescentam os seus próprios sufixos, preservando a sequência de invalidação de cache.
 
 ## 2026-09-08 — v75 publicada: reestruturação total alinhada com o protótipo
 
