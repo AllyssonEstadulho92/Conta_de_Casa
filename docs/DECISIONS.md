@@ -8,22 +8,22 @@ Este ficheiro mantém as decisões vigentes necessárias para continuidade. O de
 Estado: aceite. `.app-shell` e `.main` usam viewport CSS; `VisualViewport` fica reservado a teclado e diálogos.
 
 ## D-002 — Camada móvel dedicada
-Estado: aceite. `mobile-layout.css` mantém compatibilidade estrutural Safari/safe areas; releases podem acrescentar uma camada final versionada.
+Estado: aceite. `mobile-layout.css` mantém compatibilidade Safari/safe areas; releases podem acrescentar uma camada final versionada.
 
 ## D-003 — Densidade móvel sem sacrificar acessibilidade
-Estado: aceite. Compactação não pode remover foco, contraste, legibilidade ou alvos de toque adequados.
+Estado: aceite. Compactação não pode remover foco, contraste, legibilidade ou alvos tácteis adequados.
 
 ## D-004 — Mercado como camada isolada
-Estado: aceite. Mercado não reescreve cifragem, persistência ou núcleo financeiro sem necessidade comprovada.
+Estado: aceite. Mercado não reescreve cifragem, persistência financeira ou núcleo de cálculos sem necessidade comprovada.
 
 ## D-005 — Nunca tratar demonstração como preço real
 Estado: aceite. Valores fictícios não entram nos totais nem são apresentados como preços atuais.
 
 ## D-006 — Preço pesquisado é estimativa
-Estado: aceite. Catálogo alimenta `estimatedCents`; `actualCents` representa valor efetivamente confirmado/pago.
+Estado: aceite. Pesquisa pode alimentar `estimatedCents`; `actualCents` representa valor confirmado/pago.
 
-## D-007 — Código de barras identifica produto, não prova preço
-Estado: aceite. GTIN/EAN/UPC identifica artigo; preço continua estimado até confirmação.
+## D-007 — Código de barras/PID identifica produto, não prova preço
+Estado: aceite. GTIN/EAN/UPC/PID identifica artigo; preço continua independente e sujeito a confirmação.
 
 ## D-008 — Lucide como sistema vetorial oficial
 Estado: aceite. Ícones são locais, auditáveis e sem icon font/CDN em runtime.
@@ -50,10 +50,10 @@ Estado: aceite. Nome, embalagem, loja, categoria, estado e preço identificam o 
 Estado: aceite. Agrupamento e disclosures reutilizam os mesmos itens, IDs e handlers.
 
 ## D-022 — Colisões visuais devem ser consolidadas
-Estado: aceite. `design-system.css` é a base consolidada; `ui-consistency.css` deixou de ser distribuído.
+Estado: aceite. `design-system.css` é a base consolidada; camadas históricas só podem ser removidas após prova de ausência de referências.
 
 ## D-023 — Cada alteração pública relevante gera revisão validável
-Estado: aceite. Alterações visuais podem usar revisão interna dentro do mesmo build quando não existe mudança funcional; cache e asset versioning têm de permitir atualização real.
+Estado: aceite. Alterações podem usar revisão interna no mesmo build; cache e asset versioning têm de permitir atualização real.
 
 ## D-024 — Auto-adição por código de barras é conservadora
 Estado: aceite. Exige correspondência forte; ambiguidade exige confirmação. Só estimativas podem ser atualizadas automaticamente.
@@ -77,135 +77,86 @@ Estado: aceite. Drawer, eventos e renderização continuam únicos.
 Estado: aceite. Desktop e drawer móvel permanecem alinhados com a decisão da v73.
 
 ## D-040 — v75 usa o protótipo como referência visual sem transformar demonstração em funcionalidade
-Estado: aceite e publicada. A fidelidade visual não autoriza preços, lojas, artigos ou capacidades fictícias.
+Estado: aceite e publicada. Fidelidade visual não autoriza preços, lojas, artigos ou capacidades fictícias.
 
 ## D-041 — Cabeçalho móvel minimalista e orientado à tarefa
 Data: 8 de setembro de 2026 · Estado: aceite.
 
-### Decisão
-
-1. O cabeçalho móvel deve mostrar apenas navegação, contexto atual e notificações.
-2. O bloco `Olá, Utilizador / Bem-vindo de volta!` e o avatar não pertencem ao topbar global e ficam ocultos.
-3. Hambúrguer + título ficam à esquerda; `#notificationsBtn` fica como única ação à direita.
-4. O sino mantém handler, badge, ARIA e semântica existentes; a alteração é visual.
-5. A linha visual do header usa 60 px mais safe area superior.
-6. Gradiente, sombra e efeitos devem ser discretos; evitar cartões ou ornamentos dentro da topbar.
-7. O título deve truncar com ellipsis em ecrãs estreitos, sem empurrar notificações para fora do viewport.
-8. Hambúrguer e sino mantêm área de toque >= 44 px, foco visível e `prefers-reduced-motion`.
-9. `v75-header-refinement.css` é carregado depois de `v75-architecture.css` e não pode alterar estado da aplicação.
-10. A revisão pública do cabeçalho é `75-header2`; o Service Worker usa cache distinto para invalidar a revisão anterior.
+- hambúrguer + título à esquerda;
+- notificações à direita;
+- sem saudação/avatar duplicados no topbar global;
+- alvos de toque >= 44 px;
+- `75-header2` é camada visual e não altera estado.
 
 ## D-042 — Correções transversais da v75 ficam numa camada final de estabilidade
 Data: 8 de setembro de 2026 · Estado: aceite.
 
-### Problema
-
-A v75 acumulou camadas funcionais e visuais válidas, mas continuavam possíveis colisões entre breakpoints, métricas de tipografia, safe areas, controlos mobile, tabelas, diálogos e imagens remotas do Mercado. Corrigir estes problemas diretamente em `core.js` ou `finance.js` aumentaria risco sem relação com a causa.
-
-### Decisão
-
-1. Criar `v75-stability.css/js` como camada de estabilidade do bundle v75.
-2. Limitar a camada a apresentação, responsividade, acessibilidade e estados visuais.
-3. Não ler nem escrever `appState`, montantes, `estimatedCents`, `actualCents`, IndexedDB, cofre ou sincronização.
-4. Uniformizar tipografia com a stack nativa do sistema para evitar dependência de fontes não distribuídas.
-5. Em mobile, inputs/selects/textarea usam 16 px para evitar zoom automático do Safari.
-6. Safe areas horizontais passam a ser consideradas no header, conteúdo e navegação inferior, além das áreas superior/inferior já existentes.
-7. A barra inferior preserva exatamente cinco destinos e alvos de toque adequados.
-8. Falha de fotografia remota no Mercado é um estado visual explícito (`Imagem indisponível`), nunca remoção do artigo nem alteração de preço.
-9. `theme-color` acompanha tema e cabeçalho visível para reduzir discrepâncias entre Safari/PWA e a aplicação.
-10. A revisão é `75-stability1`; o cache recebe o sufixo `-stability1`.
-11. CI e verificação pré-deploy devem cobrir a mesma arquitetura v74/v75, incluindo a camada e respetivo teste.
-12. A camada deve ser consolidada numa futura release apenas depois de validação real em hardware; não remover regras históricas sem prova de que deixaram de ser referenciadas.
+`v75-stability.css/js` trata apresentação, responsividade, acessibilidade, safe areas e estados visuais sem ler/escrever estado financeiro. Revisão `75-stability1`.
 
 ## D-043 — Geometria de páginas é uma responsabilidade CSS separada
 Data: 9 de setembro de 2026 · Estado: aceite.
 
-### Problema
+`v75-layout-polish.css` (`75-layout1`) uniformiza largura útil, margens, ritmo, grelhas e breakpoints sem criar rotas, dados, preços ou handlers.
 
-As páginas já partilhavam identidade visual e regras de estabilidade, mas os componentes continuavam a herdar grelhas genéricas de épocas diferentes. Isso podia produzir páginas com larguras, proporções e densidades diferentes, sobretudo entre desktop largo, web compacto e telemóvel. Alterar lógica de renderização ou núcleo financeiro para corrigir geometria seria risco desnecessário.
-
-### Decisão
-
-1. Criar `v75-layout-polish.css` como camada CSS-only carregada depois de `v75-stability.css`.
-2. A revisão chama-se `75-layout1` e não altera o build funcional `v75`.
-3. Todas as páginas usam uma coluna de conteúdo comum no desktop, com máximo de 1280 px e padding fluido.
-4. Grelhas reduzem colunas antes de comprimir cartões, formulários ou textos abaixo de uma largura útil adequada.
-5. Início, Despesas, Calendário, Mercado, Planeamento, Relatórios, Metas, Segurança, Diagnóstico e Definições recebem regras espaciais específicas quando a estrutura de informação o exige.
-6. Tablet/web compacto (`821–1120px`) é tratado separadamente do desktop largo para evitar saltos bruscos de densidade.
-7. Mobile continua a usar o breakpoint funcional de 820 px, com refinamentos adicionais em 540, 430 e 350 px.
-8. A camada não pode referenciar `appState`, montantes, `estimatedCents`, `actualCents`, IndexedDB ou operações de persistência.
-9. A camada não cria rotas, dados, preços, lojas, handlers ou capacidades; só altera geometria e apresentação.
-10. O Service Worker e `prepare-pages.cjs` devem versionar e distribuir `v75-layout-polish.css` explicitamente para evitar cache antigo.
-11. CI e Pages devem executar `tests/v75-layout-polish.test.cjs` antes de publicação.
-12. Esta camada não substitui a validação em hardware real; qualquer consolidação futura em `design-system.css` só deve ocorrer depois de testes físicos e prova de ausência de regressões.
-
-## D-044 — Drawer móvel usa painel azul à direita com página clara visível
+## D-044 — Drawer móvel azul à direita
 Data: 9 de setembro de 2026 · Estado: substituída por D-045.
 
-A revisão `75-drawer1` estabeleceu a composição espacial correta: página clara visível, drawer à direita, largura limitada, X no canto superior direito, rodapé integrado e sem segunda navegação. O azul saturado foi posteriormente substituído para recuperar coerência cromática com o resto da aplicação.
+A composição espacial foi mantida, mas a cor azul foi substituída para recuperar coerência com a identidade da aplicação.
 
 ## D-045 — Drawer móvel partilha a paleta do cabeçalho
 Data: 9 de setembro de 2026 · Estado: aceite.
 
-### Problema
+`v75-drawer-theme.css` (`75-drawer2`) mantém o drawer à direita, página clara visível, hambúrguer/X, swipe, Escape, foco e ARIA. Paleta canónica: `#003f4c`, `#005965`, `#087a78`; menta `#5be0c2` apenas como acento.
 
-A validação visual mostrou que o drawer azul de `75-drawer1`, embora próximo da referência estrutural, destoava do cabeçalho e da identidade verde-petróleo/teal já consolidada na aplicação. O menu passava a parecer um produto visual diferente.
-
-### Decisão
-
-1. Manter integralmente a estrutura espacial aprovada em `75-drawer1`: lado direito, página clara visível, largura limitada, cantos internos arredondados e backdrop leve.
-2. Substituir a camada por `v75-drawer-theme.css` com revisão `75-drawer2`.
-3. Usar exatamente a mesma família cromática de `75-header2`: `#003f4c`, `#005965` e `#087a78`.
-4. Usar `#5be0c2` apenas como acento de foco, seleção e detalhe; não transformar o menu num painel verde claro.
-5. Manter ícones e labels em branco/opacidades controladas para contraste consistente.
-6. Manter item ativo translúcido e evitar cartões brancos dentro do drawer.
-7. `mobile-menu-toggle.js` não é alterado; hambúrguer/X, swipe pela direita, Escape, foco, ARIA e scroll interno continuam a ser o contrato funcional.
-8. `v75-drawer-blue.css` deixa de integrar o bundle público e é substituído pela camada neutra `v75-drawer-theme.css`.
-9. `DRAWER_REV = 75-drawer2` e o Service Worker recebe novo cache para impedir reutilização da revisão azul.
-10. CI e Pages passam a executar `tests/v75-drawer-theme.test.cjs`, incluindo uma verificação explícita de correspondência entre a paleta do drawer e a do cabeçalho.
-11. A camada continua proibida de aceder a `appState`, montantes, IndexedDB, persistência, cifragem, QR, Mercado ou sincronização.
-
-## D-046 — Destaques do Mercado usam carrossel largo e fallback local, sem inventar imagens
+## D-046 — Destaques do Mercado usam carrossel largo e fallback local
 Data: 9 de setembro de 2026 · Estado: aceite.
 
-### Problema
-
-O bloco móvel **Produtos em destaque** continuava a usar a grelha histórica de três colunas e uma área de imagem de 66 px. Em iPhone, nomes reais ficavam partidos verticalmente, preço e categoria perdiam hierarquia e a ausência de fotografia deixava o cartão visualmente vazio. Isto não correspondia ao protótipo aprovado.
-
-### Decisão
-
-1. Criar `v75-market-featured.css/js` com revisão `75-featured1`, sem reescrever `v74-experience.js` nem o núcleo financeiro.
-2. Reutilizar os mesmos itens pendentes, `data-edit-market` e `data-v74-market-browser`; não criar catálogo ou handlers paralelos.
-3. Em mobile, substituir a grelha de três colunas por carrossel horizontal com cartão de cerca de 78–84% do viewport e `scroll-snap`.
-4. Reservar 140–154 px para a imagem, manter nome em no máximo duas linhas, preço em linha própria e categoria em pill.
-5. Como os destaques atuais já pertencem à lista, o rodapé indica **Na sua lista** em vez de simular **Adicionar à lista**.
-6. Se existir URL de imagem válida, mostrar a fotografia com `object-fit: contain` e skeleton durante o carregamento.
-7. Se a imagem falhar ou não existir, mostrar fallback vetorial local por categoria; nunca mostrar broken-image icon nem deixar o cartão deformado.
-8. Se houver `productCode` GTIN válido, a camada pode consultar o Open Food Facts apenas por esse GTIN para tentar recuperar uma imagem. A imagem recuperada é apenas de apresentação e não é persistida pela camada.
-9. Não enviar automaticamente nomes da lista para serviços externos para procurar fotografias.
-10. Aceitar apenas hosts de imagem explicitamente validados: `images.openfoodfacts.org`, paths oficiais do Continente em `www.continente.pt` e paths oficiais do Pingo Doce em `static.pingodoce.pt`.
-11. `v75-market-featured.js` pode ler `appState.market` para compor o cartão, mas não pode chamar `commit()`, `saveState()`, substituir `appState` ou escrever montantes.
-12. Adicionar `FEATURED_REV = 75-featured1`, novo sufixo de cache e `tests/v75-market-featured.test.cjs`; CI e Pages devem validar a revisão antes da publicação.
+`v75-market-featured.css/js` (`75-featured1`) transforma os destaques móveis em carrossel largo sem criar catálogo paralelo nem alterar montantes. Imagem pode ser recuperada por GTIN quando existe; nomes não são enviados automaticamente para procura de imagem.
 
 ## D-047 — Fotografias oficiais são indexadas por retalhista + PID numa biblioteca separada
 Data: 9 de setembro de 2026 · Estado: aceite.
 
 ### Problema
 
-O pipeline conseguia resolver fotografias oficiais do Continente e Pingo Doce, mas cada nova sessão/pesquisa podia voltar a consultar as fontes e cartões anteriormente resolvidos podiam regressar a placeholder até a imagem ser novamente encontrada. Copiar em massa imagens dos retalhistas para o repositório também criaria problemas de manutenção, escala e direitos de utilização.
+O pipeline resolvia fotografias oficiais, mas podia repetir consultas e perder a fotografia entre sessões. Copiar em massa os binários dos retalhistas para o repositório seria pesado, rapidamente obsoleto e inadequado para a arquitetura.
 
 ### Decisão
 
-1. Criar `market-image-library.js` com revisão `75-image-library1`.
-2. Usar uma base IndexedDB própria, `conta-de-casa-market-image-library`, separada do estado financeiro.
-3. A chave canónica é `marketId|pid`; não usar nome textual como identidade da fotografia.
-4. Guardar apenas metadados e URL oficial validado, nunca binários copiados dos retalhistas.
-5. Continente só é aceite em `www.continente.pt`, catálogo `Sites-col-master-catalog` e PID correspondente.
-6. Pingo Doce só é aceite em `static.pingodoce.pt`, catálogo `Sites-pingo-doce-master`, tamanho oficial `large|medium|small` e PID correspondente.
-7. A biblioteca observa o catálogo real: captura imagens oficiais resolvidas e restaura-as quando o mesmo SKU reaparece.
-8. Entradas positivas expiram ao fim de 45 dias para reduzir URLs obsoletos.
-9. Falha ou expiração regressa ao pipeline normal/fallback; nunca altera o artigo, preço, quantidade ou estado de compra.
-10. O módulo não pode referenciar `appState`, `saveState()`, `commit()`, cofre, pagamentos ou sincronização financeira.
-11. `IMAGE_LIBRARY_REV = 75-image-library1`; o asset deve carregar antes da política/auditoria/bridge de imagens e ter cache próprio no Service Worker.
-12. CI e Pages devem executar `tests/market-image-library.test.cjs` e validar sintaxe, isolamento, hosts/PID, distribuição e cache.
-13. “Biblioteca de todas as imagens” significa biblioteca extensível de todos os SKUs oficiais encontrados/validados; não se declara cobertura integral do catálogo dinâmico dos retalhistas sem uma fonte oficial exaustiva e autorizada.
+1. `market-image-library.js` usa revisão `75-image-library1`.
+2. A base `conta-de-casa-market-image-library` é separada do estado financeiro.
+3. A chave canónica é `marketId|pid`; nome textual nunca identifica sozinho uma imagem.
+4. Só são guardados metadados e URL oficial validada, nunca binários copiados.
+5. Continente: `www.continente.pt` + `Sites-col-master-catalog` + PID exato.
+6. Pingo Doce: `static.pingodoce.pt` + `Sites-pingo-doce-master` + tamanho oficial + PID exato.
+7. Entradas positivas expiram após 45 dias.
+8. Falha/expiração regressa ao pipeline/fallback sem alterar artigo ou preço.
+9. O módulo não pode referenciar `appState`, `saveState()`, `commit()`, cofre, pagamentos ou sincronização financeira.
+10. “Biblioteca de todas as imagens” significa biblioteca extensível dos SKUs efetivamente encontrados e validados; não se declara cobertura integral de um catálogo dinâmico sem fonte oficial exaustiva/autorizada.
+
+## D-048 — Catálogo visual cresce progressivamente com SKUs reais, sem armazenar preços
+Data: 9 de setembro de 2026 · Estado: aceite para `75-catalog1`.
+
+### Problema
+
+A biblioteca de imagens só cresce quando um SKU é encontrado. Para obter uma experiência de Mercado mais rica, é útil antecipar produtos por categorias e ir formando um catálogo local de centenas/milhares de SKUs. Fazer crawling massivo dos sites, guardar preços antigos ou associar produtos apenas por nome criaria risco técnico, de dados obsoletos e de correspondência incorreta.
+
+### Decisão
+
+1. Criar `market-visual-catalog.js/css` com revisão `75-catalog1`.
+2. Criar IndexedDB própria `conta-de-casa-market-visual-catalog`, separada das bases financeira e de imagens.
+3. A identidade continua `marketId|pid`; deduplicação por nome é proibida.
+4. O índice local guarda nome, embalagem, categorias, URL oficial e timestamps; **não guarda preço**.
+5. O catálogo começa com 12 grupos úteis: Bebidas, Lacticínios e ovos, Frutas e legumes, Carne e peixe, Padaria e pastelaria, Mercearia/Despensa, Congelados, Snacks e doces, Higiene pessoal, Limpeza, Bebé e Animais.
+6. Os termos de categoria são seeds de descoberta da aplicação, não taxonomia oficial dos retalhistas.
+7. A descoberta usa exclusivamente o pipeline real suportado para Continente e Pingo Doce; resultados exigem PID e URL oficial coerentes.
+8. Enriquecimento automático é limitado a 18 pesquisas por sessão, 48 por dia e intervalo mínimo de 15 s; só uma pesquisa Cesta pode estar em voo.
+9. Enriquecimento de imagens é ainda mais lento: máximo de 20 tentativas por sessão, intervalo de 8 s e resolução direta com concorrência máxima 2.
+10. Não executar enriquecimento quando offline, quando a página está oculta ou quando `Save-Data` está ativo.
+11. Persistir cursor de descoberta para que sessões seguintes continuem noutros termos, permitindo crescimento progressivo sem crawling agressivo.
+12. Criar `market-catalog-image-resolver.js` para aproveitar a URL exata do produto e tentar a imagem oficial sem repetir uma pesquisa por nome; se falhar, usar o resolvedor oficial existente.
+13. Imagens continuam a passar pelos validadores estritos de domínio/path/PID e são guardadas pela `75-image-library1`.
+14. Ao tocar num produto, a ação **Ver preço atual** reutiliza `#marketCatalogSearch` e o evento `input`; o preço volta a ser consultado pela pesquisa viva existente.
+15. O catálogo não pode referenciar `appState`, `saveState()`, `commit()`, `estimatedCents`, `actualCents` ou `amountCents`.
+16. `CATALOG_REV = 75-catalog1`; Service Worker e Pages devem versionar/distribuir os novos assets.
+17. CI e Pages devem executar `tests/market-visual-catalog.test.cjs` antes de publicação.
+18. Não declarar “todos os produtos” ou “milhares já carregados” sem medição real da base local; a arquitetura permite acumulação progressiva, não cobertura instantânea garantida.
