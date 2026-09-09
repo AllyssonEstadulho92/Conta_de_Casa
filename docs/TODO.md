@@ -42,10 +42,10 @@ Atualizado: 9 de setembro de 2026
 - [x] Atualizar CI e Pages para o novo teste.
 - [x] Atualizar `release-manifest.json`.
 - [x] Atualizar documentação técnica obrigatória.
-- [ ] Confirmar CI completo verde na branch `fix/v75-drawer-teal`.
-- [ ] Integrar a revisão validada em `main`.
-- [ ] Confirmar CI de `main` no SHA final.
-- [ ] Confirmar GitHub Pages concluído sobre o SHA final.
+- [x] Confirmar CI completo verde na branch `fix/v75-drawer-teal`.
+- [x] Integrar a revisão validada em `main`.
+- [x] Confirmar CI de `main` no SHA integrado.
+- [x] Confirmar GitHub Pages concluído sobre o SHA integrado.
 
 ## P1 — Validação física de `75-drawer2`
 
