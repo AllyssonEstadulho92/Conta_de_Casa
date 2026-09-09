@@ -16,6 +16,8 @@ A aplicação mantém arquitetura PWA estática/local-first, com estado financei
 
 A revisão `75-featured1` corrige o bloco móvel **Produtos em destaque**, que continuava visualmente comprimido e distante do protótipo apesar das revisões anteriores. O problema confirmado era de composição: a experiência v74 ainda usava três colunas estreitas no telemóvel e uma área de imagem de apenas 66 px, o que quebrava nomes longos e deixava cartões estranhos quando a fotografia não existia.
 
+A revisão foi integrada em `main` e o CI completo do SHA funcional `998bb19476e175647d4aad395008b8188e9c13f1` terminou com sucesso. O GitHub Pages concluiu também o deploy desse SHA com sucesso. A validação que permanece pendente é a comparação visual em hardware real, sobretudo iPhone/Safari/PWA.
+
 ## Revisão `75-featured1`
 
 Foram criadas duas camadas específicas:
@@ -77,13 +79,13 @@ A navegação móvel continua **Início / Despesas / Mercado / Planeamento / Mai
 - geometria: `75-layout1`;
 - drawer visual: `75-drawer2`;
 - destaques Mercado: `75-featured1`;
-- cache esperado: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1`.
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1`.
 
 `v75-market-featured.css?v=75-featured1` e `v75-market-featured.js?v=75-featured1` integram a allowlist Pages e o Service Worker.
 
-## QA
+## QA e publicação
 
-A revisão possui `tests/v75-market-featured.test.cjs`, cobrindo:
+`tests/v75-market-featured.test.cjs` cobre:
 
 - carrossel horizontal e scroll snap;
 - largura proporcional dos cartões;
@@ -94,7 +96,7 @@ A revisão possui `tests/v75-market-featured.test.cjs`, cobrindo:
 - ausência de escrita no estado;
 - distribuição, ordem dos assets e cache.
 
-CI e Pages passam a executar este teste e a validar a sintaxe de `v75-market-featured.js`.
+A branch `fix/v75-featured-prototype` passou o CI completo. Depois da integração por fast-forward, `main` voltou a passar finanças, auditoria, isolamento, faturas, QR, Mercado, arquitetura, estabilidade, layout, featured, drawer, segurança, responsividade, navegação, acessibilidade e sincronização. O workflow GitHub Pages publicou o mesmo SHA funcional com sucesso.
 
 ## Validação manual necessária
 
@@ -113,4 +115,4 @@ No iPhone/Safari/PWA, confirmar:
 
 ## Próximo passo
 
-Validar `75-featured1` no CI, integrar em `main`, confirmar GitHub Pages e depois comparar visualmente no iPhone com o protótipo aprovado.
+Comparar `75-featured1` visualmente no iPhone com o protótipo aprovado. Se a PWA ainda mostrar a grelha antiga, forçar a instalação da atualização pelo centro de atualizações/reabrir a aplicação antes de avaliar o layout.
