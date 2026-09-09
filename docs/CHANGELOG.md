@@ -1,5 +1,46 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-09 — v75 `75-featured1`: Produtos em destaque alinhados com o protótipo
+
+### Objetivo
+
+Corrigir o bloco móvel **Produtos em destaque**, que continuava visualmente distante do protótipo aprovado: três colunas demasiado estreitas, área de imagem de 66 px, nomes partidos verticalmente e cartões pobres quando a fotografia não existia.
+
+### Alterações
+
+- criada `v75-market-featured.css` como camada visual específica do bloco;
+- criada `v75-market-featured.js` como composição read-only sobre os mesmos itens e handlers existentes;
+- a grelha de três colunas mobile passa a carrossel horizontal com `scroll-snap`;
+- os cartões ocupam aproximadamente 78–84% do viewport móvel, deixando parte do seguinte visível;
+- área de fotografia passa para 140–154 px conforme a largura do ecrã;
+- nome do produto fica limitado a duas linhas;
+- categoria passa para pill discreta e o preço fica isolado numa linha própria;
+- rodapé mostra **Na sua lista**, evitando simular uma ação de adicionar num item que já está pendente;
+- adicionados botões anterior/seguinte e indicadores de posição;
+- imagens válidas já existentes continuam a ser utilizadas;
+- quando não existe fotografia, surge fallback vetorial local por categoria com `Imagem indisponível`, em vez de broken-image icon ou cartão deformado;
+- durante o carregamento existe skeleton discreto;
+- se houver `productCode` GTIN válido, a camada pode consultar o Open Food Facts apenas por esse código e usar a imagem em apresentação, sem persistir o resultado;
+- nomes da lista não são enviados automaticamente a serviços externos para procurar fotografias;
+- URLs aceites são limitados a `images.openfoodfacts.org` e paths oficiais validados de Continente/Pingo Doce;
+- `FEATURED_REV = 75-featured1` foi adicionado ao bundle Pages;
+- Service Worker passa a usar cache com sufixo `-drawer2-featured1`;
+- criado `tests/v75-market-featured.test.cjs`;
+- CI e Pages passam a validar sintaxe e comportamento estrutural desta revisão.
+
+### Segurança e integridade
+
+- `v75-market-featured.js` lê os itens apenas para apresentação;
+- não chama `commit()`, `saveState()`, não substitui `appState` e não altera montantes;
+- `core.js`, `finance.js`, `STATE_VERSION = 5`, IndexedDB, PIN, PBKDF2-SHA-256, AES-GCM, QR, pagamentos e sincronização permanecem inalterados;
+- não são criados preços, produtos ou fotografias fictícias.
+
+### Distribuição
+
+- revisão: `75-featured1`;
+- assets: `v75-market-featured.css?v=75-featured1` e `v75-market-featured.js?v=75-featured1`;
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1`.
+
 ## 2026-09-09 — v75 `75-drawer2`: drawer alinhado com a paleta oficial da aplicação
 
 ### Objetivo
@@ -178,7 +219,7 @@ Reduzir ruído visual no topo da aplicação e aproximar a composição do padr�
 
 ### Compatibilidade de atualização
 
-O sufixo `header2` foi colocado no final da assinatura-base. `75-stability1`, `75-layout1` e `75-drawer2` acrescentam os seus próprios sufixos, preservando a sequência de invalidação de cache.
+O sufixo `header2` foi colocado no final da assinatura-base. `75-stability1`, `75-layout1`, `75-drawer2` e `75-featured1` acrescentam os seus próprios sufixos, preservando a sequência de invalidação de cache.
 
 ## 2026-09-08 — v75 publicada: reestruturação total alinhada com o protótipo
 
