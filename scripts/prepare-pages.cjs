@@ -20,11 +20,14 @@ const DRAWER_REV = '75-drawer2';
 const FEATURED_REV = '75-featured1';
 const IMAGE_LIBRARY_REV = '75-image-library1';
 const CATALOG_REV = '75-catalog1';
+const PD_PHOTO_REV = '75-pd-photo1';
+const PHOTO_LOADER_REV = '75-photo-loader1';
 
 /* Bundle público v75: mantém a experiência v74 como base funcional de apresentação,
    aplica arquitetura, cabeçalho, estabilidade, geometria, biblioteca/destaques/catálogo
-   visual do Mercado e a revisão visual do drawer petróleo/teal à direita. Camadas
-   históricas ui-consistency.css e v64-runtime.css continuam fora da distribuição. */
+   visual do Mercado, biblioteca progressiva Pingo Doce, carregador de fotografias e
+   a revisão visual do drawer petróleo/teal à direita. Camadas históricas
+   ui-consistency.css e v64-runtime.css continuam fora da distribuição. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -47,6 +50,8 @@ const PUBLIC_FILES = Object.freeze([
   'v75-layout-polish.css',
   'v75-market-featured.css',
   'market-visual-catalog.css',
+  'pingo-doce-photo-library.css',
+  'market-photo-loader.css',
   'v75-drawer-theme.css',
   'core.js',
   'finance.js',
@@ -69,6 +74,8 @@ const PUBLIC_FILES = Object.freeze([
   'market-official-images.js',
   'market-catalog-image-resolver.js',
   'market-visual-catalog.js',
+  'pingo-doce-photo-library.js',
+  'market-photo-loader.js',
   'v64-runtime.js',
   'market-shopping-focus.js',
   'v74-experience.js',
@@ -116,6 +123,8 @@ if(!index.includes('v75-stability.css')) index=index.replace('</head>',`  <link 
 if(!index.includes('v75-layout-polish.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-layout-polish.css?v=${LAYOUT_REV}" />\n</head>`);
 if(!index.includes('v75-market-featured.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-market-featured.css?v=${FEATURED_REV}" />\n</head>`);
 if(!index.includes('market-visual-catalog.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-visual-catalog.css?v=${CATALOG_REV}" />\n</head>`);
+if(!index.includes('pingo-doce-photo-library.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./pingo-doce-photo-library.css?v=${PD_PHOTO_REV}" />\n</head>`);
+if(!index.includes('market-photo-loader.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-photo-loader.css?v=${PHOTO_LOADER_REV}" />\n</head>`);
 if(!index.includes('v75-drawer-theme.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-drawer-theme.css?v=${DRAWER_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
@@ -128,6 +137,8 @@ if(!index.includes('market-image-audit.js')) index=index.replace('</body>',`  <s
 if(!index.includes('market-official-images.js')) index=index.replace('</body>',`  <script src="./market-official-images.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 if(!index.includes('market-catalog-image-resolver.js')) index=index.replace('</body>',`  <script src="./market-catalog-image-resolver.js?v=${CATALOG_REV}" defer></script>\n</body>`);
 if(!index.includes('market-visual-catalog.js')) index=index.replace('</body>',`  <script src="./market-visual-catalog.js?v=${CATALOG_REV}" defer></script>\n</body>`);
+if(!index.includes('pingo-doce-photo-library.js')) index=index.replace('</body>',`  <script src="./pingo-doce-photo-library.js?v=${PD_PHOTO_REV}" defer></script>\n</body>`);
+if(!index.includes('market-photo-loader.js')) index=index.replace('</body>',`  <script src="./market-photo-loader.js?v=${PHOTO_LOADER_REV}" defer></script>\n</body>`);
 if(!index.includes('market-branding.js')) index=index.replace('</body>',`  <script src="./market-branding.js?v=${UI_REV}" defer></script>\n</body>`);
 if(!index.includes('market-category-groups.js')) index=index.replace('</body>',`  <script src="./market-category-groups.js?v=${CATEGORY_REV}" defer></script>\n</body>`);
 if(!index.includes('v64-runtime.js')) index=index.replace('</body>',`  <script src="./v64-runtime.js?v=${RUNTIME_REV}" defer></script>\n</body>`);
@@ -152,4 +163,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; layout ${LAYOUT_REV}; drawer ${DRAWER_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; layout ${LAYOUT_REV}; drawer ${DRAWER_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
