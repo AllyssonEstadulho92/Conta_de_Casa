@@ -63,7 +63,7 @@ assert.equal(typeof sandbox.CDCMarketPhotoLoader.warmVisible,'function');
 
 assert.match(prepare,/const PHOTO_LOADER_REV = '75-photo-loader3'/);
 for(const asset of ['market-photo-loader.css','market-photo-loader.js'])assert.ok(prepare.includes(`'${asset}'`));
-assert.match(sw,/pd-photo1-photo-loader3/);
+assert.match(sw,/pd-photo1-pd-view1-photo-loader3/);
 for(const asset of ['./market-photo-loader.css','./market-photo-loader.js'])assert.ok(sw.includes(`'${asset}'`));
 
 const dist=path.join(ROOT,'dist');
