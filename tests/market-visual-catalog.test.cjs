@@ -14,7 +14,7 @@ const css=read('market-visual-catalog.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 
-assert.match(catalog,/75-catalog1/);
+assert.match(catalog,/75-catalog3/);
 assert.match(catalog,/conta-de-casa-market-visual-catalog/);
 assert.match(catalog,/SESSION_QUERY_BUDGET=18/);
 assert.match(catalog,/DAILY_QUERY_BUDGET=48/);
@@ -29,6 +29,13 @@ assert.match(catalog,/createIndex\('categories','categories',\{unique:false,mult
 assert.match(catalog,/Ver preço atual/);
 assert.match(catalog,/dispatchEvent\(new Event\('input'/);
 assert.match(catalog,/browser\.querySelector\('#marketVisualCatalog'\)\)return/);
+assert.doesNotMatch(catalog,/grid\.replaceChildren\(\);/,'catalog refresh must not clear the visible grid before rebuilding cards');
+assert.match(catalog,/existingCards=new Map/);
+assert.match(catalog,/grid\.insertBefore\(card,cursor\)/);
+assert.match(catalog,/cdc:market-photo-ready/);
+const imageWarmBlock=catalog.match(/function scheduleImageWarm[\s\S]*?\n  }\n\n  async function backgroundStep/)?.[0]||'';
+assert.ok(imageWarmBlock,'image warm scheduler block should remain testable');
+assert.doesNotMatch(imageWarmBlock,/renderProducts\(\)/,'background image warm must not rebuild the product grid');
 assert.doesNotMatch(catalog,/\bappState\b/);
 assert.doesNotMatch(catalog,/\bsaveState\b/);
 assert.doesNotMatch(catalog,/\bcommit\s*\(/);
@@ -62,7 +69,7 @@ catalogSandbox.globalThis=catalogSandbox;
 vm.createContext(catalogSandbox);
 vm.runInContext(catalog,catalogSandbox,{filename:'market-visual-catalog.js'});
 assert.ok(catalogSandbox.CDCMarketVisualCatalog);
-assert.equal(catalogSandbox.CDCMarketVisualCatalog.revision,'75-catalog1');
+assert.equal(catalogSandbox.CDCMarketVisualCatalog.revision,'75-catalog3');
 assert.equal(catalogSandbox.CDCMarketVisualCatalog.categories.length,12);
 assert.ok(catalogSandbox.CDCMarketVisualCatalog.categories.some(category=>category.label==='Bebidas'));
 assert.ok(catalogSandbox.CDCMarketVisualCatalog.categories.some(category=>category.label==='Lacticínios e ovos'));
@@ -125,18 +132,18 @@ assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-c
   assert.ok(fetchedUrl.startsWith('https://r.jina.ai/https://www.continente.pt/produto/'));
   assert.equal(fallbackCalls,0,'exact retailer URL should avoid a second product search');
 
-  assert.match(prepare,/const CATALOG_REV = '75-catalog2'/);
+  assert.match(prepare,/const CATALOG_REV = '75-catalog3'/);
   for(const asset of ['market-visual-catalog.css','market-catalog-image-resolver.js','market-visual-catalog.js'])assert.ok(prepare.includes(`'${asset}'`));
-  assert.match(sw,/image-library1-catalog2/);
+  assert.match(sw,/image-library1-catalog3/);
   for(const asset of ['./market-visual-catalog.css','./market-catalog-image-resolver.js','./market-visual-catalog.js'])assert.ok(sw.includes(`'${asset}'`));
 
   const dist=path.join(ROOT,'dist');
   try{
     execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
     const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-    assert.match(index,/market-visual-catalog\.css\?v=75-catalog2/);
-    assert.match(index,/market-catalog-image-resolver\.js\?v=75-catalog2/);
-    assert.match(index,/market-visual-catalog\.js\?v=75-catalog2/);
+    assert.match(index,/market-visual-catalog\.css\?v=75-catalog3/);
+    assert.match(index,/market-catalog-image-resolver\.js\?v=75-catalog3/);
+    assert.match(index,/market-visual-catalog\.js\?v=75-catalog3/);
     assert.ok(index.indexOf('market-official-images.js')<index.indexOf('market-catalog-image-resolver.js'));
     assert.ok(index.indexOf('market-catalog-image-resolver.js')<index.indexOf('market-visual-catalog.js'));
     assert.ok(index.indexOf('market-visual-catalog.js')<index.indexOf('v64-runtime.js'));
@@ -145,5 +152,5 @@ assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-c
     fs.rmSync(dist,{recursive:true,force:true});
   }
 
-  console.log('Progressive visual market catalog and non-blocking official image resolver: OK');
+  console.log('Progressive visual market catalog, stable rendering and non-blocking official image resolver: OK');
 })().catch(error=>{console.error(error);process.exitCode=1;});
