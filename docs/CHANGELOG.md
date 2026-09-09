@@ -1,72 +1,69 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-09 — v75 `75-pd-photo1` + `75-photo-loader1`: biblioteca Pingo Doce e carregamento rápido
+## 2026-09-09 — v75 `75-catalog2` + `75-photo-loader2`: correção do pipeline real de fotografias
 
-### Objetivo
+### Evidência que originou a correção
 
-Aumentar de forma significativa a cobertura de fotografias reais do Pingo Doce no Mercado e evitar a sensação de cartão vazio enquanto a fotografia ainda está a ser resolvida.
+Validação física no iPhone/Safari mostrou `Biblioteca Pingo Doce: 285 SKUs indexados · 0 fotografias oficiais` e vários cartões presos em **A carregar fotografia…**. O problema deixou de ser tratado como simples questão visual.
 
-### Biblioteca Pingo Doce
+A sonda de CI já conseguia, para um SKU conhecido, obter resposta do reader e localizar uma imagem Pingo Doce com PID exato. A investigação concentrou-se por isso no runtime entre a URL oficial encontrada e a persistência/apresentação no cartão.
 
-- criado `pingo-doce-photo-library.js` com revisão `75-pd-photo1`;
-- criada IndexedDB isolada `conta-de-casa-pingo-doce-photo-library`;
-- cada SKU usa a chave `pingo-doce|pid`;
-- descoberta restrita a `search_products` com `stores:['pingodoce']`;
-- só entram produtos com PID e página oficial Pingo Doce coerentes;
-- adicionadas 15 famílias de produto e mais de 200 termos de descoberta;
-- o inventário guarda nome, embalagem, categoria, página oficial e estado `pending|ready|missing`;
-- a fotografia é procurada apenas para o SKU exato e persistida pela biblioteca geral `75-image-library1` depois da validação oficial;
-- não são copiados ficheiros binários para o GitHub;
-- não são guardados preços, quantidades, faturas, PIN, credenciais ou dados do cofre;
-- limites: 24 pesquisas por sessão, 72/dia, 30 tentativas de fotografia por sessão e 120/dia;
-- trabalho automático suspenso offline, com página oculta ou `Save-Data` ativo;
-- adicionada área **Biblioteca Pingo Doce** com contagem de SKUs/fotografias e botão **Atualizar biblioteca**.
+### `75-catalog2`
 
-### Carregador de fotografias
+- `market-catalog-image-resolver.js` passa para revisão `75-catalog2`;
+- timeout do reader reduzido para 8 s;
+- mantém validação estrita de página oficial, retalhista, path de imagem e PID;
+- removido o segundo `new Image()` bloqueante de até 10 s antes de devolver a referência;
+- a referência validada pode ser persistida imediatamente;
+- o carregamento real passa a ser comprovado no cartão que efetivamente apresenta a imagem;
+- uma falha de transporte já não transforma automaticamente uma URL oficialmente identificada num falso negativo antes de a UI a tentar usar.
 
-- criado `market-photo-loader.js` com revisão `75-photo-loader1`;
-- criado `market-photo-loader.css`;
-- cartão sem fotografia passa imediatamente para skeleton/shimmer;
-- adicionado spinner e texto **A carregar fotografia…**;
-- fotografias já presentes na IndexedDB são aplicadas primeiro;
-- imagens resolvidas para cartões visíveis usam `loading='eager'` para reduzir atraso percebido;
-- ao primeiro acesso ao Mercado é feito aquecimento limitado da biblioteca Pingo Doce;
-- cartões visíveis são reavaliados a cada 850 ms durante no máximo 18 ciclos;
-- `prefers-reduced-motion` remove animações e o tema escuro tem apresentação própria;
-- o loader não faz pedidos externos diretamente nem acede ao estado financeiro.
+### `75-photo-loader2`
 
-### Distribuição
+- `market-photo-loader.js` passa para revisão `75-photo-loader2`;
+- loader só trabalha com `#page-market.page.active`;
+- até 6 cartões visíveis recebem prioridade;
+- `CDCMarketVisualCatalog.listCategory()` é reutilizado para obter o registo exato do SKU sem aceder diretamente à IndexedDB;
+- consulta `CDCMarketImageLibrary` primeiro;
+- SKU visível sem cache é resolvido imediatamente por `CDCOfficialMarketImages.resolve()`;
+- resultado válido é persistido e aplicado com `loading='eager'`;
+- evento `cdc:market-photo-ready` reduz espera entre resolução e atualização visual;
+- ciclo visual passa de 850 ms/18 para 500 ms/24;
+- após 12 s, o spinner deixa de rodar indefinidamente e o texto passa a **Fotografia a validar…**;
+- retry por SKU limitado a 30 s;
+- se o `<img>` falhar, a referência é removida de `75-image-library1` para permitir nova tentativa limpa;
+- no primeiro carregamento desta revisão, `imagesToday` da biblioteca Pingo Doce é reposto uma única vez e marcado com `photoRuntimeRevision=75-photo-loader2`, evitando que falhas do runtime antigo bloqueiem a correção até ao dia seguinte;
+- esta recuperação toca apenas na store `meta` de `conta-de-casa-pingo-doce-photo-library`.
 
-- adicionados `pingo-doce-photo-library.css/js` à allowlist de Pages;
-- adicionados `market-photo-loader.css/js` à allowlist de Pages;
-- CSS carregado depois do catálogo visual e antes do drawer;
-- JS carregado depois de `market-visual-catalog.js`, com biblioteca Pingo Doce antes do loader;
-- Service Worker atualizado para cache `...-catalog1-pd-photo1-photo-loader1`;
-- CI e Pages passam a verificar sintaxe e os dois novos testes.
+### Segurança e dados
 
-### QA e publicação
+- `core.js` e `finance.js` não foram alterados;
+- `STATE_VERSION = 5` permanece;
+- nenhum preço, fatura, pagamento, PIN, token ou chave é lido/escrito pelo loader;
+- identidade de fotografia continua `marketId|pid`;
+- Pingo Doce continua restrito a URL oficial e imagem `static.pingodoce.pt/Sites-pingo-doce-master` com PID exato;
+- o loader não faz `fetch()` próprio.
 
-Novos testes:
+### Distribuição/QA
 
-- `tests/pingo-doce-photo-library.test.cjs`;
-- `tests/market-photo-loader.test.cjs`.
-
-Publicação funcional confirmada no SHA `7a59ae017a4640cfa3ad5ec357cd99425ca9ee71`:
-
-- CI final da branch: sucesso;
-- branch comparada com `main`: `ahead`, `behind 0`;
-- integração por fast-forward sem force;
-- CI de `main`: sucesso;
-- GitHub Pages: deploy concluído com sucesso;
-- regressões de finanças, Mercado, segurança, responsividade, navegação, acessibilidade e sincronização passaram.
-
-Os commits documentais posteriores apenas fecham o estado do projeto e não alteram a implementação funcional.
-
-### Limitação explícita
-
-A solução foi desenhada para acumular progressivamente todos os SKUs Pingo Doce que as fontes disponíveis consigam descobrir e validar. Não se afirma uma cópia instantânea de 100% do catálogo dinâmico porque o projeto não dispõe de uma API oficial exaustiva/autorizada que permita provar essa cobertura.
+- `CATALOG_REV` passa a `75-catalog2`;
+- `PHOTO_LOADER_REV` passa a `75-photo-loader2`;
+- cache passa para `...-image-library1-catalog2-pd-photo1-photo-loader2`;
+- `tests/market-visual-catalog.test.cjs`, `tests/market-photo-loader.test.cjs` e `tests/pingo-doce-photo-library.test.cjs` atualizados;
+- publicação continua condicionada a CI verde da branch, fast-forward, CI de `main`, Pages no mesmo SHA e nova validação física.
 
 ---
+
+## 2026-09-09 — v75 `75-pd-photo1` + `75-photo-loader1`: biblioteca Pingo Doce e primeiro carregador visual
+
+- criada `pingo-doce-photo-library.js` com IndexedDB isolada e chave `pingo-doce|pid`;
+- descoberta restrita a `search_products` com `stores:['pingodoce']`;
+- 15 famílias e mais de 200 termos de descoberta;
+- estados `pending|ready|missing`;
+- limites de rede por sessão/dia;
+- criado primeiro `market-photo-loader.js/css` com skeleton, spinner e **A carregar fotografia…**;
+- fotografias em cache usam `loading='eager'`;
+- revisão publicada e tecnicamente verde, mas a validação física posterior mostrou que a fila/resolução não produzia fotografias Pingo Doce `ready` de forma aceitável no iPhone, levando a `75-catalog2`/`75-photo-loader2`.
 
 ## 2026-09-09 — v75 `75-catalog1`: catálogo visual progressivo por categorias
 
