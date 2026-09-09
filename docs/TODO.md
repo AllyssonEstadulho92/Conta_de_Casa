@@ -25,7 +25,7 @@ Evidência física: 285 SKUs Pingo Doce indexados, 0 fotografias oficiais e cart
 
 - [x] Inspecionar pipeline real desde catálogo → página oficial → resolver → biblioteca → cartão.
 - [x] Confirmar que a sonda CI encontra resultado Pingo Doce e imagem exata em fonte conhecida.
-- [x] Identificar preflight `new Image()` bloqueante de até 10 s no resolvedor direto.
+- [x] Identificar preflight visual bloqueante de até 10 s no resolvedor direto.
 - [x] Identificar que `75-photo-loader1` não priorizava cartões visíveis.
 - [x] Identificar risco de orçamento persistido `imagesToday` esgotado por falsos negativos antigos.
 
@@ -34,7 +34,7 @@ Evidência física: 285 SKUs Pingo Doce indexados, 0 fotografias oficiais e cart
 - [x] Manter `safeProductUrl()` antes de qualquer resolução.
 - [x] Manter `safeOfficialImageUrl()` com host/path/PID exatos.
 - [x] Reduzir timeout do reader direto para 8 s.
-- [x] Remover o segundo `new Image()` bloqueante do resolvedor direto.
+- [x] Remover o segundo preflight visual bloqueante do resolvedor direto.
 - [x] Transferir a prova de transporte real para o componente que apresenta `<img>`.
 - [x] Atualizar teste para garantir ausência do preflight e preservação dos validadores oficiais.
 - [x] Atualizar versão de distribuição `CATALOG_REV=75-catalog2`.
@@ -68,11 +68,11 @@ Evidência física: 285 SKUs Pingo Doce indexados, 0 fotografias oficiais e cart
 - [x] Atualizar `DECISIONS.md`.
 - [x] Atualizar `TODO.md`.
 - [x] Atualizar `CHANGELOG.md`.
-- [ ] Confirmar CI final verde da branch `fix/v75-market-photo-runtime`.
-- [ ] Comparar branch final com `main`: `ahead`, `behind 0`.
-- [ ] Integrar por fast-forward sem force.
-- [ ] Confirmar CI de `main` no SHA integrado.
-- [ ] Confirmar GitHub Pages no mesmo SHA.
+- [x] Confirmar CI final verde da branch `fix/v75-market-photo-runtime` no SHA `f485fd4317ad0acbd2475f9ca86efed5b413bb76`.
+- [x] Comparar branch final com `main`: `ahead`, `behind 0` antes da integração.
+- [x] Integrar por fast-forward sem force.
+- [x] Confirmar CI de `main` no SHA integrado `f485fd4317ad0acbd2475f9ca86efed5b413bb76`.
+- [x] Confirmar GitHub Pages no mesmo SHA.
 
 ## P1 — Revalidação física iPhone/Safari/PWA
 
