@@ -5,6 +5,7 @@ Build público: `v75`
 Revisão transversal: `75-stability1`
 Revisão de geometria: `75-layout1`
 Revisão do drawer móvel: `75-drawer2`
+Revisão dos destaques do Mercado: `75-featured1`
 Branch pública: `main`
 Distribuição: GitHub Pages / PWA
 URL pública: `https://allyssonestadulho92.github.io/Conta_de_Casa/`
@@ -13,62 +14,55 @@ URL pública: `https://allyssonestadulho92.github.io/Conta_de_Casa/`
 
 A aplicação mantém arquitetura PWA estática/local-first, com estado financeiro em IndexedDB, valores em cêntimos, cofre PBKDF2-SHA-256 + AES-GCM, sincronização GitHub opcional apenas sobre envelope cifrado e `STATE_VERSION = 5`.
 
-A revisão `75-drawer2` substitui a experiência azul de `75-drawer1` por uma composição alinhada com o padrão visual já usado no cabeçalho móvel. A página principal continua clara/branca e o menu continua a abrir pelo **lado direito**.
+A revisão `75-featured1` corrige o bloco móvel **Produtos em destaque**, que continuava visualmente comprimido e distante do protótipo apesar das revisões anteriores. O problema confirmado era de composição: a experiência v74 ainda usava três colunas estreitas no telemóvel e uma área de imagem de apenas 66 px, o que quebrava nomes longos e deixava cartões estranhos quando a fotografia não existia.
 
-## Revisão `75-drawer2`
+## Revisão `75-featured1`
 
-A camada final passa a ser `v75-drawer-theme.css`, carregada depois de `v75-layout-polish.css` e com responsabilidade exclusivamente visual sobre o drawer móvel.
+Foram criadas duas camadas específicas:
 
-Principais alterações:
+- `v75-market-featured.css`: geometria, carrossel, cartão, imagem, fallback e controlos;
+- `v75-market-featured.js`: recompõe apenas o bloco de destaques sobre os mesmos itens e handlers já existentes.
 
-- drawer continua ancorado à direita (`inset: 0 0 0 auto`);
-- largura mantém `min(320px, calc(100vw - 72px))`, preservando uma faixa visível da página à esquerda;
-- paleta passa a usar a mesma família cromática do cabeçalho `75-header2`: `#003f4c`, `#005965` e `#087a78`;
-- menta `#5be0c2` passa a ser usada apenas como acento de foco/seleção;
-- gradiente, sombras e backdrop deixam de usar azul saturado e passam para verde-petróleo/teal;
-- item ativo mantém superfície translúcida, sem cartão branco interno;
-- `icon.svg`, nome **Conta de Casa**, subtítulo e X continuam no cabeçalho do drawer;
-- `Ocultar valores` e `Bloquear` permanecem no mesmo painel;
-- safe areas, foco, scroll interno, `prefers-reduced-motion`, Escape e swipe da direita continuam preservados.
+Comportamento esperado no telemóvel:
 
-A revisão não cria uma segunda navegação nem altera destinos, rotas, gestos ou handlers.
+- cabeçalho com ícone, título **Produtos em destaque**, subtítulo e ação **Ver todos**;
+- cartões largos em carrossel horizontal, com parte do cartão seguinte visível;
+- scroll snap, botões anterior/seguinte e indicadores de posição;
+- fotografia numa área estável de aproximadamente 150 px;
+- nome limitado a duas linhas, evitando texto vertical ou colado ao preço;
+- categoria em pill discreta;
+- preço isolado e legível;
+- rodapé **Na sua lista**, porque os destaques atuais já são itens pendentes da lista de compras;
+- fallback visual local elegante quando a fotografia não existe ou falha;
+- skeleton discreto durante o carregamento;
+- tentativa de recuperar fotografia pelo GTIN já existente através do Open Food Facts quando há `productCode`, sem escrever essa fotografia no estado nem alterar preços.
 
-## Revisões anteriores preservadas
+A revisão não cria produtos fictícios, não inventa preços e não transforma uma fotografia em prova de preço ou transação.
 
-`75-layout1` continua responsável por geometria, proporção e alinhamento entre páginas. `75-stability1` continua responsável por tipografia, overflow, safe areas, formulários, navegação inferior, diálogos e estados visuais. `75-header2` continua responsável pelo cabeçalho móvel minimalista.
+## Cabeçalho, drawer e navegação
 
-## Cabeçalho e navegação
+O cabeçalho móvel mantém hambúrguer + título à esquerda e notificações à direita. O drawer continua a abrir exclusivamente pela direita, com a paleta `#003f4c → #005965 → #087a78`, menta `#5be0c2` como acento e página clara visível à esquerda.
 
-O cabeçalho móvel mantém:
-
-- hambúrguer + título à esquerda;
-- notificações à direita;
-- sem saudação/avatar duplicados no topbar;
-- 60 px de linha útil mais safe area;
-- alvos tácteis de 44 px;
-- título com ellipsis em ecrãs estreitos;
-- gradiente `#003f4c → #005965 → #087a78`.
-
-A navegação móvel continua **Início / Despesas / Mercado / Planeamento / Mais**. O drawer continua a abrir e fechar pela direita e o gesto horizontal continua a usar a margem direita.
+A navegação móvel continua **Início / Despesas / Mercado / Planeamento / Mais**.
 
 ## Integridade funcional preservada
 
-Não foram modificados por `75-drawer2`:
+`75-featured1` não altera:
 
 - `core.js` / persistência;
 - `finance.js` / cálculos;
 - `STATE_VERSION = 5`;
-- valores monetários em cêntimos;
+- IndexedDB;
 - pagamentos e histórico;
 - PIN e palavra-passe;
 - PBKDF2-SHA-256 + AES-GCM;
 - QR fiscal e scanner de código de barras;
 - `estimatedCents` / `actualCents`;
 - sincronização cifrada;
-- regras e dados do Mercado;
-- `mobile-menu-toggle.js` e a lógica de swipe/hambúrguer/X.
+- regras de cálculo ou confirmação de preços;
+- handlers de edição dos itens do Mercado.
 
-O teste `tests/v75-drawer-theme.test.cjs` valida direção, proporção, correspondência cromática com o cabeçalho, distribuição pública, cache e ausência de acesso ao estado financeiro.
+`v75-market-featured.js` lê os itens apenas para apresentação. Não chama `commit()`, `saveState()` nem substitui `appState`.
 
 ## Versionamento público
 
@@ -82,31 +76,41 @@ O teste `tests/v75-drawer-theme.test.cjs` valida direção, proporção, corresp
 - estabilidade: `75-stability1`;
 - geometria: `75-layout1`;
 - drawer visual: `75-drawer2`;
-- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2`.
+- destaques Mercado: `75-featured1`;
+- cache esperado: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1`.
 
-`v75-drawer-theme.css?v=75-drawer2` integra a allowlist Pages e o cache do Service Worker. `v75-drawer-blue.css` deixou de integrar a distribuição pública.
+`v75-market-featured.css?v=75-featured1` e `v75-market-featured.js?v=75-featured1` integram a allowlist Pages e o Service Worker.
 
-## Pipeline e publicação
+## QA
 
-A revisão `75-drawer2` passou o CI completo na branch `fix/v75-drawer-teal`, incluindo testes financeiros, auditoria, isolamento, QR, Mercado, arquitetura, estabilidade, geometria, menu animado, segurança, responsividade, acessibilidade, sincronização e `tests/v75-drawer-theme.test.cjs`.
+A revisão possui `tests/v75-market-featured.test.cjs`, cobrindo:
 
-A revisão foi integrada por fast-forward em `main`. O CI de `main` terminou com sucesso no SHA integrado e o workflow GitHub Pages verificou a mesma revisão, preparou a allowlist pública, carregou o artefacto e concluiu o deploy com sucesso.
+- carrossel horizontal e scroll snap;
+- largura proporcional dos cartões;
+- área estável de fotografia;
+- limite de duas linhas no nome;
+- fallback `Imagem indisponível`;
+- recuperação opcional por GTIN;
+- ausência de escrita no estado;
+- distribuição, ordem dos assets e cache.
+
+CI e Pages passam a executar este teste e a validar a sintaxe de `v75-market-featured.js`.
 
 ## Validação manual necessária
 
-Validar em iPhone/Safari/PWA real:
+No iPhone/Safari/PWA, confirmar:
 
-- cor do drawer igual ao padrão do cabeçalho;
-- largura do menu e quantidade de página branca visível;
-- posição do X no canto superior direito;
-- contraste de labels e ícones;
-- item ativo em menta/transparência sem excesso de brilho;
-- animação hambúrguer → X → hambúrguer;
-- safe area superior/inferior;
-- scroll do menu;
-- swipe pela direita;
-- ausência de colisão com a barra inferior e Safari.
+- cartão largo em vez de três colunas espremidas;
+- swipe horizontal natural entre destaques;
+- fotografia carregada quando existe URL válida;
+- fallback visual limpo quando não existe fotografia;
+- nomes longos em no máximo duas linhas;
+- preço separado do texto;
+- **Ver todos** continua a abrir a pesquisa real do Mercado;
+- tocar num destaque continua a abrir os detalhes do item real;
+- ausência de overflow horizontal da página fora do próprio carrossel;
+- tema escuro, safe areas e navegação inferior sem regressão.
 
 ## Próximo passo
 
-Validar visualmente `75-drawer2` no iPhone real. Qualquer ajuste posterior de tom, contraste ou proporção deve permanecer na camada de apresentação, sem tocar no núcleo financeiro salvo evidência de causa funcional.
+Validar `75-featured1` no CI, integrar em `main`, confirmar GitHub Pages e depois comparar visualmente no iPhone com o protótipo aprovado.
