@@ -3,7 +3,8 @@
 Atualizado: 9 de setembro de 2026
 Build público: `v75`
 Revisão transversal: `75-stability1`
-Revisão de geometria publicada: `75-layout1`
+Revisão de geometria: `75-layout1`
+Revisão do drawer móvel: `75-drawer1`
 Branch pública: `main`
 Distribuição: GitHub Pages / PWA
 URL pública: `https://allyssonestadulho92.github.io/Conta_de_Casa/`
@@ -12,44 +13,48 @@ URL pública: `https://allyssonestadulho92.github.io/Conta_de_Casa/`
 
 A aplicação mantém arquitetura PWA estática/local-first, com estado financeiro em IndexedDB, valores em cêntimos, cofre PBKDF2-SHA-256 + AES-GCM, sincronização GitHub opcional apenas sobre envelope cifrado e `STATE_VERSION = 5`.
 
-A revisão `75-layout1` está integrada em `main`, passou o pipeline completo e foi distribuída pelo GitHub Pages. É uma camada CSS-only dedicada a geometria, proporções, largura útil, distribuição de colunas e alinhamento entre páginas. Não reescreve `core.js`, `finance.js`, persistência, cifragem ou regras financeiras.
+A revisão `75-drawer1` está integrada em `main` sobre `75-layout1`. É uma camada CSS-only inspirada no protótipo visual fornecido: a página principal continua clara/branca e o menu móvel abre num painel azul pelo **lado direito**, mantendo uma faixa visível da página ao fundo.
 
-## Revisão `75-layout1`
+## Revisão `75-drawer1`
 
-A camada `v75-layout-polish.css` carrega depois de `v75-stability.css` e faz cada página usar a largura e as proporções adequadas ao espaço disponível.
+A nova camada `v75-drawer-blue.css` é carregada depois de `v75-layout-polish.css` e modifica exclusivamente a apresentação do drawer móvel.
 
-Principais melhorias publicadas:
+Principais alterações:
 
-- coluna de conteúdo comum de até 1280 px no desktop;
-- espaçamento vertical, padding e raio dos painéis uniformizados;
-- Início com distribuição proporcional dos painéis e redução de colunas em web compacto;
-- Despesas e Mercado com pesquisa, ações, filtros e resumos dimensionados sem comprimir campos;
-- Calendário com sete colunas preservadas e densidade progressiva por breakpoint;
-- Planeamento, Relatórios e Diagnóstico com duas colunas equilibradas no desktop e uma no mobile;
-- Metas com grelha `auto-fit`, evitando cartões estreitos;
-- Segurança e Sincronização com duas colunas apenas quando há largura útil suficiente;
-- Definições centradas no desktop;
-- toolbars, button rows, tabs, detail grids e panel heads com comportamento previsível;
-- categorias do Planeamento reorganizadas em ecrãs estreitos para evitar texto, valor e barra sobrepostos;
-- diálogos, quick actions e cofre mantêm a mesma coluna visual do restante produto.
+- drawer continua ancorado à direita (`inset: 0 0 0 auto`);
+- largura passa a `min(320px, calc(100vw - 72px))`, deixando parte da página clara visível à esquerda;
+- painel usa gradiente azul com profundidade discreta, sem superfície branca pesada;
+- cantos internos do drawer recebem arredondamento, mantendo a extremidade direita alinhada ao ecrã;
+- cabeçalho usa `icon.svg`, nome **Conta de Casa** e subtítulo **Navegação** em branco;
+- o mesmo `#mobileMenuBtn` continua a mover-se para o drawer e transforma-se em X; dentro do drawer fica no canto superior direito;
+- grupos, ícones e labels usam branco/transparências controladas;
+- item ativo usa realce translúcido em vez de cartão branco;
+- `Ocultar valores` e `Bloquear` permanecem integrados no plano azul;
+- backdrop é muito leve e sem blur, para que a página clara continue perceptível;
+- `prefers-reduced-motion`, foco visível e safe areas continuam preservados.
 
-## Cabeçalho e navegação preservados
+A revisão não cria uma segunda navegação nem muda destinos, rotas, gestos ou handlers.
 
-O cabeçalho móvel `75-header2` permanece:
+## Revisões anteriores preservadas
+
+`75-layout1` continua responsável por geometria, proporção e alinhamento entre páginas. `75-stability1` continua responsável por tipografia, overflow, safe areas, formulários, navegação inferior, diálogos e estados visuais. `75-header2` continua responsável pelo cabeçalho móvel minimalista.
+
+## Cabeçalho e navegação
+
+O cabeçalho móvel mantém:
 
 - hambúrguer + título à esquerda;
 - notificações à direita;
 - sem saudação/avatar duplicados no topbar;
 - 60 px de linha útil mais safe area;
 - alvos tácteis de 44 px;
-- título com ellipsis em ecrãs estreitos;
-- drawer à direita e hambúrguer ↔ X.
+- título com ellipsis em ecrãs estreitos.
 
-A navegação móvel continua **Início / Despesas / Mercado / Planeamento / Mais**.
+A navegação móvel continua **Início / Despesas / Mercado / Planeamento / Mais**. O drawer continua a abrir e fechar pela direita e o gesto horizontal continua a usar a margem direita.
 
 ## Integridade funcional preservada
 
-Não foram modificados por `75-layout1`:
+Não foram modificados por `75-drawer1`:
 
 - `core.js` / persistência;
 - `finance.js` / cálculos;
@@ -61,47 +66,46 @@ Não foram modificados por `75-layout1`:
 - QR fiscal e scanner de código de barras;
 - `estimatedCents` / `actualCents`;
 - sincronização cifrada;
-- políticas de imagens/preços do Mercado.
+- regras e dados do Mercado;
+- `mobile-menu-toggle.js` e a lógica de swipe/hambúrguer/X.
 
-O teste dedicado impede que a camada de geometria passe a depender de `appState`, montantes, IndexedDB ou funções de persistência.
+O teste `tests/v75-drawer-blue.test.cjs` impede que a camada visual passe a aceder ao estado financeiro ou persistência.
 
 ## Versionamento público
 
 - build: `v75`;
 - UI base: `74-ui1`;
 - Mercado: `74-shopping2`;
-- menu: `73-menu8`;
+- menu funcional: `73-menu8`;
 - experiência base: `74-experience2`;
 - arquitetura: `75-architecture2`;
 - cabeçalho: `75-header2`;
 - estabilidade: `75-stability1`;
 - geometria: `75-layout1`;
-- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1`.
+- drawer visual: `75-drawer1`;
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer1`.
 
-`v75-layout-polish.css?v=75-layout1` integra a allowlist Pages e o cache do Service Worker.
+`v75-drawer-blue.css?v=75-drawer1` integra a allowlist Pages e o cache do Service Worker.
 
-## Pipeline e publicação
+## Pipeline
 
-A revisão passou primeiro o CI completo na branch de trabalho e depois foi integrada por fast-forward em `main`.
+A revisão passou o CI completo na branch `fix/v75-blue-right-drawer`, incluindo testes financeiros, auditoria, isolamento, QR, Mercado, arquitetura, estabilidade, geometria, menu animado, segurança, responsividade, acessibilidade, sincronização e o teste específico do novo drawer.
 
-O CI de `main` terminou com sucesso, incluindo:
+Depois da integração em `main`, o pipeline público deve validar novamente o mesmo SHA antes do deploy Pages.
 
-- sintaxe;
-- testes financeiros e auditoria financeira;
-- invariantes de contagem e isolamento do cofre;
-- datas, faturas e QR;
-- Mercado, imagens, código de barras e contabilização;
-- arquitetura v75, estabilidade v75 e teste `v75-layout-polish`;
-- menu móvel, centro de atualização e segurança;
-- responsividade, regressão mobile, navegação e acessibilidade;
-- sincronização e manifesto.
+## Validação manual necessária
 
-O workflow GitHub Pages voltou a verificar a revisão testada, preparou a allowlist pública, carregou o artefacto e concluiu o deploy com sucesso.
+A referência visual foi implementada por código, mas a validação final deve ser feita em iPhone/Safari/PWA real para confirmar:
 
-## Limitação de validação
-
-A validação automatizada confirma contratos de código, regressões e distribuição, mas não substitui inspeção física. Continuam necessários testes em iPhone/Safari/PWA, Android/Chrome, tablet e desktop para confirmar proporções visuais, safe areas, calendário, filtros, Planeamento, tema escuro, drawer, bottom navigation e ausência de overflow em hardware real.
+- largura do menu e quantidade de página branca visível;
+- azul e contraste dos labels/ícones;
+- posição do X no canto superior direito do drawer;
+- animação hambúrguer → X → hambúrguer;
+- safe area superior/inferior;
+- scroll do menu quando todo o conteúdo não couber;
+- swipe pela direita;
+- ausência de colisão com a barra inferior e Safari.
 
 ## Próximo passo
 
-Validar a revisão publicada em dispositivos reais. Qualquer regressão visual encontrada deve ser corrigida na camada de apresentação sem tocar no núcleo financeiro, salvo evidência de que a causa está realmente no domínio funcional.
+Validar `75-drawer1` no iPhone real. Se a proporção ou o tom de azul precisar de ajuste, a correção deve permanecer em `v75-drawer-blue.css`, sem tocar no núcleo financeiro.
