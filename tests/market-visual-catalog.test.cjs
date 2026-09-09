@@ -14,7 +14,7 @@ const css=read('market-visual-catalog.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 
-assert.match(catalog,/75-catalog1/);
+assert.match(catalog,/75-catalog3/);
 assert.match(catalog,/conta-de-casa-market-visual-catalog/);
 assert.match(catalog,/SESSION_QUERY_BUDGET=18/);
 assert.match(catalog,/DAILY_QUERY_BUDGET=48/);
@@ -22,6 +22,7 @@ assert.match(catalog,/SESSION_IMAGE_BUDGET=20/);
 assert.match(catalog,/BACKGROUND_QUERY_INTERVAL_MS=15000/);
 assert.match(catalog,/navigator\.connection\?\.saveData/);
 assert.match(catalog,/document\.visibilityState==='hidden'/);
+assert.match(catalog,/marketIsActive/);
 assert.match(catalog,/queryInFlight/);
 assert.match(catalog,/stores:\['pingodoce','continente'\],limit:20/);
 assert.match(catalog,/\$\{marketId\}\|\$\{pid\}/);
@@ -29,6 +30,13 @@ assert.match(catalog,/createIndex\('categories','categories',\{unique:false,mult
 assert.match(catalog,/Ver preço atual/);
 assert.match(catalog,/dispatchEvent\(new Event\('input'/);
 assert.match(catalog,/browser\.querySelector\('#marketVisualCatalog'\)\)return/);
+assert.match(catalog,/renderSignature/);
+assert.match(catalog,/signature===renderSignature&&hasStableCards/);
+assert.match(catalog,/announcePhotoReady/);
+assert.match(catalog,/cdc:market-photo-ready/);
+assert.match(catalog,/mutationObserver\.observe\(page,/);
+assert.doesNotMatch(catalog,/mutationObserver\.observe\(document\.body/);
+assert.doesNotMatch(catalog,/await renderProducts\(\);\s*await renderStats\(\);\s*scheduleImageWarm/);
 assert.doesNotMatch(catalog,/\bappState\b/);
 assert.doesNotMatch(catalog,/\bsaveState\b/);
 assert.doesNotMatch(catalog,/\bcommit\s*\(/);
@@ -62,7 +70,7 @@ catalogSandbox.globalThis=catalogSandbox;
 vm.createContext(catalogSandbox);
 vm.runInContext(catalog,catalogSandbox,{filename:'market-visual-catalog.js'});
 assert.ok(catalogSandbox.CDCMarketVisualCatalog);
-assert.equal(catalogSandbox.CDCMarketVisualCatalog.revision,'75-catalog1');
+assert.equal(catalogSandbox.CDCMarketVisualCatalog.revision,'75-catalog3');
 assert.equal(catalogSandbox.CDCMarketVisualCatalog.categories.length,12);
 assert.ok(catalogSandbox.CDCMarketVisualCatalog.categories.some(category=>category.label==='Bebidas'));
 assert.ok(catalogSandbox.CDCMarketVisualCatalog.categories.some(category=>category.label==='Lacticínios e ovos'));
@@ -145,5 +153,5 @@ assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-c
     fs.rmSync(dist,{recursive:true,force:true});
   }
 
-  console.log('Progressive visual market catalog and non-blocking official image resolver: OK');
+  console.log('Progressive visual market catalog keeps stable cards and non-blocking official image resolver: OK');
 })().catch(error=>{console.error(error);process.exitCode=1;});
