@@ -1,0 +1,207 @@
+/* Conta de Casa — catálogo visual progressivo do Mercado (75-catalog1). */
+.market-visual-catalog{
+  min-width:0;
+  display:grid;
+  gap:14px;
+  padding:16px;
+  border:1px solid color-mix(in srgb,var(--border) 88%,var(--primary));
+  border-radius:20px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 96%,var(--primary-2)),var(--surface));
+  box-shadow:0 6px 22px rgba(12,52,62,.055);
+}
+.market-visual-catalog-head{
+  min-width:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:start;
+}
+.market-visual-catalog-heading{min-width:0;display:grid;gap:4px}
+.market-visual-catalog-eyebrow{
+  color:var(--primary);
+  font-size:.72rem;
+  font-weight:700;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+.market-visual-catalog-title{margin:0;font-size:1.12rem;line-height:1.25;font-weight:650;letter-spacing:-.015em}
+.market-visual-catalog-subtitle{max-width:620px;margin:0;color:var(--muted);font-size:.8rem;line-height:1.45}
+.market-visual-catalog-refresh{
+  min-height:42px;
+  padding:0 14px;
+  border:1px solid color-mix(in srgb,var(--primary) 24%,var(--border));
+  border-radius:12px;
+  background:color-mix(in srgb,var(--primary-2) 58%,var(--surface));
+  color:var(--primary);
+  font-size:.8rem;
+  font-weight:650;
+}
+.market-visual-category-strip{
+  min-width:0;
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+  scroll-snap-type:x proximity;
+  scrollbar-width:none;
+  padding:1px 1px 5px;
+}
+.market-visual-category-strip::-webkit-scrollbar{display:none}
+.market-visual-category{
+  flex:0 0 auto;
+  min-height:40px;
+  max-width:210px;
+  padding:0 13px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:var(--surface);
+  color:var(--text);
+  font-size:.79rem;
+  font-weight:600;
+  white-space:nowrap;
+  scroll-snap-align:start;
+}
+.market-visual-category.active{
+  border-color:color-mix(in srgb,var(--primary) 42%,var(--border));
+  background:var(--primary);
+  color:#fff;
+}
+.market-visual-catalog-controls{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.market-visual-store-filter{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  padding:4px;
+  border-radius:12px;
+  background:var(--surface-2);
+}
+.market-visual-store{
+  min-height:34px;
+  padding:0 10px;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:var(--muted);
+  font-size:.74rem;
+  font-weight:600;
+}
+.market-visual-store.active{background:var(--surface);color:var(--text);box-shadow:0 2px 8px rgba(12,52,62,.06)}
+.market-visual-catalog-stats{color:var(--muted);font-size:.74rem;line-height:1.35}
+.market-visual-catalog-grid{
+  min-width:0;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.market-visual-product-card{
+  min-width:0;
+  display:grid;
+  grid-template-rows:128px minmax(0,1fr);
+  padding:0;
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  background:var(--surface);
+  color:var(--text);
+  text-align:left;
+  box-shadow:0 3px 12px rgba(12,52,62,.035);
+}
+.market-visual-product-card:hover{border-color:color-mix(in srgb,var(--primary) 28%,var(--border));box-shadow:0 8px 22px rgba(12,52,62,.075)}
+.market-visual-product-media{
+  min-width:0;
+  min-height:0;
+  display:grid;
+  place-items:center;
+  padding:10px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--surface-2) 72%,#fff),var(--surface));
+}
+.market-visual-product-media img{width:100%;height:100%;max-width:150px;max-height:108px;object-fit:contain;display:block}
+.market-visual-catalog-fallback{
+  width:74px;
+  height:74px;
+  display:grid;
+  place-items:center;
+  border-radius:22px;
+  background:color-mix(in srgb,var(--primary-2) 62%,var(--surface));
+  border:1px solid color-mix(in srgb,var(--primary) 15%,var(--border));
+  color:var(--primary);
+}
+.market-visual-catalog-fallback-mark{font-size:1.35rem;font-weight:750;line-height:1}
+.market-visual-product-copy{min-width:0;display:grid;align-content:start;gap:5px;padding:11px 12px 12px}
+.market-visual-product-store{color:var(--primary);font-size:.68rem;font-weight:700;line-height:1.25}
+.market-visual-product-name{
+  min-width:0;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+  font-size:.86rem;
+  line-height:1.28;
+  font-weight:650;
+}
+.market-visual-product-pack{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--muted);
+  font-size:.72rem;
+}
+.market-visual-product-action{margin-top:2px;color:var(--primary);font-size:.72rem;font-weight:650}
+.market-visual-catalog-empty{
+  grid-column:1/-1;
+  min-height:150px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:6px;
+  padding:22px;
+  border:1px dashed var(--border);
+  border-radius:14px;
+  background:var(--surface);
+  text-align:center;
+}
+.market-visual-catalog-empty strong{font-size:.92rem}
+.market-visual-catalog-empty span{max-width:380px;color:var(--muted);font-size:.78rem;line-height:1.45}
+.market-visual-category:focus-visible,.market-visual-store:focus-visible,.market-visual-product-card:focus-visible,.market-visual-catalog-refresh:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--primary) 38%,transparent);
+  outline-offset:2px;
+}
+
+@media(max-width:680px){
+  .market-visual-catalog{padding:14px;border-radius:18px}
+  .market-visual-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .market-visual-product-card{grid-template-rows:118px minmax(0,1fr)}
+  .market-visual-product-media img{max-height:98px}
+}
+
+@media(max-width:430px){
+  .market-visual-catalog{margin-inline:-2px;padding:13px 12px;gap:12px}
+  .market-visual-catalog-head{grid-template-columns:minmax(0,1fr);gap:9px}
+  .market-visual-catalog-refresh{justify-self:start}
+  .market-visual-catalog-controls{align-items:flex-start;gap:8px}
+  .market-visual-store-filter{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .market-visual-store{min-width:0;padding:0 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .market-visual-catalog-stats{width:100%}
+  .market-visual-product-card{grid-template-rows:110px minmax(0,1fr)}
+  .market-visual-product-copy{padding:10px}
+  .market-visual-product-name{font-size:.82rem}
+}
+
+@media(max-width:350px){
+  .market-visual-catalog-grid{grid-template-columns:1fr}
+  .market-visual-product-card{grid-template-columns:104px minmax(0,1fr);grid-template-rows:minmax(118px,auto)}
+  .market-visual-product-media{height:100%}
+}
+
+@media(prefers-reduced-motion:no-preference){
+  .market-visual-product-card,.market-visual-category,.market-visual-store,.market-visual-catalog-refresh{transition:border-color .18s ease,box-shadow .18s ease,background-color .18s ease,color .18s ease,transform .18s ease}
+  .market-visual-product-card:active{transform:scale(.985)}
+}
