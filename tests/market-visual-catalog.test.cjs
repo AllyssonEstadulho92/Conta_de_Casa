@@ -35,13 +35,18 @@ assert.doesNotMatch(catalog,/\bcommit\s*\(/);
 assert.doesNotMatch(catalog,/estimatedCents|actualCents|amountCents/);
 assert.doesNotMatch(catalog,/Authorization|api[_-]?key|tokenGitHub/i);
 
+assert.match(resolver,/75-catalog2/);
 assert.match(resolver,/JINA_READER_ORIGIN='https:\/\/r\.jina\.ai'/);
+assert.match(resolver,/REQUEST_TIMEOUT_MS=8000/);
 assert.match(resolver,/MAX_CONCURRENT=2/);
 assert.match(resolver,/safeProductUrl/);
 assert.match(resolver,/safeOfficialImageUrl/);
 assert.match(resolver,/catalogDirectResolver:REVISION/);
 assert.match(resolver,/credentials:'omit'/);
 assert.match(resolver,/referrerPolicy:'no-referrer'/);
+assert.doesNotMatch(resolver,/IMAGE_TIMEOUT_MS/);
+assert.doesNotMatch(resolver,/function canLoadImage/);
+assert.doesNotMatch(resolver,/new Image\(/);
 assert.doesNotMatch(resolver,/\bappState\b|\bsaveState\b|\bcommit\s*\(/);
 
 assert.match(css,/\.market-visual-catalog-grid/);
@@ -111,7 +116,8 @@ resolverSandbox.globalThis=resolverSandbox;
 vm.createContext(resolverSandbox);
 vm.runInContext(resolver,resolverSandbox,{filename:'market-catalog-image-resolver.js'});
 assert.ok(resolverSandbox.CDCMarketCatalogImageResolver);
-assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-catalog1');
+assert.equal(resolverSandbox.CDCMarketCatalogImageResolver.revision,'75-catalog2');
+assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-catalog2');
 
 (async()=>{
   const direct=await resolverSandbox.CDCOfficialMarketImages.resolve({marketId:'continente',pid:'8504297',name:'Leite',sourceUrl:continenteProduct});
@@ -119,18 +125,18 @@ assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-c
   assert.ok(fetchedUrl.startsWith('https://r.jina.ai/https://www.continente.pt/produto/'));
   assert.equal(fallbackCalls,0,'exact retailer URL should avoid a second product search');
 
-  assert.match(prepare,/const CATALOG_REV = '75-catalog1'/);
+  assert.match(prepare,/const CATALOG_REV = '75-catalog2'/);
   for(const asset of ['market-visual-catalog.css','market-catalog-image-resolver.js','market-visual-catalog.js'])assert.ok(prepare.includes(`'${asset}'`));
-  assert.match(sw,/image-library1-catalog1/);
+  assert.match(sw,/image-library1-catalog2/);
   for(const asset of ['./market-visual-catalog.css','./market-catalog-image-resolver.js','./market-visual-catalog.js'])assert.ok(sw.includes(`'${asset}'`));
 
   const dist=path.join(ROOT,'dist');
   try{
     execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
     const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-    assert.match(index,/market-visual-catalog\.css\?v=75-catalog1/);
-    assert.match(index,/market-catalog-image-resolver\.js\?v=75-catalog1/);
-    assert.match(index,/market-visual-catalog\.js\?v=75-catalog1/);
+    assert.match(index,/market-visual-catalog\.css\?v=75-catalog2/);
+    assert.match(index,/market-catalog-image-resolver\.js\?v=75-catalog2/);
+    assert.match(index,/market-visual-catalog\.js\?v=75-catalog2/);
     assert.ok(index.indexOf('market-official-images.js')<index.indexOf('market-catalog-image-resolver.js'));
     assert.ok(index.indexOf('market-catalog-image-resolver.js')<index.indexOf('market-visual-catalog.js'));
     assert.ok(index.indexOf('market-visual-catalog.js')<index.indexOf('v64-runtime.js'));
@@ -139,5 +145,5 @@ assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-c
     fs.rmSync(dist,{recursive:true,force:true});
   }
 
-  console.log('Progressive visual market catalog remains bounded, exact-SKU, isolated and distributable: OK');
+  console.log('Progressive visual market catalog and non-blocking official image resolver: OK');
 })().catch(error=>{console.error(error);process.exitCode=1;});
