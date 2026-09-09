@@ -116,8 +116,8 @@
       setImageState(visual,'is-loading');
       img.src=resolved;
     };
-    img.addEventListener('load',()=>setImageState(visual,'is-loaded'),{once:false});
-    img.addEventListener('error',()=>{void tryFallback();},{once:false});
+    img.addEventListener('load',()=>setImageState(visual,'is-loaded'));
+    img.addEventListener('error',()=>{void tryFallback();});
     if(img.complete){
       if(img.naturalWidth>0&&img.naturalHeight>0)setImageState(visual,'is-loaded');
       else void tryFallback();
@@ -195,12 +195,15 @@
     const cards=[...grid.querySelectorAll('.cdc-featured-card')];
     let controls=home.querySelector('.cdc-featured-controls');
     if(cards.length<=1){controls?.remove();return;}
+    const countKey=String(cards.length);
+    if(controls?.dataset.featuredCount===countKey){syncPager(grid,controls);return;}
     if(!controls){
       controls=document.createElement('div');
       controls.className='cdc-featured-controls';
       controls.setAttribute('aria-label','Navegação dos produtos em destaque');
       grid.insertAdjacentElement('afterend',controls);
     }
+    controls.dataset.featuredCount=countKey;
     controls.innerHTML=`<button class="cdc-featured-arrow" type="button" data-featured-prev aria-label="Produto anterior">${icon('left',18)}</button><span class="cdc-featured-dots" aria-hidden="true">${cards.map((_,index)=>`<i class="cdc-featured-dot${index===0?' active':''}"></i>`).join('')}</span><button class="cdc-featured-arrow" type="button" data-featured-next aria-label="Produto seguinte">${icon('right',18)}</button>`;
     const scrollToIndex=index=>{
       const target=cards[Math.max(0,Math.min(cards.length-1,index))];
@@ -213,11 +216,14 @@
     };
     controls.querySelector('[data-featured-prev]')?.addEventListener('click',()=>scrollToIndex(activeIndex()-1));
     controls.querySelector('[data-featured-next]')?.addEventListener('click',()=>scrollToIndex(activeIndex()+1));
-    let raf=0;
-    grid.addEventListener('scroll',()=>{
-      if(raf)return;
-      raf=requestAnimationFrame(()=>{raf=0;syncPager(grid,controls);});
-    },{passive:true});
+    if(grid.dataset.featuredScrollBound!=='1'){
+      grid.dataset.featuredScrollBound='1';
+      let raf=0;
+      grid.addEventListener('scroll',()=>{
+        if(raf)return;
+        raf=requestAnimationFrame(()=>{raf=0;const current=home.querySelector('.cdc-featured-controls');if(current)syncPager(grid,current);});
+      },{passive:true});
+    }
     syncPager(grid,controls);
   }
 
