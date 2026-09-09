@@ -84,13 +84,13 @@ O teste `tests/v75-drawer-theme.test.cjs` valida direção, proporção, corresp
 - drawer visual: `75-drawer2`;
 - cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2`.
 
-`v75-drawer-theme.css?v=75-drawer2` integra a allowlist Pages e o cache do Service Worker. `v75-drawer-blue.css` deixa de integrar a distribuição pública.
+`v75-drawer-theme.css?v=75-drawer2` integra a allowlist Pages e o cache do Service Worker. `v75-drawer-blue.css` deixou de integrar a distribuição pública.
 
-## Pipeline
+## Pipeline e publicação
 
-A revisão deve passar primeiro o CI completo na branch `fix/v75-drawer-teal`, incluindo testes financeiros, auditoria, isolamento, QR, Mercado, arquitetura, estabilidade, geometria, menu animado, segurança, responsividade, acessibilidade, sincronização e o teste específico `v75-drawer-theme.test.cjs`.
+A revisão `75-drawer2` passou o CI completo na branch `fix/v75-drawer-teal`, incluindo testes financeiros, auditoria, isolamento, QR, Mercado, arquitetura, estabilidade, geometria, menu animado, segurança, responsividade, acessibilidade, sincronização e `tests/v75-drawer-theme.test.cjs`.
 
-Depois da integração em `main`, o mesmo conjunto de regressões deve voltar a passar antes do deploy Pages.
+A revisão foi integrada por fast-forward em `main`. O CI de `main` terminou com sucesso no SHA integrado e o workflow GitHub Pages verificou a mesma revisão, preparou a allowlist pública, carregou o artefacto e concluiu o deploy com sucesso.
 
 ## Validação manual necessária
 
@@ -109,4 +109,4 @@ Validar em iPhone/Safari/PWA real:
 
 ## Próximo passo
 
-Confirmar CI da branch, integrar `75-drawer2` em `main`, validar CI público e GitHub Pages e depois confirmar visualmente no iPhone real.
+Validar visualmente `75-drawer2` no iPhone real. Qualquer ajuste posterior de tom, contraste ou proporção deve permanecer na camada de apresentação, sem tocar no núcleo financeiro salvo evidência de causa funcional.
