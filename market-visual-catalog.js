@@ -1,16 +1,17 @@
 'use strict';
 
 /*
- * Conta de Casa — catálogo visual progressivo do Mercado (75-catalog1)
+ * Conta de Casa — catálogo visual progressivo do Mercado (75-catalog3)
  *
  * Objetivo:
  * - apresentar categorias úteis antes de existir uma pesquisa manual;
  * - acumular, de forma lenta e limitada, SKUs reais devolvidos por cesta.pt;
  * - reutilizar apenas fotografias oficiais validadas pela biblioteca existente;
+ * - preservar os cartões já montados durante atualizações de fundo para evitar flicker;
  * - nunca escrever preços, quantidades, faturas ou estado financeiro.
  */
 (function installMarketVisualCatalog(root){
-  const REVISION='75-catalog1';
+  const REVISION='75-catalog3';
   const DB_NAME='conta-de-casa-market-visual-catalog';
   const DB_VERSION=1;
   const PRODUCT_STORE='products';
@@ -274,7 +275,7 @@
   function ensureCestaReady(){
     if(cestaReadyPromise)return cestaReadyPromise;
     cestaReadyPromise=(async()=>{
-      await cestaRpc({jsonrpc:'2.0',id:7501,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Conta de Casa visual catalog',version:'75-catalog1'}}});
+      await cestaRpc({jsonrpc:'2.0',id:7501,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Conta de Casa visual catalog',version:REVISION}}});
       await cestaRpc({jsonrpc:'2.0',method:'notifications/initialized'}).catch(()=>null);
       return true;
     })().catch(error=>{cestaReadyPromise=null;throw error;});
@@ -347,6 +348,12 @@
     scheduleImageWarm(1200);
   }
 
+  function emitPhotoReady(record){
+    const id=identity(record);if(!id)return;
+    if(typeof root.CustomEvent!=='function'||typeof root.dispatchEvent!=='function')return;
+    root.dispatchEvent(new root.CustomEvent('cdc:market-photo-ready',{detail:{key:id.key,marketId:id.marketId,pid:id.pid}}));
+  }
+
   async function warmOneImage(record){
     if(sessionImages>=SESSION_IMAGE_BUDGET)return null;
     const library=root.CDCMarketImageLibrary;
@@ -359,7 +366,9 @@
     }).catch(()=>null);
     sessionImages+=1;
     if(!result?.imageUrl)return null;
-    return library.remember({...result,pack:record.pack},record).catch(()=>null);
+    const stored=await library.remember({...result,pack:record.pack},record).catch(()=>null);
+    if(stored)emitPhotoReady(record);
+    return stored;
   }
 
   function scheduleImageWarm(delay=BACKGROUND_IMAGE_INTERVAL_MS){
@@ -369,7 +378,6 @@
       if(!backgroundAllowed()){scheduleImageWarm(BACKGROUND_IMAGE_INTERVAL_MS);return;}
       const record=imageQueue.shift();
       if(record){imageQueued.delete(record.key);await warmOneImage(record);}
-      await renderProducts();
       await renderStats();
       scheduleImageWarm(BACKGROUND_IMAGE_INTERVAL_MS);
     },Math.max(500,delay));
@@ -440,22 +448,73 @@
     return button;
   }
 
+  function syncProductCard(card,record,category){
+    if(!card)return;
+    card.dataset.visualCatalogProduct=record.key;
+    card.setAttribute('aria-label',`Pesquisar preço atual de ${record.name}`);
+    const store=card.querySelector('.market-visual-product-store');
+    if(store)store.textContent=STORE_LABELS[record.marketId]||record.marketId;
+    const name=card.querySelector('.market-visual-product-name');
+    if(name)name.textContent=record.name;
+    const copy=card.querySelector('.market-visual-product-copy');
+    let pack=card.querySelector('.market-visual-product-pack');
+    if(record.pack){
+      if(!pack&&copy){
+        pack=el('small','market-visual-product-pack');
+        const action=copy.querySelector('.market-visual-product-action');
+        if(action)copy.insertBefore(pack,action);else copy.append(pack);
+      }
+      if(pack)pack.textContent=record.pack;
+    }else if(pack)pack.remove();
+    const fallbackMark=card.querySelector('.market-visual-catalog-fallback-mark');
+    if(fallbackMark)fallbackMark.textContent=category.label.slice(0,1);
+  }
+
+  function emptyCatalogState(category){
+    const empty=el('div','market-visual-catalog-empty');
+    empty.append(el('strong','',`A preparar ${category.label}`));
+    empty.append(el('span','','Os produtos reais desta categoria serão adicionados progressivamente.'));
+    return empty;
+  }
+
   async function renderProducts(){
     if(typeof document==='undefined')return;
     const grid=document.querySelector('#marketVisualCatalogGrid');if(!grid)return;
     const category=categoryById(activeCategory);
     const records=await listCategory(category.id,activeStore,CATEGORY_RENDER_LIMIT);
-    grid.replaceChildren();
     if(!records.length){
-      const empty=el('div','market-visual-catalog-empty');
-      empty.append(el('strong','',`A preparar ${category.label}`));
-      empty.append(el('span','','Os produtos reais desta categoria serão adicionados progressivamente.'));
-      grid.append(empty);
+      const currentEmpty=grid.querySelector('.market-visual-catalog-empty');
+      if(currentEmpty&&grid.childElementCount===1){
+        const title=currentEmpty.querySelector('strong');
+        if(title)title.textContent=`A preparar ${category.label}`;
+      }else grid.replaceChildren(emptyCatalogState(category));
       return;
     }
-    const fragment=document.createDocumentFragment();
-    for(const record of records)fragment.append(await productCard(record,category));
-    grid.append(fragment);
+
+    grid.querySelector('.market-visual-catalog-empty')?.remove();
+    const wantedKeys=new Set(records.map(record=>record.key));
+    const existingCards=new Map(
+      [...grid.querySelectorAll('[data-visual-catalog-product]')]
+        .map(card=>[card.dataset.visualCatalogProduct,card])
+        .filter(([key])=>key)
+    );
+
+    for(const [key,card] of existingCards){
+      if(!wantedKeys.has(key)){
+        card.remove();
+        existingCards.delete(key);
+      }
+    }
+
+    let cursor=grid.firstElementChild;
+    for(const record of records){
+      let card=existingCards.get(record.key);
+      if(card)syncProductCard(card,record,category);
+      else card=await productCard(record,category);
+      if(card!==cursor)grid.insertBefore(card,cursor);
+      cursor=card.nextElementSibling;
+    }
+
     enqueueImages(records.filter(record=>!imageQueued.has(record.key)).slice(0,4));
   }
 
