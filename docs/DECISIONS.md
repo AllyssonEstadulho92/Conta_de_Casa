@@ -138,3 +138,27 @@ As páginas já partilhavam identidade visual e regras de estabilidade, mas os c
 10. O Service Worker e `prepare-pages.cjs` devem versionar e distribuir `v75-layout-polish.css` explicitamente para evitar cache antigo.
 11. CI e Pages devem executar `tests/v75-layout-polish.test.cjs` antes de publicação.
 12. Esta camada não substitui a validação em hardware real; qualquer consolidação futura em `design-system.css` só deve ocorrer depois de testes físicos e prova de ausência de regressões.
+
+## D-044 — Drawer móvel usa painel azul à direita com página clara visível
+Data: 9 de setembro de 2026 · Estado: aceite.
+
+### Problema
+
+A validação em iPhone mostrou que o drawer branco ocupava demasiado espaço visual e não correspondia ao protótipo de referência apresentado pelo utilizador. A referência separa claramente duas superfícies: página branca e menu azul. A direção canónica do projeto, contudo, é a direita desde a v73.
+
+### Decisão
+
+1. Manter o drawer no lado direito; não regressar ao padrão esquerdo do protótipo original.
+2. Criar `v75-drawer-blue.css` como camada CSS-only carregada depois de `v75-layout-polish.css`.
+3. A revisão chama-se `75-drawer1` e não altera `mobile-menu-toggle.js`.
+4. A página principal deve continuar clara e parcialmente visível quando o drawer está aberto.
+5. O drawer usa largura `min(320px, calc(100vw - 72px))` em mobile para preservar uma faixa perceptível da página sem comprimir excessivamente a navegação.
+6. O painel usa azul saturado/gradiente, ícones e labels claros e item ativo translúcido; não usar cartões brancos dentro do menu.
+7. O mesmo `#mobileMenuBtn` continua a ser reutilizado e transforma-se em X; no estado aberto fica visualmente no canto superior direito do drawer.
+8. O cabeçalho do drawer usa `icon.svg`, nome do produto e subtítulo de navegação; não introduzir fotografia de perfil fictícia.
+9. `Ocultar valores` e `Bloquear` permanecem no rodapé do mesmo drawer.
+10. Backdrop deve ser leve e sem blur forte para não transformar a página branca em fundo cinzento pesado.
+11. Safe areas, foco, ARIA, Escape, scroll interno, swipe da direita e `prefers-reduced-motion` são requisitos obrigatórios.
+12. A camada não pode ler ou escrever `appState`, montantes, IndexedDB, cifragem, QR, Mercado ou sincronização.
+13. `DRAWER_REV = 75-drawer1`, Service Worker e Pages devem versionar explicitamente a nova camada.
+14. CI e Pages devem executar `tests/v75-drawer-blue.test.cjs` antes da publicação.
