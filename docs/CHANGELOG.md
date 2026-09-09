@@ -44,14 +44,23 @@ Aumentar de forma significativa a cobertura de fotografias reais do Pingo Doce n
 - Service Worker atualizado para cache `...-catalog1-pd-photo1-photo-loader1`;
 - CI e Pages passam a verificar sintaxe e os dois novos testes.
 
-### QA
+### QA e publicação
 
 Novos testes:
 
 - `tests/pingo-doce-photo-library.test.cjs`;
 - `tests/market-photo-loader.test.cjs`.
 
-O CI da branch passou no SHA `3cd7a98acaa7979ea87bd0f3b090992afe79404c` antes da atualização documental final. É obrigatório validar novamente o SHA final antes de integrar em `main`.
+Publicação funcional confirmada no SHA `7a59ae017a4640cfa3ad5ec357cd99425ca9ee71`:
+
+- CI final da branch: sucesso;
+- branch comparada com `main`: `ahead`, `behind 0`;
+- integração por fast-forward sem force;
+- CI de `main`: sucesso;
+- GitHub Pages: deploy concluído com sucesso;
+- regressões de finanças, Mercado, segurança, responsividade, navegação, acessibilidade e sincronização passaram.
+
+Os commits documentais posteriores apenas fecham o estado do projeto e não alteram a implementação funcional.
 
 ### Limitação explícita
 
