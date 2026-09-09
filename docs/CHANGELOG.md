@@ -1,5 +1,48 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-09 — v75 `75-image-library1`: biblioteca persistente de fotografias oficiais
+
+### Objetivo
+
+Criar uma biblioteca reutilizável para as fotografias dos produtos do Mercado, reduzindo cartões sem imagem e consultas repetidas aos retalhistas, sem copiar em massa ficheiros de imagem para o repositório nem permitir correspondências aproximadas entre produtos diferentes.
+
+### Alterações
+
+- criado `market-image-library.js` com revisão `75-image-library1`;
+- criada IndexedDB separada `conta-de-casa-market-image-library`, independente do estado financeiro;
+- cada entrada é indexada por `marketId|pid`, usando o SKU/PID real do Continente ou Pingo Doce;
+- a biblioteca guarda apenas metadados e URL oficial validado, não os binários das fotografias;
+- imagens Continente só são aceites em `www.continente.pt`, catálogo `Sites-col-master-catalog` e com o PID exato no path;
+- imagens Pingo Doce só são aceites em `static.pingodoce.pt`, catálogo `Sites-pingo-doce-master`, tamanhos `large|medium|small` e PID exato;
+- páginas-fonte também são validadas pelo domínio, estrutura e PID do retalhista;
+- fotografias oficiais já resolvidas no catálogo são capturadas automaticamente para a biblioteca;
+- quando o mesmo SKU volta a surgir, a fotografia validada pode ser reposta a partir da biblioteca;
+- entradas positivas expiram ao fim de 45 dias para evitar referências permanentemente obsoletas;
+- quando não existe imagem válida, o pipeline continua a usar o fallback `Imagem indisponível` sem alterar produto ou preço;
+- `IMAGE_LIBRARY_REV = 75-image-library1` foi adicionado ao bundle Pages;
+- `market-image-library.js` é carregado antes da política/auditoria/bridge de imagens;
+- Service Worker passa a usar cache com sufixo `-featured1-image-library1`;
+- criado `tests/market-image-library.test.cjs`;
+- CI e Pages passam a validar sintaxe, isolamento, hosts/PID, persistência, distribuição e cache da biblioteca.
+
+### Segurança e integridade
+
+- `market-image-library.js` não referencia `appState`, `saveState()`, `commit()`, montantes, pagamentos, cofre ou sincronização financeira;
+- `core.js`, `finance.js`, `STATE_VERSION = 5`, PIN, PBKDF2-SHA-256, AES-GCM, QR e cálculos financeiros permanecem inalterados;
+- URLs cujo domínio, catálogo ou PID não correspondam exatamente ao SKU são rejeitados;
+- a biblioteca não envia credenciais, tokens, faturas ou dados pessoais aos retalhistas;
+- a fotografia continua a ser apenas apoio visual e nunca prova preço ou transação.
+
+### Cobertura
+
+A biblioteca é extensível e cresce com os SKUs oficiais efetivamente encontrados e validados no Continente e Pingo Doce. Não se declara uma cópia integral e estática de todos os catálogos dos retalhistas, porque os catálogos são dinâmicos e não existe no projeto uma fonte oficial exaustiva/autorizada para descarga massiva de todas as imagens.
+
+### Distribuição
+
+- revisão: `75-image-library1`;
+- asset: `market-image-library.js?v=75-image-library1`;
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1`.
+
 ## 2026-09-09 — v75 `75-featured1`: Produtos em destaque alinhados com o protótipo
 
 ### Objetivo
