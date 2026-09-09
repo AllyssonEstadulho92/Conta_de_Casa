@@ -82,6 +82,7 @@ jobs:
           node tests/v75-architecture.test.cjs
           node tests/v75-stability.test.cjs
           node tests/v75-layout-polish.test.cjs
+          node tests/v75-drawer-blue.test.cjs
           node tests/mobile-menu-toggle.test.cjs
           node tests/app-update.test.cjs
           node tests/security.test.cjs
