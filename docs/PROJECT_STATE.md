@@ -1,94 +1,87 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 8 de setembro de 2026
-Build público: `v75`
-Revisão transversal: `75-stability1`
+Atualizado: 9 de setembro de 2026
+Build público atual: `v75`
+Revisão transversal publicada: `75-stability1`
+Revisão de geometria em validação: `75-layout1`
+Branch de trabalho: `fix/v75-layout-proportions`
 Branch pública: `main`
 Distribuição: GitHub Pages / PWA
 URL pública: `https://allyssonestadulho92.github.io/Conta_de_Casa/`
 
 ## Estado atual
 
-A v75 mantém arquitetura PWA estática/local-first, com estado financeiro em IndexedDB, valores em cêntimos, cofre PBKDF2-SHA-256 + AES-GCM, sincronização GitHub opcional apenas sobre envelope cifrado e `STATE_VERSION = 5`.
+A aplicação mantém arquitetura PWA estática/local-first, com estado financeiro em IndexedDB, valores em cêntimos, cofre PBKDF2-SHA-256 + AES-GCM, sincronização GitHub opcional apenas sobre envelope cifrado e `STATE_VERSION = 5`.
 
-A revisão `75-stability1` está integrada em `main`, validada pelo pipeline completo e distribuída por GitHub Pages. É uma camada final exclusivamente de apresentação para corrigir inconsistências transversais de tipografia, alinhamento, overflow, safe areas, formulários, navegação, diálogos e estados visuais do Mercado sem reescrever `core.js`, `finance.js`, persistência, cifragem ou regras financeiras.
+A revisão publicada `75-stability1` continua responsável por tipografia, safe areas, overflow, formulários, navegação, diálogos e estados visuais do Mercado. A nova revisão `75-layout1` foi criada separadamente para corrigir geometria, proporções, largura útil, distribuição de colunas e alinhamento entre páginas sem alterar `core.js`, `finance.js`, persistência, cifragem ou regras financeiras.
 
-## Cabeçalho móvel `75-header2`
+## Revisão `75-layout1`
 
-O cabeçalho móvel continua minimalista:
+A camada `v75-layout-polish.css` é CSS-only e carrega depois de `v75-stability.css`. O objetivo é fazer cada página usar a largura e as proporções adequadas ao espaço disponível, em vez de depender apenas das grelhas históricas genéricas.
 
-- sem `Olá, Utilizador / Bem-vindo de volta!` e sem avatar no topbar;
+Principais regras:
+
+- coluna de conteúdo comum de até 1280 px no desktop;
+- espaçamento vertical e padding de painéis uniformizados;
+- Início com redistribuição proporcional dos painéis e redução de colunas em web compacto;
+- Despesas e Mercado com pesquisa, ação e filtros dimensionados sem comprimir campos;
+- Calendário com sete colunas preservadas, mas células adaptadas por breakpoint;
+- Planeamento, Relatórios e Diagnóstico com proporção desktop equilibrada e reflow para uma coluna em mobile;
+- Metas com grelha `auto-fit`, evitando cartões demasiado estreitos;
+- Segurança e Sincronização com grelhas coerentes, formulários de duas colunas apenas quando há largura suficiente;
+- Definições centradas no desktop;
+- toolbars, button rows, tabs, detail grids e panel heads com comportamento previsível em tablet/telemóvel;
+- categorias do Planeamento reorganizadas em ecrãs estreitos para evitar valores e barras espremidos;
+- cartões do cofre, diálogos e quick actions mantêm a mesma coluna visual do produto.
+
+A revisão não contém referências a `appState`, `estimatedCents`, `actualCents`, IndexedDB ou funções de persistência.
+
+## Cabeçalho e navegação preservados
+
+O cabeçalho móvel `75-header2` permanece minimalista:
+
 - hambúrguer + título à esquerda;
-- sino de notificações como única ação à direita;
-- linha visual de 60 px mais safe area;
+- notificações à direita;
+- sem saudação/avatar duplicados no topbar;
+- 60 px de linha útil mais safe area;
+- alvos tácteis de 44 px;
 - título com ellipsis em ecrãs estreitos;
-- hambúrguer e sino com alvo tátil estabilizado em 44 px pela revisão transversal;
-- foco visível e `prefers-reduced-motion` preservados.
+- drawer à direita e hambúrguer ↔ X preservados.
 
-## Estabilidade transversal `75-stability1`
+A navegação móvel continua **Início / Despesas / Mercado / Planeamento / Mais**.
 
-A revisão acrescenta:
+## Integridade funcional preservada
 
-- stack tipográfica nativa consistente em iOS, Android, macOS e Windows;
-- `min-width: 0`, controlo de overflow e wrapping defensivo em flex/grid;
-- safe areas laterais e superior/inferior no cabeçalho, conteúdo, navegação e diálogos;
-- inputs/selects/textarea com 16 px no mobile para evitar zoom automático do Safari;
-- barra inferior com cinco destinos, dimensões estáveis e labels truncados de forma segura;
-- tabelas confinadas ao próprio scroll no desktop e ocultadas quando existe representação móvel equivalente;
-- foco visível coerente, suporte a `forced-colors` e redução de movimento;
-- sincronização da cor do browser/PWA com o tema e o cabeçalho visível;
-- estados `loading`, `loaded`, `error` e `empty` para fotografias do Mercado, com skeleton e fallback `Imagem indisponível`;
-- ampliação de fotografia desativada enquanto a imagem está inválida e restaurada quando a imagem volta a carregar;
-- grelha de produtos do Mercado reduzida de três para duas colunas até 430 px para preservar leitura e área tátil;
-- observação de re-renderizações para que falhas de imagem remota não deixem cartões vazios/deformados.
-
-## Arquitetura v75 preservada
-
-- navegação móvel: **Início / Despesas / Mercado / Planeamento / Mais**;
-- Despesas: Todas/Entradas/Saídas, pesquisa, movimentos e FAB;
-- nova despesa mobile full-screen com **Manual / Ler fatura / QR Code**;
-- QR/câmara reutiliza `invoice-capture.js`;
-- Mercado mantém apenas fontes realmente suportadas: Continente e Pingo Doce;
-- Planeamento usa métricas reais de orçamento, gasto, disponível e categorias;
-- drawer à direita e animação hambúrguer ↔ X preservados;
-- PIN/cofre, IndexedDB e sincronização não foram migrados.
-
-## Versionamento público
-
-- build: `v75`;
-- UI base: `74-ui1`;
-- Mercado: `74-shopping2`;
-- menu: `73-menu8`;
-- experiência base: `74-experience2`;
-- arquitetura final: `75-architecture2`;
-- cabeçalho: `75-header2`;
-- estabilidade: `75-stability1`;
-- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1`.
-
-O Service Worker continua a eliminar caches anteriores durante `activate`. O bundle Pages carrega `v75-stability.css/js?v=75-stability1` depois da arquitetura e do cabeçalho, garantindo invalidação real sem alterar o build funcional.
-
-## Integridade funcional
-
-Continuam preservados:
+Não foram modificados pela revisão de layout:
 
 - `core.js` / persistência;
 - `finance.js` / cálculos;
 - `STATE_VERSION = 5`;
+- valores monetários em cêntimos;
 - pagamentos e histórico;
 - PIN e palavra-passe;
 - PBKDF2-SHA-256 + AES-GCM;
 - QR fiscal e scanner de código de barras;
 - `estimatedCents` / `actualCents`;
-- sincronização cifrada.
+- sincronização cifrada;
+- políticas de imagens/preços do Mercado.
 
-## Pipeline e publicação
+## Distribuição preparada
 
-A revisão integrada em `main` concluiu com sucesso o pipeline completo: sintaxe, finanças, auditoria financeira, invariantes de contagem, isolamento do cofre, datas, faturas, QR, Mercado, imagens, código de barras, runtime, ícones, consistência visual, arquitetura v75, estabilidade v75, menu, centro de atualização, segurança, responsividade, regressão mobile, navegação, acessibilidade, sincronização e manifesto.
+A branch de trabalho prepara:
 
-O workflow GitHub Pages verificou novamente a revisão testada, preparou a allowlist pública, carregou o artefacto e concluiu o deploy com sucesso.
+- `LAYOUT_REV = 75-layout1` em `scripts/prepare-pages.cjs`;
+- `v75-layout-polish.css?v=75-layout1` carregado depois de `v75-stability.css`;
+- cache PWA `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1`;
+- teste dedicado `tests/v75-layout-polish.test.cjs`;
+- CI e verificação pré-Pages configurados para executar o novo teste.
 
-As notas públicas de `release-manifest.json` estão alinhadas com `75-header2` e `75-stability1`, sem a referência obsoleta à saudação dentro do cabeçalho global.
+## Estado de validação
+
+A revisão está em branch de trabalho enquanto o pipeline completo é executado. Não deve ser considerada publicada até a branch passar CI, ser integrada em `main`, o CI de `main` terminar com sucesso e o GitHub Pages concluir o deploy da revisão testada.
+
+A validação automatizada não substitui inspeção em hardware real. Depois da publicação continuam necessários testes físicos em iPhone/Safari/PWA, Android/Chrome, tablet e desktop para confirmar proporções, safe areas, títulos, filtros, calendário, formulários, bottom navigation, drawer, tema escuro e ausência de overflow.
 
 ## Próximo passo
 
-A parte automatizável e publicável desta revisão está concluída. Falta apenas validação física em dispositivos reais: iPhone/Safari/PWA e Android/Chrome para safe areas, títulos longos, badge, hambúrguer/X, rotação, tema escuro, formulários sem zoom, navegação inferior, ausência de overflow e fallback de imagens do Mercado. Qualquer regressão observada em hardware deve ser corrigida na camada de apresentação antes de tocar no núcleo financeiro.
+Concluir CI da branch `fix/v75-layout-proportions`. Se estiver verde, integrar por fast-forward em `main`, confirmar CI e Pages sobre o SHA integrado e só depois marcar `75-layout1` como publicada.
