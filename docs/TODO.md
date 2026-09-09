@@ -33,10 +33,10 @@ Atualizado: 9 de setembro de 2026
 - [x] Adicionar `tests/v75-layout-polish.test.cjs`.
 - [x] Incluir o teste de layout no CI e na verificação pré-deploy Pages.
 - [x] Atualizar `release-manifest.json` e documentação técnica obrigatória.
-- [ ] Confirmar CI completo verde na branch `fix/v75-layout-proportions`.
-- [ ] Integrar a revisão validada em `main`.
-- [ ] Confirmar CI verde no SHA integrado em `main`.
-- [ ] Confirmar GitHub Pages concluído sobre o SHA integrado.
+- [x] Confirmar CI completo verde na branch `fix/v75-layout-proportions`.
+- [x] Integrar a revisão validada em `main`.
+- [x] Confirmar CI verde no SHA integrado em `main`.
+- [x] Confirmar GitHub Pages concluído sobre o SHA integrado.
 
 ## P1 — Validação física de `75-header2` + `75-stability1` + `75-layout1`
 
@@ -74,7 +74,7 @@ Atualizado: 9 de setembro de 2026
 - [x] `tests/v75-layout-polish.test.cjs` cobre distribuição, ordem de CSS, cache e proibição de acesso ao estado financeiro.
 - [x] Sintaxe CI cobre `v74-experience.js`, `v75-architecture.js` e `v75-stability.js`.
 - [x] Verificação Pages repete arquitetura, estabilidade e layout antes do deploy.
-- [ ] Confirmar execução completa da revisão `75-layout1` sem regressões nos testes financeiros, segurança, responsividade, navegação e sincronização.
+- [x] Execução completa da revisão `75-layout1` terminou sem regressões nos testes financeiros, segurança, responsividade, navegação e sincronização.
 
 ## P2 — Consolidação posterior
 
