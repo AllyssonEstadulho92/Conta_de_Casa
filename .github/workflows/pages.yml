@@ -58,6 +58,7 @@ jobs:
           node --check v74-experience.js
           node --check v75-architecture.js
           node --check v75-stability.js
+          node --check v75-market-featured.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
           node tests/finance.test.cjs
@@ -82,6 +83,7 @@ jobs:
           node tests/v75-architecture.test.cjs
           node tests/v75-stability.test.cjs
           node tests/v75-layout-polish.test.cjs
+          node tests/v75-market-featured.test.cjs
           node tests/v75-drawer-theme.test.cjs
           node tests/mobile-menu-toggle.test.cjs
           node tests/app-update.test.cjs
