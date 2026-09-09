@@ -75,7 +75,7 @@
     if(!imageUrl)return null;
 
     /*
-     * Não fazemos aqui um segundo carregamento bloqueante da imagem com new Image().
+     * Não fazemos aqui um segundo carregamento visual bloqueante.
      * O URL já foi obtido da página oficial exata e passou host/path/PID. No Safari,
      * esse preflight visual podia ficar até 10 s à espera e transformar uma fotografia
      * válida num falso negativo. O componente visual é quem testa o carregamento real;
