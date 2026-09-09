@@ -2,198 +2,100 @@
 
 Atualizado: 9 de setembro de 2026
 
-## P0 — v75 publicada e estabilidade transversal
+## P0 — Baseline v75 preservada
 
-- [x] Publicar v75 em `main` com Início / Despesas / Mercado / Planeamento / Mais.
-- [x] Preservar `core.js`, `finance.js`, `STATE_VERSION = 5`, IndexedDB, pagamentos, cifragem e sincronização.
-- [x] Implementar `v75-architecture.css/js` sem criar lógica financeira paralela.
-- [x] Manter drawer à direita e hambúrguer ↔ X.
-- [x] Refinar topbar para `75-header2`.
-- [x] Criar `75-stability1` para tipografia, overflow, safe areas, formulários, navegação e diálogos.
-- [x] Criar `75-layout1` para geometria e proporção entre páginas.
-- [x] Criar `75-drawer2` para alinhar o drawer com a paleta petróleo/teal da aplicação.
+- [x] Manter `STATE_VERSION = 5`, IndexedDB financeiro e valores em cêntimos.
+- [x] Preservar `core.js`, `finance.js`, pagamentos, faturas, PIN, PBKDF2-SHA-256, AES-GCM e sincronização.
+- [x] Manter navegação móvel Início / Despesas / Mercado / Planeamento / Mais.
+- [x] Manter drawer no lado direito e cabeçalho `75-header2`.
+- [x] Manter `75-stability1`, `75-layout1`, `75-drawer2` e `75-featured1`.
 
-## P0 — `75-featured1`: Produtos em destaque alinhados com o protótipo
+## P0 — Biblioteca geral e catálogo visual
 
-- [x] Confirmar a causa visual: três colunas mobile e imagem de 66 px da experiência v74.
-- [x] Criar `v75-market-featured.css` sem alterar cálculos ou estado.
-- [x] Criar `v75-market-featured.js` sobre os mesmos itens e handlers existentes.
-- [x] Substituir no mobile a grelha apertada por carrossel horizontal com `scroll-snap`.
-- [x] Definir cartão com 78–84% do viewport e área de imagem de 140–154 px.
-- [x] Limitar nome do produto a duas linhas e separar preço/categoria.
-- [x] Adicionar category pill e rodapé `Na sua lista`.
-- [x] Criar fallback vetorial local `Imagem indisponível` para evitar cartões vazios/deformados.
-- [x] Manter skeleton enquanto a fotografia carrega.
-- [x] Reutilizar imagem já validada quando disponível.
-- [x] Tentar recuperar imagem por GTIN no Open Food Facts quando existe `productCode`, sem persistir pela camada.
-- [x] Não enviar automaticamente nomes da lista para procurar fotografias.
-- [x] Adicionar controlos anterior/seguinte e indicadores de posição.
-- [x] Manter `Ver todos` ligado à pesquisa real do Mercado.
-- [x] Manter clique no cartão ligado ao item real através de `data-edit-market`.
-- [x] Criar `FEATURED_REV = 75-featured1`.
-- [x] Atualizar Service Worker para cache `-drawer2-featured1`.
-- [x] Criar `tests/v75-market-featured.test.cjs`.
-- [x] Atualizar CI e Pages para sintaxe e teste da nova camada.
-- [x] Atualizar documentação técnica obrigatória.
-- [x] Confirmar CI completo verde na branch `fix/v75-featured-prototype`.
-- [x] Integrar a revisão validada em `main`.
-- [x] Confirmar CI de `main` no SHA funcional `998bb19476e175647d4aad395008b8188e9c13f1`.
-- [x] Confirmar GitHub Pages concluído sobre o mesmo SHA funcional.
+- [x] Biblioteca persistente por `marketId|pid` em `75-image-library1`.
+- [x] Catálogo visual progressivo por categorias em `75-catalog1`.
+- [x] Resolver fotografia pela página oficial exata quando disponível.
+- [x] Não guardar preços no catálogo visual.
+- [x] Limitar pesquisa/enriquecimento automático e respeitar offline/Save-Data/visibilidade.
 
-## P0 — `75-image-library1`: biblioteca persistente de fotografias oficiais
+## P0 — `75-pd-photo1`: biblioteca dedicada Pingo Doce
 
-- [x] Rever o pipeline real de Continente/Pingo Doce antes de alterar a arquitetura.
-- [x] Criar `market-image-library.js` numa camada separada do estado financeiro.
-- [x] Criar IndexedDB própria `conta-de-casa-market-image-library`.
-- [x] Indexar cada fotografia por `marketId|pid`, nunca apenas pelo nome do produto.
-- [x] Validar estritamente URLs oficiais do Continente por host, catálogo e PID.
-- [x] Validar estritamente URLs oficiais do Pingo Doce por host, catálogo, tamanho e PID.
-- [x] Guardar apenas metadados/URL oficial validado, sem copiar binários dos retalhistas para o repositório.
-- [x] Definir expiração de 45 dias para revalidar referências antigas.
-- [x] Capturar automaticamente imagens oficiais já resolvidas nos cartões do catálogo.
-- [x] Reutilizar a imagem da biblioteca quando o mesmo SKU volta a aparecer.
-- [x] Manter fallback `Imagem indisponível` quando a fotografia não existe, expira ou falha.
-- [x] Garantir ausência de acesso a `appState`, `saveState()`, `commit()`, montantes, cofre e sincronização financeira.
-- [x] Criar `IMAGE_LIBRARY_REV = 75-image-library1`.
-- [x] Adicionar `market-image-library.js` ao bundle público antes da política/bridge de imagens.
-- [x] Atualizar Service Worker para cache `-image-library1`.
-- [x] Criar `tests/market-image-library.test.cjs`.
-- [x] Atualizar CI e Pages para validar sintaxe, isolamento, distribuição e cache.
-- [x] Confirmar CI final verde na branch no SHA `5f7b051c2b767c71581b4dc86054f502629a54cd`.
-- [x] Integrar `75-image-library1` em `main` por fast-forward no mesmo SHA.
-- [x] Confirmar CI de `main` concluído com sucesso no SHA `5f7b051c2b767c71581b4dc86054f502629a54cd`.
-- [x] Confirmar GitHub Pages concluído com sucesso sobre o mesmo SHA.
+- [x] Criar `pingo-doce-photo-library.js`.
+- [x] Criar IndexedDB isolada `conta-de-casa-pingo-doce-photo-library`.
+- [x] Indexar exclusivamente por `pingo-doce|pid`.
+- [x] Restringir pesquisa a `stores:['pingodoce']`.
+- [x] Aceitar apenas página oficial Pingo Doce com PID correspondente.
+- [x] Criar 15 famílias de descoberta.
+- [x] Criar mais de 200 termos de pesquisa para aumentar cobertura.
+- [x] Manter estados de imagem `pending`, `ready` e `missing`.
+- [x] Reutilizar primeiro a biblioteca geral `75-image-library1`.
+- [x] Resolver apenas a partir da página oficial exata do SKU.
+- [x] Persistir fotografia final apenas após validação oficial existente.
+- [x] Limitar a 24 pesquisas/sessão e 72/dia.
+- [x] Limitar fotografias a 30 tentativas/sessão e 120/dia.
+- [x] Suspender trabalho automático offline, página oculta ou `Save-Data`.
+- [x] Adicionar estado/contador **Biblioteca Pingo Doce** na área do catálogo.
+- [x] Adicionar botão **Atualizar biblioteca** com ação limitada.
+- [x] Criar `tests/pingo-doce-photo-library.test.cjs`.
 
-## P1 — Validação física de `75-image-library1`
+## P0 — `75-photo-loader1`: carregamento visual rápido
 
-- [ ] iPhone/Safari/PWA: confirmar instalação do novo Service Worker/cache.
-- [ ] Pesquisar um SKU com fotografia oficial e voltar a pesquisá-lo depois de reabrir a aplicação.
-- [ ] Confirmar que a fotografia reaparece para o mesmo PID sem troca entre produtos.
-- [ ] Confirmar que Continente e Pingo Doce permanecem isolados por `marketId|pid`.
-- [ ] Confirmar que URL inválida/expirada regressa ao fallback sem cartão quebrado.
-- [ ] Confirmar funcionamento aceitável em rede lenta e offline parcial.
-- [ ] Confirmar que o armazenamento indisponível/privado não bloqueia a pesquisa do Mercado.
-- [ ] Confirmar que nenhum preço, quantidade ou estado de compra é alterado pela biblioteca.
+- [x] Criar `market-photo-loader.js`.
+- [x] Criar `market-photo-loader.css`.
+- [x] Mostrar skeleton/shimmer imediatamente em cartão sem fotografia.
+- [x] Mostrar spinner e **A carregar fotografia…**.
+- [x] Consultar primeiro IndexedDB/cache de imagens.
+- [x] Usar `loading='eager'` para fotografia já resolvida em cartão visível.
+- [x] Aquecer a biblioteca Pingo Doce no primeiro acesso ao Mercado.
+- [x] Reavaliar cartões numa janela curta de 850 ms, máximo 18 ciclos.
+- [x] Respeitar tema escuro e `prefers-reduced-motion`.
+- [x] Garantir que o loader não faz chamadas externas próprias.
+- [x] Criar `tests/market-photo-loader.test.cjs`.
 
-## P1 — Validação física de `75-featured1`
+## P0 — Distribuição e QA
 
-- [ ] iPhone/Safari/PWA: confirmar atualização do Service Worker e carregamento de `75-featured1`.
-- [ ] Confirmar que já não aparecem três cartões espremidos lado a lado.
-- [ ] Confirmar swipe horizontal e `scroll-snap` natural.
-- [ ] Confirmar que o cartão seguinte fica parcialmente visível como indicação de carrossel.
-- [ ] Confirmar fotografia quando existe URL válida.
-- [ ] Confirmar fallback elegante quando a fotografia não existe/falha.
-- [ ] Confirmar nomes longos em no máximo duas linhas.
-- [ ] Confirmar preço isolado e legível.
-- [ ] Confirmar category pill sem cortar informação essencial.
-- [ ] Confirmar botões anterior/seguinte e dots.
-- [ ] Confirmar `Ver todos` abre o browser real do Mercado.
-- [ ] Confirmar toque no cartão abre os detalhes do item real.
-- [ ] Confirmar ausência de overflow horizontal fora do carrossel.
-- [ ] Confirmar tema escuro, safe areas e navegação inferior.
-
-## P1 — Validação física de `75-drawer2`
-
-- [ ] Confirmar gradiente petróleo/teal visualmente igual ao cabeçalho.
-- [ ] Confirmar drawer a abrir exclusivamente pela direita.
-- [ ] Confirmar página branca visível à esquerda do drawer.
-- [ ] Confirmar largura equilibrada para labels longos.
-- [ ] Confirmar logo/nome/X alinhados.
-- [ ] Confirmar hambúrguer → X → hambúrguer sem deslocamento.
-- [ ] Confirmar swipe pela margem direita.
-- [ ] Confirmar scroll até ao rodapé.
-- [ ] Confirmar safe areas superior/inferior.
-- [ ] Confirmar item ativo com menta discreta e contraste adequado.
-
-## P1 — Validação física geral
-
-- [ ] iPhone: focar inputs/selects sem zoom automático do Safari.
-- [ ] iPhone/Android: navegação inferior com cinco destinos sem corte.
-- [ ] Comparar Início, Despesas, Mercado, Planeamento e Mais para confirmar margens e largura iguais.
-- [ ] 320/350/375/390/430 px: Calendário sem overflow.
-- [ ] 320/375/390/430 px: Planeamento sem texto/valor sobreposto.
-- [ ] Android/tablet: mudança natural entre uma e duas colunas.
-- [ ] Desktop 821–1120 px: grelhas reduzidas e filtros sem compressão.
-- [ ] Desktop >=1121 px: KPIs, Relatórios, Metas, Segurança e Definições proporcionais.
-- [ ] Desktop: tabelas, sidebar e diálogos sem regressão.
-
-## P1 — Mercado
-
-- [x] Fallback quando `imageUrl` falha no catálogo tradicional.
-- [x] Área de fotografia estável no catálogo tradicional.
-- [x] Skeleton discreto.
-- [x] `Imagem indisponível` em falha remota.
-- [x] Ampliação desativada quando a imagem falha.
-- [x] Grelha do catálogo a duas colunas até 430 px.
-- [x] Destaques móveis com fallback próprio em `75-featured1`.
-- [x] Biblioteca persistente de metadados oficiais por SKU em `75-image-library1`.
-- [ ] Validar Continente/Pingo Doce em rede lenta, offline e URL quebrado.
-- [ ] Avaliar futuramente uma fonte oficial/autorizada exaustiva se for necessária cobertura integral antecipada do catálogo, sem crawling agressivo.
-
-## P1 — QA e publicação
-
-- [x] `tests/v75-stability.test.cjs`.
-- [x] `tests/v75-layout-polish.test.cjs`.
-- [x] `tests/v75-drawer-theme.test.cjs`.
-- [x] `tests/v75-market-featured.test.cjs`.
-- [x] `tests/market-image-library.test.cjs`.
-- [x] CI cobre arquitetura, estabilidade, layout, drawer, destaques e biblioteca de imagens.
-- [x] Pages repete a validação antes do deploy.
-
-## P2 — Consolidação posterior
-
-- [ ] Rever CSS histórico restante numa release própria, sem misturar regras financeiras.
-- [ ] Depois da validação real, absorver as camadas v75 estáveis no sistema visual consolidado de uma release futura.
-- [ ] Remover resíduos apenas após confirmar ausência de referências funcionais.
-- [ ] Rever pipeline externo do Mercado separadamente.
-- [ ] Manter `PROJECT_STATE.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md` e `CHANGELOG.md` sincronizados em cada alteração relevante.
-
-## P0 — `75-catalog1`: catálogo visual progressivo por categorias
-
-- [x] Rever o pipeline real do Mercado e `75-image-library1` antes da alteração.
-- [x] Criar `market-visual-catalog.js` e IndexedDB `conta-de-casa-market-visual-catalog`.
-- [x] Criar `market-visual-catalog.css` responsivo e acessível.
-- [x] Criar `market-catalog-image-resolver.js` para usar a URL oficial exata do SKU.
-- [x] Indexar/deduplicar exclusivamente por `marketId|pid`.
-- [x] Não armazenar preço no catálogo visual.
-- [x] Criar 12 categorias iniciais e seeds de descoberta.
-- [x] Usar apenas Continente/Pingo Doce através do pipeline `cesta.pt` suportado.
-- [x] Exigir PID + URL oficial coerentes antes de indexar.
-- [x] Limitar enriquecimento a 18 pesquisas/sessão, 48/dia e 15 s entre passos.
-- [x] Impedir pesquisas Cesta concorrentes.
-- [x] Suspender background offline, página oculta ou `Save-Data` ativo.
-- [x] Persistir cursor para continuar a descoberta entre sessões.
-- [x] Limitar imagens a 20 tentativas/sessão, 8 s entre passos e concorrência 2.
-- [x] Reutilizar `75-image-library1` e validação oficial por PID.
-- [x] Implementar **Ver preço atual** através da pesquisa viva existente.
-- [x] Implementar filtros Todos / Continente / Pingo Doce e estatísticas.
-- [x] Implementar fallback visual local e grelha 3/2/1 colunas.
-- [x] Garantir ausência de `appState`, `saveState()`, `commit()`, `estimatedCents`, `actualCents`, `amountCents`.
-- [x] Adicionar `CATALOG_REV = 75-catalog1`, assets Pages e cache `-catalog1`.
-- [x] Criar `tests/market-visual-catalog.test.cjs` e integrar em CI/Pages.
-- [x] Corrigir a regex incorreta detetada no primeiro CI do novo teste.
-- [x] Atualizar `release-manifest.json` com `75-catalog1` sem remover o histórico anterior.
-- [x] Atualizar os cinco documentos obrigatórios preservando o histórico útil.
-- [x] CI técnico verde no SHA `8e5d61c3c68771cd3e1cd5990cbe201e30fb7baa`.
-- [x] CI final após documentação/release manifest verde no SHA `c45b7be38748c22f21c8168fd0edced8c8cc0987`.
-- [ ] Executar CI final após restauração/preservação documental.
-- [ ] Comparar branch com `main` e confirmar fast-forward seguro.
-- [ ] Integrar em `main` sem force.
+- [x] Adicionar CSS/JS Pingo Doce à allowlist Pages.
+- [x] Adicionar CSS/JS loader à allowlist Pages.
+- [x] Atualizar Service Worker para `-catalog1-pd-photo1-photo-loader1`.
+- [x] Atualizar CI com syntax check e novos testes.
+- [x] Atualizar Pages com os mesmos testes.
+- [x] Atualizar `PROJECT_STATE.md`.
+- [x] Atualizar `ARCHITECTURE.md`.
+- [x] Atualizar `DECISIONS.md`.
+- [x] Atualizar `TODO.md`.
+- [x] Atualizar `CHANGELOG.md`.
+- [ ] Confirmar CI final verde da branch após documentação.
+- [ ] Comparar branch final com `main`.
+- [ ] Integrar por fast-forward sem force.
 - [ ] Confirmar CI de `main` no SHA integrado.
-- [ ] Confirmar GitHub Pages no SHA integrado.
-- [ ] Fechar a documentação como publicada.
+- [ ] Confirmar GitHub Pages no mesmo SHA.
 
-## P1 — Validação física de `75-catalog1`
+## P1 — Validação física iPhone/Safari/PWA
 
-- [ ] iPhone/Safari/PWA: confirmar cache `-catalog1` e montagem única do Catálogo visual.
-- [ ] Testar categorias, filtros e contador de produtos/imagens.
-- [ ] Confirmar crescimento progressivo entre sessões sem duplicação do mesmo `marketId|pid`.
-- [ ] Confirmar fotografia correta por PID em Continente e Pingo Doce.
-- [ ] Confirmar fallback limpo quando não existe fotografia validada.
-- [ ] Confirmar **Ver preço atual** a disparar a pesquisa viva, sem preço armazenado.
-- [ ] Confirmar nenhuma alteração a preço, quantidade ou estado financeiro ao navegar pelo catálogo.
-- [ ] Confirmar suspensão automática offline, página oculta e `Save-Data`.
-- [ ] Validar rede lenta e URLs de imagem falhadas.
-- [ ] 320/350/375/390/430 px: sem overflow; tablet/desktop: grelha e foco corretos.
-- [ ] Tema escuro: contraste e fallback legíveis.
-- [ ] Medir crescimento real após várias sessões; não declarar cobertura integral sem dados.
+- [ ] Confirmar instalação do cache `pd-photo1-photo-loader1`.
+- [ ] Entrar em Mercado e verificar feedback imediato **A carregar fotografia…**.
+- [ ] Confirmar que imagens já guardadas aparecem praticamente de imediato.
+- [ ] Confirmar substituição do skeleton pela fotografia sem layout shift relevante.
+- [ ] Confirmar que Pingo Doce nunca recebe fotografia de outro PID.
+- [ ] Confirmar que Continente não é afetado pela biblioteca dedicada.
+- [ ] Confirmar rede lenta sem bloqueio da página.
+- [ ] Confirmar offline parcial com cartões utilizáveis.
+- [ ] Confirmar `Save-Data` sem enriquecimento automático.
+- [ ] Confirmar tema escuro e reduced motion.
+- [ ] Confirmar ausência de overflow horizontal.
+- [ ] Confirmar valores financeiros idênticos antes/depois.
+
+## P1 — Cobertura do catálogo
+
+- [ ] Medir SKUs Pingo Doce indexados após 1 sessão.
+- [ ] Medir SKUs após vários dias de uso normal.
+- [ ] Identificar categorias com baixo recall e acrescentar termos apenas quando necessário.
+- [ ] Revalidar URLs marcadas `missing` numa futura política de retry com backoff.
+- [ ] Avaliar fonte oficial/autorizada exaustiva caso venha a existir.
+- [ ] Não declarar “100% do catálogo” sem prova de cobertura exaustiva.
+
+## P2 — Consolidação
+
+- [ ] Após validação real, avaliar absorção das camadas estáveis no sistema visual consolidado.
+- [ ] Remover CSS/JS histórico apenas com prova de ausência de referências.
+- [ ] Manter documentação sincronizada em cada alteração relevante.
