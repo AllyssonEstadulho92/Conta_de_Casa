@@ -35,10 +35,10 @@ Atualizado: 9 de setembro de 2026
 - [x] Criar `tests/v75-market-featured.test.cjs`.
 - [x] Atualizar CI e Pages para sintaxe e teste da nova camada.
 - [x] Atualizar documentação técnica obrigatória.
-- [ ] Confirmar CI completo verde na branch `fix/v75-featured-prototype`.
-- [ ] Integrar a revisão validada em `main`.
-- [ ] Confirmar CI de `main` no SHA final.
-- [ ] Confirmar GitHub Pages concluído sobre o SHA final.
+- [x] Confirmar CI completo verde na branch `fix/v75-featured-prototype`.
+- [x] Integrar a revisão validada em `main`.
+- [x] Confirmar CI de `main` no SHA funcional `998bb19476e175647d4aad395008b8188e9c13f1`.
+- [x] Confirmar GitHub Pages concluído sobre o mesmo SHA funcional.
 
 ## P1 — Validação física de `75-featured1`
 
