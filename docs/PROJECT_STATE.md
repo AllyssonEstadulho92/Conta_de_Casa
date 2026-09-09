@@ -15,7 +15,7 @@ URL pública: `https://allyssonestadulho92.github.io/Conta_de_Casa/`
 
 A aplicação mantém arquitetura PWA estática/local-first, com estado financeiro em IndexedDB, valores em cêntimos, cofre PBKDF2-SHA-256 + AES-GCM, sincronização GitHub opcional apenas sobre envelope cifrado e `STATE_VERSION = 5`.
 
-A revisão `75-featured1` mantém o bloco móvel **Produtos em destaque** em carrossel largo e alinhado com o protótipo. A nova revisão `75-image-library1` acrescenta uma biblioteca persistente separada para fotografias oficiais do Mercado, sem alterar o estado financeiro.
+A revisão `75-featured1` mantém o bloco móvel **Produtos em destaque** em carrossel largo e alinhado com o protótipo. A revisão `75-image-library1` está integrada em `main` e publicada por GitHub Pages, acrescentando uma biblioteca persistente separada para fotografias oficiais do Mercado, sem alterar o estado financeiro.
 
 ## Biblioteca de imagens `75-image-library1`
 
@@ -74,7 +74,7 @@ A navegação móvel continua **Início / Despesas / Mercado / Planeamento / Mai
 
 A nova base IndexedDB é exclusivamente para metadados de imagens oficiais do Mercado.
 
-## Versionamento público esperado
+## Versionamento público
 
 - build: `v75`;
 - UI base: `74-ui1`;
@@ -88,11 +88,11 @@ A nova base IndexedDB é exclusivamente para metadados de imagens oficiais do Me
 - drawer visual: `75-drawer2`;
 - destaques Mercado: `75-featured1`;
 - biblioteca imagens: `75-image-library1`;
-- cache esperado: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1`.
+- cache: `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1`.
 
 `market-image-library.js?v=75-image-library1` integra a allowlist Pages e o Service Worker.
 
-## QA
+## QA e publicação
 
 Foi criado `tests/market-image-library.test.cjs`, cobrindo:
 
@@ -104,7 +104,14 @@ Foi criado `tests/market-image-library.test.cjs`, cobrindo:
 - distribuição e ordem do asset no bundle;
 - cache versionado.
 
-O CI da branch `feat/v75-market-image-library` passou integralmente no SHA `6d48c2d300e20343a1abaf7046f8f59e78a2181f`, incluindo o novo teste da biblioteca, testes financeiros, segurança, responsividade e sincronização.
+Validação confirmada:
+
+- CI final da branch `feat/v75-market-image-library`: sucesso no SHA `5f7b051c2b767c71581b4dc86054f502629a54cd`;
+- integração em `main`: fast-forward no mesmo SHA;
+- CI de `main`: sucesso no mesmo SHA;
+- GitHub Pages: deploy concluído com sucesso sobre o mesmo SHA.
+
+Os testes incluíram finanças, auditoria, contagem, isolamento, datas, faturas, QR, Mercado, imagens, barcode, arquitetura v75, segurança, responsividade, navegação, acessibilidade e sincronização.
 
 ## Validação manual necessária
 
@@ -119,4 +126,4 @@ No iPhone/Safari/PWA, confirmar:
 
 ## Próximo passo
 
-Integrar `75-image-library1` em `main` depois da documentação e do CI final, publicar por GitHub Pages e validar a reutilização de fotografias em dispositivo real.
+Validar `75-image-library1` fisicamente no iPhone/Safari/PWA com pesquisas repetidas de SKUs reais do Continente e Pingo Doce. Depois, se for necessária cobertura antecipada de um catálogo muito maior, avaliar uma fonte oficial/autorizada exaustiva em vez de fazer crawling massivo dos sites dos retalhistas.
