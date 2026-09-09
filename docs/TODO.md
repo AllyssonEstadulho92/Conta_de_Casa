@@ -58,7 +58,7 @@ Evidência física: Safari/iPhone apresenta **“Um problema ocorreu repetidamen
 - [x] Atualizar `ARCHITECTURE.md`.
 - [x] Atualizar `DECISIONS.md`.
 - [x] Atualizar `TODO.md`.
-- [ ] Atualizar `CHANGELOG.md`.
+- [x] Atualizar `CHANGELOG.md`.
 - [ ] Confirmar CI verde da branch `fix/v75-market-safari-crash`.
 - [ ] Comparar branch final com `main` e confirmar `behind 0`.
 - [ ] Integrar por fast-forward sem force.
