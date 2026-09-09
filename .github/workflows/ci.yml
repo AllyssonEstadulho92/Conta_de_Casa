@@ -49,6 +49,7 @@ jobs:
           node --check market-catalog-image-resolver.js
           node --check market-visual-catalog.js
           node --check pingo-doce-photo-library.js
+          node --check pingo-doce-library-view.js
           node --check market-photo-loader.js
           node --check v64-runtime.js
           node --check v74-experience.js
@@ -108,6 +109,9 @@ jobs:
 
       - name: Pingo Doce progressive photo library tests
         run: node tests/pingo-doce-photo-library.test.cjs
+
+      - name: Pingo Doce library view tests
+        run: node tests/pingo-doce-library-view.test.cjs
 
       - name: Market photo loader tests
         run: node tests/market-photo-loader.test.cjs
