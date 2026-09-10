@@ -5,7 +5,7 @@ Build publicado: `v75`
 Programa técnico em preparação: `v76` — TypeScript  
 Distribuição: GitHub Pages / PWA
 
-Revisões integradas: `75-usability1`, `75-pages1`, `75-assets1`, `75-startup2`, `75-catalog4`, `75-photo-loader3`, `75-market1`. Revisão visual em PR: `75-expenses1`.
+Revisões integradas: `75-usability1`, `75-pages1`, `75-assets1`, `75-startup2`, `75-catalog4`, `75-photo-loader3`, `75-market1`, `75-expenses1`.
 
 ## 1. Invariantes
 
@@ -39,7 +39,7 @@ Ordem conceptual relevante:
 2. experiência e componentes v74;
 3. arquitetura/cabeçalho/estabilidade/layout/drawer v75;
 4. `v75-pages.css` — Início, Despesas e Planeamento;
-5. `v75-expenses-modern.css` — refinamento visual exclusivo de Despesas, quando `75-expenses1` estiver integrado;
+5. `v75-expenses-modern.css` — refinamento visual exclusivo de Despesas (`75-expenses1`);
 6. `asset-loader.css` — estados genéricos de assets;
 7. componentes especializados do Mercado, incluindo catálogo e `market-photo-loader.css/js`;
 8. `v75-market-flow.css` — refinamento de pesquisa, filtros e fluxo de compra;
@@ -56,7 +56,7 @@ Drawer/desktop acrescenta Relatórios, Metas, Segurança e Diagnóstico. `v75-ar
 
 ## 5. Início, Despesas e Planeamento
 
-`75-pages1` é apenas apresentação. Despesas usa a vista canónica de `renderBills()`/`filterBills()` também no mobile, com Lista/Calendário, filtros, resumo e cartões. Planeamento continua a usar `renderPlanning()` para saldo, orçamento, conciliação e rendimentos. Início continua a derivar métricas do núcleo existente.
+`75-pages1` é apenas apresentação. Despesas usa a vista canónica de `renderBills()`/`filterBills()` também no mobile, com Lista/Calendário, filtros, resumo e cartões. `75-expenses1` refina a apresentação dessa mesma vista sem criar outro fluxo funcional. Planeamento continua a usar `renderPlanning()` para saldo, orçamento, conciliação e rendimentos. Início continua a derivar métricas do núcleo existente.
 
 ## 6. Tipografia e ícones
 
@@ -195,7 +195,7 @@ Regras:
 
 `tests/v75-market-flow.test.cjs` verifica isolamento financeiro, distinção de pesquisas, promoção do campo de preço real, qualificação de valores, geometria do browser, `marketId|pid`, PID, loader especializado, scanner e bundle Pages.
 
-Para `75-expenses1`, `scripts/prepare-pages.cjs` publica `v75-expenses-modern.css?v=75-expenses1`, `sw.js` inclui o asset/cache e `tests/v75-expenses-modern.test.cjs` valida isolamento, composição e responsividade. A ordem exigida é `v75-pages.css → v75-expenses-modern.css → v75-usability.css`.
+`75-expenses1` está integrado pelo PR #73 no commit `176450fcb236a2272afb9d6a6983b42681aa705d`. `scripts/prepare-pages.cjs` publica `v75-expenses-modern.css?v=75-expenses1`, `sw.js` inclui o asset/cache e `tests/v75-expenses-modern.test.cjs` valida isolamento, composição e responsividade. A ordem é `v75-pages.css → v75-expenses-modern.css → v75-usability.css`. CI de `main` `34496500755`, TypeScript Foundation `34496500641` e Pages `34496540096` concluíram com sucesso.
 
 Validação física permanece necessária em Safari/PWA, Android/Chrome, tablet e desktop.
 
