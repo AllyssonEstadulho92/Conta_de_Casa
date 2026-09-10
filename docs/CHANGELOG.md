@@ -42,10 +42,12 @@ Não foram alterados `core.js`, `finance.js`, `render.js`, `forms.js`, `events.j
 - `sw.js` inclui o novo asset e invalida o cache com `expenses1`;
 - criado `tests/v75-expenses-modern.test.cjs`;
 - CI e Pages executam o novo teste;
-- PR #73 aberto;
-- CI do PR no head `4013d05af84c4af2367c823a597ee42f41b8cb5a`: run `34495879773` — sucesso;
-- TypeScript Foundation no mesmo head: run `34495879840` — sucesso;
-- a branch estava `behind 0` relativamente a `main` antes das atualizações documentais de preservação;
+- PR #73 integrado por squash como `176450fcb236a2272afb9d6a6983b42681aa705d`;
+- CI final do PR `34496437909`: sucesso;
+- TypeScript Foundation final do PR `34496437836`: sucesso;
+- CI de `main` `34496500755`: sucesso;
+- TypeScript Foundation de `main` `34496500641`: sucesso;
+- GitHub Pages `34496540096`: sucesso;
 - validação física permanece pendente em Safari/PWA, mobile, tablet, desktop e tema escuro.
 
 ---
