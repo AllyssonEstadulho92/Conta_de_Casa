@@ -67,11 +67,13 @@ Atualizado: 10 de setembro de 2026
 
 ### QA antes de integrar Bloco 1
 
-- [ ] Abrir PR do Bloco 1.
-- [ ] Confirmar `npm run typecheck` verde no GitHub Actions.
-- [ ] Confirmar CI legado verde no PR.
-- [ ] Comparar branch com `main` e confirmar `behind 0`.
-- [ ] Confirmar que `scripts/prepare-pages.cjs` continua a publicar o runtime JavaScript v75 sem novos `.ts`.
+- [x] Abrir PR #72 do Bloco 1.
+- [x] Confirmar `npm run typecheck` verde no GitHub Actions: run `34485339181` no head `58836af7bb53baaadd52d70d633968b9d68ec27e`.
+- [x] Confirmar CI legado verde no PR: run `34485339056` no mesmo head.
+- [x] Comparar branch com `main` e confirmar `behind 0` antes da atualização documental final.
+- [x] Confirmar que `scripts/prepare-pages.cjs` continua a publicar o runtime JavaScript v75 sem novos `.ts`.
+- [ ] Confirmar novamente typecheck + CI no head documental final do PR #72.
+- [ ] Confirmar novamente `behind 0` no head final.
 - [ ] Integrar apenas com checks verdes.
 - [ ] Confirmar CI de `main` após integração.
 - [ ] Confirmar que o deploy Pages não sofre alteração funcional no Bloco 1.
