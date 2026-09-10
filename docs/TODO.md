@@ -7,7 +7,7 @@ Atualizado: 10 de setembro de 2026
 - [x] Manter `STATE_VERSION = 5`, IndexedDB financeiro e valores em cêntimos.
 - [x] Preservar PBKDF2-SHA-256 + AES-GCM.
 - [x] Manter `PBKDF2_ITERATIONS = 250000`.
-- [x] Não alterar cálculos, faturas, pagamentos, QR, scanner ou sync por correções visuais.
+- [x] Não alterar cálculos, faturas, pagamentos, QR, scanner ou sync por correções visuais/versionamento.
 - [x] Preservar `estimatedCents` separado de `actualCents`.
 - [x] Preservar `marketId|pid` no pipeline especializado.
 
@@ -23,43 +23,36 @@ Atualizado: 10 de setembro de 2026
 - [x] `75-expenses1`.
 - [x] Fundação TypeScript — PR #72.
 - [x] `76-veggie-menu1` — PR #74.
-- [x] `76-veggie-menu2` + `76-modern-ui1` — PR #76, merge `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
+- [x] `76-veggie-menu2` + `76-modern-ui1` — PR #76.
 
-## P0 — `76-veggie-menu2` + `76-modern-ui1`
+## P0 — `76-version-audit1`
 
-### Implementação
+### Auditoria e correção
 
-- [x] Rever captura física iPhone/Safari.
-- [x] Separar regressão do menu de regressão da topbar.
-- [x] Manter exatamente duas linhas no Veggie Burger.
-- [x] Animar as duas linhas explicitamente em TypeScript/Web Animations API.
-- [x] Superior `+45°`; inferior `-45°`; ambas visíveis.
-- [x] Manter um único `#mobileMenuBtn`.
-- [x] Manter botão fora da shell transformada durante drawer/swipe.
-- [x] Revogar topbar sticky no mobile.
-- [x] Colocar `.topbar` em fluxo normal e remover padding de header fixo.
-- [x] Criar `v76-modern-ui.css` como camada visual final.
-- [x] Modernizar Início, Despesas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições.
-- [x] Modernizar dialogs, drawer, tabs, formulários, estados vazios e bottom nav.
-- [x] Preservar tema escuro, reduced-motion, forced-colors, foco e alvos tácteis.
+- [x] Comparar o Centro de Atualização com o padrão implementado no Foco Jornada.
+- [x] Confirmar erro: retorno por release igual ocorria antes de `registration.update()`.
+- [x] Separar versão da aplicação, release pública e build exato.
+- [x] Usar `package.json.version` como Application Version: `0.76.0-dev.1`.
+- [x] Preservar release pública `v75` sem promoção artificial.
+- [x] Injetar Build ID Git curto e Build Date no HTML distribuído.
+- [x] Mostrar versão, release, build, data, PWA/Web, Service Worker e rede em `Versão e Atualizações`.
+- [x] Garantir que `registration.update()` ocorre antes da conclusão “atualizado”.
+- [x] Permitir deteção de Service Worker novo dentro da mesma release.
+- [x] Manter instalação explícita por `APPLY_UPDATE`.
+- [x] Adicionar `v76-version-about.css` à distribuição/cache.
+- [x] Atualizar regressão em `tests/app-update.test.cjs`.
+- [x] CI final da branch `34539811658`: sucesso.
+- [ ] PR para `main`: CI + TypeScript strict verdes.
+- [ ] Integrar em `main`.
+- [ ] Confirmar CI + TypeScript de `main`.
+- [ ] Confirmar GitHub Pages.
+- [ ] Validar fisicamente no iPhone/Safari/PWA o cartão de versão e a verificação manual.
 
-### Build/QA
+### Riscos de governação
 
-- [x] Publicar `76-veggie-menu2` e `76-modern-ui1` pela allowlist de Pages.
-- [x] Atualizar Service Worker/cache para `veggie-menu2-modern-ui1`.
-- [x] Atualizar `tests/v76-veggie-menu.test.cjs`.
-- [x] Criar `tests/v76-modern-ui.test.cjs`.
-- [x] Adicionar testes ao CI e gate de Pages.
-- [x] CI da branch `34537274602`: sucesso.
-- [x] TypeScript PR `34537361127`: sucesso.
-- [x] CI PR `34537361274`: sucesso.
-- [x] Confirmar branch `behind 0` antes do merge.
-- [x] Integrar PR #76.
-- [x] TypeScript main `34537430909`: sucesso.
-- [x] CI main `34537430967`: sucesso.
-- [x] GitHub Pages `34537469989`: sucesso.
+- [ ] Avaliar proteção da branch `main`; encontra-se atualmente sem branch protection.
 
-### Validação física pós-publicação
+## P0 — validação física `76-veggie-menu2` + `76-modern-ui1`
 
 - [ ] iPhone/Safari/PWA: duas linhas visíveis no estado fechado.
 - [ ] Toque: animação contínua duas linhas → X.

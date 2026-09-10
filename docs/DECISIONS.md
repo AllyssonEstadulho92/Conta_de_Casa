@@ -69,8 +69,6 @@ Estado: integrado pelo PR #76.
 4. Bottom navigation pode continuar persistente porque é navegação global.
 5. Safe areas, acessibilidade e alvos tácteis permanecem obrigatórios.
 
-Fundamento: a captura física demonstrou que o header preso ao viewport competia com o conteúdo e quebrava a composição.
-
 ## D-070 — UI/UX master é última camada visual transversal e isolada
 
 Estado: integrado pelo PR #76 como `76-modern-ui1`.
@@ -83,15 +81,36 @@ Estado: integrado pelo PR #76 como `76-modern-ui1`.
 6. Tema escuro, reduced-motion, forced-colors, pinch-to-zoom e alvos tácteis permanecem requisitos.
 7. Camadas antigas só podem ser consolidadas após validação física e prova de ausência de regressão.
 
-## Evidência da integração
+## D-071 — versão, release e build são identidades separadas; atualização verifica o build real
 
-PR #76 integrado como `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
+Data: 10 de setembro de 2026. Estado: aceite para `76-version-audit1`.
 
-- TypeScript PR `34537361127`: sucesso;
-- CI PR `34537361274`: sucesso;
-- TypeScript main `34537430909`: sucesso;
-- CI main `34537430967`: sucesso;
-- Pages `34537469989`: sucesso.
+### Facto que originou a decisão
+
+O Centro de Atualização anterior terminava a verificação quando `release-manifest.latestVersion` era igual ao `app-build` instalado. Como `registration.update()` ficava depois desse retorno, uma compilação nova dentro da mesma release podia ser apresentada como inexistente.
+
+### Decisão
+
+1. `package.json.version` é a fonte da **versão da aplicação**, atualmente `0.76.0-dev.1`.
+2. `app-build`/`release-manifest.json` continuam a representar a **release pública**, atualmente `v75`.
+3. Cada compilação pública recebe **Build ID** de 7 caracteres derivado do SHA Git e **Build Date** ISO.
+4. `scripts/prepare-pages.cjs` injeta os quatro metadados no HTML publicado: aplicação, release, build e data.
+5. A UI `Versão e Atualizações` deve apresentar estas identidades sem as confundir.
+6. A verificação manual deve executar `registration.update()` antes de concluir que não há atualização.
+7. Igualdade de número de release não é evidência suficiente para afirmar que o build está atualizado.
+8. A aplicação de um Service Worker em espera permanece dependente de ação explícita do utilizador.
+9. Este mecanismo não pode ler, alterar ou transmitir estado financeiro, PIN, cofre ou envelope cifrado.
+10. Não promover automaticamente `v75` para `v76`; isso exige decisão/release formal separada.
+
+### Fundamento
+
+O Foco Jornada já separa versão visível de identidade de compilação e força a revalidação real do Service Worker. Adotar o mesmo princípio no Conta de Casa elimina o falso negativo sem alterar a arquitetura local-first nem o domínio financeiro.
+
+## Evidência recente
+
+UI/UX PR #76 integrado como `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`; TypeScript, CI e Pages tiveram sucesso.
+
+`76-version-audit1`: commit funcional `41cd36b662991fc2f29d5736c2b77621c4649e87`; correção do teste `9d6a923c6f10bda2e7128f48053ad278063634ca`; CI `34539811658` com sucesso.
 
 ## Lacuna técnica preservada
 
