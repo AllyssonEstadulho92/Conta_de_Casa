@@ -11,7 +11,7 @@ Atualizado: 10 de setembro de 2026
 - [x] Preservar `estimatedCents` separado de `actualCents` no Mercado.
 - [x] Preservar `marketId|pid` como identidade canónica de SKU/fotografia no pipeline especializado.
 
-## P0 — Revisões v75 integradas
+## P0 — Revisões integradas
 
 - [x] `75-startup2` — abertura pós-PIN sem bloqueio remoto em dispositivo emparelhado.
 - [x] `75-photo-loader3` — estado terminal estável das fotografias.
@@ -20,8 +20,9 @@ Atualizado: 10 de setembro de 2026
 - [x] `75-pages1` — Início, Despesas e Planeamento.
 - [x] `75-assets1` — biblioteca/critério local-first e loader transversal opt-in.
 - [x] `75-market1` — pesquisa, filtros e fluxo de compra do Mercado; PR #71.
-- [x] `75-expenses1` — Despesas/Faturas modernas; PR #73, merge `176450fcb236a2272afb9d6a6983b42681aa705d`.
-- [x] Confirmar CI/TypeScript/Pages após `75-expenses1`: `34496500755`, `34496500641`, `34496540096` — sucesso.
+- [x] `75-expenses1` — Despesas/Faturas modernas; PR #73.
+- [x] fundação TypeScript — PR #72.
+- [x] `76-veggie-menu1` — Veggie Burger/X em TypeScript; PR #74, merge `f196545662b5d120a0dd21b2c498a209cfc144d3`.
 
 ## P0 — v76 Bloco 0 e Bloco 1
 
@@ -32,60 +33,51 @@ Atualizado: 10 de setembro de 2026
 - [x] Integrar fundação TypeScript pelo PR #72.
 - [x] TypeScript como `devDependency`, sem dependências runtime.
 - [x] `tsconfig.json` com `strict`, `strictNullChecks`, `noUncheckedIndexedAccess` e `exactOptionalPropertyTypes`.
-- [x] Criar `src/types/primitives.ts`, `persisted-state.ts`, `market.ts` e `index.ts`.
-- [x] Criar `src/type-tests/contracts.ts`.
+- [x] Criar contratos em `src/types/` e testes de compilação.
 - [x] Criar workflow `.github/workflows/typescript.yml`.
-- [x] Confirmar TypeScript Foundation/CI/Pages de `main` após Bloco 1.
 
 ## P0 — `76-veggie-menu1`: Veggie Burger + X em TypeScript
 
-### Auditoria
+### Auditoria e implementação
 
-- [x] Confirmar que `#mobileMenuBtn` é o controlo canónico.
-- [x] Confirmar que `#drawerCloseBtn` legado já fica oculto para não gerar dois X.
-- [x] Confirmar que `mobile-menu-toggle.js` v73 controla abertura, fecho, swipe, foco e `aria-expanded`.
+- [x] Confirmar `#mobileMenuBtn` como controlo canónico.
+- [x] Confirmar `#drawerCloseBtn` oculto para não gerar dois X.
+- [x] Confirmar `mobile-menu-toggle.js` v73 como controlador de abertura/fecho/swipe/foco/ARIA.
 - [x] Identificar causa do desaparecimento no swipe: botão dentro da `.nav-drawer-shell` transformada.
-- [x] Confirmar que `.topbar` já usa sticky na base e pode ser reforçada no mobile sem mudar navegação.
-
-### Implementação
-
-- [x] Criar branch `feat/v76-typescript-veggie-menu`.
 - [x] Criar `src/ui/veggie-menu-toggle.ts` em TypeScript strict.
-- [x] Implementar Veggie Burger fechado com exatamente duas linhas.
+- [x] Fechado com exatamente duas linhas horizontais.
 - [x] Transformar as mesmas duas linhas em X (`+45°/-45°`).
-- [x] Manter um único `#mobileMenuBtn` para Abrir/Fechar.
-- [x] Preservar `aria-expanded` e `aria-label` do controlador existente.
-- [x] Quando o dialog abre, mover o mesmo botão para filho direto de `#mobileDrawer`, fora da shell transformada.
-- [x] Manter o botão visível durante `data-dragging` e `data-closing`.
-- [x] Reservar espaço na `.drawer-head` para evitar colisão com marca/título.
+- [x] Manter um único `#mobileMenuBtn`.
+- [x] Preservar `aria-expanded` e `aria-label`.
+- [x] Com dialog aberto, mover o mesmo botão para filho direto de `#mobileDrawer` fora da shell transformada.
+- [x] Manter botão visível durante `data-dragging` e `data-closing`.
+- [x] Reservar espaço na `.drawer-head` para evitar colisão.
 - [x] Reforçar topbar sticky no mobile.
 - [x] Implementar `prefers-reduced-motion` e `forced-colors`.
-- [x] Criar runtime browser `v76-veggie-menu.js` derivado da fonte TS.
-- [x] Criar `v76-veggie-menu.css`.
+- [x] Criar runtime browser `v76-veggie-menu.js` e CSS `v76-veggie-menu.css`.
 
 ### Distribuição e QA
 
 - [x] Criar `tests/v76-veggie-menu.test.cjs`.
-- [x] Adicionar syntax check e teste ao CI.
-- [x] Adicionar verificação ao workflow Pages.
+- [x] Adicionar syntax check/teste ao CI e Pages.
 - [x] Publicar CSS/JS pela allowlist de `scripts/prepare-pages.cjs`.
-- [x] Carregar `v76-veggie-menu.js` depois de `mobile-menu-toggle.js`.
-- [x] Adicionar os dois assets ao Service Worker e versionar cache com `veggie-menu1`.
-- [x] Confirmar TypeScript strict no head funcional `95bdacab47b8b97d5f6cf61d52fc492b5a10ceca`: run `34516585121` — sucesso.
-- [x] Confirmar CI completo no mesmo head: run `34516585241` — sucesso.
-- [ ] Confirmar TypeScript + CI novamente no head documental final.
-- [ ] Confirmar branch `behind 0` relativamente a `main` antes do PR.
-- [ ] Abrir PR e integrar apenas com checks verdes.
-- [ ] Confirmar TypeScript + CI de `main` após merge.
-- [ ] Confirmar GitHub Pages no SHA integrado.
+- [x] Carregar runtime TS-derived depois de `mobile-menu-toggle.js`.
+- [x] Adicionar assets ao Service Worker/cache `veggie-menu1`.
+- [x] TypeScript no head final do PR #74: run `34517171997` — sucesso.
+- [x] CI no head final do PR #74: run `34517171967` — sucesso.
+- [x] Confirmar branch `behind 0` antes do merge.
+- [x] Integrar PR #74 em `main`.
+- [x] TypeScript de `main`: run `34517268279` — sucesso.
+- [x] CI de `main`: run `34517268450` — sucesso.
+- [x] GitHub Pages: run `34517324242` — sucesso.
 
-### Validação física
+### Validação física pendente
 
 - [ ] iPhone/Safari/PWA: fechado mostra apenas duas linhas.
 - [ ] Toque: duas linhas convergem para X e regressam sem salto.
 - [ ] Swipe de abertura: botão não desaparece.
 - [ ] Swipe de fecho: botão não desaparece.
-- [ ] X permanece no canto superior direito enquanto o drawer está aberto.
+- [ ] X permanece no canto superior direito do drawer.
 - [ ] Não aparece segundo X.
 - [ ] Cabeçalho permanece fixo durante scroll normal.
 - [ ] Sem colisão entre marca, título e botão.
@@ -131,7 +123,7 @@ Branch reservada: `feat/v76-money-dates`.
 - [ ] Produzir subtotal, descontos, IVA quando determinado, total estimado, total confirmado e diferença.
 - [ ] Reconciliar compra com talão/fatura/QR sem substituir valores silenciosamente.
 - [ ] Guardar origem, instante de observação e validade de preço externo.
-- [ ] Corrigir com teste a lacuna `pid` do browser live antes de o integrar em `marketId|pid`.
+- [ ] Corrigir com teste a lacuna `pid` antes de integrar browser live em `marketId|pid`.
 - [ ] Preferir GTIN/PID a pesquisa por termo para identidade de imagem.
 - [ ] Construir biblioteca progressiva de fotografias sem associar imagem a preço.
 - [ ] Verificar origem/licença de logos de mercados antes de incorporar SVG local.
@@ -144,7 +136,6 @@ Branch reservada: `feat/v76-money-dates`.
 - [ ] Migrar render/forms/events com tipos DOM e guards de `null`.
 - [ ] Migrar Service Worker/build apenas depois de pipeline TS estável.
 - [ ] Remover JavaScript legado somente com prova de ausência de referências.
-- [ ] Ativar `strict` para toda a árvore TypeScript.
 - [ ] Eliminar `any` não justificado.
 - [ ] Revalidar segurança, finanças, sincronização, manifest, offline e responsividade.
 
