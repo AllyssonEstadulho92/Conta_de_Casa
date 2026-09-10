@@ -4,7 +4,7 @@ Atualizado: 10 de setembro de 2026
 Build público: `v75`  
 Programa técnico: `v76` — migração incremental TypeScript + revisão UI/UX  
 Branch pública: `main`  
-Branch de trabalho: `fix/v76-menu-flow-modern-ui`  
+HEAD funcional publicado: `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`  
 Distribuição: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
@@ -20,48 +20,38 @@ Distribuição: GitHub Pages / PWA
 - QR, scanner, backup/restauro, PWA e funcionamento offline não podem regredir por mudanças visuais;
 - alterações UI/UX não podem modificar cálculos, pagamentos, faturas, persistência ou segurança.
 
-## 2. Base integrada em `main`
+## 2. Estado integrado em `main`
 
 - `75-market1` — Mercado;
 - `75-expenses1` — Despesas/Faturas;
 - fundação TypeScript — PR #72;
 - `76-veggie-menu1` — PR #74;
-- documentação de publicação — PR #75.
+- `76-veggie-menu2` + `76-modern-ui1` — PR #76, merge `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
 
-## 3. Evidência física recebida em iPhone/Safari
+## 3. Problemas confirmados por validação física
 
-A captura real de 10/09/2026 mostrou duas regressões de apresentação:
+Captura real em iPhone/Safari mostrou:
 
-1. o Veggie Burger fechado aparece, mas a transição ao abrir não é percebida de forma fiável;
-2. a topbar mantida sticky/fixa entra em conflito com o fluxo do conteúdo durante scroll, produzindo uma composição visual incoerente.
+1. o Veggie Burger fechado aparecia, mas a transição ao abrir não era percebida de forma fiável;
+2. a topbar sticky/fixa permanecia no viewport durante scroll e quebrava o fluxo visual;
+3. as páginas necessitavam de uma linguagem visual transversal mais consistente.
 
-A mesma captura confirmou que o conteúdo funcional continua presente: conciliação, resumo mensal, ações rápidas, categorias e navegação inferior.
+## 4. Correção publicada
 
-## 4. Candidato atual — `76-veggie-menu2` + `76-modern-ui1`
+### `76-veggie-menu2`
 
-### Menu
+- fonte `src/ui/veggie-menu-toggle.ts` em TypeScript strict;
+- duas barras horizontais no estado fechado;
+- animação explícita por Web Animations API;
+- barra superior termina em `+45°` e inferior em `-45°`;
+- ambas permanecem visíveis durante a transformação;
+- continua a existir apenas um `#mobileMenuBtn`;
+- com drawer aberto, o botão fica fora da `.nav-drawer-shell` transformada para não desaparecer no swipe;
+- `prefers-reduced-motion` e `forced-colors` preservados.
 
-`src/ui/veggie-menu-toggle.ts` passa a animar explicitamente as duas linhas por Web Animations API:
+### `76-modern-ui1`
 
-- fechado: duas linhas horizontais;
-- aberto: superior `+45°`, inferior `-45°`;
-- ambas mantêm `opacity: 1` durante a transição;
-- o mesmo `#mobileMenuBtn` continua canónico;
-- o botão permanece fora da `.nav-drawer-shell` transformada enquanto o drawer está aberto;
-- `prefers-reduced-motion` permanece suportado.
-
-### Cabeçalho
-
-`v76-modern-ui.css` remove a política fixa/sticky no mobile:
-
-- `.topbar` volta ao fluxo normal com `position: relative`;
-- `.main` deixa de reservar padding fantasma para um header fixo;
-- o conteúdo começa depois do cabeçalho sem sobreposição;
-- o cabeçalho mantém identidade teal, hierarquia e alvo táctil adequado.
-
-### Sistema visual master
-
-Criado `v76-modern-ui.css` como última camada visual transversal, cobrindo explicitamente:
+Nova última camada visual transversal `v76-modern-ui.css`, cobrindo:
 
 - Início;
 - Despesas;
@@ -73,48 +63,42 @@ Criado `v76-modern-ui.css` como última camada visual transversal, cobrindo expl
 - Segurança;
 - Diagnóstico;
 - Definições;
-- dialogs;
-- drawer;
-- bottom navigation;
-- estados vazios, formulários, botões, tabs e superfícies.
+- dialogs, drawer, bottom navigation, tabs, formulários e estados vazios.
 
-O sistema introduz tokens coerentes para superfícies, contraste, bordas, sombras, raios, estados, foco e espaçamento. Mantém tema escuro, `prefers-reduced-motion` e `forced-colors`.
+No mobile, a `.topbar` passou para fluxo normal (`position: relative`) e `.main` deixou de reservar espaço para um header fixo. A navegação inferior permanece persistente em formato dock.
 
-## 5. Distribuição
+## 5. Isolamento
 
-`scripts/prepare-pages.cjs` foi preparado para:
+A revisão não altera `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, schema, IndexedDB, PIN, PBKDF2, AES-GCM, backup, sincronização, QR, scanner ou CSP.
 
-- publicar `v76-veggie-menu.css/js?v=76-veggie-menu2`;
-- publicar `v76-modern-ui.css?v=76-modern-ui1` depois de `v75-usability.css`;
-- manter todos os módulos funcionais atuais em JavaScript durante a migração incremental.
+## 6. QA publicado
 
-`sw.js` inclui o novo asset e invalida o cache em `veggie-menu2-modern-ui1`.
+PR #76:
 
-## 6. QA atual
+- TypeScript Foundation `34537361127`: **sucesso**;
+- CI `34537361274`: **sucesso**;
+- branch estava `behind 0` antes do merge.
 
-Branch `fix/v76-menu-flow-modern-ui`, head funcional validado antes da documentação:
+Após merge em `main` (`6323b0a9...`):
 
-- CI push `34537017339`: **sucesso**;
-- `v76 Veggie Burger TypeScript tests`: sucesso;
-- `v76 master UI tests`: sucesso;
+- TypeScript Foundation `34537430909`: **sucesso**;
+- CI `34537430967`: **sucesso**;
+- GitHub Pages `34537469989`: **sucesso**;
+- testes específicos `v76 Veggie Burger TypeScript tests` e `v76 master UI tests`: sucesso;
 - regressões de finanças, faturas, Mercado, scanner, segurança, responsividade, acessibilidade, sincronização e manifest: sucesso.
 
-TypeScript strict será confirmado novamente pelo workflow de pull request antes do merge.
+## 7. Validação física ainda necessária
 
-## 7. Riscos e limites
+Depois de receber o novo cache/PWA no iPhone:
 
-- testes automáticos não substituem validação física em Safari/iPhone;
-- o redesign é CSS e não muda a lógica de negócio;
-- a topbar deixa deliberadamente de acompanhar o scroll no mobile porque a evidência física mostrou que isso prejudicava a arquitetura visual;
-- a navegação inferior continua fixa por ser controlo persistente de navegação, mas passa a formato dock compacto.
+- confirmar animação duas linhas ↔ X;
+- confirmar swipe sem desaparecimento do botão;
+- confirmar que o header rola normalmente e não fica preso no viewport;
+- confirmar que bottom navigation não tapa ações;
+- validar Início, Despesas, Mercado, Planeamento e Mais;
+- validar restantes páginas em 320/375/390/430 px, tablet e desktop;
+- validar tema claro/escuro e orientação vertical/horizontal.
 
 ## 8. Próximo passo
 
-1. atualizar os cinco documentos permanentes;
-2. comparar branch com `main` e confirmar ausência de regressões não intencionais;
-3. abrir PR;
-4. exigir CI + TypeScript strict verdes;
-5. integrar apenas com checks verdes;
-6. confirmar CI + TypeScript + Pages no SHA integrado;
-7. validar fisicamente em iPhone/Safari o menu, scroll e todas as páginas principais;
-8. só depois retomar `feat/v76-money-dates`.
+Após validação física de `76-modern-ui1`, corrigir apenas regressões comprovadas e depois retomar `feat/v76-money-dates` para o Bloco 2 da migração TypeScript.
