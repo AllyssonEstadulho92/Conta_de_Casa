@@ -2,7 +2,7 @@
 
 O histórico integral de commits e versões permanece no Git. Este ficheiro mantém as alterações relevantes para continuidade técnica.
 
-## 2026-09-11 — v76 `76-mobile-shell2` — correção estrutural mobile
+## 2026-09-11 — v76 `76-mobile-shell2` — publicado
 
 ### Evidência física
 
@@ -33,12 +33,14 @@ A aplicação tinha uma arquitetura de viewport mista. `mobile-layout.css` ainda
 
 A versão de programa permanece `0.76.0-dev.1` e a release pública permanece `v75`. Esta correção é distinguida pelo Build ID, conforme o modelo de versionamento já adotado.
 
-### QA
+### QA e publicação
 
 - `tests/v76-mobile-shell.test.cjs`: sucesso;
-- primeira CI `34541749424`: o shell passou, mas a suite parou porque a branch tinha sido temporariamente avançada para `0.76.0-dev.2` enquanto o teste de versionamento preservava `0.76.0-dev.1`;
-- corrigido mantendo `0.76.0-dev.1` e usando Build ID como identidade da compilação;
-- CI funcional final antes da documentação `34541849503`: sucesso integral.
+- CI funcional da branch `34541849503`: sucesso integral;
+- PR #80 integrado em `main` no commit `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`;
+- TypeScript Foundation de `main` `34542259212`: sucesso;
+- CI de `main` `34542259148`: sucesso;
+- GitHub Pages `34542303536`: sucesso.
 
 ### Isolamento
 
@@ -46,7 +48,7 @@ Não foram alterados `core.js`, `finance.js`, `render.js`, `forms.js`, `events.j
 
 ### Pendente
 
-Validação física pós-publicação no iPhone/Safari/PWA, incluindo 320/375/390/430 px e scroll até ao último item.
+Validação física da compilação publicada no iPhone/Safari/PWA, incluindo 320/375/390/430 px e scroll até ao último item.
 
 ---
 
