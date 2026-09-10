@@ -1,6 +1,6 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 10 de setembro de 2026  
+Atualizado: 11 de setembro de 2026  
 Versão da aplicação: `0.76.0-dev.1`  
 Release pública: `v75`  
 Programa técnico: `v76` — migração incremental TypeScript + UI/UX  
@@ -43,40 +43,32 @@ Ordem visual relevante:
 4. páginas, Despesas e Mercado v75;
 5. `v76-veggie-menu.css` (`76-veggie-menu2`);
 6. `v75-usability.css`;
-7. `v76-modern-ui.css` (`76-modern-ui1`) como última camada visual transversal;
-8. `v76-version-about.css` (`76-version-audit1`) limita-se ao ecrã de versão/atualizações e usa os tokens v76 existentes.
+7. `v76-modern-ui.css` (`76-modern-ui1`) — design system transversal;
+8. `v76-mobile-shell.css` (`76-mobile-shell2`) — autoridade final da geometria em ≤820 px;
+9. `v76-version-about.css` (`76-version-audit1`) — apresentação específica do Centro de Versão.
+
+A ordem de `v76-mobile-shell.css` depois de `v76-modern-ui.css` é deliberada: o design system define aparência; o shell final define apenas viewport, safe areas, scroll e reserva da navegação persistente.
 
 ## 4. Modelo de versionamento
 
-O versionamento tem dimensões explícitas, sem conflitar semver com a release pública:
-
 - **Application Version**: `package.json.version`, atualmente `0.76.0-dev.1`;
 - **Public Release**: `BUILD`/`release-manifest.json`, atualmente `v75`;
-- **Build ID**: primeiros 7 caracteres do SHA Git do código efetivamente compilado;
+- **Build ID**: primeiros 7 caracteres do SHA Git do código compilado;
 - **Build Date**: data ISO gerada no processo de preparação do Pages.
 
-`scripts/prepare-pages.cjs` injeta no `dist/index.html`:
-
-- `meta[name="app-version"]`;
-- `meta[name="app-build"]`;
-- `meta[name="app-build-id"]`;
-- `meta[name="app-build-date"]`.
-
-O Build ID é obtido por `git rev-parse --short=7 HEAD`, com `GITHUB_SHA` como fallback de CI e `local` apenas como fallback final.
+`scripts/prepare-pages.cjs` injeta `app-version`, `app-build`, `app-build-id` e `app-build-date` no HTML público. Alterações dentro da mesma versão de desenvolvimento são distinguidas pelo Build ID, não por aumento artificial da release.
 
 ## 5. Atualizações PWA
 
 `app-update.js` e `sw.js` implementam atualização controlada:
 
-1. o histórico de release é consultado com `cache: no-store`;
-2. `navigator.serviceWorker.getRegistration()` resolve a instalação atual;
-3. a verificação manual chama `registration.update()` **antes** de qualquer conclusão de “atualizado”;
-4. uma release numericamente igual não bloqueia a procura de um Service Worker de build mais recente;
-5. se existir `registration.waiting`, a instalação só avança por `APPLY_UPDATE` após ação explícita;
-6. `controllerchange` provoca reload controlado;
+1. `release-manifest.json` é consultado com `cache: no-store`;
+2. resolve-se a instalação atual por `navigator.serviceWorker.getRegistration()`;
+3. a verificação manual chama `registration.update()` antes de declarar “atualizado”;
+4. uma release igual não bloqueia a procura de um Service Worker mais recente;
+5. um worker em espera só é aplicado por `APPLY_UPDATE` após ação explícita;
+6. `controllerchange` faz reload controlado;
 7. dados financeiros, PIN e cofre não participam deste protocolo.
-
-Esta ordem segue o princípio técnico usado pelo Foco Jornada: versão visível + identidade da compilação + revalidação real do Service Worker.
 
 ## 6. Navegação
 
@@ -84,14 +76,33 @@ Mobile principal:
 
 `Início → Despesas → Mercado → Planeamento → Mais`
 
-O drawer mantém destinos secundários agrupados. Rotas, IDs, permissões e handlers não são substituídos pelo redesign.
+O drawer mantém destinos secundários. Rotas, IDs, permissões e handlers não são substituídos por CSS.
 
-## 7. Cabeçalho mobile
+## 7. Shell móvel — `76-mobile-shell2`
 
-- `.topbar` em fluxo normal com `position: relative`;
-- sem `padding-top` reservado para header fixo;
-- conteúdo começa depois do cabeçalho sem sobreposição;
-- navegação inferior continua persistente por ser navegação global.
+### Problema anterior
+
+Existiam duas decisões incompatíveis em cascata:
+
+- `mobile-layout.css` mantinha `.app-shell` e `.main` com `height/max-height:100dvh`, `overflow:hidden` no shell e scroll interno em `.main`;
+- `76-modern-ui1` já tinha tornado a `.topbar` relativa e no fluxo normal, mas sem revogar integralmente as limitações do viewport e sem repor `safe-area-inset-top`.
+
+Em Safari/iPhone isto produziu clipping real: cabeçalho dentro da status bar e conteúdo final por baixo do dock.
+
+### Arquitetura corrigida
+
+Em ≤820 px, `v76-mobile-shell.css` estabelece:
+
+- `body` como único scroll vertical da aplicação desbloqueada;
+- `.app-shell`: `height:auto`, `min-height:100dvh`, sem `max-height` e sem clipping;
+- `.main`: altura automática, sem scroll container paralelo;
+- `.topbar`: `position:relative`, no fluxo, com `--v76-shell-safe-top=max(24px, env(safe-area-inset-top))`;
+- `.page`: conteúdo elástico e `padding-bottom` calculado por `--v76-shell-nav-reserve`;
+- `.mobile-nav`: continua `position:fixed`, com altura explícita e deslocamento por `safe-area-inset-bottom`;
+- ajustes para ≤390 px, ≤359 px e landscape de baixa altura;
+- `scroll-margin-bottom` em elementos focáveis para não ficarem atrás do dock.
+
+O drawer/dialog continua a usar a sua própria geometria modal; a alteração não interfere no gesto lateral nem no Veggie Burger.
 
 ## 8. Veggie Burger TypeScript — `76-veggie-menu2`
 
@@ -99,43 +110,35 @@ Fonte: `src/ui/veggie-menu-toggle.ts`. Runtime: `v76-veggie-menu.js`.
 
 - fechado: duas barras horizontais;
 - aberto: superior `+45°`, inferior `-45°`;
-- Web Animations API anima explicitamente ambas;
-- as duas barras permanecem visíveis;
-- `#mobileMenuBtn` continua controlo único;
-- `aria-expanded`/`aria-label` continuam associados ao mesmo controlo;
-- com drawer aberto, o botão permanece fora da `.nav-drawer-shell` transformada;
+- Web Animations API anima ambas;
+- `#mobileMenuBtn` é controlo único;
+- `aria-expanded`/`aria-label` preservados;
+- com drawer aberto, o botão permanece fora da shell transformada;
 - reduced-motion e forced-colors preservados.
 
 ## 9. Sistema visual master — `76-modern-ui1`
 
-`v76-modern-ui.css` define tokens transversais para background, superfícies, texto, muted, primary/accent, estados, bordas, sombras, raios e foco.
+`v76-modern-ui.css` define tokens comuns de background, superfícies, texto, muted, primary/accent, estados, bordas, sombras, raios e foco.
 
-Cobertura explícita: Dashboard, Despesas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições, além de tabs, botões, inputs, painéis, tabelas, estados vazios, dialogs, drawer e bottom navigation.
+Cobertura: Dashboard, Despesas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições, além de tabs, botões, inputs, painéis, tabelas, estados vazios, dialogs, drawer e bottom navigation.
 
 ## 10. Segurança
 
-`76-version-audit1`, `76-veggie-menu2` e `76-modern-ui1` não alteram `core.js`, `finance.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sync, QR/scanner, CSP, endpoints ou segredos.
+`76-mobile-shell2`, `76-version-audit1`, `76-veggie-menu2` e `76-modern-ui1` não alteram `core.js`, `finance.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sync, QR/scanner, CSP, endpoints ou segredos.
 
-O novo ecrã de versão não lê nem transmite dados do cofre. A verificação usa apenas `release-manifest.json`, Service Worker e metadados de build da própria distribuição.
+O novo shell é CSS/layout + distribuição/cache; não lê estado financeiro.
 
-## 11. QA e publicação
+## 11. QA
 
-`76-version-audit1` tem regressão específica em `tests/app-update.test.cjs` para:
+`tests/v76-mobile-shell.test.cjs` valida:
 
-- semver da aplicação;
-- metadados version/release/build/date em `dist`;
-- distribuição do CSS de versão;
-- cache do Service Worker;
-- garantia de que `registration.update()` precede a conclusão “não existe atualização pendente”;
-- prevenção do antigo retorno antecipado quando a release é igual.
+- safe area superior/inferior;
+- revogação de `height/max-height:100dvh` e `overflow:hidden` no shell final;
+- scroll de documento;
+- reserva inferior baseada na altura do dock;
+- topbar relativa com compensação da status bar;
+- folha `v76-mobile-shell.css` posterior a `v76-modern-ui.css` no `dist`;
+- allowlist de Pages e Service Worker;
+- ausência de `zoom` CSS.
 
-Integração/publicação:
-
-- PR #78 integrado em `main` como `a68de711df1c42ec33948d3fff2f4d5e337e2436`;
-- TypeScript Foundation do PR `34540211764`: sucesso;
-- CI do PR `34540211775`: sucesso;
-- TypeScript Foundation de `main` `34540271567`: sucesso;
-- CI de `main` `34540271547`: sucesso;
-- GitHub Pages `34540307404`: sucesso.
-
-Validação física pós-publicação continua obrigatória para Safari/iPhone/PWA.
+CI funcional da branch antes da documentação: `34541849503` — sucesso integral. Validação física pós-publicação continua obrigatória para Safari/iPhone/PWA.

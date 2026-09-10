@@ -1,6 +1,6 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 10 de setembro de 2026
+Atualizado: 11 de setembro de 2026
 
 Este ficheiro mantém as decisões vigentes necessárias para continuidade. O histórico detalhado permanece no Git.
 
@@ -69,48 +69,60 @@ Estado: integrado pelo PR #76.
 4. Bottom navigation pode continuar persistente porque é navegação global.
 5. Safe areas, acessibilidade e alvos tácteis permanecem obrigatórios.
 
-## D-070 — UI/UX master é última camada visual transversal e isolada
+## D-070 — UI/UX master é camada visual transversal e isolada
 
 Estado: integrado pelo PR #76 como `76-modern-ui1`.
 
-1. `v76-modern-ui.css` carrega depois de `v75-usability.css` e tem autoridade final apenas sobre apresentação.
+1. `v76-modern-ui.css` define o design system transversal.
 2. Cobre Dashboard, Despesas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições.
 3. Cobre botões, inputs, tabs, tabelas, dialogs, drawer, bottom navigation e estados vazios.
-4. Usa tokens comuns de cor, superfície, borda, raio, sombra, estado e foco.
-5. Não altera handlers, dados, cálculos, IndexedDB, PIN, cifragem, sync, scanner, QR ou CSP.
-6. Tema escuro, reduced-motion, forced-colors, pinch-to-zoom e alvos tácteis permanecem requisitos.
-7. Camadas antigas só podem ser consolidadas após validação física e prova de ausência de regressão.
+4. Não altera handlers, dados, cálculos, IndexedDB, PIN, cifragem, sync, scanner, QR ou CSP.
+5. Tema escuro, reduced-motion, forced-colors, pinch-to-zoom e alvos tácteis permanecem requisitos.
+6. Geometria de viewport móvel pode ser delegada a uma camada posterior específica sem alterar o design system.
 
 ## D-071 — versão, release e build são identidades separadas; atualização verifica o build real
 
-Data: 10 de setembro de 2026. Estado: **integrado em `main` como `76-version-audit1` pelo PR #78**, merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`.
+Data: 10 de setembro de 2026. Estado: integrado em `main` como `76-version-audit1` pelo PR #78, merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`.
 
-### Facto que originou a decisão
+1. `package.json.version` é a fonte da versão da aplicação, atualmente `0.76.0-dev.1`.
+2. `app-build`/`release-manifest.json` representam a release pública, atualmente `v75`.
+3. Cada compilação pública recebe Build ID de 7 caracteres e Build Date ISO.
+4. `scripts/prepare-pages.cjs` injeta aplicação, release, build e data.
+5. `registration.update()` ocorre antes de concluir que não há atualização.
+6. Release igual não prova build igual.
+7. Aplicação de Service Worker em espera continua dependente de ação explícita.
+8. O mecanismo não lê nem transmite estado financeiro, PIN ou cofre.
+9. Não promover `v75` para `v76` sem release formal.
 
-O Centro de Atualização anterior terminava a verificação quando `release-manifest.latestVersion` era igual ao `app-build` instalado. Como `registration.update()` ficava depois desse retorno, uma compilação nova dentro da mesma release podia ser apresentada como inexistente.
+## D-072 — shell móvel tem um único scroll e respeita safe areas
+
+Data: 11 de setembro de 2026. Estado: candidato `76-mobile-shell2` na branch `fix/v76-mobile-shell2`.
+
+### Factos que originaram a decisão
+
+A validação física em iPhone mostrou a topbar a invadir a status bar e o dock inferior a cobrir o final do conteúdo. A revisão do código confirmou uma arquitetura mista: `mobile-layout.css` ainda impunha um viewport interno `100dvh`/`overflow:hidden`, enquanto `76-modern-ui1` já tinha colocado a topbar no fluxo normal.
 
 ### Decisão
 
-1. `package.json.version` é a fonte da **versão da aplicação**, atualmente `0.76.0-dev.1`.
-2. `app-build`/`release-manifest.json` continuam a representar a **release pública**, atualmente `v75`.
-3. Cada compilação pública recebe **Build ID** de 7 caracteres derivado do SHA Git e **Build Date** ISO.
-4. `scripts/prepare-pages.cjs` injeta os quatro metadados no HTML publicado: aplicação, release, build e data.
-5. A UI `Versão e Atualizações` deve apresentar estas identidades sem as confundir.
-6. A verificação manual deve executar `registration.update()` antes de concluir que não há atualização.
-7. Igualdade de número de release não é evidência suficiente para afirmar que o build está atualizado.
-8. A aplicação de um Service Worker em espera permanece dependente de ação explícita do utilizador.
-9. Este mecanismo não pode ler, alterar ou transmitir estado financeiro, PIN, cofre ou envelope cifrado.
-10. Não promover automaticamente `v75` para `v76`; isso exige decisão/release formal separada.
+1. Em ≤820 px, a aplicação desbloqueada usa **um único scroll vertical no documento**.
+2. `.app-shell` e `.main` deixam de impor `max-height:100dvh` ou clipping na camada final.
+3. A topbar continua `position:relative` e recebe compensação explícita de `safe-area-inset-top`.
+4. A bottom navigation pode continuar fixa, mas a altura do dock e `safe-area-inset-bottom` entram obrigatoriamente na reserva inferior das páginas.
+5. `v76-mobile-shell.css` carrega depois de `v76-modern-ui.css` e só tem autoridade sobre geometria de viewport, não sobre domínio ou regras financeiras.
+6. Devem existir ajustes para 320/375/390/430 px e landscape de baixa altura.
+7. Nenhuma solução pode usar `zoom`, bloquear pinch-to-zoom ou esconder conteúdo para fazê-lo caber.
+8. Foco de teclado/touch deve poder ser deslocado acima do dock persistente.
+9. Drawer e dialogs mantêm geometrias próprias e não transferem o scroll principal de volta para `.main`.
 
 ### Fundamento
 
-O Foco Jornada já separa versão visível de identidade de compilação e força a revalidação real do Service Worker. Adotar o mesmo princípio no Conta de Casa elimina o falso negativo sem alterar a arquitetura local-first nem o domínio financeiro.
+Uma única origem de scroll elimina a competição entre header relativo, viewport interno e dock fixo. Safe areas passam a ser parte explícita da geometria, em vez de depender de regras históricas da cascata CSS.
 
 ## Evidência recente
 
-UI/UX PR #76 integrado como `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`; TypeScript, CI e Pages tiveram sucesso.
-
-`76-version-audit1`: PR #78 integrado como `a68de711df1c42ec33948d3fff2f4d5e337e2436`; TypeScript do PR `34540211764`, CI do PR `34540211775`, TypeScript de `main` `34540271567`, CI de `main` `34540271547` e Pages `34540307404`: sucesso.
+- UI/UX PR #76: merge `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
+- `76-version-audit1`: PR #78, merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`; CI/TypeScript/Pages verdes.
+- `76-mobile-shell2`: teste específico passou; CI funcional da branch `34541849503` terminou com sucesso integral antes da documentação.
 
 ## Lacuna técnica preservada
 

@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 10 de setembro de 2026
+Atualizado: 11 de setembro de 2026
 
 ## P0 — Invariantes
 
@@ -26,45 +26,53 @@ Atualizado: 10 de setembro de 2026
 - [x] `76-veggie-menu2` + `76-modern-ui1` — PR #76.
 - [x] `76-version-audit1` — PR #78.
 
+## P0 — `76-mobile-shell2`
+
+### Diagnóstico e implementação
+
+- [x] Confirmar pela captura física que a topbar entra na status bar do iPhone.
+- [x] Confirmar pela captura física que o dock inferior cobre/corta conteúdo final.
+- [x] Identificar conflito entre `mobile-layout.css` (`100dvh` + scroll interno) e `76-modern-ui1` (topbar no fluxo).
+- [x] Criar `v76-mobile-shell.css` como autoridade final da geometria ≤820 px.
+- [x] Mover o scroll principal para o documento e remover clipping final de `.app-shell`/`.main`.
+- [x] Aplicar `safe-area-inset-top` ao cabeçalho.
+- [x] Aplicar `safe-area-inset-bottom` e altura explícita ao dock.
+- [x] Reservar `padding-bottom` de página superior à altura total do dock.
+- [x] Cobrir ≤390 px, ≤359 px e landscape de baixa altura.
+- [x] Preservar pinch-to-zoom; não usar `zoom` CSS.
+- [x] Adicionar `v76-mobile-shell.css` à allowlist Pages e cache PWA.
+- [x] Adicionar `tests/v76-mobile-shell.test.cjs` à CI e ao gate do Pages.
+- [x] CI funcional da branch antes da documentação `34541849503`: sucesso.
+- [ ] Abrir PR e confirmar CI + TypeScript strict.
+- [ ] Integrar em `main`.
+- [ ] Confirmar CI + TypeScript em `main`.
+- [ ] Confirmar GitHub Pages.
+- [ ] Validar fisicamente no iPhone/Safari/PWA.
+
+### Validação física obrigatória
+
+- [ ] Veggie Burger totalmente abaixo da hora/status bar.
+- [ ] Topbar rola com o conteúdo e nunca fica presa no viewport.
+- [ ] Scroll chega ao último cartão/ação sem corte.
+- [ ] Último conteúdo fica integralmente acima do dock.
+- [ ] Bottom nav não corta ícone nem rótulo.
+- [ ] 320/375/390/430 px.
+- [ ] vertical e horizontal.
+- [ ] Safari web e PWA instalada.
+- [ ] Início, Despesas, Mercado, Planeamento e Mais.
+- [ ] Calendário, Relatórios, Objetivos, Segurança, Diagnóstico e Definições.
+
 ## P0 — `76-version-audit1`
 
-### Auditoria e correção
-
-- [x] Comparar o Centro de Atualização com o padrão implementado no Foco Jornada.
-- [x] Confirmar erro: retorno por release igual ocorria antes de `registration.update()`.
+- [x] Corrigir falso “atualizado” antes de `registration.update()`.
 - [x] Separar versão da aplicação, release pública e build exato.
-- [x] Usar `package.json.version` como Application Version: `0.76.0-dev.1`.
-- [x] Preservar release pública `v75` sem promoção artificial.
-- [x] Injetar Build ID Git curto e Build Date no HTML distribuído.
-- [x] Mostrar versão, release, build, data, PWA/Web, Service Worker e rede em `Versão e Atualizações`.
-- [x] Garantir que `registration.update()` ocorre antes da conclusão “atualizado”.
-- [x] Permitir deteção de Service Worker novo dentro da mesma release.
-- [x] Manter instalação explícita por `APPLY_UPDATE`.
-- [x] Adicionar `v76-version-about.css` à distribuição/cache.
-- [x] Atualizar regressão em `tests/app-update.test.cjs`.
-- [x] CI final da branch `34539811658`: sucesso.
-- [x] PR #78: CI `34540211775` + TypeScript strict `34540211764` — sucesso.
-- [x] Integrar em `main`: merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`.
-- [x] Confirmar `main`: CI `34540271547` + TypeScript `34540271567` — sucesso.
-- [x] Confirmar GitHub Pages `34540307404` — sucesso.
+- [x] Application Version `0.76.0-dev.1`; release pública `v75`.
+- [x] PR #78 integrado; CI/TypeScript/Pages verdes.
 - [ ] Validar fisicamente no iPhone/Safari/PWA o cartão de versão e a verificação manual.
 
-### Riscos de governação
+## P0 — Riscos de governação
 
 - [ ] Avaliar proteção da branch `main`; encontra-se atualmente sem branch protection.
-
-## P0 — validação física `76-veggie-menu2` + `76-modern-ui1`
-
-- [ ] iPhone/Safari/PWA: duas linhas visíveis no estado fechado.
-- [ ] Toque: animação contínua duas linhas → X.
-- [ ] Fecho: X → duas linhas sem desaparecimento.
-- [ ] Swipe abertura/fecho sem perda do botão.
-- [ ] Header rola com o conteúdo e não fica preso no viewport.
-- [ ] Conteúdo nunca passa por baixo/por cima da topbar.
-- [ ] Bottom nav não tapa ações finais.
-- [ ] Validar Início, Despesas, Mercado, Planeamento e Mais em 320/375/390/430 px.
-- [ ] Validar Calendário, Relatórios, Objetivos, Segurança, Diagnóstico e Definições.
-- [ ] Validar tablet/desktop, claro/escuro e orientação vertical/horizontal.
 
 ## P0 — v76 Bloco 2: dinheiro, quantidades e datas
 
@@ -107,6 +115,6 @@ Branch reservada: `feat/v76-money-dates`.
 
 ## P2 — Consolidação visual
 
-- [ ] Após validação física de `76-modern-ui1`, medir quais camadas v74/v75 podem ser fundidas.
+- [ ] Após validação física de `76-mobile-shell2`, medir quais camadas v74/v75 podem ser fundidas.
 - [ ] Remover CSS histórico apenas com comparação visual e regressões verdes.
 - [ ] Manter uma única fonte visual final sem quebrar compatibilidade PWA/Safari.
