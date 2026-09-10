@@ -98,7 +98,7 @@ Estado: integrado em `main` como `75-market1` pelo PR #71, commit funcional `c44
 
 ## D-064 — migração para TypeScript será incremental e sem mudança simultânea de runtime
 
-Data: 10 de setembro de 2026. Estado: aceite para o programa `v76`; fundação em `feat/v76-typescript-foundation`.
+Data: 10 de setembro de 2026. Estado: fundação integrada em `main` pelo PR #72, merge `2c1d78508507ab77d6df95850568d9fd7f6b9577`.
 
 ### Decisão
 
@@ -149,9 +149,39 @@ Data: 10 de setembro de 2026. Estado: aceite para v76.
 - não expandir CSP nem introduzir CDN apenas para branding;
 - manter fallback textual/visual enquanto a origem do asset não estiver validada.
 
+## D-067 — modernização de Despesas será uma camada visual isolada
+
+Data: 10 de setembro de 2026. Estado: aceite na branch `feat/v75-expenses-modern-ui` como `75-expenses1`; PR #73.
+
+### Factos
+
+- `#page-bills` já contém Lista/Calendário, pesquisa, filtros completos, resumo, tabela desktop e cartões mobile;
+- `renderBills()` e `filterBills()` já fornecem o fluxo funcional canónico;
+- `billActionsHtml()` mantém Abrir/Detalhes, Editar, Pagar e Excluir conforme o estado;
+- não foi identificado defeito financeiro que justificasse reescrever o domínio para modernizar o layout.
+
+### Decisão
+
+1. `v75-expenses-modern.css` é exclusivamente visual e limitado a `html.cdc-v75 #page-bills`.
+2. Não alterar `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js` nem os IDs canónicos para este redesign.
+3. Modernizar tabs, barra de pesquisa/criação, filtros, resumo, tabela desktop e cartões mobile.
+4. No mobile, manter `Em falta` como foco principal e preservar vencimento, estado, Total, Pago, Categoria, progresso e ações.
+5. Suportar desktop intermédio, `≤820px` e `≤430px`, sem criar uma segunda UI funcional.
+6. Respeitar `prefers-reduced-motion` e `forced-colors`.
+7. Carregar a camada depois de `v75-pages.css` e antes de `v75-usability.css`.
+8. Versionar bundle/cache como `75-expenses1` e proteger a integração com teste próprio.
+
+### Fundamento
+
+A página já tem a lógica necessária e está coberta por regressões. Uma camada CSS isolada reduz a superfície de risco e permite modernizar a experiência sem tocar em cálculos, pagamentos ou persistência.
+
+### Segurança
+
+A revisão não introduz rede, CDN, script, endpoint, token ou segredo. Não altera PIN, PBKDF2, AES-GCM, IndexedDB ou sincronização.
+
 ## Evidência técnica v76 — Bloco 1
 
-Foram adicionados na branch de fundação:
+Foram adicionados e integrados pelo PR #72:
 
 - `package.json` com TypeScript apenas como `devDependency`;
 - `tsconfig.json` estrito e `noEmit`;

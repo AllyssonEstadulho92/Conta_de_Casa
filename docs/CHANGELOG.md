@@ -2,6 +2,54 @@
 
 O histórico integral de commits e versões permanece no Git. Este ficheiro mantém as alterações relevantes para continuidade técnica.
 
+## 2026-09-10 — v75 `75-expenses1` — layout moderno de Despesas
+
+### Objetivo
+
+Modernizar a página de Despesas/Faturas sem alterar cálculos, filtros, dados, pagamentos, segurança ou sincronização.
+
+### Diagnóstico
+
+- a página canónica já possuía Lista/Calendário, pesquisa, filtros completos, resumo, tabela desktop e cartões mobile;
+- `renderBills()`/`filterBills()` já forneciam o comportamento funcional vigente;
+- a necessidade identificada era visual: hierarquia, densidade, alinhamento, legibilidade e adaptação entre desktop/mobile;
+- reescrever lógica financeira para atingir o redesign aumentaria risco sem benefício funcional.
+
+### Alterações
+
+Criado `v75-expenses-modern.css`, revisão `75-expenses1`, integralmente limitado a `html.cdc-v75 #page-bills`:
+
+- Lista/Calendário com controlo segmentado mais limpo;
+- pesquisa e `Nova fatura` numa barra operacional moderna;
+- pesquisa com indicador visual CSS, sem dependência externa;
+- filtros agrupados num painel responsivo;
+- cartões de resumo com hierarquia e alinhamento de valores reforçados;
+- tabela desktop com contentor elevado, cabeçalho fixo, espaçamento e hover;
+- cartões mobile com `Em falta` em destaque;
+- vencimento, estado, Total, Pago, Categoria e progresso mantidos visíveis;
+- ações Abrir/Detalhes, Editar, Pagar e Excluir preservadas;
+- breakpoints para desktop intermédio, `≤820px` e `≤430px`;
+- tratamento de `prefers-reduced-motion` e `forced-colors`.
+
+### Isolamento
+
+Não foram alterados `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js` ou `index.html` fonte. Não existem mudanças em IndexedDB, PIN, PBKDF2, AES-GCM, regras de faturas/pagamentos, Mercado, QR, scanner ou sync.
+
+### Distribuição e QA
+
+- `scripts/prepare-pages.cjs` publica `v75-expenses-modern.css?v=75-expenses1`;
+- ordem exigida: `v75-pages.css` → `v75-expenses-modern.css` → `v75-usability.css`;
+- `sw.js` inclui o novo asset e invalida o cache com `expenses1`;
+- criado `tests/v75-expenses-modern.test.cjs`;
+- CI e Pages executam o novo teste;
+- PR #73 aberto;
+- CI do PR no head `4013d05af84c4af2367c823a597ee42f41b8cb5a`: run `34495879773` — sucesso;
+- TypeScript Foundation no mesmo head: run `34495879840` — sucesso;
+- a branch estava `behind 0` relativamente a `main` antes das atualizações documentais de preservação;
+- validação física permanece pendente em Safari/PWA, mobile, tablet, desktop e tema escuro.
+
+---
+
 ## 2026-09-10 — v76 Bloco 1 — fundação TypeScript
 
 ### Objetivo
@@ -33,7 +81,7 @@ Neste bloco não foram alterados:
 - IndexedDB, schema persistido, PBKDF2, AES-GCM, PIN, backup, sync, QR ou scanner;
 - CSS, navegação ou experiência visual.
 
-Os ficheiros `.ts` ainda não são publicados no bundle Pages.
+Os ficheiros `.ts` do Bloco 1 não são publicados no bundle Pages.
 
 ### Achados da auditoria inicial
 
@@ -46,15 +94,13 @@ Os ficheiros `.ts` ainda não são publicados no bundle Pages.
 
 O motor futuro deve distinguir identidade, preço observado, estimativa, preço confirmado, quantidade/peso, promoções/descontos conhecidos e reconciliação com talão/fatura. O rótulo **Exato** só pode ser usado quando todos os fatores que determinam o preço final estiverem confirmados. Caso contrário, mantém-se **Estimativa** ou **Preço por confirmar**.
 
-### QA
+### QA e integração
 
-- PR #72 aberto: `feat(v76): fundação TypeScript sem alterar runtime`;
-- TypeScript Foundation run `34485339181` no head `58836af7bb53baaadd52d70d633968b9d68ec27e`: **sucesso**;
-- CI legado run `34485339056` no mesmo head: **sucesso**;
-- o CI legado concluiu com sucesso os testes de finanças, auditoria, contagem, isolamento, datas, formulários, QR, Mercado, imagens, scanner, segurança, responsividade, acessibilidade, sincronização, PWA/startup e manifest;
-- comparação com `main` antes da atualização documental final: `behind 0`;
-- o diff não altera o runtime publicado: não existem mudanças em `index.html`, `scripts/prepare-pages.cjs`, `sw.js`, `core.js`, `finance.js`, `render.js`, `forms.js` ou `events.js`;
-- como esta documentação produz um novo head da branch, o merge continua condicionado a nova confirmação de CI + typecheck verdes nesse head.
+- PR #72 integrado em `main` como `2c1d78508507ab77d6df95850568d9fd7f6b9577`;
+- TypeScript Foundation de `main` run `34485922921`: **sucesso**;
+- CI de `main` run `34485922896`: **sucesso**;
+- GitHub Pages run `34485986996`: **sucesso**;
+- o bundle público continuou a executar o runtime JavaScript v75 neste bloco.
 
 ---
 

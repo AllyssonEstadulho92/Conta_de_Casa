@@ -149,6 +149,9 @@ jobs:
       - name: v75 page proportion and alignment tests
         run: node tests/v75-layout-polish.test.cjs
 
+      - name: v75 modern expenses UI tests
+        run: node tests/v75-expenses-modern.test.cjs
+
       - name: v75 featured Mercado prototype tests
         run: node tests/v75-market-featured.test.cjs
 

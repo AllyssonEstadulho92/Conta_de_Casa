@@ -65,20 +65,79 @@ Atualizado: 10 de setembro de 2026
 - [x] Registar discrepância: `pid` é extraído no parser Cesta mas não exposto como propriedade do resultado nem persistido por `addProduct()`.
 - [x] Registar que imagem por termo/score não equivale a identificação forte de SKU.
 
-### QA antes de integrar Bloco 1
+### QA e integração Bloco 1
 
 - [x] Abrir PR #72 do Bloco 1.
-- [x] Confirmar `npm run typecheck` verde no GitHub Actions: run `34485339181` no head `58836af7bb53baaadd52d70d633968b9d68ec27e`.
-- [x] Confirmar CI legado verde no PR: run `34485339056` no mesmo head.
-- [x] Comparar branch com `main` e confirmar `behind 0` antes da atualização documental final.
-- [x] Confirmar que `scripts/prepare-pages.cjs` continua a publicar o runtime JavaScript v75 sem novos `.ts`.
-- [ ] Confirmar novamente typecheck + CI no head documental final do PR #72.
-- [ ] Confirmar novamente `behind 0` no head final.
-- [ ] Integrar apenas com checks verdes.
-- [ ] Confirmar CI de `main` após integração.
-- [ ] Confirmar que o deploy Pages não sofre alteração funcional no Bloco 1.
+- [x] Confirmar `npm run typecheck` verde no GitHub Actions.
+- [x] Confirmar CI legado verde no PR.
+- [x] Confirmar branch `behind 0` antes do merge.
+- [x] Confirmar que o bundle público continuou JavaScript v75.
+- [x] Integrar PR #72 como `2c1d78508507ab77d6df95850568d9fd7f6b9577`.
+- [x] Confirmar TypeScript Foundation de `main`: run `34485922921` — sucesso.
+- [x] Confirmar CI de `main`: run `34485922896` — sucesso.
+- [x] Confirmar GitHub Pages de `main`: run `34485986996` — sucesso.
+
+## P0 — `75-expenses1`: Despesas modernas
+
+### Auditoria
+
+- [x] Confirmar estrutura de `#page-bills` e respetivos IDs canónicos.
+- [x] Confirmar `renderBills()`/`filterBills()` como fluxo funcional vigente.
+- [x] Confirmar tabela desktop e cartões mobile existentes.
+- [x] Confirmar ações Abrir/Detalhes, Editar, Pagar e Excluir existentes.
+- [x] Confirmar que o redesign não exige mudança de regras financeiras.
+
+### Implementação
+
+- [x] Criar branch `feat/v75-expenses-modern-ui` a partir de `main`.
+- [x] Criar `v75-expenses-modern.css` revisão `75-expenses1`.
+- [x] Modernizar Lista/Calendário sem alterar navegação.
+- [x] Modernizar pesquisa e `Nova fatura`.
+- [x] Modernizar painel de filtros.
+- [x] Modernizar cartões de resumo.
+- [x] Modernizar tabela desktop.
+- [x] Modernizar cartões mobile.
+- [x] Manter `Em falta`, vencimento, Total, Pago, Categoria, progresso e ações.
+- [x] Adicionar breakpoints para desktop intermédio, `≤820px` e `≤430px`.
+- [x] Adicionar `prefers-reduced-motion` e `forced-colors`.
+- [x] Não alterar `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js` ou `index.html` fonte.
+
+### Distribuição e QA
+
+- [x] Adicionar `EXPENSES_REV = 75-expenses1` ao build.
+- [x] Incluir CSS na allowlist Pages.
+- [x] Carregar depois de `v75-pages.css` e antes de `v75-usability.css`.
+- [x] Adicionar asset e `expenses1` ao Service Worker/cache.
+- [x] Criar `tests/v75-expenses-modern.test.cjs`.
+- [x] Adicionar teste ao CI e ao workflow Pages.
+- [x] CI push do head `4013d05af84c4af2367c823a597ee42f41b8cb5a`: run `34495698852` — sucesso.
+- [x] CI do PR #73 no mesmo head: run `34495879773` — sucesso.
+- [x] TypeScript Foundation do PR #73 no mesmo head: run `34495879840` — sucesso.
+- [x] Confirmar `behind 0` antes das atualizações documentais de preservação.
+- [ ] Confirmar CI + TypeScript no head documental final do PR #73.
+- [ ] Confirmar novamente `behind 0`.
+- [ ] Integrar PR #73 apenas com checks verdes.
+- [ ] Confirmar CI de `main` no SHA integrado.
+- [ ] Confirmar GitHub Pages no SHA integrado.
+
+### Validação física
+
+- [ ] iPhone/Safari/PWA.
+- [ ] 320 px.
+- [ ] 375 px.
+- [ ] 390 px.
+- [ ] 430 px.
+- [ ] tablet.
+- [ ] desktop.
+- [ ] tema claro e escuro.
+- [ ] pesquisa, filtros e limpar filtros.
+- [ ] Lista ↔ Calendário.
+- [ ] Abrir/Detalhes, Editar, Pagar e Excluir quando permitido.
+- [ ] muitas faturas e textos longos.
 
 ## P0 — v76 Bloco 2: dinheiro, quantidades e datas
+
+Branch reservada: `feat/v76-money-dates`.
 
 - [ ] Mapear testes atuais de `parseCents`, `money`, `validCents`, `marketQuantityMilli`, `marketLineCents` e datas civis.
 - [ ] Criar vetores de paridade JS→TS antes da substituição.

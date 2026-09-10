@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog4-pd-photo1-photo-loader3-startup2-usability1-pages1-assets1-market1';
+const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog4-pd-photo1-photo-loader3-startup2-usability1-pages1-assets1-market1-expenses1';
 const NAVIGATION_TIMEOUT_MS = 4000;
 const PUBLIC_ASSETS = [
   './',
@@ -30,6 +30,7 @@ const PUBLIC_ASSETS = [
   './market-photo-loader.css',
   './v75-drawer-theme.css',
   './v75-pages.css',
+  './v75-expenses-modern.css',
   './v75-market-flow.css',
   './v75-usability.css',
   './core.js',

@@ -5,9 +5,10 @@ Build publicado: `v75`
 Programa técnico em preparação: `v76` — migração incremental TypeScript  
 Branch pública: `main`  
 Baseline funcional publicada: `c44348dbc5a942b601f360fa38793bd9d8b47a1a` (`75-market1`)  
-HEAD documental posterior em `main`: `954c0df349d5d307cd2afd33bb07042e7f670315`  
-Branch de trabalho: `feat/v76-typescript-foundation`  
-PR: `#72` — fundação TypeScript sem alterar runtime  
+HEAD público atual: `2c1d78508507ab77d6df95850568d9fd7f6b9577` (fundação TypeScript integrada)  
+Branch visual em revisão: `feat/v75-expenses-modern-ui`  
+PR visual: `#73` — `75-expenses1`  
+Branch técnica reservada para o próximo bloco: `feat/v76-money-dates`  
 Distribuição atual: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
@@ -20,7 +21,8 @@ Distribuição atual: GitHub Pages / PWA
 - sincronização GitHub opcional limitada ao envelope cifrado;
 - preço pesquisado no Mercado permanece `estimatedCents` e preço efetivamente confirmado permanece `actualCents`;
 - identidade canónica de catálogo/fotografia permanece `marketId|pid` onde esse pipeline é utilizado;
-- QR, scanner, backup/restauro, PWA, Service Worker e funcionamento offline não podem regredir por causa da migração TypeScript.
+- QR, scanner, backup/restauro, PWA, Service Worker e funcionamento offline não podem regredir por causa da migração TypeScript;
+- alterações exclusivamente visuais não podem modificar cálculos, pagamentos, faturas ou persistência.
 
 ## 2. Baseline v75 confirmada
 
@@ -54,7 +56,9 @@ O plano completo está em `docs/TYPESCRIPT_MIGRATION.md`.
 
 ## 4. Bloco 1 — fundação TypeScript
 
-Implementado na branch `feat/v76-typescript-foundation`, ainda sem alteração de runtime:
+Integrado em `main` pelo PR #72 no commit `2c1d78508507ab77d6df95850568d9fd7f6b9577`, sem alteração de runtime funcional.
+
+Inclui:
 
 - `package.json` com ferramenta TypeScript de desenvolvimento;
 - `tsconfig.json` em modo `strict`, `noEmit`, `strictNullChecks`, `noUncheckedIndexedAccess` e `exactOptionalPropertyTypes`;
@@ -63,16 +67,22 @@ Implementado na branch `feat/v76-typescript-foundation`, ainda sem alteração d
 - `src/types/persisted-state.ts` a representar o schema normalizado atual `STATE_VERSION = 5` observado em `core.js`;
 - `src/types/market.ts` com contratos do browser de Mercado atual e separação estimado/confirmado;
 - `src/type-tests/contracts.ts` com verificações positivas e `@ts-expect-error` para regressões estruturais;
-- workflow `.github/workflows/typescript.yml` isolado do deploy, para `npm run typecheck`.
+- workflow `.github/workflows/typescript.yml` para `npm run typecheck`.
 
-O bundle público continua a usar `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js` e os restantes módulos JavaScript existentes. `index.html`, `scripts/prepare-pages.cjs`, `sw.js`, cálculos, armazenamento e segurança ainda não foram mudados para TypeScript.
+O bundle público continua a usar `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js` e os restantes módulos JavaScript existentes. Os `.ts` do Bloco 1 não entram no bundle Pages.
+
+QA após integração:
+
+- TypeScript Foundation `34485922921`: sucesso;
+- CI `34485922896`: sucesso;
+- GitHub Pages `34485986996`: sucesso.
 
 ## 5. Factos técnicos encontrados durante o mapeamento
 
 1. `core.js` normaliza explicitamente faturas, pagamentos, rendimentos, artigos de Mercado, objetivos, atividade, auditoria, definições, conflitos e tombstones antes de produzir o estado v5.
 2. O artigo de Mercado persistido atual contém `id`, `name`, `category`, `quantity`, `unit`, `estimatedCents`, `actualCents`, `purchased`, `productCode`, dados de imagem e timestamps.
 3. O browser live atual pesquisa apenas Pingo Doce e Continente através de `cesta.pt` e pode enriquecer resultados com imagens Open Food Facts.
-4. O parser live extrai um `pid` da resposta Cesta para compor o `id` do resultado, mas esse `pid` não é atualmente exposto como propriedade própria do objeto de resultado nem persistido pelo fluxo `addProduct()` de `market-experience.js`. Isto deve ser revisto antes de unificar a identidade do browser live com a biblioteca canónica `marketId|pid`; não será corrigido por inferência no Bloco 1.
+4. O parser live extrai um `pid` da resposta Cesta para compor o `id` do resultado, mas esse `pid` não é atualmente exposto como propriedade própria do objeto de resultado nem persistido pelo fluxo `addProduct()` de `market-experience.js`. Isto deve ser revisto antes de unificar a identidade do browser live com a biblioteca canónica `marketId|pid`.
 5. A pesquisa de imagem do browser live é por termo e usa score de correspondência. É adequada como referência visual, mas não é prova forte de identidade do SKU. A futura biblioteca profissional deve preferir GTIN/PID e fontes verificadas.
 
 ## 6. Precisão do Mercado
@@ -89,22 +99,60 @@ A biblioteca de imagens continuará progressiva e associada à identidade do pro
 
 Logos SVG de supermercados só devem ser incorporados como assets locais depois de verificação da origem e direito de utilização. Não serão copiados de sites aleatórios, CDNs ou agregadores sem validação de licença/termos, CSP e privacidade.
 
-## 8. QA do Bloco 1
+## 8. Revisão visual atual — `75-expenses1`
 
-PR #72 aberto sobre `main`. Na revisão do head `58836af7bb53baaadd52d70d633968b9d68ec27e`:
+Objetivo: modernizar a página de Despesas/Faturas sem alterar o domínio financeiro.
 
-- workflow `TypeScript Foundation` run `34485339181`: **sucesso**;
-- CI legado run `34485339056`: **sucesso**;
-- todos os testes financeiros, Mercado, segurança, sincronização, responsividade, acessibilidade, PWA/startup e manifest executados pelo CI legado passaram;
-- comparação com `main`: `behind 0` antes desta atualização documental;
-- diff funcional confirmado: não altera `index.html`, `scripts/prepare-pages.cjs`, `sw.js`, `core.js`, `finance.js`, `render.js`, `forms.js` ou `events.js`.
+Factos confirmados antes da alteração:
 
-Esta atualização documental cria um novo head da branch; os checks do PR devem voltar a ficar verdes nesse head antes do merge.
+- `#page-bills` já contém Lista/Calendário, pesquisa, Estado, Categoria, intervalo de datas, ordenação, resumo, tabela desktop e cartões mobile;
+- `renderBills()`/`filterBills()` já fornecem o comportamento funcional canónico;
+- as ações Abrir/Detalhes, Editar, Pagar e Excluir já são condicionadas ao estado da fatura;
+- não foi encontrado motivo funcional para alterar `finance.js`, `render.js`, `forms.js` ou `events.js` apenas para modernizar a apresentação.
 
-## 9. Próximo passo
+Implementação na branch `feat/v75-expenses-modern-ui`:
 
-1. confirmar CI legado + TypeScript no head documental final do PR #72;
-2. confirmar novamente `behind 0`;
-3. integrar o Bloco 1 apenas com checks verdes;
-4. confirmar CI de `main` após integração;
-5. iniciar o Bloco 2 numa branch nova: dinheiro, quantidades e datas, com testes de paridade JavaScript → TypeScript antes da substituição do runtime.
+- `v75-expenses-modern.css`, revisão `75-expenses1`, limitado a `html.cdc-v75 #page-bills`;
+- Lista/Calendário refinados como controlo segmentado;
+- pesquisa + `Nova fatura` numa barra operacional moderna;
+- painel de filtros responsivo;
+- cartões de resumo com hierarquia reforçada;
+- tabela desktop com contentor, cabeçalho fixo e hover discreto;
+- cartões mobile com `Em falta` como foco e Total/Pago/Categoria, vencimento, estado, progresso e ações preservados;
+- breakpoints para desktop intermédio, `≤820px` e `≤430px`;
+- `prefers-reduced-motion` e `forced-colors` tratados;
+- `scripts/prepare-pages.cjs` e `sw.js` versionam/publicam `75-expenses1`;
+- `tests/v75-expenses-modern.test.cjs` adicionado ao CI e ao workflow Pages.
+
+## 9. QA de `75-expenses1`
+
+PR #73 aberto sobre `main`.
+
+No head anterior à preservação documental (`4013d05af84c4af2367c823a597ee42f41b8cb5a`):
+
+- CI push `34495698852`: sucesso;
+- CI do PR `34495879773`: sucesso, incluindo `v75 modern expenses UI tests` e todas as regressões financeiras, Mercado, segurança, sincronização, responsividade, acessibilidade e manifest;
+- TypeScript Foundation do PR `34495879840`: sucesso;
+- comparação com `main`: `behind 0` antes da atualização documental seguinte.
+
+Como a preservação documental gera novo head, os checks devem voltar a concluir com sucesso antes do merge.
+
+## 10. Validação física pendente
+
+- iPhone/Safari/PWA;
+- 320/375/390/430 px;
+- tablet;
+- desktop;
+- tema claro e escuro;
+- pesquisa, filtros, limpar filtros e Lista ↔ Calendário;
+- Abrir/Detalhes, Editar, Pagar e Excluir quando permitido;
+- muitas faturas e textos longos.
+
+## 11. Próximo passo
+
+1. confirmar CI + TypeScript no head documental final do PR #73;
+2. confirmar `behind 0`;
+3. integrar `75-expenses1` apenas com checks verdes;
+4. confirmar CI e GitHub Pages no SHA integrado;
+5. validar fisicamente Despesas;
+6. retomar `feat/v76-money-dates` para o Bloco 2 com testes de paridade JS→TS antes de substituir runtime.

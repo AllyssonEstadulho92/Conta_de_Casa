@@ -5,7 +5,7 @@ Build publicado: `v75`
 Programa técnico em preparação: `v76` — TypeScript  
 Distribuição: GitHub Pages / PWA
 
-Revisões integradas: `75-usability1`, `75-pages1`, `75-assets1`, `75-startup2`, `75-catalog4`, `75-photo-loader3`, `75-market1`.
+Revisões integradas: `75-usability1`, `75-pages1`, `75-assets1`, `75-startup2`, `75-catalog4`, `75-photo-loader3`, `75-market1`. Revisão visual em PR: `75-expenses1`.
 
 ## 1. Invariantes
 
@@ -39,11 +39,12 @@ Ordem conceptual relevante:
 2. experiência e componentes v74;
 3. arquitetura/cabeçalho/estabilidade/layout/drawer v75;
 4. `v75-pages.css` — Início, Despesas e Planeamento;
-5. `asset-loader.css` — estados genéricos de assets;
-6. componentes especializados do Mercado, incluindo catálogo e `market-photo-loader.css/js`;
-7. `v75-market-flow.css` — refinamento de pesquisa, filtros e fluxo de compra;
-8. `v75-usability.css` — política final de interação/anti-zoom;
-9. runtimes de apresentação, com `v75-market-flow.js` depois de `v75-market-featured.js`.
+5. `v75-expenses-modern.css` — refinamento visual exclusivo de Despesas, quando `75-expenses1` estiver integrado;
+6. `asset-loader.css` — estados genéricos de assets;
+7. componentes especializados do Mercado, incluindo catálogo e `market-photo-loader.css/js`;
+8. `v75-market-flow.css` — refinamento de pesquisa, filtros e fluxo de compra;
+9. `v75-usability.css` — política final de interação/anti-zoom;
+10. runtimes de apresentação, com `v75-market-flow.js` depois de `v75-market-featured.js`.
 
 ## 4. Navegação v75
 
@@ -167,7 +168,7 @@ Regras:
 
 ## 13. Mobile, acessibilidade e anti-zoom
 
-`75-usability1` continua depois de `v75-market-flow.css`:
+`75-usability1` continua depois das camadas especializadas de página:
 
 - inputs/selects/textareas com pelo menos 16 px no mobile;
 - `touch-action: manipulation` em controlos;
@@ -175,7 +176,7 @@ Regras:
 - sem `user-scalable=no` ou `maximum-scale=1`;
 - pinch-to-zoom preservado.
 
-`75-market1` acrescenta `aria-busy` no catálogo visual e suporta `forced-colors`/`prefers-reduced-motion` no CSS.
+`75-market1` acrescenta `aria-busy` no catálogo visual e suporta `forced-colors`/`prefers-reduced-motion` no CSS. `75-expenses1` também trata `forced-colors` e `prefers-reduced-motion` sem ultrapassar a camada final `v75-usability.css`.
 
 ## 14. Segurança e CSP
 
@@ -186,11 +187,15 @@ Regras:
 - não introduz endpoints, origem CSP, token, telemetria ou segredo;
 - não toca em `core.js`, `finance.js`, IndexedDB financeiro, PIN, PBKDF2, AES-GCM ou sync.
 
+`75-expenses1` é CSS puro e não introduz rede, script, endpoint ou mutação de estado.
+
 ## 15. Distribuição e QA v75
 
-`v75-market-flow.css/js` são publicados como `75-market1`, incluídos no Service Worker e no cache com sufixo final `market1`. O CSS especializado fica antes de `v75-usability.css`; o JS é executado depois de `v75-market-featured.js`.
+`v75-market-flow.css/js` são publicados como `75-market1`, incluídos no Service Worker e no cache com sufixo final `market1`. O JS é executado depois de `v75-market-featured.js`.
 
 `tests/v75-market-flow.test.cjs` verifica isolamento financeiro, distinção de pesquisas, promoção do campo de preço real, qualificação de valores, geometria do browser, `marketId|pid`, PID, loader especializado, scanner e bundle Pages.
+
+Para `75-expenses1`, `scripts/prepare-pages.cjs` publica `v75-expenses-modern.css?v=75-expenses1`, `sw.js` inclui o asset/cache e `tests/v75-expenses-modern.test.cjs` valida isolamento, composição e responsividade. A ordem exigida é `v75-pages.css → v75-expenses-modern.css → v75-usability.css`.
 
 Validação física permanece necessária em Safari/PWA, Android/Chrome, tablet e desktop.
 
@@ -208,7 +213,7 @@ A migração TypeScript é incremental. O browser não executa TypeScript direta
 - `src/type-tests/contracts.ts`: regressões de compilação;
 - `.github/workflows/typescript.yml`: gate isolado de `npm run typecheck`.
 
-No Bloco 1, `scripts/prepare-pages.cjs`, `index.html` e `sw.js` não referenciam os novos `.ts`. Logo, a fundação não entra no bundle público.
+O Bloco 1 foi integrado em `main` pelo PR #72 sem mudar o runtime público.
 
 ### Arquitetura de destino
 
@@ -249,3 +254,17 @@ Durante o mapeamento foi confirmado que `market-experience.js` extrai `pid` da r
 A pesquisa de imagem do browser live por termo/Open Food Facts é apenas enriquecimento visual. A biblioteca profissional deverá preferir correspondência por GTIN/PID e fontes verificadas.
 
 Logos SVG de supermercados são assets de marca e só entram depois de verificação de origem e direito de utilização. Nenhuma alteração de CSP será feita apenas para carregar logos externos.
+
+## 19. Despesas — refinamento visual `75-expenses1`
+
+A página `#page-bills` mantém a arquitetura funcional existente:
+
+`index.html` → controlos canónicos  
+`events.js` → filtros e ações  
+`renderBills()`/`filterBills()` → composição e filtragem  
+`finance.js` → estados, pagos, pendentes e vencimentos  
+`render.js` → tabela desktop e cartões mobile
+
+IDs funcionais preservados: `billSearch`, `billStatusFilter`, `billCategoryFilter`, `billDateFrom`, `billDateTo`, `billSort`, `billClearFilters`, `billSummary`, `billsList` e `newBillBtn`.
+
+`v75-expenses-modern.css` atua apenas sobre a apresentação destes elementos. Em desktop mantém pesquisa/ação, painel de filtros, resumo e tabela; em tablet reorganiza filtros e resumo; em mobile usa cartões com `Em falta` como informação principal; em `≤430px` empilha pesquisa/ação e reduz a grelha de informação. Não existe segundo renderer nem segundo fluxo de persistência.
