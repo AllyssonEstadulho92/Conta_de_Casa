@@ -1,5 +1,6 @@
 /* Conta de Casa v76 — Veggie Burger em TypeScript.
-   Camada visual incremental: duas linhas -> X, preservando o controlador v73 do drawer. */
+   Camada visual incremental: duas linhas -> X com animação determinística,
+   preservando o controlador funcional v73 do drawer. */
 
 type VeggieMenuElements = {
   button: HTMLButtonElement;
@@ -7,6 +8,8 @@ type VeggieMenuElements = {
   drawerHead: HTMLElement;
   drawerShell: HTMLElement;
 };
+
+type MenuVisualState = 'open' | 'closed';
 
 (function installVeggieMenuToggle(root: Window) {
   let installed = false;
@@ -19,6 +22,10 @@ type VeggieMenuElements = {
     const drawerShell = drawer?.querySelector<HTMLElement>('.nav-drawer-shell') ?? null;
     if (!button || !drawer || !drawerHead || !drawerShell) return null;
     return { button, drawer, drawerHead, drawerShell };
+  }
+
+  function prefersReducedMotion(): boolean {
+    return root.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
   }
 
   function schedule(callback: () => void): void {
@@ -39,9 +46,7 @@ type VeggieMenuElements = {
     button.classList.add('veggie-menu-toggle');
 
     let sentinel = button.querySelector<SVGSVGElement>(':scope > svg.mobile-menu-icon-sentinel');
-    if (!sentinel) {
-      sentinel = button.querySelector<SVGSVGElement>(':scope > svg.ui-icon-svg');
-    }
+    if (!sentinel) sentinel = button.querySelector<SVGSVGElement>(':scope > svg.ui-icon-svg');
     if (!sentinel) {
       sentinel = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       sentinel.classList.add('ui-icon-svg');
@@ -66,22 +71,55 @@ type VeggieMenuElements = {
 
     const moveToDrawerOverlay = (): void => {
       if (!drawer.open) return;
-      if (button.parentElement === drawer) return;
-      drawer.insertBefore(button, drawerShell);
+      if (button.parentElement !== drawer) drawer.insertBefore(button, drawerShell);
       button.classList.add('drawer-menu-control', 'drawer-menu-overlay-control');
     };
 
-    const syncVisualState = (): void => {
-      const expanded = button.getAttribute('aria-expanded') === 'true';
-      const state = expanded ? 'open' : 'closed';
+    const animateGlyph = (state: MenuVisualState): void => {
+      if (prefersReducedMotion() || typeof upperLine.animate !== 'function' || typeof lowerLine.animate !== 'function') return;
+      upperLine.getAnimations().forEach(animation => animation.cancel());
+      lowerLine.getAnimations().forEach(animation => animation.cancel());
+
+      const opening = state === 'open';
+      const upperClosed = { top: '4px', transform: 'translateX(-50%) rotate(0deg)', opacity: 1 };
+      const upperOpen = { top: '8px', transform: 'translateX(-50%) rotate(45deg)', opacity: 1 };
+      const lowerClosed = { top: '12px', transform: 'translateX(-50%) rotate(0deg)', opacity: 1 };
+      const lowerOpen = { top: '8px', transform: 'translateX(-50%) rotate(-45deg)', opacity: 1 };
+      const timing: KeyframeAnimationOptions = {
+        duration: 230,
+        easing: 'cubic-bezier(.32,.72,0,1)',
+        fill: 'none'
+      };
+
+      upperLine.animate(opening ? [upperClosed, upperOpen] : [upperOpen, upperClosed], timing);
+      lowerLine.animate(opening ? [lowerClosed, lowerOpen] : [lowerOpen, lowerClosed], timing);
+      glyph.animate(
+        opening
+          ? [{ transform: 'scale(.94)' }, { transform: 'scale(1.035)', offset: .7 }, { transform: 'scale(1)' }]
+          : [{ transform: 'scale(1.02)' }, { transform: 'scale(.96)', offset: .55 }, { transform: 'scale(1)' }],
+        timing
+      );
+    };
+
+    let previousState: MenuVisualState = button.getAttribute('aria-expanded') === 'true' ? 'open' : 'closed';
+
+    const syncVisualState = (withAnimation = true): void => {
+      const state: MenuVisualState = button.getAttribute('aria-expanded') === 'true' ? 'open' : 'closed';
       button.dataset.veggieState = state;
       glyph.dataset.veggieState = state;
 
       if (drawer.open) moveToDrawerOverlay();
       if (!drawer.open) button.classList.remove('drawer-menu-overlay-control');
+
+      if (state !== previousState) {
+        if (withAnimation) animateGlyph(state);
+        button.dataset.veggieMotion = state === 'open' ? 'opening' : 'closing';
+        previousState = state;
+        root.setTimeout(() => delete button.dataset.veggieMotion, 260);
+      }
     };
 
-    const syncSoon = (): void => schedule(syncVisualState);
+    const syncSoon = (): void => schedule(() => syncVisualState(true));
 
     const buttonObserver = new MutationObserver(syncSoon);
     buttonObserver.observe(button, {
@@ -105,25 +143,9 @@ type VeggieMenuElements = {
     drawer.addEventListener('close', syncSoon);
     drawer.addEventListener('cancel', syncSoon);
 
-    button.addEventListener('animationend', () => {
-      delete button.dataset.veggieMotion;
-    });
-
-    let previousExpanded = button.getAttribute('aria-expanded');
-    const motionObserver = new MutationObserver(() => {
-      const expanded = button.getAttribute('aria-expanded');
-      if (expanded === previousExpanded) return;
-      previousExpanded = expanded;
-      button.dataset.veggieMotion = expanded === 'true' ? 'opening' : 'closing';
-    });
-    motionObserver.observe(button, { attributes: true, attributeFilter: ['aria-expanded'] });
-
-    syncVisualState();
+    syncVisualState(false);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', install, { once: true });
-  } else {
-    install();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
+  else install();
 })(window);
