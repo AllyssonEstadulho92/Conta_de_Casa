@@ -15,7 +15,7 @@ Atualizado: 10 de setembro de 2026
 - [x] Dar estado terminal estável às fotografias (`75-photo-loader3`).
 - [x] Reconciliar fotografias Pingo Doce com a base dedicada.
 - [x] Remover resolução redundante quando existe `sourceUrl` oficial exata (`75-catalog4`).
-- [x] Confirmar que `fix/v75-pin-images-stability` e `main` estão idênticas, `ahead 0 / behind 0`, no SHA `f85deed6d2fab5e1b0658ad74c25d323f621a19f`.
+- [x] Confirmar que `fix/v75-pin-images-stability` estava integralmente contida em `main` antes da auditoria atual.
 
 ## P0 — Auditoria UX/UI solicitada
 
@@ -39,17 +39,18 @@ Atualizado: 10 de setembro de 2026
 - [x] Incluir `v75-usability.css` no gerador de Pages.
 - [x] Incluir `v75-usability.css` no Service Worker e invalidar cache com `usability1`.
 - [x] Ampliar `tests/v75-stability.test.cjs` com regressões anti-zoom/distribuição.
-- [x] Atualizar documentação técnica da branch.
-- [ ] Confirmar CI verde da branch.
-- [ ] Abrir/rever PR para `main`.
-- [ ] Integrar apenas com CI verde.
-- [ ] Confirmar CI de `main` e GitHub Pages no mesmo SHA.
-- [ ] Validar no iPhone/Safari/PWA que tocar em inputs/botões não provoca auto-zoom/duplo-toque involuntário.
+- [x] Atualizar documentação técnica.
+- [x] Confirmar CI verde da branch — run `34471692881`.
+- [x] Abrir/rever PR `#66` para `main`.
+- [x] Integrar apenas após CI verde.
+- [x] Confirmar CI de `main` — run `34471773663`, sucesso.
+- [x] Confirmar GitHub Pages no mesmo SHA `c352c1883c16fd7df92aa0f26d23e3c5084b0fcf` — run `34471814790`, sucesso.
+- [ ] Validar fisicamente no iPhone/Safari/PWA que tocar em inputs/botões não provoca auto-zoom/duplo-toque involuntário.
 
 ## P1 — Parte 2: Início + Despesas + Planeamento
 
 - [ ] Rever hierarquia de informação e densidade dos cartões no Início.
-- [ ] Garantir que ações rápidas têm rótulo/ícone/feedback coerentes.
+- [ ] Garantir que ações rápidas têm rótulo, ícone e feedback coerentes.
 - [ ] Rever estados vazio, erro e carregamento relevantes.
 - [ ] Rever Despesas: pesquisa, filtros, ordenação, datas, ações e cartões mobile.
 - [ ] Reduzir ruído visual sem remover filtros funcionais.
