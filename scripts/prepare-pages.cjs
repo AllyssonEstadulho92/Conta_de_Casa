@@ -21,6 +21,7 @@ const PAGES_REV = '75-pages1';
 const DRAWER_REV = '75-drawer2';
 const USABILITY_REV = '75-usability1';
 const ASSETS_REV = '75-assets1';
+const MARKET_FLOW_REV = '75-market1';
 const FEATURED_REV = '75-featured1';
 const IMAGE_LIBRARY_REV = '75-image-library1';
 const CATALOG_REV = '75-catalog4';
@@ -30,11 +31,11 @@ const PHOTO_LOADER_REV = '75-photo-loader3';
 /* Bundle público v75: mantém a experiência v74 como base funcional de apresentação,
    aplica arquitetura, cabeçalho, estabilidade, guarda segura de arranque, geometria,
    revisão de páginas Início/Despesas/Planeamento, biblioteca transversal local-first
-   de assets visuais, biblioteca/destaques/catálogo visual do Mercado, biblioteca
-   progressiva Pingo Doce, carregador prioritário de fotografias, drawer petróleo/teal
-   à direita e uma camada transversal de usabilidade móvel sem alterar regras
-   financeiras ou segurança. Camadas históricas ui-consistency.css e v64-runtime.css
-   continuam fora da distribuição. */
+   de assets visuais, revisão de fluxo do Mercado, biblioteca/destaques/catálogo visual,
+   biblioteca progressiva Pingo Doce, carregador prioritário de fotografias, drawer
+   petróleo/teal à direita e uma camada transversal de usabilidade móvel sem alterar
+   regras financeiras ou segurança. Camadas históricas ui-consistency.css e
+   v64-runtime.css continuam fora da distribuição. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -62,6 +63,7 @@ const PUBLIC_FILES = Object.freeze([
   'market-photo-loader.css',
   'v75-drawer-theme.css',
   'v75-pages.css',
+  'v75-market-flow.css',
   'v75-usability.css',
   'core.js',
   'finance.js',
@@ -95,6 +97,7 @@ const PUBLIC_FILES = Object.freeze([
   'v75-stability.js',
   'v75-startup-guard.js',
   'v75-market-featured.js',
+  'v75-market-flow.js',
   'release-manifest.json',
   'sw.js',
   'manifest.webmanifest',
@@ -141,6 +144,7 @@ if(!index.includes('asset-loader.css')) index=index.replace('</head>',`  <link r
 if(!index.includes('market-photo-loader.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-photo-loader.css?v=${PHOTO_LOADER_REV}" />\n</head>`);
 if(!index.includes('v75-drawer-theme.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-drawer-theme.css?v=${DRAWER_REV}" />\n</head>`);
 if(!index.includes('v75-pages.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-pages.css?v=${PAGES_REV}" />\n</head>`);
+if(!index.includes('v75-market-flow.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-market-flow.css?v=${MARKET_FLOW_REV}" />\n</head>`);
 if(!index.includes('v75-usability.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-usability.css?v=${USABILITY_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
@@ -167,6 +171,7 @@ if(!index.includes('v75-architecture.js')) index=index.replace('</body>',`  <scr
 if(!index.includes('v75-stability.js')) index=index.replace('</body>',`  <script src="./v75-stability.js?v=${STABILITY_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-startup-guard.js')) index=index.replace('</body>',`  <script src="./v75-startup-guard.js?v=${STARTUP_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-market-featured.js')) index=index.replace('</body>',`  <script src="./v75-market-featured.js?v=${FEATURED_REV}" defer></script>\n</body>`);
+if(!index.includes('v75-market-flow.js')) index=index.replace('</body>',`  <script src="./v75-market-flow.js?v=${MARKET_FLOW_REV}" defer></script>\n</body>`);
 fs.writeFileSync(distIndex,index);
 
 const distEvents=path.join(DIST,'events.js');
@@ -182,4 +187,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
