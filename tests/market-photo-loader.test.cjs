@@ -13,14 +13,22 @@ const css=read('market-photo-loader.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 
-assert.match(source,/75-photo-loader2/);
+assert.match(source,/75-photo-loader3/);
 assert.match(source,/POLL_MS=500/);
-assert.match(source,/MAX_POLLS=24/);
-assert.match(source,/PRIORITY_VISIBLE_LIMIT=6/);
+assert.match(source,/MAX_POLLS=28/);
+assert.match(source,/PRIORITY_VISIBLE_LIMIT=8/);
 assert.match(source,/RETRY_AFTER_MS=30000/);
-assert.match(source,/LOADER_SETTLE_MS=12000/);
+assert.match(source,/VALIDATING_AFTER_MS=7000/);
+assert.match(source,/FINAL_SETTLE_MS=12000/);
+assert.match(source,/SETTLED_RETRY_MS=5\*60\*1000/);
 assert.match(source,/A carregar fotografia/);
-assert.match(source,/Fotografia a validar/);
+assert.match(source,/A validar fotografia/);
+assert.match(source,/Sem fotografia/);
+assert.match(source,/settleUnavailable/);
+assert.match(source,/is-photo-unavailable/);
+assert.match(source,/markPingoReady/);
+assert.match(source,/PINGO_PRODUCT_STORE='products'/);
+assert.match(source,/imageState:'ready'/);
 assert.match(source,/CDCPingoDocePhotoLibrary\?\.warmPending/);
 assert.match(source,/CDCPingoDocePhotoLibrary\?\.syncNow/);
 assert.match(source,/CDCMarketImageLibrary\?\.get/);
@@ -39,6 +47,7 @@ assert.doesNotMatch(source,/https?:\/\//);
 assert.doesNotMatch(source,/\bfetch\s*\(/);
 
 assert.match(css,/\.market-photo-loader/);
+assert.match(css,/\.market-photo-unavailable/);
 assert.match(css,/marketPhotoShimmer/);
 assert.match(css,/marketPhotoSpin/);
 assert.match(css,/a carregar fotografias/);
@@ -49,20 +58,20 @@ sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:'market-photo-loader.js'});
 assert.ok(sandbox.CDCMarketPhotoLoader);
-assert.equal(sandbox.CDCMarketPhotoLoader.revision,'75-photo-loader2');
+assert.equal(sandbox.CDCMarketPhotoLoader.revision,'75-photo-loader3');
 assert.equal(typeof sandbox.CDCMarketPhotoLoader.warmVisible,'function');
 
-assert.match(prepare,/const PHOTO_LOADER_REV = '75-photo-loader2'/);
+assert.match(prepare,/const PHOTO_LOADER_REV = '75-photo-loader3'/);
 for(const asset of ['market-photo-loader.css','market-photo-loader.js'])assert.ok(prepare.includes(`'${asset}'`));
-assert.match(sw,/pd-photo1-photo-loader2/);
+assert.match(sw,/pd-photo1-photo-loader3/);
 for(const asset of ['./market-photo-loader.css','./market-photo-loader.js'])assert.ok(sw.includes(`'${asset}'`));
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-photo-loader\.css\?v=75-photo-loader2/);
-  assert.match(index,/market-photo-loader\.js\?v=75-photo-loader2/);
+  assert.match(index,/market-photo-loader\.css\?v=75-photo-loader3/);
+  assert.match(index,/market-photo-loader\.js\?v=75-photo-loader3/);
   assert.ok(index.indexOf('pingo-doce-photo-library.css')<index.indexOf('market-photo-loader.css'));
   assert.ok(index.indexOf('pingo-doce-photo-library.js')<index.indexOf('market-photo-loader.js'));
   assert.ok(index.indexOf('market-photo-loader.js')<index.indexOf('v64-runtime.js'));
@@ -71,4 +80,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market photo loader prioritizes visible SKUs, recovers stale budget and remains non-financial: OK');
+console.log('Market photo loader prioritizes both stores, settles failed cards and reconciles Pingo Doce readiness: OK');

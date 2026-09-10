@@ -15,14 +15,14 @@ const EXPERIENCE_REV = '74-experience2';
 const ARCHITECTURE_REV = '75-architecture2';
 const HEADER_REV = '75-header2';
 const STABILITY_REV = '75-stability1';
-const STARTUP_REV = '75-startup1';
+const STARTUP_REV = '75-startup2';
 const LAYOUT_REV = '75-layout1';
 const DRAWER_REV = '75-drawer2';
 const FEATURED_REV = '75-featured1';
 const IMAGE_LIBRARY_REV = '75-image-library1';
-const CATALOG_REV = '75-catalog3';
+const CATALOG_REV = '75-catalog4';
 const PD_PHOTO_REV = '75-pd-photo1';
-const PHOTO_LOADER_REV = '75-photo-loader2';
+const PHOTO_LOADER_REV = '75-photo-loader3';
 
 /* Bundle público v75: mantém a experiência v74 como base funcional de apresentação,
    aplica arquitetura, cabeçalho, estabilidade, guarda segura de arranque, geometria,

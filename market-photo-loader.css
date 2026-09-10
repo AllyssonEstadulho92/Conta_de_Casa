@@ -1,4 +1,4 @@
-/* Conta de Casa — estados de carregamento de fotografias 75-photo-loader1 */
+/* Conta de Casa — estados de carregamento de fotografias 75-photo-loader3 */
 .market-visual-product-media{position:relative;overflow:hidden}
 .market-photo-loader{
   position:absolute;
@@ -29,7 +29,34 @@
   line-height:1.25;
   font-weight:650;
 }
+.market-photo-unavailable{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:7px;
+  min-height:100%;
+  padding:12px;
+  color:var(--muted,#6b7f80);
+  background:var(--surface-soft,#f4f8f8);
+  font-size:.7rem;
+  line-height:1.2;
+  font-weight:600;
+  text-align:center;
+}
+.market-photo-unavailable-mark{
+  display:grid;
+  place-items:center;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:rgba(8,122,120,.08);
+  color:#087a78;
+  font-size:1rem;
+}
 .market-visual-product-card.is-photo-loading .market-visual-product-media{background:#f4f8f8}
+.market-visual-product-card.is-photo-unavailable .market-visual-product-media{background:var(--surface-soft,#f4f8f8)}
 .market-photos-warming .pingo-doce-photo-library-status{border-color:rgba(8,122,120,.32)}
 .market-photos-warming .pingo-doce-photo-library-metrics::after{content:' · a carregar fotografias…';color:#087a78}
 @keyframes marketPhotoSpin{to{transform:rotate(360deg)}}
@@ -39,7 +66,9 @@
   background:linear-gradient(110deg,rgba(16,40,43,.94) 20%,rgba(25,55,58,.98) 38%,rgba(16,40,43,.94) 56%);
   background-size:220% 100%;
 }
-@media(max-width:430px){.market-photo-loader-label{font-size:.7rem}.market-photo-loader-spinner{width:26px;height:26px}}
+[data-theme="dark"] .market-photo-unavailable{color:#b8cbcc;background:#10282b}
+[data-theme="dark"] .market-photo-unavailable-mark{background:rgba(68,199,188,.12);color:#7fd8d0}
+@media(max-width:430px){.market-photo-loader-label{font-size:.7rem}.market-photo-loader-spinner{width:26px;height:26px}.market-photo-unavailable{font-size:.68rem}}
 @media(prefers-reduced-motion:reduce){
   .market-photo-loader,.market-photo-loader-spinner{animation:none}
   .market-photo-loader-spinner{border-top-color:rgba(8,122,120,.48)}

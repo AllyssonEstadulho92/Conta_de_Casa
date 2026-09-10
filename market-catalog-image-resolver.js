@@ -1,8 +1,12 @@
 'use strict';
 
-/* Conta de Casa — resolvedor direto e limitado de fotografias oficiais (75-catalog2). */
+/* Conta de Casa — resolvedor direto e limitado de fotografias oficiais (75-catalog4).
+ * Para um SKU do catálogo visual com sourceUrl oficial exato, existe uma única
+ * tentativa limitada ao reader dessa página. Não volta ao resolvedor legado, que
+ * repetia pesquisa + leitura + preflight e podia prolongar a validação no Safari.
+ */
 (function installCatalogImageResolver(root){
-  const REVISION='75-catalog2';
+  const REVISION='75-catalog4';
   const JINA_READER_ORIGIN='https://r.jina.ai';
   const REQUEST_TIMEOUT_MS=8000;
   const MAX_CONCURRENT=2;
@@ -74,13 +78,6 @@
     const imageUrl=selectOfficialImage(await response.text(),id);
     if(!imageUrl)return null;
 
-    /*
-     * Não fazemos aqui um segundo carregamento visual bloqueante.
-     * O URL já foi obtido da página oficial exata e passou host/path/PID. No Safari,
-     * esse preflight visual podia ficar até 10 s à espera e transformar uma fotografia
-     * válida num falso negativo. O componente visual é quem testa o carregamento real;
-     * se falhar, a biblioteca elimina a entrada e mantém o fallback.
-     */
     return {
       imageUrl,sourceUrl,marketId:id.marketId,pid:id.pid,
       name:clean(target.name,140),pack:clean(target.pack,100),
@@ -104,8 +101,10 @@
       ...base,
       catalogDirectResolver:REVISION,
       resolve(target={}){
+        /* Sem sourceUrl mantém-se o bridge legado para resultados de pesquisa livre. */
         if(!target?.sourceUrl)return base.resolve(target);
-        return resolve(target).then(result=>result||base.resolve(target));
+        /* Com sourceUrl exato, não repetir a mesma pesquisa/leitura se a tentativa falhar. */
+        return resolve(target);
       }
     });
   }
