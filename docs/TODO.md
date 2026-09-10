@@ -76,7 +76,7 @@ Atualizado: 10 de setembro de 2026
 - [x] Incluir `v75-pages.css` no Service Worker e invalidar cache com `pages1`.
 - [x] Manter `v75-usability.css` carregado depois de `v75-pages.css`.
 - [x] Ampliar `tests/v75-stability.test.cjs` com regressões da Parte 2.
-- [x] Atualizar documentação técnica da branch.
+- [x] Atualizar documentação técnica.
 - [x] Abrir/rever PR #68 e integrar em `main`.
 - [x] Confirmar CI de `main` verde no merge `c8ec45893c8936093ecd7c7da9ee08c9a268109c`: run `34474037338`.
 - [x] Confirmar GitHub Pages no mesmo SHA: run `34474069564`.
@@ -111,13 +111,16 @@ Atualizado: 10 de setembro de 2026
 - [x] Incluir os três recursos no Service Worker e invalidar cache com `assets1`.
 - [x] Criar `tests/design-asset-library.test.cjs`.
 - [x] Incluir syntax check e teste dedicado no CI e no pipeline Pages.
-- [x] Atualizar PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG da branch.
-- [ ] Confirmar CI verde da branch final.
-- [ ] Confirmar branch `behind 0` relativamente a `main`.
-- [ ] Abrir/rever PR para `main`.
-- [ ] Integrar apenas com CI verde.
-- [ ] Confirmar CI de `main` e GitHub Pages no SHA publicado.
-- [ ] Validar em hardware um componente opt-in com imagem lazy/fallback e, quando houver runtime Lottie aprovado, o comportamento de reduced motion.
+- [x] Atualizar PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG.
+- [x] Confirmar CI verde da branch final: run `34477808822`.
+- [x] Confirmar branch `behind 0` relativamente a `main` antes do PR.
+- [x] Abrir/rever PR #69.
+- [x] Confirmar CI do PR: run `34477918443` — sucesso.
+- [x] Integrar em `main` por squash: `a8e04d6811bd6eb08487de139fb19fb2f12128ec`.
+- [x] Confirmar CI de `main`: run `34478047035` — sucesso.
+- [x] Confirmar GitHub Pages no mesmo SHA: run `34478091014` — sucesso.
+- [ ] Validar em hardware um componente opt-in com imagem lazy/fallback.
+- [ ] Quando houver runtime Lottie local e animação aprovada, validar `prefers-reduced-motion` e fallback estático.
 
 ## P1 — Parte 3: Mercado
 
@@ -142,4 +145,4 @@ Atualizado: 10 de setembro de 2026
 - [ ] Remover código histórico apenas com prova de ausência de referências.
 - [ ] Alinhar nomenclatura base (`PAGE_META`/template) com a arquitetura v75 sem alterar rotas nem IDs.
 - [ ] Revalidar segurança, finanças, sincronização, manifest e offline depois de qualquer consolidação.
-- [ ] Se uma aplicação futura adotar novas fontes/ícones/animações, reutilizar o critério `75-assets1` e acrescentar apenas os assets aprovados, sem importar catálogos completos.
+- [ ] Em aplicações futuras, reutilizar o critério `75-assets1` e acrescentar apenas assets aprovados, nunca catálogos completos como dependência automática.
