@@ -96,7 +96,7 @@ Data: 10 de setembro de 2026. Estado: integrado em `main` como `76-version-audit
 
 ## D-072 — shell móvel tem um único scroll e respeita safe areas
 
-Data: 11 de setembro de 2026. Estado: candidato `76-mobile-shell2` na branch `fix/v76-mobile-shell2`.
+Data: 11 de setembro de 2026. Estado: integrado em `main` como `76-mobile-shell2` pelo PR #80, merge `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`; GitHub Pages publicado com sucesso.
 
 ### Factos que originaram a decisão
 
@@ -109,7 +109,7 @@ A validação física em iPhone mostrou a topbar a invadir a status bar e o dock
 3. A topbar continua `position:relative` e recebe compensação explícita de `safe-area-inset-top`.
 4. A bottom navigation pode continuar fixa, mas a altura do dock e `safe-area-inset-bottom` entram obrigatoriamente na reserva inferior das páginas.
 5. `v76-mobile-shell.css` carrega depois de `v76-modern-ui.css` e só tem autoridade sobre geometria de viewport, não sobre domínio ou regras financeiras.
-6. Devem existir ajustes para 320/375/390/430 px e landscape de baixa altura.
+6. Existem ajustes para 320/375/390/430 px e landscape de baixa altura.
 7. Nenhuma solução pode usar `zoom`, bloquear pinch-to-zoom ou esconder conteúdo para fazê-lo caber.
 8. Foco de teclado/touch deve poder ser deslocado acima do dock persistente.
 9. Drawer e dialogs mantêm geometrias próprias e não transferem o scroll principal de volta para `.main`.
@@ -122,7 +122,7 @@ Uma única origem de scroll elimina a competição entre header relativo, viewpo
 
 - UI/UX PR #76: merge `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
 - `76-version-audit1`: PR #78, merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`; CI/TypeScript/Pages verdes.
-- `76-mobile-shell2`: teste específico passou; CI funcional da branch `34541849503` terminou com sucesso integral antes da documentação.
+- `76-mobile-shell2`: PR #80, merge `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`; TypeScript `34542259212`, CI `34542259148` e Pages `34542303536` com sucesso.
 
 ## Lacuna técnica preservada
 

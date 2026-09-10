@@ -80,6 +80,8 @@ O drawer mantém destinos secundários. Rotas, IDs, permissões e handlers não 
 
 ## 7. Shell móvel — `76-mobile-shell2`
 
+Estado: integrado em `main` pelo PR #80, merge `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`, e publicado no GitHub Pages.
+
 ### Problema anterior
 
 Existiam duas decisões incompatíveis em cascata:
@@ -128,17 +130,15 @@ Cobertura: Dashboard, Despesas, Mercado, Calendário, Planeamento, Relatórios, 
 
 O novo shell é CSS/layout + distribuição/cache; não lê estado financeiro.
 
-## 11. QA
+## 11. QA e publicação
 
-`tests/v76-mobile-shell.test.cjs` valida:
+`tests/v76-mobile-shell.test.cjs` valida safe areas, revogação de clipping `100dvh`, scroll de documento, reserva inferior do dock, ordem final do CSS, allowlist Pages, Service Worker e ausência de `zoom` CSS.
 
-- safe area superior/inferior;
-- revogação de `height/max-height:100dvh` e `overflow:hidden` no shell final;
-- scroll de documento;
-- reserva inferior baseada na altura do dock;
-- topbar relativa com compensação da status bar;
-- folha `v76-mobile-shell.css` posterior a `v76-modern-ui.css` no `dist`;
-- allowlist de Pages e Service Worker;
-- ausência de `zoom` CSS.
+Evidência final do runtime integrado:
 
-CI funcional da branch antes da documentação: `34541849503` — sucesso integral. Validação física pós-publicação continua obrigatória para Safari/iPhone/PWA.
+- TypeScript Foundation `main` `34542259212`: sucesso;
+- CI `main` `34542259148`: sucesso;
+- GitHub Pages `34542303536`: sucesso;
+- commit funcional publicado: `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`.
+
+Validação física pós-publicação continua obrigatória para Safari/iPhone/PWA.
