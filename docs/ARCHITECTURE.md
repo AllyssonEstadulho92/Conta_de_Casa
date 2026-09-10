@@ -2,237 +2,204 @@
 
 Atualizado: 10 de setembro de 2026  
 Build: `v75`  
-Distribuição: GitHub Pages / PWA  
-Usabilidade integrada: `75-usability1`  
-Páginas integradas: `75-pages1`  
-Biblioteca de design integrada: `75-assets1`
+Distribuição: GitHub Pages / PWA
+
+Revisões integradas: `75-usability1`, `75-pages1`, `75-assets1`, `75-startup2`, `75-catalog4`, `75-photo-loader3`.  
+Revisão candidata da Parte 3: `75-market1`.
 
 ## 1. Invariantes
 
-A aplicação é PWA estática/local-first. Estado financeiro, apresentação, recursos visuais, Mercado e catálogos permanecem separados. São obrigatórios:
+A aplicação é PWA estática/local-first. Estado financeiro, apresentação, recursos visuais, Mercado e catálogos permanecem separados.
 
 - `STATE_VERSION = 5`;
 - dinheiro em cêntimos inteiros;
 - estado financeiro em IndexedDB;
-- PBKDF2-SHA-256 + AES-GCM para o cofre;
+- PBKDF2-SHA-256 + AES-GCM;
 - `PBKDF2_ITERATIONS = 250000`;
-- sincronização opcional apenas do envelope cifrado;
-- nenhuma password, token, chave, kit ID ou segredo embutido no código público.
+- sync opcional apenas do envelope cifrado;
+- nenhuma password, token, chave ou kit ID no código público;
+- preço pesquisado do Mercado é estimativa; preço efetivamente pago é valor confirmado separado.
 
 ## 2. Núcleo funcional
 
 - `core.js`: estado, normalização, IndexedDB, cifragem e backup;
 - `finance.js`: cálculos financeiros;
-- `render.js`, `forms.js`, `events.js`: UI funcional;
+- `render.js`, `forms.js`, `events.js`: UI funcional e mutações autorizadas;
 - `sync.js` + `sync-conflict-policy.js`: sincronização cifrada e conflitos.
 
-Revisões visuais não podem alterar cálculos, pagamentos, faturas, QR, scanner, quantidades, preços confirmados, PIN ou derivação de chave.
+Camadas v75 de apresentação não podem alterar cálculos, pagamentos, faturas, QR, scanner, quantidades, preços, PIN ou derivação de chave.
 
-## 3. Composição da interface e distribuição
+## 3. Composição e distribuição
 
-O `index.html` é o template funcional. `scripts/prepare-pages.cjs` produz `dist/` através de uma allowlist explícita, ajusta o build e injeta apenas as camadas publicadas.
+`index.html` é o template. `scripts/prepare-pages.cjs` cria `dist/` a partir de allowlist explícita e injeta as revisões publicadas.
 
-Ordem conceptual:
+Ordem conceptual relevante:
 
 1. base: `styles.css`, `design-system.css`, `mobile-layout.css`;
-2. experiência v74 e componentes específicos;
-3. arquitetura v75: `v75-architecture.css/js`;
-4. cabeçalho, estabilidade, geometria e drawer;
-5. `v75-pages.css` — Início, Despesas e Planeamento;
-6. `asset-loader.css` — estados genéricos de recursos visuais, antes de loaders especializados;
-7. componentes específicos do Mercado, incluindo `market-photo-loader.css/js`;
-8. `v75-usability.css` — camada final transversal de interação/anti-zoom;
-9. `design-asset-library.js` e `asset-loader.js` — registo/política e carregador opt-in, sem substituir o núcleo funcional.
+2. experiência e componentes v74;
+3. arquitetura/cabeçalho/estabilidade/layout/drawer v75;
+4. `v75-pages.css` — Início, Despesas e Planeamento;
+5. `asset-loader.css` — estados genéricos de assets;
+6. componentes especializados do Mercado, incluindo catálogo e `market-photo-loader.css/js`;
+7. `v75-market-flow.css` — refinamento de pesquisa, filtros e fluxo de compra;
+8. `v75-usability.css` — política final de interação/anti-zoom;
+9. runtimes de apresentação, com `v75-market-flow.js` depois de `v75-market-featured.js`.
 
-A existência de nomenclaturas e fallbacks históricos continua tolerada até uma consolidação com prova de ausência de regressões.
+## 4. Navegação v75
 
-## 4. Arquitetura de informação v75
-
-Navegação mobile principal:
+Mobile principal:
 
 `Início → Despesas → Mercado → Planeamento → Mais`
 
-O drawer/desktop acrescenta Relatórios, Metas, Segurança e Diagnóstico. `v75-architecture.js` mantém a correspondência entre páginas internas e pais de navegação.
+Drawer/desktop acrescenta Relatórios, Metas, Segurança e Diagnóstico. `v75-architecture.js` mantém os pais de navegação.
 
-## 5. Início
+## 5. Início, Despesas e Planeamento
 
-A composição usa as métricas existentes de `dashboardNumbers()` e componentes v74/v75:
+`75-pages1` é apenas apresentação. Despesas usa a vista canónica de `renderBills()`/`filterBills()` também no mobile, com Lista/Calendário, filtros, resumo e cartões. Planeamento continua a usar `renderPlanning()` para saldo, orçamento, conciliação e rendimentos. Início continua a derivar métricas do núcleo existente.
 
-- mês em análise;
-- resumo do total gasto;
-- orçamento e percentagem utilizada;
-- ações rápidas;
-- despesas por categoria;
-- alertas existentes.
-
-`75-pages1` altera apenas hierarquia, densidade, feedback e legibilidade.
-
-## 6. Despesas
-
-O fluxo funcional continua em `renderBills()`/`filterBills()` de `render.js`. A vista canónica contém Lista/Calendário, pesquisa, estado, categoria, datas, ordenação, resumo, cartões mobile/tabela desktop e ações existentes.
-
-`75-pages1` reexpõe esses mesmos elementos no móvel e deixa de usar `cdcExpenseFeed` simplificado como vista principal. Não duplica filtros nem cálculos.
-
-## 7. Planeamento
-
-`v75-architecture.js` gera o resumo do orçamento/categorias; `renderPlanning()` mantém saldo atual, saldo inicial, orçamento, conciliação e rendimentos. `75-pages1` apenas reorganiza densidade e empilhamento.
-
-## 8. Tipografia
+## 6. Tipografia e ícones
 
 Stack atual:
 
 `Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif`
 
-A política `75-assets1` estabelece:
+Política `75-assets1`:
 
-- preferir uma família por aplicação e máximo de duas;
-- verificar licença por família, canal e formato;
-- self-host apenas quando juridicamente permitido;
-- preferir WOFF2/subsets/pesos estritamente necessários;
-- usar fallback de sistema e estratégia equivalente a `font-display: swap` quando houver webfont aprovada;
-- não expandir `font-src 'self'` apenas para experimentar uma fonte externa.
+- preferir uma família tipográfica, máximo de duas;
+- licença/origem/formato verificados antes de incorporar;
+- self-host e WOFF2 quando permitido;
+- CSP não é expandida apenas para experimentar fontes.
 
-## 9. Ícones
+Ícones principais: **Lucide SVG local** via `ui-icons.js`/`ui-icons.css`. Bibliotecas externas permanecem fontes secundárias condicionais. Botões só com ícone precisam de nome acessível; decorativos usam `aria-hidden`.
 
-O sistema principal da Conta de Casa permanece **Lucide SVG local**, através de `ui-icons.js`/`ui-icons.css`.
+## 7. Biblioteca e loader transversal — `75-assets1`
 
-- sem CDN/icon font como dependência base;
-- `viewBox 24×24`, `currentColor`, dimensões explícitas;
-- decorativos usam `aria-hidden`;
-- botões apenas com ícone precisam de nome acessível;
-- dimensão visual típica 18–24 px; alvo tátil mínimo 44 px;
-- Material Symbols, Font Awesome e outros podem ser catalogados como fontes secundárias, mas não devem ser misturados sem decisão visual explícita;
-- SVGs/glifos históricos funcionam apenas como fallback até consolidação segura.
+`design-asset-library.js` expõe `CDCDesignAssetLibrary`; `asset-loader.js` expõe `CDCAssetLoader`.
 
-## 10. Biblioteca transversal de design — `75-assets1`
+O loader é opt-in:
 
-`design-asset-library.js` expõe `CDCDesignAssetLibrary`.
+- imagens: lazy, async decode, prioridade, `IntersectionObserver`, estados loading/ready/error e `no-referrer`;
+- vídeo/áudio: `preload="metadata"` por defeito e sem autoplay imposto;
+- Lottie: JSON local, runtime local previamente aprovado, `prefers-reduced-motion` e fallback;
+- same-origin por defeito e sem injeção automática de scripts/CDNs.
 
-O registo inclui fornecedores de fontes, ícones, animações e ferramentas de pairing. Cada entrada possui:
+O loader genérico não escolhe fotografias do catálogo de supermercado e não substitui `75-photo-loader3`.
 
-- `id` e nome;
-- categoria;
-- URL oficial conhecida;
-- estado no projeto (`primary`, `conditional`, `reference-only`, `restricted`, `unverified`, etc.);
-- estratégia de integração;
-- nota de licença;
-- regra operacional.
+## 8. Mercado — modelo de dados e contabilidade
 
-O catálogo **não é um package manager** e não inicia rede. A presença de um fornecedor no registo não autoriza incorporar qualquer ficheiro. `docs/DESIGN_ASSET_LIBRARY.md` documenta os critérios e fontes de verificação.
+`renderMarket()` apresenta a lista mensal. `marketMetrics()` e `finance.js` preservam o cálculo por quantidade.
 
-## 11. Loader genérico de assets — `75-assets1`
+Cada item mantém campos distintos:
 
-`asset-loader.js` expõe `CDCAssetLoader` e é opt-in. Só trabalha sobre elementos declarados com `data-cdc-*` ou pedidos explicitamente pela API.
+- `estimatedCents`: preço pesquisado/estimado por unidade;
+- `actualCents`: preço real confirmado por unidade;
+- `quantity`: quantidade;
+- `purchased`: estado de compra.
 
-### Imagens
+Regra vigente: um produto vindo do browser é criado com `estimatedCents = product.priceCents`, `actualCents = 0` e `purchased = false`. A revisão `75-market1` não escreve nenhum destes campos.
 
-- `loading="lazy"` por defeito;
-- `decoding="async"`;
-- `fetchPriority` quando suportado;
-- prioridade alta pode usar `eager`;
-- `data-cdc-src` permite diferir a atribuição do `src`;
-- `IntersectionObserver` inicia recursos diferidos perto do viewport;
-- estados `loading`, `ready` e `error`;
-- `referrerPolicy="no-referrer"` por defeito;
-- URL same-origin por defeito; data/blob são aceites apenas no contexto explicitamente permitido pelo loader.
+Quando um item comprado ainda não tem preço real, o cálculo existente pode contabilizar provisoriamente a estimativa e `marketMetrics()` sinaliza `missingReal`. A UI deve tornar essa pendência visível e pedir confirmação do preço pago.
 
-### Vídeo/áudio
+## 9. Mercado — pesquisa
 
-- `preload="metadata"` por defeito;
-- sem autoplay introduzido pelo loader;
-- estados de carregamento/erro normalizados.
+Existem dois contextos distintos:
 
-### Lottie
+### Browser de produtos
 
-- só aceita JSON local por defeito;
-- não cria `<script>` nem injeta CDN;
-- exige runtime `window.lottie` previamente aprovado e carregado localmente;
-- `prefers-reduced-motion` impede a animação e permite fallback estático;
-- falha de runtime resulta em estado `runtime-missing`, não em pedido remoto automático.
+`market-experience.js` consulta as fontes configuradas para encontrar produtos/preços. O resultado é apenas uma **estimativa de compra** até existir preço real confirmado.
 
-`asset-loader.css` fornece shimmer/fallback genérico, desativa movimento em `prefers-reduced-motion` e inclui suporte de `forced-colors`.
+`75-market1` mantém os handlers existentes e acrescenta apenas qualificação visual:
 
-## 12. Interação mobile e anti-zoom — `75-usability1`
+- `Preço pesquisado`;
+- nota explícita sobre estimativa;
+- ação `Adicionar` visível;
+- grelha do cartão com três colunas explícitas: fotografia, conteúdo e ação.
 
-- controlos de formulário mantêm pelo menos 16 px no breakpoint mobile para evitar auto-zoom de foco Safari/iOS;
-- `touch-action: manipulation` reduz zoom acidental por duplo toque em elementos interativos;
-- não se usa `user-scalable=no` nem `maximum-scale=1`;
-- pinch-to-zoom continua disponível;
-- alvos tácteis usam mínimo de 44 px e 48 px quando aplicável.
+### Pesquisa da lista
 
-`v75-usability.css` permanece depois das camadas de página/assets que possam afetar geometria de controlos.
+`#marketSearch` não consulta lojas: filtra `appState.market` já renderizado. `75-market1` altera apenas a comunicação para **Pesquisar na minha lista…**, preservando o evento existente que chama `renderMarket()`.
 
-## 13. Cofre e PIN
+## 10. Mercado — filtros e fluxo mobile
 
-Fluxo:
+Filtros canónicos existentes:
 
-`PIN → unlockVault() → enterApp() → sincronização conforme estado → shell`
+- Estado: todos / por comprar / comprados / comprados sem preço real;
+- Categoria;
+- Ordenação: pendentes primeiro, A–Z, maior estimativa, maior gasto, atualização recente.
 
-`75-startup2` permite que um dispositivo emparelhado apresente a cópia local decifrada sem esperar pela rede e inicia `syncNow('startup-background')` em segundo plano. Primeiro emparelhamento e estados não confirmados mantêm o gate original.
+`75-market1` não cria filtros novos. Torna os rótulos visíveis no mobile e reorganiza a grelha responsivamente.
 
-A biblioteca/loader `75-assets1` não participa do cofre nem do processo de derivação da chave.
+No fluxo mobile, `market-shopping-focus.js` continua responsável pela compactação e pelos grupos. `v75-market-flow.js` atua depois:
 
-## 14. Mercado — identidade, fotografias e loader especializado
+- estado visual: `Por comprar`, `Preço por confirmar`, `Comprado`;
+- significado do valor compacto: `Estimativa total`, `Estimativa provisória`, `Total contabilizado`;
+- item comprado com `actualCents <= 0`: o bloco `.market-mobile-real` existente é movido para fora de `Detalhes`, permanecendo dentro de `#marketList`;
+- o input conserva `data-market-actual`, portanto o handler delegado de `events.js` continua a guardar o preço real;
+- o grupo Comprados abre automaticamente quando contém uma pendência de preço real.
 
-Produtos continuam identificados por `marketId|pid`. Fotografias oficiais não representam preço nem transação.
+Não existe nova mutação financeira nessa camada.
 
-- `market-image-library.js`: cache partilhado de URL oficial validado;
-- `market-visual-catalog.js`: índice progressivo + renderer incremental;
-- `pingo-doce-photo-library.js`: inventário dedicado Pingo Doce;
-- `market-catalog-image-resolver.js`: resolvedor exato `75-catalog4`;
-- `market-photo-loader.js`: hidratação prioritária `75-photo-loader3`.
+## 11. Mercado — catálogo e fotografias
 
-O loader genérico `75-assets1` **não substitui** esta cadeia. Os cartões do Mercado continuam sob as regras de PID, origem oficial, cache e retry já existentes.
+Identidade canónica:
 
-## 15. Bases de imagens
+`marketId|pid`
 
-Biblioteca partilhada:
+Componentes:
 
-- DB: `conta-de-casa-market-image-library`;
-- store: `images`;
-- chave: `marketId|pid`.
+- `market-image-library.js`: biblioteca partilhada de URL validada;
+- `market-visual-catalog.js`: índice progressivo e renderer incremental;
+- `pingo-doce-photo-library.js`: inventário dedicado;
+- `market-catalog-image-resolver.js`: resolução exata `75-catalog4`;
+- `market-photo-loader.js`: loader especializado `75-photo-loader3`.
 
-Pingo Doce:
+Regras:
 
-- DB: `conta-de-casa-pingo-doce-photo-library`;
-- store principal: `products`;
-- estados: `pending | ready | missing`.
+- URL oficial deve corresponder ao retalhista e PID esperado;
+- falha de fotografia nunca remove o SKU;
+- `75-photo-loader3` mantém estados carregar → validar → `Sem fotografia`, com cooldown antes de retry automático;
+- `75-market1` não altera rede/cache/resolução. Apenas espelha `is-photo-loading` para `aria-busy` nos cartões do catálogo;
+- imagens do browser live, que não fazem parte do pipeline especializado por PID, podem usar `CDCAssetLoader` para estados genéricos de loading/error.
 
-## 16. Segurança, CSP e privacidade
+## 12. Scanner e QR
 
-A revisão `75-assets1` não expande CSP. Em particular:
+`75-market1` não contém lógica de ZXing, BarcodeDetector, scanner, QR ou captura de fatura. Na Parte 3 não foi encontrado erro funcional comprovado que justificasse alterar esse subsistema.
 
-- `font-src` permanece `'self'`;
-- nenhum Google Fonts, Adobe Fonts, Font Awesome Kit ou outro provider é contactado automaticamente;
-- URLs Lottie externas são bloqueadas pelo loader genérico;
-- nenhuma credencial, dado financeiro, PIN ou telemetria é enviado a fornecedores de design;
-- nenhuma chave de kit/serviço deve existir no código público;
-- um recurso externo futuro exige revisão explícita de licença, CSP, privacidade, disponibilidade offline e risco de supply chain.
+## 13. Mobile, acessibilidade e anti-zoom
 
-`75-pages1`/`75-usability1` permanecem isolados do estado financeiro; `75-assets1` também não referencia `appState`, valores monetários, PBKDF2, AES-GCM ou funções de persistência.
+`75-usability1` continua depois de `v75-market-flow.css`:
 
-## 17. Distribuição, cache e QA
+- inputs/selects/textareas com pelo menos 16 px no mobile;
+- `touch-action: manipulation` em controlos;
+- alvos tácteis 44/48 px;
+- sem `user-scalable=no` ou `maximum-scale=1`;
+- pinch-to-zoom preservado.
 
-O gerador Pages inclui, com `75-assets1`:
+`75-market1` acrescenta `aria-busy` no catálogo visual e suporta `forced-colors`/`prefers-reduced-motion` no CSS.
 
-- `asset-loader.css` antes do loader visual especializado do Mercado;
-- `design-asset-library.js`;
-- `asset-loader.js`;
-- `v75-usability.css` continua a última camada transversal de interação.
+## 14. Segurança e CSP
 
-O Service Worker inclui os três ativos e acrescenta `assets1` no fim da revisão de cache para invalidar a distribuição anterior sem quebrar assinaturas históricas de testes.
+`75-market1`:
 
-`tests/design-asset-library.test.cjs` valida:
+- não chama `commit()` nem `saveState()`;
+- não atribui `estimatedCents`, `actualCents`, `quantity` ou `purchased`;
+- não introduz endpoints, origem CSP, token, telemetria ou segredo;
+- não toca em `core.js`, `finance.js`, IndexedDB financeiro, PIN, PBKDF2, AES-GCM ou sync.
 
-- fornecedores e gates de integração;
-- política local-first e máximo de duas famílias;
-- CSP sem novas origens de fontes/kits;
-- URL policy same-origin;
-- ausência de injeção de runtime remoto;
-- lazy loading/async decode/prioridade de imagens;
-- media com preload leve;
-- fallback/reduced motion/forced colors;
-- isolamento financeiro/criptográfico;
-- presença e ordem dos ativos em `dist/` e Service Worker.
+## 15. Distribuição e QA
 
-Publicação funcional confirmada no SHA `a8e04d6811bd6eb08487de139fb19fb2f12128ec`: CI de `main` run `34478047035` e GitHub Pages run `34478091014`, ambos com sucesso. Validação física continua necessária para componentes opt-in em Safari/PWA, Android/Chrome e desktop.
+`v75-market-flow.css/js` são publicados como `75-market1`, incluídos no Service Worker e no cache com sufixo final `market1`. O CSS especializado fica antes de `v75-usability.css`; o JS é executado depois de `v75-market-featured.js`.
+
+`tests/v75-market-flow.test.cjs` verifica:
+
+- isolamento financeiro;
+- distinção entre pesquisa live e pesquisa da lista;
+- promoção do campo de preço real pendente;
+- qualificação de estimativa/valor contabilizado;
+- geometria de três colunas do browser;
+- `marketId|pid` e verificação de PID;
+- preservação de `75-photo-loader3`;
+- ausência de alterações de scanner;
+- inclusão e ordem no bundle Pages/Service Worker.
+
+Validação física permanece necessária em Safari/PWA, Android/Chrome, tablet e desktop.

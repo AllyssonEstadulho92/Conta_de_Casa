@@ -58,6 +58,7 @@ jobs:
           node --check v75-stability.js
           node --check v75-startup-guard.js
           node --check v75-market-featured.js
+          node --check v75-market-flow.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
 
@@ -120,6 +121,9 @@ jobs:
 
       - name: Market quantity and accounting tests
         run: node tests/market-live-accounting.test.cjs
+
+      - name: v75 Mercado flow tests
+        run: node tests/v75-market-flow.test.cjs
 
       - name: v64 scanner, billing-cycle and v74 shell tests
         run: node tests/v64-runtime.test.cjs
