@@ -1,90 +1,97 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 10 de setembro de 2026  
-Build: `v75`  
+Build publicado: `v75`  
+Programa técnico em preparação: `v76` — migração incremental TypeScript  
 Branch pública: `main`  
-HEAD público de partida da Parte 3: `4e130708de2b76eefe56d04e0e5a03d49d431446`  
-Branch de trabalho: `fix/v75-market-part3`  
-Distribuição: GitHub Pages / PWA
+Baseline funcional publicada: `c44348dbc5a942b601f360fa38793bd9d8b47a1a` (`75-market1`)  
+HEAD documental posterior em `main`: `954c0df349d5d307cd2afd33bb07042e7f670315`  
+Branch de trabalho: `feat/v76-typescript-foundation`  
+Distribuição atual: GitHub Pages / PWA
 
-Revisões integradas antes da Parte 3: `75-usability1`, `75-pages1`, `75-assets1`, `75-startup2`, `75-catalog4`, `75-photo-loader3`.  
-Revisão candidata atual: `75-market1`.
+## 1. Invariantes obrigatórias
 
-## 1. Invariantes obrigatórios
-
-- `STATE_VERSION = 5`;
+- `STATE_VERSION = 5` enquanto não existir migração de schema aprovada;
 - valores monetários em cêntimos inteiros;
 - estado financeiro em IndexedDB;
 - cofre PBKDF2-SHA-256 + AES-GCM;
 - `PBKDF2_ITERATIONS = 250000`;
 - sincronização GitHub opcional limitada ao envelope cifrado;
-- preço pesquisado no Mercado permanece `estimatedCents`; preço efetivamente confirmado permanece `actualCents`;
-- identidade de SKU/fotografia do catálogo permanece `marketId|pid`;
-- nenhuma alteração visual pode modificar cálculos, PIN, cifragem, QR, scanner ou sincronização.
+- preço pesquisado no Mercado permanece `estimatedCents` e preço efetivamente confirmado permanece `actualCents`;
+- identidade canónica de catálogo/fotografia permanece `marketId|pid` onde esse pipeline é utilizado;
+- QR, scanner, backup/restauro, PWA, Service Worker e funcionamento offline não podem regredir por causa da migração TypeScript.
 
-## 2. Baseline confirmada
+## 2. Baseline v75 confirmada
 
-A biblioteca transversal `75-assets1` foi integrada pelo PR #69 no SHA funcional `a8e04d6811bd6eb08487de139fb19fb2f12128ec`, com CI `34478047035` e GitHub Pages `34478091014`, ambos com sucesso. A atualização documental posterior foi integrada pelo PR #70; o HEAD usado para iniciar a Parte 3 é `4e130708de2b76eefe56d04e0e5a03d49d431446`, também com checks de qualidade e deploy Pages concluídos com sucesso.
+`75-market1` foi integrado pelo PR #71 no commit funcional `c44348dbc5a942b601f360fa38793bd9d8b47a1a`. O deploy GitHub Pages desse SHA concluiu com sucesso no run `34482133540`.
 
-## 3. Parte 3 — Mercado: diagnóstico
+A revisão preserva:
 
-### Factos confirmados no código
+- `core.js` e `finance.js`;
+- PIN, PBKDF2 e AES-GCM;
+- IndexedDB financeiro;
+- scanner e QR;
+- `estimatedCents` separado de `actualCents`;
+- loader de fotografias `75-photo-loader3` e pipeline especializado por PID.
 
-1. O ecrã tem dois tipos de pesquisa diferentes: o browser de produtos consulta fontes de mercado; `#marketSearch` filtra apenas a lista já adicionada. A apresentação não distinguia suficientemente estes contextos.
-2. `renderMarket()` já suporta pesquisa local, filtros por estado/categoria, ordenação, resumo, tabela desktop e cartões mobile. Não é necessário reimplementar lógica de filtros.
-3. `market-experience.js` guarda um preço encontrado como `estimatedCents` e inicializa `actualCents: 0`; esta separação está coberta por testes financeiros.
-4. No mobile, `market-shopping-focus.js` movia o campo **Preço real / unidade** para `Detalhes`. Depois de marcar um item como comprado, o cartão também passava para o grupo recolhido **Comprados**. Um item comprado sem preço real podia portanto esconder a próxima ação necessária.
-5. Os rótulos visuais Estado/Categoria/Ordenar estavam escondidos no mobile, deixando selects compactos potencialmente ambíguos.
-6. O cartão do browser de produtos contém três filhos diretos — fotografia, conteúdo e ação — mas a grelha declarava apenas duas colunas explícitas. A revisão corrige esta geometria sem alterar o renderer de dados.
-7. O catálogo progressivo já usa geometria estável e `75-photo-loader3` já fornece carregar → validar → `Sem fotografia`, cooldown e regras de PID. Não foi encontrada razão para substituir esse loader.
-8. O scanner/código de barras não apresenta nesta auditoria um erro funcional comprovado; não é alterado.
+Validação física em iPhone/Safari/PWA e breakpoints continua necessária para as revisões visuais v75.
 
-## 4. `75-market1` implementada na branch
+## 3. Objetivo v76
 
-Foram criados `v75-market-flow.js` e `v75-market-flow.css` como camada de apresentação isolada.
+Migrar o código funcional JavaScript para TypeScript por blocos pequenos, auditáveis e reversíveis, sem conversão massiva e sem trocar simultaneamente framework, UI e regras de negócio.
 
-### Pesquisa e filtros
+A meta final é:
 
-- `#marketSearch` passa a comunicar **Pesquisar na minha lista…**, distinguindo-o do browser de produtos/lojas;
-- os rótulos Estado, Categoria e Ordenar voltam a ser visíveis no mobile;
-- controlos são reorganizados responsivamente sem alterar IDs, valores ou handlers existentes.
+- fonte funcional mantida em TypeScript;
+- `strict` ativo;
+- nenhum `any` não justificado;
+- JavaScript gerado apenas no build para execução no browser;
+- paridade de resultados com a baseline antes de cada substituição de runtime;
+- testes automáticos preservados e ampliados.
 
-### Fluxo de compra mobile
+O plano completo está em `docs/TYPESCRIPT_MIGRATION.md`.
 
-- cada cartão recebe um estado visual explícito: **Por comprar**, **Preço por confirmar** ou **Comprado**;
-- o valor compacto passa a indicar o significado: **Estimativa total**, **Estimativa provisória** ou **Total contabilizado**;
-- quando um item comprado ainda tem `actualCents <= 0`, o mesmo bloco `.market-mobile-real` já criado por `render.js` é promovido para fora de `Detalhes` e apresentado como **Confirmar preço pago / unidade**;
-- se o grupo Comprados tiver itens sem preço real, é aberto automaticamente para não esconder a ação pendente;
-- o input mantém `data-market-actual`, portanto continua a usar o handler delegado existente em `events.js`. Nenhuma escrita financeira foi adicionada à nova camada.
+## 4. Bloco 1 — fundação TypeScript
 
-### Browser de produtos
+Implementado na branch `feat/v76-typescript-foundation`, ainda sem alteração de runtime:
 
-- o cartão passa a reservar três colunas explícitas: fotografia, conteúdo e ação;
-- o preço recebe a qualificação visível **Preço pesquisado**;
-- é apresentada a nota: preço encontrado é estimativa e o preço pago deve ser confirmado depois da compra;
-- a ação `+` mantém o mesmo `data-market-add-product`, mas ganha o rótulo visível **Adicionar** quando há espaço;
-- fotografias do browser live podem reutilizar `CDCAssetLoader` apenas para estados genéricos de carregamento/falha. Isto não toca no loader de catálogo por PID.
+- `package.json` com ferramenta TypeScript de desenvolvimento;
+- `tsconfig.json` em modo `strict`, `noEmit`, `strictNullChecks`, `noUncheckedIndexedAccess` e `exactOptionalPropertyTypes`;
+- `.gitignore` preparado para `node_modules` e artefactos TypeScript;
+- `src/types/primitives.ts` com tipos nominais para cêntimos, IDs, datas/horas e códigos de produto;
+- `src/types/persisted-state.ts` a representar o schema normalizado atual `STATE_VERSION = 5` observado em `core.js`;
+- `src/types/market.ts` com contratos do browser de Mercado atual e separação estimado/confirmado;
+- `src/type-tests/contracts.ts` com verificações positivas e `@ts-expect-error` para regressões estruturais;
+- workflow `.github/workflows/typescript.yml` isolado do deploy, para `npm run typecheck`.
 
-### Catálogo e fotografias
+O bundle público continua a usar `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js` e os restantes módulos JavaScript existentes. `index.html`, `scripts/prepare-pages.cjs`, `sw.js`, cálculos, armazenamento e segurança ainda não foram mudados para TypeScript.
 
-- cartões de `market-visual-catalog.js` mantêm `marketId|pid`, URL oficial com PID exato e `75-photo-loader3`;
-- `75-market1` apenas espelha `is-photo-loading` para `aria-busy`, melhorando semântica de acessibilidade;
-- não há alteração de retry, cache, IndexedDB de fotografias, resolução de URL, orçamento de rede ou fonte oficial.
+## 5. Factos técnicos encontrados durante o mapeamento
 
-## 5. Distribuição e QA
+1. `core.js` normaliza explicitamente faturas, pagamentos, rendimentos, artigos de Mercado, objetivos, atividade, auditoria, definições, conflitos e tombstones antes de produzir o estado v5.
+2. O artigo de Mercado persistido atual contém `id`, `name`, `category`, `quantity`, `unit`, `estimatedCents`, `actualCents`, `purchased`, `productCode`, dados de imagem e timestamps.
+3. O browser live atual pesquisa apenas Pingo Doce e Continente através de `cesta.pt` e pode enriquecer resultados com imagens Open Food Facts.
+4. O parser live extrai um `pid` da resposta Cesta para compor o `id` do resultado, mas esse `pid` não é atualmente exposto como propriedade própria do objeto de resultado nem persistido pelo fluxo `addProduct()` de `market-experience.js`. Isto deve ser revisto antes de unificar a identidade do browser live com a biblioteca canónica `marketId|pid`; não será corrigido por inferência no Bloco 1.
+5. A pesquisa de imagem do browser live é por termo e usa score de correspondência. É adequada como referência visual, mas não é prova forte de identidade do SKU. A futura biblioteca profissional deve preferir GTIN/PID e fontes verificadas.
 
-- `scripts/prepare-pages.cjs` publica `v75-market-flow.css/js?v=75-market1`;
-- CSS é carregado depois das camadas especializadas do Mercado e antes de `v75-usability.css`;
-- JS é carregado depois de `v75-market-featured.js`;
-- `sw.js` inclui ambos os ativos e acrescenta `market1` ao final da revisão de cache;
-- criado `tests/v75-market-flow.test.cjs` para fluxo mobile, geometria do browser, isolamento financeiro, `marketId|pid`, PID exato, loader especializado e bundle Pages;
-- CI e workflow Pages executam syntax check e o novo teste;
-- CI da branch já ficou verde no run `34481330929` antes da atualização documental final desta branch. Uma nova execução após os documentos ainda deve ser confirmada antes do merge.
+## 6. Precisão do Mercado
 
-## 6. Segurança
+O objetivo de cálculo será equivalente às operações observáveis numa compra: quantidade, peso, preço unitário, promoções conhecidas, descontos elegíveis, IVA quando determinado pelos dados, subtotal, total estimado, total confirmado e reconciliação com talão/fatura.
 
-`75-market1` não chama `commit()`, `saveState()`, não atribui `estimatedCents`, `actualCents` ou `quantity`, não altera CSP e não introduz endpoints. Também não altera `core.js`, `finance.js`, PBKDF2, AES-GCM, PIN, QR, scanner ou sincronização.
+A aplicação só poderá chamar um total de **exato** quando SKU, quantidade/peso, preço válido, promoção/condição aplicável e restantes fatores que alteram o valor estiverem confirmados. Na ausência dessa evidência, continuará a mostrar `Estimativa`.
 
-## 7. Próximo passo
+A Conta de Casa não será tratada como terminal POS proprietário e não processará pagamentos bancários apenas para imitar a caixa do supermercado.
 
-Concluir QA/PR/publicação de `75-market1`, validar o comportamento fisicamente no iPhone/Safari/PWA e depois avançar para a Parte 4: **Mais + ícones + acessibilidade final**.
+## 7. Imagens e logos
+
+A biblioteca de imagens continuará progressiva e associada à identidade do produto. Fotografias não alteram preço nem SKU.
+
+Logos SVG de supermercados só devem ser incorporados como assets locais depois de verificação da origem e direito de utilização. Não serão copiados de sites aleatórios, CDNs ou agregadores sem validação de licença/termos, CSP e privacidade.
+
+## 8. Próximo passo
+
+1. abrir PR do Bloco 1;
+2. executar CI legado e workflow TypeScript;
+3. corrigir qualquer erro de compilação antes de integrar;
+4. confirmar que o diff não altera o runtime publicado;
+5. só depois iniciar o Bloco 2: dinheiro, quantidades e datas, com testes de paridade JavaScript → TypeScript antes da substituição do código em produção.
