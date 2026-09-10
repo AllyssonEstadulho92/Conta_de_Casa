@@ -3,12 +3,11 @@
 Atualizado: 10 de setembro de 2026
 Build: `v75`
 Branch pública: `main`
-SHA publicado após a Parte 1: `c352c1883c16fd7df92aa0f26d23e3c5084b0fcf`
+SHA público antes da Parte 2: `e16c35c3a4e52dead57deccdde9630a89a4af998`
+Branch de trabalho atual: `fix/v75-pages-part2`
 Distribuição: GitHub Pages / PWA
 Revisão de usabilidade integrada: `75-usability1`
-PR de integração: `#66`
-CI de `main`: run `34471773663` — sucesso
-GitHub Pages: run `34471814790` — sucesso
+Revisão de páginas candidata: `75-pages1`
 
 ## Baseline preservada
 
@@ -16,58 +15,72 @@ GitHub Pages: run `34471814790` — sucesso
 - valores monetários em cêntimos;
 - estado financeiro em IndexedDB;
 - cofre PBKDF2-SHA-256 + AES-GCM;
-- `PBKDF2_ITERATIONS = 250000` preservado;
+- `PBKDF2_ITERATIONS = 250000`;
 - sincronização GitHub opcional limitada ao envelope cifrado;
 - UI `74-ui1`, Mercado `74-shopping2`, menu `73-menu8`, experiência `74-experience2`;
 - arquitetura `75-architecture2`, cabeçalho `75-header2`, estabilidade `75-stability1`, geometria `75-layout1`, drawer `75-drawer2`;
 - startup `75-startup2`, catálogo `75-catalog4`, loader `75-photo-loader3`;
 - usabilidade transversal `75-usability1`.
 
-## Estado confirmado
+## Estado confirmado antes da Parte 2
 
-A branch anterior `fix/v75-pin-images-stability` já estava integralmente contida em `main` antes desta auditoria. A Parte 1 da nova auditoria foi desenvolvida em `fix/v75-usability-part1`, validada por CI e integrada por squash através do PR `#66`.
+A Parte 1 foi integrada e publicada. O commit funcional `c352c1883c16fd7df92aa0f26d23e3c5084b0fcf` passou no CI `34471773663` e no GitHub Pages `34471814790`. A documentação final dessa fase foi integrada posteriormente em `main`, cujo SHA de partida para a Parte 2 é `e16c35c3a4e52dead57deccdde9630a89a4af998`.
 
-O commit público resultante é `c352c1883c16fd7df92aa0f26d23e3c5084b0fcf`. O CI de `main` terminou com sucesso no run `34471773663` e o workflow GitHub Pages do mesmo SHA terminou com sucesso no run `34471814790`.
+## Parte 2 — auditoria e melhoria de Início, Despesas e Planeamento
 
-## Auditoria UX/UI transversal — constatações
+### Factos encontrados
 
-Âmbito solicitado: ecrã de bloqueio, Início, Despesas, Mercado, Planeamento, Mais, ícones, navegação, responsividade e interação mobile.
+1. **Início** já usa composição v74/v75 com resumo do mês, orçamento, ações rápidas e categorias; no móvel as grelhas antigas são ocultadas para evitar duplicação.
+2. **Despesas** tinha uma divergência de usabilidade importante no móvel: a composição v74 escondia a navegação Lista/Calendário, `bill-filter-grid`, `billSummary` e `billsList`, substituindo a vista funcional por `cdcExpenseFeed` simplificado.
+3. O feed simplificado de Despesas suporta pesquisa e separação Todas/Entradas/Saídas, mas não expõe no móvel os filtros funcionais já existentes de estado, categoria, intervalo de datas e ordenação, nem a mesma riqueza de vencimento, progresso e ações dos cartões de fatura reais.
+4. **Planeamento** já apresenta resumo de orçamento e categorias, seguido do formulário de saldo/orçamento e da lista de rendimentos; precisava sobretudo de melhorar hierarquia, densidade e empilhamento em mobile.
+5. O sistema de ícones Lucide local já cobre as ações principais destas páginas; não é necessário introduzir nova dependência de ícones nesta fase.
 
-### Confirmado
+## `75-pages1` implementada na branch
 
-1. A aplicação possui arquitetura visual v75 por camadas, mantendo `core.js`/`finance.js` separados da apresentação.
-2. A navegação v75 usa cinco destinos principais em mobile: Início, Despesas, Mercado, Planeamento e Mais.
-3. A linguagem oficial de ícones é Lucide local via `ui-icons.js`; ainda existem fallbacks históricos no HTML/base, mas a hidratação atual normaliza os principais controlos visíveis.
-4. `v75-stability.css` já aplicava `font-size:16px` aos campos mobile para evitar o auto-zoom de foco do Safari/iOS.
-5. O `viewport` não usa `user-scalable=no` nem `maximum-scale=1`, preservando a ampliação manual por acessibilidade.
-6. O cofre dispõe de teclado PIN próprio em mobile, modo palavra-passe alternativo, recuperação/alteração de PIN e tratamento de VisualViewport.
-7. A distribuição pública é preparada por `scripts/prepare-pages.cjs`; o `index.html` do repositório é um template base e não representa sozinho o bundle final v75.
+Foi criada `v75-pages.css`, uma camada exclusivamente visual, carregada depois de arquitetura/drawer e antes de `v75-usability.css`.
 
-### Riscos/dívida técnica ainda abertos
+### Início
 
-- A aplicação mantém várias camadas visuais históricas. Só devem ser fundidas/removidas depois de prova de ausência de referências e regressões.
-- `PAGE_META`/template ainda contém nomenclaturas históricas como Faturas/Lista de compras, enquanto a arquitetura v75 apresenta Despesas/Mercado.
-- A validação física específica de `75-usability1` em iPhone/Safari/PWA ainda deve confirmar que toques e foco não provocam zoom involuntário.
-- As páginas necessitam agora da auditoria de detalhe por fluxo, densidade, estados e consistência visual; isso é tratado nas Partes 2 a 4.
+- reforça a hierarquia mês → resumo → ações rápidas → categorias;
+- melhora contraste estrutural do resumo sem alterar valores;
+- uniformiza feedback de toque/hover;
+- torna alertas móveis mais compactos e legíveis;
+- mantém as grelhas legadas ocultas no móvel para evitar informação duplicada.
 
-## Parte 1 concluída e publicada — `75-usability1`
+### Despesas
 
-Foi criada e publicada `v75-usability.css`, uma camada isolada de interação/apresentação:
+- restaura no móvel a navegação funcional **Lista / Calendário**;
+- deixa de usar o `cdcExpenseFeed` simplificado como vista principal;
+- volta a apresentar `bill-filter-grid`, `billSummary` e `billsList` no móvel;
+- torna acessíveis filtros de estado, categoria, datas e ordenação já suportados por `renderBills()`/`filterBills()`;
+- mantém pesquisa funcional e FAB de nova despesa;
+- melhora cartões móveis: hierarquia de valor em falta, vencimento, total/pago/categoria, progresso e ações;
+- não altera `render.js`, filtros, cálculos ou handlers.
 
-- `touch-action: manipulation` em controlos interativos para reduzir zoom acidental por duplo toque;
-- pinch-to-zoom e ampliação manual continuam disponíveis;
-- controlos de formulário mobile mantidos a 16 px;
-- alvos tácteis mínimos de 44 px e 48 px onde aplicável;
-- cofre mobile reforçado com `100dvh`, safe areas, scroll controlado e cartão responsivo;
-- navegação inferior e barras de Despesas/Mercado com áreas de toque estáveis;
-- respeito por `prefers-reduced-motion`.
+### Planeamento
 
-A camada foi adicionada ao gerador de Pages, ao allowlist/cache do Service Worker e aos testes de regressão. Durante o QA foram detetadas duas incompatibilidades em testes que verificavam a ordem textual da assinatura do cache; foram corrigidas preservando todas as assinaturas legadas e acrescentando `usability1` no final. A execução seguinte ficou verde.
+- melhora o resumo de orçamento e métricas;
+- empilha formulário e rendimentos em mobile;
+- reforça leitura de saldo atual, saldo calculado e diferença de conciliação;
+- melhora densidade de categorias e lista de rendimentos;
+- não altera fórmulas, saldos, orçamento ou rendimentos.
+
+## Distribuição e QA
+
+- `scripts/prepare-pages.cjs` inclui `v75-pages.css?v=75-pages1`;
+- `sw.js` inclui o ativo e invalida o cache com sufixo `pages1`;
+- `tests/v75-stability.test.cjs` verifica visibilidade funcional de Despesas no móvel, empilhamento de Planeamento, distribuição e isolamento da camada;
+- `v75-usability.css` continua a ser a camada final de interação, preservando anti-zoom e alvos tácteis.
 
 ## Segurança
 
-A Parte 1 não alterou `core.js`, `finance.js`, PBKDF2, AES-GCM, PIN, IndexedDB, sincronização, faturas, pagamentos, preços, QR ou scanner. Não foram adicionados segredos, origens externas, bibliotecas runtime ou telemetria.
+`75-pages1` é CSS puro. Não acede a `appState`, IndexedDB, PIN, PBKDF2, AES-GCM, sincronização, tokens, QR, scanner, pagamentos, preços ou funções de persistência. A mudança de Despesas apenas volta a tornar visível a UI funcional já existente.
 
-## Próximo passo
+## Estado da integração
 
-Parte 2: auditoria e melhoria de **Início + Despesas + Planeamento**, com foco em hierarquia, densidade, estados vazios/erro/carregamento, pesquisa/filtros/ações, consistência de valores e responsividade. Só depois avançar para Mercado e Mais/ícones/acessibilidade final.
+A implementação está na branch `fix/v75-pages-part2`. Só deve ser integrada em `main` depois de CI completo verde, comparação `behind 0`, revisão do PR e confirmação posterior de CI/Pages no SHA publicado.
+
+## Próximo passo após publicação
+
+Parte 3: auditoria de **Mercado**, com foco em pesquisa, filtros, catálogo, cartões, imagens, estados de carregamento e fluxo de compra, preservando a separação entre estimativa e valor confirmado.

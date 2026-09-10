@@ -3,11 +3,12 @@
 Atualizado: 10 de setembro de 2026
 Build: `v75`
 Distribuição: GitHub Pages / PWA
-Revisão UX candidata: `75-usability1`
+Revisão de usabilidade integrada: `75-usability1`
+Revisão de páginas candidata: `75-pages1`
 
 ## 1. Invariantes
 
-A aplicação é PWA estática/local-first. Estado financeiro, apresentação, Mercado e catálogos são camadas separadas. Permanecem obrigatórios:
+A aplicação é PWA estática/local-first. Estado financeiro, apresentação, Mercado e catálogos permanecem separados. São obrigatórios:
 
 - `STATE_VERSION = 5`;
 - dinheiro em cêntimos inteiros;
@@ -24,22 +25,23 @@ A aplicação é PWA estática/local-first. Estado financeiro, apresentação, M
 - `render.js`, `forms.js`, `events.js`: UI funcional;
 - `sync.js` + `sync-conflict-policy.js`: sincronização cifrada e conflitos.
 
-As revisões visuais não alteram `core.js`, `finance.js`, pagamentos, faturas, QR, scanner, quantidades ou valores financeiros.
+Revisões visuais não podem alterar cálculos, pagamentos, faturas, QR, scanner, quantidades, preços confirmados, PIN ou derivação de chave.
 
 ## 3. Composição da interface
 
-O HTML de raiz funciona como template funcional. A distribuição pública é preparada por `scripts/prepare-pages.cjs`, que copia apenas os ativos permitidos para `dist/`, ajusta o build e injeta as camadas visuais/runtime da versão publicada.
+O `index.html` é o template funcional. A distribuição pública é preparada por `scripts/prepare-pages.cjs`, que copia apenas os ativos permitidos para `dist/`, ajusta o build e injeta as camadas publicadas.
 
 Ordem conceptual das camadas atuais:
 
 1. base: `styles.css`, `design-system.css`, `mobile-layout.css`;
 2. experiência v74 e componentes específicos;
 3. arquitetura v75: `v75-architecture.css/js`;
-4. refinamentos de cabeçalho, estabilidade, proporção e drawer;
-5. `v75-usability.css` como última camada transversal de interação;
-6. componentes específicos do Mercado e runtimes que não modificam o núcleo financeiro.
+4. cabeçalho, estabilidade, geometria e drawer;
+5. `v75-pages.css` — revisão de Início, Despesas e Planeamento;
+6. `v75-usability.css` — última camada transversal de interação/anti-zoom;
+7. componentes específicos do Mercado e runtimes que não substituem o núcleo financeiro.
 
-A existência de nomenclaturas/estilos de fallback na base é deliberadamente tolerada enquanto a camada v75 estiver ativa. Consolidação física só deve remover código depois de confirmar ausência de referências e regressões.
+A existência de nomenclaturas e estilos de fallback na base continua tolerada enquanto as camadas v75 estiverem ativas. Consolidação física só pode remover código depois de confirmar ausência de referências e regressões.
 
 ## 4. Arquitetura de informação v75
 
@@ -47,33 +49,69 @@ Navegação mobile principal:
 
 `Início → Despesas → Mercado → Planeamento → Mais`
 
-O drawer/desktop acrescenta Relatórios, Metas, Segurança e Diagnóstico. `v75-architecture.js` mantém a correspondência entre páginas internas e os respetivos pais de navegação, incluindo Calendário em Despesas, Metas em Planeamento e Segurança/Diagnóstico em Mais.
+O drawer/desktop acrescenta Relatórios, Metas, Segurança e Diagnóstico. `v75-architecture.js` mantém a correspondência entre páginas internas e pais de navegação, incluindo Calendário em Despesas, Metas em Planeamento e Segurança/Diagnóstico em Mais.
 
-A página **Mais** funciona como hub de organização, conta/dados e aplicação, sem duplicar estado financeiro.
+## 5. Início
 
-## 5. Ícones
+A composição do Início é construída sobre métricas existentes de `dashboardNumbers()` e componentes v74/v75:
 
-A linguagem visual oficial é Lucide local através de `ui-icons.js` e `ui-icons.css`.
+- mês em análise;
+- resumo do total gasto;
+- orçamento e percentagem utilizada;
+- ações rápidas;
+- despesas por categoria;
+- alertas existentes do núcleo.
 
-- sem CDN ou web font;
+`75-pages1` altera apenas apresentação: hierarquia, densidade, estados de interação e legibilidade. As grelhas antigas do dashboard permanecem ocultas no móvel para não duplicar informação que já foi recomposta.
+
+## 6. Despesas
+
+O fluxo funcional continua em `renderBills()`/`filterBills()` de `render.js`. O template já contém:
+
+- Lista / Calendário;
+- pesquisa;
+- filtro de estado;
+- filtro de categoria;
+- intervalo de datas;
+- ordenação;
+- resumo de resultados;
+- cartões móveis e tabela desktop;
+- ações Detalhes/Editar/Pagar/Excluir conforme estado.
+
+A experiência v74 escondia no móvel a maior parte destes elementos e usava `cdcExpenseFeed` simplificado. `75-pages1` não reimplementa filtros nem cálculos: volta a apresentar no móvel a vista funcional canónica (`bill-filter-grid`, `billSummary`, `billsList`) e oculta apenas o feed simplificado nessa largura. Assim, os mesmos IDs e handlers são usados em desktop e mobile.
+
+A tabela continua oculta em mobile pela camada de estabilidade, sendo apresentada a `bill-mobile-list` já produzida pelo renderer.
+
+## 7. Planeamento
+
+O Planeamento mantém duas fontes visuais complementares:
+
+- `v75-architecture.js` gera o resumo do orçamento/categorias a partir de `CDCV74.dashboardMetrics()` e `categoryEntries()`;
+- `renderPlanning()` mantém o formulário real de saldo atual, saldo inicial, orçamento, conciliação e rendimentos.
+
+`75-pages1` apenas reorganiza densidade e empilhamento. Em mobile, o resumo vem primeiro e os dois painéis funcionais passam a uma coluna. Nenhum valor é recalculado em CSS.
+
+## 8. Ícones
+
+A linguagem oficial permanece Lucide local através de `ui-icons.js` e `ui-icons.css`.
+
+- sem CDN ou icon font;
 - `viewBox 24×24`, `currentColor`, dimensões explícitas;
-- SVGs e glifos existentes no HTML/base funcionam como fallback antes da hidratação;
-- a hidratação normaliza marca, navegação, pesquisa, selects, bloqueio, privacidade, tema, alertas, ações e diálogos.
+- SVGs/glifos antigos funcionam apenas como fallback antes da hidratação;
+- ações como nova despesa, novo rendimento, limpar filtros e navegação já são normalizadas pelo sistema Lucide.
 
-A dívida técnica restante é reduzir fallbacks duplicados numa fase de consolidação, não substituí-los de forma agressiva durante a auditoria funcional.
+## 9. Interação mobile e anti-zoom — `75-usability1`
 
-## 6. Interação mobile e anti-zoom — `75-usability1`
+A política distingue:
 
-A política adotada distingue dois comportamentos:
+- auto-zoom de foco Safari/iOS: evitado com controlos de formulário a pelo menos `16px`;
+- zoom acidental por duplo toque: reduzido com `touch-action: manipulation` em elementos interativos.
 
-- **auto-zoom de foco do Safari/iOS**: evitado com controlos de formulário a pelo menos `16px` em mobile;
-- **zoom acidental por duplo toque em controlos**: reduzido com `touch-action: manipulation` nos elementos interativos.
+Não é usado `user-scalable=no` nem `maximum-scale=1`. Pinch-to-zoom permanece disponível. Alvos tácteis usam referência mínima de 44 px e 48 px onde aplicável.
 
-Não é usado `user-scalable=no` nem `maximum-scale=1`. O pinch-to-zoom permanece disponível para acessibilidade.
+`v75-pages.css` é carregado antes de `v75-usability.css`, portanto a revisão das páginas não pode sobrepor a camada final de anti-zoom/alvos tácteis.
 
-Alvos tácteis usam referência mínima de 44 px e, nos controlos densos de Despesas/Mercado, 48 px quando aplicável.
-
-## 7. Cofre e PIN
+## 10. Cofre e PIN
 
 Fluxo funcional:
 
@@ -81,15 +119,9 @@ Fluxo funcional:
 
 `75-startup2` permite que um dispositivo previamente emparelhado apresente a cópia local já decifrada sem aguardar a rede e inicia `syncNow('startup-background')` em segundo plano. Primeiro emparelhamento e estados não confirmados conservam o gate original.
 
-A camada `75-usability1` não toca em derivação de chave nem validação do PIN. Em mobile reforça apenas:
+`75-usability1` atua apenas em viewport, safe areas, scroll e alvos tácteis do cofre.
 
-- viewport dinâmico `100dvh`;
-- safe areas;
-- scroll controlado quando o teclado reduz a área útil;
-- cartão de cofre responsivo;
-- alvos tácteis do teclado/ações.
-
-## 8. Mercado — identidade e imagens
+## 11. Mercado — identidade e imagens
 
 Produtos continuam identificados por `marketId|pid`. Fotografias oficiais não representam preço nem transação.
 
@@ -99,9 +131,7 @@ Produtos continuam identificados por `marketId|pid`. Fotografias oficiais não r
 - `market-catalog-image-resolver.js`: resolvedor exato `75-catalog4`;
 - `market-photo-loader.js`: hidratação prioritária `75-photo-loader3`.
 
-Para um cartão com `sourceUrl` oficial exata, a tentativa direta é limitada e não repete o bridge legado. O loader usa estados carregar → validar → **Sem fotografia** e mantém o SKU mesmo sem imagem.
-
-## 9. Bases de imagens
+## 12. Bases de imagens
 
 ### Partilhada
 
@@ -111,8 +141,6 @@ Store: `images`
 
 Chave: `marketId|pid`
 
-Guarda apenas URL oficial validado, página oficial, nome/embalagem técnicos e timestamps.
-
 ### Pingo Doce
 
 DB: `conta-de-casa-pingo-doce-photo-library`
@@ -121,25 +149,32 @@ Store principal: `products`
 
 Estados: `pending | ready | missing`.
 
-## 10. Segurança
+## 13. Segurança
 
-As camadas visuais/imagens não podem manipular `appState`, `saveState()`, `commit()`, `estimatedCents`, `actualCents`, `amountCents`, PIN, passwords ou tokens salvo nos módulos funcionais já responsáveis por esses dados.
+`75-pages1` e `75-usability1` são CSS puros. Não podem manipular `appState`, `saveState()`, `commit()`, `estimatedCents`, `actualCents`, `amountCents`, PIN, passwords, tokens ou IndexedDB.
 
-`75-usability1` é CSS puro e não introduz scripts, rede, armazenamento, segredos ou origens CSP.
+A reexposição da vista funcional de Despesas no móvel usa elementos e handlers já existentes; não acrescenta novas mutações de estado nem novas origens de rede.
 
-## 11. Distribuição e cache
+## 14. Distribuição e cache
 
-O gerador Pages inclui `v75-usability.css?v=75-usability1` no final das camadas visuais transversais. O Service Worker inclui o mesmo ativo na allowlist e usa cache revisionado com `usability1`, garantindo invalidação do cache anterior após publicação.
+O gerador Pages inclui:
 
-## 12. QA
+- `v75-pages.css?v=75-pages1`;
+- `v75-usability.css?v=75-usability1` logo depois, mantendo a camada de interação por último.
 
-O teste `tests/v75-stability.test.cjs` valida também:
+O Service Worker inclui ambos os ativos e usa cache revisionado com `pages1`, garantindo invalidação do cache anterior após publicação.
 
-- `touch-action: manipulation`;
-- `16px` nos controlos mobile;
-- ausência de `maximum-scale`/`user-scalable=no` no viewport;
-- safe areas/`100dvh` do cofre;
-- inclusão no bundle de Pages e no Service Worker;
-- isolamento da camada de usabilidade relativamente a estado financeiro/criptografia.
+## 15. QA
 
-A validação em hardware continua necessária para Safari/PWA e Android/Chrome.
+`tests/v75-stability.test.cjs` valida adicionalmente:
+
+- presença das três páginas auditadas em `v75-pages.css`;
+- navegação Lista/Calendário visível em Despesas no móvel;
+- filtros, resumo e lista funcional de Despesas visíveis;
+- feed simplificado v74 oculto na vista móvel principal;
+- Planeamento empilhado numa coluna em mobile;
+- inclusão no bundle Pages e no Service Worker;
+- ordem `v75-pages.css` → `v75-usability.css`;
+- isolamento relativamente a estado financeiro/criptografia.
+
+Validação em hardware continua necessária para Safari/PWA e Android/Chrome.
