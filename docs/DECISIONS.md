@@ -18,168 +18,100 @@ Este ficheiro mantém as decisões vigentes necessárias para continuidade. O hi
 - A UI móvel não deve esconder funcionalidades canónicas sem substituição funcional equivalente.
 - Catálogos de fontes/ícones/animações não equivalem a dependências autorizadas; cada asset exige origem/licença/integração aprovadas.
 
-## D-046 a D-055 — decisões preservadas
+## D-056 a D-063 — decisões preservadas
 
-Mantêm-se aceites as decisões anteriores sobre carrossel de destaques, biblioteca geral por retalhista+PID, catálogo progressivo sem persistir preços, biblioteca Pingo Doce isolada, publicação condicionada a CI/Pages, separação entre validade oficial e transporte, prevalência de evidência em hardware, renderer incremental sem destruir cartões estáveis e propagação `cdc:market-photo-ready`.
+Mantêm-se vigentes as decisões sobre abertura pós-PIN sem espera remota em dispositivo emparelhado, estados terminais de fotografia, resolução oficial sem tentativas redundantes, anti-zoom acessível, Despesas mobile canónicas, biblioteca de design local-first e confirmação explícita de preço real no Mercado.
 
-## D-056 — PIN não deve esperar pela rede num dispositivo já emparelhado
+## D-064 — migração para TypeScript será incremental
 
-Estado: integrado em `main`.
+Estado: integrado em `main` pelo PR #72.
 
-- manter PBKDF2 em 250000 iterações;
-- dispositivo com cópia local cifrada confirmada pode abrir após PIN sem bloquear na verificação remota;
-- `syncNow('startup-background')` continua a verificação;
-- primeiro emparelhamento e estados não confirmados mantêm o gate original.
-
-## D-057 — carregamento de fotografia deve terminar num estado estável
-
-Estado: integrado em `main` como `75-photo-loader3`.
-
-- 0–7 s: carregar;
-- 7–12 s: validar;
-- depois: `Sem fotografia`;
-- cooldown de 5 min antes de retry automático;
-- falha temporária nunca elimina SKU.
-
-## D-058 — `sourceUrl` oficial exata não dispara resolução redundante
-
-Estado: integrado em `main` como `75-catalog4`.
-
-Uma tentativa direta sem resultado termina para cartões com `sourceUrl` exata; pesquisa livre pode continuar a usar o bridge legado. Host/path/PID permanecem estritos.
-
-## D-059 — imagem Pingo Doce comprovada deve reconciliar a base dedicada
-
-Estado: integrado em `main`.
-
-Quando o loader encontra fotografia Pingo Doce válida, o mesmo `marketId|pid` é atualizado na biblioteca dedicada e a métrica é refrescada.
-
-## D-060 — impedir zoom acidental sem bloquear acessibilidade
-
-Estado: integrado em `main` como `75-usability1`.
-
-- `touch-action: manipulation` em controlos;
-- formulários mobile com pelo menos 16 px;
-- alvos tácteis 44/48 px;
-- cofre com `100dvh`/safe areas/scroll;
-- sem `user-scalable=no` nem `maximum-scale=1`.
-
-## D-061 — Despesas mobile usa a vista funcional canónica
-
-Estado: integrado em `main` como `75-pages1` pelo PR #68, merge `c8ec45893c8936093ecd7c7da9ee08c9a268109c`.
-
-`renderBills()`/`filterBills()` continuam responsáveis por pesquisa, estado, categoria, datas, ordenação, resumo e ações. A camada visual reexpõe esta UI no mobile em vez de substituir por um feed funcionalmente inferior.
-
-## D-062 — catálogo de design local-first com gate de licença e loader opt-in
-
-Estado: integrado em `main` como `75-assets1` pelo PR #69, merge `a8e04d6811bd6eb08487de139fb19fb2f12128ec`.
-
-- `design-asset-library.js` regista fornecedores sem iniciar rede;
-- Lucide local permanece sistema principal de ícones;
-- preferir uma família tipográfica, máximo duas;
-- não carregar Google Fonts, Adobe Fonts, Font Awesome kits, Lottie ou outros CDNs automaticamente;
-- `asset-loader.js/css` é opt-in para imagens/media/Lottie local;
-- o loader genérico não substitui `market-photo-loader.js` nem decide PID/fotografias do Mercado;
-- CSP não foi expandida.
-
-## D-063 — item comprado sem preço real deve tornar a confirmação imediatamente visível
-
-Estado: integrado em `main` como `75-market1` pelo PR #71, commit funcional `c44348dbc5a942b601f360fa38793bd9d8b47a1a`.
-
-1. `v75-market-flow.js/css` permanece camada de apresentação.
-2. O mesmo `.market-mobile-real`/`data-market-actual` continua a ser reutilizado; não existe segundo handler financeiro.
-3. Item comprado sem preço real expõe a confirmação fora de `Detalhes`.
-4. Grupo Comprados abre quando existe preço por confirmar.
-5. Estados visuais: `Por comprar`, `Preço por confirmar`, `Comprado`.
-6. Valores compactos distinguem estimativa de total contabilizado.
-7. Pesquisa live e pesquisa da lista permanecem contextos distintos.
-8. Scanner, PID e loader especializado não são alterados sem erro comprovado.
-
-## D-064 — migração para TypeScript será incremental e sem mudança simultânea de runtime
-
-Data: 10 de setembro de 2026. Estado: fundação integrada em `main` pelo PR #72, merge `2c1d78508507ab77d6df95850568d9fd7f6b9577`.
-
-1. Destino: código-fonte funcional em TypeScript com `strict` ativo.
-2. TypeScript é ferramenta de build/desenvolvimento; o browser continua a receber JavaScript.
-3. Não introduzir React, Flutter, .NET MAUI ou outro framework durante a migração de linguagem.
-4. Cada módulo JavaScript só é substituído depois de testes de paridade demonstrarem equivalência.
-5. `STATE_VERSION`, schema persistido, algoritmos de cifragem e formato de sincronização não mudam apenas por causa da linguagem.
-6. `any` não justificado não é aceite como estratégia de migração.
-7. Cada nova camada TypeScript deve ficar testável e reversível até a substituição completa do runtime correspondente.
+1. Destino: código-fonte funcional em TypeScript com `strict`.
+2. Browser continua a receber JavaScript durante a transição.
+3. Não introduzir React, Flutter ou .NET MAUI durante a migração de linguagem.
+4. Cada módulo só substitui runtime depois de paridade e regressão.
+5. Schema, cifragem e sincronização não mudam apenas por causa da linguagem.
+6. `any` não justificado não é estratégia aceite.
 
 ## D-065 — total de Mercado só pode ser rotulado exato com evidência completa
 
-Data: 10 de setembro de 2026. Estado: aceite para v76.
+Um total só pode ser apresentado como **Exato** quando estiverem confirmados todos os fatores que alteram o valor: SKU, quantidade/peso, preço aplicável, promoção/condições, cartão/cupão quando aplicável, regra fiscal necessária e ajustes identificados na fatura/talão.
 
-Um total do Mercado só pode ser apresentado como **Exato** quando estiverem confirmados todos os fatores que alteram o valor final: SKU, quantidade/peso, preço aplicável, promoção/condições, cartão/cupão quando aplicável, regra fiscal/IVA necessária e ajustes identificados na fatura/talão.
-
-Se algum fator determinante não estiver confirmado, o estado deve ser `Estimativa` ou `Preço por confirmar`.
+Sem isso, o estado deve permanecer `Estimativa` ou `Preço por confirmar`.
 
 ## D-066 — imagens e logos não podem enfraquecer identidade, licença ou CSP
 
-Data: 10 de setembro de 2026. Estado: aceite para v76.
+- imagens são enriquecimento visual, não prova de preço;
+- preferir GTIN/PID e fonte verificada;
+- logos SVG só entram como assets locais com origem/direito de utilização verificados;
+- não copiar SVGs de agregadores aleatórios;
+- não expandir CSP apenas para branding.
 
-- imagens de produto são enriquecimento visual e nunca prova de preço;
-- preferência futura por correspondência GTIN/PID e fonte verificada;
-- logos SVG de mercados só entram como assets locais com origem e direito de utilização verificados;
-- não copiar SVGs de agregadores/sites aleatórios;
-- não expandir CSP nem introduzir CDN apenas para branding;
-- manter fallback textual/visual enquanto a origem do asset não estiver validada.
+## D-067 — modernização de Despesas é camada visual isolada
 
-## D-067 — modernização de Despesas será uma camada visual isolada
+Estado: integrado em `main` como `75-expenses1` pelo PR #73.
 
-Data: 10 de setembro de 2026. Estado: integrado em `main` como `75-expenses1` pelo PR #73, merge funcional `176450fcb236a2272afb9d6a6983b42681aa705d`.
+`renderBills()`/`filterBills()` permanecem canónicos. A modernização não altera `core.js`, `finance.js`, persistência, segurança ou IDs funcionais.
 
-1. `v75-expenses-modern.css` é exclusivamente visual e limitado a `html.cdc-v75 #page-bills`.
-2. Não alterar `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js` nem os IDs canónicos para este redesign.
-3. Modernizar tabs, pesquisa/criação, filtros, resumo, tabela desktop e cartões mobile.
-4. No mobile, manter `Em falta` como foco principal e preservar vencimento, estado, Total, Pago, Categoria, progresso e ações.
-5. Respeitar `prefers-reduced-motion` e `forced-colors`.
-6. Carregar depois de `v75-pages.css` e antes de `v75-usability.css`.
-7. Proteger o bundle/cache e a integração com teste próprio.
+## D-068 — Veggie Burger/X usa um único controlo TypeScript
 
-Evidência pós-integração: CI `34496500755`, TypeScript `34496500641` e Pages `34496540096` com sucesso.
+Estado original: `76-veggie-menu1` integrado pelo PR #74.  
+Revisão corretiva: `76-veggie-menu2` em `fix/v76-menu-flow-modern-ui`.
 
-## D-068 — Veggie Burger/X será um único controlo TypeScript sobre o drawer validado
+### Decisão vigente
 
-Data: 10 de setembro de 2026. Estado: **integrado em `main`** como `76-veggie-menu1` pelo PR #74, merge `f196545662b5d120a0dd21b2c498a209cfc144d3`.
+1. Fechado: exatamente duas linhas horizontais.
+2. Aberto: as mesmas linhas formam X (`+45°/-45°`).
+3. `#mobileMenuBtn` é o único controlo canónico.
+4. Fonte em `src/ui/veggie-menu-toggle.ts` com TypeScript strict.
+5. A animação das duas barras é explícita via Web Animations API; ambas mantêm `opacity: 1`.
+6. O botão fica fora da `.nav-drawer-shell` transformada enquanto o drawer está aberto.
+7. `aria-expanded` e `aria-label` continuam associados ao mesmo botão.
+8. `prefers-reduced-motion`, foco e alvo táctil permanecem suportados.
+9. A camada não pode aceder ao estado financeiro.
 
-### Factos
+### Correção de decisão anterior
 
-- `mobile-menu-toggle.js` v73 já controla abertura, fecho, swipe, foco, `aria-expanded` e devolução do botão ao cabeçalho;
-- o controlador v73 oculta `#drawerCloseBtn`, evitando um segundo X;
-- anteriormente movia `#mobileMenuBtn` para `.drawer-head` quando o drawer abria;
-- `.drawer-head` está dentro de `.nav-drawer-shell`, superfície transformada durante o swipe;
-- isso fazia o próprio botão acompanhar a transformação e poder sair parcialmente da área visível.
+A regra anterior de reforçar a topbar sticky foi **revogada** após evidência física em iPhone/Safari mostrar conflito com o fluxo visual durante scroll. O menu e o comportamento do header são decisões separadas.
+
+## D-069 — topbar mobile deve permanecer no fluxo normal
+
+Data: 10 de setembro de 2026. Estado: aceite para `76-modern-ui1`.
+
+### Facto observado
+
+Captura física em iPhone/Safari mostrou conteúdo e topbar em composição incoerente durante scroll, causada pela sobreposição de camadas que combinavam header fixo/sticky e padding estrutural reservado.
 
 ### Decisão
 
-1. O ícone fechado é **Veggie Burger de exatamente duas linhas horizontais**.
-2. As mesmas duas linhas formam o X: superior `+45°`, inferior `-45°`; não criar segundo botão de fecho.
-3. A fonte é `src/ui/veggie-menu-toggle.ts`, verificada por TypeScript strict.
-4. O runtime browser derivado é `v76-veggie-menu.js`, carregado depois de `mobile-menu-toggle.js`.
-5. Enquanto o dialog estiver aberto, mover **o mesmo** `#mobileMenuBtn` para filho direto de `#mobileDrawer`, fora de `.nav-drawer-shell`, para que o swipe não o leve com o painel.
-6. Quando o dialog fechar, o controlador v73 devolve o mesmo botão ao cabeçalho original.
-7. Reforçar `.topbar` como sticky no mobile.
-8. Reservar espaço na `.drawer-head` para evitar colisão com marca/título.
-9. Respeitar `prefers-reduced-motion`, `forced-colors`, foco por teclado e alvo táctil de 44 px.
-10. A camada não pode chamar `commit()`, `saveState()` nem aceder a dados financeiros.
+1. Em mobile, `.topbar` usa `position: relative` e não acompanha o scroll.
+2. `.main` não reserva `padding-top` para header fixo.
+3. O conteúdo começa depois do cabeçalho no fluxo normal.
+4. A navegação inferior pode continuar persistente por ser navegação global, não conteúdo editorial.
+5. Safe areas, acessibilidade e alvos tácteis permanecem obrigatórios.
 
 ### Fundamento
 
-O problema era de composição visual durante uma transformação CSS, não de domínio ou de navegação. Manter o controlador v73 reduz a superfície de regressão, enquanto a camada TypeScript corrige a geometria e inicia a migração real da UI para TS.
+Um cabeçalho fixo só é útil se não competir com o conteúdo. Na Conta de Casa, a captura real demonstrou perda de coerência visual; a solução é reduzir complexidade e restaurar fluxo natural.
 
-### Evidência
+## D-070 — UI/UX master é uma última camada visual transversal e isolada
 
-Antes do merge, CI/TypeScript do PR #74 passaram. Depois do merge em `main`:
+Data: 10 de setembro de 2026. Estado: aceite para `76-modern-ui1`.
 
-- TypeScript `34517268279`: sucesso;
-- CI `34517268450`: sucesso;
-- Pages `34517324242`: sucesso.
+1. `v76-modern-ui.css` é carregado depois de `v75-usability.css` e tem autoridade final apenas sobre apresentação.
+2. O sistema cobre explicitamente Dashboard, Despesas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições.
+3. Também cobre botões, inputs, tabs, tabelas, dialogs, drawer, navegação inferior e estados vazios.
+4. Usa tokens comuns de cor, superfície, borda, raio, sombra, estado e foco para evitar páginas visualmente desconectadas.
+5. Não altera handlers, dados, cálculos, IndexedDB, PIN, cifragem, sync, scanner, QR ou CSP.
+6. Tema escuro, `prefers-reduced-motion`, `forced-colors`, pinch-to-zoom e alvos tácteis permanecem requisitos.
+7. Camadas antigas só podem ser consolidadas/removidas depois de validação física e prova de ausência de regressão.
 
-A validação física em iPhone/Safari/PWA permanece necessária porque os testes automáticos não substituem o comportamento real de gestos do Safari.
+## Evidência atual
 
-## Evidência técnica v76
+Branch `fix/v76-menu-flow-modern-ui`: CI push `34537017339` concluído com sucesso, incluindo os novos testes `v76 Veggie Burger TypeScript tests` e `v76 master UI tests`, além das regressões financeiras, Mercado, segurança, responsividade, acessibilidade e sincronização.
 
-A fundação TypeScript mantém `package.json`, `tsconfig.json`, `src/types/` e `src/type-tests/`. `src/ui/veggie-menu-toggle.ts` é um enhancement visual TypeScript publicado como runtime derivado, sem alterar o domínio financeiro.
+TypeScript strict será confirmado pelo workflow do PR antes do merge.
 
-Continua registada a lacuna do Mercado: `market-experience.js` extrai `pid` da resposta Cesta para compor o ID do resultado, mas o objeto resultante ainda não preserva `pid` como propriedade nem `addProduct()` o persiste. Não corrigir sem teste específico de identidade.
+## Lacuna técnica preservada
+
+`market-experience.js` extrai `pid` da resposta Cesta, mas o objeto persistido ainda não preserva `pid` como propriedade própria em todo o fluxo. Não corrigir sem teste específico de identidade.
