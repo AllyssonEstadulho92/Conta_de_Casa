@@ -48,9 +48,13 @@ O motor futuro deve distinguir identidade, preço observado, estimativa, preço 
 
 ### QA
 
-- os novos contratos foram verificados localmente contra TypeScript 5.8.3 disponível no ambiente de análise, sem erros de compilação;
-- a branch usa TypeScript 6.0.3 no `package.json`; o resultado oficial do GitHub Actions ainda deve ser confirmado antes de integração;
-- nenhum PR do Bloco 1 deve ser integrado sem CI legado + typecheck verdes.
+- PR #72 aberto: `feat(v76): fundação TypeScript sem alterar runtime`;
+- TypeScript Foundation run `34485339181` no head `58836af7bb53baaadd52d70d633968b9d68ec27e`: **sucesso**;
+- CI legado run `34485339056` no mesmo head: **sucesso**;
+- o CI legado concluiu com sucesso os testes de finanças, auditoria, contagem, isolamento, datas, formulários, QR, Mercado, imagens, scanner, segurança, responsividade, acessibilidade, sincronização, PWA/startup e manifest;
+- comparação com `main` antes da atualização documental final: `behind 0`;
+- o diff não altera o runtime publicado: não existem mudanças em `index.html`, `scripts/prepare-pages.cjs`, `sw.js`, `core.js`, `finance.js`, `render.js`, `forms.js` ou `events.js`;
+- como esta documentação produz um novo head da branch, o merge continua condicionado a nova confirmação de CI + typecheck verdes nesse head.
 
 ---
 
