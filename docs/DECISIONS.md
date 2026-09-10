@@ -110,7 +110,7 @@ Uma camada de apresentação não deve esconder capacidades funcionais já imple
 
 ## D-062 — Catálogo de design local-first com gate de licença e loader opt-in
 
-Data: 10 de setembro de 2026. Estado: aceite na branch `feat/v75-design-asset-library` como `75-assets1`.
+Data: 10 de setembro de 2026. Estado: integrado em `main` como `75-assets1` pelo PR #69, merge `a8e04d6811bd6eb08487de139fb19fb2f12128ec`.
 
 ### Factos
 
@@ -143,4 +143,4 @@ Centralizar fornecedores sem centralizar o **critério** aumentaria inconsistên
 
 ## Evidência técnica
 
-A revisão `75-assets1` parte de `main` no SHA `c8ec45893c8936093ecd7c7da9ee08c9a268109c`. A integração deve ocorrer apenas depois de CI verde, branch sincronizada com `main`, revisão do PR e validação posterior do GitHub Pages.
+A revisão `75-assets1` partiu de `main` no SHA `c8ec45893c8936093ecd7c7da9ee08c9a268109c`. Branch CI `34477808822` e PR CI `34477918443` concluíram com sucesso; a branch estava `behind 0` antes do merge. O PR #69 foi integrado por squash no SHA `a8e04d6811bd6eb08487de139fb19fb2f12128ec`; CI de `main` `34478047035` e GitHub Pages `34478091014` concluíram com sucesso.
