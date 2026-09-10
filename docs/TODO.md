@@ -25,10 +25,11 @@ Atualizado: 11 de setembro de 2026
 - [x] `76-veggie-menu1` — PR #74.
 - [x] `76-veggie-menu2` + `76-modern-ui1` — PR #76.
 - [x] `76-version-audit1` — PR #78.
+- [x] `76-mobile-shell2` — PR #80.
 
 ## P0 — `76-mobile-shell2`
 
-### Diagnóstico e implementação
+### Diagnóstico, implementação e publicação
 
 - [x] Confirmar pela captura física que a topbar entra na status bar do iPhone.
 - [x] Confirmar pela captura física que o dock inferior cobre/corta conteúdo final.
@@ -42,12 +43,13 @@ Atualizado: 11 de setembro de 2026
 - [x] Preservar pinch-to-zoom; não usar `zoom` CSS.
 - [x] Adicionar `v76-mobile-shell.css` à allowlist Pages e cache PWA.
 - [x] Adicionar `tests/v76-mobile-shell.test.cjs` à CI e ao gate do Pages.
-- [x] CI funcional da branch antes da documentação `34541849503`: sucesso.
-- [ ] Abrir PR e confirmar CI + TypeScript strict.
-- [ ] Integrar em `main`.
-- [ ] Confirmar CI + TypeScript em `main`.
-- [ ] Confirmar GitHub Pages.
-- [ ] Validar fisicamente no iPhone/Safari/PWA.
+- [x] CI funcional da branch `34541849503`: sucesso.
+- [x] PR #80: CI + TypeScript strict verdes.
+- [x] Integrar em `main`: `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`.
+- [x] TypeScript Foundation de `main` `34542259212`: sucesso.
+- [x] CI de `main` `34542259148`: sucesso.
+- [x] GitHub Pages `34542303536`: sucesso.
+- [ ] Validar fisicamente a compilação publicada no iPhone/Safari/PWA.
 
 ### Validação física obrigatória
 
