@@ -5,7 +5,7 @@ Versão da aplicação: `0.76.0-dev.1`
 Release pública: `v75`  
 Programa técnico: `v76` — migração incremental TypeScript + revisão UI/UX  
 Branch pública: `main`  
-HEAD funcional publicado antes da auditoria de versão: `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`  
+HEAD funcional publicado: `a68de711df1c42ec33948d3fff2f4d5e337e2436`  
 Distribuição: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
@@ -27,7 +27,8 @@ Distribuição: GitHub Pages / PWA
 - `75-expenses1` — Despesas/Faturas;
 - fundação TypeScript — PR #72;
 - `76-veggie-menu1` — PR #74;
-- `76-veggie-menu2` + `76-modern-ui1` — PR #76, merge `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
+- `76-veggie-menu2` + `76-modern-ui1` — PR #76, merge `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`;
+- `76-version-audit1` — PR #78, merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`.
 
 ## 3. UI/UX publicada
 
@@ -48,7 +49,7 @@ Distribuição: GitHub Pages / PWA
 
 No mobile, a `.topbar` passou para fluxo normal (`position: relative`) e `.main` deixou de reservar espaço para um header fixo. A navegação inferior permanece persistente em formato dock.
 
-## 4. Auditoria de versão/atualização — erro confirmado
+## 4. Auditoria de versão/atualização — erro confirmado e corrigido
 
 A comparação com o Foco Jornada confirmou um defeito no Centro de Atualização do Conta de Casa:
 
@@ -57,11 +58,9 @@ A comparação com o Foco Jornada confirmou um defeito no Centro de Atualizaçã
 - essa conclusão ocorria **antes** de `registration.update()`;
 - portanto, uma compilação nova publicada dentro da mesma release `v75` podia não ser detetada manualmente.
 
-Isto explica a inconsistência entre alterações v76 publicadas e a indicação visual de versão/atualização baseada apenas em `v75`.
+Isto explicava a inconsistência entre alterações v76 publicadas e a indicação visual de versão/atualização baseada apenas em `v75`.
 
-## 5. Correção candidata — `76-version-audit1`
-
-Branch: `fix/v76-version-audit`.
+## 5. Correção integrada — `76-version-audit1`
 
 A correção mantém três identificadores separados:
 
@@ -69,7 +68,7 @@ A correção mantém três identificadores separados:
 - **release pública:** `release-manifest.json`/`app-build` → `v75`;
 - **build exato:** SHA Git curto de 7 caracteres + data ISO de compilação, injetados por `scripts/prepare-pages.cjs`.
 
-O ecrã `Versão e Atualizações`, inspirado no padrão técnico do Foco Jornada, passa a apresentar versão instalada, release, Build ID, data de compilação, PWA/Web, estado do Service Worker e estado de rede.
+O ecrã `Versão e Atualizações`, inspirado no padrão técnico do Foco Jornada, apresenta versão instalada, release, Build ID, data de compilação, PWA/Web, estado do Service Worker e estado de rede.
 
 A ação `Verificar e atualizar agora` chama sempre `registration.update()` antes de declarar a compilação atualizada. Uma atualização dentro da mesma release deixa, assim, de ser ignorada apenas porque o número `v75` não mudou.
 
@@ -79,7 +78,7 @@ A ação `Verificar e atualizar agora` chama sempre `registration.update()` ante
 
 A instalação continua dependente de ação explícita do utilizador. O sistema de atualização usa recursos da própria aplicação e não envia o cofre nem os dados financeiros.
 
-## 7. QA
+## 7. QA e publicação
 
 UI publicada pelo PR #76:
 
@@ -92,15 +91,19 @@ Auditoria de versão:
 - commit funcional inicial `41cd36b662991fc2f29d5736c2b77621c4649e87`;
 - primeira execução CI `34539687982` falhou apenas por uma asserção demasiado específica no novo teste de metadados; sintaxe, finanças, Mercado e UI tinham passado;
 - teste corrigido no commit `9d6a923c6f10bda2e7128f48053ad278063634ca`;
-- CI `34539811658`: **sucesso**, incluindo Centro de Atualização, segurança, responsividade, acessibilidade, sincronização e manifest.
+- CI funcional `34539811658`: sucesso;
+- PR #78: TypeScript Foundation `34540211764` e CI `34540211775` — sucesso;
+- merge funcional em `main`: `a68de711df1c42ec33948d3fff2f4d5e337e2436`;
+- `main`: TypeScript Foundation `34540271567` e CI `34540271547` — sucesso;
+- GitHub Pages `34540307404` — sucesso.
 
 ## 8. Riscos/lacunas ainda abertas
 
 - validação física do novo ecrã de versão e do fluxo de atualização em iPhone/Safari/PWA ainda é necessária;
 - a branch `main` encontra-se sem proteção de branch no GitHub; é risco de governação e não foi alterado nesta correção;
 - `market-experience.js` continua com a lacuna conhecida de persistência explícita de `pid` ao longo de todo o fluxo;
-- a versão pública continua `v75` por decisão de release; não promover para `v76` sem uma release formal.
+- a release pública continua `v75` por decisão de release; não promover para `v76` sem uma release formal.
 
 ## 9. Próximo passo
 
-Integrar `76-version-audit1` apenas após CI/PR/TypeScript verdes, publicar pelo GitHub Pages e validar no iPhone que `Versão e Atualizações` mostra `0.76.0-dev.1`, o Build ID e que a verificação manual não dá falso “atualizado” quando existir um Service Worker novo. Depois, retomar `feat/v76-money-dates`.
+Validar no iPhone/Safari/PWA que `Versão e Atualizações` mostra `0.76.0-dev.1`, a release `v75`, o Build ID e a data de compilação, e que a verificação manual deteta um Service Worker novo mesmo dentro da mesma release. Depois, retomar `feat/v76-money-dates`.

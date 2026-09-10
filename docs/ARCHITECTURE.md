@@ -48,7 +48,7 @@ Ordem visual relevante:
 
 ## 4. Modelo de versionamento
 
-O versionamento passa a ter dimensões explícitas, sem conflitar semver com a release pública:
+O versionamento tem dimensões explícitas, sem conflitar semver com a release pública:
 
 - **Application Version**: `package.json.version`, atualmente `0.76.0-dev.1`;
 - **Public Release**: `BUILD`/`release-manifest.json`, atualmente `v75`;
@@ -118,7 +118,7 @@ Cobertura explícita: Dashboard, Despesas, Mercado, Calendário, Planeamento, Re
 
 O novo ecrã de versão não lê nem transmite dados do cofre. A verificação usa apenas `release-manifest.json`, Service Worker e metadados de build da própria distribuição.
 
-## 11. QA
+## 11. QA e publicação
 
 `76-version-audit1` tem regressão específica em `tests/app-update.test.cjs` para:
 
@@ -129,6 +129,13 @@ O novo ecrã de versão não lê nem transmite dados do cofre. A verificação u
 - garantia de que `registration.update()` precede a conclusão “não existe atualização pendente”;
 - prevenção do antigo retorno antecipado quando a release é igual.
 
-CI da branch após correção do teste: `34539811658` — sucesso.
+Integração/publicação:
+
+- PR #78 integrado em `main` como `a68de711df1c42ec33948d3fff2f4d5e337e2436`;
+- TypeScript Foundation do PR `34540211764`: sucesso;
+- CI do PR `34540211775`: sucesso;
+- TypeScript Foundation de `main` `34540271567`: sucesso;
+- CI de `main` `34540271547`: sucesso;
+- GitHub Pages `34540307404`: sucesso.
 
 Validação física pós-publicação continua obrigatória para Safari/iPhone/PWA.

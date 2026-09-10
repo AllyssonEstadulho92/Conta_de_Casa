@@ -2,7 +2,7 @@
 
 O histórico integral de commits e versões permanece no Git. Este ficheiro mantém as alterações relevantes para continuidade técnica.
 
-## 2026-09-10 — v76 `76-version-audit1` — auditoria de versão e atualizações
+## 2026-09-10 — v76 `76-version-audit1` — auditoria de versão e atualizações — publicado
 
 ### Diagnóstico
 
@@ -25,17 +25,25 @@ Também existia ambiguidade visual entre a versão semântica do programa, a rel
 - cache PWA revisto para `version-audit1`;
 - `tests/app-update.test.cjs` passou a validar ordem, metadados, distribuição e o caso de same-release build.
 
-### QA
+### QA e publicação
 
 - commit funcional: `41cd36b662991fc2f29d5736c2b77621c4649e87`;
 - a primeira execução CI `34539687982` encontrou uma falha no novo teste: a regex esperava acesso DOM literal, enquanto o código usava o helper genérico `metaValue()`; não foi falha de runtime;
 - teste corrigido em `9d6a923c6f10bda2e7128f48053ad278063634ca`;
-- CI `34539811658`: **sucesso**;
-- passaram finanças, invariantes, faturas, Mercado, scanner, UI v76, Centro de Atualização, segurança, responsividade, acessibilidade, sincronização e manifest.
+- CI funcional `34539811658`: sucesso;
+- PR #78: TypeScript Foundation `34540211764` e CI `34540211775` — sucesso;
+- PR #78 integrado em `main` no commit `a68de711df1c42ec33948d3fff2f4d5e337e2436`;
+- TypeScript Foundation de `main` `34540271567`: sucesso;
+- CI de `main` `34540271547`: sucesso;
+- GitHub Pages `34540307404`: sucesso.
 
 ### Isolamento
 
 Nenhuma alteração em `core.js`, `finance.js`, estado financeiro, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sincronização cifrada, QR, scanner, CSP ou regras financeiras.
+
+### Pendente
+
+Validação física no iPhone/Safari/PWA do cartão `Versão e Atualizações`, Build ID/data e deteção de uma compilação nova dentro da mesma release.
 
 ---
 
