@@ -1,5 +1,44 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-10 — v75 `75-usability1` — Parte 1 da auditoria UX/UI
+
+### Âmbito
+
+Auditoria transversal do ecrã de bloqueio, navegação e páginas Início, Despesas, Mercado, Planeamento e Mais, com foco inicial em interação mobile, zoom acidental, alvos tácteis e estabilidade do cofre.
+
+### Constatações
+
+- `v75-stability.css` já impedia o auto-zoom de foco do Safari/iOS ao usar `16px` nos campos mobile;
+- o meta viewport preservava corretamente a ampliação manual e não continha `user-scalable=no`/`maximum-scale=1`;
+- faltava uma política transversal para o duplo toque em controlos;
+- o cofre mobile beneficiava de reforço explícito de `100dvh`, safe areas e scroll controlado;
+- a linguagem oficial de ícones continua a ser Lucide local via `ui-icons.js`, embora existam fallbacks históricos no template/base;
+- a distribuição pública continua a ser gerada por `scripts/prepare-pages.cjs`, não pelo `index.html` isoladamente.
+
+### Alterações
+
+Criado `v75-usability.css` revisão `75-usability1`:
+
+- `touch-action: manipulation` nos elementos interativos para reduzir zoom acidental por duplo toque;
+- `font-size:16px` reforçado em inputs/selects/textareas mobile;
+- alvos tácteis mínimos de 44 px em controlos compactos;
+- 48 px em ações/filtros densos de Despesas e Mercado quando aplicável;
+- cofre mobile com `100dvh`, safe areas, scroll controlado e cartão responsivo;
+- navegação inferior mantém áreas de toque estáveis;
+- `prefers-reduced-motion` preservado;
+- pinch-to-zoom continua disponível.
+
+### Distribuição e QA
+
+- `scripts/prepare-pages.cjs` inclui `v75-usability.css?v=75-usability1` como última camada visual transversal;
+- `sw.js` inclui o novo ativo e o cache foi revisionado com `usability1`;
+- `tests/v75-stability.test.cjs` passou a verificar anti-zoom, acessibilidade do viewport, 16 px, alvos tácteis, bundle Pages e Service Worker;
+- não houve alterações em `core.js`, `finance.js`, IndexedDB, PBKDF2, AES-GCM, PIN, sincronização, faturas, pagamentos, QR ou scanner.
+
+Estado desta entrada: implementação concluída na branch `fix/v75-usability-part1`; integração/publicação dependem de CI verde.
+
+---
+
 ## 2026-09-10 — v75 `75-startup2` + `75-catalog4` + `75-photo-loader3`
 
 ### Evidência
@@ -53,7 +92,7 @@ Foram confirmadas duas falhas de pipeline:
 
 ### `75-catalog4`
 
-O resolvedor direto continua com timeout de 8 s e concorrência 2. Para cartões com `sourceUrl` oficial exata, uma tentativa sem resultado termina sem voltar ao bridge legado. Antes, o fallback podia repetir pesquisa Cesta + leitura da página + preflight, aumentando latência e concorrência. Pesquisa livre sem `sourceUrl` mantém o bridge legado.
+O resolvedor direto continua com timeout de 8 s e concorrência 2. Para cartões com `sourceUrl` oficial exata, uma tentativa sem resultado termina sem voltar ao bridge legado. Pesquisa livre sem `sourceUrl` mantém o bridge legado.
 
 ### Segurança
 
@@ -66,7 +105,7 @@ O resolvedor direto continua com timeout de 8 s e concorrência 2. Para cartões
 
 CI run `34445844039`: sucesso completo, incluindo sonda real, sintaxe, finanças, auditoria, isolamento/cofre, faturas/QR, Mercado/imagens, catálogo, Pingo Doce, loader, segurança, responsividade, viewport móvel, navegação, acessibilidade, sync e manifest.
 
-Publicação ainda pendente no momento deste registo: reconfirmar CI após documentação, exigir `behind 0`, fast-forward de `main`, CI de `main`, Pages e validação física.
+A comparação posterior confirmou `fix/v75-pin-images-stability` e `main` idênticas no SHA `f85deed6d2fab5e1b0658ad74c25d323f621a19f`.
 
 ---
 

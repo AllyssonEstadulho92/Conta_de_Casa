@@ -7,99 +7,76 @@ Atualizado: 10 de setembro de 2026
 - [x] Manter `STATE_VERSION = 5`, IndexedDB financeiro e valores em cêntimos.
 - [x] Preservar PBKDF2-SHA-256 + AES-GCM.
 - [x] Manter `PBKDF2_ITERATIONS = 250000`.
-- [x] Não alterar cálculos, faturas, pagamentos, QR, scanner ou sincronização cifrada por causa dos sintomas atuais.
+- [x] Não alterar cálculos, faturas, pagamentos, QR, scanner ou sincronização cifrada por correções meramente visuais.
 
-## P0 — Lentidão após PIN
+## P0 — Correções anteriores integradas
 
-- [x] Inspecionar o fluxo real do desbloqueio.
-- [x] Confirmar que `unlockVault()` é seguido por `enterApp()` e por `syncStartupGate()`.
-- [x] Confirmar que o gate remoto pode prolongar a abertura de um dispositivo já emparelhado.
-- [x] Criar `75-startup2` sem reduzir a força do PIN.
-- [x] Abrir a cópia local confirmada sem esperar pela rede quando `pairedAt + lastRemoteSha` existem.
-- [x] Continuar `syncNow('startup-background')` após abrir o shell.
-- [x] Manter primeiro emparelhamento no gate original.
-- [x] Adicionar regressão de segurança/arranque.
+- [x] Acelerar a abertura pós-PIN em dispositivo já emparelhado sem reduzir segurança (`75-startup2`).
+- [x] Dar estado terminal estável às fotografias (`75-photo-loader3`).
+- [x] Reconciliar fotografias Pingo Doce com a base dedicada.
+- [x] Remover resolução redundante quando existe `sourceUrl` oficial exata (`75-catalog4`).
+- [x] Confirmar que `fix/v75-pin-images-stability` e `main` estão idênticas, `ahead 0 / behind 0`, no SHA `f85deed6d2fab5e1b0658ad74c25d323f621a19f`.
 
-## P0 — Fotografias sem estabilização
+## P0 — Auditoria UX/UI solicitada
 
-- [x] Confirmar que `75-photo-loader2` não tinha estado terminal visual.
-- [x] Criar `75-photo-loader3`.
-- [x] Usar carregar → validar → estado final estável.
-- [x] Terminar em **Sem fotografia** após 12 s sem resultado.
-- [x] Aplicar cooldown antes de retry automático.
-- [x] Permitir retry por atualização explícita/nova navegação.
-- [x] Aumentar prioridade visível para 8 cartões com equilíbrio entre as duas lojas.
-- [x] Manter SKU visível mesmo sem imagem.
+- [x] Rever ecrã de bloqueio/PIN.
+- [x] Rever arquitetura e navegação de Início, Despesas, Mercado, Planeamento e Mais.
+- [x] Rever sistema de ícones e documentação anterior.
+- [x] Rever viewport, inputs, alvos tácteis e risco de zoom no Safari/iOS.
+- [x] Confirmar que `index.html` é template e que o bundle público real é montado por `scripts/prepare-pages.cjs`.
+- [x] Confirmar que o zoom manual não está bloqueado no meta viewport.
+- [x] Identificar dívida de nomenclatura/camadas antigas sem a remover prematuramente.
 
-## P0 — Pingo Doce em 0 fotografias
+## P0 — Parte 1 `75-usability1`
 
-- [x] Verificar fonte real, CORS e imagem oficial conhecida.
-- [x] Reproduzir no CI o validador do runtime.
-- [x] Confirmar `pid 739490` com `runtime-safe=true`.
-- [x] Concluir que não existe rejeição universal das URLs Pingo Doce.
-- [x] Reconciliar imagem Pingo Doce do cache partilhado com `imageState='ready'` da DB dedicada.
-- [x] Atualizar a métrica dedicada após reconciliação.
-- [x] Repôr uma vez o orçamento de imagens ao entrar em `75-photo-loader3`.
+- [x] Criar `v75-usability.css` como camada isolada.
+- [x] Aplicar `touch-action: manipulation` aos controlos interativos.
+- [x] Reforçar `font-size:16px` nos controlos de formulário mobile.
+- [x] Reforçar alvo táctil mínimo de 44 px.
+- [x] Reforçar 48 px nas barras/filtros densos de Despesas e Mercado.
+- [x] Melhorar viewport/safe areas/scroll do cofre mobile sem alterar o PIN.
+- [x] Manter pinch-to-zoom e acessibilidade.
+- [x] Incluir `v75-usability.css` no gerador de Pages.
+- [x] Incluir `v75-usability.css` no Service Worker e invalidar cache com `usability1`.
+- [x] Ampliar `tests/v75-stability.test.cjs` com regressões anti-zoom/distribuição.
+- [x] Atualizar documentação técnica da branch.
+- [ ] Confirmar CI verde da branch.
+- [ ] Abrir/rever PR para `main`.
+- [ ] Integrar apenas com CI verde.
+- [ ] Confirmar CI de `main` e GitHub Pages no mesmo SHA.
+- [ ] Validar no iPhone/Safari/PWA que tocar em inputs/botões não provoca auto-zoom/duplo-toque involuntário.
 
-## P0 — Resolver redundante
+## P1 — Parte 2: Início + Despesas + Planeamento
 
-- [x] Identificar fallback do resolvedor direto para o bridge legado.
-- [x] Criar distribuição `75-catalog4`.
-- [x] Quando existe `sourceUrl` exata, terminar após uma tentativa direta limitada.
-- [x] Preservar bridge legado para pesquisa livre sem `sourceUrl`.
-- [x] Preservar validação host/path/PID.
-- [x] Adicionar teste que impede regressão para dupla resolução.
+- [ ] Rever hierarquia de informação e densidade dos cartões no Início.
+- [ ] Garantir que ações rápidas têm rótulo/ícone/feedback coerentes.
+- [ ] Rever estados vazio, erro e carregamento relevantes.
+- [ ] Rever Despesas: pesquisa, filtros, ordenação, datas, ações e cartões mobile.
+- [ ] Reduzir ruído visual sem remover filtros funcionais.
+- [ ] Rever Planeamento: orçamento, saldo atual, saldo inicial, rendimentos e metas.
+- [ ] Garantir consistência entre valores apresentados e dados já calculados pelo núcleo, sem alterar fórmulas.
+- [ ] Testar 320/375/390/430 px, tablet e desktop.
 
-## P0 — QA da branch
+## P1 — Parte 3: Mercado
 
-- [x] Sonda real das fontes.
-- [x] Sintaxe.
-- [x] Finanças e invariantes.
-- [x] Isolamento/cofre.
-- [x] Faturas/QR.
-- [x] Mercado e imagens.
-- [x] Catálogo visual.
-- [x] Biblioteca Pingo Doce.
-- [x] Loader.
-- [x] Segurança.
-- [x] Responsividade e viewport móvel.
-- [x] Navegação e acessibilidade.
-- [x] Sincronização e conflitos.
-- [x] Manifest.
-- [x] CI branch run `34445844039` verde.
+- [ ] Rever pesquisa, filtros, lista, catálogo visual e ações de compra.
+- [ ] Rever hierarquia entre estimativa, quantidade, valor real e estado comprado.
+- [ ] Manter preço pesquisado separado do valor confirmado.
+- [ ] Rever estados de imagem/carregamento sem reintroduzir flicker.
+- [ ] Confirmar Continente/Pingo Doce sem troca de PID.
+- [ ] Rever scanner/código de barras apenas na camada de apresentação, salvo erro funcional comprovado.
 
-## P0 — Documentação
+## P1 — Parte 4: Mais + ícones + acessibilidade final
 
-- [x] Atualizar `PROJECT_STATE.md`.
-- [x] Atualizar `ARCHITECTURE.md`.
-- [x] Atualizar `DECISIONS.md`.
-- [x] Atualizar `TODO.md`.
-- [x] Atualizar `CHANGELOG.md`.
+- [ ] Rever grupos de Mais e reduzir duplicações de navegação.
+- [ ] Rever Segurança, Diagnóstico, Aparência e Preferências como fluxos secundários.
+- [ ] Consolidar ícones Lucide visíveis e eliminar fallback redundante apenas com prova de ausência de regressão.
+- [ ] Rever foco, teclado, leitores de ecrã e `prefers-reduced-motion`.
+- [ ] Auditoria final de contraste e alvos tácteis.
 
-## P0 — Integração/publicação
+## P2 — Consolidação técnica
 
-- [ ] Reconfirmar CI depois do commit documental.
-- [ ] Comparar `fix/v75-pin-images-stability` com `main` e exigir `behind 0`.
-- [ ] Integrar por fast-forward sem force.
-- [ ] Confirmar CI completo de `main`.
-- [ ] Confirmar GitHub Pages no mesmo SHA testado.
-- [ ] Atualizar documentação com SHA/runs de publicação.
-
-## P1 — Revalidação física iPhone/Safari/PWA
-
-- [ ] Medir tempo entre toque em desbloquear e shell visível.
-- [ ] Confirmar que o PIN não espera vários segundos pela rede num dispositivo já emparelhado.
-- [ ] Confirmar que sincronização continua a ocorrer depois de entrar.
-- [ ] Abrir Mercado durante 30–60 s.
-- [ ] Confirmar que cartão sem imagem termina em **Sem fotografia** e não fica eternamente a validar.
-- [ ] Filtrar Pingo Doce e confirmar que fotografias válidas começam a incrementar a métrica dedicada.
-- [ ] Confirmar ausência de PID trocado.
-- [ ] Confirmar Continente sem regressão.
-- [ ] Confirmar ausência de flicker do renderer `75-catalog3`.
-- [ ] Confirmar valores financeiros idênticos antes/depois.
-
-## P2 — Consolidação
-
-- [ ] Depois da validação física, consolidar as camadas de imagem se profiling mostrar duplicação residual.
-- [ ] Avaliar diagnóstico por loja: imagens partilhadas Continente/Pingo Doce separadamente.
+- [ ] Depois da validação física, medir se camadas visuais antigas podem ser fundidas com segurança.
 - [ ] Remover código histórico apenas com prova de ausência de referências.
+- [ ] Alinhar nomenclatura base (`PAGE_META`/template) com a arquitetura v75 sem alterar rotas nem IDs.
+- [ ] Revalidar segurança, finanças, sincronização, manifest e offline depois de qualquer consolidação.
