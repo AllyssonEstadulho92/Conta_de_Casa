@@ -1,247 +1,103 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-10 — v75 `75-assets1` — biblioteca de fontes, ícones, animações e carregamento de assets
+O histórico integral de commits e versões permanece no Git. Este ficheiro mantém as alterações relevantes para continuidade técnica.
 
-### Âmbito
-
-Criada uma fundação reutilizável para as aplicações do projeto Móvel e Computador, com catálogo de fornecedores, critérios de licença/integração e um loader opt-in para imagens, media e animações. A revisão não troca a tipografia/ícones atuais da Conta de Casa e não transforma os catálogos externos em dependências runtime.
+## 2026-09-10 — v75 `75-market1` — Parte 3: Mercado
 
 ### Diagnóstico
 
-- a Conta de Casa já usa Lucide SVG local como linguagem principal de ícones;
-- a stack tipográfica atual usa Inter com fallbacks de sistema;
-- a CSP mantém `font-src 'self'` e o bundle PWA é allowlist/offline-first;
-- Lottie, Google Fonts, Fontshare, Font Squirrel, DaFont, UNCUT.wtf, Adobe Fonts, MyFonts, Fontpair, Fontjoy, Font Awesome, Material Symbols e Type Icons têm modelos diferentes de licença/integração;
-- “Free Icon Font Proyectos” não identifica uma fonte oficial inequívoca e foi mantida como não verificada;
-- o Mercado já possui `75-photo-loader3`, por isso o loader transversal não pode substituir identidade `marketId|pid`, resolução oficial ou IndexedDB de fotografias.
+- havia dois significados diferentes de pesquisa no mesmo ecrã: pesquisa live de produtos/lojas e pesquisa que filtra apenas a lista já adicionada;
+- os rótulos Estado/Categoria/Ordenar estavam visualmente escondidos no mobile;
+- `market-shopping-focus.js` colocava o bloco `Preço real / unidade` dentro de `Detalhes`;
+- depois de marcar um artigo como comprado, o cartão passava também para o grupo recolhido `Comprados`;
+- um item comprado com `actualCents <= 0` podia assim esconder a ação necessária para confirmar o preço pago;
+- o browser live renderizava fotografia + conteúdo + ação como três filhos diretos, mas a grelha tinha apenas duas colunas explícitas;
+- o pipeline especializado de fotografias por `marketId|pid` já tinha geometria estável, estados terminais e validação estrita; não foi encontrada razão para o substituir;
+- não foi confirmado qualquer erro funcional no scanner/código de barras nesta auditoria.
 
 ### Alterações
 
-- criado `design-asset-library.js` revisão `75-assets1`, expondo `CDCDesignAssetLibrary`;
-- registados os fornecedores indicados com categoria, URL conhecida, estado, modo de integração, licença e regra operacional;
-- Lucide local definido como sistema principal da Conta de Casa;
-- política tipográfica: uma família preferencial, máximo de duas, licença/origem obrigatórias e local-first;
-- `Type Icons Font` classificada como restrita até existir licença compatível;
-- “Free Icon Font Proyectos” classificada como não verificada até existir URL/licença inequívoca;
-- criado `asset-loader.js` opt-in para imagens, vídeo/áudio e Lottie;
-- imagens declaradas recebem lazy loading, `decoding="async"`, prioridade explícita, `IntersectionObserver`, `no-referrer` e estados loading/ready/error;
-- vídeo/áudio recebem `preload="metadata"` por defeito, sem autoplay introduzido pelo loader;
-- Lottie aceita JSON local e exige runtime `window.lottie` local/aprovado; não injeta scripts/CDNs;
-- `prefers-reduced-motion` usa estado pausado/fallback estático quando fornecido;
-- criado `asset-loader.css` com shimmer, fallback, reduced-motion e forced-colors;
-- criada documentação `docs/DESIGN_ASSET_LIBRARY.md` com critérios de adoção e fontes de verificação.
+Criados `v75-market-flow.js` e `v75-market-flow.css`, revisão `75-market1`:
 
-### Segurança e arquitetura
+- `#marketSearch` comunica **Pesquisar na minha lista…**, distinguindo filtro local de pesquisa live;
+- rótulos de Estado, Categoria e Ordenar voltam a estar visíveis no mobile;
+- cartões mobile mostram estado explícito: **Por comprar**, **Preço por confirmar** ou **Comprado**;
+- o valor compacto passa a indicar **Estimativa total**, **Estimativa provisória** ou **Total contabilizado**;
+- quando um item comprado não tem preço real, o mesmo `.market-mobile-real` já produzido pelo renderer é movido para fora de `Detalhes` e apresentado como **Confirmar preço pago / unidade**;
+- o input conserva `data-market-actual`, continuando a usar o handler delegado existente em `events.js`;
+- o grupo Comprados abre enquanto contiver pelo menos uma pendência de preço real;
+- browser live corrigido para três colunas explícitas: fotografia / conteúdo / ação;
+- preço do browser rotulado como **Preço pesquisado** e acompanhado de aviso de que é estimativa;
+- botão existente mantém `data-market-add-product` e ganha rótulo visível **Adicionar** quando há espaço;
+- imagens genéricas do browser live podem usar `CDCAssetLoader` para estados loading/error;
+- catálogo progressivo mantém `75-photo-loader3`; a nova camada apenas espelha carregamento para `aria-busy`.
 
-- CSP não foi expandida;
-- `font-src 'self'` permanece;
-- nenhum provider é contactado apenas por estar catalogado;
-- nenhum kit, token ou segredo foi adicionado;
-- `core.js`, `finance.js`, PIN, PBKDF2, AES-GCM, IndexedDB financeiro, sincronização, QR e scanner permanecem inalterados;
-- o loader genérico não decide imagens de produto e não interfere com `market-photo-loader.js`.
+### Isolamento financeiro e segurança
+
+- `market-experience.js` continua a criar produtos pesquisados com `estimatedCents=product.priceCents`, `actualCents=0`, `purchased=false`;
+- `75-market1` não chama `commit()` nem `saveState()` e não atribui `estimatedCents`, `actualCents`, `quantity` ou `purchased`;
+- não foram alterados `core.js`, `finance.js`, PIN, PBKDF2, AES-GCM, IndexedDB financeiro, sincronização, QR ou scanner;
+- CSP e endpoints permanecem inalterados;
+- `marketId|pid`, host/path/PID exato, caches e regras oficiais de fotografias permanecem intactos.
 
 ### Distribuição e QA
 
-- `scripts/prepare-pages.cjs` inclui `asset-loader.css`, `design-asset-library.js` e `asset-loader.js` com `75-assets1`;
-- `asset-loader.css` é injetado antes do loader especializado do Mercado e `v75-usability.css` continua a camada final de interação;
-- `sw.js` inclui os três ativos e acrescenta `assets1` no final da assinatura de cache;
-- criado `tests/design-asset-library.test.cjs` para catálogo, gates, CSP, URL policy, loader, build `dist/` e isolamento financeiro/criptográfico;
-- workflows CI e Pages fazem syntax check dos novos JS e executam o teste dedicado.
-
-### Integração/publicação
-
-- branch final: `3706d2fc318a5ccae0a4ec808984c19dcfc3eb87`;
-- CI de push da branch: run `34477808822` — sucesso;
-- PR `#69` — CI run `34477918443` — sucesso;
-- branch confirmada `behind 0` antes da integração;
-- PR #69 integrado por squash em `main`;
-- commit funcional publicado: `a8e04d6811bd6eb08487de139fb19fb2f12128ec`;
-- CI de `main`: run `34478047035` — sucesso;
-- GitHub Pages do mesmo SHA: run `34478091014` — sucesso.
-
-A validação em hardware de componentes opt-in ainda está pendente. Nenhuma família de fonte específica nem ficheiro de animação Lottie foi incorporado nesta fase: a fundação exige seleção e licença exatas antes de adicionar esses ficheiros.
+- `scripts/prepare-pages.cjs` inclui `v75-market-flow.css/js?v=75-market1`;
+- CSS é injetado depois dos componentes especializados do Mercado e antes de `v75-usability.css`;
+- JS é injetado depois de `v75-market-featured.js`;
+- Service Worker inclui os novos ativos e acrescenta `market1` ao fim da revisão de cache;
+- criado `tests/v75-market-flow.test.cjs` cobrindo fluxo, geometria, estimate/actual split, PID, loader, scanner e bundle;
+- workflows CI e Pages executam syntax check e o novo teste;
+- CI da branch durante a implementação: run `34481330929` — sucesso;
+- validação final após documentos, PR, main e Pages ainda é necessária antes de considerar a revisão publicada.
 
 ---
 
-## 2026-09-10 — v75 `75-pages1` — Parte 2 da auditoria UX/UI
+## 2026-09-10 — v75 `75-assets1` — biblioteca de design e carregamento transversal
 
-### Âmbito
-
-Revisão de **Início, Despesas e Planeamento**, com prioridade à equivalência funcional entre mobile e desktop, hierarquia visual, densidade, filtros, estados, ações e responsividade. A alteração é exclusivamente visual e não modifica cálculos, dados, segurança ou persistência.
-
-### Diagnóstico
-
-- **Início** já tinha composição v74/v75 adequada, mas beneficiava de uma hierarquia visual mais clara entre mês, resumo, orçamento, ações rápidas, alertas e categorias.
-- **Despesas** apresentava a principal divergência: no móvel, a composição v74 escondia Lista/Calendário, `bill-filter-grid`, `billSummary` e `billsList`, substituindo-os por `cdcExpenseFeed` simplificado.
-- O feed simplificado permitia Todas/Entradas/Saídas e pesquisa, mas não expunha no móvel os filtros funcionais já existentes de estado, categoria, datas e ordenação, nem a mesma informação de vencimento, progresso e ações dos cartões canónicos.
-- **Planeamento** já utilizava os valores do núcleo e precisava sobretudo de melhor sequência visual e empilhamento dos painéis no móvel.
-- Os ícones necessários nesta fase já estão cobertos pelo sistema Lucide local; não foi adicionada qualquer biblioteca externa.
-
-### Alterações — `75-pages1`
-
-Foi criado `v75-pages.css`:
-
-- **Início:** reforço da leitura mês → resumo → ações rápidas → categorias; resumo mensal com destaque estrutural mais claro; alertas mais compactos no móvel; feedback de interação uniforme; sem reintroduzir os blocos legados duplicados.
-- **Despesas:** Lista/Calendário volta a estar acessível no móvel; filtros de estado, categoria, datas e ordenação voltam a ser apresentados; `billSummary` e `billsList` canónicos voltam a ser visíveis; os cartões móveis existentes passam a concentrar valor em falta, vencimento, total, pago, categoria, progresso e ações; `cdcExpenseFeed`/`cdcExpenseTabs` deixam de ser a vista principal móvel.
-- **Planeamento:** resumo de orçamento e categorias recebe melhor hierarquia; formulário de saldo/orçamento e rendimentos passam a uma coluna em mobile; conciliação e lista de rendimentos ganham melhor legibilidade.
-- Breakpoint muito estreito mantém filtros e ações em coluna para evitar compressão excessiva.
-- `prefers-reduced-motion` e `forced-colors` continuam tratados.
-
-### Distribuição e QA
-
-- `scripts/prepare-pages.cjs` inclui `v75-pages.css?v=75-pages1`;
-- `v75-pages.css` é carregado depois da arquitetura/drawer e antes de `v75-usability.css`, preservando a política final de anti-zoom e alvos tácteis;
-- `sw.js` inclui o novo ativo e invalida o cache com `pages1`;
-- `tests/v75-stability.test.cjs` verifica a visibilidade funcional de Despesas no móvel, o empilhamento de Planeamento, a ordem das camadas, distribuição e isolamento relativamente ao estado financeiro/criptográfico;
-- não foram alterados `core.js`, `finance.js`, `render.js`, IndexedDB, PBKDF2, AES-GCM, PIN, sincronização, pagamentos, QR ou scanner.
-
-### Integração/publicação
-
-- PR `#68` integrado em `main`;
-- commit público: `c8ec45893c8936093ecd7c7da9ee08c9a268109c`;
-- CI de `main`: run `34474037338` — sucesso;
-- GitHub Pages do mesmo SHA: run `34474069564` — sucesso.
-
-Validação física de `75-pages1` em 320/375/390/430 px, tablet e desktop permanece pendente.
+- criado `design-asset-library.js` com catálogo/critério de fontes, ícones, Lottie e ferramentas de pairing;
+- Lucide SVG local permanece sistema principal de ícones;
+- política tipográfica: uma família preferencial, máximo de duas, licença/origem obrigatórias;
+- criado `asset-loader.js/css` opt-in para imagens, vídeo/áudio e Lottie local;
+- lazy loading, async decode, prioridades, estados loading/ready/error, reduced-motion e forced-colors;
+- CSP não expandida; nenhum provider é contactado apenas por estar catalogado;
+- PR #69 integrado como `a8e04d6811bd6eb08487de139fb19fb2f12128ec`;
+- CI main `34478047035` e Pages `34478091014`: sucesso;
+- PR documental #70 finalizou o estado permanente; HEAD de partida da Parte 3: `4e130708de2b76eefe56d04e0e5a03d49d431446`.
 
 ---
 
-## 2026-09-10 — v75 `75-usability1` — Parte 1 da auditoria UX/UI
+## 2026-09-10 — v75 `75-pages1` — Parte 2: Início, Despesas e Planeamento
 
-### Âmbito
+- Início: hierarquia e densidade revistas sem alterar métricas;
+- Despesas mobile voltou a usar Lista/Calendário, filtros, resumo e cartões canónicos de `renderBills()`/`filterBills()`;
+- Planeamento: painéis e resumo reorganizados responsivamente;
+- PR #68 integrado como `c8ec45893c8936093ecd7c7da9ee08c9a268109c`;
+- CI `34474037338` e Pages `34474069564`: sucesso.
 
-Auditoria transversal do ecrã de bloqueio, navegação e páginas Início, Despesas, Mercado, Planeamento e Mais, com foco inicial em interação mobile, zoom acidental, alvos tácteis e estabilidade do cofre.
+---
 
-### Constatações
+## 2026-09-10 — v75 `75-usability1` — Parte 1: usabilidade transversal
 
-- `v75-stability.css` já impedia o auto-zoom de foco do Safari/iOS ao usar `16px` nos campos mobile;
-- o meta viewport preservava corretamente a ampliação manual e não continha `user-scalable=no`/`maximum-scale=1`;
-- faltava uma política transversal para o duplo toque em controlos;
-- o cofre mobile beneficiava de reforço explícito de `100dvh`, safe areas e scroll controlado;
-- a linguagem oficial de ícones continua a ser Lucide local via `ui-icons.js`, embora existam fallbacks históricos no template/base;
-- a distribuição pública continua a ser gerada por `scripts/prepare-pages.cjs`, não pelo `index.html` isoladamente.
-
-### Alterações
-
-Criado `v75-usability.css` revisão `75-usability1`:
-
-- `touch-action: manipulation` nos elementos interativos para reduzir zoom acidental por duplo toque;
-- `font-size:16px` reforçado em inputs/selects/textareas mobile;
-- alvos tácteis mínimos de 44 px em controlos compactos;
-- 48 px em ações/filtros densos de Despesas e Mercado quando aplicável;
-- cofre mobile com `100dvh`, safe areas, scroll controlado e cartão responsivo;
-- navegação inferior mantém áreas de toque estáveis;
-- `prefers-reduced-motion` preservado;
-- pinch-to-zoom continua disponível.
-
-### Distribuição e QA
-
-- `scripts/prepare-pages.cjs` inclui `v75-usability.css?v=75-usability1` como última camada visual transversal;
-- `sw.js` inclui o novo ativo e o cache foi revisionado com `usability1`;
-- `tests/v75-stability.test.cjs` passou a verificar anti-zoom, acessibilidade do viewport, 16 px, alvos tácteis, bundle Pages e Service Worker;
-- não houve alterações em `core.js`, `finance.js`, IndexedDB, PBKDF2, AES-GCM, PIN, sincronização, faturas, pagamentos, QR ou scanner.
-
-Durante o QA, duas execuções detetaram incompatibilidades em testes que validavam a ordem textual da assinatura do cache. A correção preservou as assinaturas legadas e colocou `usability1` no final da revisão do cache. A execução seguinte ficou verde.
-
-### Integração/publicação
-
-- PR `#66` integrado por squash em `main`;
-- commit público: `c352c1883c16fd7df92aa0f26d23e3c5084b0fcf`;
-- CI da branch: run `34471692881` — sucesso;
-- CI de `main`: run `34471773663` — sucesso;
-- GitHub Pages do mesmo SHA: run `34471814790` — sucesso.
-
-Validação física específica de `75-usability1` em iPhone/Safari/PWA permanece pendente.
+- `touch-action: manipulation` em controlos;
+- formulários mobile com 16 px para reduzir auto-zoom Safari;
+- alvos tácteis 44/48 px;
+- cofre mobile com `100dvh`, safe areas e scroll controlado;
+- pinch-to-zoom preservado;
+- PR #66 integrado como `c352c1883c16fd7df92aa0f26d23e3c5084b0fcf`;
+- CI main `34471773663` e Pages `34471814790`: sucesso.
 
 ---
 
 ## 2026-09-10 — v75 `75-startup2` + `75-catalog4` + `75-photo-loader3`
 
-### Evidência
-
-Validação física no iPhone/Safari mostrou:
-
-- demora depois de introduzir o PIN;
-- cartões do catálogo presos em carregamento/validação de fotografia;
-- `1863 produtos indexados · 125 imagens validadas` no catálogo geral;
-- `1229 SKUs indexados · 0 fotografias oficiais` na biblioteca dedicada Pingo Doce.
-
-### Diagnóstico do PIN
-
-O PIN correto concluía `unlockVault()`, mas o shell só era apresentado depois de `syncStartupGate()`. Num dispositivo já emparelhado, a verificação GitHub podia bloquear a abertura apesar de já existir uma cópia local cifrada confirmada.
-
-### `75-startup2`
-
-- PBKDF2 permanece em 250000 iterações;
-- nenhum relaxamento de AES-GCM, PIN ou cofre;
-- dispositivo com `pairedAt + lastRemoteSha`, token local, sync ativo e rede disponível abre imediatamente a cópia local confirmada;
-- `syncNow('startup-background')` continua a verificação remota sem bloquear a UI;
-- primeiro emparelhamento e estados não confirmados continuam a usar o gate original;
-- proteção contra ecrã branco de `75-startup1` permanece.
-
-### Diagnóstico das fotografias
-
-A sonda real foi reforçada para aplicar também o validador usado no runtime. O run de diagnóstico `34444945747` confirmou:
-
-- Cesta devolve Continente e Pingo Doce;
-- reader responde para o origin GitHub Pages;
-- Continente conhecido: `runtime-safe=true`;
-- Pingo Doce `pid 739490`: `runtime-safe=true`.
-
-Isto exclui uma rejeição universal do formato atual das fotografias Pingo Doce como causa do contador zero.
-
-Foram confirmadas duas falhas de pipeline:
-
-1. `75-photo-loader2` podia ficar visualmente em **Fotografia a validar…** sem estado terminal;
-2. uma imagem Pingo Doce resolvida pelo loader era guardada na biblioteca partilhada, mas o registo correspondente da DB Pingo Doce não era imediatamente marcado como `ready`.
-
-### `75-photo-loader3`
-
-- prioridade visível sobe para 8 cartões e procura equilíbrio entre as duas lojas;
-- 0–7 s: **A carregar fotografia…**;
-- 7–12 s: **A validar fotografia…**;
-- após 12 s: estado final estável **Sem fotografia**;
-- retry automático só depois de 5 min, salvo atualização explícita/nova navegação;
-- imagem Pingo Doce existente no cache partilhado ou resolvida com sucesso atualiza também `imageState='ready'` na base dedicada;
-- métrica Pingo Doce é atualizada após reconciliação;
-- o orçamento diário de imagens herdado é reposto uma vez ao entrar nesta revisão.
-
-### `75-catalog4`
-
-O resolvedor direto continua com timeout de 8 s e concorrência 2. Para cartões com `sourceUrl` oficial exata, uma tentativa sem resultado termina sem voltar ao bridge legado. Pesquisa livre sem `sourceUrl` mantém o bridge legado.
-
-### Segurança
-
-- host/path/PID permanecem validados;
-- nenhum acesso novo a valores financeiros, faturas, pagamentos ou preços pelas camadas de imagem;
-- a otimização do arranque consulta apenas estado de emparelhamento/sync já existente;
-- PBKDF2, AES-GCM e política de conflitos permanecem inalterados.
-
-### QA da branch
-
-CI run `34445844039`: sucesso completo, incluindo sonda real, sintaxe, finanças, auditoria, isolamento/cofre, faturas/QR, Mercado/imagens, catálogo, Pingo Doce, loader, segurança, responsividade, viewport móvel, navegação, acessibilidade, sync e manifest.
-
-A comparação posterior confirmou `fix/v75-pin-images-stability` e `main` idênticas no SHA `f85deed6d2fab5e1b0658ad74c25d323f621a19f`.
-
----
-
-## 2026-09-10 — v75 `75-startup1`
-
-- Service Worker passou a limitar navegação de rede a 4 s e usar `index.html` em cache em erro/timeout;
-- criado `v75-startup-guard.js` para impedir superfície totalmente branca durante a barreira inicial;
-- CI e Pages concluídos com sucesso;
-- a validação física seguinte revelou separadamente a demora pós-PIN e a instabilidade das fotografias tratadas acima.
-
----
-
-## 2026-09-09 — v75 `75-catalog3`
-
-- renderer do catálogo deixou de destruir a grelha inteira durante atualização de fundo;
-- cartões são reconciliados por `marketId|pid`;
-- nós DOM e imagens carregadas são preservados;
-- `cdc:market-photo-ready` passou a propagar fotografias resolvidas;
-- correção direcionada ao flicker observado no iPhone.
+- abertura pós-PIN em dispositivo já emparelhado deixa de esperar pela verificação remota, sem reduzir PBKDF2/AES-GCM;
+- fotografias passam a terminar em estado estável carregar → validar → `Sem fotografia`, com cooldown de retry;
+- imagens Pingo Doce válidas reconciliam a biblioteca dedicada;
+- `sourceUrl` oficial exata não dispara resolução redundante;
+- host/path/PID permanecem estritos;
+- branch final e main convergiram no SHA `f85deed6d2fab5e1b0658ad74c25d323f621a19f` após CI verde.
 
 ## Histórico anterior
 
-As revisões anteriores permanecem no histórico Git e em `release-manifest.json`. Continuam vigentes as decisões de `75-catalog2`, `75-photo-loader2`, `75-pd-photo1`, `75-image-library1`, `75-featured1`, `75-drawer2`, `75-layout1`, `75-stability1`, `75-header2` e baseline v74/v73 quando não substituídas explicitamente pelas revisões acima.
+Revisões anteriores de faturas, pagamentos, navegação, segurança, sincronização, Mercado, catálogo e responsividade permanecem no histórico Git e em `release-manifest.json`. Não remover comportamento histórico sem prova de ausência de referências e regressões.
