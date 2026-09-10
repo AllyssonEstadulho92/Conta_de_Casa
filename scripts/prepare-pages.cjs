@@ -11,6 +11,7 @@ const CATEGORY_REV = '64-ui1';
 const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
+const VEGGIE_MENU_REV = '76-veggie-menu1';
 const EXPERIENCE_REV = '74-experience2';
 const ARCHITECTURE_REV = '75-architecture2';
 const HEADER_REV = '75-header2';
@@ -32,6 +33,7 @@ const PHOTO_LOADER_REV = '75-photo-loader3';
 /* Bundle público v75: mantém a experiência v74 como base funcional de apresentação,
    aplica arquitetura, cabeçalho, estabilidade, guarda segura de arranque, geometria,
    revisão de páginas Início/Despesas/Planeamento, refinamento visual moderno de Despesas,
+   Veggie Burger TypeScript como camada incremental sobre o controlador móvel validado,
    biblioteca transversal local-first de assets visuais, revisão de fluxo do Mercado,
    biblioteca/destaques/catálogo visual, biblioteca progressiva Pingo Doce, carregador
    prioritário de fotografias, drawer petróleo/teal à direita e uma camada transversal
@@ -50,6 +52,7 @@ const PUBLIC_FILES = Object.freeze([
   'asset-loader.css',
   'market-shopping-focus.css',
   'mobile-menu-toggle.css',
+  'v76-veggie-menu.css',
   'invoice-capture.css',
   'app-update.css',
   'market-image-audit.css',
@@ -75,6 +78,7 @@ const PUBLIC_FILES = Object.freeze([
   'sync-conflict-policy.js',
   'events.js',
   'mobile-menu-toggle.js',
+  'v76-veggie-menu.js',
   'market-experience.js',
   'market-branding.js',
   'market-category-groups.js',
@@ -147,6 +151,7 @@ if(!index.includes('market-photo-loader.css')) index=index.replace('</head>',`  
 if(!index.includes('v75-drawer-theme.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-drawer-theme.css?v=${DRAWER_REV}" />\n</head>`);
 if(!index.includes('v75-pages.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-pages.css?v=${PAGES_REV}" />\n</head>`);
 if(!index.includes('v75-expenses-modern.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-expenses-modern.css?v=${EXPENSES_REV}" />\n</head>`);
+if(!index.includes('v76-veggie-menu.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-veggie-menu.css?v=${VEGGIE_MENU_REV}" />\n</head>`);
 if(!index.includes('v75-market-flow.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-market-flow.css?v=${MARKET_FLOW_REV}" />\n</head>`);
 if(!index.includes('v75-usability.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-usability.css?v=${USABILITY_REV}" />\n</head>`);
 
@@ -169,6 +174,7 @@ if(!index.includes('market-category-groups.js')) index=index.replace('</body>',`
 if(!index.includes('v64-runtime.js')) index=index.replace('</body>',`  <script src="./v64-runtime.js?v=${RUNTIME_REV}" defer></script>\n</body>`);
 if(!index.includes('market-shopping-focus.js')) index=index.replace('</body>',`  <script src="./market-shopping-focus.js?v=${SHOPPING_REV}" defer></script>\n</body>`);
 if(!index.includes('mobile-menu-toggle.js')) index=index.replace('</body>',`  <script src="./mobile-menu-toggle.js?v=${MENU_REV}" defer></script>\n</body>`);
+if(!index.includes('v76-veggie-menu.js')) index=index.replace('</body>',`  <script src="./v76-veggie-menu.js?v=${VEGGIE_MENU_REV}" defer></script>\n</body>`);
 if(!index.includes('v74-experience.js')) index=index.replace('</body>',`  <script src="./v74-experience.js?v=${EXPERIENCE_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-architecture.js')) index=index.replace('</body>',`  <script src="./v75-architecture.js?v=${ARCHITECTURE_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-stability.js')) index=index.replace('</body>',`  <script src="./v75-stability.js?v=${STABILITY_REV}" defer></script>\n</body>`);
@@ -190,4 +196,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; veggie-menu ${VEGGIE_MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
