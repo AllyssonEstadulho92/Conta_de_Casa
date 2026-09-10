@@ -20,6 +20,7 @@ const LAYOUT_REV = '75-layout1';
 const PAGES_REV = '75-pages1';
 const DRAWER_REV = '75-drawer2';
 const USABILITY_REV = '75-usability1';
+const ASSETS_REV = '75-assets1';
 const FEATURED_REV = '75-featured1';
 const IMAGE_LIBRARY_REV = '75-image-library1';
 const CATALOG_REV = '75-catalog4';
@@ -28,11 +29,12 @@ const PHOTO_LOADER_REV = '75-photo-loader3';
 
 /* Bundle público v75: mantém a experiência v74 como base funcional de apresentação,
    aplica arquitetura, cabeçalho, estabilidade, guarda segura de arranque, geometria,
-   revisão de páginas Início/Despesas/Planeamento, biblioteca/destaques/catálogo visual
-   do Mercado, biblioteca progressiva Pingo Doce, carregador prioritário de fotografias,
-   drawer petróleo/teal à direita e uma camada transversal de usabilidade móvel sem
-   alterar regras financeiras ou segurança. Camadas históricas ui-consistency.css e
-   v64-runtime.css continuam fora da distribuição. */
+   revisão de páginas Início/Despesas/Planeamento, biblioteca transversal local-first
+   de assets visuais, biblioteca/destaques/catálogo visual do Mercado, biblioteca
+   progressiva Pingo Doce, carregador prioritário de fotografias, drawer petróleo/teal
+   à direita e uma camada transversal de usabilidade móvel sem alterar regras
+   financeiras ou segurança. Camadas históricas ui-consistency.css e v64-runtime.css
+   continuam fora da distribuição. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -43,6 +45,7 @@ const PUBLIC_FILES = Object.freeze([
   'market-category-groups.css',
   'market-barcode.css',
   'ui-icons.css',
+  'asset-loader.css',
   'market-shopping-focus.css',
   'mobile-menu-toggle.css',
   'invoice-capture.css',
@@ -73,6 +76,8 @@ const PUBLIC_FILES = Object.freeze([
   'market-category-groups.js',
   'market-barcode.js',
   'ui-icons.js',
+  'design-asset-library.js',
+  'asset-loader.js',
   'invoice-capture.js',
   'app-update.js',
   'market-image-library.js',
@@ -132,6 +137,7 @@ if(!index.includes('v75-layout-polish.css')) index=index.replace('</head>',`  <l
 if(!index.includes('v75-market-featured.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-market-featured.css?v=${FEATURED_REV}" />\n</head>`);
 if(!index.includes('market-visual-catalog.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-visual-catalog.css?v=${CATALOG_REV}" />\n</head>`);
 if(!index.includes('pingo-doce-photo-library.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./pingo-doce-photo-library.css?v=${PD_PHOTO_REV}" />\n</head>`);
+if(!index.includes('asset-loader.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./asset-loader.css?v=${ASSETS_REV}" />\n</head>`);
 if(!index.includes('market-photo-loader.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./market-photo-loader.css?v=${PHOTO_LOADER_REV}" />\n</head>`);
 if(!index.includes('v75-drawer-theme.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-drawer-theme.css?v=${DRAWER_REV}" />\n</head>`);
 if(!index.includes('v75-pages.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-pages.css?v=${PAGES_REV}" />\n</head>`);
@@ -140,6 +146,8 @@ if(!index.includes('v75-usability.css')) index=index.replace('</head>',`  <link 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
 if(!index.includes('sync-conflict-policy.js')) index=index.replace(syncScript,`${syncScript}<script src="./sync-conflict-policy.js?v=${UI_REV}" defer></script>`);
 
+if(!index.includes('design-asset-library.js')) index=index.replace('</body>',`  <script src="./design-asset-library.js?v=${ASSETS_REV}" defer></script>\n</body>`);
+if(!index.includes('asset-loader.js')) index=index.replace('</body>',`  <script src="./asset-loader.js?v=${ASSETS_REV}" defer></script>\n</body>`);
 if(!index.includes('app-update.js')) index=index.replace('</body>',`  <script src="./app-update.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 if(!index.includes('market-image-library.js')) index=index.replace('</body>',`  <script src="./market-image-library.js?v=${IMAGE_LIBRARY_REV}" defer></script>\n</body>`);
 if(!index.includes('market-retailer-image-policy.js')) index=index.replace('</body>',`  <script src="./market-retailer-image-policy.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
@@ -174,4 +182,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);

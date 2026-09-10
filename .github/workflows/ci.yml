@@ -40,6 +40,8 @@ jobs:
           node --check market-shopping-focus.js
           node --check market-barcode.js
           node --check ui-icons.js
+          node --check design-asset-library.js
+          node --check asset-loader.js
           node --check invoice-capture.js
           node --check app-update.js
           node --check market-image-library.js
@@ -124,6 +126,9 @@ jobs:
 
       - name: Unified icon audit tests
         run: node tests/ui-icons.test.cjs
+
+      - name: Design asset library and loader tests
+        run: node tests/design-asset-library.test.cjs
 
       - name: Visual consistency and v74 base tests
         run: node tests/ui-consistency.test.cjs

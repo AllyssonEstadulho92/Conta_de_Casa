@@ -1,5 +1,59 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-10 — v75 `75-assets1` — biblioteca de fontes, ícones, animações e carregamento de assets
+
+### Âmbito
+
+Criada uma fundação reutilizável para as aplicações do projeto Móvel e Computador, com catálogo de fornecedores, critérios de licença/integração e um loader opt-in para imagens, media e animações. A revisão não troca a tipografia/ícones atuais da Conta de Casa e não transforma os catálogos externos em dependências runtime.
+
+### Diagnóstico
+
+- a Conta de Casa já usa Lucide SVG local como linguagem principal de ícones;
+- a stack tipográfica atual usa Inter com fallbacks de sistema;
+- a CSP mantém `font-src 'self'` e o bundle PWA é allowlist/offline-first;
+- Lottie, Google Fonts, Fontshare, Font Squirrel, DaFont, UNCUT.wtf, Adobe Fonts, MyFonts, Fontpair, Fontjoy, Font Awesome, Material Symbols e Type Icons têm modelos diferentes de licença/integração;
+- “Free Icon Font Proyectos” não identifica uma fonte oficial inequívoca e foi mantida como não verificada;
+- o Mercado já possui `75-photo-loader3`, por isso o loader transversal não pode substituir identidade `marketId|pid`, resolução oficial ou IndexedDB de fotografias.
+
+### Alterações
+
+- criado `design-asset-library.js` revisão `75-assets1`, expondo `CDCDesignAssetLibrary`;
+- registados os fornecedores indicados com categoria, URL conhecida, estado, modo de integração, licença e regra operacional;
+- Lucide local definido como sistema principal da Conta de Casa;
+- política tipográfica: uma família preferencial, máximo de duas, licença/origem obrigatórias e local-first;
+- `Type Icons Font` classificada como restrita até existir licença compatível;
+- “Free Icon Font Proyectos” classificada como não verificada até existir URL/licença inequívoca;
+- criado `asset-loader.js` opt-in para imagens, vídeo/áudio e Lottie;
+- imagens declaradas recebem lazy loading, `decoding="async"`, prioridade explícita, `IntersectionObserver`, `no-referrer` e estados loading/ready/error;
+- vídeo/áudio recebem `preload="metadata"` por defeito, sem autoplay introduzido pelo loader;
+- Lottie aceita JSON local e exige runtime `window.lottie` local/aprovado; não injeta scripts/CDNs;
+- `prefers-reduced-motion` usa estado pausado/fallback estático quando fornecido;
+- criado `asset-loader.css` com shimmer, fallback, reduced-motion e forced-colors;
+- criada documentação `docs/DESIGN_ASSET_LIBRARY.md` com critérios de adoção e fontes de verificação.
+
+### Segurança e arquitetura
+
+- CSP não foi expandida;
+- `font-src 'self'` permanece;
+- nenhum provider é contactado apenas por estar catalogado;
+- nenhum kit, token ou segredo foi adicionado;
+- `core.js`, `finance.js`, PIN, PBKDF2, AES-GCM, IndexedDB financeiro, sincronização, QR e scanner permanecem inalterados;
+- o loader genérico não decide imagens de produto e não interfere com `market-photo-loader.js`.
+
+### Distribuição e QA
+
+- `scripts/prepare-pages.cjs` inclui `asset-loader.css`, `design-asset-library.js` e `asset-loader.js` com `75-assets1`;
+- `asset-loader.css` é injetado antes do loader especializado do Mercado e `v75-usability.css` continua a camada final de interação;
+- `sw.js` inclui os três ativos e acrescenta `assets1` no final da assinatura de cache;
+- criado `tests/design-asset-library.test.cjs` para catálogo, gates, CSP, política de URL, loader, build `dist/` e isolamento financeiro/criptográfico;
+- workflows CI e Pages passaram a fazer syntax check dos novos JS e executar o teste dedicado.
+
+### Estado
+
+Implementação concluída na branch `feat/v75-design-asset-library`. Integração em `main` permanece condicionada a CI verde, comparação sem commits em falta, revisão do PR e validação posterior do GitHub Pages.
+
+---
+
 ## 2026-09-10 — v75 `75-pages1` — Parte 2 da auditoria UX/UI
 
 ### Âmbito
@@ -32,9 +86,14 @@ Foi criado `v75-pages.css`:
 - `tests/v75-stability.test.cjs` verifica a visibilidade funcional de Despesas no móvel, o empilhamento de Planeamento, a ordem das camadas, distribuição e isolamento relativamente ao estado financeiro/criptográfico;
 - não foram alterados `core.js`, `finance.js`, `render.js`, IndexedDB, PBKDF2, AES-GCM, PIN, sincronização, pagamentos, QR ou scanner.
 
-### Estado
+### Integração/publicação
 
-Implementação concluída na branch `fix/v75-pages-part2`. Integração/publicação dependem de CI verde, comparação sem divergência relativamente a `main` e validação posterior do GitHub Pages.
+- PR `#68` integrado em `main`;
+- commit público: `c8ec45893c8936093ecd7c7da9ee08c9a268109c`;
+- CI de `main`: run `34474037338` — sucesso;
+- GitHub Pages do mesmo SHA: run `34474069564` — sucesso.
+
+Validação física de `75-pages1` em 320/375/390/430 px, tablet e desktop permanece pendente.
 
 ---
 
