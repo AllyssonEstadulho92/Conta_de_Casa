@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog4-pd-photo1-photo-loader3-startup2';
+const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-usability1-featured1-image-library1-catalog4-pd-photo1-photo-loader3-startup2';
 const NAVIGATION_TIMEOUT_MS = 4000;
 const PUBLIC_ASSETS = [
   './',
@@ -28,6 +28,7 @@ const PUBLIC_ASSETS = [
   './pingo-doce-photo-library.css',
   './market-photo-loader.css',
   './v75-drawer-theme.css',
+  './v75-usability.css',
   './core.js',
   './finance.js',
   './render.js',
