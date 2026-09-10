@@ -15,6 +15,7 @@ const EXPERIENCE_REV = '74-experience2';
 const ARCHITECTURE_REV = '75-architecture2';
 const HEADER_REV = '75-header2';
 const STABILITY_REV = '75-stability1';
+const STARTUP_REV = '75-startup1';
 const LAYOUT_REV = '75-layout1';
 const DRAWER_REV = '75-drawer2';
 const FEATURED_REV = '75-featured1';
@@ -24,10 +25,10 @@ const PD_PHOTO_REV = '75-pd-photo1';
 const PHOTO_LOADER_REV = '75-photo-loader2';
 
 /* Bundle público v75: mantém a experiência v74 como base funcional de apresentação,
-   aplica arquitetura, cabeçalho, estabilidade, geometria, biblioteca/destaques/catálogo
-   visual do Mercado, biblioteca progressiva Pingo Doce, carregador prioritário de
-   fotografias e a revisão visual do drawer petróleo/teal à direita. Camadas históricas
-   ui-consistency.css e v64-runtime.css continuam fora da distribuição. */
+   aplica arquitetura, cabeçalho, estabilidade, guarda segura de arranque, geometria,
+   biblioteca/destaques/catálogo visual do Mercado, biblioteca progressiva Pingo Doce,
+   carregador prioritário de fotografias e a revisão visual do drawer petróleo/teal à direita.
+   Camadas históricas ui-consistency.css e v64-runtime.css continuam fora da distribuição. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -81,6 +82,7 @@ const PUBLIC_FILES = Object.freeze([
   'v74-experience.js',
   'v75-architecture.js',
   'v75-stability.js',
+  'v75-startup-guard.js',
   'v75-market-featured.js',
   'release-manifest.json',
   'sw.js',
@@ -147,6 +149,7 @@ if(!index.includes('mobile-menu-toggle.js')) index=index.replace('</body>',`  <s
 if(!index.includes('v74-experience.js')) index=index.replace('</body>',`  <script src="./v74-experience.js?v=${EXPERIENCE_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-architecture.js')) index=index.replace('</body>',`  <script src="./v75-architecture.js?v=${ARCHITECTURE_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-stability.js')) index=index.replace('</body>',`  <script src="./v75-stability.js?v=${STABILITY_REV}" defer></script>\n</body>`);
+if(!index.includes('v75-startup-guard.js')) index=index.replace('</body>',`  <script src="./v75-startup-guard.js?v=${STARTUP_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-market-featured.js')) index=index.replace('</body>',`  <script src="./v75-market-featured.js?v=${FEATURED_REV}" defer></script>\n</body>`);
 fs.writeFileSync(distIndex,index);
 
@@ -163,4 +166,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; layout ${LAYOUT_REV}; drawer ${DRAWER_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; drawer ${DRAWER_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);

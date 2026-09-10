@@ -1,6 +1,7 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog3-pd-photo1-photo-loader2';
+const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog3-pd-photo1-photo-loader2-startup1';
+const NAVIGATION_TIMEOUT_MS = 4000;
 const PUBLIC_ASSETS = [
   './',
   './index.html',
@@ -55,6 +56,7 @@ const PUBLIC_ASSETS = [
   './v74-experience.js',
   './v75-architecture.js',
   './v75-stability.js',
+  './v75-startup-guard.js',
   './v75-market-featured.js',
   './release-manifest.json',
   './manifest.webmanifest',
@@ -87,6 +89,30 @@ async function refreshClientsAfterExplicitUpdate() {
   }));
 }
 
+async function navigationResponse(request) {
+  const cached = await caches.match('./index.html');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), NAVIGATION_TIMEOUT_MS);
+  try {
+    const response = await fetch(request,{cache:'no-store',signal:controller.signal});
+    if(response?.ok){
+      const copy=response.clone();
+      caches.open(CACHE).then(cache=>cache.put('./index.html',copy)).catch(()=>undefined);
+      return response;
+    }
+    if(cached)return cached;
+    return response;
+  } catch (_error) {
+    if(cached)return cached;
+    return new Response('Conta de Casa indisponível temporariamente.',{
+      status:503,
+      headers:{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'}
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(PUBLIC_ASSETS)));
 });
@@ -113,7 +139,7 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
 
   if (event.request.mode === 'navigate') {
-    event.respondWith(fetch(event.request).catch(() => caches.match('./index.html')));
+    event.respondWith(navigationResponse(event.request));
     return;
   }
 
