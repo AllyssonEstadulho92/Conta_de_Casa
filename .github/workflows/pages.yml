@@ -41,6 +41,7 @@ jobs:
           node --check forms.js
           node --check events.js
           node --check mobile-menu-toggle.js
+          node --check v76-veggie-menu.js
           node --check sync.js
           node --check sync-conflict-policy.js
           node --check market-experience.js
@@ -101,6 +102,7 @@ jobs:
           node tests/v75-market-featured.test.cjs
           node tests/v75-drawer-theme.test.cjs
           node tests/mobile-menu-toggle.test.cjs
+          node tests/v76-veggie-menu.test.cjs
           node tests/app-update.test.cjs
           node tests/security.test.cjs
           node tests/responsive.test.cjs
