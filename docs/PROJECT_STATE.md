@@ -7,6 +7,7 @@ Branch pública: `main`
 Baseline funcional publicada: `c44348dbc5a942b601f360fa38793bd9d8b47a1a` (`75-market1`)  
 HEAD documental posterior em `main`: `954c0df349d5d307cd2afd33bb07042e7f670315`  
 Branch de trabalho: `feat/v76-typescript-foundation`  
+PR: `#72` — fundação TypeScript sem alterar runtime  
 Distribuição atual: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
@@ -88,10 +89,22 @@ A biblioteca de imagens continuará progressiva e associada à identidade do pro
 
 Logos SVG de supermercados só devem ser incorporados como assets locais depois de verificação da origem e direito de utilização. Não serão copiados de sites aleatórios, CDNs ou agregadores sem validação de licença/termos, CSP e privacidade.
 
-## 8. Próximo passo
+## 8. QA do Bloco 1
 
-1. abrir PR do Bloco 1;
-2. executar CI legado e workflow TypeScript;
-3. corrigir qualquer erro de compilação antes de integrar;
-4. confirmar que o diff não altera o runtime publicado;
-5. só depois iniciar o Bloco 2: dinheiro, quantidades e datas, com testes de paridade JavaScript → TypeScript antes da substituição do código em produção.
+PR #72 aberto sobre `main`. Na revisão do head `58836af7bb53baaadd52d70d633968b9d68ec27e`:
+
+- workflow `TypeScript Foundation` run `34485339181`: **sucesso**;
+- CI legado run `34485339056`: **sucesso**;
+- todos os testes financeiros, Mercado, segurança, sincronização, responsividade, acessibilidade, PWA/startup e manifest executados pelo CI legado passaram;
+- comparação com `main`: `behind 0` antes desta atualização documental;
+- diff funcional confirmado: não altera `index.html`, `scripts/prepare-pages.cjs`, `sw.js`, `core.js`, `finance.js`, `render.js`, `forms.js` ou `events.js`.
+
+Esta atualização documental cria um novo head da branch; os checks do PR devem voltar a ficar verdes nesse head antes do merge.
+
+## 9. Próximo passo
+
+1. confirmar CI legado + TypeScript no head documental final do PR #72;
+2. confirmar novamente `behind 0`;
+3. integrar o Bloco 1 apenas com checks verdes;
+4. confirmar CI de `main` após integração;
+5. iniciar o Bloco 2 numa branch nova: dinheiro, quantidades e datas, com testes de paridade JavaScript → TypeScript antes da substituição do runtime.
