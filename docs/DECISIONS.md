@@ -151,7 +151,7 @@ Data: 10 de setembro de 2026. Estado: aceite para v76.
 
 ## D-067 — modernização de Despesas será uma camada visual isolada
 
-Data: 10 de setembro de 2026. Estado: aceite na branch `feat/v75-expenses-modern-ui` como `75-expenses1`; PR #73.
+Data: 10 de setembro de 2026. Estado: integrado em `main` como `75-expenses1` pelo PR #73, merge `176450fcb236a2272afb9d6a6983b42681aa705d`.
 
 ### Factos
 
@@ -178,6 +178,14 @@ A página já tem a lógica necessária e está coberta por regressões. Uma cam
 ### Segurança
 
 A revisão não introduz rede, CDN, script, endpoint, token ou segredo. Não altera PIN, PBKDF2, AES-GCM, IndexedDB ou sincronização.
+
+### Evidência de integração
+
+- CI final do PR #73: `34496437909` — sucesso;
+- TypeScript Foundation final do PR #73: `34496437836` — sucesso;
+- CI de `main`: `34496500755` — sucesso;
+- TypeScript Foundation de `main`: `34496500641` — sucesso;
+- GitHub Pages: `34496540096` — sucesso.
 
 ## Evidência técnica v76 — Bloco 1
 
