@@ -85,8 +85,6 @@ Estado: integrado em `main` como `75-assets1` pelo PR #69, merge `a8e04d6811bd6e
 
 Estado: integrado em `main` como `75-market1` pelo PR #71, commit funcional `c44348dbc5a942b601f360fa38793bd9d8b47a1a`.
 
-### Decisão preservada
-
 1. `v75-market-flow.js/css` permanece camada de apresentação.
 2. O mesmo `.market-mobile-real`/`data-market-actual` continua a ser reutilizado; não existe segundo handler financeiro.
 3. Item comprado sem preço real expõe a confirmação fora de `Detalhes`.
@@ -100,8 +98,6 @@ Estado: integrado em `main` como `75-market1` pelo PR #71, commit funcional `c44
 
 Data: 10 de setembro de 2026. Estado: fundação integrada em `main` pelo PR #72, merge `2c1d78508507ab77d6df95850568d9fd7f6b9577`.
 
-### Decisão
-
 1. Destino: código-fonte funcional em TypeScript com `strict` ativo.
 2. TypeScript é ferramenta de build/desenvolvimento; o browser continua a receber JavaScript.
 3. Não introduzir React, Flutter, .NET MAUI ou outro framework durante a migração de linguagem.
@@ -110,15 +106,11 @@ Data: 10 de setembro de 2026. Estado: fundação integrada em `main` pelo PR #72
 6. `any` não justificado não é aceite como estratégia de migração.
 7. Cada nova camada TypeScript deve ficar testável e reversível até a substituição completa do runtime correspondente.
 
-### Fundamento
-
-A aplicação já possui grande superfície funcional e testes de regressão. Uma conversão massiva aumentaria o risco de quebrar cálculos, cofre, sincronização e PWA. A migração por blocos permite provar equivalência antes de cada substituição.
-
 ## D-065 — total de Mercado só pode ser rotulado exato com evidência completa
 
 Data: 10 de setembro de 2026. Estado: aceite para v76.
 
-Um total do Mercado só pode ser apresentado como **Exato** quando estiverem confirmados todos os fatores que alteram o valor final: SKU, quantidade/peso, preço aplicável, promoção e respetivas condições, cartão/cupão quando aplicável, regra fiscal/IVA necessária e ajustes identificados na fatura/talão.
+Um total do Mercado só pode ser apresentado como **Exato** quando estiverem confirmados todos os fatores que alteram o valor final: SKU, quantidade/peso, preço aplicável, promoção/condições, cartão/cupão quando aplicável, regra fiscal/IVA necessária e ajustes identificados na fatura/talão.
 
 Se algum fator determinante não estiver confirmado, o estado deve ser `Estimativa` ou `Preço por confirmar`.
 
@@ -137,8 +129,6 @@ Data: 10 de setembro de 2026. Estado: aceite para v76.
 
 Data: 10 de setembro de 2026. Estado: integrado em `main` como `75-expenses1` pelo PR #73, merge funcional `176450fcb236a2272afb9d6a6983b42681aa705d`.
 
-### Decisão
-
 1. `v75-expenses-modern.css` é exclusivamente visual e limitado a `html.cdc-v75 #page-bills`.
 2. Não alterar `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js` nem os IDs canónicos para este redesign.
 3. Modernizar tabs, pesquisa/criação, filtros, resumo, tabela desktop e cartões mobile.
@@ -147,32 +137,30 @@ Data: 10 de setembro de 2026. Estado: integrado em `main` como `75-expenses1` pe
 6. Carregar depois de `v75-pages.css` e antes de `v75-usability.css`.
 7. Proteger o bundle/cache e a integração com teste próprio.
 
-### Evidência
-
-Após integração: CI `34496500755`, TypeScript Foundation `34496500641` e Pages `34496540096` concluíram com sucesso.
+Evidência pós-integração: CI `34496500755`, TypeScript `34496500641` e Pages `34496540096` com sucesso.
 
 ## D-068 — Veggie Burger/X será um único controlo TypeScript sobre o drawer validado
 
-Data: 10 de setembro de 2026. Estado: aceite e implementado na branch `feat/v76-typescript-veggie-menu` como `76-veggie-menu1`.
+Data: 10 de setembro de 2026. Estado: **integrado em `main`** como `76-veggie-menu1` pelo PR #74, merge `f196545662b5d120a0dd21b2c498a209cfc144d3`.
 
 ### Factos
 
 - `mobile-menu-toggle.js` v73 já controla abertura, fecho, swipe, foco, `aria-expanded` e devolução do botão ao cabeçalho;
-- o controlador v73 ocultava `#drawerCloseBtn`, evitando um segundo X;
-- o mesmo controlador movia `#mobileMenuBtn` para `.drawer-head` quando o drawer abria;
-- `.drawer-head` está dentro de `.nav-drawer-shell`, que é transformado durante o swipe;
-- consequentemente o próprio botão podia deslocar-se para fora da área visível durante o gesto.
+- o controlador v73 oculta `#drawerCloseBtn`, evitando um segundo X;
+- anteriormente movia `#mobileMenuBtn` para `.drawer-head` quando o drawer abria;
+- `.drawer-head` está dentro de `.nav-drawer-shell`, superfície transformada durante o swipe;
+- isso fazia o próprio botão acompanhar a transformação e poder sair parcialmente da área visível.
 
 ### Decisão
 
-1. O ícone fechado passa a **Veggie Burger de exatamente duas linhas horizontais**.
-2. As mesmas duas linhas formam o X: superior `+45°`, inferior `-45°`; não criar um segundo botão de fecho.
-3. A fonte da nova camada é `src/ui/veggie-menu-toggle.ts`, verificada por TypeScript strict.
+1. O ícone fechado é **Veggie Burger de exatamente duas linhas horizontais**.
+2. As mesmas duas linhas formam o X: superior `+45°`, inferior `-45°`; não criar segundo botão de fecho.
+3. A fonte é `src/ui/veggie-menu-toggle.ts`, verificada por TypeScript strict.
 4. O runtime browser derivado é `v76-veggie-menu.js`, carregado depois de `mobile-menu-toggle.js`.
-5. Enquanto o dialog estiver aberto, mover **o mesmo** `#mobileMenuBtn` para filho direto de `#mobileDrawer`, fora de `.nav-drawer-shell`, para que o swipe não o leve juntamente com o painel.
-6. Quando o dialog fechar, deixar o controlador v73 devolver o mesmo botão ao cabeçalho original; não duplicar estado nem listeners de negócio.
-7. Reforçar a `.topbar` como sticky no mobile.
-8. Reservar espaço na `.drawer-head` para evitar colisão com a marca/título.
+5. Enquanto o dialog estiver aberto, mover **o mesmo** `#mobileMenuBtn` para filho direto de `#mobileDrawer`, fora de `.nav-drawer-shell`, para que o swipe não o leve com o painel.
+6. Quando o dialog fechar, o controlador v73 devolve o mesmo botão ao cabeçalho original.
+7. Reforçar `.topbar` como sticky no mobile.
+8. Reservar espaço na `.drawer-head` para evitar colisão com marca/título.
 9. Respeitar `prefers-reduced-motion`, `forced-colors`, foco por teclado e alvo táctil de 44 px.
 10. A camada não pode chamar `commit()`, `saveState()` nem aceder a dados financeiros.
 
@@ -180,18 +168,18 @@ Data: 10 de setembro de 2026. Estado: aceite e implementado na branch `feat/v76-
 
 O problema era de composição visual durante uma transformação CSS, não de domínio ou de navegação. Manter o controlador v73 reduz a superfície de regressão, enquanto a camada TypeScript corrige a geometria e inicia a migração real da UI para TS.
 
-### QA funcional
+### Evidência
 
-No head `95bdacab47b8b97d5f6cf61d52fc492b5a10ceca`:
+Antes do merge, CI/TypeScript do PR #74 passaram. Depois do merge em `main`:
 
-- TypeScript Foundation `34516585121`: sucesso;
-- CI `34516585241`: sucesso;
-- o teste `v76 Veggie Burger TypeScript tests` passou juntamente com finanças, faturas, Mercado, scanner, segurança, responsividade, acessibilidade e sincronização.
+- TypeScript `34517268279`: sucesso;
+- CI `34517268450`: sucesso;
+- Pages `34517324242`: sucesso.
 
-Validação física em iPhone/Safari/PWA permanece obrigatória após publicação.
+A validação física em iPhone/Safari/PWA permanece necessária porque os testes automáticos não substituem o comportamento real de gestos do Safari.
 
 ## Evidência técnica v76
 
-A fundação TypeScript integrada mantém `package.json`, `tsconfig.json`, `src/types/` e `src/type-tests/`. O novo `src/ui/veggie-menu-toggle.ts` é o primeiro enhancement visual TypeScript publicado como runtime derivado, sem alterar o domínio financeiro.
+A fundação TypeScript mantém `package.json`, `tsconfig.json`, `src/types/` e `src/type-tests/`. `src/ui/veggie-menu-toggle.ts` é um enhancement visual TypeScript publicado como runtime derivado, sem alterar o domínio financeiro.
 
 Continua registada a lacuna do Mercado: `market-experience.js` extrai `pid` da resposta Cesta para compor o ID do resultado, mas o objeto resultante ainda não preserva `pid` como propriedade nem `addProduct()` o persiste. Não corrigir sem teste específico de identidade.
