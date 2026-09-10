@@ -3,22 +3,13 @@
 Atualizado: 10 de setembro de 2026
 Build: `v75`
 Distribuição: GitHub Pages / PWA
-Runtime público: `75-catalog3`
-Candidato: `75-startup1`
+Runtime publicado: `75-startup1`
 
 ## 1. Princípios e invariantes
 
 A aplicação é uma PWA estática/local-first. Apresentação, Mercado, catálogo, transporte de navegação e sincronização são camadas separadas do núcleo financeiro.
 
-Invariantes:
-
-- `STATE_VERSION = 5`;
-- valores monetários em cêntimos;
-- estado financeiro em IndexedDB;
-- PBKDF2-SHA-256 + AES-GCM para o cofre;
-- sincronização opcional apenas do envelope cifrado;
-- sem passwords, tokens ou chaves embutidos;
-- uma correção visual/de disponibilidade não pode reescrever cálculos, persistência ou identidade do cofre.
+Invariantes: `STATE_VERSION = 5`; valores monetários em cêntimos; estado financeiro em IndexedDB; PBKDF2-SHA-256 + AES-GCM para o cofre; sincronização opcional apenas do envelope cifrado; sem passwords, tokens ou chaves embutidos. Correções visuais/de disponibilidade não podem reescrever cálculos, persistência ou identidade do cofre.
 
 ## 2. Camadas principais
 
@@ -51,104 +42,80 @@ Invariantes:
 - `market-retailer-image-policy.js`: política contra correspondência aproximada;
 - `market-official-images.js`: bridge e validadores oficiais;
 - `market-image-library.js`: cache persistente por `marketId|pid`;
-- `market-catalog-image-resolver.js`: resolução direta da fotografia oficial (`75-catalog2`);
+- `market-catalog-image-resolver.js`: fotografia oficial (`75-catalog2`);
 - `market-visual-catalog.js`: índice progressivo + renderer incremental (`75-catalog3`);
-- `pingo-doce-photo-library.js`: expansão dedicada Pingo Doce (`75-pd-photo1`);
-- `market-photo-loader.js`: prioridade e hidratação das fotografias visíveis (`75-photo-loader2`).
+- `pingo-doce-photo-library.js`: expansão Pingo Doce (`75-pd-photo1`);
+- `market-photo-loader.js`: prioridade/hidratação (`75-photo-loader2`).
 
 ## 3. Persistência e identidade de imagens
 
-A biblioteca geral usa IndexedDB `conta-de-casa-market-image-library` e chave canónica `marketId|pid`. Guarda apenas mercado, PID, metadados de diagnóstico, URL oficial validado, página oficial e timestamps/expiração. Não guarda binários, preços, faturas, dados pessoais ou credenciais.
-
-O catálogo visual usa `conta-de-casa-market-visual-catalog`. O store `products` mantém `marketId|pid`, nome, embalagem, categorias, página oficial e timestamps; `meta` mantém cursor e orçamento de descoberta. O catálogo não persiste preço. **Ver preço atual** continua a usar a pesquisa viva.
+A biblioteca geral usa IndexedDB `conta-de-casa-market-image-library` e chave `marketId|pid`. Guarda apenas mercado, PID, metadados de diagnóstico, URL oficial validado, página oficial e timestamps/expiração. O catálogo visual usa `conta-de-casa-market-visual-catalog`, não persiste preço e **Ver preço atual** continua a usar a pesquisa viva.
 
 ## 4. Resolvedor oficial `75-catalog2`
 
-`safeProductUrl()` valida HTTPS, retalhista, path e PID. A página oficial exata é lida, os candidatos de fotografia são filtrados por host/path/PID e apenas uma referência válida é entregue à biblioteca. A disponibilidade final é comprovada pelo `<img>`; uma referência quebrada é expurgada pelo loader. Timeout do reader: 8 s. Concorrência direta: 2.
+`safeProductUrl()` valida HTTPS, retalhista, path e PID. A página oficial exata é lida, candidatos são filtrados por host/path/PID e a disponibilidade final é comprovada pelo `<img>`. Timeout do reader: 8 s. Concorrência direta: 2.
 
 ## 5. Renderer incremental `75-catalog3`
 
-O renderer reconcilia a grelha por `marketId|pid`: remove apenas chaves obsoletas, reutiliza os mesmos nós DOM para produtos existentes, atualiza texto/metadados sem substituir a área da fotografia e cria nós apenas para novas chaves. O aquecimento periódico de imagem não reconstrói a grelha; uma fotografia persistida em background emite `cdc:market-photo-ready` para hidratação do cartão existente.
+A grelha é reconciliada por `marketId|pid`: remove apenas chaves obsoletas, reutiliza nós DOM existentes, atualiza metadados sem substituir a área da fotografia e cria nós apenas para novas chaves. O aquecimento periódico não reconstrói a grelha; uma fotografia persistida em background emite `cdc:market-photo-ready`.
 
-## 6. Biblioteca Pingo Doce `75-pd-photo1`
+## 6. Biblioteca Pingo Doce e loader
 
-Base `conta-de-casa-pingo-doce-photo-library`, estados `pending|ready|missing`, 15 grupos e mais de 200 termos de descoberta. Limites mantidos: 24 pesquisas/sessão, 72/dia, 30 tentativas de imagem/sessão, 120/dia, suspensão offline/oculta/Save-Data.
+`75-pd-photo1` mantém estados `pending|ready|missing`, limites por sessão/dia e suspensão offline/oculta/Save-Data. `75-photo-loader2` trabalha apenas no Mercado ativo, consulta cache primeiro, prioriza até 6 cartões, usa PID exato, polling limitado e cooldown de retry, sem escrever estado financeiro.
 
-## 7. Carregador `75-photo-loader2`
+## 7. Arranque seguro `75-startup1`
 
-Trabalha apenas com `#page-market.page.active`, consulta primeiro a biblioteca geral, prioriza até 6 cartões, resolve por SKU exato, aplica imagem válida com `loading='eager'`, reavalia a cada 500 ms por no máximo 24 ciclos e usa cooldown de 30 s. Não possui `fetch()` próprio nem escreve estado financeiro.
+### Riscos confirmados
 
-## 8. Arranque seguro `75-startup1`
+Foram confirmados dois caminhos independentes capazes de produzir ecrã branco no Safari/PWA: navegação do Service Worker sem timeout e período em que `#vaultScreen` e `#app` podem ficar simultaneamente ocultos durante a barreira inicial de sincronização. A captura física não permite determinar qual ocorreu, por isso ambos foram corrigidos.
 
-### Problema arquitetural
-
-Foram confirmados dois estados independentes capazes de produzir um ecrã branco no Safari/PWA:
-
-1. a navegação controlada pelo Service Worker podia aguardar indefinidamente por `fetch(event.request)` antes de chegar ao fallback de cache;
-2. durante o desbloqueio, o fluxo funcional pode manter simultaneamente `#vaultScreen` e `#app` ocultos enquanto a barreira inicial de sincronização ainda não terminou.
-
-A captura física não prova qual ocorreu, por isso a correção cobre ambos sem alterar a política de segurança.
-
-### Contrato de navegação
+### Navegação
 
 Para `event.request.mode === 'navigate'`, `sw.js` usa `navigationResponse()`:
 
-1. lê antecipadamente `./index.html` do Cache Storage;
-2. inicia rede com `cache:'no-store'` e `AbortController`;
-3. aborta a tentativa após 4000 ms;
-4. resposta de rede `ok` é devolvida e atualiza a cópia de `index.html` no cache;
+1. obtém `./index.html` do Cache Storage;
+2. tenta rede com `cache:'no-store'` e `AbortController`;
+3. aborta após 4000 ms;
+4. resposta `ok` é devolvida e atualiza o `index.html` em cache;
 5. erro/timeout usa o `index.html` instalado;
-6. se não existir rede nem cache, devolve 503 textual, evitando espera indefinida.
+6. se não existir rede nem cache, devolve 503 textual.
 
-Pedidos dos restantes assets mantêm network-first com `cache:'no-store'` e fallback para a chave pública correspondente.
+Os restantes assets mantêm network-first com `cache:'no-store'` e fallback para cache.
 
-### Contrato de visibilidade
+### Visibilidade segura
 
-`v75-startup-guard.js` é uma camada de apresentação. Observa apenas:
-
-- classe `app-active` em `<html>`;
-- atributo `hidden` de `#vaultScreen`;
-- atributo `hidden` de `#app`.
-
-Quando `app-active` está ativo e os dois contentores estão ocultos, o cofre é mostrado temporariamente com `aria-busy="true"` e mensagem de preparação. O shell financeiro continua oculto. Quando `#app` fica disponível, a guarda volta a ocultar o cofre e restaura a mensagem anterior.
+`v75-startup-guard.js` observa apenas classe `app-active` e `hidden` de `#vaultScreen`/`#app`. Se `app-active` estiver ativo e ambos estiverem ocultos, reapresenta temporariamente o cofre com `aria-busy="true"` e mensagem de preparação. Quando `#app` fica disponível, oculta novamente o cofre e restaura a mensagem anterior.
 
 A camada não lê `appState`, não usa IndexedDB, não chama `syncNow()`, não altera PIN/cifragem e não antecipa dados financeiros.
 
-## 9. Segurança
+## 8. Segurança
 
-As camadas de imagem e `75-startup1` não podem aceder a valores financeiros, credenciais ou chaves. A guarda de arranque melhora disponibilidade sem contornar a barreira de sincronização existente. Não é necessário nem recomendado limpar dados do Safari para aplicar a correção, porque isso poderia eliminar o cofre local em IndexedDB.
+As camadas visuais e de imagens não podem aceder a valores financeiros, credenciais ou chaves. `75-startup1` melhora disponibilidade sem contornar a barreira de sincronização. Não se deve limpar dados do Safari para aplicar a correção, pois isso pode apagar IndexedDB/cofre local.
 
-## 10. Responsividade e acessibilidade
+## 9. Responsividade e acessibilidade
 
-- mobile principal <=820 px;
-- refinamentos 540/430/350 px;
-- safe areas iOS preservadas;
-- inputs móveis com 16 px para evitar zoom de foco;
-- `prefers-reduced-motion` respeitado;
-- estado de preparação usa `aria-busy`;
-- a navegação continua utilizável em desktop/tablet/mobile.
+Mobile principal <=820 px; refinamentos 540/430/350 px; safe areas iOS preservadas; inputs móveis com 16 px; `prefers-reduced-motion` respeitado; o estado de preparação usa `aria-busy`.
 
-## 11. Ordem relevante de assets
+## 10. Ordem relevante de assets
 
-1. núcleo funcional e `events.js`;
-2. bibliotecas/políticas do Mercado;
-3. `v64-runtime.js`, experiência e arquitetura;
-4. `v75-stability.js?v=75-stability1`;
-5. `v75-startup-guard.js?v=75-startup1`;
-6. `v75-market-featured.js`.
+Após o núcleo funcional: bibliotecas do Mercado → `v64-runtime.js`/experiência/arquitetura → `v75-stability.js?v=75-stability1` → `v75-startup-guard.js?v=75-startup1` → `v75-market-featured.js`.
 
-A guarda é carregada depois da estabilidade base e antes de `DOMContentLoaded` terminar, ficando pronta antes de o utilizador poder iniciar o desbloqueio.
+## 11. Cache e distribuição
 
-## 12. Cache e distribuição
-
-Cache candidato:
+Cache publicado:
 
 `conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog3-pd-photo1-photo-loader2-startup1`
 
-`v75-startup-guard.js` integra explicitamente a allowlist do bundle e do Service Worker.
+`v75-startup-guard.js` integra a allowlist do bundle e do Service Worker.
 
-## 13. QA
+## 12. QA e publicação
 
-Commit funcional candidato: `cd229d83c3d47f54d7f8990a76f2f29acb372f47`.
+- commit funcional: `cd229d83c3d47f54d7f8990a76f2f29acb372f47`;
+- commit integrado: `188c0820adff62540987fb6f8ef65c76ab9bf596`;
+- CI branch funcional `34440532734`: sucesso;
+- CI branch após docs `34440742219`: sucesso;
+- integração em `main`: fast-forward, `behind 0`;
+- CI main `34440788510`: sucesso;
+- Pages `34440824303`: sucesso.
 
-CI da branch run `34440532734`: sucesso completo, incluindo o novo teste de regressão de arranque Safari/PWA. A publicação final e a validação física permanecem pendentes nesta etapa.
+A validação física no mesmo iPhone/Safari continua necessária para encerrar o defeito.

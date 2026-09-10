@@ -42,12 +42,17 @@ A auditoria confirmou dois caminhos independentes capazes de gerar um estado bra
 - a correção não antecipa dados financeiros durante o arranque;
 - não é necessário limpar dados do Safari para aplicar a revisão; fazê-lo poderia eliminar o cofre local em IndexedDB.
 
-### QA atual
+### QA e publicação
 
 - commit funcional: `cd229d83c3d47f54d7f8990a76f2f29acb372f47`;
-- CI da branch `fix/v75-safari-blank-screen`, run `34440532734`: sucesso completo;
-- integração/publicação em `main` ainda pendentes nesta etapa;
-- validação física no mesmo iPhone/Safari continua obrigatória.
+- commit integrado: `188c0820adff62540987fb6f8ef65c76ab9bf596`;
+- CI funcional da branch `34440532734`: sucesso;
+- CI da branch após documentação `34440742219`: sucesso;
+- comparação pré-integração: `ahead 2`, `behind 0`;
+- `main` avançou por fast-forward sem force para `188c0820adff62540987fb6f8ef65c76ab9bf596`;
+- CI de `main` `34440788510`: sucesso completo;
+- GitHub Pages `34440824303`: sucesso, com checkout da revisão testada, preparação da allowlist, upload e deploy;
+- permanece pendente apenas a revalidação física do arranque no mesmo iPhone/Safari/PWA.
 
 ---
 

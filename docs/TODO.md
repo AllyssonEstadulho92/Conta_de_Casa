@@ -23,26 +23,26 @@ Atualizado: 10 de setembro de 2026
 ## P0 — Ecrã branco no Safari/PWA
 
 - [x] Rever a captura física e separar factos de causa provável.
-- [x] Inspecionar o artefacto Pages publicado e confirmar que `index.html`, estilos e scripts existem.
-- [x] Confirmar que a navegação do Service Worker tinha `fetch()` sem timeout antes do fallback.
-- [x] Confirmar que o fluxo de entrada pode ocultar `#vaultScreen` e `#app` durante a barreira inicial.
+- [x] Inspecionar o artefacto Pages publicado e confirmar `index.html`, estilos e scripts.
+- [x] Confirmar navegação do Service Worker sem timeout antes do fallback.
+- [x] Confirmar estado possível com `#vaultScreen` e `#app` simultaneamente ocultos durante a barreira inicial.
 - [x] Criar revisão `75-startup1`.
 - [x] Criar `v75-startup-guard.js` sem acesso a estado financeiro/IndexedDB/sync.
-- [x] Manter o cofre visível com `aria-busy` quando cofre+shell ficariam simultaneamente ocultos.
+- [x] Manter o cofre visível com `aria-busy` quando cofre+shell ficariam ocultos.
 - [x] Preservar o shell financeiro oculto até a barreira existente terminar.
 - [x] Limitar navegação de rede a 4 s com `AbortController`.
 - [x] Usar `index.html` em cache no timeout/erro.
-- [x] Atualizar a cópia de `index.html` em cache após navegação de rede bem-sucedida.
+- [x] Atualizar `index.html` em cache após navegação de rede bem-sucedida.
 - [x] Devolver 503 legível se não houver rede nem cache.
 - [x] Atualizar cache para sufixo `startup1`.
 - [x] Incluir `v75-startup-guard.js` no bundle/Service Worker.
 - [x] Adicionar `tests/safari-startup.test.cjs` e passo dedicado no CI.
 - [x] Confirmar CI funcional da branch — run `34440532734`.
-- [ ] Confirmar CI após documentação.
-- [ ] Comparar branch com `main` e confirmar `behind 0`.
-- [ ] Integrar por fast-forward sem force.
-- [ ] Confirmar CI completo de `main`.
-- [ ] Confirmar GitHub Pages no SHA integrado.
+- [x] Confirmar CI após documentação — run `34440742219`.
+- [x] Comparar branch com `main` e confirmar `behind 0`.
+- [x] Integrar por fast-forward sem force no SHA `188c0820adff62540987fb6f8ef65c76ab9bf596`.
+- [x] Confirmar CI completo de `main` — run `34440788510`.
+- [x] Confirmar GitHub Pages — run `34440824303`.
 - [ ] Revalidar no mesmo iPhone/Safari sem limpar IndexedDB/dados do site.
 
 ## P0 — Documentação desta correção
@@ -52,36 +52,45 @@ Atualizado: 10 de setembro de 2026
 - [x] Atualizar `DECISIONS.md`.
 - [x] Atualizar `TODO.md`.
 - [x] Atualizar `CHANGELOG.md`.
+- [x] Registar CI e Pages da publicação.
+
+## P1 — Revalidação física do arranque
+
+- [ ] Abrir a URL em Safari com rede normal e confirmar carregamento sem branco prolongado.
+- [ ] Repetir com rede degradada/instável e confirmar fallback após ~4 s quando o cache já existir.
+- [ ] Desbloquear o cofre e confirmar estado **A preparar a aplicação com segurança…** quando a barreira inicial demorar.
+- [ ] Confirmar que dados financeiros não aparecem antes do fim da barreira.
+- [ ] Fechar/reabrir a PWA e confirmar comportamento idêntico.
+- [ ] Confirmar que nenhuma validação exige limpar dados do Safari.
 
 ## P1 — Revalidação física do Mercado
 
-- [ ] Confirmar novo cache com `catalog3` + `startup1`.
+- [ ] Confirmar cache com `catalog3` + `startup1`.
 - [ ] Confirmar que fotografias já visíveis não desaparecem/reaparecem durante atualização de fundo.
-- [ ] Confirmar ausência de flicker ao permanecer no Mercado por pelo menos 30–60 s.
+- [ ] Confirmar ausência de flicker ao permanecer no Mercado por 30–60 s.
 - [ ] Trocar categorias e filtros repetidamente e confirmar estabilidade dos cartões.
-- [ ] Confirmar que os primeiros cartões continuam a receber prioridade de fotografia.
-- [ ] Confirmar que **Fotografia a validar…** substitui o spinner após a janela máxima quando necessário.
-- [ ] Confirmar que o contador Pingo Doce deixa `0` quando existem fotografias oficiais válidas.
-- [ ] Confirmar que imagem em cache surge sem atraso perceptível.
-- [ ] Confirmar que imagem quebrada é expurgada e não prende o cartão.
-- [ ] Confirmar que Pingo Doce nunca recebe fotografia de outro PID.
-- [ ] Confirmar que Continente continua correto.
-- [ ] Confirmar rede lenta/offline sem bloqueio da página.
-- [ ] Confirmar tema escuro e `prefers-reduced-motion`.
-- [ ] Confirmar ausência de overflow horizontal/layout shift relevante.
+- [ ] Confirmar prioridade dos primeiros cartões.
+- [ ] Confirmar **Fotografia a validar…** após a janela máxima quando necessário.
+- [ ] Confirmar que o contador Pingo Doce deixa `0` quando existirem fotografias oficiais válidas.
+- [ ] Confirmar imagem em cache sem atraso perceptível.
+- [ ] Confirmar expurgo de imagem quebrada sem prender o cartão.
+- [ ] Confirmar Pingo Doce sem fotografia de outro PID.
+- [ ] Confirmar Continente correto.
+- [ ] Confirmar rede lenta/offline sem bloqueio.
+- [ ] Confirmar tema escuro, `prefers-reduced-motion` e ausência de overflow/layout shift relevante.
 - [ ] Confirmar valores financeiros idênticos antes/depois.
 
 ## P1 — Cobertura do catálogo
 
 - [ ] Medir SKUs Pingo Doce `ready/pending/missing` depois do runtime atualizado.
 - [ ] Medir fotografias gerais e Pingo Doce por sessão.
-- [ ] Identificar categorias com baixo recall só depois de estabilizado o pipeline visual.
-- [ ] Revalidar `missing` com política de retry/backoff quando necessário.
+- [ ] Identificar categorias com baixo recall apenas depois de estabilizado o pipeline visual.
+- [ ] Revalidar `missing` com retry/backoff quando necessário.
 - [ ] Não declarar 100% do catálogo sem fonte exaustiva/autorizada.
 
 ## P2 — Consolidação
 
-- [ ] Após validação física, avaliar consolidação das camadas de Mercado numa implementação mais simples.
-- [ ] Avaliar integrar a guarda de arranque diretamente no fluxo funcional apenas se isso reduzir complexidade sem enfraquecer a segurança.
+- [ ] Após validação física, avaliar consolidação das camadas de Mercado.
+- [ ] Avaliar integrar a guarda de arranque diretamente no fluxo funcional apenas se reduzir complexidade sem enfraquecer segurança.
 - [ ] Remover código histórico apenas com prova de ausência de referências.
 - [ ] Manter documentação sincronizada em cada alteração relevante.

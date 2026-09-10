@@ -63,7 +63,7 @@ Data: 9 de setembro de 2026 · Estado: aceite e publicada.
 
 ## D-056 — O arranque nunca pode ficar visualmente sem estado seguro
 
-Data: 10 de setembro de 2026 · Estado: aceite; implementação candidata validada em CI.
+Data: 10 de setembro de 2026 · Estado: aceite, integrada e publicada.
 
 ### Factos observáveis
 
@@ -91,7 +91,7 @@ A captura física no iPhone/Safari mostrou uma página totalmente branca com a b
 
 ### Fundamento
 
-A disponibilidade do shell e a confidencialidade do cofre são requisitos simultâneos. Um estado de espera deve ser visível e acessível sem antecipar dados financeiros. O fallback de navegação deve ser temporalmente limitado porque um `fetch()` pendente não é equivalente a uma falha e, por isso, não ativa `.catch()`.
+A disponibilidade do shell e a confidencialidade do cofre são requisitos simultâneos. Um estado de espera deve ser visível e acessível sem antecipar dados financeiros. Um `fetch()` pendente não ativa `.catch()`, portanto o fallback de navegação precisa de limite temporal explícito.
 
 ### Critérios de aceitação
 
@@ -102,7 +102,13 @@ A disponibilidade do shell e a confidencialidade do cofre são requisitos simult
 - regressões financeiras, segurança, Mercado, responsividade, acessibilidade e sync permanecem verdes;
 - confirmação final no mesmo iPhone/Safari/PWA.
 
-### Evidência atual
+### Evidência de publicação
 
-Commit funcional: `cd229d83c3d47f54d7f8990a76f2f29acb372f47`.
-CI da branch run `34440532734`: sucesso completo. Integração e Pages ainda pendentes nesta etapa.
+- commit funcional `cd229d83c3d47f54d7f8990a76f2f29acb372f47`;
+- commit integrado `188c0820adff62540987fb6f8ef65c76ab9bf596`;
+- CI branch `34440532734`: sucesso;
+- CI branch após documentação `34440742219`: sucesso;
+- integração em `main` por fast-forward sem force, com `behind 0`;
+- CI main `34440788510`: sucesso;
+- GitHub Pages `34440824303`: sucesso;
+- encerramento funcional continua dependente da revalidação física definida em D-053.
