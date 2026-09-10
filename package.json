@@ -1,0 +1,15 @@
+{
+  "name": "conta-de-casa",
+  "private": true,
+  "version": "0.76.0-dev.1",
+  "description": "Conta de Casa — ferramentas de desenvolvimento para a migração incremental TypeScript v76.",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}
