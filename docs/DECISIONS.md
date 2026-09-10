@@ -10,7 +10,7 @@ Este ficheiro mantém as decisões vigentes necessárias para continuidade. O hi
 - Valores monetários em cêntimos e `STATE_VERSION = 5`.
 - Cofre PBKDF2-SHA-256 + AES-GCM; `PBKDF2_ITERATIONS = 250000`.
 - Fotografias não são prova de preço nem de transação.
-- `marketId|pid` é a identidade canónica de fotografia/SKU.
+- `marketId|pid` é a identidade canónica de fotografia/SKU no pipeline especializado.
 - Preço pesquisado é estimativa; preço efetivamente pago continua separado.
 - Falha de fotografia nunca remove o artigo.
 - Releases públicas relevantes usam revisão/cache invalidável.
@@ -83,40 +83,81 @@ Estado: integrado em `main` como `75-assets1` pelo PR #69, merge `a8e04d6811bd6e
 
 ## D-063 — item comprado sem preço real deve tornar a confirmação imediatamente visível
 
-Data: 10 de setembro de 2026. Estado: aceite na branch `fix/v75-market-part3` como `75-market1`.
+Estado: integrado em `main` como `75-market1` pelo PR #71, commit funcional `c44348dbc5a942b601f360fa38793bd9d8b47a1a`.
 
-### Factos
+### Decisão preservada
 
-- o browser de produtos cria itens com `estimatedCents=product.priceCents`, `actualCents=0` e `purchased=false`;
-- `render.js` já cria um input real com `data-market-actual` e `events.js` já possui o handler delegado que valida e guarda esse valor;
-- `market-shopping-focus.js` movia `.market-mobile-real` para o disclosure `Detalhes`;
-- ao marcar um item como comprado, o cartão também passa ao grupo recolhido `Comprados`;
-- consequentemente, o estado `purchased=true` + `actualCents<=0` podia esconder a ação necessária para substituir a estimativa pelo preço pago.
+1. `v75-market-flow.js/css` permanece camada de apresentação.
+2. O mesmo `.market-mobile-real`/`data-market-actual` continua a ser reutilizado; não existe segundo handler financeiro.
+3. Item comprado sem preço real expõe a confirmação fora de `Detalhes`.
+4. Grupo Comprados abre quando existe preço por confirmar.
+5. Estados visuais: `Por comprar`, `Preço por confirmar`, `Comprado`.
+6. Valores compactos distinguem estimativa de total contabilizado.
+7. Pesquisa live e pesquisa da lista permanecem contextos distintos.
+8. Scanner, PID e loader especializado não são alterados sem erro comprovado.
+
+## D-064 — migração para TypeScript será incremental e sem mudança simultânea de runtime
+
+Data: 10 de setembro de 2026. Estado: aceite para o programa `v76`; fundação em `feat/v76-typescript-foundation`.
 
 ### Decisão
 
-1. Criar `v75-market-flow.js/css` revisão `75-market1` como camada exclusivamente de apresentação.
-2. Não criar novo input nem novo handler financeiro. Reutilizar o `.market-mobile-real` e `data-market-actual` já existentes.
-3. Quando um item estiver comprado e sem preço real, mover o bloco existente para fora de `Detalhes`, permanecendo dentro de `#marketList` para manter event delegation.
-4. Abrir o grupo `Comprados` automaticamente enquanto existir pelo menos um item com preço por confirmar.
-5. Expor estados visuais `Por comprar`, `Preço por confirmar` e `Comprado`.
-6. Qualificar o valor compacto como `Estimativa total`, `Estimativa provisória` ou `Total contabilizado` para não confundir estimativa com valor pago.
-7. Distinguir pesquisa live de produtos da pesquisa que apenas filtra a lista, usando `Pesquisar na minha lista…` para `#marketSearch`.
-8. Tornar Estado/Categoria/Ordenar visíveis no mobile sem alterar valores nem handlers.
-9. No browser live, corrigir o cartão para três colunas explícitas — fotografia, conteúdo, ação — e rotular o preço como `Preço pesquisado`.
-10. A ação de adicionar mantém `data-market-add-product`; ganha apenas rótulo visível quando houver espaço.
-11. `CDCAssetLoader` pode acompanhar imagens genéricas do browser live, mas não substitui a cadeia especializada `marketId|pid`/`75-photo-loader3` do catálogo.
-12. No catálogo progressivo, apenas espelhar estado de carregamento para `aria-busy`; não alterar retry, cache, fontes oficiais ou resolução.
-13. Scanner/código de barras permanece intocado salvo erro funcional comprovado.
+1. Destino: código-fonte funcional em TypeScript com `strict` ativo.
+2. TypeScript é ferramenta de build/desenvolvimento; o browser continua a receber JavaScript.
+3. Não introduzir React, Flutter, .NET MAUI ou outro framework durante a migração de linguagem.
+4. Cada módulo JavaScript só é substituído depois de testes de paridade demonstrarem equivalência.
+5. `STATE_VERSION`, schema persistido, algoritmos de cifragem e formato de sincronização não mudam apenas por causa da linguagem.
+6. `any` não justificado não é aceite como estratégia de migração.
+7. O Bloco 1 contém apenas configuração, contratos/tipos e typecheck; não entra no bundle Pages.
 
 ### Fundamento
 
-A próxima ação financeira necessária deve estar visível no momento em que se torna necessária. Promover o controlo já existente evita duplicar lógica ou criar um segundo caminho de persistência, ao mesmo tempo que mantém a distinção contabilística entre estimativa e preço real.
+A aplicação já possui grande superfície funcional e testes de regressão. Uma conversão massiva aumentaria o risco de quebrar cálculos, cofre, sincronização e PWA. A migração por blocos permite provar equivalência antes de cada substituição.
 
-### Segurança
+## D-065 — total de Mercado só pode ser rotulado exato com evidência completa
 
-`75-market1` não chama `commit()`/`saveState()`, não atribui `estimatedCents`, `actualCents`, `quantity` ou `purchased`, não altera CSP e não adiciona endpoints. O núcleo financeiro, PIN, PBKDF2, AES-GCM, IndexedDB, QR, scanner e sincronização permanecem inalterados.
+Data: 10 de setembro de 2026. Estado: aceite como regra de produto/contabilidade para v76.
 
-## Evidência técnica atual
+### Decisão
 
-A Parte 3 parte de `main` no SHA `4e130708de2b76eefe56d04e0e5a03d49d431446`. O CI da branch ficou verde no run `34481330929` antes da atualização documental final. Integração em `main` continua condicionada a CI final verde, `behind 0`, revisão do PR e confirmação posterior do GitHub Pages.
+Um total do Mercado só pode ser apresentado como **Exato** quando estiverem confirmados todos os fatores que alteram o valor final, incluindo:
+
+- SKU/produto correto;
+- quantidade ou peso real;
+- preço válido para o retalhista/local/momento aplicável;
+- promoção e respetivas condições;
+- cartão/cupão/elegibilidade quando aplicável;
+- regra fiscal/IVA quando necessária ao cálculo apresentado;
+- ajustes posteriores identificados na fatura/talão.
+
+Se algum destes fatores não estiver confirmado, o estado deve ser `Estimativa` ou `Preço por confirmar`.
+
+### Consequência
+
+A aplicação poderá reproduzir operações observáveis de uma passagem em caixa para planeamento e conferência, mas não se apresenta como POS proprietário e não processa pagamentos bancários apenas para imitar o supermercado.
+
+## D-066 — imagens e logos não podem enfraquecer identidade, licença ou CSP
+
+Data: 10 de setembro de 2026. Estado: aceite para v76.
+
+### Decisão
+
+- imagens de produto são enriquecimento visual e nunca prova de preço;
+- preferência futura por correspondência GTIN/PID e fonte verificada;
+- logos SVG de mercados só entram como assets locais com origem e direito de utilização verificados;
+- não copiar SVGs de agregadores/sites aleatórios;
+- não expandir CSP nem introduzir CDN apenas para branding;
+- manter fallback textual/visual enquanto a origem do asset não estiver validada.
+
+## Evidência técnica v76 — Bloco 1
+
+Foram adicionados na branch de fundação:
+
+- `package.json` com TypeScript apenas como `devDependency`;
+- `tsconfig.json` estrito e `noEmit`;
+- tipos nominais e schema persistido v5 em `src/types/`;
+- contratos de Mercado que distinguem pesquisa/preço estimado/confirmado;
+- testes de compilação em `src/type-tests/contracts.ts`;
+- workflow `.github/workflows/typescript.yml`.
+
+Durante o mapeamento foi identificada uma lacuna a rever no Bloco de Mercado: `market-experience.js` extrai o `pid` da resposta Cesta para compor o ID do resultado, mas o objeto resultante não preserva `pid` como propriedade nem `addProduct()` o persiste. Não corrigir esta discrepância sem teste específico de identidade.
