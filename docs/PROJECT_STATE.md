@@ -3,10 +3,12 @@
 Atualizado: 10 de setembro de 2026
 Build: `v75`
 Branch pública: `main`
-SHA de `main` antes da auditoria de usabilidade: `f85deed6d2fab5e1b0658ad74c25d323f621a19f`
-Branch de auditoria/correção atual: `fix/v75-usability-part1`
+SHA publicado após a Parte 1: `c352c1883c16fd7df92aa0f26d23e3c5084b0fcf`
 Distribuição: GitHub Pages / PWA
-Revisão de usabilidade candidata: `75-usability1`
+Revisão de usabilidade integrada: `75-usability1`
+PR de integração: `#66`
+CI de `main`: run `34471773663` — sucesso
+GitHub Pages: run `34471814790` — sucesso
 
 ## Baseline preservada
 
@@ -18,11 +20,14 @@ Revisão de usabilidade candidata: `75-usability1`
 - sincronização GitHub opcional limitada ao envelope cifrado;
 - UI `74-ui1`, Mercado `74-shopping2`, menu `73-menu8`, experiência `74-experience2`;
 - arquitetura `75-architecture2`, cabeçalho `75-header2`, estabilidade `75-stability1`, geometria `75-layout1`, drawer `75-drawer2`;
-- startup `75-startup2`, catálogo de distribuição `75-catalog4`, loader `75-photo-loader3`.
+- startup `75-startup2`, catálogo `75-catalog4`, loader `75-photo-loader3`;
+- usabilidade transversal `75-usability1`.
 
-## Estado confirmado antes da nova auditoria
+## Estado confirmado
 
-A branch anterior `fix/v75-pin-images-stability` e `main` foram comparadas em 10/09/2026 e estavam **idênticas**, `ahead 0 / behind 0`, no SHA `f85deed6d2fab5e1b0658ad74c25d323f621a19f`. Assim, as correções de PIN/fotografias já fazem parte do código de `main`. A publicação GitHub Pages desse SHA continua a exigir confirmação independente pelo workflow/ambiente antes de ser declarada como verificada.
+A branch anterior `fix/v75-pin-images-stability` já estava integralmente contida em `main` antes desta auditoria. A Parte 1 da nova auditoria foi desenvolvida em `fix/v75-usability-part1`, validada por CI e integrada por squash através do PR `#66`.
+
+O commit público resultante é `c352c1883c16fd7df92aa0f26d23e3c5084b0fcf`. O CI de `main` terminou com sucesso no run `34471773663` e o workflow GitHub Pages do mesmo SHA terminou com sucesso no run `34471814790`.
 
 ## Auditoria UX/UI transversal — constatações
 
@@ -30,44 +35,39 @@ A branch anterior `fix/v75-pin-images-stability` e `main` foram comparadas em 10
 
 ### Confirmado
 
-1. A aplicação já possui uma arquitetura visual v75 por camadas, mantendo `core.js`/`finance.js` separados da apresentação.
+1. A aplicação possui arquitetura visual v75 por camadas, mantendo `core.js`/`finance.js` separados da apresentação.
 2. A navegação v75 usa cinco destinos principais em mobile: Início, Despesas, Mercado, Planeamento e Mais.
-3. A linguagem oficial de ícones é Lucide local via `ui-icons.js`; ainda existem SVGs/glifos de fallback no HTML e em camadas antigas, mas a hidratação atual normaliza os principais controlos visíveis.
-4. `v75-stability.css` já força `font-size:16px` nos campos mobile para evitar o auto-zoom de foco do Safari/iOS.
+3. A linguagem oficial de ícones é Lucide local via `ui-icons.js`; ainda existem fallbacks históricos no HTML/base, mas a hidratação atual normaliza os principais controlos visíveis.
+4. `v75-stability.css` já aplicava `font-size:16px` aos campos mobile para evitar o auto-zoom de foco do Safari/iOS.
 5. O `viewport` não usa `user-scalable=no` nem `maximum-scale=1`, preservando a ampliação manual por acessibilidade.
-6. O ecrã de cofre dispõe de teclado PIN próprio em mobile, modo palavra-passe alternativo, recuperação/alteração de PIN e tratamento de VisualViewport.
+6. O cofre dispõe de teclado PIN próprio em mobile, modo palavra-passe alternativo, recuperação/alteração de PIN e tratamento de VisualViewport.
 7. A distribuição pública é preparada por `scripts/prepare-pages.cjs`; o `index.html` do repositório é um template base e não representa sozinho o bundle final v75.
 
-### Riscos encontrados
+### Riscos/dívida técnica ainda abertos
 
-- Não existia uma regra transversal explícita para impedir **duplo toque/zoom acidental** em controlos, apesar de o auto-zoom de inputs já estar mitigado.
-- O cofre mobile dependia de várias regras históricas para altura/espaçamento; em ecrãs baixos/teclado aberto era útil reforçar `100dvh`, safe areas e scroll controlado.
-- A aplicação ainda mantém várias camadas visuais históricas. A remoção/compactação só deve ser feita depois de prova de ausência de referências para não introduzir regressões.
-- A fonte técnica base (`PAGE_META`/HTML) ainda contém nomenclaturas antigas como Faturas/Lista de compras, enquanto a arquitetura v75 apresenta Despesas/Mercado. Não é erro funcional atual, mas é dívida de consolidação.
+- A aplicação mantém várias camadas visuais históricas. Só devem ser fundidas/removidas depois de prova de ausência de referências e regressões.
+- `PAGE_META`/template ainda contém nomenclaturas históricas como Faturas/Lista de compras, enquanto a arquitetura v75 apresenta Despesas/Mercado.
+- A validação física específica de `75-usability1` em iPhone/Safari/PWA ainda deve confirmar que toques e foco não provocam zoom involuntário.
+- As páginas necessitam agora da auditoria de detalhe por fluxo, densidade, estados e consistência visual; isso é tratado nas Partes 2 a 4.
 
-## Parte 1 implementada na branch — `75-usability1`
+## Parte 1 concluída e publicada — `75-usability1`
 
-Foi criada uma camada isolada `v75-usability.css` com alterações apenas de interação/apresentação:
+Foi criada e publicada `v75-usability.css`, uma camada isolada de interação/apresentação:
 
 - `touch-action: manipulation` em controlos interativos para reduzir zoom acidental por duplo toque;
-- mantém pinch-to-zoom e não bloqueia a ampliação manual do browser;
-- garante controlos de formulário mobile a 16 px;
-- reforça alvos tácteis mínimos de 44 px e 48 px onde aplicável;
-- reforça o cofre mobile com `100dvh`, safe areas, scroll controlado e cartão responsivo;
-- mantém navegação inferior e barras de Despesas/Mercado com áreas de toque estáveis;
-- respeita `prefers-reduced-motion`.
+- pinch-to-zoom e ampliação manual continuam disponíveis;
+- controlos de formulário mobile mantidos a 16 px;
+- alvos tácteis mínimos de 44 px e 48 px onde aplicável;
+- cofre mobile reforçado com `100dvh`, safe areas, scroll controlado e cartão responsivo;
+- navegação inferior e barras de Despesas/Mercado com áreas de toque estáveis;
+- respeito por `prefers-reduced-motion`.
 
-A camada foi adicionada ao gerador de GitHub Pages e ao allowlist/cache do Service Worker. O teste transversal `tests/v75-stability.test.cjs` foi ampliado para validar anti-zoom, acessibilidade, distribuição e isolamento da camada.
+A camada foi adicionada ao gerador de Pages, ao allowlist/cache do Service Worker e aos testes de regressão. Durante o QA foram detetadas duas incompatibilidades em testes que verificavam a ordem textual da assinatura do cache; foram corrigidas preservando todas as assinaturas legadas e acrescentando `usability1` no final. A execução seguinte ficou verde.
 
 ## Segurança
 
-A Parte 1 não altera `core.js`, `finance.js`, PBKDF2, AES-GCM, PIN, IndexedDB, sincronização, faturas, pagamentos, preços, QR ou scanner. Não foram adicionados segredos, origens externas, bibliotecas runtime ou telemetria.
+A Parte 1 não alterou `core.js`, `finance.js`, PBKDF2, AES-GCM, PIN, IndexedDB, sincronização, faturas, pagamentos, preços, QR ou scanner. Não foram adicionados segredos, origens externas, bibliotecas runtime ou telemetria.
 
-## Próximas partes
+## Próximo passo
 
-1. validar CI da branch `fix/v75-usability-part1`;
-2. integrar em `main` apenas se CI ficar verde e confirmar Pages no mesmo SHA;
-3. Parte 2: Início + Despesas + Planeamento — hierarquia, densidade, estados vazios, filtros e ações;
-4. Parte 3: Mercado — pesquisa, filtros, cartões, imagens, estados de carregamento e fluxo de compra sem tocar na contabilidade;
-5. Parte 4: Mais + cofre + consolidação final de ícones e acessibilidade;
-6. revalidação física em iPhone/Safari/PWA e, se possível, Android/Chrome.
+Parte 2: auditoria e melhoria de **Início + Despesas + Planeamento**, com foco em hierarquia, densidade, estados vazios/erro/carregamento, pesquisa/filtros/ações, consistência de valores e responsividade. Só depois avançar para Mercado e Mais/ícones/acessibilidade final.
