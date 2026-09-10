@@ -15,6 +15,7 @@ Este ficheiro mantém as decisões vigentes necessárias para continuidade. O hi
 - Drawer móvel e sidebar permanecem à direita; cabeçalho móvel minimalista.
 - Falha de fotografia nunca remove o artigo.
 - Releases públicas relevantes usam revisão/cache invalidável.
+- A ampliação manual do browser permanece disponível; correções de zoom acidental não podem usar `user-scalable=no` ou `maximum-scale=1`.
 
 ## D-046 a D-055 — decisões preservadas
 
@@ -22,7 +23,7 @@ Mantêm-se aceites as decisões anteriores sobre: carrossel de destaques; biblio
 
 ## D-056 — O PIN não deve esperar pela rede num dispositivo já emparelhado
 
-Data: 10 de setembro de 2026. Estado: aceite na branch de correção.
+Data: 10 de setembro de 2026. Estado: integrado em `main`.
 
 ### Facto
 
@@ -38,19 +39,15 @@ O fluxo `unlockVault() → enterApp() → syncStartupGate()` fazia a aplicação
 
 ### Fundamento
 
-A rede não acrescenta autenticação ao PIN já validado localmente. Num dispositivo previamente emparelhado, bloquear toda a UI até uma chamada remota terminar degrada disponibilidade sem aumentar a força criptográfica. A sincronização continua obrigatória como mecanismo de consistência, mas passa a ser assíncrona no arranque recorrente.
-
-### Critério de aceitação
-
-PIN correto em dispositivo emparelhado apresenta o shell sem aguardar o timeout remoto; CI de segurança/sync permanece verde; conflitos continuam tratados pelo mecanismo existente.
+A rede não acrescenta autenticação ao PIN já validado localmente. Num dispositivo previamente emparelhado, bloquear toda a UI até uma chamada remota terminar degrada disponibilidade sem aumentar a força criptográfica.
 
 ## D-057 — Um carregamento de fotografia deve terminar num estado visual estável
 
-Data: 10 de setembro de 2026. Estado: aceite na branch de correção.
+Data: 10 de setembro de 2026. Estado: integrado em `main`.
 
 ### Facto
 
-`75-photo-loader2` mudava de “A carregar fotografia…” para “Fotografia a validar…”, mas não definia um fim visual para a tentativa. Sem imagem disponível naquele ciclo, o cartão continuava com aparência de operação permanente.
+`75-photo-loader2` mudava de “A carregar fotografia…” para “Fotografia a validar…”, mas não definia um fim visual para a tentativa.
 
 ### Decisão
 
@@ -61,17 +58,9 @@ Data: 10 de setembro de 2026. Estado: aceite na branch de correção.
 5. Atualização explícita/nova navegação pode iniciar uma nova tentativa.
 6. A inexistência temporária de fotografia não elimina o SKU.
 
-### Fundamento
-
-Um estado assíncrono sem terminalidade é uma falha de UX e gera tráfego repetido. O utilizador deve distinguir “a trabalhar” de “não foi possível nesta tentativa”.
-
 ## D-058 — Uma sourceUrl oficial exata não deve disparar uma segunda resolução redundante
 
-Data: 10 de setembro de 2026. Estado: aceite na branch de correção.
-
-### Facto
-
-O resolvedor direto `75-catalog2` tinha limite de 8 s, mas, ao devolver `null`, o wrapper podia chamar o bridge legado. Esse bridge podia voltar a pesquisar Cesta, ler a mesma página e fazer preflight visual, prolongando a tentativa e competindo com outras filas.
+Data: 10 de setembro de 2026. Estado: integrado em `main`.
 
 ### Decisão
 
@@ -81,15 +70,11 @@ O resolvedor direto `75-catalog2` tinha limite de 8 s, mas, ao devolver `null`, 
 
 ### Fundamento
 
-Quando a página oficial do SKU já é conhecida, repetir descoberta não melhora identidade e aumenta latência/concorrência. A tentativa exata deve ser limitada e determinística.
+Quando a página oficial do SKU já é conhecida, repetir descoberta não melhora identidade e aumenta latência/concorrência.
 
 ## D-059 — O contador Pingo Doce deve refletir uma imagem já comprovada pela biblioteca partilhada
 
-Data: 10 de setembro de 2026. Estado: aceite na branch de correção.
-
-### Facto
-
-A biblioteca partilhada podia guardar uma imagem oficial Pingo Doce enquanto o registo correspondente na DB dedicada continuava `pending`/`missing`. Assim o catálogo geral podia aumentar o número de imagens, mas o painel Pingo Doce continuar em `0 fotografias oficiais`.
+Data: 10 de setembro de 2026. Estado: integrado em `main`.
 
 ### Decisão
 
@@ -99,6 +84,38 @@ Quando `75-photo-loader3` encontra no cache ou resolve uma fotografia Pingo Doce
 
 A reconciliação toca apenas metadados de imagem da DB dedicada Pingo Doce. Não acede a faturas, pagamentos, preços, PIN, token ou estado financeiro.
 
+## D-060 — Impedir zoom acidental sem bloquear a acessibilidade
+
+Data: 10 de setembro de 2026. Estado: aceite na branch `fix/v75-usability-part1`.
+
+### Factos
+
+- A aplicação já usava `font-size:16px` nos campos mobile em `v75-stability.css`, mitigando o auto-zoom que o Safari/iOS pode aplicar ao focar campos com texto menor.
+- O `viewport` atual não bloqueia zoom manual.
+- Não existia uma política transversal explícita para o duplo toque em controlos interativos.
+
+### Decisão
+
+1. Criar `v75-usability.css` revisão `75-usability1` como camada puramente visual/interacional.
+2. Aplicar `touch-action: manipulation` a controlos interativos para reduzir zoom acidental por duplo toque.
+3. Reforçar 16 px em inputs/selects/textareas no breakpoint mobile.
+4. Manter alvos tácteis com referência mínima de 44 px e 48 px em controlos densos quando aplicável.
+5. Reforçar o ecrã do cofre com `100dvh`, safe areas e scroll controlado.
+6. Não adicionar `user-scalable=no` nem `maximum-scale=1`; pinch-to-zoom deve continuar disponível.
+7. Carregar a camada no bundle Pages e versioná-la no Service Worker.
+
+### Fundamento
+
+Bloquear todo o zoom resolveria um sintoma à custa de acessibilidade. A combinação `16px` nos campos + `touch-action: manipulation` nos controlos elimina as duas fontes principais de zoom involuntário sem impedir o utilizador de ampliar deliberadamente a interface.
+
+### Limites
+
+A decisão reduz zoom involuntário em controlos. Não pretende impedir gestos de ampliação voluntários no conteúdo e deve ser confirmada em hardware Safari/PWA.
+
+### Segurança
+
+`75-usability1` é CSS puro. Não lê nem escreve estado, não altera PIN/criptografia, não acede à rede e não introduz dependências externas.
+
 ## Evidência técnica
 
-A sonda real reforçada confirmou em 10/09/2026 que Pingo Doce `pid 739490` devolve imagem exata e que essa URL é aceite pelo mesmo validador do runtime (`runtime-safe=true`). A branch com as decisões acima passou CI completo no run `34445844039`.
+A comparação entre `fix/v75-pin-images-stability` e `main` confirmou estado idêntico em `f85deed6d2fab5e1b0658ad74c25d323f621a19f`. A nova Parte 1 acrescenta apenas a camada de usabilidade, distribuição/cache e testes/documentação associados. O resultado só deve ser integrado após CI verde.
