@@ -6,109 +6,99 @@ Este ficheiro mantém as decisões vigentes necessárias para continuidade. O hi
 
 ## Decisões estruturais vigentes
 
-- O estado financeiro continua local-first e separado das camadas visuais/de catálogo.
-- Valores monetários são guardados em cêntimos; `STATE_VERSION = 5` permanece estável.
-- Fotografias nunca são prova de preço ou transação.
-- Preço pesquisado é estimativa; `actualCents` representa valor confirmado/pago.
-- GTIN/PID identifica o artigo, não prova o preço.
-- Mercado não pode reescrever cofre, cálculos ou sincronização por motivos visuais.
-- Drawer móvel e sidebar permanecem no lado direito.
-- Cabeçalho móvel permanece minimalista: hambúrguer+título à esquerda, notificações à direita.
-- A aplicação usa Lucide local como sistema de ícones.
-- Falhas de imagem têm fallback visual e nunca removem o artigo.
-- Releases públicas relevantes usam revisão própria e cache invalidável.
-- Disponibilidade nunca pode ser obtida à custa de expor dados financeiros antes da barreira de segurança.
+- Estado financeiro local-first separado das camadas visuais e de catálogo.
+- Valores monetários em cêntimos e `STATE_VERSION = 5`.
+- Cofre PBKDF2-SHA-256 + AES-GCM; `PBKDF2_ITERATIONS = 250000` não é reduzido para melhorar desempenho aparente.
+- Fotografias não são prova de preço nem de transação.
+- `marketId|pid` é a identidade canónica de fotografia/SKU.
+- Preço pesquisado é estimativa; valor efetivamente confirmado continua separado.
+- Drawer móvel e sidebar permanecem à direita; cabeçalho móvel minimalista.
+- Falha de fotografia nunca remove o artigo.
+- Releases públicas relevantes usam revisão/cache invalidável.
 
-## D-046 — Destaques do Mercado em carrossel largo
+## D-046 a D-055 — decisões preservadas
 
-Estado: aceite. `75-featured1` usa carrossel horizontal mobile, área estável de fotografia e fallback local.
+Mantêm-se aceites as decisões anteriores sobre: carrossel de destaques; biblioteca geral por retalhista+PID; catálogo progressivo sem persistir preços; biblioteca Pingo Doce isolada; publicação condicionada a CI/Pages; separação entre validade oficial e transporte; prevalência de evidência em hardware; renderer incremental sem destruir cartões estáveis; e propagação `cdc:market-photo-ready`.
 
-## D-047 — Biblioteca geral por retalhista + PID
+## D-056 — O PIN não deve esperar pela rede num dispositivo já emparelhado
 
-Estado: aceite. `75-image-library1` usa IndexedDB separada e chave `marketId|pid`; guarda metadados e URL oficial validado, nunca binários ou preços.
+Data: 10 de setembro de 2026. Estado: aceite na branch de correção.
 
-## D-048 — Catálogo visual progressivo não guarda preços
+### Facto
 
-Estado: aceite. O índice local guarda SKUs reais e metadados; **Ver preço atual** reutiliza a pesquisa viva.
-
-## D-049 — Biblioteca Pingo Doce dedicada sem duplicar estado financeiro
-
-Estado: aceite. `75-pd-photo1` mantém apenas produtos Pingo Doce, PID/URL oficial e estados `pending|ready|missing`.
-
-## D-050 — Feedback de carregamento de fotografia
-
-Estado: substituída parcialmente por D-052. Skeleton/spinner isolado não resolvia a priorização real do pipeline.
-
-## D-051 — Publicação exige CI da branch, CI de main e Pages
-
-Estado: aceite. Fluxo obrigatório: CI verde da branch → integração fast-forward sem force → CI verde de `main` → GitHub Pages no SHA integrado → validação física quando relevante.
-
-## D-052 — Separar validade oficial de transporte e priorizar cartões visíveis
-
-Estado: aceite e publicada. `75-catalog2` elimina preflight visual duplicado e `75-photo-loader2` prioriza cartões visíveis sem tocar no estado financeiro.
-
-## D-053 — Evidência em hardware prevalece sobre teste sintético
-
-Estado: aceite. Defeitos Safari/PWA e de imagens só são encerrados depois de repetir no dispositivo real o cenário que os revelou.
-
-## D-054 — Runtime2 publicado, eficácia dependente de revalidação física
-
-Estado: aceite. A validação posterior revelou flicker distinto, tratado por D-055.
-
-## D-055 — O catálogo não pode destruir cartões estáveis durante atualizações de fundo
-
-Data: 9 de setembro de 2026 · Estado: aceite e publicada.
-
-`75-catalog3` reconcilia cartões por `marketId|pid`, preserva o mesmo nó DOM/media, remove apenas chaves obsoletas e usa `cdc:market-photo-ready` para hidratação sem reconstruir a grelha. Não altera `core.js`, `finance.js`, PIN, cifragem ou sincronização.
-
-## D-056 — O arranque nunca pode ficar visualmente sem estado seguro
-
-Data: 10 de setembro de 2026 · Estado: aceite, integrada e publicada.
-
-### Factos observáveis
-
-A captura física no iPhone/Safari mostrou uma página totalmente branca com a barra de progresso do browser ainda ativa. A captura não contém informação suficiente para atribuir o episódio a uma única função.
-
-### Riscos confirmados no código
-
-1. O Service Worker tratava navegações com `fetch(event.request).catch(...)` sem timeout. Se a promessa ficasse pendente, o fallback de cache não era atingido.
-2. O fluxo de entrada pode ocultar simultaneamente `#vaultScreen` e `#app` enquanto aguarda a barreira inicial de sincronização. Isto preserva a confidencialidade, mas cria uma superfície branca durante a espera.
+O fluxo `unlockVault() → enterApp() → syncStartupGate()` fazia a aplicação esperar pela sincronização GitHub depois de o PIN já ter decifrado corretamente o cofre local. O gate remoto tinha timeout próprio, pelo que a demora percebida pelo utilizador podia ser atribuída ao PIN embora estivesse a ocorrer depois da operação criptográfica local.
 
 ### Decisão
 
-1. Criar a revisão `75-startup1`.
-2. Manter a barreira inicial de sincronização e a regra de não mostrar dados financeiros antes da sua resolução.
-3. Adicionar `v75-startup-guard.js` como camada exclusivamente visual.
-4. Quando `html.app-active` estiver ativo e cofre+shell estiverem ocultos, mostrar temporariamente o cofre com `aria-busy="true"` e mensagem de preparação.
-5. Ocultar novamente o cofre assim que o shell da aplicação ficar disponível.
-6. Limitar a navegação de rede do Service Worker a 4 segundos com `AbortController`.
-7. Em timeout/erro de navegação, usar o `index.html` já instalado em Cache Storage.
-8. Atualizar a cópia de `index.html` em cache quando a rede responde com sucesso.
-9. Se não existir rede nem cache, devolver 503 legível em vez de espera indefinida.
-10. Alterar o identificador do cache para terminar em `startup1`.
-11. Adicionar teste de regressão específico e incluí-lo no CI.
-12. Não pedir ao utilizador para limpar dados do Safari como passo de recuperação, porque isso pode apagar IndexedDB/cofre local.
+1. Manter PBKDF2 em 250000 iterações e não enfraquecer a derivação da chave.
+2. Se o dispositivo tem `pairedAt` + `lastRemoteSha`, sincronização ativa, token local e rede disponível, a última cópia local cifrada confirmada pode ser mostrada imediatamente após o PIN.
+3. A verificação GitHub inicia logo a seguir com `syncNow('startup-background')`.
+4. Primeiro emparelhamento e estados sem confirmação continuam a usar o gate original.
+5. A política de conflitos e a cifragem remota não são alteradas.
 
 ### Fundamento
 
-A disponibilidade do shell e a confidencialidade do cofre são requisitos simultâneos. Um estado de espera deve ser visível e acessível sem antecipar dados financeiros. Um `fetch()` pendente não ativa `.catch()`, portanto o fallback de navegação precisa de limite temporal explícito.
+A rede não acrescenta autenticação ao PIN já validado localmente. Num dispositivo previamente emparelhado, bloquear toda a UI até uma chamada remota terminar degrada disponibilidade sem aumentar a força criptográfica. A sincronização continua obrigatória como mecanismo de consistência, mas passa a ser assíncrona no arranque recorrente.
 
-### Critérios de aceitação
+### Critério de aceitação
 
-- nenhuma navegação controlada pelo Service Worker aguarda rede indefinidamente;
-- cache de `index.html` é usado depois do timeout/erro;
-- durante a barreira de arranque existe sempre uma superfície segura visível;
-- `v75-startup-guard.js` não acede a `appState`, IndexedDB, montantes ou sincronização;
-- regressões financeiras, segurança, Mercado, responsividade, acessibilidade e sync permanecem verdes;
-- confirmação final no mesmo iPhone/Safari/PWA.
+PIN correto em dispositivo emparelhado apresenta o shell sem aguardar o timeout remoto; CI de segurança/sync permanece verde; conflitos continuam tratados pelo mecanismo existente.
 
-### Evidência de publicação
+## D-057 — Um carregamento de fotografia deve terminar num estado visual estável
 
-- commit funcional `cd229d83c3d47f54d7f8990a76f2f29acb372f47`;
-- commit integrado `188c0820adff62540987fb6f8ef65c76ab9bf596`;
-- CI branch `34440532734`: sucesso;
-- CI branch após documentação `34440742219`: sucesso;
-- integração em `main` por fast-forward sem force, com `behind 0`;
-- CI main `34440788510`: sucesso;
-- GitHub Pages `34440824303`: sucesso;
-- encerramento funcional continua dependente da revalidação física definida em D-053.
+Data: 10 de setembro de 2026. Estado: aceite na branch de correção.
+
+### Facto
+
+`75-photo-loader2` mudava de “A carregar fotografia…” para “Fotografia a validar…”, mas não definia um fim visual para a tentativa. Sem imagem disponível naquele ciclo, o cartão continuava com aparência de operação permanente.
+
+### Decisão
+
+1. `75-photo-loader3` mantém estado de carregamento até 7 s.
+2. Entre 7 e 12 s apresenta validação.
+3. Aos 12 s sem resultado termina em `Sem fotografia`.
+4. O estado final usa cooldown de 5 min antes de novo retry automático.
+5. Atualização explícita/nova navegação pode iniciar uma nova tentativa.
+6. A inexistência temporária de fotografia não elimina o SKU.
+
+### Fundamento
+
+Um estado assíncrono sem terminalidade é uma falha de UX e gera tráfego repetido. O utilizador deve distinguir “a trabalhar” de “não foi possível nesta tentativa”.
+
+## D-058 — Uma sourceUrl oficial exata não deve disparar uma segunda resolução redundante
+
+Data: 10 de setembro de 2026. Estado: aceite na branch de correção.
+
+### Facto
+
+O resolvedor direto `75-catalog2` tinha limite de 8 s, mas, ao devolver `null`, o wrapper podia chamar o bridge legado. Esse bridge podia voltar a pesquisar Cesta, ler a mesma página e fazer preflight visual, prolongando a tentativa e competindo com outras filas.
+
+### Decisão
+
+- Distribuição `75-catalog4` termina a tentativa quando a resolução direta de uma `sourceUrl` exata não encontra imagem válida.
+- Pesquisa livre sem `sourceUrl` continua a usar o bridge legado.
+- Host, path e PID permanecem estritos.
+
+### Fundamento
+
+Quando a página oficial do SKU já é conhecida, repetir descoberta não melhora identidade e aumenta latência/concorrência. A tentativa exata deve ser limitada e determinística.
+
+## D-059 — O contador Pingo Doce deve refletir uma imagem já comprovada pela biblioteca partilhada
+
+Data: 10 de setembro de 2026. Estado: aceite na branch de correção.
+
+### Facto
+
+A biblioteca partilhada podia guardar uma imagem oficial Pingo Doce enquanto o registo correspondente na DB dedicada continuava `pending`/`missing`. Assim o catálogo geral podia aumentar o número de imagens, mas o painel Pingo Doce continuar em `0 fotografias oficiais`.
+
+### Decisão
+
+Quando `75-photo-loader3` encontra no cache ou resolve uma fotografia Pingo Doce válida, atualiza também o mesmo `marketId|pid` na DB dedicada para `imageState='ready'` e refresca a métrica.
+
+### Segurança
+
+A reconciliação toca apenas metadados de imagem da DB dedicada Pingo Doce. Não acede a faturas, pagamentos, preços, PIN, token ou estado financeiro.
+
+## Evidência técnica
+
+A sonda real reforçada confirmou em 10/09/2026 que Pingo Doce `pid 739490` devolve imagem exata e que essa URL é aceite pelo mesmo validador do runtime (`runtime-safe=true`). A branch com as decisões acima passou CI completo no run `34445844039`.

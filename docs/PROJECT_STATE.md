@@ -3,84 +3,94 @@
 Atualizado: 10 de setembro de 2026
 Build: `v75`
 Branch pública: `main`
+Branch de correção em validação: `fix/v75-pin-images-stability`
 Distribuição: GitHub Pages / PWA
-Runtime publicado: `75-startup1` sobre SHA funcional `188c0820adff62540987fb6f8ef65c76ab9bf596`
+Runtime público anterior: `75-startup1` sobre `main` SHA `3964f3a7bfde219cdb7f50cc45eef6cb1723d338`
+Runtime candidato: `75-startup2` + distribuição `75-catalog4` + `75-photo-loader3`
 
 ## Baseline preservada
 
-- UI base: `74-ui1`
-- Mercado: `74-shopping2`
-- menu funcional: `73-menu8`
-- experiência: `74-experience2`
-- arquitetura: `75-architecture2`
-- cabeçalho: `75-header2`
-- estabilidade: `75-stability1`
-- guarda de arranque: `75-startup1`
-- geometria: `75-layout1`
-- drawer: `75-drawer2`
-- destaques Mercado: `75-featured1`
-- biblioteca geral de imagens: `75-image-library1`
-- resolvedor oficial de imagens: `75-catalog2`
-- catálogo visual / renderer: `75-catalog3`
-- biblioteca Pingo Doce: `75-pd-photo1`
-- carregador visual: `75-photo-loader2`
+- `STATE_VERSION = 5`;
+- valores monetários em cêntimos;
+- estado financeiro em IndexedDB;
+- cofre PBKDF2-SHA-256 + AES-GCM;
+- `PBKDF2_ITERATIONS = 250000` preservado;
+- sincronização GitHub opcional limitada ao envelope cifrado;
+- UI `74-ui1`, Mercado `74-shopping2`, menu `73-menu8`, experiência `74-experience2`;
+- arquitetura `75-architecture2`, cabeçalho `75-header2`, estabilidade `75-stability1`, geometria `75-layout1`, drawer `75-drawer2`;
+- renderer incremental do catálogo permanece `75-catalog3` internamente.
 
-## Invariantes
+## Evidência física atual
 
-A aplicação continua PWA estática/local-first. O estado financeiro permanece em IndexedDB, os montantes são inteiros em cêntimos, `STATE_VERSION = 5`, o cofre usa PBKDF2-SHA-256 + AES-GCM e a sincronização GitHub opcional continua limitada ao envelope cifrado.
+No iPhone/Safari foram observados três sintomas simultâneos:
 
-A correção `75-startup1` não altera `core.js`, `finance.js`, cálculos, pagamentos, faturas, QR, scanner, PIN, cifragem, `estimatedCents`, `actualCents` ou a lógica de sincronização. Atua apenas na disponibilidade do documento de navegação e na continuidade visual do arranque.
+1. demora perceptível depois de introduzir o PIN;
+2. cartões de produto presos em **A carregar fotografia…** / **A validar fotografia…**;
+3. catálogo com `1863 produtos indexados · 125 imagens validadas` e biblioteca Pingo Doce com `1229 SKUs indexados · 0 fotografias oficiais`.
 
-## Problema anterior: fotografias a piscar
+Os dois contadores não representam a mesma coisa: o catálogo geral usa o total da biblioteca partilhada de imagens oficiais (Continente + Pingo Doce), enquanto o painel Pingo Doce conta apenas registos da base dedicada cujo `imageState` chegou a `ready`.
 
-`75-catalog3` substituiu a reconstrução destrutiva da grelha por reconciliação incremental por `marketId|pid`. Cartões existentes são reutilizados e uma fotografia pronta é propagada por `cdc:market-photo-ready`. O CI e o Pages dessa revisão ficaram verdes; a validação física final do flicker continua pendente.
+## Causa confirmada — demora após PIN
 
-## Defeito observado: ecrã branco no iPhone/Safari
+O PIN não estava apenas a decifrar o cofre local. Depois de `unlockVault()`, `enterApp()` aguardava `syncStartupGate()`. Num dispositivo já emparelhado e online, esta barreira podia esperar pela sincronização GitHub e pelo timeout de arranque antes de mostrar o shell.
 
-A captura de 10 de setembro mostrou o Safari numa página totalmente branca enquanto a barra de progresso do próprio browser ainda indicava carregamento. A imagem, isoladamente, não permite provar qual etapa de runtime ficou bloqueada.
+A força criptográfica do PIN não foi reduzida. A correção candidata `75-startup2` mantém a derivação PBKDF2 atual e apenas deixa de bloquear a apresentação da cópia local cifrada já confirmada num dispositivo emparelhado. A verificação remota começa imediatamente em segundo plano e a política de conflitos permanece inalterada.
 
-A auditoria confirmou dois caminhos independentes capazes de produzir um estado branco:
+## Causa confirmada — imagens sem estado final
 
-1. **Navegação do Service Worker sem limite temporal.** `sw.js` fazia `fetch(event.request)` e só recorria ao `index.html` em cache quando a promessa rejeitava. Uma ligação lenta ou pendurada podia manter a navegação sem resposta durante tempo indeterminado.
-2. **Estado transitório após desbloqueio.** O fluxo existente pode manter simultaneamente `#vaultScreen` e `#app` ocultos enquanto a barreira inicial de sincronização aguarda. A confidencialidade deve ser preservada, mas não deve resultar numa superfície branca.
+`75-photo-loader2` alterava o texto para **Fotografia a validar…** após a janela de carregamento, mas não tinha um estado terminal visual. Um SKU sem fotografia resolvida podia, por isso, continuar indefinidamente com aparência de trabalho em curso.
 
-Não é possível confirmar apenas pela captura qual destes caminhos ocorreu naquele momento. Ambos foram tratados porque são riscos reais confirmados no código.
+Além disso, um resultado Pingo Doce resolvido pelo carregador visível era guardado na biblioteca partilhada, mas não atualizava imediatamente o `imageState` do mesmo SKU na base dedicada Pingo Doce. O contador podia continuar em `0` mesmo quando a fotografia já tinha sido resolvida por outro caminho.
 
-## Correção publicada `75-startup1`
+## Fonte Pingo Doce verificada
 
-### Navegação
+Foi reforçada a sonda real de CI para reproduzir também o validador do runtime. No run `34444945747`, a origem respondeu corretamente:
 
-- documentos de navegação passam por `navigationResponse()`;
-- tentativa de rede usa `cache:'no-store'` e `AbortController`;
-- limite de rede: 4 segundos;
-- após timeout/erro, usa `./index.html` já instalado em cache;
-- navegação de rede bem-sucedida atualiza a cópia de `index.html` no cache;
-- se não existir rede nem cache, é devolvida resposta 503 legível;
-- cache público termina em `photo-loader2-startup1`.
+- `cesta.pt`: Continente e Pingo Doce disponíveis;
+- reader Continente: imagem exata encontrada e aceite pelo validador;
+- reader Pingo Doce: imagem exata encontrada e aceite pelo validador;
+- exemplo Pingo Doce `pid 739490`: `runtime-safe=true`.
 
-### Arranque seguro visível
+Conclusão: o `0 fotografias oficiais` não é explicado por uma rejeição universal do host/path/PID do Pingo Doce. O problema está no pipeline de execução/estado do browser e não na inexistência geral da fonte.
 
-`v75-startup-guard.js` (`75-startup1`) observa apenas a visibilidade do cofre e do shell. Se `html.app-active` estiver ativo e ambos estiverem ocultos, reapresenta temporariamente o ecrã do cofre com `aria-busy="true"` e a mensagem **A preparar a aplicação com segurança…**. Assim que o shell fica disponível, o cofre volta a ser ocultado.
+## Correção candidata
 
-A guarda não lê `appState`, não acede a IndexedDB, não chama sincronização e não expõe dados financeiros antes da barreira de segurança existente.
+### `75-startup2`
 
-## QA e publicação
+- dispositivos já emparelhados deixam de aguardar a rede para abrir a cópia local cifrada confirmada;
+- `syncNow('startup-background')` continua a verificação remota em segundo plano;
+- dispositivos ainda não emparelhados mantêm a barreira original;
+- a guarda contra ecrã branco permanece ativa.
 
-- commit funcional inicial: `cd229d83c3d47f54d7f8990a76f2f29acb372f47`;
-- commit integrado com documentação: `188c0820adff62540987fb6f8ef65c76ab9bf596`;
-- CI funcional da branch run `34440532734`: sucesso;
-- CI da branch após documentação run `34440742219`: sucesso;
-- comparação antes da integração: `ahead 2`, `behind 0`;
-- integração em `main`: fast-forward sem force para `188c0820adff62540987fb6f8ef65c76ab9bf596`;
-- CI de `main` run `34440788510`: sucesso completo;
-- GitHub Pages run `34440824303`: sucesso, incluindo checkout da revisão testada, allowlist, upload e deploy.
+### Distribuição `75-catalog4`
 
-Passaram, entre outros, sintaxe, finanças, isolamento/cofre, faturas/QR, Mercado/imagens, catálogo visual, Pingo Doce, loader, segurança, responsividade, viewport móvel, navegação, acessibilidade, sync e o novo teste **Safari/PWA startup blank-screen regression tests**.
+- o resolvedor direto continua limitado a 8 s e a duas operações simultâneas;
+- quando existe `sourceUrl` oficial exato, uma falha direta já não aciona novamente o resolvedor legado, que repetia pesquisa/leitura/preflight;
+- pesquisa livre sem `sourceUrl` continua a usar o bridge legado;
+- validação exata por retalhista e PID permanece obrigatória.
+
+### `75-photo-loader3`
+
+- prioriza até 8 cartões, com equilíbrio entre Pingo Doce e Continente;
+- após 7 s passa para **A validar fotografia…**;
+- após 12 s sem resultado termina em estado estável **Sem fotografia**, em vez de spinner/validação infinita;
+- um cartão estabilizado só volta a tentar automaticamente após 5 min, ou mediante atualização explícita/nova navegação;
+- imagens Pingo Doce encontradas no cache ou resolvidas passam a marcar o SKU correspondente como `ready` na biblioteca dedicada;
+- o contador Pingo Doce é atualizado após essa reconciliação;
+- a revisão nova repõe uma vez o orçamento diário de imagens herdado do runtime anterior.
+
+## QA
+
+Branch CI run `34445844039`: sucesso completo. Passaram sonda real de fontes, sintaxe, finanças, auditoria, contagem, isolamento/cofre, datas, faturas/QR, Mercado, imagens, catálogo visual, Pingo Doce, loader, segurança, responsividade, viewport móvel, navegação, acessibilidade, sincronização e manifest.
 
 ## Estado atual
 
-A correção está integrada e publicada. O defeito ainda não deve ser considerado encerrado apenas com CI/Pages, porque foi observado em hardware real e depende do comportamento efetivo do Safari/PWA.
+A correção está validada em CI na branch, mas ainda não está declarada publicada neste ficheiro. Antes da integração deve ser confirmado `behind 0`; depois é obrigatório fast-forward sem force, CI de `main`, GitHub Pages e revalidação física no mesmo iPhone.
 
 ## Próximo passo
 
-Reabrir a aplicação no mesmo iPhone/Safari sem apagar dados do site nem IndexedDB. Confirmar que uma ligação lenta nunca mantém uma página branca indefinidamente e que, após PIN, existe sempre um estado visual seguro durante a preparação. Depois retomar a validação física do flicker do Mercado durante 30–60 segundos.
+1. comparar branch com `main` e confirmar `behind 0`;
+2. integrar por fast-forward sem force;
+3. confirmar CI de `main` e Pages;
+4. no iPhone medir tempo PIN → shell;
+5. no Mercado manter a página aberta por 30–60 s, verificar que nenhum cartão fica eternamente em validação e confirmar que o contador Pingo Doce começa a refletir fotografias realmente resolvidas.

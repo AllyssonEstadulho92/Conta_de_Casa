@@ -1,156 +1,92 @@
 # Changelog Técnico — Conta de Casa
 
-## 2026-09-10 — v75 `75-startup1`: proteção contra ecrã branco no Safari/PWA
+## 2026-09-10 — v75 `75-startup2` + `75-catalog4` + `75-photo-loader3`
 
 ### Evidência
 
-Uma validação física no iPhone/Safari mostrou uma página completamente branca enquanto a barra de progresso do browser permanecia ativa. A captura não permite identificar por si só uma única causa.
+Validação física no iPhone/Safari mostrou:
 
-A auditoria confirmou dois caminhos independentes capazes de gerar um estado branco: a navegação do Service Worker aguardava `fetch(event.request)` sem timeout antes de recorrer ao cache; e o fluxo de entrada podia manter simultaneamente `#vaultScreen` e `#app` ocultos enquanto aguardava a barreira inicial de sincronização.
+- demora depois de introduzir o PIN;
+- cartões do catálogo presos em carregamento/validação de fotografia;
+- `1863 produtos indexados · 125 imagens validadas` no catálogo geral;
+- `1229 SKUs indexados · 0 fotografias oficiais` na biblioteca dedicada Pingo Doce.
 
-### Correção
+### Diagnóstico do PIN
 
-- criado `v75-startup-guard.js` com revisão `75-startup1`;
-- a guarda observa apenas `app-active` e os atributos `hidden` do cofre/shell;
-- quando ambos ficariam ocultos durante arranque ativo, o ecrã seguro do cofre volta a ser apresentado com `aria-busy="true"`;
-- é mostrada a mensagem **A preparar a aplicação com segurança…**;
-- o shell financeiro permanece oculto até o fluxo funcional existente o libertar;
-- assim que `#app` fica visível, a guarda oculta novamente o cofre e restaura a mensagem anterior;
-- a camada não lê `appState`, IndexedDB, montantes ou sincronização.
+O PIN correto concluía `unlockVault()`, mas o shell só era apresentado depois de `syncStartupGate()`. Num dispositivo já emparelhado, a verificação GitHub podia bloquear a abertura apesar de já existir uma cópia local cifrada confirmada.
 
-### Navegação/Service Worker
+### `75-startup2`
 
-- criada `navigationResponse()` para documentos de navegação;
-- tentativa de rede usa `cache:'no-store'` e `AbortController`;
-- timeout de navegação: 4000 ms;
-- timeout/erro usa `./index.html` instalado em Cache Storage;
-- resposta de rede válida atualiza o `index.html` em cache;
-- ausência simultânea de rede e cache devolve 503 textual em vez de espera indefinida;
-- cache passa a terminar em `photo-loader2-startup1`.
+- PBKDF2 permanece em 250000 iterações;
+- nenhum relaxamento de AES-GCM, PIN ou cofre;
+- dispositivo com `pairedAt + lastRemoteSha`, token local, sync ativo e rede disponível abre imediatamente a cópia local confirmada;
+- `syncNow('startup-background')` continua a verificação remota sem bloquear a UI;
+- primeiro emparelhamento e estados não confirmados continuam a usar o gate original;
+- proteção contra ecrã branco de `75-startup1` permanece.
 
-### Distribuição e testes
+### Diagnóstico das fotografias
 
-- `STARTUP_REV = '75-startup1'` adicionado a `scripts/prepare-pages.cjs`;
-- `v75-startup-guard.js` integrado na allowlist pública e carregado depois de `v75-stability.js`;
-- o ficheiro integra também a allowlist do Service Worker;
-- criado `tests/safari-startup.test.cjs`;
-- CI passa a verificar sintaxe da nova camada e regressão dedicada.
+A sonda real foi reforçada para aplicar também o validador usado no runtime. O run de diagnóstico `34444945747` confirmou:
 
-### Segurança e dados
+- Cesta devolve Continente e Pingo Doce;
+- reader responde para o origin GitHub Pages;
+- Continente conhecido: `runtime-safe=true`;
+- Pingo Doce `pid 739490`: `runtime-safe=true`.
 
-- `core.js`, `finance.js`, PIN, PBKDF2-SHA-256, AES-GCM, pagamentos, faturas, QR, scanner e política de sincronização permanecem inalterados;
-- a correção não antecipa dados financeiros durante o arranque;
-- não é necessário limpar dados do Safari para aplicar a revisão; fazê-lo poderia eliminar o cofre local em IndexedDB.
+Isto exclui uma rejeição universal do formato atual das fotografias Pingo Doce como causa do contador zero.
 
-### QA e publicação
+Foram confirmadas duas falhas de pipeline:
 
-- commit funcional: `cd229d83c3d47f54d7f8990a76f2f29acb372f47`;
-- commit integrado: `188c0820adff62540987fb6f8ef65c76ab9bf596`;
-- CI funcional da branch `34440532734`: sucesso;
-- CI da branch após documentação `34440742219`: sucesso;
-- comparação pré-integração: `ahead 2`, `behind 0`;
-- `main` avançou por fast-forward sem force para `188c0820adff62540987fb6f8ef65c76ab9bf596`;
-- CI de `main` `34440788510`: sucesso completo;
-- GitHub Pages `34440824303`: sucesso, com checkout da revisão testada, preparação da allowlist, upload e deploy;
-- permanece pendente apenas a revalidação física do arranque no mesmo iPhone/Safari/PWA.
+1. `75-photo-loader2` podia ficar visualmente em **Fotografia a validar…** sem estado terminal;
+2. uma imagem Pingo Doce resolvida pelo loader era guardada na biblioteca partilhada, mas o registo correspondente da DB Pingo Doce não era imediatamente marcado como `ready`.
 
----
+### `75-photo-loader3`
 
-## 2026-09-09 — v75 `75-catalog3`: renderer incremental para eliminar flicker de fotografias
+- prioridade visível sobe para 8 cartões e procura equilíbrio entre as duas lojas;
+- 0–7 s: **A carregar fotografia…**;
+- 7–12 s: **A validar fotografia…**;
+- após 12 s: estado final estável **Sem fotografia**;
+- retry automático só depois de 5 min, salvo atualização explícita/nova navegação;
+- imagem Pingo Doce existente no cache partilhado ou resolvida com sucesso atualiza também `imageState='ready'` na base dedicada;
+- métrica Pingo Doce é atualizada após reconciliação;
+- o orçamento diário de imagens herdado é reposto uma vez ao entrar nesta revisão.
 
-### Evidência
+### `75-catalog4`
 
-Uma validação física no iPhone mostrou a área de fotografia do catálogo a piscar durante atualizações automáticas. A análise confirmou que `scheduleImageWarm()` chamava `renderProducts()` depois de resolver uma fotografia e `renderProducts()` começava por `grid.replaceChildren()`, destruindo cartões e `<img>` antes da reconstrução assíncrona.
+O resolvedor direto continua com timeout de 8 s e concorrência 2. Para cartões com `sourceUrl` oficial exata, uma tentativa sem resultado termina sem voltar ao bridge legado. Antes, o fallback podia repetir pesquisa Cesta + leitura da página + preflight, aumentando latência e concorrência. Pesquisa livre sem `sourceUrl` mantém o bridge legado.
 
-### Correção
+### Segurança
 
-- `market-visual-catalog.js` passa para revisão `75-catalog3`;
-- cartões são reconciliados pela chave `marketId|pid`;
-- o mesmo nó DOM é preservado enquanto o SKU continuar presente;
-- apenas cartões obsoletos são removidos;
-- novos nós são criados apenas para novos SKUs;
-- loja, nome, embalagem e `aria-label` são atualizados sem substituir a área de fotografia;
-- `scheduleImageWarm()` deixa de chamar `renderProducts()` após cada fotografia;
-- uma fotografia persistida em background emite `cdc:market-photo-ready` para o loader.
+- host/path/PID permanecem validados;
+- nenhum acesso novo a valores financeiros, faturas, pagamentos ou preços pelas camadas de imagem;
+- a otimização do arranque consulta apenas estado de emparelhamento/sync já existente;
+- PBKDF2, AES-GCM e política de conflitos permanecem inalterados.
 
-### Distribuição e segurança
+### QA da branch
 
-- `CATALOG_REV` passa para `75-catalog3`;
-- cache passa para `...-image-library1-catalog3-pd-photo1-photo-loader2`;
-- o resolvedor mantém lógica segura `75-catalog2` e valida host/path/PID;
-- núcleo financeiro, PIN, cifragem e sincronização não foram alterados.
+CI run `34445844039`: sucesso completo, incluindo sonda real, sintaxe, finanças, auditoria, isolamento/cofre, faturas/QR, Mercado/imagens, catálogo, Pingo Doce, loader, segurança, responsividade, viewport móvel, navegação, acessibilidade, sync e manifest.
 
-### QA/publicação
-
-- CI da branch: sucesso;
-- integração em `main`: fast-forward sem force para `6dd4eafa947bf83e847f657ab9e155717d3971bc`;
-- CI de `main` run `34414686159`: sucesso;
-- GitHub Pages run `34414730220`: sucesso;
-- teste físico final do flicker continua pendente.
+Publicação ainda pendente no momento deste registo: reconfirmar CI após documentação, exigir `behind 0`, fast-forward de `main`, CI de `main`, Pages e validação física.
 
 ---
 
-## 2026-09-09 — v75 `75-catalog2` + `75-photo-loader2`
+## 2026-09-10 — v75 `75-startup1`
 
-- timeout do reader reduzido para 8 s;
-- validação estrita de página oficial, retalhista, path e PID preservada;
-- removido preflight visual duplicado;
-- cartões visíveis priorizados até 6 por ciclo;
-- resultado válido persistido e aplicado com `loading='eager'`;
-- polling limitado a 500 ms/24 ciclos e retry de 30 s;
-- imagem quebrada é expurgada;
-- estado financeiro permanece isolado.
+- Service Worker passou a limitar navegação de rede a 4 s e usar `index.html` em cache em erro/timeout;
+- criado `v75-startup-guard.js` para impedir superfície totalmente branca durante a barreira inicial;
+- CI e Pages concluídos com sucesso;
+- a validação física seguinte revelou separadamente a demora pós-PIN e a instabilidade das fotografias tratadas acima.
 
-## 2026-09-09 — v75 `75-pd-photo1` + `75-photo-loader1`
+---
 
-- criada biblioteca Pingo Doce isolada por `pingo-doce|pid`;
-- 15 famílias e mais de 200 termos;
-- estados `pending|ready|missing`;
-- limites de rede por sessão/dia;
-- loader inicial com skeleton/spinner.
+## 2026-09-09 — v75 `75-catalog3`
 
-## 2026-09-09 — v75 `75-catalog1`
-
-- criado catálogo visual progressivo;
-- índice separado por `marketId|pid`;
-- descoberta limitada de SKUs reais Continente/Pingo Doce;
-- preços não persistidos;
-- **Ver preço atual** reutiliza pesquisa viva.
-
-## 2026-09-09 — v75 `75-image-library1`
-
-- biblioteca persistente de fotografias oficiais em IndexedDB própria;
-- identidade estrita `marketId|pid`;
-- apenas metadados e URL oficial validado;
-- TTL de 45 dias;
-- nenhuma alteração ao estado financeiro.
-
-## 2026-09-09 — v75 `75-featured1`
-
-- cartões mobile em carrossel horizontal largo;
-- área de fotografia estável;
-- nome em duas linhas;
-- preço isolado;
-- fallback vetorial quando não existe fotografia.
-
-## 2026-09-09 — v75 `75-drawer2`
-
-- drawer mantém lado direito;
-- gradiente petróleo/teal alinhado com o cabeçalho;
-- hambúrguer/X, swipe, Escape, foco e ARIA preservados.
-
-## 2026-09-09 — v75 `75-layout1`
-
-- largura, margens, grelhas e ritmo vertical uniformizados;
-- formulários/cartões reduzem colunas antes de comprimir conteúdo;
-- sem alteração ao núcleo financeiro.
-
-## 2026-09-08 — v75 `75-stability1` e `75-header2`
-
-- tipografia, safe areas, overflow, formulários, navegação, diálogos e estados de imagem estabilizados;
-- cabeçalho móvel simplificado para hambúrguer+título e notificações;
-- Mercado permanece terceiro destino da navegação inferior.
+- renderer do catálogo deixou de destruir a grelha inteira durante atualização de fundo;
+- cartões são reconciliados por `marketId|pid`;
+- nós DOM e imagens carregadas são preservados;
+- `cdc:market-photo-ready` passou a propagar fotografias resolvidas;
+- correção direcionada ao flicker observado no iPhone.
 
 ## Histórico anterior
 
-As revisões anteriores permanecem preservadas no histórico Git e em `release-manifest.json`.
+As revisões anteriores permanecem no histórico Git e em `release-manifest.json`. Continuam vigentes as decisões de `75-catalog2`, `75-photo-loader2`, `75-pd-photo1`, `75-image-library1`, `75-featured1`, `75-drawer2`, `75-layout1`, `75-stability1`, `75-header2` e baseline v74/v73 quando não substituídas explicitamente pelas revisões acima.
