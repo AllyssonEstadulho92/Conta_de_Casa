@@ -4,10 +4,9 @@ Atualizado: 10 de setembro de 2026
 Build publicado: `v75`  
 Programa técnico em preparação: `v76` — migração incremental TypeScript  
 Branch pública: `main`  
-Baseline funcional publicada: `c44348dbc5a942b601f360fa38793bd9d8b47a1a` (`75-market1`)  
-HEAD público atual: `2c1d78508507ab77d6df95850568d9fd7f6b9577` (fundação TypeScript integrada)  
-Branch visual em revisão: `feat/v75-expenses-modern-ui`  
-PR visual: `#73` — `75-expenses1`  
+Baseline funcional publicada: `176450fcb236a2272afb9d6a6983b42681aa705d` (`75-expenses1`)  
+Última revisão funcional: `75-expenses1` — Despesas modernas  
+PR integrado: `#73`  
 Branch técnica reservada para o próximo bloco: `feat/v76-money-dates`  
 Distribuição atual: GitHub Pages / PWA
 
@@ -99,18 +98,18 @@ A biblioteca de imagens continuará progressiva e associada à identidade do pro
 
 Logos SVG de supermercados só devem ser incorporados como assets locais depois de verificação da origem e direito de utilização. Não serão copiados de sites aleatórios, CDNs ou agregadores sem validação de licença/termos, CSP e privacidade.
 
-## 8. Revisão visual atual — `75-expenses1`
+## 8. `75-expenses1` — Despesas modernas
 
-Objetivo: modernizar a página de Despesas/Faturas sem alterar o domínio financeiro.
+Estado: integrado em `main` pelo PR #73 no commit `176450fcb236a2272afb9d6a6983b42681aa705d`.
 
 Factos confirmados antes da alteração:
 
-- `#page-bills` já contém Lista/Calendário, pesquisa, Estado, Categoria, intervalo de datas, ordenação, resumo, tabela desktop e cartões mobile;
-- `renderBills()`/`filterBills()` já fornecem o comportamento funcional canónico;
-- as ações Abrir/Detalhes, Editar, Pagar e Excluir já são condicionadas ao estado da fatura;
+- `#page-bills` já continha Lista/Calendário, pesquisa, Estado, Categoria, intervalo de datas, ordenação, resumo, tabela desktop e cartões mobile;
+- `renderBills()`/`filterBills()` já forneciam o comportamento funcional canónico;
+- as ações Abrir/Detalhes, Editar, Pagar e Excluir já eram condicionadas ao estado da fatura;
 - não foi encontrado motivo funcional para alterar `finance.js`, `render.js`, `forms.js` ou `events.js` apenas para modernizar a apresentação.
 
-Implementação na branch `feat/v75-expenses-modern-ui`:
+Implementação:
 
 - `v75-expenses-modern.css`, revisão `75-expenses1`, limitado a `html.cdc-v75 #page-bills`;
 - Lista/Calendário refinados como controlo segmentado;
@@ -122,20 +121,16 @@ Implementação na branch `feat/v75-expenses-modern-ui`:
 - breakpoints para desktop intermédio, `≤820px` e `≤430px`;
 - `prefers-reduced-motion` e `forced-colors` tratados;
 - `scripts/prepare-pages.cjs` e `sw.js` versionam/publicam `75-expenses1`;
-- `tests/v75-expenses-modern.test.cjs` adicionado ao CI e ao workflow Pages.
+- `tests/v75-expenses-modern.test.cjs` integrado no CI e no workflow Pages.
 
-## 9. QA de `75-expenses1`
+## 9. QA/publicação de `75-expenses1`
 
-PR #73 aberto sobre `main`.
-
-No head anterior à preservação documental (`4013d05af84c4af2367c823a597ee42f41b8cb5a`):
-
-- CI push `34495698852`: sucesso;
-- CI do PR `34495879773`: sucesso, incluindo `v75 modern expenses UI tests` e todas as regressões financeiras, Mercado, segurança, sincronização, responsividade, acessibilidade e manifest;
-- TypeScript Foundation do PR `34495879840`: sucesso;
-- comparação com `main`: `behind 0` antes da atualização documental seguinte.
-
-Como a preservação documental gera novo head, os checks devem voltar a concluir com sucesso antes do merge.
+- CI do head final do PR #73 `34496437909`: sucesso;
+- TypeScript Foundation do head final `34496437836`: sucesso;
+- PR #73 integrado por squash no commit `176450fcb236a2272afb9d6a6983b42681aa705d`;
+- CI de `main` `34496500755`: sucesso, incluindo finanças, auditoria, faturas, Mercado, imagens, scanner, segurança, responsividade, acessibilidade, sincronização, manifest e teste específico de Despesas;
+- TypeScript Foundation de `main` `34496500641`: sucesso;
+- GitHub Pages `34496540096`: sucesso, incluindo verificação da revisão, preparação da allowlist e deploy.
 
 ## 10. Validação física pendente
 
@@ -150,9 +145,6 @@ Como a preservação documental gera novo head, os checks devem voltar a conclui
 
 ## 11. Próximo passo
 
-1. confirmar CI + TypeScript no head documental final do PR #73;
-2. confirmar `behind 0`;
-3. integrar `75-expenses1` apenas com checks verdes;
-4. confirmar CI e GitHub Pages no SHA integrado;
-5. validar fisicamente Despesas;
-6. retomar `feat/v76-money-dates` para o Bloco 2 com testes de paridade JS→TS antes de substituir runtime.
+1. validar fisicamente `75-expenses1` em iPhone/Safari/PWA e restantes breakpoints;
+2. corrigir apenas regressões visuais comprovadas, se existirem;
+3. retomar `feat/v76-money-dates` para o Bloco 2 com testes de paridade JS→TS antes de substituir runtime.
