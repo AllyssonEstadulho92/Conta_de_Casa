@@ -35,7 +35,17 @@ Criado `v75-usability.css` revisão `75-usability1`:
 - `tests/v75-stability.test.cjs` passou a verificar anti-zoom, acessibilidade do viewport, 16 px, alvos tácteis, bundle Pages e Service Worker;
 - não houve alterações em `core.js`, `finance.js`, IndexedDB, PBKDF2, AES-GCM, PIN, sincronização, faturas, pagamentos, QR ou scanner.
 
-Estado desta entrada: implementação concluída na branch `fix/v75-usability-part1`; integração/publicação dependem de CI verde.
+Durante o QA, duas execuções detetaram incompatibilidades em testes que validavam a ordem textual da assinatura do cache. A correção preservou as assinaturas legadas e colocou `usability1` no final da revisão do cache. A execução seguinte ficou verde.
+
+### Integração/publicação
+
+- PR `#66` integrado por squash em `main`;
+- commit público: `c352c1883c16fd7df92aa0f26d23e3c5084b0fcf`;
+- CI da branch: run `34471692881` — sucesso;
+- CI de `main`: run `34471773663` — sucesso;
+- GitHub Pages do mesmo SHA: run `34471814790` — sucesso.
+
+Validação física específica de `75-usability1` em iPhone/Safari/PWA permanece pendente.
 
 ---
 
