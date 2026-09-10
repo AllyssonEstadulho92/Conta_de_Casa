@@ -20,7 +20,8 @@ Atualizado: 10 de setembro de 2026
 - [x] `75-pages1` — Início, Despesas e Planeamento.
 - [x] `75-assets1` — biblioteca/critério local-first e loader transversal opt-in.
 - [x] `75-market1` — pesquisa, filtros e fluxo de compra do Mercado; PR #71 / `c44348dbc5a942b601f360fa38793bd9d8b47a1a`.
-- [x] Confirmar GitHub Pages de `75-market1`: run `34482133540` — sucesso.
+- [x] `75-expenses1` — layout moderno de Despesas; PR #73 / `176450fcb236a2272afb9d6a6983b42681aa705d`.
+- [x] Confirmar GitHub Pages de `75-expenses1`: run `34496540096` — sucesso.
 
 ## P1 — Validação física acumulada v75
 
@@ -29,6 +30,9 @@ Atualizado: 10 de setembro de 2026
 - [ ] Validar em hardware um componente `75-assets1` com imagem lazy/fallback.
 - [ ] Validar fisicamente o fluxo marcar comprado → confirmar preço real no iPhone/Safari/PWA.
 - [ ] Validar visualmente pesquisa/filtros/browser do Mercado em 320/375/390/430 px, tablet e desktop.
+- [ ] Validar `75-expenses1` em iPhone/Safari/PWA, 320/375/390/430 px, tablet e desktop.
+- [ ] Validar `75-expenses1` em tema claro e escuro, com muitas faturas e textos longos.
+- [ ] Validar pesquisa, filtros, Lista ↔ Calendário e ações de fatura após `75-expenses1`.
 - [ ] Quando existir runtime/animação Lottie local aprovada, validar reduced-motion/fallback.
 
 ## P0 — v76 Bloco 0: baseline e especificação
@@ -110,30 +114,13 @@ Atualizado: 10 de setembro de 2026
 - [x] Adicionar asset e `expenses1` ao Service Worker/cache.
 - [x] Criar `tests/v75-expenses-modern.test.cjs`.
 - [x] Adicionar teste ao CI e ao workflow Pages.
-- [x] CI push do head `4013d05af84c4af2367c823a597ee42f41b8cb5a`: run `34495698852` — sucesso.
-- [x] CI do PR #73 no mesmo head: run `34495879773` — sucesso.
-- [x] TypeScript Foundation do PR #73 no mesmo head: run `34495879840` — sucesso.
-- [x] Confirmar `behind 0` antes das atualizações documentais de preservação.
-- [ ] Confirmar CI + TypeScript no head documental final do PR #73.
-- [ ] Confirmar novamente `behind 0`.
-- [ ] Integrar PR #73 apenas com checks verdes.
-- [ ] Confirmar CI de `main` no SHA integrado.
-- [ ] Confirmar GitHub Pages no SHA integrado.
-
-### Validação física
-
-- [ ] iPhone/Safari/PWA.
-- [ ] 320 px.
-- [ ] 375 px.
-- [ ] 390 px.
-- [ ] 430 px.
-- [ ] tablet.
-- [ ] desktop.
-- [ ] tema claro e escuro.
-- [ ] pesquisa, filtros e limpar filtros.
-- [ ] Lista ↔ Calendário.
-- [ ] Abrir/Detalhes, Editar, Pagar e Excluir quando permitido.
-- [ ] muitas faturas e textos longos.
+- [x] CI final do PR #73: run `34496437909` — sucesso.
+- [x] TypeScript Foundation final do PR #73: run `34496437836` — sucesso.
+- [x] Confirmar `behind 0` antes do merge.
+- [x] Integrar PR #73 por squash como `176450fcb236a2272afb9d6a6983b42681aa705d`.
+- [x] Confirmar CI de `main`: run `34496500755` — sucesso.
+- [x] Confirmar TypeScript Foundation de `main`: run `34496500641` — sucesso.
+- [x] Confirmar GitHub Pages: run `34496540096` — sucesso.
 
 ## P0 — v76 Bloco 2: dinheiro, quantidades e datas
 
