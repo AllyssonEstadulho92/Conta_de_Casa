@@ -1,0 +1,120 @@
+/* Conta de Casa v75 — fundação de usabilidade 75-usability1.
+   Camada exclusivamente visual/interacional. Não altera dados, cálculos,
+   IndexedDB, cofre, PIN, sincronização, scanner ou regras financeiras. */
+
+:root{
+  --v75-usability-tap-target:44px;
+}
+
+/* Evita zoom acidental por duplo toque sem desativar pinch-to-zoom do navegador. */
+html.cdc-v75 :is(
+  button,
+  a[href],
+  input,
+  select,
+  textarea,
+  summary,
+  [role="button"],
+  [role="tab"],
+  [tabindex]:not([tabindex="-1"])
+){
+  touch-action:manipulation;
+}
+
+/* Alvos tácteis previsíveis em controlos de navegação e ações compactas. */
+html.cdc-v75 :is(
+  .icon-btn,
+  .nav-btn,
+  .icon-text-btn,
+  .section-tab,
+  .dialog-close,
+  .vault-key,
+  .vault-disclosure,
+  .v75-more-row,
+  .settings-software-update-row
+){
+  min-height:var(--v75-usability-tap-target);
+}
+
+html.cdc-v75 :is(.icon-btn,.dialog-close,.sidebar-toggle,.mobile-menu-btn){
+  min-width:var(--v75-usability-tap-target);
+}
+
+/* O foco continua visível para teclado; o toque não deixa um halo persistente no iOS. */
+@media (hover:none) and (pointer:coarse){
+  html.cdc-v75 :is(button,a[href],[role="button"]){-webkit-tap-highlight-color:transparent}
+}
+
+@media(max-width:820px){
+  /* Safari/iOS amplia automaticamente campos com texto inferior a 16 px.
+     Esta regra impede esse auto-zoom mantendo a ampliação manual disponível. */
+  html.cdc-v75 :is(
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea
+  ){
+    font-size:16px!important;
+  }
+
+  /* Cofre: ocupa o viewport dinâmico, respeita safe areas e continua rolável
+     quando o teclado ou um ecrã de menor altura reduz o espaço disponível. */
+  html.cdc-v75 .vault-screen{
+    min-height:100dvh!important;
+    padding:
+      max(16px,env(safe-area-inset-top,0px))
+      max(14px,env(safe-area-inset-right,0px))
+      max(16px,env(safe-area-inset-bottom,0px))
+      max(14px,env(safe-area-inset-left,0px))!important;
+    overflow-y:auto;
+    overscroll-behavior-y:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  html.cdc-v75 .vault-card{
+    width:min(100%,430px)!important;
+    margin:auto!important;
+    padding:clamp(18px,5vw,28px)!important;
+    border-radius:22px!important;
+  }
+
+  html.cdc-v75 .vault-card h1{
+    margin-top:22px!important;
+    font-size:clamp(1.42rem,6vw,1.72rem)!important;
+    line-height:1.15!important;
+  }
+
+  html.cdc-v75 .vault-unlock-intro{
+    text-align:center;
+  }
+
+  html.cdc-v75 .vault-unlock-input-label{
+    margin-top:18px!important;
+  }
+
+  html.cdc-v75 .vault-key{
+    min-width:52px;
+    min-height:52px;
+  }
+
+  html.cdc-v75 .vault-enter-btn,
+  html.cdc-v75 .vault-keyboard-toggle,
+  html.cdc-v75 .vault-disclosure{
+    width:100%;
+  }
+
+  /* A navegação inferior mantém cinco destinos igualmente clicáveis. */
+  html.cdc-v75 .mobile-nav .nav-btn{
+    touch-action:manipulation;
+    min-height:52px!important;
+  }
+
+  /* Evita que barras de ações muito densas criem alvos demasiado pequenos. */
+  html.cdc-v75 :is(.bill-command-bar,.market-command-bar) :is(button,input),
+  html.cdc-v75 :is(.bill-filter-grid,.market-filter-grid) :is(button,input,select){
+    min-height:48px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  html.cdc-v75 :is(.vault-screen,.dialog-shell,.nav-drawer-shell){scroll-behavior:auto!important}
+}
