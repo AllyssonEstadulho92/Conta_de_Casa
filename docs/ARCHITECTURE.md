@@ -1,11 +1,11 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 10 de setembro de 2026  
-Build: `v75`  
+Build publicado: `v75`  
+Programa técnico em preparação: `v76` — TypeScript  
 Distribuição: GitHub Pages / PWA
 
-Revisões integradas: `75-usability1`, `75-pages1`, `75-assets1`, `75-startup2`, `75-catalog4`, `75-photo-loader3`.  
-Revisão candidata da Parte 3: `75-market1`.
+Revisões integradas: `75-usability1`, `75-pages1`, `75-assets1`, `75-startup2`, `75-catalog4`, `75-photo-loader3`, `75-market1`.
 
 ## 1. Invariantes
 
@@ -20,7 +20,7 @@ A aplicação é PWA estática/local-first. Estado financeiro, apresentação, r
 - nenhuma password, token, chave ou kit ID no código público;
 - preço pesquisado do Mercado é estimativa; preço efetivamente pago é valor confirmado separado.
 
-## 2. Núcleo funcional
+## 2. Núcleo funcional atual
 
 - `core.js`: estado, normalização, IndexedDB, cifragem e backup;
 - `finance.js`: cálculos financeiros;
@@ -102,7 +102,7 @@ Quando um item comprado ainda não tem preço real, o cálculo existente pode co
 
 ## 9. Mercado — pesquisa
 
-Existem dois contextos distintos:
+Existem dois contextos distintos.
 
 ### Browser de produtos
 
@@ -186,20 +186,66 @@ Regras:
 - não introduz endpoints, origem CSP, token, telemetria ou segredo;
 - não toca em `core.js`, `finance.js`, IndexedDB financeiro, PIN, PBKDF2, AES-GCM ou sync.
 
-## 15. Distribuição e QA
+## 15. Distribuição e QA v75
 
 `v75-market-flow.css/js` são publicados como `75-market1`, incluídos no Service Worker e no cache com sufixo final `market1`. O CSS especializado fica antes de `v75-usability.css`; o JS é executado depois de `v75-market-featured.js`.
 
-`tests/v75-market-flow.test.cjs` verifica:
-
-- isolamento financeiro;
-- distinção entre pesquisa live e pesquisa da lista;
-- promoção do campo de preço real pendente;
-- qualificação de estimativa/valor contabilizado;
-- geometria de três colunas do browser;
-- `marketId|pid` e verificação de PID;
-- preservação de `75-photo-loader3`;
-- ausência de alterações de scanner;
-- inclusão e ordem no bundle Pages/Service Worker.
+`tests/v75-market-flow.test.cjs` verifica isolamento financeiro, distinção de pesquisas, promoção do campo de preço real, qualificação de valores, geometria do browser, `marketId|pid`, PID, loader especializado, scanner e bundle Pages.
 
 Validação física permanece necessária em Safari/PWA, Android/Chrome, tablet e desktop.
+
+## 16. Arquitetura de migração v76 — TypeScript
+
+A migração TypeScript é incremental. O browser não executa TypeScript diretamente. O código `.ts` será verificado/compilado durante o desenvolvimento e a distribuição continuará a conter JavaScript compatível com o ambiente atual.
+
+### Fundação do Bloco 1
+
+- `package.json`: apenas ferramentas de desenvolvimento; nenhuma dependência runtime;
+- `tsconfig.json`: `strict`, `noEmit`, `strictNullChecks`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `isolatedModules`;
+- `src/types/primitives.ts`: tipos nominais para cêntimos, IDs, datas/horas e códigos de produto;
+- `src/types/persisted-state.ts`: contrato do estado normalizado v5 observado em `core.js`;
+- `src/types/market.ts`: contratos de pesquisa/preço do Mercado;
+- `src/type-tests/contracts.ts`: regressões de compilação;
+- `.github/workflows/typescript.yml`: gate isolado de `npm run typecheck`.
+
+No Bloco 1, `scripts/prepare-pages.cjs`, `index.html` e `sw.js` não referenciam os novos `.ts`. Logo, a fundação não entra no bundle público.
+
+### Arquitetura de destino
+
+A árvore final deve separar:
+
+- `src/core/`: estado, validação, datas, persistência;
+- `src/finance/`: dinheiro, faturas, pagamentos, rendimentos, orçamento e IVA;
+- `src/market/`: identidade, pesquisa, carrinho, promoções, imagens e reconciliação;
+- `src/security/`: cofre e cifragem sem mudança de algoritmo por causa da linguagem;
+- `src/sync/`: sincronização e conflitos;
+- `src/ui/`: render, formulários, eventos e navegação;
+- `src/types/`: contratos partilhados.
+
+A migração deve substituir módulos apenas depois de testes de paridade provarem equivalência.
+
+## 17. Mercado v76 — motor de cálculo e exatidão
+
+A arquitetura de destino do Mercado deve distinguir explicitamente:
+
+1. identidade do produto;
+2. observação de preço;
+3. preço estimado;
+4. preço confirmado;
+5. quantidade/peso;
+6. promoção/desconto aplicável;
+7. linha de carrinho;
+8. total de carrinho;
+9. reconciliação com talão/fatura.
+
+Operações monetárias não devem depender de floating point. Quantidades fracionárias devem usar escala inteira ou razão explícita, e cada regra de arredondamento deve ter teste próprio.
+
+A aplicação só pode apresentar `Exato` quando todos os fatores que determinam o valor final estiverem confirmados. Caso contrário, apresenta `Estimativa` ou `Preço por confirmar`.
+
+## 18. Mercado v76 — identidade e imagens
+
+Durante o mapeamento foi confirmado que `market-experience.js` extrai `pid` da resposta Cesta para compor o ID interno do resultado, mas não expõe esse PID como propriedade própria do resultado nem o persiste no artigo criado por `addProduct()`. Antes de integrar o browser live na biblioteca `marketId|pid`, esta lacuna precisa de uma correção específica e testada.
+
+A pesquisa de imagem do browser live por termo/Open Food Facts é apenas enriquecimento visual. A biblioteca profissional deverá preferir correspondência por GTIN/PID e fontes verificadas.
+
+Logos SVG de supermercados são assets de marca e só entram depois de verificação de origem e direito de utilização. Nenhuma alteração de CSP será feita apenas para carregar logos externos.
