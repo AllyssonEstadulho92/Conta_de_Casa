@@ -77,12 +77,47 @@ Atualizado: 10 de setembro de 2026
 - [x] Manter `v75-usability.css` carregado depois de `v75-pages.css`.
 - [x] Ampliar `tests/v75-stability.test.cjs` com regressões da Parte 2.
 - [x] Atualizar documentação técnica da branch.
-- [ ] Confirmar CI verde da branch.
-- [ ] Confirmar branch `behind 0` relativamente a `main` antes de integrar.
+- [x] Abrir/rever PR #68 e integrar em `main`.
+- [x] Confirmar CI de `main` verde no merge `c8ec45893c8936093ecd7c7da9ee08c9a268109c`: run `34474037338`.
+- [x] Confirmar GitHub Pages no mesmo SHA: run `34474069564`.
+- [ ] Validar fisicamente 320/375/390/430 px, tablet e desktop quando disponível.
+
+## P1 — Fundação de design/assets `75-assets1`
+
+### Catálogo e critérios
+
+- [x] Criar registo reutilizável de fornecedores em `design-asset-library.js`.
+- [x] Registar Lottie, Google Fonts, Fontshare, Font Squirrel, DaFont, UNCUT.wtf, Adobe Fonts, MyFonts, Fontpair, Fontjoy, Font Awesome, Material Symbols, Type Icons e o item não verificado “Free Icon Font Proyectos”.
+- [x] Manter Lucide local como sistema principal de ícones da Conta de Casa.
+- [x] Definir uma família tipográfica preferencial e máximo de duas por aplicação.
+- [x] Exigir validação de origem/licença antes de incorporar ficheiros.
+- [x] Bloquear integração automática de recursos classificados como restritos ou não verificados.
+- [x] Documentar critérios em `docs/DESIGN_ASSET_LIBRARY.md`.
+
+### Carregamento de fotos e outros recursos
+
+- [x] Criar `asset-loader.js` opt-in.
+- [x] Aplicar lazy loading, async decode, prioridade e `IntersectionObserver` a imagens declaradas.
+- [x] Criar estados loading/ready/error e fallback visual em `asset-loader.css`.
+- [x] Suportar vídeo/áudio com `preload="metadata"` por defeito e sem autoplay automático.
+- [x] Preparar integração Lottie apenas com runtime e JSON locais aprovados.
+- [x] Respeitar `prefers-reduced-motion` e fallback estático.
+- [x] Não substituir `market-photo-loader.js` nem a identidade `marketId|pid`.
+- [x] Não expandir a CSP nem introduzir kits/tokens/CDNs.
+
+### Distribuição/QA
+
+- [x] Incluir `asset-loader.css`, `design-asset-library.js` e `asset-loader.js` no bundle Pages.
+- [x] Incluir os três recursos no Service Worker e invalidar cache com `assets1`.
+- [x] Criar `tests/design-asset-library.test.cjs`.
+- [x] Incluir syntax check e teste dedicado no CI e no pipeline Pages.
+- [x] Atualizar PROJECT_STATE, ARCHITECTURE, DECISIONS, TODO e CHANGELOG da branch.
+- [ ] Confirmar CI verde da branch final.
+- [ ] Confirmar branch `behind 0` relativamente a `main`.
 - [ ] Abrir/rever PR para `main`.
 - [ ] Integrar apenas com CI verde.
 - [ ] Confirmar CI de `main` e GitHub Pages no SHA publicado.
-- [ ] Validar fisicamente 320/375/390/430 px, tablet e desktop quando disponível.
+- [ ] Validar em hardware um componente opt-in com imagem lazy/fallback e, quando houver runtime Lottie aprovado, o comportamento de reduced motion.
 
 ## P1 — Parte 3: Mercado
 
@@ -107,3 +142,4 @@ Atualizado: 10 de setembro de 2026
 - [ ] Remover código histórico apenas com prova de ausência de referências.
 - [ ] Alinhar nomenclatura base (`PAGE_META`/template) com a arquitetura v75 sem alterar rotas nem IDs.
 - [ ] Revalidar segurança, finanças, sincronização, manifest e offline depois de qualquer consolidação.
+- [ ] Se uma aplicação futura adotar novas fontes/ícones/animações, reutilizar o critério `75-assets1` e acrescentar apenas os assets aprovados, sem importar catálogos completos.
