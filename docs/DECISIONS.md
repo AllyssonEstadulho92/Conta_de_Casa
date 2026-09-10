@@ -1,6 +1,6 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 9 de setembro de 2026
+Atualizado: 10 de setembro de 2026
 
 Este ficheiro mantém as decisões vigentes necessárias para continuidade. O histórico detalhado permanece no Git.
 
@@ -17,104 +17,92 @@ Este ficheiro mantém as decisões vigentes necessárias para continuidade. O hi
 - A aplicação usa Lucide local como sistema de ícones.
 - Falhas de imagem têm fallback visual e nunca removem o artigo.
 - Releases públicas relevantes usam revisão própria e cache invalidável.
+- Disponibilidade nunca pode ser obtida à custa de expor dados financeiros antes da barreira de segurança.
 
 ## D-046 — Destaques do Mercado em carrossel largo
 
-Estado: aceite.
-
-`75-featured1` substitui a grelha mobile apertada por carrossel horizontal, reserva área estável para a fotografia, limita o nome a duas linhas e usa fallback local quando a fotografia não existe.
+Estado: aceite. `75-featured1` usa carrossel horizontal mobile, área estável de fotografia e fallback local.
 
 ## D-047 — Biblioteca geral por retalhista + PID
 
-Estado: aceite.
-
-`75-image-library1` usa IndexedDB separada e chave `marketId|pid`. Guarda apenas metadados e URL oficial validado. Não copia binários para o GitHub e não usa o nome textual como identidade suficiente da fotografia.
+Estado: aceite. `75-image-library1` usa IndexedDB separada e chave `marketId|pid`; guarda metadados e URL oficial validado, nunca binários ou preços.
 
 ## D-048 — Catálogo visual progressivo não guarda preços
 
-Estado: aceite.
-
-O índice local guarda SKUs reais, nome, embalagem, categoria, URL oficial e timestamps; **Ver preço atual** reutiliza a pesquisa viva. A cobertura é progressiva e não é declarada como 100% sem fonte exaustiva.
+Estado: aceite. O índice local guarda SKUs reais e metadados; **Ver preço atual** reutiliza a pesquisa viva.
 
 ## D-049 — Biblioteca Pingo Doce dedicada sem duplicar estado financeiro
 
-Estado: aceite.
-
-`75-pd-photo1` usa IndexedDB própria, apenas produtos Pingo Doce com PID/URL oficial coerentes e estados `pending|ready|missing`. Não guarda preços, quantidades, faturas, cofre ou credenciais.
+Estado: aceite. `75-pd-photo1` mantém apenas produtos Pingo Doce, PID/URL oficial e estados `pending|ready|missing`.
 
 ## D-050 — Feedback de carregamento de fotografia
 
-Estado: substituída parcialmente por D-052.
-
-O primeiro loader introduziu skeleton/spinner, mas a validação física mostrou que feedback visual sem priorização real não resolvia o pipeline.
+Estado: substituída parcialmente por D-052. Skeleton/spinner isolado não resolvia a priorização real do pipeline.
 
 ## D-051 — Publicação exige CI da branch, CI de main e Pages
 
-Estado: aceite.
-
-Fluxo obrigatório: CI verde da branch → integração fast-forward em `main` sem force → CI verde de `main` → GitHub Pages concluído no SHA integrado → validação física quando relevante.
+Estado: aceite. Fluxo obrigatório: CI verde da branch → integração fast-forward sem force → CI verde de `main` → GitHub Pages no SHA integrado → validação física quando relevante.
 
 ## D-052 — Separar validade oficial de transporte e priorizar cartões visíveis
 
-Estado: aceite e publicada.
-
-`75-catalog2` elimina o segundo preflight visual bloqueante depois de a referência já ter sido validada por página oficial + host/path + PID. `75-photo-loader2` prioriza até 6 cartões, testa disponibilidade no `<img>`, expurga URL quebrado, limita polling/retry e preserva a separação do estado financeiro.
+Estado: aceite e publicada. `75-catalog2` elimina preflight visual duplicado e `75-photo-loader2` prioriza cartões visíveis sem tocar no estado financeiro.
 
 ## D-053 — Evidência em hardware prevalece sobre teste sintético
 
-Estado: aceite.
-
-Para imagens remotas, testes unitários e CI são necessários mas não suficientes. O encerramento exige repetir no dispositivo/browser real o cenário que revelou o problema.
+Estado: aceite. Defeitos Safari/PWA e de imagens só são encerrados depois de repetir no dispositivo real o cenário que os revelou.
 
 ## D-054 — Runtime2 publicado, eficácia dependente de revalidação física
 
-Estado: aceite.
-
-`75-catalog2` + `75-photo-loader2` foi publicado e passou CI/Pages. A validação posterior revelou um defeito diferente: flicker causado pela estratégia de rerender do catálogo.
+Estado: aceite. A validação posterior revelou flicker distinto, tratado por D-055.
 
 ## D-055 — O catálogo não pode destruir cartões estáveis durante atualizações de fundo
 
-Data: 9 de setembro de 2026 · Estado: aceite, integrada e publicada.
+Data: 9 de setembro de 2026 · Estado: aceite e publicada.
 
-### Factos observados
+`75-catalog3` reconcilia cartões por `marketId|pid`, preserva o mesmo nó DOM/media, remove apenas chaves obsoletas e usa `cdc:market-photo-ready` para hidratação sem reconstruir a grelha. Não altera `core.js`, `finance.js`, PIN, cifragem ou sincronização.
 
-A captura em hardware mostrou a zona da fotografia a piscar. A inspeção do código confirmou que não era apenas uma animação CSS:
+## D-056 — O arranque nunca pode ficar visualmente sem estado seguro
 
-1. `scheduleImageWarm()` chamava `renderProducts()` depois de resolver uma imagem;
-2. `renderProducts()` começava por `grid.replaceChildren()`;
-3. a grelha inteira era removida antes da reconstrução assíncrona dos cartões;
-4. os `<img>` existentes eram destruídos e recriados, reiniciando apresentação/carregamento no browser.
+Data: 10 de setembro de 2026 · Estado: aceite; implementação candidata validada em CI.
+
+### Factos observáveis
+
+A captura física no iPhone/Safari mostrou uma página totalmente branca com a barra de progresso do browser ainda ativa. A captura não contém informação suficiente para atribuir o episódio a uma única função.
+
+### Riscos confirmados no código
+
+1. O Service Worker tratava navegações com `fetch(event.request).catch(...)` sem timeout. Se a promessa ficasse pendente, o fallback de cache não era atingido.
+2. O fluxo de entrada pode ocultar simultaneamente `#vaultScreen` e `#app` enquanto aguarda a barreira inicial de sincronização. Isto preserva a confidencialidade, mas cria uma superfície branca durante a espera.
 
 ### Decisão
 
-1. Criar revisão de renderer/distribuição `75-catalog3`.
-2. Manter o resolver oficial interno `75-catalog2`; o defeito não exige alterar validação de origem/PID.
-3. Reconciliar os cartões pela identidade canónica `marketId|pid`.
-4. Reutilizar o mesmo nó DOM quando a chave continua presente.
-5. Atualizar texto e metadados sem substituir `.market-visual-product-media`.
-6. Remover apenas cartões cuja chave deixou de fazer parte do resultado atual.
-7. Criar novos cartões apenas para novas chaves.
-8. Retirar `renderProducts()` da rotina periódica de aquecimento de imagem.
-9. Depois de uma imagem válida ser persistida em background, emitir `cdc:market-photo-ready` e deixar `75-photo-loader2` hidratar o cartão existente.
-10. Atualizar revisão de distribuição/cache para `catalog3` e introduzir teste que falha se o caminho periódico voltar a reconstruir a grelha.
-11. Não tocar em `core.js`, `finance.js`, pagamentos, faturas, PIN, cifragem ou sincronização.
+1. Criar a revisão `75-startup1`.
+2. Manter a barreira inicial de sincronização e a regra de não mostrar dados financeiros antes da sua resolução.
+3. Adicionar `v75-startup-guard.js` como camada exclusivamente visual.
+4. Quando `html.app-active` estiver ativo e cofre+shell estiverem ocultos, mostrar temporariamente o cofre com `aria-busy="true"` e mensagem de preparação.
+5. Ocultar novamente o cofre assim que o shell da aplicação ficar disponível.
+6. Limitar a navegação de rede do Service Worker a 4 segundos com `AbortController`.
+7. Em timeout/erro de navegação, usar o `index.html` já instalado em Cache Storage.
+8. Atualizar a cópia de `index.html` em cache quando a rede responde com sucesso.
+9. Se não existir rede nem cache, devolver 503 legível em vez de espera indefinida.
+10. Alterar o identificador do cache para terminar em `startup1`.
+11. Adicionar teste de regressão específico e incluí-lo no CI.
+12. Não pedir ao utilizador para limpar dados do Safari como passo de recuperação, porque isso pode apagar IndexedDB/cofre local.
 
 ### Fundamento
 
-A identidade do produto já é estável (`marketId|pid`). Destruir um componente visual que representa a mesma identidade é trabalho desnecessário, causa flicker e perde estado de apresentação. A reconciliação incremental mantém continuidade visual e reduz alterações do DOM sem mudar a lógica de negócio.
+A disponibilidade do shell e a confidencialidade do cofre são requisitos simultâneos. Um estado de espera deve ser visível e acessível sem antecipar dados financeiros. O fallback de navegação deve ser temporalmente limitado porque um `fetch()` pendente não é equivalente a uma falha e, por isso, não ativa `.catch()`.
 
 ### Critérios de aceitação
 
-- ausência de `grid.replaceChildren()` vazio no caminho normal de renderização com produtos;
-- aquecimento periódico de fotografia não chama `renderProducts()`;
-- fotografia pronta é propagada por evento para o loader;
+- nenhuma navegação controlada pelo Service Worker aguarda rede indefinidamente;
+- cache de `index.html` é usado depois do timeout/erro;
+- durante a barreira de arranque existe sempre uma superfície segura visível;
+- `v75-startup-guard.js` não acede a `appState`, IndexedDB, montantes ou sincronização;
 - regressões financeiras, segurança, Mercado, responsividade, acessibilidade e sync permanecem verdes;
-- confirmação final no iPhone/Safari/PWA sem flicker.
+- confirmação final no mesmo iPhone/Safari/PWA.
 
-### Evidência de publicação
+### Evidência atual
 
-- branch validada com CI completo;
-- fast-forward de `main` sem force para `6dd4eafa947bf83e847f657ab9e155717d3971bc`;
-- CI `main` run `34414686159`: sucesso;
-- GitHub Pages run `34414730220`: sucesso;
-- encerramento funcional continua dependente da revalidação física definida em D-053.
+Commit funcional: `cd229d83c3d47f54d7f8990a76f2f29acb372f47`.
+CI da branch run `34440532734`: sucesso completo. Integração e Pages ainda pendentes nesta etapa.

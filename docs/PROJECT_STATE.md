@@ -1,10 +1,11 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 9 de setembro de 2026
+Atualizado: 10 de setembro de 2026
 Build: `v75`
 Branch pública: `main`
 Distribuição: GitHub Pages / PWA
-Runtime publicado: `75-catalog3` sobre SHA `6dd4eafa947bf83e847f657ab9e155717d3971bc`
+Runtime público anterior: `75-catalog3` sobre `90cbfea6e7d2851c42d6d1e6467d2fc52aeaae1f`
+Candidato atual: `75-startup1` em `fix/v75-safari-blank-screen` sobre `cd229d83c3d47f54d7f8990a76f2f29acb372f47`
 
 ## Baseline preservada
 
@@ -15,6 +16,7 @@ Runtime publicado: `75-catalog3` sobre SHA `6dd4eafa947bf83e847f657ab9e155717d39
 - arquitetura: `75-architecture2`
 - cabeçalho: `75-header2`
 - estabilidade: `75-stability1`
+- guarda de arranque: `75-startup1`
 - geometria: `75-layout1`
 - drawer: `75-drawer2`
 - destaques Mercado: `75-featured1`
@@ -24,81 +26,59 @@ Runtime publicado: `75-catalog3` sobre SHA `6dd4eafa947bf83e847f657ab9e155717d39
 - biblioteca Pingo Doce: `75-pd-photo1`
 - carregador visual: `75-photo-loader2`
 
-## Estado funcional e invariantes
+## Invariantes
 
 A aplicação continua PWA estática/local-first. O estado financeiro permanece em IndexedDB, os montantes são inteiros em cêntimos, `STATE_VERSION = 5`, o cofre usa PBKDF2-SHA-256 + AES-GCM e a sincronização GitHub opcional continua limitada ao envelope cifrado.
 
-A correção atual não altera `core.js`, `finance.js`, pagamentos, faturas, QR, scanner, PIN, cifragem, `estimatedCents`, `actualCents` ou sincronização.
+A correção `75-startup1` não altera `core.js`, `finance.js`, cálculos, pagamentos, faturas, QR, scanner, PIN, cifragem, `estimatedCents`, `actualCents` ou a lógica de sincronização. Atua apenas na disponibilidade do documento de navegação e na continuidade visual do arranque.
 
-## Problema anterior: fotografias Pingo Doce
+## Problema anterior: fotografias a piscar
 
-A validação física no iPhone/Safari tinha mostrado:
+`75-catalog3` substituiu a reconstrução destrutiva da grelha por reconciliação incremental por `marketId|pid`. Cartões existentes são reutilizados e uma fotografia pronta é propagada por `cdc:market-photo-ready`. O CI e o Pages dessa revisão ficaram verdes; a validação física final do flicker continua pendente.
 
-- `566 produtos indexados · 57 imagens validadas` no catálogo geral;
-- `Biblioteca Pingo Doce: 285 SKUs indexados · 0 fotografias oficiais`;
-- cartões visíveis demasiado tempo em **A carregar fotografia…**.
+## Novo defeito observado: ecrã branco no iPhone/Safari
 
-Esse problema originou `75-catalog2` + `75-photo-loader2`: foi removido o segundo preflight visual bloqueante, os cartões visíveis passaram a ser priorizados, o retry ficou limitado e a UI deixou de manter spinner infinito.
+A captura de 10 de setembro mostra o Safari numa página totalmente branca enquanto a barra de progresso do próprio browser ainda indica carregamento. A imagem, isoladamente, não permite provar qual etapa de runtime ficou bloqueada.
 
-## Bug confirmado: fotografias a piscar
+A auditoria confirmou, porém, dois caminhos independentes capazes de produzir um estado branco:
 
-A evidência visual seguinte mostrou fotografias/cartões do catálogo a piscar durante atualizações de fundo.
+1. **Navegação do Service Worker sem limite temporal.** `sw.js` fazia `fetch(event.request)` e só recorria ao `index.html` em cache quando a promessa rejeitava. Uma ligação lenta ou pendurada podia manter a navegação sem resposta durante tempo indeterminado.
+2. **Estado transitório após desbloqueio.** O fluxo existente pode manter simultaneamente `#vaultScreen` e `#app` ocultos enquanto a barreira inicial de sincronização aguarda. A política de segurança deve continuar a impedir a apresentação de dados financeiros antes de a barreira terminar, mas não deve resultar numa superfície branca.
 
-### Causa confirmada no código
+Não é possível confirmar apenas pela captura qual destes dois caminhos ocorreu naquele momento. Ambos foram tratados porque são riscos reais confirmados no código.
 
-`market-visual-catalog.js` reconstruía a grelha inteira em atualizações periódicas:
+## Correção candidata `75-startup1`
 
-1. `scheduleImageWarm()` resolvia uma fotografia e chamava `renderProducts()`;
-2. `renderProducts()` executava `grid.replaceChildren()`;
-3. cada cartão era criado novamente e fazia nova consulta assíncrona à biblioteca de imagens;
-4. os elementos `<img>` já carregados eram removidos do DOM e recriados.
+### Navegação
 
-O efeito era visualmente semelhante a uma fotografia que desaparece e reaparece. Não era apenas animação CSS nem falha da imagem remota.
+- documentos de navegação passam por `navigationResponse()`;
+- tentativa de rede usa `cache:'no-store'` e `AbortController`;
+- limite de rede: 4 segundos;
+- após timeout/erro, usa `./index.html` já instalado em cache;
+- uma navegação de rede bem-sucedida atualiza a cópia de `index.html` no cache;
+- se não existir rede nem cache, é devolvida resposta 503 legível em vez de uma espera indefinida;
+- cache público passa a terminar em `photo-loader2-startup1`.
 
-## Correção publicada `75-catalog3`
+### Arranque seguro visível
 
-Foi implementada uma renderização incremental por chave `marketId|pid`:
+Foi criado `v75-startup-guard.js` (`75-startup1`). A camada observa apenas a visibilidade do cofre e do shell da aplicação. Se `html.app-active` estiver ativo e ambos estiverem ocultos, reapresenta temporariamente o ecrã do cofre com `aria-busy="true"` e a mensagem **A preparar a aplicação com segurança…**. Assim que o shell fica disponível, o cofre volta a ser ocultado.
 
-- cartões existentes são reutilizados em vez de destruídos;
-- apenas cartões que deixaram de pertencer ao resultado atual são removidos;
-- cartões novos são criados apenas quando realmente necessários;
-- texto/metadados do cartão são sincronizados sem substituir a área de fotografia;
-- a fila de aquecimento de fotografias deixou de chamar `renderProducts()` após cada imagem;
-- uma fotografia resolvida em background emite `cdc:market-photo-ready`, permitindo ao `75-photo-loader2` hidratar o cartão já existente;
-- o cache de distribuição passa para `...-image-library1-catalog3-pd-photo1-photo-loader2`.
+A guarda não lê `appState`, não acede a IndexedDB, não chama sincronização e não expõe dados financeiros antes da barreira de segurança existente.
 
-O resolvedor de origem continua `75-catalog2`; `75-catalog3` altera o catálogo/renderer, não relaxa a validação de host, path ou PID.
+## QA atual
 
-## QA e publicação
+Commit funcional: `cd229d83c3d47f54d7f8990a76f2f29acb372f47`.
 
-- CI completo da branch: sucesso;
-- integração em `main`: fast-forward sem force para `6dd4eafa947bf83e847f657ab9e155717d3971bc`;
-- CI de `main` run `34414686159`: sucesso completo;
-- GitHub Pages run `34414730220`: sucesso, incluindo checkout da revisão testada, preparação da allowlist, upload e deploy.
-
-Passaram, entre outros:
-
-- probe real das fontes Continente/Pingo Doce;
-- sintaxe;
-- finanças e invariantes de contagem;
-- isolamento/cofre;
-- faturas e QR;
-- Mercado e imagens oficiais;
-- catálogo visual `75-catalog3`;
-- biblioteca Pingo Doce;
-- `75-photo-loader2`;
-- segurança;
-- responsividade e viewport móvel;
-- navegação e acessibilidade;
-- sincronização;
-- validação do manifest.
-
-Um primeiro CI da branch falhou apenas porque `tests/pingo-doce-photo-library.test.cjs` ainda esperava o identificador de cache `catalog2`; o teste de distribuição foi atualizado para `catalog3` e os ciclos seguintes ficaram totalmente verdes.
+CI da branch `fix/v75-safari-blank-screen`, run `34440532734`: **sucesso completo**. Passaram sintaxe, finanças, isolamento/cofre, faturas/QR, Mercado/imagens, `75-catalog3`, Pingo Doce, loader, segurança, responsividade, viewport móvel, navegação, acessibilidade, sync e o novo teste **Safari/PWA startup blank-screen regression tests**.
 
 ## Estado atual
 
-A correção está integrada e publicada. Ainda não é correto declarar o defeito encerrado apenas com CI/Pages, porque ele foi observado em hardware real e depende do comportamento do Safari/PWA.
+A correção está validada em CI na branch, mas ainda não foi integrada/publicada em `main`. O defeito não deve ser considerado encerrado até existir deploy Pages do SHA integrado e nova validação no mesmo iPhone/Safari.
 
 ## Próximo passo
 
-Repetir no mesmo iPhone/Safari/PWA o cenário exato da captura durante 30–60 segundos. A validação física deve confirmar simultaneamente ausência de flicker, carregamento estável, ausência de troca de PID e preservação dos valores financeiros. Se o flicker persistir, recolher nova captura e tempo aproximado entre piscadelas antes de alterar outra camada.
+1. Integrar a branch em `main` por fast-forward sem force depois desta atualização documental e de novo CI verde.
+2. Confirmar CI de `main` e GitHub Pages.
+3. Reabrir a aplicação no iPhone/Safari sem apagar dados do site nem IndexedDB.
+4. Confirmar que uma ligação lenta nunca mantém uma página branca indefinidamente e que, após PIN, existe sempre um estado visual seguro durante a preparação.
+5. Depois retomar a validação física do flicker do Mercado.

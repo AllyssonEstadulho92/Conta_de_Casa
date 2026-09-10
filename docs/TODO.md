@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 9 de setembro de 2026
+Atualizado: 10 de setembro de 2026
 
 ## P0 — Baseline v75 preservada
 
@@ -10,36 +10,42 @@ Atualizado: 9 de setembro de 2026
 - [x] Manter drawer no lado direito e cabeçalho `75-header2`.
 - [x] Manter `75-stability1`, `75-layout1`, `75-drawer2` e `75-featured1`.
 
-## P0 — Pipeline de imagens anterior
+## P0 — Pipeline de imagens
 
 - [x] Biblioteca persistente por `marketId|pid` em `75-image-library1`.
 - [x] Catálogo visual progressivo.
 - [x] Biblioteca dedicada Pingo Doce em `75-pd-photo1`.
 - [x] Resolver oficial não bloqueante `75-catalog2`.
 - [x] Carregador prioritário `75-photo-loader2`.
+- [x] Renderer incremental `75-catalog3` sem reconstrução destrutiva da grelha.
 - [x] Manter limites de rede e suspensão offline/Save-Data/visibilidade.
 
-## P0 — Bug novo: fotografias/cartões a piscar
+## P0 — Ecrã branco no Safari/PWA
 
-- [x] Inspecionar o renderer real do catálogo e não assumir causa CSS.
-- [x] Confirmar que `scheduleImageWarm()` chamava `renderProducts()` depois de cada fotografia.
-- [x] Confirmar que `renderProducts()` eliminava a grelha com `grid.replaceChildren()`.
-- [x] Confirmar impacto: `<img>` já carregados eram destruídos e recriados.
-- [x] Criar revisão `75-catalog3`.
-- [x] Reconciliar cartões por `marketId|pid`.
-- [x] Preservar o mesmo nó DOM/media para produtos ainda presentes.
-- [x] Remover apenas cartões obsoletos.
-- [x] Criar apenas cartões realmente novos.
-- [x] Retirar `renderProducts()` do aquecimento periódico de imagens.
-- [x] Emitir `cdc:market-photo-ready` quando background persiste uma fotografia.
-- [x] Reutilizar `75-photo-loader2` para hidratar o cartão existente.
-- [x] Atualizar `CATALOG_REV` para `75-catalog3`.
-- [x] Atualizar cache do Service Worker para `catalog3`.
-- [x] Adicionar regressão que impede reconstrução destrutiva da grelha.
-- [x] Atualizar teste Pingo Doce para o novo identificador de cache.
-- [x] Confirmar CI completo da branch.
+- [x] Rever a captura física e separar factos de causa provável.
+- [x] Inspecionar o artefacto Pages publicado e confirmar que `index.html`, estilos e scripts existem.
+- [x] Confirmar que a navegação do Service Worker tinha `fetch()` sem timeout antes do fallback.
+- [x] Confirmar que o fluxo de entrada pode ocultar `#vaultScreen` e `#app` durante a barreira inicial.
+- [x] Criar revisão `75-startup1`.
+- [x] Criar `v75-startup-guard.js` sem acesso a estado financeiro/IndexedDB/sync.
+- [x] Manter o cofre visível com `aria-busy` quando cofre+shell ficariam simultaneamente ocultos.
+- [x] Preservar o shell financeiro oculto até a barreira existente terminar.
+- [x] Limitar navegação de rede a 4 s com `AbortController`.
+- [x] Usar `index.html` em cache no timeout/erro.
+- [x] Atualizar a cópia de `index.html` em cache após navegação de rede bem-sucedida.
+- [x] Devolver 503 legível se não houver rede nem cache.
+- [x] Atualizar cache para sufixo `startup1`.
+- [x] Incluir `v75-startup-guard.js` no bundle/Service Worker.
+- [x] Adicionar `tests/safari-startup.test.cjs` e passo dedicado no CI.
+- [x] Confirmar CI funcional da branch — run `34440532734`.
+- [ ] Confirmar CI após documentação.
+- [ ] Comparar branch com `main` e confirmar `behind 0`.
+- [ ] Integrar por fast-forward sem force.
+- [ ] Confirmar CI completo de `main`.
+- [ ] Confirmar GitHub Pages no SHA integrado.
+- [ ] Revalidar no mesmo iPhone/Safari sem limpar IndexedDB/dados do site.
 
-## P0 — Documentação
+## P0 — Documentação desta correção
 
 - [x] Atualizar `PROJECT_STATE.md`.
 - [x] Atualizar `ARCHITECTURE.md`.
@@ -47,18 +53,9 @@ Atualizado: 9 de setembro de 2026
 - [x] Atualizar `TODO.md`.
 - [x] Atualizar `CHANGELOG.md`.
 
-## P0 — Integração/publicação `75-catalog3`
+## P1 — Revalidação física do Mercado
 
-- [x] Reconfirmar CI da branch depois dos commits documentais.
-- [x] Comparar branch com `main` e confirmar `behind 0` antes da integração.
-- [x] Integrar por fast-forward sem force para `6dd4eafa947bf83e847f657ab9e155717d3971bc`.
-- [x] Confirmar CI completo de `main` — run `34414686159`.
-- [x] Confirmar GitHub Pages — run `34414730220`.
-- [x] Atualizar documentação com a publicação confirmada.
-
-## P1 — Revalidação física iPhone/Safari/PWA
-
-- [ ] Confirmar novo cache `catalog3-pd-photo1-photo-loader2`.
+- [ ] Confirmar novo cache com `catalog3` + `startup1`.
 - [ ] Confirmar que fotografias já visíveis não desaparecem/reaparecem durante atualização de fundo.
 - [ ] Confirmar ausência de flicker ao permanecer no Mercado por pelo menos 30–60 s.
 - [ ] Trocar categorias e filtros repetidamente e confirmar estabilidade dos cartões.
@@ -84,7 +81,7 @@ Atualizado: 9 de setembro de 2026
 
 ## P2 — Consolidação
 
-- [ ] Após validação física, avaliar consolidação de `75-catalog2`/`75-catalog3`/`75-photo-loader2` numa camada de Mercado única e mais simples.
+- [ ] Após validação física, avaliar consolidação das camadas de Mercado numa implementação mais simples.
+- [ ] Avaliar integrar a guarda de arranque diretamente no fluxo funcional apenas se isso reduzir complexidade sem enfraquecer a segurança.
 - [ ] Remover código histórico apenas com prova de ausência de referências.
-- [ ] Avaliar serialização explícita de renderizações concorrentes se a validação física ou profiling mostrar chamadas sobrepostas.
 - [ ] Manter documentação sincronizada em cada alteração relevante.
