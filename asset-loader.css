@@ -1,0 +1,90 @@
+/* Conta de Casa — estados transversais de assets 75-assets1.
+   Visual neutro e reutilizável; componentes específicos podem sobrepor estes estados. */
+
+[data-cdc-asset-frame]{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+
+[data-cdc-asset-frame][data-cdc-asset-state="loading"]::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:linear-gradient(110deg,
+    color-mix(in srgb,var(--surface-2,#edf5f4) 92%,transparent) 20%,
+    color-mix(in srgb,var(--surface,#fff) 98%,transparent) 38%,
+    color-mix(in srgb,var(--surface-2,#edf5f4) 92%,transparent) 56%);
+  background-size:220% 100%;
+  animation:cdcAssetShimmer 1.15s linear infinite;
+}
+
+[data-cdc-asset-frame][data-cdc-asset-state="error"]::after,
+[data-cdc-asset-frame][data-cdc-asset-state="runtime-missing"]::after{
+  content:attr(data-cdc-asset-error-label);
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:grid;
+  place-items:center;
+  padding:12px;
+  pointer-events:none;
+  color:var(--muted,#61757a);
+  background:var(--surface-2,#edf5f4);
+  font-size:.75rem;
+  line-height:1.35;
+  font-weight:600;
+  text-align:center;
+}
+
+[data-cdc-asset-frame][data-cdc-asset-state="error"]:not([data-cdc-asset-error-label])::after{
+  content:"Conteúdo indisponível";
+}
+
+[data-cdc-asset-frame][data-cdc-asset-state="runtime-missing"]:not([data-cdc-asset-error-label])::after{
+  content:"Animação indisponível";
+}
+
+[data-cdc-asset-frame][data-cdc-asset-state="paused"]::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+img[data-cdc-asset],img[data-cdc-src],video[data-cdc-asset]{
+  display:block;
+  max-width:100%;
+}
+
+img[data-cdc-asset][data-cdc-asset-state="loading"],
+img[data-cdc-src][data-cdc-asset-state="loading"]{
+  opacity:.01;
+}
+
+img[data-cdc-asset][data-cdc-asset-state="ready"],
+img[data-cdc-src][data-cdc-asset-state="ready"]{
+  opacity:1;
+  transition:opacity .18s ease;
+}
+
+[data-cdc-lottie-src]{
+  min-width:1px;
+  min-height:1px;
+}
+
+@keyframes cdcAssetShimmer{to{background-position:-220% 0}}
+
+@media(prefers-reduced-motion:reduce){
+  [data-cdc-asset-frame][data-cdc-asset-state="loading"]::before{animation:none}
+  img[data-cdc-asset][data-cdc-asset-state="ready"],
+  img[data-cdc-src][data-cdc-asset-state="ready"]{transition:none}
+}
+
+@media(forced-colors:active){
+  [data-cdc-asset-frame][data-cdc-asset-state="loading"]::before{background:Canvas;border:1px solid CanvasText}
+  [data-cdc-asset-frame][data-cdc-asset-state="error"]::after,
+  [data-cdc-asset-frame][data-cdc-asset-state="runtime-missing"]::after{background:Canvas;color:CanvasText;border:1px solid CanvasText}
+}
