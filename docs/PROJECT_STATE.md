@@ -1,13 +1,14 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 10 de setembro de 2026
-Build: `v75`
-Branch pública: `main`
-SHA público antes da Parte 2: `e16c35c3a4e52dead57deccdde9630a89a4af998`
-Branch de trabalho atual: `fix/v75-pages-part2`
-Distribuição: GitHub Pages / PWA
-Revisão de usabilidade integrada: `75-usability1`
-Revisão de páginas candidata: `75-pages1`
+Atualizado: 10 de setembro de 2026  
+Build: `v75`  
+Branch pública: `main`  
+SHA público de partida: `c8ec45893c8936093ecd7c7da9ee08c9a268109c`  
+Branch de trabalho atual: `feat/v75-design-asset-library`  
+Distribuição: GitHub Pages / PWA  
+Revisão de usabilidade integrada: `75-usability1`  
+Revisão de páginas integrada: `75-pages1`  
+Revisão de biblioteca de design candidata: `75-assets1`
 
 ## Baseline preservada
 
@@ -19,68 +20,73 @@ Revisão de páginas candidata: `75-pages1`
 - sincronização GitHub opcional limitada ao envelope cifrado;
 - UI `74-ui1`, Mercado `74-shopping2`, menu `73-menu8`, experiência `74-experience2`;
 - arquitetura `75-architecture2`, cabeçalho `75-header2`, estabilidade `75-stability1`, geometria `75-layout1`, drawer `75-drawer2`;
-- startup `75-startup2`, catálogo `75-catalog4`, loader `75-photo-loader3`;
-- usabilidade transversal `75-usability1`.
+- startup `75-startup2`, catálogo `75-catalog4`, loader especializado de Mercado `75-photo-loader3`;
+- usabilidade transversal `75-usability1`;
+- páginas Início/Despesas/Planeamento `75-pages1`.
 
-## Estado confirmado antes da Parte 2
+## Estado confirmado antes de `75-assets1`
 
-A Parte 1 foi integrada e publicada. O commit funcional `c352c1883c16fd7df92aa0f26d23e3c5084b0fcf` passou no CI `34471773663` e no GitHub Pages `34471814790`. A documentação final dessa fase foi integrada posteriormente em `main`, cujo SHA de partida para a Parte 2 é `e16c35c3a4e52dead57deccdde9630a89a4af998`.
+A Parte 2 foi integrada em `main` através do PR #68, com commit de merge `c8ec45893c8936093ecd7c7da9ee08c9a268109c`. A revisão `75-pages1` está portanto na baseline desta fase. A documentação da Parte 2 ainda continha frases de estado de branch/candidata; esta revisão corrige essa divergência documental.
 
-## Parte 2 — auditoria e melhoria de Início, Despesas e Planeamento
+## Objetivo atual
 
-### Factos encontrados
+Criar uma fundação reutilizável para **fontes, ícones, animações e carregamento de assets** que possa orientar a Conta de Casa e as outras aplicações do projeto Móvel e Computador sem introduzir dependências externas indiscriminadas.
 
-1. **Início** já usa composição v74/v75 com resumo do mês, orçamento, ações rápidas e categorias; no móvel as grelhas antigas são ocultadas para evitar duplicação.
-2. **Despesas** tinha uma divergência de usabilidade importante no móvel: a composição v74 escondia a navegação Lista/Calendário, `bill-filter-grid`, `billSummary` e `billsList`, substituindo a vista funcional por `cdcExpenseFeed` simplificado.
-3. O feed simplificado de Despesas suporta pesquisa e separação Todas/Entradas/Saídas, mas não expõe no móvel os filtros funcionais já existentes de estado, categoria, intervalo de datas e ordenação, nem a mesma riqueza de vencimento, progresso e ações dos cartões de fatura reais.
-4. **Planeamento** já apresenta resumo de orçamento e categorias, seguido do formulário de saldo/orçamento e da lista de rendimentos; precisava sobretudo de melhorar hierarquia, densidade e empilhamento em mobile.
-5. O sistema de ícones Lucide local já cobre as ações principais destas páginas; não é necessário introduzir nova dependência de ícones nesta fase.
+## Factos encontrados
 
-## `75-pages1` implementada na branch
+1. A Conta de Casa já possui um sistema principal de ícones: **Lucide SVG local**, via `ui-icons.js`/`ui-icons.css`, com licença distribuída em `LUCIDE_LICENSE.txt`.
+2. A tipografia atual está centralizada em `--cdc-font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif`.
+3. A CSP atual mantém `font-src 'self'`; ativar Google Fonts, Adobe Fonts, kits Font Awesome ou outras CDNs exigiria expandir política de rede e prejudicaria o modelo offline-first.
+4. Lottie, Google Fonts, Fontshare, Font Squirrel, DaFont, UNCUT.wtf, Adobe Fonts, MyFonts, Fontpair, Fontjoy, Font Awesome e Material Symbols não têm o mesmo modelo de licença/integração. Estar num catálogo não equivale a autorização para copiar ou incorporar ficheiros.
+5. **Type Icons Font** foi classificada como restrita até existir licença compatível; **Free Icon Font Proyectos** permanece não verificada porque o nome fornecido não identifica uma origem oficial inequívoca.
+6. O Mercado já tem um loader especializado (`75-photo-loader3`) associado a PID, fontes oficiais, cache de imagens e IndexedDB. Um loader genérico não pode substituir essa lógica.
 
-Foi criada `v75-pages.css`, uma camada exclusivamente visual, carregada depois de arquitetura/drawer e antes de `v75-usability.css`.
+## `75-assets1` implementada na branch
 
-### Início
+### Catálogo e política
 
-- reforça a hierarquia mês → resumo → ações rápidas → categorias;
-- melhora contraste estrutural do resumo sem alterar valores;
-- uniformiza feedback de toque/hover;
-- torna alertas móveis mais compactos e legíveis;
-- mantém as grelhas legadas ocultas no móvel para evitar informação duplicada.
+Foi adicionado `design-asset-library.js`, que expõe `CDCDesignAssetLibrary` e regista os fornecedores indicados com estado, categoria, origem, integração e regra de licença.
 
-### Despesas
+Critérios principais:
 
-- restaura no móvel a navegação funcional **Lista / Calendário**;
-- deixa de usar o `cdcExpenseFeed` simplificado como vista principal;
-- volta a apresentar `bill-filter-grid`, `billSummary` e `billsList` no móvel;
-- torna acessíveis filtros de estado, categoria, datas e ordenação já suportados por `renderBills()`/`filterBills()`;
-- mantém pesquisa funcional e FAB de nova despesa;
-- melhora cartões móveis: hierarquia de valor em falta, vencimento, total/pago/categoria, progresso e ações;
-- não altera `render.js`, filtros, cálculos ou handlers.
+- Lucide local continua a ser o sistema principal de ícones da Conta de Casa;
+- preferir uma família tipográfica; máximo de duas por aplicação;
+- fontes e runtimes externos não são carregados automaticamente;
+- origem e licença devem ser verificadas antes de incorporar ficheiros;
+- preservar CSP e funcionamento offline/PWA;
+- animações devem respeitar `prefers-reduced-motion` e possuir fallback;
+- ícones funcionais necessitam nome acessível; decorativos usam `aria-hidden`.
 
-### Planeamento
+### Carregamento transversal
 
-- melhora o resumo de orçamento e métricas;
-- empilha formulário e rendimentos em mobile;
-- reforça leitura de saldo atual, saldo calculado e diferença de conciliação;
-- melhora densidade de categorias e lista de rendimentos;
-- não altera fórmulas, saldos, orçamento ou rendimentos.
+Foram adicionados `asset-loader.js` e `asset-loader.css`.
 
-## Distribuição e QA
+O loader é **opt-in** e suporta:
 
-- `scripts/prepare-pages.cjs` inclui `v75-pages.css?v=75-pages1`;
-- `sw.js` inclui o ativo e invalida o cache com sufixo `pages1`;
-- `tests/v75-stability.test.cjs` verifica visibilidade funcional de Despesas no móvel, empilhamento de Planeamento, distribuição e isolamento da camada;
-- `v75-usability.css` continua a ser a camada final de interação, preservando anti-zoom e alvos tácteis.
+- imagens com `loading="lazy"`, `decoding="async"`, prioridade explícita e pré-carregamento por `IntersectionObserver`;
+- estados `loading`, `ready`, `error` e fallback visual;
+- vídeo/áudio com `preload="metadata"` por defeito e sem autoplay automático;
+- Lottie apenas com JSON local e runtime `window.lottie` previamente aprovado/local;
+- fallback estático quando `prefers-reduced-motion` está ativo;
+- URLs same-origin por defeito, sem injeção de `<script>` remoto.
+
+O loader transversal não seleciona fotos de produtos, não altera PID e não interfere com `market-photo-loader.js`.
+
+### Distribuição e QA
+
+- `scripts/prepare-pages.cjs` inclui `asset-loader.css`, `design-asset-library.js` e `asset-loader.js`, revisionados como `75-assets1`;
+- `sw.js` inclui os três ativos e usa sufixo de cache `assets1`;
+- `tests/design-asset-library.test.cjs` valida catálogo, gate de licenças, CSP, URL policy, loader, build `dist/` e isolamento financeiro/criptográfico;
+- CI e Pages passam a executar/verificar estes ficheiros e o novo teste.
 
 ## Segurança
 
-`75-pages1` é CSS puro. Não acede a `appState`, IndexedDB, PIN, PBKDF2, AES-GCM, sincronização, tokens, QR, scanner, pagamentos, preços ou funções de persistência. A mudança de Despesas apenas volta a tornar visível a UI funcional já existente.
+`75-assets1` não altera `core.js`, `finance.js`, IndexedDB financeiro, PIN, PBKDF2, AES-GCM, sincronização, pagamentos, QR ou scanner. Não expande CSP, não adiciona tokens/kits e não faz pedidos a fornecedores apenas porque estes constam do catálogo.
 
 ## Estado da integração
 
-A implementação está na branch `fix/v75-pages-part2`. Só deve ser integrada em `main` depois de CI completo verde, comparação `behind 0`, revisão do PR e confirmação posterior de CI/Pages no SHA publicado.
+A implementação está na branch `feat/v75-design-asset-library`. Só deve ser integrada em `main` depois de CI completo verde, comparação sem commits em falta relativamente a `main`, revisão do PR e confirmação posterior do CI/Pages no SHA publicado.
 
-## Próximo passo após publicação
+## Próximo passo funcional
 
-Parte 3: auditoria de **Mercado**, com foco em pesquisa, filtros, catálogo, cartões, imagens, estados de carregamento e fluxo de compra, preservando a separação entre estimativa e valor confirmado.
+Depois da integração de `75-assets1`, retomar a Parte 3: auditoria de **Mercado**, usando a nova fundação apenas para estados genéricos onde for apropriado e preservando `75-photo-loader3`, identidade `marketId|pid`, fontes oficiais e separação entre estimativa e valor confirmado.
