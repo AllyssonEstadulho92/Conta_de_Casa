@@ -3,6 +3,7 @@
 Atualizado: 10 de setembro de 2026
 Build: `v75`
 Distribuição: GitHub Pages / PWA
+Revisão UX candidata: `75-usability1`
 
 ## 1. Invariantes
 
@@ -23,69 +24,84 @@ A aplicação é PWA estática/local-first. Estado financeiro, apresentação, M
 - `render.js`, `forms.js`, `events.js`: UI funcional;
 - `sync.js` + `sync-conflict-policy.js`: sincronização cifrada e conflitos.
 
-A revisão atual não altera `core.js`, `finance.js`, pagamentos, faturas, QR, scanner, quantidades ou valores financeiros.
+As revisões visuais não alteram `core.js`, `finance.js`, pagamentos, faturas, QR, scanner, quantidades ou valores financeiros.
 
-## 3. Arranque e PIN
+## 3. Composição da interface
 
-Fluxo base:
+O HTML de raiz funciona como template funcional. A distribuição pública é preparada por `scripts/prepare-pages.cjs`, que copia apenas os ativos permitidos para `dist/`, ajusta o build e injeta as camadas visuais/runtime da versão publicada.
 
-`PIN → unlockVault() → enterApp() → syncStartupGate() → shell`
+Ordem conceptual das camadas atuais:
 
-Até `75-startup1`, `syncStartupGate()` podia bloquear a apresentação do shell enquanto verificava o GitHub, mesmo quando o dispositivo já tinha uma cópia local cifrada previamente confirmada.
+1. base: `styles.css`, `design-system.css`, `mobile-layout.css`;
+2. experiência v74 e componentes específicos;
+3. arquitetura v75: `v75-architecture.css/js`;
+4. refinamentos de cabeçalho, estabilidade, proporção e drawer;
+5. `v75-usability.css` como última camada transversal de interação;
+6. componentes específicos do Mercado e runtimes que não modificam o núcleo financeiro.
 
-`v75-startup-guard.js` passa a revisão `75-startup2` e instala uma otimização estritamente para dispositivos emparelhados:
+A existência de nomenclaturas/estilos de fallback na base é deliberadamente tolerada enquanto a camada v75 estiver ativa. Consolidação física só deve remover código depois de confirmar ausência de referências e regressões.
 
-1. confirma que sincronização está ativa;
-2. confirma que existe `pairedAt` e `lastRemoteSha`;
-3. confirma que a credencial local existe e que o dispositivo está online;
-4. apresenta imediatamente a cópia local já decifrada pelo PIN;
-5. inicia `syncNow('startup-background')` sem bloquear a UI.
+## 4. Arquitetura de informação v75
 
-Para primeiro emparelhamento, ausência de token ou estados não confirmados, o `syncStartupGate()` original continua a decidir. A política de conflitos não é alterada.
+Navegação mobile principal:
 
-A mesma camada conserva a proteção visual contra o estado em que `#vaultScreen` e `#app` estariam simultaneamente ocultos.
+`Início → Despesas → Mercado → Planeamento → Mais`
 
-## 4. Mercado — identidade
+O drawer/desktop acrescenta Relatórios, Metas, Segurança e Diagnóstico. `v75-architecture.js` mantém a correspondência entre páginas internas e os respetivos pais de navegação, incluindo Calendário em Despesas, Metas em Planeamento e Segurança/Diagnóstico em Mais.
+
+A página **Mais** funciona como hub de organização, conta/dados e aplicação, sem duplicar estado financeiro.
+
+## 5. Ícones
+
+A linguagem visual oficial é Lucide local através de `ui-icons.js` e `ui-icons.css`.
+
+- sem CDN ou web font;
+- `viewBox 24×24`, `currentColor`, dimensões explícitas;
+- SVGs e glifos existentes no HTML/base funcionam como fallback antes da hidratação;
+- a hidratação normaliza marca, navegação, pesquisa, selects, bloqueio, privacidade, tema, alertas, ações e diálogos.
+
+A dívida técnica restante é reduzir fallbacks duplicados numa fase de consolidação, não substituí-los de forma agressiva durante a auditoria funcional.
+
+## 6. Interação mobile e anti-zoom — `75-usability1`
+
+A política adotada distingue dois comportamentos:
+
+- **auto-zoom de foco do Safari/iOS**: evitado com controlos de formulário a pelo menos `16px` em mobile;
+- **zoom acidental por duplo toque em controlos**: reduzido com `touch-action: manipulation` nos elementos interativos.
+
+Não é usado `user-scalable=no` nem `maximum-scale=1`. O pinch-to-zoom permanece disponível para acessibilidade.
+
+Alvos tácteis usam referência mínima de 44 px e, nos controlos densos de Despesas/Mercado, 48 px quando aplicável.
+
+## 7. Cofre e PIN
+
+Fluxo funcional:
+
+`PIN → unlockVault() → enterApp() → sincronização conforme estado → shell`
+
+`75-startup2` permite que um dispositivo previamente emparelhado apresente a cópia local já decifrada sem aguardar a rede e inicia `syncNow('startup-background')` em segundo plano. Primeiro emparelhamento e estados não confirmados conservam o gate original.
+
+A camada `75-usability1` não toca em derivação de chave nem validação do PIN. Em mobile reforça apenas:
+
+- viewport dinâmico `100dvh`;
+- safe areas;
+- scroll controlado quando o teclado reduz a área útil;
+- cartão de cofre responsivo;
+- alvos tácteis do teclado/ações.
+
+## 8. Mercado — identidade e imagens
 
 Produtos continuam identificados por `marketId|pid`. Fotografias oficiais não representam preço nem transação.
 
 - `market-image-library.js`: cache partilhado de URL oficial validado;
-- `market-visual-catalog.js`: índice progressivo + renderer incremental interno `75-catalog3`;
-- `pingo-doce-photo-library.js`: inventário dedicado Pingo Doce `75-pd-photo1`;
-- `market-catalog-image-resolver.js`: resolvedor exato distribuído como `75-catalog4`;
+- `market-visual-catalog.js`: índice progressivo + renderer incremental;
+- `pingo-doce-photo-library.js`: inventário dedicado Pingo Doce;
+- `market-catalog-image-resolver.js`: resolvedor exato `75-catalog4`;
 - `market-photo-loader.js`: hidratação prioritária `75-photo-loader3`.
 
-## 5. Resolução oficial `75-catalog4`
+Para um cartão com `sourceUrl` oficial exata, a tentativa direta é limitada e não repete o bridge legado. O loader usa estados carregar → validar → **Sem fotografia** e mantém o SKU mesmo sem imagem.
 
-Para um cartão do catálogo com `sourceUrl` oficial:
-
-1. `safeProductUrl()` valida HTTPS, retalhista, path e PID;
-2. `r.jina.ai` lê apenas a página oficial exata;
-3. URLs candidatas são extraídas;
-4. `safeOfficialImageUrl()` valida host/path/PID;
-5. a melhor referência é devolvida para a biblioteca partilhada.
-
-Limites: 8 s por leitura; máximo 2 operações simultâneas.
-
-Mudança de `75-catalog4`: uma tentativa direta sem resultado termina nesse ponto. Não volta ao bridge legado para repetir pesquisa Cesta, leitura da mesma página e preflight. O bridge legado permanece disponível apenas para resultados sem `sourceUrl` exato, como pesquisa livre.
-
-## 6. Loader `75-photo-loader3`
-
-O loader trabalha apenas quando `#page-market.page.active`.
-
-Estados visuais:
-
-- 0–7 s: **A carregar fotografia…**;
-- 7–12 s: **A validar fotografia…**;
-- após 12 s sem fotografia: **Sem fotografia** estável.
-
-Um estado terminal não é equivalente a “SKU sem imagem para sempre”; significa apenas que a tentativa atual terminou. O retry automático usa cooldown de 5 min, e atualização explícita/nova navegação pode antecipar nova tentativa.
-
-Prioridade: até 8 cartões, procurando equilíbrio entre Pingo Doce e Continente antes de preencher vagas restantes.
-
-Quando uma fotografia Pingo Doce existe no cache partilhado ou é resolvida com sucesso, o loader atualiza também o registo correspondente da base `conta-de-casa-pingo-doce-photo-library` para `imageState='ready'`. Isso alinha o contador dedicado com o estado técnico efetivamente comprovado.
-
-## 7. Bases de imagens
+## 9. Bases de imagens
 
 ### Partilhada
 
@@ -95,7 +111,7 @@ Store: `images`
 
 Chave: `marketId|pid`
 
-Guarda apenas URL oficial validado, página oficial, nome/embalagem técnicos e timestamps. TTL positivo: 45 dias.
+Guarda apenas URL oficial validado, página oficial, nome/embalagem técnicos e timestamps.
 
 ### Pingo Doce
 
@@ -105,39 +121,25 @@ Store principal: `products`
 
 Estados: `pending | ready | missing`.
 
-O contador “fotografias oficiais” conta apenas `ready`, não o total de imagens existentes na biblioteca partilhada.
+## 10. Segurança
 
-## 8. Fonte e validação
+As camadas visuais/imagens não podem manipular `appState`, `saveState()`, `commit()`, `estimatedCents`, `actualCents`, `amountCents`, PIN, passwords ou tokens salvo nos módulos funcionais já responsáveis por esses dados.
 
-A sonda real de CI testa:
+`75-usability1` é CSS puro e não introduz scripts, rede, armazenamento, segredos ou origens CSP.
 
-- disponibilidade de `cesta.pt` para Continente e Pingo Doce;
-- resposta CORS do reader para o origin GitHub Pages;
-- presença de imagem exata;
-- compatibilidade da mesma URL com o validador usado pelo runtime.
+## 11. Distribuição e cache
 
-No diagnóstico de 10/09/2026, o Pingo Doce conhecido `pid 739490` foi aceite com `runtime-safe=true`, excluindo uma rejeição universal do formato atual das URLs Pingo Doce como explicação para o contador zero.
+O gerador Pages inclui `v75-usability.css?v=75-usability1` no final das camadas visuais transversais. O Service Worker inclui o mesmo ativo na allowlist e usa cache revisionado com `usability1`, garantindo invalidação do cache anterior após publicação.
 
-## 9. Segurança
+## 12. QA
 
-As camadas de imagem não podem manipular `appState`, `saveState()`, `commit()`, `estimatedCents`, `actualCents`, `amountCents`, PIN, passwords ou tokens.
+O teste `tests/v75-stability.test.cjs` valida também:
 
-A otimização do arranque pode consultar apenas metadados de sincronização e iniciar a mesma sincronização cifrada já existente; não reduz PBKDF2, não altera AES-GCM e não apresenta dados sem o PIN ter decifrado o cofre local.
+- `touch-action: manipulation`;
+- `16px` nos controlos mobile;
+- ausência de `maximum-scale`/`user-scalable=no` no viewport;
+- safe areas/`100dvh` do cofre;
+- inclusão no bundle de Pages e no Service Worker;
+- isolamento da camada de usabilidade relativamente a estado financeiro/criptografia.
 
-## 10. Distribuição candidata
-
-Cache candidato:
-
-`conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog4-pd-photo1-photo-loader3-startup2`
-
-Revisões novas:
-
-- startup: `75-startup2`;
-- catálogo/resolvedor de distribuição: `75-catalog4`;
-- loader: `75-photo-loader3`.
-
-Renderer incremental do catálogo continua internamente `75-catalog3`.
-
-## 11. QA
-
-Branch CI `34445844039`: sucesso completo. A validação em hardware continua necessária porque os sintomas reportados são dependentes de Safari/PWA, rede e IndexedDB local.
+A validação em hardware continua necessária para Safari/PWA e Android/Chrome.
