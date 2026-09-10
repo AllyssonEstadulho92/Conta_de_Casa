@@ -15,7 +15,7 @@ Atualizado: 10 de setembro de 2026
 - [x] Dar estado terminal estável às fotografias (`75-photo-loader3`).
 - [x] Reconciliar fotografias Pingo Doce com a base dedicada.
 - [x] Remover resolução redundante quando existe `sourceUrl` oficial exata (`75-catalog4`).
-- [x] Confirmar que `fix/v75-pin-images-stability` estava integralmente contida em `main` antes da auditoria atual.
+- [x] Publicar `75-usability1` com anti-zoom, alvos tácteis e reforço do cofre.
 
 ## P0 — Auditoria UX/UI solicitada
 
@@ -29,34 +29,60 @@ Atualizado: 10 de setembro de 2026
 
 ## P0 — Parte 1 `75-usability1`
 
-- [x] Criar `v75-usability.css` como camada isolada.
+- [x] Implementar e integrar `v75-usability.css`.
 - [x] Aplicar `touch-action: manipulation` aos controlos interativos.
-- [x] Reforçar `font-size:16px` nos controlos de formulário mobile.
-- [x] Reforçar alvo táctil mínimo de 44 px.
-- [x] Reforçar 48 px nas barras/filtros densos de Despesas e Mercado.
-- [x] Melhorar viewport/safe areas/scroll do cofre mobile sem alterar o PIN.
+- [x] Reforçar `font-size:16px` em formulários mobile.
+- [x] Reforçar alvos tácteis de 44/48 px.
+- [x] Melhorar viewport/safe areas/scroll do cofre mobile.
 - [x] Manter pinch-to-zoom e acessibilidade.
-- [x] Incluir `v75-usability.css` no gerador de Pages.
-- [x] Incluir `v75-usability.css` no Service Worker e invalidar cache com `usability1`.
-- [x] Ampliar `tests/v75-stability.test.cjs` com regressões anti-zoom/distribuição.
-- [x] Atualizar documentação técnica.
-- [x] Confirmar CI verde da branch — run `34471692881`.
-- [x] Abrir/rever PR `#66` para `main`.
-- [x] Integrar apenas após CI verde.
-- [x] Confirmar CI de `main` — run `34471773663`, sucesso.
-- [x] Confirmar GitHub Pages no mesmo SHA `c352c1883c16fd7df92aa0f26d23e3c5084b0fcf` — run `34471814790`, sucesso.
+- [x] Publicar no GitHub Pages com CI verde.
 - [ ] Validar fisicamente no iPhone/Safari/PWA que tocar em inputs/botões não provoca auto-zoom/duplo-toque involuntário.
 
-## P1 — Parte 2: Início + Despesas + Planeamento
+## P1 — Parte 2 `75-pages1`: Início + Despesas + Planeamento
 
-- [ ] Rever hierarquia de informação e densidade dos cartões no Início.
-- [ ] Garantir que ações rápidas têm rótulo, ícone e feedback coerentes.
-- [ ] Rever estados vazio, erro e carregamento relevantes.
-- [ ] Rever Despesas: pesquisa, filtros, ordenação, datas, ações e cartões mobile.
-- [ ] Reduzir ruído visual sem remover filtros funcionais.
-- [ ] Rever Planeamento: orçamento, saldo atual, saldo inicial, rendimentos e metas.
-- [ ] Garantir consistência entre valores apresentados e dados já calculados pelo núcleo, sem alterar fórmulas.
-- [ ] Testar 320/375/390/430 px, tablet e desktop.
+### Início
+
+- [x] Rever hierarquia de informação e densidade dos cartões.
+- [x] Melhorar relação mês → resumo → ações rápidas → categorias.
+- [x] Uniformizar feedback de toque/hover sem alterar handlers.
+- [x] Melhorar apresentação de alertas móveis.
+- [x] Manter grelhas legadas ocultas no móvel para evitar duplicação.
+
+### Despesas
+
+- [x] Confirmar que `renderBills()`/`filterBills()` já suportam pesquisa, estado, categoria, datas e ordenação.
+- [x] Identificar que a composição v74 escondia a vista funcional canónica no móvel.
+- [x] Restaurar Lista/Calendário em mobile.
+- [x] Restaurar `bill-filter-grid` em mobile.
+- [x] Restaurar `billSummary` e `billsList` em mobile.
+- [x] Usar cartões móveis já produzidos pelo renderer principal.
+- [x] Ocultar o feed simplificado `cdcExpenseFeed` como vista principal móvel.
+- [x] Preservar FAB de nova despesa, pesquisa, vencimentos, progresso e ações existentes.
+- [x] Não alterar `render.js`, filtros, pagamentos ou cálculos.
+
+### Planeamento
+
+- [x] Rever resumo de orçamento, categorias, formulário e rendimentos.
+- [x] Melhorar hierarquia e densidade do resumo.
+- [x] Empilhar os painéis funcionais em mobile.
+- [x] Melhorar leitura de saldo atual, saldo calculado e diferença de conciliação.
+- [x] Melhorar lista de rendimentos sem alterar dados.
+- [x] Preservar fórmulas e valores do núcleo.
+
+### Distribuição/QA
+
+- [x] Criar `v75-pages.css` revisão `75-pages1`.
+- [x] Incluir `v75-pages.css` no gerador de Pages.
+- [x] Incluir `v75-pages.css` no Service Worker e invalidar cache com `pages1`.
+- [x] Manter `v75-usability.css` carregado depois de `v75-pages.css`.
+- [x] Ampliar `tests/v75-stability.test.cjs` com regressões da Parte 2.
+- [x] Atualizar documentação técnica da branch.
+- [ ] Confirmar CI verde da branch.
+- [ ] Confirmar branch `behind 0` relativamente a `main` antes de integrar.
+- [ ] Abrir/rever PR para `main`.
+- [ ] Integrar apenas com CI verde.
+- [ ] Confirmar CI de `main` e GitHub Pages no SHA publicado.
+- [ ] Validar fisicamente 320/375/390/430 px, tablet e desktop quando disponível.
 
 ## P1 — Parte 3: Mercado
 
