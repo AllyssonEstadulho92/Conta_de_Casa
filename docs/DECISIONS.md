@@ -17,6 +17,7 @@ Este ficheiro mantém as decisões vigentes necessárias para continuidade. O hi
 - Releases públicas relevantes usam revisão/cache invalidável.
 - A ampliação manual do browser permanece disponível; correções de zoom acidental não podem usar `user-scalable=no` ou `maximum-scale=1`.
 - A UI móvel não deve esconder funcionalidades canónicas que existam e estejam operacionais no renderer principal sem uma substituição funcional equivalente.
+- Um catálogo de fontes/ícones/animações não equivale a uma lista de dependências autorizadas; cada asset precisa de origem, licença e integração aprovadas.
 
 ## D-046 a D-055 — decisões preservadas
 
@@ -80,7 +81,7 @@ Data: 10 de setembro de 2026. Estado: integrado em `main` como `75-usability1`.
 
 ## D-061 — Despesas no móvel deve usar a vista funcional canónica
 
-Data: 10 de setembro de 2026. Estado: aceite na branch `fix/v75-pages-part2`.
+Data: 10 de setembro de 2026. Estado: integrado em `main` como `75-pages1` pelo PR #68, merge `c8ec45893c8936093ecd7c7da9ee08c9a268109c`.
 
 ### Factos
 
@@ -107,6 +108,39 @@ Uma camada de apresentação não deve esconder capacidades funcionais já imple
 
 `75-pages1` é CSS puro. Não lê/escreve estado, não altera PIN/criptografia, não acede à rede e não introduz dependências externas.
 
+## D-062 — Catálogo de design local-first com gate de licença e loader opt-in
+
+Data: 10 de setembro de 2026. Estado: aceite na branch `feat/v75-design-asset-library` como `75-assets1`.
+
+### Factos
+
+- A Conta de Casa já dispõe de Lucide SVG local como sistema principal de ícones.
+- A CSP mantém `font-src 'self'` e a PWA depende de um bundle explícito/offline.
+- Os fornecedores indicados pelo utilizador usam regimes de licença e integração diferentes; alguns são apenas ferramentas de descoberta/emparelhamento e outros exigem licença específica por canal.
+- O Mercado já possui um carregador especializado de fotografias, associado a `marketId|pid`, fontes oficiais e IndexedDB.
+
+### Decisão
+
+1. Criar `design-asset-library.js` como registo de fornecedores e política, sem iniciar pedidos de rede.
+2. Manter **Lucide local** como sistema principal de ícones da Conta de Casa.
+3. Preferir uma família tipográfica por aplicação e permitir no máximo duas, com licença e origem verificadas.
+4. Não carregar Google Fonts, Adobe Fonts, Font Awesome kits, Lottie ou outros runtimes/CDNs automaticamente.
+5. Tratar `Type Icons Font` como restrita até existir licença compatível e `Free Icon Font Proyectos` como não verificada até existir URL/origem oficial inequívoca.
+6. Criar `asset-loader.js`/`asset-loader.css` como fundação opt-in para imagens, media e Lottie local.
+7. Imagens genéricas devem usar lazy loading, async decode, prioridade explícita, estados de carregamento e fallback.
+8. Lottie deve exigir runtime local já aprovado, JSON local, estado de erro quando ausente e fallback para `prefers-reduced-motion`.
+9. O loader genérico não pode substituir `market-photo-loader.js` nem decidir fotografias/PID do Mercado.
+10. Não expandir CSP nesta revisão; qualquer futura origem externa requer decisão separada de segurança, privacidade, offline e licença.
+11. Incluir os ativos no Service Worker/Pages e validar a política por testes automatizados.
+
+### Fundamento
+
+Centralizar fornecedores sem centralizar o **critério** aumentaria inconsistência visual, risco de supply chain, problemas de licença e dependência de rede. Um registo declarativo com integração local-first permite reutilizar fontes/ícones/animações entre aplicações sem transformar cada catálogo externo numa dependência runtime.
+
+### Segurança
+
+`75-assets1` não referencia estado financeiro ou criptográfico, não injeta scripts externos, não adiciona tokens e mantém as origens CSP atuais. URLs externas de Lottie são bloqueadas pelo loader; recursos de imagem externos continuam sujeitos a autorização explícita e à CSP da aplicação.
+
 ## Evidência técnica
 
-A Parte 2 parte de `main` no SHA `e16c35c3a4e52dead57deccdde9630a89a4af998`. A integração só deve ocorrer após CI verde, comparação sem divergência e validação posterior do GitHub Pages.
+A revisão `75-assets1` parte de `main` no SHA `c8ec45893c8936093ecd7c7da9ee08c9a268109c`. A integração deve ocorrer apenas depois de CI verde, branch sincronizada com `main`, revisão do PR e validação posterior do GitHub Pages.
