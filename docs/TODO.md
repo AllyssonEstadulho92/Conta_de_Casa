@@ -24,6 +24,7 @@ Atualizado: 10 de setembro de 2026
 - [x] Fundação TypeScript — PR #72.
 - [x] `76-veggie-menu1` — PR #74.
 - [x] `76-veggie-menu2` + `76-modern-ui1` — PR #76.
+- [x] `76-version-audit1` — PR #78.
 
 ## P0 — `76-version-audit1`
 
@@ -42,10 +43,10 @@ Atualizado: 10 de setembro de 2026
 - [x] Adicionar `v76-version-about.css` à distribuição/cache.
 - [x] Atualizar regressão em `tests/app-update.test.cjs`.
 - [x] CI final da branch `34539811658`: sucesso.
-- [ ] PR para `main`: CI + TypeScript strict verdes.
-- [ ] Integrar em `main`.
-- [ ] Confirmar CI + TypeScript de `main`.
-- [ ] Confirmar GitHub Pages.
+- [x] PR #78: CI `34540211775` + TypeScript strict `34540211764` — sucesso.
+- [x] Integrar em `main`: merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`.
+- [x] Confirmar `main`: CI `34540271547` + TypeScript `34540271567` — sucesso.
+- [x] Confirmar GitHub Pages `34540307404` — sucesso.
 - [ ] Validar fisicamente no iPhone/Safari/PWA o cartão de versão e a verificação manual.
 
 ### Riscos de governação
