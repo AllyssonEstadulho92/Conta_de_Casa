@@ -32,6 +32,7 @@ jobs:
           node --check forms.js
           node --check events.js
           node --check mobile-menu-toggle.js
+          node --check v76-veggie-menu.js
           node --check sync.js
           node --check sync-conflict-policy.js
           node --check market-experience.js
@@ -160,6 +161,9 @@ jobs:
 
       - name: Animated mobile menu tests
         run: node tests/mobile-menu-toggle.test.cjs
+
+      - name: v76 Veggie Burger TypeScript tests
+        run: node tests/v76-veggie-menu.test.cjs
 
       - name: Software update center tests
         run: node tests/app-update.test.cjs

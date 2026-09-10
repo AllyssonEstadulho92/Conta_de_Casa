@@ -2,14 +2,10 @@
 
 Atualizado: 10 de setembro de 2026  
 Build publicado: `v75`  
-Programa técnico em preparação: `v76` — migração incremental TypeScript  
+Programa técnico: `v76` — migração incremental TypeScript  
 Branch pública: `main`  
-Baseline funcional publicada: `c44348dbc5a942b601f360fa38793bd9d8b47a1a` (`75-market1`)  
-HEAD público atual: `2c1d78508507ab77d6df95850568d9fd7f6b9577` (fundação TypeScript integrada)  
-Branch visual em revisão: `feat/v75-expenses-modern-ui`  
-PR visual: `#73` — `75-expenses1`  
-Branch técnica reservada para o próximo bloco: `feat/v76-money-dates`  
-Distribuição atual: GitHub Pages / PWA
+Branch de trabalho atual: `feat/v76-typescript-veggie-menu`  
+Distribuição: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
 
@@ -20,139 +16,109 @@ Distribuição atual: GitHub Pages / PWA
 - `PBKDF2_ITERATIONS = 250000`;
 - sincronização GitHub opcional limitada ao envelope cifrado;
 - preço pesquisado no Mercado permanece `estimatedCents` e preço efetivamente confirmado permanece `actualCents`;
-- identidade canónica de catálogo/fotografia permanece `marketId|pid` onde esse pipeline é utilizado;
+- identidade canónica do catálogo/fotografia permanece `marketId|pid` onde esse pipeline é utilizado;
 - QR, scanner, backup/restauro, PWA, Service Worker e funcionamento offline não podem regredir por causa da migração TypeScript;
-- alterações exclusivamente visuais não podem modificar cálculos, pagamentos, faturas ou persistência.
+- alterações visuais não podem modificar cálculos, pagamentos, faturas, persistência ou segurança.
 
-## 2. Baseline v75 confirmada
+## 2. Estado integrado em `main`
 
-`75-market1` foi integrado pelo PR #71 no commit funcional `c44348dbc5a942b601f360fa38793bd9d8b47a1a`. O deploy GitHub Pages desse SHA concluiu com sucesso no run `34482133540`.
+### v75 funcional
 
-A revisão preserva:
+- `75-market1` integrado pelo PR #71;
+- `75-expenses1` integrado pelo PR #73 no commit funcional `176450fcb236a2272afb9d6a6983b42681aa705d`;
+- Despesas/Faturas tem pesquisa, filtros, resumo, tabela desktop e cartões mobile modernizados sem alterar o domínio financeiro;
+- após a integração de `75-expenses1`, CI `34496500755`, TypeScript `34496500641` e Pages `34496540096` concluíram com sucesso.
 
-- `core.js` e `finance.js`;
-- PIN, PBKDF2 e AES-GCM;
-- IndexedDB financeiro;
-- scanner e QR;
-- `estimatedCents` separado de `actualCents`;
-- loader de fotografias `75-photo-loader3` e pipeline especializado por PID.
+### v76 Bloco 1
 
-Validação física em iPhone/Safari/PWA e breakpoints continua necessária para as revisões visuais v75.
-
-## 3. Objetivo v76
-
-Migrar o código funcional JavaScript para TypeScript por blocos pequenos, auditáveis e reversíveis, sem conversão massiva e sem trocar simultaneamente framework, UI e regras de negócio.
-
-A meta final é:
-
-- fonte funcional mantida em TypeScript;
-- `strict` ativo;
-- nenhum `any` não justificado;
-- JavaScript gerado apenas no build para execução no browser;
-- paridade de resultados com a baseline antes de cada substituição de runtime;
-- testes automáticos preservados e ampliados.
-
-O plano completo está em `docs/TYPESCRIPT_MIGRATION.md`.
-
-## 4. Bloco 1 — fundação TypeScript
-
-Integrado em `main` pelo PR #72 no commit `2c1d78508507ab77d6df95850568d9fd7f6b9577`, sem alteração de runtime funcional.
+A fundação TypeScript foi integrada pelo PR #72 no commit `2c1d78508507ab77d6df95850568d9fd7f6b9577`.
 
 Inclui:
 
-- `package.json` com ferramenta TypeScript de desenvolvimento;
-- `tsconfig.json` em modo `strict`, `noEmit`, `strictNullChecks`, `noUncheckedIndexedAccess` e `exactOptionalPropertyTypes`;
-- `.gitignore` preparado para `node_modules` e artefactos TypeScript;
-- `src/types/primitives.ts` com tipos nominais para cêntimos, IDs, datas/horas e códigos de produto;
-- `src/types/persisted-state.ts` a representar o schema normalizado atual `STATE_VERSION = 5` observado em `core.js`;
-- `src/types/market.ts` com contratos do browser de Mercado atual e separação estimado/confirmado;
-- `src/type-tests/contracts.ts` com verificações positivas e `@ts-expect-error` para regressões estruturais;
-- workflow `.github/workflows/typescript.yml` para `npm run typecheck`.
+- `package.json` com TypeScript apenas como ferramenta de desenvolvimento;
+- `tsconfig.json` com `strict`, `strictNullChecks`, `noUncheckedIndexedAccess` e `exactOptionalPropertyTypes`;
+- contratos em `src/types/` para valores, estado persistido e Mercado;
+- `src/type-tests/contracts.ts`;
+- workflow `.github/workflows/typescript.yml`.
 
-O bundle público continua a usar `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js` e os restantes módulos JavaScript existentes. Os `.ts` do Bloco 1 não entram no bundle Pages.
+O browser continua a receber JavaScript. A migração é feita por blocos e cada runtime novo só pode entrar depois de validação TypeScript + regressão.
 
-QA após integração:
+## 3. Bloco atual — Veggie Burger TypeScript
 
-- TypeScript Foundation `34485922921`: sucesso;
-- CI `34485922896`: sucesso;
-- GitHub Pages `34485986996`: sucesso.
+Objetivo solicitado: substituir visualmente o hambúrguer de três linhas por **Veggie Burger de duas linhas**, fazendo as mesmas duas barras convergirem e rodarem para formar o **X**, sem duplicar controlos e sem desaparecer durante o gesto lateral.
 
-## 5. Factos técnicos encontrados durante o mapeamento
+### Factos encontrados antes da alteração
 
-1. `core.js` normaliza explicitamente faturas, pagamentos, rendimentos, artigos de Mercado, objetivos, atividade, auditoria, definições, conflitos e tombstones antes de produzir o estado v5.
-2. O artigo de Mercado persistido atual contém `id`, `name`, `category`, `quantity`, `unit`, `estimatedCents`, `actualCents`, `purchased`, `productCode`, dados de imagem e timestamps.
-3. O browser live atual pesquisa apenas Pingo Doce e Continente através de `cesta.pt` e pode enriquecer resultados com imagens Open Food Facts.
-4. O parser live extrai um `pid` da resposta Cesta para compor o `id` do resultado, mas esse `pid` não é atualmente exposto como propriedade própria do objeto de resultado nem persistido pelo fluxo `addProduct()` de `market-experience.js`. Isto deve ser revisto antes de unificar a identidade do browser live com a biblioteca canónica `marketId|pid`.
-5. A pesquisa de imagem do browser live é por termo e usa score de correspondência. É adequada como referência visual, mas não é prova forte de identidade do SKU. A futura biblioteca profissional deve preferir GTIN/PID e fontes verificadas.
+- `mobile-menu-toggle.js` v73 já controla abertura/fecho, swipe, foco e transferência do botão para o drawer;
+- o botão histórico `#drawerCloseBtn` já é ocultado pelo controlador para evitar um segundo X;
+- o controlador v73 coloca `#mobileMenuBtn` dentro de `.drawer-head`, que por sua vez está dentro de `.nav-drawer-shell`;
+- `.nav-drawer-shell` é a superfície transformada durante o swipe;
+- por isso, o mesmo botão também viajava com a superfície e podia desaparecer parcialmente enquanto o drawer era arrastado;
+- a `.topbar` já era `sticky` na base, mas a nova camada reforça explicitamente esta invariável no mobile.
 
-## 6. Precisão do Mercado
+### Implementação
 
-O objetivo de cálculo será equivalente às operações observáveis numa compra: quantidade, peso, preço unitário, promoções conhecidas, descontos elegíveis, IVA quando determinado pelos dados, subtotal, total estimado, total confirmado e reconciliação com talão/fatura.
+Criados:
 
-A aplicação só poderá chamar um total de **exato** quando SKU, quantidade/peso, preço válido, promoção/condição aplicável e restantes fatores que alteram o valor estiverem confirmados. Na ausência dessa evidência, continuará a mostrar `Estimativa`.
+- `src/ui/veggie-menu-toggle.ts` — fonte TypeScript estrita da nova camada;
+- `v76-veggie-menu.js` — runtime browser derivado da fonte TypeScript;
+- `v76-veggie-menu.css` — geometria, transição duas linhas → X, controlo overlay e acessibilidade;
+- `tests/v76-veggie-menu.test.cjs` — proteção de isolamento, publicação e regressão.
 
-A Conta de Casa não será tratada como terminal POS proprietário e não processará pagamentos bancários apenas para imitar a caixa do supermercado.
+Comportamento:
 
-## 7. Imagens e logos
+- fechado: duas linhas horizontais iguais (`Veggie Burger`);
+- aberto: linha superior roda `+45°` e inferior `-45°`, formando o X;
+- o mesmo `#mobileMenuBtn` continua a representar Abrir/Fechar e mantém `aria-expanded`/`aria-label` do controlador existente;
+- quando o dialog está aberto, a camada TypeScript reposiciona o mesmo botão como filho direto de `#mobileDrawer`, fora do `.nav-drawer-shell` transformado;
+- durante `data-dragging` e `data-closing`, o controlo permanece visível no top-layer do dialog;
+- `.drawer-head` reserva espaço à direita para não colidir com o botão;
+- `prefers-reduced-motion` elimina animações; `forced-colors` mantém contorno legível;
+- não existem chamadas a `commit()`, `saveState()` nem acesso a estado financeiro nesta camada.
 
-A biblioteca de imagens continuará progressiva e associada à identidade do produto. Fotografias não alteram preço nem SKU.
+## 4. Distribuição do bloco atual
 
-Logos SVG de supermercados só devem ser incorporados como assets locais depois de verificação da origem e direito de utilização. Não serão copiados de sites aleatórios, CDNs ou agregadores sem validação de licença/termos, CSP e privacidade.
+`scripts/prepare-pages.cjs` publica:
 
-## 8. Revisão visual atual — `75-expenses1`
+- `v76-veggie-menu.css?v=76-veggie-menu1`;
+- `v76-veggie-menu.js?v=76-veggie-menu1` depois do controlador `mobile-menu-toggle.js` validado.
 
-Objetivo: modernizar a página de Despesas/Faturas sem alterar o domínio financeiro.
+`sw.js` inclui ambos os assets e a revisão de cache termina em `veggie-menu1`.
 
-Factos confirmados antes da alteração:
+O build público continua identificado como `v75`; `76-veggie-menu1` é uma revisão incremental do programa de migração v76, não uma alteração do schema financeiro.
 
-- `#page-bills` já contém Lista/Calendário, pesquisa, Estado, Categoria, intervalo de datas, ordenação, resumo, tabela desktop e cartões mobile;
-- `renderBills()`/`filterBills()` já fornecem o comportamento funcional canónico;
-- as ações Abrir/Detalhes, Editar, Pagar e Excluir já são condicionadas ao estado da fatura;
-- não foi encontrado motivo funcional para alterar `finance.js`, `render.js`, `forms.js` ou `events.js` apenas para modernizar a apresentação.
+## 5. QA automatizado do bloco atual
 
-Implementação na branch `feat/v75-expenses-modern-ui`:
+No head funcional `95bdacab47b8b97d5f6cf61d52fc492b5a10ceca`:
 
-- `v75-expenses-modern.css`, revisão `75-expenses1`, limitado a `html.cdc-v75 #page-bills`;
-- Lista/Calendário refinados como controlo segmentado;
-- pesquisa + `Nova fatura` numa barra operacional moderna;
-- painel de filtros responsivo;
-- cartões de resumo com hierarquia reforçada;
-- tabela desktop com contentor, cabeçalho fixo e hover discreto;
-- cartões mobile com `Em falta` como foco e Total/Pago/Categoria, vencimento, estado, progresso e ações preservados;
-- breakpoints para desktop intermédio, `≤820px` e `≤430px`;
-- `prefers-reduced-motion` e `forced-colors` tratados;
-- `scripts/prepare-pages.cjs` e `sw.js` versionam/publicam `75-expenses1`;
-- `tests/v75-expenses-modern.test.cjs` adicionado ao CI e ao workflow Pages.
+- TypeScript Foundation run `34516585121`: **sucesso**;
+- CI run `34516585241`: **sucesso**;
+- `src/ui/veggie-menu-toggle.ts` passou `npm run typecheck` em modo strict;
+- `v76-veggie-menu.js` passou syntax check;
+- teste específico `v76 Veggie Burger TypeScript tests`: sucesso;
+- passaram igualmente finanças, auditoria, contagem, isolamento, datas, faturas, QR, Mercado, imagens, scanner, segurança, responsividade, navegação, acessibilidade, sincronização, PWA e manifest.
 
-## 9. QA de `75-expenses1`
+As alterações documentais posteriores criam novo head e exigem nova confirmação dos checks antes do merge.
 
-PR #73 aberto sobre `main`.
+## 6. Validação física ainda necessária
 
-No head anterior à preservação documental (`4013d05af84c4af2367c823a597ee42f41b8cb5a`):
+Após publicação em `main`, validar em iPhone/Safari/PWA:
 
-- CI push `34495698852`: sucesso;
-- CI do PR `34495879773`: sucesso, incluindo `v75 modern expenses UI tests` e todas as regressões financeiras, Mercado, segurança, sincronização, responsividade, acessibilidade e manifest;
-- TypeScript Foundation do PR `34495879840`: sucesso;
-- comparação com `main`: `behind 0` antes da atualização documental seguinte.
+- Veggie Burger fechado com exatamente duas linhas;
+- toque: transição suave para X e regresso ao Veggie Burger;
+- swipe de abertura e de fecho sem o controlo desaparecer;
+- X fixo no canto superior direito do drawer;
+- topbar permanece fixa durante scroll normal;
+- ausência de segundo X;
+- ausência de colisão entre botão, marca e título;
+- larguras 320/375/390/430 px e orientação vertical/horizontal;
+- tema claro/escuro e `prefers-reduced-motion`.
 
-Como a preservação documental gera novo head, os checks devem voltar a concluir com sucesso antes do merge.
+## 7. Próximo passo
 
-## 10. Validação física pendente
-
-- iPhone/Safari/PWA;
-- 320/375/390/430 px;
-- tablet;
-- desktop;
-- tema claro e escuro;
-- pesquisa, filtros, limpar filtros e Lista ↔ Calendário;
-- Abrir/Detalhes, Editar, Pagar e Excluir quando permitido;
-- muitas faturas e textos longos.
-
-## 11. Próximo passo
-
-1. confirmar CI + TypeScript no head documental final do PR #73;
-2. confirmar `behind 0`;
-3. integrar `75-expenses1` apenas com checks verdes;
-4. confirmar CI e GitHub Pages no SHA integrado;
-5. validar fisicamente Despesas;
-6. retomar `feat/v76-money-dates` para o Bloco 2 com testes de paridade JS→TS antes de substituir runtime.
+1. confirmar novamente CI + TypeScript no head documental final;
+2. comparar a branch com `main` e confirmar `behind 0`;
+3. abrir PR e integrar apenas com checks verdes;
+4. confirmar CI + TypeScript + GitHub Pages no SHA integrado;
+5. validar fisicamente o menu no iPhone através de captura real;
+6. depois retomar o Bloco 2 v76 — dinheiro, quantidades e datas — com paridade JS → TS antes de substituir runtime financeiro.

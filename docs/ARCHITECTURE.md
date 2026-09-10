@@ -2,260 +2,121 @@
 
 Atualizado: 10 de setembro de 2026  
 Build publicado: `v75`  
-Programa técnico em preparação: `v76` — TypeScript  
+Programa técnico: `v76` — migração incremental TypeScript  
 Distribuição: GitHub Pages / PWA
 
-Revisões integradas: `75-usability1`, `75-pages1`, `75-assets1`, `75-startup2`, `75-catalog4`, `75-photo-loader3`, `75-market1`. Revisão visual em PR: `75-expenses1`.
+Revisões integradas em `main`: `75-startup2`, `75-photo-loader3`, `75-catalog4`, `75-usability1`, `75-pages1`, `75-assets1`, `75-market1`, `75-expenses1` e fundação TypeScript. Revisão em desenvolvimento: `76-veggie-menu1`.
 
 ## 1. Invariantes
 
-A aplicação é PWA estática/local-first. Estado financeiro, apresentação, recursos visuais, Mercado e catálogos permanecem separados.
+A aplicação é PWA estática/local-first. Estado financeiro, apresentação, recursos visuais e catálogos permanecem separados.
 
-- `STATE_VERSION = 5`;
+- `STATE_VERSION = 5` enquanto não existir migração própria aprovada;
 - dinheiro em cêntimos inteiros;
 - estado financeiro em IndexedDB;
 - PBKDF2-SHA-256 + AES-GCM;
 - `PBKDF2_ITERATIONS = 250000`;
-- sync opcional apenas do envelope cifrado;
-- nenhuma password, token, chave ou kit ID no código público;
-- preço pesquisado do Mercado é estimativa; preço efetivamente pago é valor confirmado separado.
+- sincronização opcional apenas do envelope cifrado;
+- nenhuma password, token ou chave no código público;
+- preço pesquisado do Mercado é `estimatedCents`; preço confirmado permanece `actualCents`;
+- `marketId|pid` continua a identidade canónica do pipeline especializado de SKU/fotografia;
+- alterações visuais não podem modificar regras financeiras, segurança ou persistência.
 
 ## 2. Núcleo funcional atual
 
 - `core.js`: estado, normalização, IndexedDB, cifragem e backup;
 - `finance.js`: cálculos financeiros;
 - `render.js`, `forms.js`, `events.js`: UI funcional e mutações autorizadas;
-- `sync.js` + `sync-conflict-policy.js`: sincronização cifrada e conflitos.
+- `sync.js` + `sync-conflict-policy.js`: sincronização cifrada e conflitos;
+- `mobile-menu-toggle.js`: controlador móvel v73 já validado para abertura/fecho, gesto horizontal e foco;
+- `v75-architecture.js`: hierarquia e agrupamento da navegação;
+- `src/`: fundação e módulos que estão a migrar progressivamente para TypeScript.
 
-Camadas v75 de apresentação não podem alterar cálculos, pagamentos, faturas, QR, scanner, quantidades, preços, PIN ou derivação de chave.
+O browser continua a executar JavaScript; TypeScript é fonte verificada/compilada durante a transição.
 
-## 3. Composição e distribuição
+## 3. Build e composição pública
 
-`index.html` é o template. `scripts/prepare-pages.cjs` cria `dist/` a partir de allowlist explícita e injeta as revisões publicadas.
+`index.html` é o template. `scripts/prepare-pages.cjs` cria `dist/` a partir de allowlist explícita e injeta as revisões publicadas. O Service Worker mantém uma allowlist equivalente e uma revisão de cache invalidável.
 
-Ordem conceptual relevante:
+Ordem visual relevante no mobile:
 
-1. base: `styles.css`, `design-system.css`, `mobile-layout.css`;
-2. experiência e componentes v74;
-3. arquitetura/cabeçalho/estabilidade/layout/drawer v75;
-4. `v75-pages.css` — Início, Despesas e Planeamento;
-5. `v75-expenses-modern.css` — refinamento visual exclusivo de Despesas, quando `75-expenses1` estiver integrado;
-6. `asset-loader.css` — estados genéricos de assets;
-7. componentes especializados do Mercado, incluindo catálogo e `market-photo-loader.css/js`;
-8. `v75-market-flow.css` — refinamento de pesquisa, filtros e fluxo de compra;
-9. `v75-usability.css` — política final de interação/anti-zoom;
-10. runtimes de apresentação, com `v75-market-flow.js` depois de `v75-market-featured.js`.
+1. estilos base e responsive;
+2. `mobile-menu-toggle.css` — geometria/controller visual legado validado;
+3. arquitetura, cabeçalho, estabilidade, layout e drawer v75;
+4. `v75-pages.css` e `v75-expenses-modern.css`;
+5. `v76-veggie-menu.css` — override específico do Veggie Burger;
+6. componentes do Mercado;
+7. `v75-usability.css` como política final de interação.
 
-## 4. Navegação v75
+Ordem de runtime relevante:
+
+1. runtimes funcionais atuais;
+2. `mobile-menu-toggle.js` — controlador v73;
+3. `v76-veggie-menu.js` — enhancement derivado de TypeScript, carregado depois do controlador;
+4. runtimes v74/v75 de apresentação.
+
+A nova camada não substitui o controlador v73 antes de existir equivalência funcional comprovada.
+
+## 4. Navegação e hierarquia
 
 Mobile principal:
 
 `Início → Despesas → Mercado → Planeamento → Mais`
 
-Drawer/desktop acrescenta Relatórios, Metas, Segurança e Diagnóstico. `v75-architecture.js` mantém os pais de navegação.
+O drawer completo organiza as áreas por contexto, mantendo os destinos canónicos e sem duplicar rotas. Relatórios, metas, segurança, diagnóstico e preferências permanecem fluxos secundários. A hierarquia é produzida por `v75-architecture.js`; o Veggie Burger não altera os destinos.
 
-## 5. Início, Despesas e Planeamento
+## 5. Cabeçalho móvel
 
-`75-pages1` é apenas apresentação. Despesas usa a vista canónica de `renderBills()`/`filterBills()` também no mobile, com Lista/Calendário, filtros, resumo e cartões. Planeamento continua a usar `renderPlanning()` para saldo, orçamento, conciliação e rendimentos. Início continua a derivar métricas do núcleo existente.
+A `.topbar` é sticky no topo e a revisão `76-veggie-menu1` reforça no mobile:
 
-## 6. Tipografia e ícones
+- `position: sticky`;
+- `top: 0`;
+- z-index suficiente para permanecer acima do conteúdo normal;
+- largura e safe areas preservadas.
 
-Stack atual:
+O objetivo é que o cabeçalho não desapareça quando a página é percorrida. A validação final continua a exigir Safari/PWA real.
 
-`Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif`
+## 6. Veggie Burger TypeScript — `76-veggie-menu1`
 
-Política `75-assets1`:
+### Estrutura
 
-- preferir uma família tipográfica, máximo de duas;
-- licença/origem/formato verificados antes de incorporar;
-- self-host e WOFF2 quando permitido;
-- CSP não é expandida apenas para experimentar fontes.
+`src/ui/veggie-menu-toggle.ts` é a fonte TypeScript strict. O runtime browser publicado é `v76-veggie-menu.js`.
 
-Ícones principais: **Lucide SVG local** via `ui-icons.js`/`ui-icons.css`. Bibliotecas externas permanecem fontes secundárias condicionais. Botões só com ícone precisam de nome acessível; decorativos usam `aria-hidden`.
+O controlo canónico continua a ser **um único** `#mobileMenuBtn`:
 
-## 7. Biblioteca e loader transversal — `75-assets1`
+- fechado: duas barras horizontais (`Veggie Burger`);
+- aberto: barra superior `+45°` e inferior `-45°`, formando o X;
+- `aria-expanded`, `aria-label` e o estado de abrir/fechar continuam sincronizados pelo controlador existente;
+- o `#drawerCloseBtn` histórico permanece oculto, impedindo um segundo X.
 
-`design-asset-library.js` expõe `CDCDesignAssetLibrary`; `asset-loader.js` expõe `CDCAssetLoader`.
+### Correção do desaparecimento durante swipe
 
-O loader é opt-in:
+Antes desta revisão, `mobile-menu-toggle.js` transferia `#mobileMenuBtn` para `.drawer-head`. Como `.drawer-head` está dentro de `.nav-drawer-shell`, o botão era transformado juntamente com o painel durante o swipe e podia sair parcialmente do viewport.
 
-- imagens: lazy, async decode, prioridade, `IntersectionObserver`, estados loading/ready/error e `no-referrer`;
-- vídeo/áudio: `preload="metadata"` por defeito e sem autoplay imposto;
-- Lottie: JSON local, runtime local previamente aprovado, `prefers-reduced-motion` e fallback;
-- same-origin por defeito e sem injeção automática de scripts/CDNs.
+A nova camada TypeScript observa a abertura do dialog e move **o mesmo botão**, sem clonar, para filho direto de `#mobileDrawer`, imediatamente antes de `.nav-drawer-shell`:
 
-O loader genérico não escolhe fotografias do catálogo de supermercado e não substitui `75-photo-loader3`.
+`#mobileDrawer > #mobileMenuBtn + .nav-drawer-shell`
 
-## 8. Mercado — modelo de dados e contabilidade
+Assim:
 
-`renderMarket()` apresenta a lista mensal. `marketMetrics()` e `finance.js` preservam o cálculo por quantidade.
+- o drawer continua a mover-se sob o dedo;
+- o botão fica no top-layer do dialog;
+- `data-dragging` e `data-closing` não escondem o controlo;
+- quando o dialog fecha, o controlador v73 devolve o mesmo botão ao cabeçalho original;
+- `.drawer-head` reserva espaço à direita para evitar colisão entre marca e botão.
 
-Cada item mantém campos distintos:
+`MutationObserver` é usado apenas para sincronizar estado visual/posição do controlo; não toca em dados da aplicação.
 
-- `estimatedCents`: preço pesquisado/estimado por unidade;
-- `actualCents`: preço real confirmado por unidade;
-- `quantity`: quantidade;
-- `purchased`: estado de compra.
+## 7. Acessibilidade do menu
 
-Regra vigente: um produto vindo do browser é criado com `estimatedCents = product.priceCents`, `actualCents = 0` e `purchased = false`. A revisão `75-market1` não escreve nenhum destes campos.
+- alvo táctil: 44 × 44 px;
+- foco visível por teclado;
+- `prefers-reduced-motion` remove transições/animações;
+- `forced-colors` mantém fronteira e contraste do controlo;
+- SVG sentinel oculto mantém compatibilidade com `ui-icons.js` sem permitir que a hidratação substitua o glyph customizado;
+- não existe bloqueio de pinch-to-zoom.
 
-Quando um item comprado ainda não tem preço real, o cálculo existente pode contabilizar provisoriamente a estimativa e `marketMetrics()` sinaliza `missingReal`. A UI deve tornar essa pendência visível e pedir confirmação do preço pago.
-
-## 9. Mercado — pesquisa
-
-Existem dois contextos distintos.
-
-### Browser de produtos
-
-`market-experience.js` consulta as fontes configuradas para encontrar produtos/preços. O resultado é apenas uma **estimativa de compra** até existir preço real confirmado.
-
-`75-market1` mantém os handlers existentes e acrescenta apenas qualificação visual:
-
-- `Preço pesquisado`;
-- nota explícita sobre estimativa;
-- ação `Adicionar` visível;
-- grelha do cartão com três colunas explícitas: fotografia, conteúdo e ação.
-
-### Pesquisa da lista
-
-`#marketSearch` não consulta lojas: filtra `appState.market` já renderizado. `75-market1` altera apenas a comunicação para **Pesquisar na minha lista…**, preservando o evento existente que chama `renderMarket()`.
-
-## 10. Mercado — filtros e fluxo mobile
-
-Filtros canónicos existentes:
-
-- Estado: todos / por comprar / comprados / comprados sem preço real;
-- Categoria;
-- Ordenação: pendentes primeiro, A–Z, maior estimativa, maior gasto, atualização recente.
-
-`75-market1` não cria filtros novos. Torna os rótulos visíveis no mobile e reorganiza a grelha responsivamente.
-
-No fluxo mobile, `market-shopping-focus.js` continua responsável pela compactação e pelos grupos. `v75-market-flow.js` atua depois:
-
-- estado visual: `Por comprar`, `Preço por confirmar`, `Comprado`;
-- significado do valor compacto: `Estimativa total`, `Estimativa provisória`, `Total contabilizado`;
-- item comprado com `actualCents <= 0`: o bloco `.market-mobile-real` existente é movido para fora de `Detalhes`, permanecendo dentro de `#marketList`;
-- o input conserva `data-market-actual`, portanto o handler delegado de `events.js` continua a guardar o preço real;
-- o grupo Comprados abre automaticamente quando contém uma pendência de preço real.
-
-Não existe nova mutação financeira nessa camada.
-
-## 11. Mercado — catálogo e fotografias
-
-Identidade canónica:
-
-`marketId|pid`
-
-Componentes:
-
-- `market-image-library.js`: biblioteca partilhada de URL validada;
-- `market-visual-catalog.js`: índice progressivo e renderer incremental;
-- `pingo-doce-photo-library.js`: inventário dedicado;
-- `market-catalog-image-resolver.js`: resolução exata `75-catalog4`;
-- `market-photo-loader.js`: loader especializado `75-photo-loader3`.
-
-Regras:
-
-- URL oficial deve corresponder ao retalhista e PID esperado;
-- falha de fotografia nunca remove o SKU;
-- `75-photo-loader3` mantém estados carregar → validar → `Sem fotografia`, com cooldown antes de retry automático;
-- `75-market1` não altera rede/cache/resolução. Apenas espelha `is-photo-loading` para `aria-busy` nos cartões do catálogo;
-- imagens do browser live, que não fazem parte do pipeline especializado por PID, podem usar `CDCAssetLoader` para estados genéricos de loading/error.
-
-## 12. Scanner e QR
-
-`75-market1` não contém lógica de ZXing, BarcodeDetector, scanner, QR ou captura de fatura. Na Parte 3 não foi encontrado erro funcional comprovado que justificasse alterar esse subsistema.
-
-## 13. Mobile, acessibilidade e anti-zoom
-
-`75-usability1` continua depois das camadas especializadas de página:
-
-- inputs/selects/textareas com pelo menos 16 px no mobile;
-- `touch-action: manipulation` em controlos;
-- alvos tácteis 44/48 px;
-- sem `user-scalable=no` ou `maximum-scale=1`;
-- pinch-to-zoom preservado.
-
-`75-market1` acrescenta `aria-busy` no catálogo visual e suporta `forced-colors`/`prefers-reduced-motion` no CSS. `75-expenses1` também trata `forced-colors` e `prefers-reduced-motion` sem ultrapassar a camada final `v75-usability.css`.
-
-## 14. Segurança e CSP
-
-`75-market1`:
-
-- não chama `commit()` nem `saveState()`;
-- não atribui `estimatedCents`, `actualCents`, `quantity` ou `purchased`;
-- não introduz endpoints, origem CSP, token, telemetria ou segredo;
-- não toca em `core.js`, `finance.js`, IndexedDB financeiro, PIN, PBKDF2, AES-GCM ou sync.
-
-`75-expenses1` é CSS puro e não introduz rede, script, endpoint ou mutação de estado.
-
-## 15. Distribuição e QA v75
-
-`v75-market-flow.css/js` são publicados como `75-market1`, incluídos no Service Worker e no cache com sufixo final `market1`. O JS é executado depois de `v75-market-featured.js`.
-
-`tests/v75-market-flow.test.cjs` verifica isolamento financeiro, distinção de pesquisas, promoção do campo de preço real, qualificação de valores, geometria do browser, `marketId|pid`, PID, loader especializado, scanner e bundle Pages.
-
-Para `75-expenses1`, `scripts/prepare-pages.cjs` publica `v75-expenses-modern.css?v=75-expenses1`, `sw.js` inclui o asset/cache e `tests/v75-expenses-modern.test.cjs` valida isolamento, composição e responsividade. A ordem exigida é `v75-pages.css → v75-expenses-modern.css → v75-usability.css`.
-
-Validação física permanece necessária em Safari/PWA, Android/Chrome, tablet e desktop.
-
-## 16. Arquitetura de migração v76 — TypeScript
-
-A migração TypeScript é incremental. O browser não executa TypeScript diretamente. O código `.ts` será verificado/compilado durante o desenvolvimento e a distribuição continuará a conter JavaScript compatível com o ambiente atual.
-
-### Fundação do Bloco 1
-
-- `package.json`: apenas ferramentas de desenvolvimento; nenhuma dependência runtime;
-- `tsconfig.json`: `strict`, `noEmit`, `strictNullChecks`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `isolatedModules`;
-- `src/types/primitives.ts`: tipos nominais para cêntimos, IDs, datas/horas e códigos de produto;
-- `src/types/persisted-state.ts`: contrato do estado normalizado v5 observado em `core.js`;
-- `src/types/market.ts`: contratos de pesquisa/preço do Mercado;
-- `src/type-tests/contracts.ts`: regressões de compilação;
-- `.github/workflows/typescript.yml`: gate isolado de `npm run typecheck`.
-
-O Bloco 1 foi integrado em `main` pelo PR #72 sem mudar o runtime público.
-
-### Arquitetura de destino
-
-A árvore final deve separar:
-
-- `src/core/`: estado, validação, datas, persistência;
-- `src/finance/`: dinheiro, faturas, pagamentos, rendimentos, orçamento e IVA;
-- `src/market/`: identidade, pesquisa, carrinho, promoções, imagens e reconciliação;
-- `src/security/`: cofre e cifragem sem mudança de algoritmo por causa da linguagem;
-- `src/sync/`: sincronização e conflitos;
-- `src/ui/`: render, formulários, eventos e navegação;
-- `src/types/`: contratos partilhados.
-
-A migração deve substituir módulos apenas depois de testes de paridade provarem equivalência.
-
-## 17. Mercado v76 — motor de cálculo e exatidão
-
-A arquitetura de destino do Mercado deve distinguir explicitamente:
-
-1. identidade do produto;
-2. observação de preço;
-3. preço estimado;
-4. preço confirmado;
-5. quantidade/peso;
-6. promoção/desconto aplicável;
-7. linha de carrinho;
-8. total de carrinho;
-9. reconciliação com talão/fatura.
-
-Operações monetárias não devem depender de floating point. Quantidades fracionárias devem usar escala inteira ou razão explícita, e cada regra de arredondamento deve ter teste próprio.
-
-A aplicação só pode apresentar `Exato` quando todos os fatores que determinam o valor final estiverem confirmados. Caso contrário, apresenta `Estimativa` ou `Preço por confirmar`.
-
-## 18. Mercado v76 — identidade e imagens
-
-Durante o mapeamento foi confirmado que `market-experience.js` extrai `pid` da resposta Cesta para compor o ID interno do resultado, mas não expõe esse PID como propriedade própria do resultado nem o persiste no artigo criado por `addProduct()`. Antes de integrar o browser live na biblioteca `marketId|pid`, esta lacuna precisa de uma correção específica e testada.
-
-A pesquisa de imagem do browser live por termo/Open Food Facts é apenas enriquecimento visual. A biblioteca profissional deverá preferir correspondência por GTIN/PID e fontes verificadas.
-
-Logos SVG de supermercados são assets de marca e só entram depois de verificação de origem e direito de utilização. Nenhuma alteração de CSP será feita apenas para carregar logos externos.
-
-## 19. Despesas — refinamento visual `75-expenses1`
+## 8. Despesas — `75-expenses1`
 
 A página `#page-bills` mantém a arquitetura funcional existente:
 
@@ -267,4 +128,79 @@ A página `#page-bills` mantém a arquitetura funcional existente:
 
 IDs funcionais preservados: `billSearch`, `billStatusFilter`, `billCategoryFilter`, `billDateFrom`, `billDateTo`, `billSort`, `billClearFilters`, `billSummary`, `billsList` e `newBillBtn`.
 
-`v75-expenses-modern.css` atua apenas sobre a apresentação destes elementos. Em desktop mantém pesquisa/ação, painel de filtros, resumo e tabela; em tablet reorganiza filtros e resumo; em mobile usa cartões com `Em falta` como informação principal; em `≤430px` empilha pesquisa/ação e reduz a grelha de informação. Não existe segundo renderer nem segundo fluxo de persistência.
+`v75-expenses-modern.css` é apenas apresentação. Não existe segundo renderer nem segundo fluxo de persistência.
+
+## 9. Mercado — dados e precisão
+
+Cada item mantém campos distintos:
+
+- `estimatedCents`: preço pesquisado/estimado por unidade;
+- `actualCents`: preço real confirmado por unidade;
+- `quantity`: quantidade;
+- `purchased`: estado de compra.
+
+Um produto vindo do browser continua a ser criado com `estimatedCents = product.priceCents`, `actualCents = 0` e `purchased = false`. Se um item comprado ainda não tiver preço real, a UI deve expor `Preço por confirmar`.
+
+O futuro motor TypeScript do Mercado deve separar identidade, observação de preço, estimativa, confirmação, quantidade/peso, promoções/descontos conhecidos, linha de carrinho, total e reconciliação com talão/fatura. Só pode apresentar **Exato** quando todos os fatores determinantes estiverem confirmados.
+
+## 10. Mercado — identidade, fotografias e logos
+
+Identidade canónica do pipeline especializado: `marketId|pid`.
+
+Componentes atuais incluem `market-image-library.js`, `market-visual-catalog.js`, `pingo-doce-photo-library.js`, `market-catalog-image-resolver.js` e `market-photo-loader.js`.
+
+Regras:
+
+- falha de fotografia nunca remove SKU;
+- imagem é enriquecimento visual, não prova de preço;
+- pesquisa por termo/Open Food Facts não equivale a identificação forte de SKU;
+- a futura biblioteca deve preferir GTIN/PID e fonte verificada;
+- logos SVG só entram como assets locais após verificação de origem/direito de utilização;
+- CSP não é expandida apenas para branding.
+
+Existe uma lacuna registada: `market-experience.js` extrai `pid` da resposta Cesta para compor o ID interno, mas ainda não o preserva como propriedade própria nem o persiste por `addProduct()`. Corrigir apenas com teste específico.
+
+## 11. Scanner, QR e segurança
+
+`76-veggie-menu1` não contém lógica de scanner, QR, finanças, IndexedDB, PIN, PBKDF2, AES-GCM ou sincronização. Não introduz endpoints, telemetria, token, origem CSP ou segredo.
+
+`75-market1` e `75-expenses1` mantêm o mesmo princípio de isolamento de apresentação.
+
+## 12. Migração TypeScript
+
+Fundação integrada em `main` pelo PR #72:
+
+- `package.json`: TypeScript apenas como `devDependency`;
+- `tsconfig.json`: `strict`, `noEmit`, `strictNullChecks`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `isolatedModules`;
+- `src/types/`: tipos nominais, estado persistido v5 e contratos de Mercado;
+- `src/type-tests/contracts.ts`;
+- `.github/workflows/typescript.yml`.
+
+Arquitetura de destino:
+
+- `src/core/`: estado, validação, datas, persistência;
+- `src/finance/`: dinheiro, faturas, pagamentos, rendimentos, orçamento, IVA;
+- `src/market/`: identidade, pesquisa, carrinho, promoções, imagens, reconciliação;
+- `src/security/`: cofre/cifragem;
+- `src/sync/`: sincronização/conflitos;
+- `src/ui/`: render, formulários, eventos e navegação;
+- `src/types/`: contratos partilhados.
+
+Cada substituição de runtime exige paridade e regressão verde. `any` não justificado não é estratégia aceite.
+
+## 13. QA e validação física
+
+`tests/v76-veggie-menu.test.cjs` protege:
+
+- fonte TypeScript com dois elementos visuais;
+- runtime browser válido;
+- mesmo botão fora da superfície transformada durante drawer aberto;
+- transformação duas linhas → X;
+- topbar sticky;
+- reduced-motion/forced-colors;
+- ausência de mutação financeira;
+- composição no Pages e Service Worker.
+
+No head funcional `95bdacab47b8b97d5f6cf61d52fc492b5a10ceca`, TypeScript run `34516585121` e CI run `34516585241` concluíram com sucesso.
+
+A validação física continua obrigatória em iPhone/Safari/PWA, 320/375/390/430 px, tablet/desktop quando aplicável, orientação vertical/horizontal e tema claro/escuro.

@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog4-pd-photo1-photo-loader3-startup2-usability1-pages1-assets1-market1-expenses1';
+const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2-stability1-layout1-drawer2-featured1-image-library1-catalog4-pd-photo1-photo-loader3-startup2-usability1-pages1-assets1-market1-expenses1-veggie-menu1';
 const NAVIGATION_TIMEOUT_MS = 4000;
 const PUBLIC_ASSETS = [
   './',
@@ -16,6 +16,7 @@ const PUBLIC_ASSETS = [
   './asset-loader.css',
   './market-shopping-focus.css',
   './mobile-menu-toggle.css',
+  './v76-veggie-menu.css',
   './invoice-capture.css',
   './app-update.css',
   './market-image-audit.css',
@@ -41,6 +42,7 @@ const PUBLIC_ASSETS = [
   './sync-conflict-policy.js',
   './events.js',
   './mobile-menu-toggle.js',
+  './v76-veggie-menu.js',
   './market-experience.js',
   './market-branding.js',
   './market-category-groups.js',

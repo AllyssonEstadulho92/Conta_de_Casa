@@ -108,7 +108,7 @@ Data: 10 de setembro de 2026. Estado: fundação integrada em `main` pelo PR #72
 4. Cada módulo JavaScript só é substituído depois de testes de paridade demonstrarem equivalência.
 5. `STATE_VERSION`, schema persistido, algoritmos de cifragem e formato de sincronização não mudam apenas por causa da linguagem.
 6. `any` não justificado não é aceite como estratégia de migração.
-7. O Bloco 1 contém apenas configuração, contratos/tipos e typecheck; não entra no bundle Pages.
+7. Cada nova camada TypeScript deve ficar testável e reversível até a substituição completa do runtime correspondente.
 
 ### Fundamento
 
@@ -116,31 +116,15 @@ A aplicação já possui grande superfície funcional e testes de regressão. Um
 
 ## D-065 — total de Mercado só pode ser rotulado exato com evidência completa
 
-Data: 10 de setembro de 2026. Estado: aceite como regra de produto/contabilidade para v76.
+Data: 10 de setembro de 2026. Estado: aceite para v76.
 
-### Decisão
+Um total do Mercado só pode ser apresentado como **Exato** quando estiverem confirmados todos os fatores que alteram o valor final: SKU, quantidade/peso, preço aplicável, promoção e respetivas condições, cartão/cupão quando aplicável, regra fiscal/IVA necessária e ajustes identificados na fatura/talão.
 
-Um total do Mercado só pode ser apresentado como **Exato** quando estiverem confirmados todos os fatores que alteram o valor final, incluindo:
-
-- SKU/produto correto;
-- quantidade ou peso real;
-- preço válido para o retalhista/local/momento aplicável;
-- promoção e respetivas condições;
-- cartão/cupão/elegibilidade quando aplicável;
-- regra fiscal/IVA quando necessária ao cálculo apresentado;
-- ajustes posteriores identificados na fatura/talão.
-
-Se algum destes fatores não estiver confirmado, o estado deve ser `Estimativa` ou `Preço por confirmar`.
-
-### Consequência
-
-A aplicação poderá reproduzir operações observáveis de uma passagem em caixa para planeamento e conferência, mas não se apresenta como POS proprietário e não processa pagamentos bancários apenas para imitar o supermercado.
+Se algum fator determinante não estiver confirmado, o estado deve ser `Estimativa` ou `Preço por confirmar`.
 
 ## D-066 — imagens e logos não podem enfraquecer identidade, licença ou CSP
 
 Data: 10 de setembro de 2026. Estado: aceite para v76.
-
-### Decisão
 
 - imagens de produto são enriquecimento visual e nunca prova de preço;
 - preferência futura por correspondência GTIN/PID e fonte verificada;
@@ -151,43 +135,63 @@ Data: 10 de setembro de 2026. Estado: aceite para v76.
 
 ## D-067 — modernização de Despesas será uma camada visual isolada
 
-Data: 10 de setembro de 2026. Estado: aceite na branch `feat/v75-expenses-modern-ui` como `75-expenses1`; PR #73.
-
-### Factos
-
-- `#page-bills` já contém Lista/Calendário, pesquisa, filtros completos, resumo, tabela desktop e cartões mobile;
-- `renderBills()` e `filterBills()` já fornecem o fluxo funcional canónico;
-- `billActionsHtml()` mantém Abrir/Detalhes, Editar, Pagar e Excluir conforme o estado;
-- não foi identificado defeito financeiro que justificasse reescrever o domínio para modernizar o layout.
+Data: 10 de setembro de 2026. Estado: integrado em `main` como `75-expenses1` pelo PR #73, merge funcional `176450fcb236a2272afb9d6a6983b42681aa705d`.
 
 ### Decisão
 
 1. `v75-expenses-modern.css` é exclusivamente visual e limitado a `html.cdc-v75 #page-bills`.
 2. Não alterar `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js` nem os IDs canónicos para este redesign.
-3. Modernizar tabs, barra de pesquisa/criação, filtros, resumo, tabela desktop e cartões mobile.
+3. Modernizar tabs, pesquisa/criação, filtros, resumo, tabela desktop e cartões mobile.
 4. No mobile, manter `Em falta` como foco principal e preservar vencimento, estado, Total, Pago, Categoria, progresso e ações.
-5. Suportar desktop intermédio, `≤820px` e `≤430px`, sem criar uma segunda UI funcional.
-6. Respeitar `prefers-reduced-motion` e `forced-colors`.
-7. Carregar a camada depois de `v75-pages.css` e antes de `v75-usability.css`.
-8. Versionar bundle/cache como `75-expenses1` e proteger a integração com teste próprio.
+5. Respeitar `prefers-reduced-motion` e `forced-colors`.
+6. Carregar depois de `v75-pages.css` e antes de `v75-usability.css`.
+7. Proteger o bundle/cache e a integração com teste próprio.
+
+### Evidência
+
+Após integração: CI `34496500755`, TypeScript Foundation `34496500641` e Pages `34496540096` concluíram com sucesso.
+
+## D-068 — Veggie Burger/X será um único controlo TypeScript sobre o drawer validado
+
+Data: 10 de setembro de 2026. Estado: aceite e implementado na branch `feat/v76-typescript-veggie-menu` como `76-veggie-menu1`.
+
+### Factos
+
+- `mobile-menu-toggle.js` v73 já controla abertura, fecho, swipe, foco, `aria-expanded` e devolução do botão ao cabeçalho;
+- o controlador v73 ocultava `#drawerCloseBtn`, evitando um segundo X;
+- o mesmo controlador movia `#mobileMenuBtn` para `.drawer-head` quando o drawer abria;
+- `.drawer-head` está dentro de `.nav-drawer-shell`, que é transformado durante o swipe;
+- consequentemente o próprio botão podia deslocar-se para fora da área visível durante o gesto.
+
+### Decisão
+
+1. O ícone fechado passa a **Veggie Burger de exatamente duas linhas horizontais**.
+2. As mesmas duas linhas formam o X: superior `+45°`, inferior `-45°`; não criar um segundo botão de fecho.
+3. A fonte da nova camada é `src/ui/veggie-menu-toggle.ts`, verificada por TypeScript strict.
+4. O runtime browser derivado é `v76-veggie-menu.js`, carregado depois de `mobile-menu-toggle.js`.
+5. Enquanto o dialog estiver aberto, mover **o mesmo** `#mobileMenuBtn` para filho direto de `#mobileDrawer`, fora de `.nav-drawer-shell`, para que o swipe não o leve juntamente com o painel.
+6. Quando o dialog fechar, deixar o controlador v73 devolver o mesmo botão ao cabeçalho original; não duplicar estado nem listeners de negócio.
+7. Reforçar a `.topbar` como sticky no mobile.
+8. Reservar espaço na `.drawer-head` para evitar colisão com a marca/título.
+9. Respeitar `prefers-reduced-motion`, `forced-colors`, foco por teclado e alvo táctil de 44 px.
+10. A camada não pode chamar `commit()`, `saveState()` nem aceder a dados financeiros.
 
 ### Fundamento
 
-A página já tem a lógica necessária e está coberta por regressões. Uma camada CSS isolada reduz a superfície de risco e permite modernizar a experiência sem tocar em cálculos, pagamentos ou persistência.
+O problema era de composição visual durante uma transformação CSS, não de domínio ou de navegação. Manter o controlador v73 reduz a superfície de regressão, enquanto a camada TypeScript corrige a geometria e inicia a migração real da UI para TS.
 
-### Segurança
+### QA funcional
 
-A revisão não introduz rede, CDN, script, endpoint, token ou segredo. Não altera PIN, PBKDF2, AES-GCM, IndexedDB ou sincronização.
+No head `95bdacab47b8b97d5f6cf61d52fc492b5a10ceca`:
 
-## Evidência técnica v76 — Bloco 1
+- TypeScript Foundation `34516585121`: sucesso;
+- CI `34516585241`: sucesso;
+- o teste `v76 Veggie Burger TypeScript tests` passou juntamente com finanças, faturas, Mercado, scanner, segurança, responsividade, acessibilidade e sincronização.
 
-Foram adicionados e integrados pelo PR #72:
+Validação física em iPhone/Safari/PWA permanece obrigatória após publicação.
 
-- `package.json` com TypeScript apenas como `devDependency`;
-- `tsconfig.json` estrito e `noEmit`;
-- tipos nominais e schema persistido v5 em `src/types/`;
-- contratos de Mercado que distinguem pesquisa/preço estimado/confirmado;
-- testes de compilação em `src/type-tests/contracts.ts`;
-- workflow `.github/workflows/typescript.yml`.
+## Evidência técnica v76
 
-Durante o mapeamento foi identificada uma lacuna a rever no Bloco de Mercado: `market-experience.js` extrai o `pid` da resposta Cesta para compor o ID do resultado, mas o objeto resultante não preserva `pid` como propriedade nem `addProduct()` o persiste. Não corrigir esta discrepância sem teste específico de identidade.
+A fundação TypeScript integrada mantém `package.json`, `tsconfig.json`, `src/types/` e `src/type-tests/`. O novo `src/ui/veggie-menu-toggle.ts` é o primeiro enhancement visual TypeScript publicado como runtime derivado, sem alterar o domínio financeiro.
+
+Continua registada a lacuna do Mercado: `market-experience.js` extrai `pid` da resposta Cesta para compor o ID do resultado, mas o objeto resultante ainda não preserva `pid` como propriedade nem `addProduct()` o persiste. Não corrigir sem teste específico de identidade.
