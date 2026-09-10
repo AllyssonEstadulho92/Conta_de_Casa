@@ -1,167 +1,163 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 10 de setembro de 2026  
-Build publicado: `v75`  
-Programa técnico: `v76` — migração incremental TypeScript  
+Build público: `v75`  
+Programa técnico: `v76` — migração incremental TypeScript + UI/UX  
 Distribuição: GitHub Pages / PWA
-
-Revisões integradas em `main`: `75-startup2`, `75-photo-loader3`, `75-catalog4`, `75-usability1`, `75-pages1`, `75-assets1`, `75-market1`, `75-expenses1`, fundação TypeScript e `76-veggie-menu1`.
 
 ## 1. Invariantes
 
-A aplicação é PWA estática/local-first. Estado financeiro, apresentação, recursos visuais e catálogos permanecem separados.
+A aplicação continua PWA estática/local-first. Estado financeiro, apresentação, recursos visuais e catálogos permanecem separados.
 
-- `STATE_VERSION = 5` enquanto não existir migração própria aprovada;
+- `STATE_VERSION = 5`;
 - dinheiro em cêntimos inteiros;
 - estado financeiro em IndexedDB;
 - PBKDF2-SHA-256 + AES-GCM;
 - `PBKDF2_ITERATIONS = 250000`;
 - sincronização opcional apenas do envelope cifrado;
-- nenhuma password, token ou chave no código público;
-- `estimatedCents` permanece distinto de `actualCents`;
-- `marketId|pid` continua a identidade canónica do pipeline especializado de SKU/fotografia;
-- alterações visuais não podem modificar regras financeiras, segurança ou persistência.
+- nenhum segredo no código público;
+- `estimatedCents` distinto de `actualCents`;
+- `marketId|pid` continua identidade canónica do pipeline especializado de SKU/fotografia;
+- alterações visuais não podem modificar domínio financeiro, segurança ou persistência.
 
-## 2. Núcleo funcional atual
+## 2. Núcleo funcional
 
 - `core.js`: estado, normalização, IndexedDB, cifragem e backup;
 - `finance.js`: cálculos financeiros;
 - `render.js`, `forms.js`, `events.js`: UI funcional e mutações autorizadas;
 - `sync.js` + `sync-conflict-policy.js`: sincronização cifrada e conflitos;
-- `mobile-menu-toggle.js`: controlador móvel v73 para abertura/fecho, gesto horizontal e foco;
-- `v75-architecture.js`: hierarquia e agrupamento da navegação;
-- `src/`: módulos e contratos que estão a migrar progressivamente para TypeScript.
+- `mobile-menu-toggle.js`: controlador móvel v73;
+- `v75-architecture.js`: hierarquia de navegação;
+- `src/`: módulos/contratos migrados progressivamente para TypeScript.
 
-O browser continua a executar JavaScript. TypeScript é a fonte verificada/compilada durante a transição.
+O browser continua a executar JavaScript durante a migração. TypeScript é a fonte verificada para os novos blocos.
 
-## 3. Build e composição pública
+## 3. Composição pública
 
-`index.html` é o template. `scripts/prepare-pages.cjs` cria `dist/` por allowlist explícita. `sw.js` mantém uma allowlist equivalente e revisão de cache invalidável.
+`index.html` é o template. `scripts/prepare-pages.cjs` cria `dist/` por allowlist explícita e injeta revisões de cache. `sw.js` mantém allowlist equivalente.
 
-Ordem relevante no mobile:
+Ordem visual relevante:
 
-1. estilos base/responsive;
+1. estilos base e responsive;
 2. `mobile-menu-toggle.css`;
 3. arquitetura/cabeçalho/estabilidade/layout/drawer v75;
-4. `v75-pages.css` e `v75-expenses-modern.css`;
+4. páginas, Despesas e Mercado v75;
 5. `v76-veggie-menu.css`;
-6. componentes especializados do Mercado;
-7. `v75-usability.css` como política final de interação.
+6. `v75-usability.css`;
+7. **`v76-modern-ui.css` como última camada transversal**.
 
-Runtime relevante:
+A última camada tem autoridade apenas sobre apresentação, geometria, estados visuais e responsividade.
 
-1. módulos funcionais atuais;
-2. `mobile-menu-toggle.js` — controlador v73;
-3. `v76-veggie-menu.js` — enhancement derivado de TypeScript, carregado depois do controlador;
-4. runtimes v74/v75 de apresentação.
-
-## 4. Navegação e hierarquia
+## 4. Navegação
 
 Mobile principal:
 
 `Início → Despesas → Mercado → Planeamento → Mais`
 
-O drawer completo organiza destinos por contexto. Relatórios, Metas, Segurança, Diagnóstico e preferências permanecem fluxos secundários. `v75-architecture.js` mantém a hierarquia; `76-veggie-menu1` não altera destinos, rotas nem permissões.
+O drawer completo mantém destinos secundários agrupados. Rotas, IDs, permissões e handlers existentes não são substituídos pelo redesign.
 
-## 5. Cabeçalho móvel
+## 5. Cabeçalho mobile — nova política
 
-A `.topbar` é sticky no topo. `76-veggie-menu1` reforça no mobile `position: sticky`, `top: 0` e z-index suficiente para permanecer acima do conteúdo normal, sem alterar safe areas ou navegação.
+A evidência física em iPhone mostrou que a combinação de header sticky/fixo com padding reservado criava uma composição estranha durante scroll. A política v76 passa a ser:
 
-## 6. Veggie Burger TypeScript — `76-veggie-menu1`
+- `.topbar` no fluxo normal (`position: relative`) em mobile;
+- sem `padding-top` estrutural reservado para header fixo;
+- conteúdo começa imediatamente depois do header;
+- safe areas permanecem respeitadas pelas camadas base/PWA;
+- navegação inferior continua persistente por ser controlo de navegação e não cabeçalho de conteúdo.
 
-`src/ui/veggie-menu-toggle.ts` é a fonte TypeScript strict. `v76-veggie-menu.js` é o runtime browser derivado.
+## 6. Veggie Burger TypeScript — `76-veggie-menu2`
 
-O controlo canónico continua a ser um único `#mobileMenuBtn`:
+Fonte: `src/ui/veggie-menu-toggle.ts`.  
+Runtime browser: `v76-veggie-menu.js`.
 
-- fechado: duas barras horizontais (`Veggie Burger`);
-- aberto: barra superior `+45°` e inferior `-45°`, formando o X;
-- `aria-expanded`, `aria-label` e abrir/fechar continuam sincronizados pelo controlador existente;
-- `#drawerCloseBtn` histórico permanece oculto para impedir segundo X.
+O controlo canónico permanece `#mobileMenuBtn`:
 
-### Swipe
+- fechado: duas barras horizontais;
+- aberto: superior `+45°`, inferior `-45°`;
+- Web Animations API anima explicitamente as duas barras;
+- ambas permanecem visíveis durante a transição;
+- `aria-expanded`/`aria-label` continuam a vir do controlador funcional;
+- com drawer aberto, o mesmo botão fica fora da `.nav-drawer-shell` transformada;
+- `prefers-reduced-motion` desativa animação;
+- não há segundo botão/X funcional.
 
-Antes desta revisão, o controlador v73 transferia `#mobileMenuBtn` para `.drawer-head`. Como `.drawer-head` pertence à `.nav-drawer-shell`, o botão era transformado juntamente com o painel durante o swipe e podia sair parcialmente do viewport.
+## 7. Sistema visual master — `76-modern-ui1`
 
-Com `76-veggie-menu1`, quando o dialog está aberto, a camada TypeScript move **o mesmo botão**, sem clonar, para filho direto de `#mobileDrawer`, antes da `.nav-drawer-shell`:
+`v76-modern-ui.css` define tokens transversais para:
 
-`#mobileDrawer > #mobileMenuBtn + .nav-drawer-shell`
+- background/surface/surface-soft;
+- texto e muted;
+- primary/accent;
+- danger/warning/success;
+- bordas;
+- sombras;
+- raios;
+- foco.
 
-Consequências:
+Aplica estes contratos de apresentação a todas as páginas:
 
-- o drawer continua a mover-se sob o dedo;
-- o botão permanece no top-layer do dialog;
-- `data-dragging` e `data-closing` não escondem o controlo;
-- quando o dialog fecha, o controlador v73 devolve o mesmo botão ao cabeçalho;
-- `.drawer-head` reserva espaço à direita para não colidir com marca/título.
+- `#page-dashboard`;
+- `#page-bills`;
+- `#page-market`;
+- `#page-calendar`;
+- `#page-planning`;
+- `#page-reports`;
+- `#page-goals`;
+- `#page-security`;
+- `#page-diagnostics`;
+- `#page-settings`.
 
-`MutationObserver` sincroniza apenas estado visual/posição do controlo e não toca em dados financeiros.
+Também cobre tabs, botões, inputs, painéis, tabelas, estados vazios, dialogs, drawer e bottom navigation.
 
-## 7. Acessibilidade do menu
+## 8. Princípios UI/UX
 
-- alvo táctil 44 × 44 px;
-- foco visível por teclado;
-- `prefers-reduced-motion` remove transições/animações;
-- `forced-colors` mantém contraste;
-- SVG sentinel oculto preserva compatibilidade com `ui-icons.js` sem substituir o glyph customizado;
-- pinch-to-zoom continua permitido.
+- uma família tipográfica principal;
+- hierarquia visual baseada em tamanho, peso, espaçamento e contraste, não em excesso de cores;
+- ações primárias distinguíveis de ações secundárias/destrutivas;
+- superfícies com bordas leves e sombras discretas;
+- alvos tácteis mínimos de 44 px;
+- campos mobile com 16 px para evitar zoom automático Safari;
+- `prefers-reduced-motion` e `forced-colors` preservados;
+- pinch-to-zoom não é bloqueado;
+- bottom navigation mantém cinco destinos previsíveis.
 
-## 8. Despesas — `75-expenses1`
+## 9. Despesas
 
-`#page-bills` mantém a arquitetura funcional existente:
+`renderBills()`/`filterBills()` permanecem canónicos. `v75-expenses-modern.css` e `v76-modern-ui.css` apenas alteram apresentação. Estados, vencimentos, valores, Total/Pago/Em falta e ações continuam derivados do domínio atual.
 
-`index.html` → controlos  
-`events.js` → filtros/ações  
-`renderBills()`/`filterBills()` → composição/filtragem  
-`finance.js` → estados e cálculos  
-`render.js` → desktop/mobile
+## 10. Mercado
 
-`v75-expenses-modern.css` é exclusivamente visual. Não existe segundo renderer nem segundo fluxo de persistência.
+A apresentação pode evoluir sem confundir precisão:
 
-## 9. Mercado — dados e precisão
-
-Cada item mantém `estimatedCents`, `actualCents`, `quantity` e `purchased` distintos. Produto pesquisado continua estimado até existir preço real confirmado.
-
-O motor TypeScript futuro deve separar identidade, preço observado, estimativa, confirmação, quantidade/peso, promoções/descontos conhecidos, linha de carrinho, total e reconciliação com talão/fatura. Só pode apresentar **Exato** com todos os fatores determinantes confirmados.
-
-## 10. Mercado — identidade, fotografias e logos
-
-- identidade canónica especializada: `marketId|pid`;
-- falha de fotografia nunca remove SKU;
-- imagem é enriquecimento visual, não prova de preço;
-- futura biblioteca deve preferir GTIN/PID e fonte verificada;
-- logos SVG só entram como assets locais após verificação de origem/direito de utilização;
-- CSP não é expandida apenas para branding.
-
-Lacuna conhecida: `market-experience.js` extrai `pid` da resposta Cesta, mas ainda não o persiste como campo próprio por `addProduct()`. Corrigir apenas com teste específico.
+- preço pesquisado continua estimado;
+- preço real continua confirmação distinta;
+- imagem não prova preço;
+- futura exatidão de caixa exige SKU, quantidade/peso, preço aplicável e descontos/regras relevantes confirmados;
+- lacuna conhecida: `pid` extraído pela pesquisa live ainda precisa de persistência explícita com teste próprio.
 
 ## 11. Segurança
 
-`76-veggie-menu1` não contém lógica de finanças, IndexedDB, PIN, PBKDF2, AES-GCM, sync, QR, scanner ou Mercado. Não introduz endpoint, telemetria, token, origem CSP ou segredo.
+`76-veggie-menu2` e `76-modern-ui1` não alteram:
 
-## 12. Migração TypeScript
+- `core.js`;
+- `finance.js`;
+- IndexedDB;
+- PIN;
+- PBKDF2/AES-GCM;
+- backup;
+- sincronização;
+- QR/scanner;
+- CSP;
+- endpoints ou segredos.
 
-Fundação integrada em `main` pelo PR #72. Arquitetura de destino:
+## 12. QA
 
-- `src/core/`: estado, validação, datas, persistência;
-- `src/finance/`: dinheiro, faturas, pagamentos, rendimentos, orçamento, IVA;
-- `src/market/`: identidade, pesquisa, carrinho, promoções, imagens, reconciliação;
-- `src/security/`: cofre/cifragem;
-- `src/sync/`: sincronização/conflitos;
-- `src/ui/`: render, formulários, eventos e navegação;
-- `src/types/`: contratos partilhados.
+Testes específicos:
 
-Cada substituição de runtime exige paridade e regressão verde. `any` não justificado não é estratégia aceite.
+- `tests/v76-veggie-menu.test.cjs`;
+- `tests/v76-modern-ui.test.cjs`.
 
-## 13. QA
+CI do head funcional da branch `fix/v76-menu-flow-modern-ui`: run `34537017339` — sucesso, incluindo todas as regressões existentes e os dois testes v76.
 
-`tests/v76-veggie-menu.test.cjs` protege fonte TS, duas linhas, transformação para X, mesmo botão fora da shell transformada, topbar sticky, reduced-motion/forced-colors, isolamento financeiro e publicação.
-
-PR #74 integrado em `main` como `f196545662b5d120a0dd21b2c498a209cfc144d3`.
-
-Após integração:
-
-- TypeScript `34517268279`: sucesso;
-- CI `34517268450`: sucesso;
-- Pages `34517324242`: sucesso.
-
-Validação física continua obrigatória em iPhone/Safari/PWA, especialmente swipe, animação e geometrias 320/375/390/430 px.
+TypeScript strict deve passar no PR antes de integração. Depois do merge, CI + TypeScript + Pages devem ser confirmados novamente.

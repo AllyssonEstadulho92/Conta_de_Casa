@@ -7,148 +7,144 @@ Atualizado: 10 de setembro de 2026
 - [x] Manter `STATE_VERSION = 5`, IndexedDB financeiro e valores em cêntimos.
 - [x] Preservar PBKDF2-SHA-256 + AES-GCM.
 - [x] Manter `PBKDF2_ITERATIONS = 250000`.
-- [x] Não alterar cálculos, faturas, pagamentos, QR, scanner ou sincronização cifrada por correções meramente visuais.
-- [x] Preservar `estimatedCents` separado de `actualCents` no Mercado.
-- [x] Preservar `marketId|pid` como identidade canónica de SKU/fotografia no pipeline especializado.
+- [x] Não alterar cálculos, faturas, pagamentos, QR, scanner ou sync por correções visuais.
+- [x] Preservar `estimatedCents` separado de `actualCents`.
+- [x] Preservar `marketId|pid` no pipeline especializado.
 
-## P0 — Revisões integradas
+## P0 — Base integrada
 
-- [x] `75-startup2` — abertura pós-PIN sem bloqueio remoto em dispositivo emparelhado.
-- [x] `75-photo-loader3` — estado terminal estável das fotografias.
-- [x] `75-catalog4` — resolução exata sem tentativa redundante de `sourceUrl` oficial.
-- [x] `75-usability1` — anti-zoom, alvos tácteis e cofre mobile.
-- [x] `75-pages1` — Início, Despesas e Planeamento.
-- [x] `75-assets1` — biblioteca/critério local-first e loader transversal opt-in.
-- [x] `75-market1` — pesquisa, filtros e fluxo de compra do Mercado; PR #71.
-- [x] `75-expenses1` — Despesas/Faturas modernas; PR #73.
-- [x] fundação TypeScript — PR #72.
-- [x] `76-veggie-menu1` — Veggie Burger/X em TypeScript; PR #74, merge `f196545662b5d120a0dd21b2c498a209cfc144d3`.
+- [x] `75-startup2`.
+- [x] `75-photo-loader3`.
+- [x] `75-catalog4`.
+- [x] `75-usability1`.
+- [x] `75-pages1`.
+- [x] `75-assets1`.
+- [x] `75-market1`.
+- [x] `75-expenses1`.
+- [x] Fundação TypeScript — PR #72.
+- [x] `76-veggie-menu1` — PR #74.
 
-## P0 — v76 Bloco 0 e Bloco 1
+## P0 — `76-veggie-menu2` + `76-modern-ui1`
 
-- [x] Criar `docs/TYPESCRIPT_MIGRATION.md`.
-- [x] Definir estratégia incremental e critérios de aceitação por bloco.
-- [x] Definir que `100% TypeScript` é meta de código-fonte, não promessa de zero defeitos.
-- [x] Definir regra de exatidão do Mercado: sem evidência completa, resultado continua `Estimativa`.
-- [x] Integrar fundação TypeScript pelo PR #72.
-- [x] TypeScript como `devDependency`, sem dependências runtime.
-- [x] `tsconfig.json` com `strict`, `strictNullChecks`, `noUncheckedIndexedAccess` e `exactOptionalPropertyTypes`.
-- [x] Criar contratos em `src/types/` e testes de compilação.
-- [x] Criar workflow `.github/workflows/typescript.yml`.
+### Evidência/diagnóstico
 
-## P0 — `76-veggie-menu1`: Veggie Burger + X em TypeScript
+- [x] Rever captura física iPhone/Safari enviada em 10/09/2026.
+- [x] Confirmar que o Veggie Burger fechado aparece, mas a animação ao abrir não é percebida de forma fiável.
+- [x] Confirmar conflito visual entre topbar sticky/fixa e fluxo do conteúdo durante scroll.
+- [x] Separar problema do menu de problema do cabeçalho.
 
-### Auditoria e implementação
+### Menu
 
-- [x] Confirmar `#mobileMenuBtn` como controlo canónico.
-- [x] Confirmar `#drawerCloseBtn` oculto para não gerar dois X.
-- [x] Confirmar `mobile-menu-toggle.js` v73 como controlador de abertura/fecho/swipe/foco/ARIA.
-- [x] Identificar causa do desaparecimento no swipe: botão dentro da `.nav-drawer-shell` transformada.
-- [x] Criar `src/ui/veggie-menu-toggle.ts` em TypeScript strict.
-- [x] Fechado com exatamente duas linhas horizontais.
-- [x] Transformar as mesmas duas linhas em X (`+45°/-45°`).
+- [x] Manter exatamente duas linhas no Veggie Burger.
+- [x] Criar animação TS explícita das duas linhas por Web Animations API.
+- [x] Linha superior termina em `+45°`.
+- [x] Linha inferior termina em `-45°`.
+- [x] Ambas mantêm `opacity: 1` durante a transformação.
 - [x] Manter um único `#mobileMenuBtn`.
-- [x] Preservar `aria-expanded` e `aria-label`.
-- [x] Com dialog aberto, mover o mesmo botão para filho direto de `#mobileDrawer` fora da shell transformada.
-- [x] Manter botão visível durante `data-dragging` e `data-closing`.
-- [x] Reservar espaço na `.drawer-head` para evitar colisão.
-- [x] Reforçar topbar sticky no mobile.
-- [x] Implementar `prefers-reduced-motion` e `forced-colors`.
-- [x] Criar runtime browser `v76-veggie-menu.js` e CSS `v76-veggie-menu.css`.
+- [x] Manter botão fora da shell transformada durante drawer aberto/swipe.
+- [x] Manter `prefers-reduced-motion` e `forced-colors`.
+- [x] Atualizar revisão para `76-veggie-menu2`.
 
-### Distribuição e QA
+### Header e fluxo
 
-- [x] Criar `tests/v76-veggie-menu.test.cjs`.
-- [x] Adicionar syntax check/teste ao CI e Pages.
-- [x] Publicar CSS/JS pela allowlist de `scripts/prepare-pages.cjs`.
-- [x] Carregar runtime TS-derived depois de `mobile-menu-toggle.js`.
-- [x] Adicionar assets ao Service Worker/cache `veggie-menu1`.
-- [x] TypeScript no head final do PR #74: run `34517171997` — sucesso.
-- [x] CI no head final do PR #74: run `34517171967` — sucesso.
-- [x] Confirmar branch `behind 0` antes do merge.
-- [x] Integrar PR #74 em `main`.
-- [x] TypeScript de `main`: run `34517268279` — sucesso.
-- [x] CI de `main`: run `34517268450` — sucesso.
-- [x] GitHub Pages: run `34517324242` — sucesso.
+- [x] Revogar regra sticky anterior com base em evidência física.
+- [x] Colocar `.topbar` em `position: relative` no mobile.
+- [x] Remover padding estrutural reservado para header fixo.
+- [x] Fazer conteúdo começar depois do header sem sobreposição.
+- [x] Manter navegação inferior persistente.
 
-### Validação física pendente
+### UI/UX master
 
-- [ ] iPhone/Safari/PWA: fechado mostra apenas duas linhas.
-- [ ] Toque: duas linhas convergem para X e regressam sem salto.
-- [ ] Swipe de abertura: botão não desaparece.
-- [ ] Swipe de fecho: botão não desaparece.
-- [ ] X permanece no canto superior direito do drawer.
-- [ ] Não aparece segundo X.
-- [ ] Cabeçalho permanece fixo durante scroll normal.
-- [ ] Sem colisão entre marca, título e botão.
-- [ ] Validar 320/375/390/430 px e orientação vertical/horizontal.
-- [ ] Validar tema claro/escuro e reduced-motion.
+- [x] Criar `v76-modern-ui.css`.
+- [x] Definir tokens de superfície, cor, borda, sombra, raio e foco.
+- [x] Modernizar Dashboard/Início.
+- [x] Modernizar Despesas/Faturas.
+- [x] Modernizar Mercado.
+- [x] Modernizar Calendário.
+- [x] Modernizar Planeamento.
+- [x] Modernizar Relatórios.
+- [x] Modernizar Objetivos.
+- [x] Modernizar Segurança.
+- [x] Modernizar Diagnóstico.
+- [x] Modernizar Definições.
+- [x] Modernizar dialogs, drawer, tabs, formulários, estados vazios e bottom nav.
+- [x] Preservar tema escuro.
+- [x] Preservar reduced-motion, forced-colors, foco e alvos tácteis.
 
-## P1 — Validação física acumulada v75
+### Build/QA
 
-- [ ] Validar anti-zoom e alvos tácteis no iPhone/Safari/PWA.
-- [ ] Validar `75-pages1` em 320/375/390/430 px, tablet e desktop.
-- [ ] Validar fisicamente `75-expenses1` em mobile/tablet/desktop, tema claro/escuro, filtros e ações.
-- [ ] Validar em hardware um componente `75-assets1` com imagem lazy/fallback.
-- [ ] Validar marcar comprado → confirmar preço real no iPhone/Safari/PWA.
-- [ ] Validar pesquisa/filtros/browser do Mercado em 320/375/390/430 px, tablet e desktop.
+- [x] Publicar `v76-modern-ui.css` pela allowlist de Pages.
+- [x] Carregar `v76-modern-ui.css` depois de `v75-usability.css`.
+- [x] Atualizar Service Worker/cache para `veggie-menu2-modern-ui1`.
+- [x] Atualizar `tests/v76-veggie-menu.test.cjs`.
+- [x] Criar `tests/v76-modern-ui.test.cjs`.
+- [x] Adicionar teste master UI ao CI.
+- [x] Adicionar teste master UI ao gate de Pages.
+- [x] CI push funcional `34537017339`: sucesso.
+- [ ] Abrir PR para `main`.
+- [ ] TypeScript strict do PR: sucesso.
+- [ ] CI do PR: sucesso.
+- [ ] Confirmar branch `behind 0` antes do merge.
+- [ ] Integrar PR.
+- [ ] CI de `main`: sucesso.
+- [ ] TypeScript de `main`: sucesso.
+- [ ] GitHub Pages: sucesso.
+
+### Validação física após publicação
+
+- [ ] iPhone/Safari/PWA: duas linhas visíveis no estado fechado.
+- [ ] Toque: animação contínua duas linhas → X.
+- [ ] Fecho: X → duas linhas sem desaparecimento.
+- [ ] Swipe abertura/fecho sem perda do botão.
+- [ ] Header rola com o conteúdo e não fica preso no viewport.
+- [ ] Conteúdo nunca passa por baixo/por cima da topbar.
+- [ ] Bottom nav não tapa ações finais.
+- [ ] Validar Início, Despesas, Mercado, Planeamento e Mais em 320/375/390/430 px.
+- [ ] Validar Calendário, Relatórios, Objetivos, Segurança, Diagnóstico e Definições.
+- [ ] Validar tablet e desktop.
+- [ ] Validar claro/escuro e orientação vertical/horizontal.
 
 ## P0 — v76 Bloco 2: dinheiro, quantidades e datas
 
 Branch reservada: `feat/v76-money-dates`.
 
-- [ ] Mapear testes atuais de `parseCents`, `money`, `validCents`, `marketQuantityMilli`, `marketLineCents` e datas civis.
-- [ ] Criar vetores de paridade JS→TS antes da substituição.
-- [ ] Migrar funções puras para módulos TypeScript sem mudar resultados válidos.
-- [ ] Criar tipos/constructors de `Cents`, datas civis e quantidades escaladas.
+- [ ] Mapear testes atuais.
+- [ ] Criar vetores de paridade JS→TS.
+- [ ] Migrar funções puras sem mudar resultados.
+- [ ] Criar tipos de `Cents`, datas civis e quantidades escaladas.
 - [ ] Evitar floating point em operações contabilísticas.
-- [ ] Testar limites, valores inválidos, arredondamento, milhares, vírgula/ponto e quantidades fracionárias.
-- [ ] Só substituir o runtime quando a paridade estiver comprovada.
+- [ ] Testar limites, inválidos, arredondamento e quantidades fracionárias.
+- [ ] Só substituir runtime com paridade comprovada.
 
 ## P0 — v76 Bloco 3: domínio financeiro
 
 - [ ] Migrar `finance.js` por subdomínios.
-- [ ] Tipar faturas, pagamentos, rendimentos, orçamento, objetivos, relatórios e estados derivados.
-- [ ] Testar zero, limites, pagamentos parciais, vencimentos, recorrência e arredondamentos.
+- [ ] Tipar faturas, pagamentos, rendimentos, orçamento, objetivos e relatórios.
+- [ ] Testar pagamentos parciais, vencimentos, recorrência e arredondamentos.
 - [ ] Manter dinheiro persistido em cêntimos inteiros.
 
 ## P0 — v76 Blocos 4–6: Mercado exato, caixa e assets
 
 - [ ] Separar identidade, observação de preço, estimativa, confirmação, quantidade/peso e total.
-- [ ] Criar motor de carrinho com aritmética inteira/razões controladas.
-- [ ] Suportar scanner GTIN/EAN e pesquisa manual sem misturar identidades.
-- [ ] Suportar unidade, embalagem e produtos a peso.
-- [ ] Modelar promoções apenas quando a regra estiver conhecida e testada.
-- [ ] Modelar descontos/cupões/cartão apenas quando elegibilidade e ordem de aplicação estiverem confirmadas.
-- [ ] Produzir subtotal, descontos, IVA quando determinado, total estimado, total confirmado e diferença.
-- [ ] Reconciliar compra com talão/fatura/QR sem substituir valores silenciosamente.
-- [ ] Guardar origem, instante de observação e validade de preço externo.
-- [ ] Corrigir com teste a lacuna `pid` antes de integrar browser live em `marketId|pid`.
-- [ ] Preferir GTIN/PID a pesquisa por termo para identidade de imagem.
-- [ ] Construir biblioteca progressiva de fotografias sem associar imagem a preço.
-- [ ] Verificar origem/licença de logos de mercados antes de incorporar SVG local.
-- [ ] Não introduzir CDN/hotlinking sem revisão de CSP/privacidade/licença.
+- [ ] Criar motor de carrinho com aritmética controlada.
+- [ ] Suportar GTIN/EAN, unidades, embalagens e produtos a peso.
+- [ ] Modelar promoções/descontos/cupões apenas com regras conhecidas e testadas.
+- [ ] Reconciliar com talão/fatura sem substituir valores silenciosamente.
+- [ ] Corrigir a lacuna `pid` com teste específico.
+- [ ] Preferir GTIN/PID para imagens.
+- [ ] Verificar licença/origem de logos SVG antes de incorporar assets locais.
 
-## P0 — v76 Blocos 7–10: core, sync, UI e conclusão
+## P0 — v76 Blocos 7–10
 
-- [ ] Migrar cofre/IndexedDB sem alterar PBKDF2/AES-GCM ou formato persistido sem decisão própria.
-- [ ] Migrar sincronização/conflitos com estados discriminados e testes de concorrência/offline.
-- [ ] Migrar render/forms/events com tipos DOM e guards de `null`.
-- [ ] Migrar Service Worker/build apenas depois de pipeline TS estável.
-- [ ] Remover JavaScript legado somente com prova de ausência de referências.
+- [ ] Migrar cofre/IndexedDB sem alterar algoritmos ou schema sem decisão própria.
+- [ ] Migrar sync/conflitos com testes de concorrência/offline.
+- [ ] Migrar render/forms/events com tipos DOM e guards.
+- [ ] Migrar Service Worker/build após pipeline TS estável.
+- [ ] Remover JavaScript legado apenas com prova de ausência de referências.
 - [ ] Eliminar `any` não justificado.
-- [ ] Revalidar segurança, finanças, sincronização, manifest, offline e responsividade.
 
-## P1 — Mais + ícones + acessibilidade final
+## P2 — Consolidação visual
 
-- [ ] Rever grupos de Mais e reduzir duplicações de navegação.
-- [ ] Rever Segurança, Diagnóstico, Aparência e Preferências como fluxos secundários.
-- [ ] Consolidar ícones Lucide visíveis apenas com prova de ausência de regressão.
-- [ ] Rever foco, teclado, leitores de ecrã e `prefers-reduced-motion`.
-- [ ] Auditoria final de contraste e alvos tácteis.
-
-## P2 — Consolidação técnica
-
-- [ ] Depois da validação física, medir se camadas visuais antigas podem ser fundidas com segurança.
-- [ ] Remover código histórico apenas com prova de ausência de referências.
-- [ ] Alinhar nomenclatura base sem alterar rotas/IDs sem necessidade.
+- [ ] Só depois da validação física de `76-modern-ui1`, medir quais camadas v74/v75 podem ser fundidas.
+- [ ] Remover CSS histórico apenas com comparação visual e regressões verdes.
+- [ ] Manter uma única fonte visual final sem quebrar compatibilidade PWA/Safari.

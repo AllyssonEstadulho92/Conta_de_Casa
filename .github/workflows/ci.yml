@@ -165,6 +165,9 @@ jobs:
       - name: v76 Veggie Burger TypeScript tests
         run: node tests/v76-veggie-menu.test.cjs
 
+      - name: v76 master UI tests
+        run: node tests/v76-modern-ui.test.cjs
+
       - name: Software update center tests
         run: node tests/app-update.test.cjs
 

@@ -1,10 +1,10 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 10 de setembro de 2026  
-Build publicado: `v75`  
-Programa técnico: `v76` — migração incremental TypeScript  
+Build público: `v75`  
+Programa técnico: `v76` — migração incremental TypeScript + revisão UI/UX  
 Branch pública: `main`  
-HEAD funcional publicado: `f196545662b5d120a0dd21b2c498a209cfc144d3`  
+Branch de trabalho: `fix/v76-menu-flow-modern-ui`  
 Distribuição: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
@@ -15,107 +15,106 @@ Distribuição: GitHub Pages / PWA
 - cofre PBKDF2-SHA-256 + AES-GCM;
 - `PBKDF2_ITERATIONS = 250000`;
 - sincronização GitHub opcional limitada ao envelope cifrado;
-- preço pesquisado no Mercado permanece `estimatedCents` e preço efetivamente confirmado permanece `actualCents`;
-- identidade canónica do catálogo/fotografia permanece `marketId|pid` onde esse pipeline é utilizado;
-- QR, scanner, backup/restauro, PWA, Service Worker e funcionamento offline não podem regredir por causa da migração TypeScript;
-- alterações visuais não podem modificar cálculos, pagamentos, faturas, persistência ou segurança.
+- `estimatedCents` permanece distinto de `actualCents`;
+- `marketId|pid` permanece identidade canónica no pipeline especializado de SKU/fotografia;
+- QR, scanner, backup/restauro, PWA e funcionamento offline não podem regredir por mudanças visuais;
+- alterações UI/UX não podem modificar cálculos, pagamentos, faturas, persistência ou segurança.
 
-## 2. Estado integrado em `main`
+## 2. Base integrada em `main`
 
-### v75 funcional
+- `75-market1` — Mercado;
+- `75-expenses1` — Despesas/Faturas;
+- fundação TypeScript — PR #72;
+- `76-veggie-menu1` — PR #74;
+- documentação de publicação — PR #75.
 
-- `75-market1` integrado pelo PR #71;
-- `75-expenses1` integrado pelo PR #73 no commit `176450fcb236a2272afb9d6a6983b42681aa705d`;
-- Despesas/Faturas tem pesquisa, filtros, resumo, tabela desktop e cartões mobile modernizados sem alterar o domínio financeiro;
-- após `75-expenses1`, CI `34496500755`, TypeScript `34496500641` e Pages `34496540096` concluíram com sucesso.
+## 3. Evidência física recebida em iPhone/Safari
 
-### v76 TypeScript
+A captura real de 10/09/2026 mostrou duas regressões de apresentação:
 
-- fundação TypeScript integrada pelo PR #72 no commit `2c1d78508507ab77d6df95850568d9fd7f6b9577`;
-- `76-veggie-menu1` integrado pelo PR #74 no commit `f196545662b5d120a0dd21b2c498a209cfc144d3`.
+1. o Veggie Burger fechado aparece, mas a transição ao abrir não é percebida de forma fiável;
+2. a topbar mantida sticky/fixa entra em conflito com o fluxo do conteúdo durante scroll, produzindo uma composição visual incoerente.
 
-O browser continua a receber JavaScript compatível. A migração é feita por blocos e cada runtime novo só entra depois de typecheck e regressão.
+A mesma captura confirmou que o conteúdo funcional continua presente: conciliação, resumo mensal, ações rápidas, categorias e navegação inferior.
 
-## 3. `76-veggie-menu1` — estado final publicado
+## 4. Candidato atual — `76-veggie-menu2` + `76-modern-ui1`
 
-Objetivo: substituir visualmente o hambúrguer de três linhas por **Veggie Burger de duas linhas**, fazendo as mesmas duas barras convergirem e rodarem para formar o **X**, sem duplicar controlos e sem desaparecer durante o gesto lateral.
+### Menu
 
-### Diagnóstico confirmado
+`src/ui/veggie-menu-toggle.ts` passa a animar explicitamente as duas linhas por Web Animations API:
 
-- `mobile-menu-toggle.js` v73 já controla abertura/fecho, swipe, foco e transferência do botão para o drawer;
-- `#drawerCloseBtn` histórico já é ocultado pelo controlador para evitar um segundo X;
-- o controlador v73 coloca `#mobileMenuBtn` dentro de `.drawer-head` quando abre;
-- `.drawer-head` está dentro de `.nav-drawer-shell`, superfície transformada durante o swipe;
-- por isso, o mesmo botão podia viajar com a superfície e desaparecer parcialmente durante o gesto;
-- `.topbar` já era sticky na base, e a nova camada reforça explicitamente esta invariável no mobile.
+- fechado: duas linhas horizontais;
+- aberto: superior `+45°`, inferior `-45°`;
+- ambas mantêm `opacity: 1` durante a transição;
+- o mesmo `#mobileMenuBtn` continua canónico;
+- o botão permanece fora da `.nav-drawer-shell` transformada enquanto o drawer está aberto;
+- `prefers-reduced-motion` permanece suportado.
 
-### Implementação publicada
+### Cabeçalho
 
-- `src/ui/veggie-menu-toggle.ts` — fonte TypeScript strict;
-- `v76-veggie-menu.js` — runtime browser derivado da fonte TypeScript;
-- `v76-veggie-menu.css` — geometria, transição duas linhas → X, overlay e acessibilidade;
-- `tests/v76-veggie-menu.test.cjs` — isolamento, publicação e regressão.
+`v76-modern-ui.css` remove a política fixa/sticky no mobile:
 
-Comportamento:
+- `.topbar` volta ao fluxo normal com `position: relative`;
+- `.main` deixa de reservar padding fantasma para um header fixo;
+- o conteúdo começa depois do cabeçalho sem sobreposição;
+- o cabeçalho mantém identidade teal, hierarquia e alvo táctil adequado.
 
-- fechado: exatamente duas linhas horizontais (`Veggie Burger`);
-- aberto: linha superior `+45°` e inferior `-45°`, formando o X;
-- existe apenas um `#mobileMenuBtn` para Abrir/Fechar;
-- `aria-expanded`/`aria-label` permanecem associados ao mesmo controlo;
-- com o dialog aberto, o mesmo botão é reposicionado como filho direto de `#mobileDrawer`, fora da `.nav-drawer-shell` transformada;
-- durante `data-dragging` e `data-closing`, o controlo permanece visível no top-layer do dialog;
-- `.drawer-head` reserva espaço à direita para evitar colisão;
-- `prefers-reduced-motion` elimina animações e `forced-colors` mantém contraste;
-- a camada não chama `commit()`, `saveState()` nem acede ao estado financeiro.
+### Sistema visual master
 
-## 4. Distribuição
+Criado `v76-modern-ui.css` como última camada visual transversal, cobrindo explicitamente:
 
-`scripts/prepare-pages.cjs` publica:
+- Início;
+- Despesas;
+- Mercado;
+- Calendário;
+- Planeamento;
+- Relatórios;
+- Objetivos;
+- Segurança;
+- Diagnóstico;
+- Definições;
+- dialogs;
+- drawer;
+- bottom navigation;
+- estados vazios, formulários, botões, tabs e superfícies.
 
-- `v76-veggie-menu.css?v=76-veggie-menu1`;
-- `v76-veggie-menu.js?v=76-veggie-menu1` depois de `mobile-menu-toggle.js`.
+O sistema introduz tokens coerentes para superfícies, contraste, bordas, sombras, raios, estados, foco e espaçamento. Mantém tema escuro, `prefers-reduced-motion` e `forced-colors`.
 
-`sw.js` inclui ambos os assets e a revisão de cache termina em `veggie-menu1`.
+## 5. Distribuição
 
-O build público continua identificado como `v75`; `76-veggie-menu1` é uma revisão incremental do programa v76 e não altera o schema financeiro.
+`scripts/prepare-pages.cjs` foi preparado para:
 
-## 5. QA confirmado
+- publicar `v76-veggie-menu.css/js?v=76-veggie-menu2`;
+- publicar `v76-modern-ui.css?v=76-modern-ui1` depois de `v75-usability.css`;
+- manter todos os módulos funcionais atuais em JavaScript durante a migração incremental.
 
-### Antes do merge
+`sw.js` inclui o novo asset e invalida o cache em `veggie-menu2-modern-ui1`.
 
-Head final do PR #74: `d2936117634ab167b5ee60040f616d969a83e7b8`.
+## 6. QA atual
 
-- TypeScript Foundation `34517080694`: sucesso;
-- CI push `34517080695`: sucesso;
-- CI do PR `34517171967`: sucesso;
-- TypeScript do PR `34517171997`: sucesso;
-- branch estava `behind 0` relativamente a `main` antes do merge.
+Branch `fix/v76-menu-flow-modern-ui`, head funcional validado antes da documentação:
 
-### Depois do merge em `main`
+- CI push `34537017339`: **sucesso**;
+- `v76 Veggie Burger TypeScript tests`: sucesso;
+- `v76 master UI tests`: sucesso;
+- regressões de finanças, faturas, Mercado, scanner, segurança, responsividade, acessibilidade, sincronização e manifest: sucesso.
 
-Commit publicado: `f196545662b5d120a0dd21b2c498a209cfc144d3`.
+TypeScript strict será confirmado novamente pelo workflow de pull request antes do merge.
 
-- TypeScript Foundation `34517268279`: **sucesso**;
-- CI `34517268450`: **sucesso**;
-- GitHub Pages `34517324242`: **sucesso**;
-- o CI incluiu `v76 Veggie Burger TypeScript tests` e as regressões de finanças, faturas, Mercado, scanner, segurança, responsividade, acessibilidade, sincronização e manifest.
+## 7. Riscos e limites
 
-## 6. Validação física ainda necessária
+- testes automáticos não substituem validação física em Safari/iPhone;
+- o redesign é CSS e não muda a lógica de negócio;
+- a topbar deixa deliberadamente de acompanhar o scroll no mobile porque a evidência física mostrou que isso prejudicava a arquitetura visual;
+- a navegação inferior continua fixa por ser controlo persistente de navegação, mas passa a formato dock compacto.
 
-Em iPhone/Safari/PWA validar:
+## 8. Próximo passo
 
-- fechado mostra exatamente duas linhas;
-- toque transforma as duas linhas em X e regressa sem salto;
-- swipe de abertura e fecho sem o controlo desaparecer;
-- X permanece no canto superior direito do drawer;
-- não aparece segundo X;
-- topbar permanece fixa durante scroll normal;
-- sem colisão entre botão, marca e título;
-- 320/375/390/430 px e orientação vertical/horizontal;
-- tema claro/escuro e `prefers-reduced-motion`.
-
-## 7. Próximo passo
-
-1. validar fisicamente `76-veggie-menu1` no iPhone através de captura real;
-2. corrigir apenas se a evidência em hardware mostrar regressão;
-3. retomar `feat/v76-money-dates` para o Bloco 2 — dinheiro, quantidades e datas — com paridade JS → TS antes de substituir runtime financeiro.
+1. atualizar os cinco documentos permanentes;
+2. comparar branch com `main` e confirmar ausência de regressões não intencionais;
+3. abrir PR;
+4. exigir CI + TypeScript strict verdes;
+5. integrar apenas com checks verdes;
+6. confirmar CI + TypeScript + Pages no SHA integrado;
+7. validar fisicamente em iPhone/Safari o menu, scroll e todas as páginas principais;
+8. só depois retomar `feat/v76-money-dates`.

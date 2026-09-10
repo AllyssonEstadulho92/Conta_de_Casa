@@ -11,7 +11,8 @@ const CATEGORY_REV = '64-ui1';
 const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
-const VEGGIE_MENU_REV = '76-veggie-menu1';
+const VEGGIE_MENU_REV = '76-veggie-menu2';
+const MODERN_UI_REV = '76-modern-ui1';
 const EXPERIENCE_REV = '74-experience2';
 const ARCHITECTURE_REV = '75-architecture2';
 const HEADER_REV = '75-header2';
@@ -30,15 +31,10 @@ const CATALOG_REV = '75-catalog4';
 const PD_PHOTO_REV = '75-pd-photo1';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 
-/* Bundle público v75: mantém a experiência v74 como base funcional de apresentação,
-   aplica arquitetura, cabeçalho, estabilidade, guarda segura de arranque, geometria,
-   revisão de páginas Início/Despesas/Planeamento, refinamento visual moderno de Despesas,
-   Veggie Burger TypeScript como camada incremental sobre o controlador móvel validado,
-   biblioteca transversal local-first de assets visuais, revisão de fluxo do Mercado,
-   biblioteca/destaques/catálogo visual, biblioteca progressiva Pingo Doce, carregador
-   prioritário de fotografias, drawer petróleo/teal à direita e uma camada transversal
-   de usabilidade móvel sem alterar regras financeiras ou segurança. Camadas históricas
-   ui-consistency.css e v64-runtime.css continuam fora da distribuição. */
+/* Bundle público v75 com programa v76 incremental. Mantém a experiência funcional existente,
+   acrescenta o Veggie Burger TypeScript v2 e aplica 76-modern-ui1 como última camada visual
+   transversal. As camadas v76 não alteram domínio financeiro, persistência, cifragem,
+   sincronização, scanner, QR ou regras de Mercado. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -70,6 +66,7 @@ const PUBLIC_FILES = Object.freeze([
   'v75-expenses-modern.css',
   'v75-market-flow.css',
   'v75-usability.css',
+  'v76-modern-ui.css',
   'core.js',
   'finance.js',
   'render.js',
@@ -154,6 +151,7 @@ if(!index.includes('v75-expenses-modern.css')) index=index.replace('</head>',`  
 if(!index.includes('v76-veggie-menu.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-veggie-menu.css?v=${VEGGIE_MENU_REV}" />\n</head>`);
 if(!index.includes('v75-market-flow.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-market-flow.css?v=${MARKET_FLOW_REV}" />\n</head>`);
 if(!index.includes('v75-usability.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-usability.css?v=${USABILITY_REV}" />\n</head>`);
+if(!index.includes('v76-modern-ui.css')) index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-modern-ui.css?v=${MODERN_UI_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
 if(!index.includes('sync-conflict-policy.js')) index=index.replace(syncScript,`${syncScript}<script src="./sync-conflict-policy.js?v=${UI_REV}" defer></script>`);
@@ -196,4 +194,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry))) throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; veggie-menu ${VEGGIE_MENU_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for ${BUILD} (${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; veggie-menu ${VEGGIE_MENU_REV}; modern-ui ${MODERN_UI_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
