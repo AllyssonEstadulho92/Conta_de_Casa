@@ -2,220 +2,269 @@
 
 Atualizado: 10 de setembro de 2026  
 Build publicado: `v75`  
-Programa técnico: `v76` — TypeScript incremental  
+Programa técnico em preparação: `v76` — TypeScript  
 Distribuição: GitHub Pages / PWA
 
-## 1. Princípios e invariantes
+Revisões integradas: `75-usability1`, `75-pages1`, `75-assets1`, `75-startup2`, `75-catalog4`, `75-photo-loader3`, `75-market1`. Revisão visual em PR: `75-expenses1`.
 
-A aplicação é estática/local-first. Estado financeiro, regras de negócio, UI, Mercado, assets e sincronização permanecem separados.
+## 1. Invariantes
+
+A aplicação é PWA estática/local-first. Estado financeiro, apresentação, recursos visuais, Mercado e catálogos permanecem separados.
 
 - `STATE_VERSION = 5`;
-- dinheiro persistido em cêntimos inteiros;
-- IndexedDB para estado financeiro;
-- PBKDF2-SHA-256 + AES-GCM para o cofre;
+- dinheiro em cêntimos inteiros;
+- estado financeiro em IndexedDB;
+- PBKDF2-SHA-256 + AES-GCM;
 - `PBKDF2_ITERATIONS = 250000`;
-- sincronização opcional apenas do envelope cifrado;
-- sem passwords, tokens ou chaves embutidas no código público;
-- preço pesquisado do Mercado é estimativa; preço confirmado permanece separado;
-- alterações de apresentação não podem modificar regras financeiras.
+- sync opcional apenas do envelope cifrado;
+- nenhuma password, token, chave ou kit ID no código público;
+- preço pesquisado do Mercado é estimativa; preço efetivamente pago é valor confirmado separado.
 
-## 2. Componentes funcionais atuais
+## 2. Núcleo funcional atual
 
-- `core.js`: estado, normalização, datas base, IndexedDB, cifragem e backup;
-- `finance.js`: cálculos financeiros, estados de faturas e métricas;
-- `render.js`: renderização das páginas e componentes;
-- `forms.js`: formulários e validação de entrada;
-- `events.js`: delegação de eventos e ações do utilizador;
-- `sync.js` + `sync-conflict-policy.js`: sincronização cifrada e resolução de conflitos;
-- `market-*.js/css`: pesquisa, catálogo, imagens, scanner e experiência do Mercado;
-- `scripts/prepare-pages.cjs`: allowlist e composição do bundle público;
-- `sw.js`: cache/offline e aplicação de atualização.
+- `core.js`: estado, normalização, IndexedDB, cifragem e backup;
+- `finance.js`: cálculos financeiros;
+- `render.js`, `forms.js`, `events.js`: UI funcional e mutações autorizadas;
+- `sync.js` + `sync-conflict-policy.js`: sincronização cifrada e conflitos.
 
-## 3. Rotas e navegação
+Camadas v75 de apresentação não podem alterar cálculos, pagamentos, faturas, QR, scanner, quantidades, preços, PIN ou derivação de chave.
 
-A navegação utiliza fragmentos conhecidos, não rotas de servidor.
+## 3. Composição e distribuição
 
-- `#dashboard` — Início;
-- `#bills` — Despesas/Faturas;
-- `#calendar` — Calendário financeiro;
-- `#planning` — Planeamento;
-- `#market` — Mercado;
-- `#reports` — Relatórios;
-- `#goals` — Objetivos;
-- `#security` — Segurança e sincronização;
-- `#diagnostics` — Integridade;
-- `#settings` — Definições.
+`index.html` é o template. `scripts/prepare-pages.cjs` cria `dist/` a partir de allowlist explícita e injeta as revisões publicadas.
 
-No mobile a navegação principal mantém Início, Despesas, Mercado, Planeamento e Mais. O drawer/desktop expõe as secções secundárias.
+Ordem conceptual relevante:
 
-## 4. Dados financeiros
+1. base: `styles.css`, `design-system.css`, `mobile-layout.css`;
+2. experiência e componentes v74;
+3. arquitetura/cabeçalho/estabilidade/layout/drawer v75;
+4. `v75-pages.css` — Início, Despesas e Planeamento;
+5. `v75-expenses-modern.css` — refinamento visual exclusivo de Despesas, quando `75-expenses1` estiver integrado;
+6. `asset-loader.css` — estados genéricos de assets;
+7. componentes especializados do Mercado, incluindo catálogo e `market-photo-loader.css/js`;
+8. `v75-market-flow.css` — refinamento de pesquisa, filtros e fluxo de compra;
+9. `v75-usability.css` — política final de interação/anti-zoom;
+10. runtimes de apresentação, com `v75-market-flow.js` depois de `v75-market-featured.js`.
 
-O estado persistido v5 contém, entre outros domínios:
+## 4. Navegação v75
 
-- meses/perfis mensais;
-- faturas;
-- pagamentos;
-- rendimentos;
-- lista de Mercado;
-- objetivos;
-- atividade/auditoria;
-- segurança;
-- tombstones e conflitos de sincronização.
+Mobile principal:
 
-Valores monetários são inteiros em cêntimos. Datas civis de vencimento são tratadas separadamente de timestamps quando necessário para evitar deslocamentos por timezone.
+`Início → Despesas → Mercado → Planeamento → Mais`
 
-## 5. Despesas/Faturas — arquitetura funcional
+Drawer/desktop acrescenta Relatórios, Metas, Segurança e Diagnóstico. `v75-architecture.js` mantém os pais de navegação.
 
-A página `#bills` usa a estrutura canónica existente:
+## 5. Início, Despesas e Planeamento
 
-`index.html` → controlos de pesquisa/filtro/resumo/lista  
-`events.js` → alterações de filtros e ações  
-`renderBills()` → recolhe critérios e renderiza  
-`filterBills()` → filtra/ordena  
-`finance.js` → calcula estados, pagos, pendentes e vencimentos  
-`render.js` → tabela desktop + cartões mobile
+`75-pages1` é apenas apresentação. Despesas usa a vista canónica de `renderBills()`/`filterBills()` também no mobile, com Lista/Calendário, filtros, resumo e cartões. Planeamento continua a usar `renderPlanning()` para saldo, orçamento, conciliação e rendimentos. Início continua a derivar métricas do núcleo existente.
 
-IDs funcionais preservados:
+## 6. Tipografia e ícones
 
-- `billSearch`;
-- `billStatusFilter`;
-- `billCategoryFilter`;
-- `billDateFrom`;
-- `billDateTo`;
-- `billSort`;
-- `billClearFilters`;
-- `billSummary`;
-- `billsList`;
-- `newBillBtn`.
+Stack atual:
 
-A revisão visual não cria um segundo fluxo de dados nem duplica handlers.
+`Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif`
 
-## 6. Camada visual de Despesas — `75-expenses1`
+Política `75-assets1`:
 
-`v75-expenses-modern.css` é uma camada apenas de apresentação e está integralmente limitada a:
+- preferir uma família tipográfica, máximo de duas;
+- licença/origem/formato verificados antes de incorporar;
+- self-host e WOFF2 quando permitido;
+- CSP não é expandida apenas para experimentar fontes.
 
-`html.cdc-v75 #page-bills`
+Ícones principais: **Lucide SVG local** via `ui-icons.js`/`ui-icons.css`. Bibliotecas externas permanecem fontes secundárias condicionais. Botões só com ícone precisam de nome acessível; decorativos usam `aria-hidden`.
 
-Responsabilidades:
+## 7. Biblioteca e loader transversal — `75-assets1`
 
-- controlo segmentado Lista/Calendário;
-- barra de pesquisa/criação;
-- painel de filtros;
-- cartões de resumo;
-- tabela desktop;
-- cartões mobile;
-- estados hover/focus/active;
-- adaptação responsiva;
-- `prefers-reduced-motion` e `forced-colors`.
+`design-asset-library.js` expõe `CDCDesignAssetLibrary`; `asset-loader.js` expõe `CDCAssetLoader`.
 
-Não contém lógica JavaScript, persistência ou cálculo.
+O loader é opt-in:
 
-## 7. Ordem de CSS no bundle
+- imagens: lazy, async decode, prioridade, `IntersectionObserver`, estados loading/ready/error e `no-referrer`;
+- vídeo/áudio: `preload="metadata"` por defeito e sem autoplay imposto;
+- Lottie: JSON local, runtime local previamente aprovado, `prefers-reduced-motion` e fallback;
+- same-origin por defeito e sem injeção automática de scripts/CDNs.
 
-Ordem relevante para Despesas:
+O loader genérico não escolhe fotografias do catálogo de supermercado e não substitui `75-photo-loader3`.
 
-1. `styles.css`;
-2. `design-system.css`;
-3. `mobile-layout.css`;
-4. camadas de experiência/arquitetura v74/v75;
-5. `v75-pages.css` — baseline funcional visual de Início/Despesas/Planeamento;
-6. `v75-expenses-modern.css?v=75-expenses1` — refinamento exclusivo de Despesas;
-7. outras camadas especializadas;
-8. `v75-usability.css` — política transversal final de interação e acessibilidade.
+## 8. Mercado — modelo de dados e contabilidade
 
-A camada de Despesas deve ficar depois de `v75-pages.css` para poder refiná-la, mas antes de `v75-usability.css` para não ultrapassar as garantias finais de alvos tácteis/anti-zoom.
+`renderMarket()` apresenta a lista mensal. `marketMetrics()` e `finance.js` preservam o cálculo por quantidade.
 
-## 8. Responsividade de Despesas
+Cada item mantém campos distintos:
 
-Desktop amplo:
+- `estimatedCents`: preço pesquisado/estimado por unidade;
+- `actualCents`: preço real confirmado por unidade;
+- `quantity`: quantidade;
+- `purchased`: estado de compra.
 
-- pesquisa + ação numa linha;
-- filtros em seis áreas operacionais;
-- quatro cartões de resumo;
-- tabela com cabeçalho fixo no contentor.
+Regra vigente: um produto vindo do browser é criado com `estimatedCents = product.priceCents`, `actualCents = 0` e `purchased = false`. A revisão `75-market1` não escreve nenhum destes campos.
 
-Desktop/tablet intermédio (`821–1100px`):
+Quando um item comprado ainda não tem preço real, o cálculo existente pode contabilizar provisoriamente a estimativa e `marketMetrics()` sinaliza `missingReal`. A UI deve tornar essa pendência visível e pedir confirmação do preço pago.
 
-- filtros em três colunas;
-- resumo em duas colunas.
+## 9. Mercado — pesquisa
 
-Mobile (`≤820px`):
+Existem dois contextos distintos.
 
-- tabs em duas colunas;
-- pesquisa e ação compactas;
-- filtros em duas colunas;
-- resumo 2×2;
-- cartões mobile com `Em falta` como informação principal;
-- Total/Pago/Categoria e progresso abaixo.
+### Browser de produtos
 
-Ecrãs estreitos (`≤430px`):
+`market-experience.js` consulta as fontes configuradas para encontrar produtos/preços. O resultado é apenas uma **estimativa de compra** até existir preço real confirmado.
 
-- pesquisa e Nova fatura empilhadas;
-- filtros numa coluna;
-- área financeira do cartão reduzida para duas colunas, com Categoria em largura total.
+`75-market1` mantém os handlers existentes e acrescenta apenas qualificação visual:
 
-## 9. Segurança da revisão visual
+- `Preço pesquisado`;
+- nota explícita sobre estimativa;
+- ação `Adicionar` visível;
+- grelha do cartão com três colunas explícitas: fotografia, conteúdo e ação.
 
-`75-expenses1` não altera:
+### Pesquisa da lista
 
-- dados persistidos;
-- cálculo de `remainingForBill`, `paidForBill`, `billStatus` ou filtros;
-- criação/edição/pagamento/eliminação de faturas;
-- cofre, PIN, PBKDF2 ou AES-GCM;
-- sincronização;
-- QR/scanner;
-- CSP ou endpoints.
+`#marketSearch` não consulta lojas: filtra `appState.market` já renderizado. `75-market1` altera apenas a comunicação para **Pesquisar na minha lista…**, preservando o evento existente que chama `renderMarket()`.
 
-A pesquisa visual usa pseudo-elementos CSS e não introduz ícones/CDNs externos.
+## 10. Mercado — filtros e fluxo mobile
 
-## 10. Mercado
+Filtros canónicos existentes:
 
-O Mercado mantém:
+- Estado: todos / por comprar / comprados / comprados sem preço real;
+- Categoria;
+- Ordenação: pendentes primeiro, A–Z, maior estimativa, maior gasto, atualização recente.
 
-- `estimatedCents` separado de `actualCents`;
-- `marketId|pid` como identidade canónica no pipeline especializado;
-- `75-photo-loader3` para estados de fotografia;
-- pesquisa live Pingo Doce/Continente via fontes configuradas;
-- Open Food Facts apenas como enriquecimento visual quando aplicável;
-- scanner e QR separados da camada visual de Despesas.
+`75-market1` não cria filtros novos. Torna os rótulos visíveis no mobile e reorganiza a grelha responsivamente.
 
-A futura v76 deve corrigir com teste específico a lacuna em que o `pid` extraído no browser live não é atualmente persistido como propriedade própria do item adicionado.
+No fluxo mobile, `market-shopping-focus.js` continua responsável pela compactação e pelos grupos. `v75-market-flow.js` atua depois:
 
-## 11. TypeScript v76
+- estado visual: `Por comprar`, `Preço por confirmar`, `Comprado`;
+- significado do valor compacto: `Estimativa total`, `Estimativa provisória`, `Total contabilizado`;
+- item comprado com `actualCents <= 0`: o bloco `.market-mobile-real` existente é movido para fora de `Detalhes`, permanecendo dentro de `#marketList`;
+- o input conserva `data-market-actual`, portanto o handler delegado de `events.js` continua a guardar o preço real;
+- o grupo Comprados abre automaticamente quando contém uma pendência de preço real.
 
-O Bloco 1 foi integrado no `main` pelo PR #72 e adiciona:
+Não existe nova mutação financeira nessa camada.
 
-- `package.json` com TypeScript apenas como dependência de desenvolvimento;
-- `tsconfig.json` estrito e `noEmit`;
-- tipos nominais e contratos persistidos em `src/types/`;
-- type-tests;
-- workflow dedicado.
+## 11. Mercado — catálogo e fotografias
 
-O browser continua a executar o runtime JavaScript v75. A branch separada `feat/v76-money-dates` destina-se ao Bloco 2 e não deve misturar a revisão visual de Despesas.
+Identidade canónica:
 
-Arquitetura de destino:
+`marketId|pid`
 
-- `src/core/`;
-- `src/finance/`;
-- `src/market/`;
-- `src/security/`;
-- `src/sync/`;
-- `src/ui/`;
-- `src/types/`.
+Componentes:
 
-Cada substituição de runtime exige paridade JS→TS antes de integração.
+- `market-image-library.js`: biblioteca partilhada de URL validada;
+- `market-visual-catalog.js`: índice progressivo e renderer incremental;
+- `pingo-doce-photo-library.js`: inventário dedicado;
+- `market-catalog-image-resolver.js`: resolução exata `75-catalog4`;
+- `market-photo-loader.js`: loader especializado `75-photo-loader3`.
 
-## 12. QA e distribuição
+Regras:
 
-`tests/v75-expenses-modern.test.cjs` verifica:
+- URL oficial deve corresponder ao retalhista e PID esperado;
+- falha de fotografia nunca remove o SKU;
+- `75-photo-loader3` mantém estados carregar → validar → `Sem fotografia`, com cooldown antes de retry automático;
+- `75-market1` não altera rede/cache/resolução. Apenas espelha `is-photo-loading` para `aria-busy` nos cartões do catálogo;
+- imagens do browser live, que não fazem parte do pipeline especializado por PID, podem usar `CDCAssetLoader` para estados genéricos de loading/error.
 
-- isolamento do CSS a `#page-bills`;
-- presença dos componentes canónicos;
-- ausência de lógica financeira/criptográfica no CSS;
-- breakpoints, reduced motion e forced colors;
-- inclusão na allowlist Pages;
-- revisão `75-expenses1`;
-- Service Worker/cache;
-- ordem `v75-pages.css → v75-expenses-modern.css → v75-usability.css` no `dist/index.html`.
+## 12. Scanner e QR
 
-CI e Pages executam este teste antes de publicação. Validação física em Safari/PWA, mobile, tablet, desktop e tema escuro continua obrigatória.
+`75-market1` não contém lógica de ZXing, BarcodeDetector, scanner, QR ou captura de fatura. Na Parte 3 não foi encontrado erro funcional comprovado que justificasse alterar esse subsistema.
+
+## 13. Mobile, acessibilidade e anti-zoom
+
+`75-usability1` continua depois das camadas especializadas de página:
+
+- inputs/selects/textareas com pelo menos 16 px no mobile;
+- `touch-action: manipulation` em controlos;
+- alvos tácteis 44/48 px;
+- sem `user-scalable=no` ou `maximum-scale=1`;
+- pinch-to-zoom preservado.
+
+`75-market1` acrescenta `aria-busy` no catálogo visual e suporta `forced-colors`/`prefers-reduced-motion` no CSS. `75-expenses1` também trata `forced-colors` e `prefers-reduced-motion` sem ultrapassar a camada final `v75-usability.css`.
+
+## 14. Segurança e CSP
+
+`75-market1`:
+
+- não chama `commit()` nem `saveState()`;
+- não atribui `estimatedCents`, `actualCents`, `quantity` ou `purchased`;
+- não introduz endpoints, origem CSP, token, telemetria ou segredo;
+- não toca em `core.js`, `finance.js`, IndexedDB financeiro, PIN, PBKDF2, AES-GCM ou sync.
+
+`75-expenses1` é CSS puro e não introduz rede, script, endpoint ou mutação de estado.
+
+## 15. Distribuição e QA v75
+
+`v75-market-flow.css/js` são publicados como `75-market1`, incluídos no Service Worker e no cache com sufixo final `market1`. O JS é executado depois de `v75-market-featured.js`.
+
+`tests/v75-market-flow.test.cjs` verifica isolamento financeiro, distinção de pesquisas, promoção do campo de preço real, qualificação de valores, geometria do browser, `marketId|pid`, PID, loader especializado, scanner e bundle Pages.
+
+Para `75-expenses1`, `scripts/prepare-pages.cjs` publica `v75-expenses-modern.css?v=75-expenses1`, `sw.js` inclui o asset/cache e `tests/v75-expenses-modern.test.cjs` valida isolamento, composição e responsividade. A ordem exigida é `v75-pages.css → v75-expenses-modern.css → v75-usability.css`.
+
+Validação física permanece necessária em Safari/PWA, Android/Chrome, tablet e desktop.
+
+## 16. Arquitetura de migração v76 — TypeScript
+
+A migração TypeScript é incremental. O browser não executa TypeScript diretamente. O código `.ts` será verificado/compilado durante o desenvolvimento e a distribuição continuará a conter JavaScript compatível com o ambiente atual.
+
+### Fundação do Bloco 1
+
+- `package.json`: apenas ferramentas de desenvolvimento; nenhuma dependência runtime;
+- `tsconfig.json`: `strict`, `noEmit`, `strictNullChecks`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `isolatedModules`;
+- `src/types/primitives.ts`: tipos nominais para cêntimos, IDs, datas/horas e códigos de produto;
+- `src/types/persisted-state.ts`: contrato do estado normalizado v5 observado em `core.js`;
+- `src/types/market.ts`: contratos de pesquisa/preço do Mercado;
+- `src/type-tests/contracts.ts`: regressões de compilação;
+- `.github/workflows/typescript.yml`: gate isolado de `npm run typecheck`.
+
+O Bloco 1 foi integrado em `main` pelo PR #72 sem mudar o runtime público.
+
+### Arquitetura de destino
+
+A árvore final deve separar:
+
+- `src/core/`: estado, validação, datas, persistência;
+- `src/finance/`: dinheiro, faturas, pagamentos, rendimentos, orçamento e IVA;
+- `src/market/`: identidade, pesquisa, carrinho, promoções, imagens e reconciliação;
+- `src/security/`: cofre e cifragem sem mudança de algoritmo por causa da linguagem;
+- `src/sync/`: sincronização e conflitos;
+- `src/ui/`: render, formulários, eventos e navegação;
+- `src/types/`: contratos partilhados.
+
+A migração deve substituir módulos apenas depois de testes de paridade provarem equivalência.
+
+## 17. Mercado v76 — motor de cálculo e exatidão
+
+A arquitetura de destino do Mercado deve distinguir explicitamente:
+
+1. identidade do produto;
+2. observação de preço;
+3. preço estimado;
+4. preço confirmado;
+5. quantidade/peso;
+6. promoção/desconto aplicável;
+7. linha de carrinho;
+8. total de carrinho;
+9. reconciliação com talão/fatura.
+
+Operações monetárias não devem depender de floating point. Quantidades fracionárias devem usar escala inteira ou razão explícita, e cada regra de arredondamento deve ter teste próprio.
+
+A aplicação só pode apresentar `Exato` quando todos os fatores que determinam o valor final estiverem confirmados. Caso contrário, apresenta `Estimativa` ou `Preço por confirmar`.
+
+## 18. Mercado v76 — identidade e imagens
+
+Durante o mapeamento foi confirmado que `market-experience.js` extrai `pid` da resposta Cesta para compor o ID interno do resultado, mas não expõe esse PID como propriedade própria do resultado nem o persiste no artigo criado por `addProduct()`. Antes de integrar o browser live na biblioteca `marketId|pid`, esta lacuna precisa de uma correção específica e testada.
+
+A pesquisa de imagem do browser live por termo/Open Food Facts é apenas enriquecimento visual. A biblioteca profissional deverá preferir correspondência por GTIN/PID e fontes verificadas.
+
+Logos SVG de supermercados são assets de marca e só entram depois de verificação de origem e direito de utilização. Nenhuma alteração de CSP será feita apenas para carregar logos externos.
+
+## 19. Despesas — refinamento visual `75-expenses1`
+
+A página `#page-bills` mantém a arquitetura funcional existente:
+
+`index.html` → controlos canónicos  
+`events.js` → filtros e ações  
+`renderBills()`/`filterBills()` → composição e filtragem  
+`finance.js` → estados, pagos, pendentes e vencimentos  
+`render.js` → tabela desktop e cartões mobile
+
+IDs funcionais preservados: `billSearch`, `billStatusFilter`, `billCategoryFilter`, `billDateFrom`, `billDateTo`, `billSort`, `billClearFilters`, `billSummary`, `billsList` e `newBillBtn`.
+
+`v75-expenses-modern.css` atua apenas sobre a apresentação destes elementos. Em desktop mantém pesquisa/ação, painel de filtros, resumo e tabela; em tablet reorganiza filtros e resumo; em mobile usa cartões com `Em falta` como informação principal; em `≤430px` empilha pesquisa/ação e reduz a grelha de informação. Não existe segundo renderer nem segundo fluxo de persistência.
