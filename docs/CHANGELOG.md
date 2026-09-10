@@ -2,6 +2,54 @@
 
 O histórico integral de commits e versões permanece no Git. Este ficheiro mantém as alterações relevantes para continuidade técnica.
 
+## 2026-09-11 — v76 `76-mobile-shell2` — correção estrutural mobile
+
+### Evidência física
+
+Captura em iPhone/Safari mostrou dois defeitos concretos:
+
+- topbar/ícone do menu dentro da área ocupada pela hora e indicadores do iOS;
+- conteúdo inferior visualmente cortado/encoberto pelo dock persistente.
+
+### Causa confirmada no código
+
+A aplicação tinha uma arquitetura de viewport mista. `mobile-layout.css` ainda prendia `.app-shell` e `.main` a `100dvh`, com `overflow:hidden` no shell e scroll interno em `.main`. Entretanto, `76-modern-ui1` já tinha colocado a `.topbar` em fluxo normal e removido o padding de header fixo. A cascata mantinha, portanto, restrições antigas de viewport sem a respetiva geometria de cabeçalho.
+
+### Alterações
+
+- criado `v76-mobile-shell.css`, revisão `76-mobile-shell2`, carregado depois de `v76-modern-ui.css`;
+- scroll vertical principal passa a pertencer ao documento em mobile;
+- `.app-shell` e `.main` deixam de impor `max-height:100dvh`/clipping na camada final;
+- topbar mantém-se relativa e recebe compensação por `safe-area-inset-top`;
+- dock mantém-se fixo com altura explícita e `safe-area-inset-bottom`;
+- páginas reservam `padding-bottom` calculado para manter o último conteúdo acima do dock;
+- adicionados ajustes para ≤390 px, ≤359 px e landscape de baixa altura;
+- elementos focáveis usam `scroll-margin-bottom` para permanecer visíveis;
+- sem `zoom` CSS e sem bloqueio de pinch-to-zoom;
+- novo asset incluído em `scripts/prepare-pages.cjs` e no cache PWA;
+- novo teste `tests/v76-mobile-shell.test.cjs` integrado na CI e no gate do GitHub Pages.
+
+### Versionamento
+
+A versão de programa permanece `0.76.0-dev.1` e a release pública permanece `v75`. Esta correção é distinguida pelo Build ID, conforme o modelo de versionamento já adotado.
+
+### QA
+
+- `tests/v76-mobile-shell.test.cjs`: sucesso;
+- primeira CI `34541749424`: o shell passou, mas a suite parou porque a branch tinha sido temporariamente avançada para `0.76.0-dev.2` enquanto o teste de versionamento preservava `0.76.0-dev.1`;
+- corrigido mantendo `0.76.0-dev.1` e usando Build ID como identidade da compilação;
+- CI funcional final antes da documentação `34541849503`: sucesso integral.
+
+### Isolamento
+
+Não foram alterados `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sincronização cifrada, QR, scanner, CSP ou regras financeiras/Mercado.
+
+### Pendente
+
+Validação física pós-publicação no iPhone/Safari/PWA, incluindo 320/375/390/430 px e scroll até ao último item.
+
+---
+
 ## 2026-09-10 — v76 `76-version-audit1` — auditoria de versão e atualizações — publicado
 
 ### Diagnóstico
@@ -28,10 +76,8 @@ Também existia ambiguidade visual entre a versão semântica do programa, a rel
 ### QA e publicação
 
 - commit funcional: `41cd36b662991fc2f29d5736c2b77621c4649e87`;
-- a primeira execução CI `34539687982` encontrou uma falha no novo teste: a regex esperava acesso DOM literal, enquanto o código usava o helper genérico `metaValue()`; não foi falha de runtime;
 - teste corrigido em `9d6a923c6f10bda2e7128f48053ad278063634ca`;
 - CI funcional `34539811658`: sucesso;
-- PR #78: TypeScript Foundation `34540211764` e CI `34540211775` — sucesso;
 - PR #78 integrado em `main` no commit `a68de711df1c42ec33948d3fff2f4d5e337e2436`;
 - TypeScript Foundation de `main` `34540271567`: sucesso;
 - CI de `main` `34540271547`: sucesso;
@@ -40,10 +86,6 @@ Também existia ambiguidade visual entre a versão semântica do programa, a rel
 ### Isolamento
 
 Nenhuma alteração em `core.js`, `finance.js`, estado financeiro, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sincronização cifrada, QR, scanner, CSP ou regras financeiras.
-
-### Pendente
-
-Validação física no iPhone/Safari/PWA do cartão `Versão e Atualizações`, Build ID/data e deteção de uma compilação nova dentro da mesma release.
 
 ---
 
@@ -71,8 +113,6 @@ Criado `v76-modern-ui.css`, revisão `76-modern-ui1`, cobrindo Início, Despesas
 ### QA e publicação
 
 PR #76 integrado em `main` no commit `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`; TypeScript main `34537430909`, CI main `34537430967` e GitHub Pages `34537469989`: sucesso.
-
-A validação física pós-publicação continua necessária para animação, swipe, scroll e geometrias em hardware real.
 
 ---
 
