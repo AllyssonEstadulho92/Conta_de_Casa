@@ -21,7 +21,9 @@
   function schedule(){
     if(scheduled)return;
     scheduled=true;
-    root.requestAnimationFrame?.(()=>{scheduled=false;apply();})||setTimeout(()=>{scheduled=false;apply();},0);
+    const run=()=>{scheduled=false;apply();};
+    if(typeof root.requestAnimationFrame==='function')root.requestAnimationFrame(run);
+    else setTimeout(run,0);
   }
 
   function clarifyListSearch(){
@@ -46,11 +48,12 @@
       badge.className='market-flow-status';
       headCopy.appendChild(badge);
     }
-    badge.className=`market-flow-status ${state.key}`;
-    badge.textContent=state.label;
+    const className=`market-flow-status ${state.key}`;
+    if(badge.className!==className)badge.className=className;
+    if(badge.textContent!==state.label)badge.textContent=state.label;
   }
 
-  function promoteRealPrice(card,item,state){
+  function promoteRealPrice(card,state){
     const details=card.querySelector(':scope > .market-item-details');
     const real=card.querySelector('.market-mobile-real');
     if(!real||!details)return;
@@ -58,9 +61,10 @@
     real.classList.toggle('market-price-confirmation',state.key==='missing-real');
     if(state.key==='missing-real'){
       const label=real.querySelector(':scope > span');
-      if(label)label.textContent='Confirmar preço pago / unidade';
+      if(label&&label.textContent!=='Confirmar preço pago / unidade')label.textContent='Confirmar preço pago / unidade';
       const hint=real.querySelector(':scope > small');
-      if(hint)hint.textContent='Necessário para substituir a estimativa pelo valor efetivamente pago.';
+      const hintText='Necessário para substituir a estimativa pelo valor efetivamente pago.';
+      if(hint&&hint.textContent!==hintText)hint.textContent=hintText;
       if(real.parentElement===details.querySelector('.market-item-details-body'))card.insertBefore(real,details);
     }
   }
@@ -82,13 +86,13 @@
 
       const headCopy=card.querySelector('.market-mobile-head > div');
       ensureStatus(headCopy,state);
-      promoteRealPrice(card,item,state);
+      promoteRealPrice(card,state);
     });
 
     list.querySelectorAll('.market-purchased-group').forEach(group=>{
       const hasMissing=Boolean(group.querySelector('.market-mobile-card[data-market-flow-state="missing-real"]'));
       group.classList.toggle('has-missing-real',hasMissing);
-      if(hasMissing)group.open=true;
+      if(hasMissing&&!group.open)group.open=true;
     });
   }
 
@@ -139,8 +143,8 @@
 
   function mirrorCatalogBusyState(){
     document.querySelectorAll('.market-visual-product-card').forEach(card=>{
-      const busy=card.classList.contains('is-photo-loading');
-      card.setAttribute('aria-busy',String(busy));
+      const busy=String(card.classList.contains('is-photo-loading'));
+      if(card.getAttribute('aria-busy')!==busy)card.setAttribute('aria-busy',busy);
     });
   }
 
