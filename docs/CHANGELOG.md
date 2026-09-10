@@ -2,6 +2,62 @@
 
 O histórico integral de commits e versões permanece no Git. Este ficheiro mantém as alterações relevantes para continuidade técnica.
 
+## 2026-09-10 — v76 Bloco 1 — fundação TypeScript
+
+### Objetivo
+
+Iniciar a migração integral da fonte funcional para TypeScript sem alterar ainda o runtime publicado, cálculos, armazenamento, segurança, Mercado, UI ou PWA.
+
+### Alterações
+
+- criado `docs/TYPESCRIPT_MIGRATION.md` com estratégia por blocos, critérios de aceitação e regra de precisão do Mercado;
+- criado `package.json` apenas para ferramentas de desenvolvimento;
+- TypeScript fixado como `devDependency`, sem dependências runtime;
+- criado `tsconfig.json` com `strict`, `noEmit`, `strictNullChecks`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitReturns`, `isolatedModules` e outras verificações estritas;
+- `.gitignore` passa a ignorar `node_modules` e `*.tsbuildinfo`;
+- criado `src/types/primitives.ts` com tipos nominais para cêntimos, IDs, datas/horas e códigos de produto;
+- criado `src/types/persisted-state.ts` com o contrato do estado normalizado `STATE_VERSION = 5` observado em `core.js`;
+- criado `src/types/market.ts` com contratos do browser live, identidade de catálogo e separação entre preço estimado e confirmado;
+- criado `src/types/index.ts` para exportação dos contratos;
+- criado `src/type-tests/contracts.ts` com exemplos válidos e regressões protegidas por `@ts-expect-error`;
+- criado workflow `.github/workflows/typescript.yml` para `npm run typecheck` em Node 24.
+
+### Isolamento de runtime
+
+Neste bloco não foram alterados:
+
+- `index.html`;
+- `scripts/prepare-pages.cjs`;
+- `sw.js`;
+- `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`;
+- IndexedDB, schema persistido, PBKDF2, AES-GCM, PIN, backup, sync, QR ou scanner;
+- CSS, navegação ou experiência visual.
+
+Os ficheiros `.ts` ainda não são publicados no bundle Pages.
+
+### Achados da auditoria inicial
+
+- `core.js` possui normalização explícita suficiente para derivar o primeiro contrato tipado do estado v5 sem inventar campos;
+- `market-experience.js` pesquisa Pingo Doce/Continente via Cesta e usa Open Food Facts apenas como enriquecimento visual opcional;
+- o parser Cesta extrai `pid` para compor o identificador do resultado, mas não preserva `pid` como propriedade própria nem o persiste no fluxo `addProduct()`; esta discrepância foi registada para correção testada num bloco posterior;
+- imagem encontrada por termo/score não é identificação forte de SKU e não deve servir de base para afirmar correspondência exata.
+
+### Precisão do Mercado definida para v76
+
+O motor futuro deve distinguir identidade, preço observado, estimativa, preço confirmado, quantidade/peso, promoções/descontos conhecidos e reconciliação com talão/fatura. O rótulo **Exato** só pode ser usado quando todos os fatores que determinam o preço final estiverem confirmados. Caso contrário, mantém-se **Estimativa** ou **Preço por confirmar**.
+
+### QA
+
+- PR #72 aberto: `feat(v76): fundação TypeScript sem alterar runtime`;
+- TypeScript Foundation run `34485339181` no head `58836af7bb53baaadd52d70d633968b9d68ec27e`: **sucesso**;
+- CI legado run `34485339056` no mesmo head: **sucesso**;
+- o CI legado concluiu com sucesso os testes de finanças, auditoria, contagem, isolamento, datas, formulários, QR, Mercado, imagens, scanner, segurança, responsividade, acessibilidade, sincronização, PWA/startup e manifest;
+- comparação com `main` antes da atualização documental final: `behind 0`;
+- o diff não altera o runtime publicado: não existem mudanças em `index.html`, `scripts/prepare-pages.cjs`, `sw.js`, `core.js`, `finance.js`, `render.js`, `forms.js` ou `events.js`;
+- como esta documentação produz um novo head da branch, o merge continua condicionado a nova confirmação de CI + typecheck verdes nesse head.
+
+---
+
 ## 2026-09-10 — v75 `75-market1` — Parte 3: Mercado
 
 ### Diagnóstico
@@ -48,8 +104,8 @@ Criados `v75-market-flow.js` e `v75-market-flow.css`, revisão `75-market1`:
 - Service Worker inclui os novos ativos e acrescenta `market1` ao fim da revisão de cache;
 - criado `tests/v75-market-flow.test.cjs` cobrindo fluxo, geometria, estimate/actual split, PID, loader, scanner e bundle;
 - workflows CI e Pages executam syntax check e o novo teste;
-- CI da branch durante a implementação: run `34481330929` — sucesso;
-- validação final após documentos, PR, main e Pages ainda é necessária antes de considerar a revisão publicada.
+- PR #71 integrado como `c44348dbc5a942b601f360fa38793bd9d8b47a1a`;
+- GitHub Pages do SHA funcional: run `34482133540` — sucesso.
 
 ---
 
