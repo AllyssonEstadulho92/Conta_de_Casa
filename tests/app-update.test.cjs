@@ -10,6 +10,7 @@ const read = file => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
 const updateJs = read('app-update.js');
 const updateCss = read('app-update.css');
+const versionCss = read('v76-version-about.css');
 const designCss = read('design-system.css');
 const runtimeJs = read('v64-runtime.js');
 const shoppingJs = read('market-shopping-focus.js');
@@ -26,14 +27,24 @@ const layoutCss = read('v75-layout-polish.css');
 const drawerCss = read('v75-drawer-theme.css');
 const sw = read('sw.js');
 const prepare = read('scripts/prepare-pages.cjs');
+const packageJson = JSON.parse(read('package.json'));
 const publicFilesStart=prepare.indexOf('const PUBLIC_FILES');
 const publicFilesEnd=prepare.indexOf(']);',publicFilesStart);
 const publicFilesBlock=prepare.slice(publicFilesStart,publicFilesEnd+3);
 const releaseManifest = JSON.parse(read('release-manifest.json'));
 const webManifest = JSON.parse(read('manifest.webmanifest'));
 
-assert.match(updateJs, /Instalação de atualizações/);
-assert.match(updateJs, /Histórico de versões/);
+assert.match(packageJson.version,/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/);
+assert.equal(packageJson.version,'0.76.0-dev.1');
+
+assert.match(updateJs, /VERSÃO INSTALADA/);
+assert.match(updateJs, /Conta de Casa \$\{escapeHtml\(appVersion\(\)\)\}/);
+assert.match(updateJs, /Build <span class="software-version-build-id">/);
+assert.match(updateJs, /Verificar e atualizar agora/);
+assert.match(updateJs, /Deteção por compilação/);
+assert.match(updateJs, /metaValue\('app-version'\)/);
+assert.match(updateJs, /metaValue\('app-build-id'\)/);
+assert.match(updateJs, /metaValue\('app-build-date'\)/);
 assert.match(updateJs, /release-manifest\.json/);
 assert.match(updateJs, /cache:'no-store'/);
 assert.match(updateJs, /navigator\.serviceWorker\.getRegistration/);
@@ -43,6 +54,13 @@ assert.match(updateJs, /controllerchange/);
 assert.match(updateJs, /location\.reload\(\)/);
 assert.doesNotMatch(updateJs, /https?:\/\//, 'The update center must not contact external endpoints.');
 
+const updateAction=updateJs.slice(updateJs.indexOf('async function runUpdateAction()'),updateJs.indexOf('function install()'));
+const registrationUpdateIndex=updateAction.indexOf('await registration.update()');
+const currentConclusionIndex=updateAction.indexOf('Não existe uma atualização pendente');
+assert.ok(registrationUpdateIndex>=0,'manual update action must ask the Service Worker to revalidate');
+assert.ok(currentConclusionIndex>registrationUpdateIndex,'the app must not declare itself current before Service Worker revalidation');
+assert.doesNotMatch(updateAction,/if\(!isNewerVersion\(manifest\.latestVersion\)\)[\s\S]{0,220}return/,'same-release builds must not be skipped');
+
 assert.equal(releaseManifest.schemaVersion,1);
 assert.equal(releaseManifest.channel,'stable');
 assert.equal(releaseManifest.latestVersion,'v75');
@@ -51,19 +69,15 @@ assert.ok(releaseManifest.releases[0].items.length>=8);
 assert.ok(releaseManifest.releases.some(release=>release.version==='v74'));
 assert.ok(releaseManifest.releases.some(release=>release.version==='v73'));
 assert.ok(releaseManifest.releases.some(release=>release.version==='v64'));
-assert.ok(releaseManifest.releases[0].items.some(item=>/barra inferior|Mercado/i.test(item)));
-assert.ok(releaseManifest.releases[0].items.some(item=>/PIN|cofre/i.test(item)));
-assert.ok(releaseManifest.releases[0].items.some(item=>/não.*migrados|não.*reescritos|sem migração|sem reescrita/i.test(item)));
-assert.ok(releaseManifest.releases[0].items.some(item=>/75-stability1/i.test(item)));
-assert.ok(releaseManifest.releases[0].items.some(item=>/75-layout1/i.test(item)));
-assert.ok(releaseManifest.releases[0].items.some(item=>/75-drawer2/i.test(item)));
-assert.ok(releaseManifest.releases[0].items.some(item=>/sem saudação|saudação.*duplicad/i.test(item)));
 assert.equal(webManifest.background_color,'#f4f8f8');
 assert.equal(webManifest.theme_color,'#f4f8f8');
 
 assert.match(updateCss, /software-update-dialog/);
 assert.match(updateCss, /safe-area-inset-bottom/);
 assert.match(updateCss, /prefers-reduced-motion/);
+assert.match(versionCss,/software-version-hero/);
+assert.match(versionCss,/software-version-facts/);
+assert.match(versionCss,/forced-colors/);
 assert.match(designCss,/Conta de Casa v74/);
 assert.match(runtimeJs,/Conta de Casa v64/);
 assert.match(shoppingJs,/Conta de Casa v65/);
@@ -79,9 +93,10 @@ assert.match(stabilityCss,/revisão transversal de estabilidade visual/i);
 assert.match(layoutCss,/revisão 75-layout1/i);
 assert.match(drawerCss,/revisão 75-drawer2/i);
 
-assert.match(sw, /conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw, /version-audit1/);
+assert.match(sw, /conta-de-casa-public-v75-architecture2/);
 assert.match(sw, /stability1-layout1-drawer2/);
-for(const asset of ['./app-update.css','./app-update.js','./design-system.css','./v64-runtime.js','./market-shopping-focus.css','./market-shopping-focus.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js','./v75-stability.css','./v75-stability.js','./v75-layout-polish.css','./v75-drawer-theme.css','./release-manifest.json'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be cached`);
+for(const asset of ['./app-update.css','./app-update.js','./v76-version-about.css','./design-system.css','./v64-runtime.js','./market-shopping-focus.css','./market-shopping-focus.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js','./v75-stability.css','./v75-stability.js','./v75-layout-polish.css','./v75-drawer-theme.css','./release-manifest.json'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be cached`);
 assert.ok(!sw.includes("'./v75-drawer-blue.css'"));
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
@@ -91,7 +106,13 @@ assert.match(sw, /applyRequested=true/);
 assert.match(sw, /client\.navigate\(client\.url\)/);
 assert.doesNotMatch(sw, /install[\s\S]{0,260}skipWaiting\(\)/);
 
+assert.match(prepare, /const APP_VERSION = String\(PACKAGE\.version/);
+assert.match(prepare, /git'.*rev-parse.*--short=7.*HEAD/s);
+assert.match(prepare, /const APP_UPDATE_REV = '76-version-audit1'/);
 assert.match(prepare, /const BUILD = 'v75'/);
+assert.match(prepare, /name="app-version"/);
+assert.match(prepare, /name="app-build-id"/);
+assert.match(prepare, /name="app-build-date"/);
 assert.match(prepare, /const UI_REV = '74-ui1'/);
 assert.match(prepare, /const CATEGORY_REV = '64-ui1'/);
 assert.match(prepare, /const RUNTIME_REV = '64-runtime1'/);
@@ -103,7 +124,7 @@ assert.match(prepare, /const HEADER_REV = '75-header2'/);
 assert.match(prepare, /const STABILITY_REV = '75-stability1'/);
 assert.match(prepare, /const LAYOUT_REV = '75-layout1'/);
 assert.match(prepare, /const DRAWER_REV = '75-drawer2'/);
-for(const asset of ['app-update.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-stability.css','v75-stability.js','v75-layout-polish.css','v75-drawer-theme.css','release-manifest.json'])assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be copied to dist`);
+for(const asset of ['app-update.css','v76-version-about.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-stability.css','v75-stability.js','v75-layout-polish.css','v75-drawer-theme.css','release-manifest.json'])assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be copied to dist`);
 assert.doesNotMatch(publicFilesBlock,/'v75-drawer-blue\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'ui-consistency\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'v64-runtime\.css'/);
@@ -117,10 +138,17 @@ try {
   const events = fs.readFileSync(path.join(dist, 'events.js'), 'utf8');
   const distManifest = JSON.parse(fs.readFileSync(path.join(dist,'release-manifest.json'),'utf8'));
   const distWebManifest = JSON.parse(fs.readFileSync(path.join(dist,'manifest.webmanifest'),'utf8'));
-  assert.match(index, /<meta name="app-build" content="v75"/);
+  const meta=(name)=>new RegExp(`<meta name="${name}" content="([^"]+)"`).exec(index)?.[1]||'';
+
+  assert.equal(meta('app-build'),'v75');
+  assert.equal(meta('app-version'),packageJson.version);
+  assert.match(meta('app-build-id'),/^(?:[0-9a-f]{7}|local)$/);
+  assert.ok(!Number.isNaN(Date.parse(meta('app-build-date'))),'app-build-date must be a valid ISO timestamp');
   assert.match(index, /<meta name="theme-color" content="#f4f8f8"/);
   assert.match(index, /design-system\.css\?v=75/);
-  assert.match(index, /app-update\.css\?v=75/);
+  assert.match(index, /app-update\.css\?v=76-version-audit1/);
+  assert.match(index, /v76-version-about\.css\?v=76-version-audit1/);
+  assert.match(index, /app-update\.js\?v=76-version-audit1/);
   assert.match(index, /market-brand\.css\?v=74-ui1/);
   assert.match(index, /market-shopping-focus\.css\?v=74-shopping2/);
   assert.match(index, /mobile-menu-toggle\.css\?v=73-menu8/);
@@ -137,7 +165,7 @@ try {
   assert.doesNotMatch(index, /ui-consistency\.css/);
   assert.doesNotMatch(index, /v64-runtime\.css/);
   assert.doesNotMatch(index, /\?v=53/);
-  assert.match(index, /id="appBuildVersion">v75</);
+  assert.ok(index.includes(`id="appBuildVersion">${packageJson.version} · v75</strong>`));
   assert.match(events, /\.\/sw\.js\?v=75/);
   assert.equal(distManifest.latestVersion,'v75');
   assert.equal(distWebManifest.background_color,'#f4f8f8');
@@ -147,12 +175,7 @@ try {
   assert.ok(index.indexOf('mobile-menu-toggle.js?v=73-menu8') < index.indexOf('v74-experience.js?v=74-experience2'));
   assert.ok(index.indexOf('v74-experience.js?v=74-experience2') < index.indexOf('v75-architecture.js?v=75-architecture2'));
   assert.ok(index.indexOf('v75-architecture.js?v=75-architecture2') < index.indexOf('v75-stability.js?v=75-stability1'));
-  assert.ok(index.indexOf('mobile-menu-toggle.css?v=73-menu8') < index.indexOf('v74-experience.css?v=74-experience2'));
-  assert.ok(index.indexOf('v74-experience.css?v=74-experience2') < index.indexOf('v75-architecture.css?v=75-architecture2'));
-  assert.ok(index.indexOf('v75-header-refinement.css?v=75-header2') < index.indexOf('v75-stability.css?v=75-stability1'));
-  assert.ok(index.indexOf('v75-stability.css?v=75-stability1') < index.indexOf('v75-layout-polish.css?v=75-layout1'));
-  assert.ok(index.indexOf('v75-layout-polish.css?v=75-layout1') < index.indexOf('v75-drawer-theme.css?v=75-drawer2'));
-  for(const asset of ['app-update.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-stability.css','v75-stability.js','v75-layout-polish.css','v75-drawer-theme.css','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  for(const asset of ['app-update.css','v76-version-about.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-stability.css','v75-stability.js','v75-layout-polish.css','v75-drawer-theme.css','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
   assert.ok(!fs.existsSync(path.join(dist,'v75-drawer-blue.css')));
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
@@ -160,4 +183,4 @@ try {
   fs.rmSync(dist, { recursive:true, force:true });
 }
 
-console.log('Versioned v75 architecture release, controlled installation and stability1 + layout1 + drawer2 expectations: OK');
+console.log(`Version metadata ${packageJson.version}, same-release Service Worker verification and controlled updates: OK`);

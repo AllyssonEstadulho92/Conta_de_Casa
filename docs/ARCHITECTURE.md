@@ -1,13 +1,14 @@
 # Arquitetura — Conta de Casa
 
 Atualizado: 10 de setembro de 2026  
-Build público: `v75`  
+Versão da aplicação: `0.76.0-dev.1`  
+Release pública: `v75`  
 Programa técnico: `v76` — migração incremental TypeScript + UI/UX  
 Distribuição: GitHub Pages / PWA
 
 ## 1. Invariantes
 
-A aplicação continua PWA estática/local-first. Estado financeiro, apresentação, recursos visuais e catálogos permanecem separados.
+A aplicação continua PWA estática/local-first. Estado financeiro, apresentação, recursos visuais, catálogos e metadados de build permanecem separados.
 
 - `STATE_VERSION = 5`;
 - dinheiro em cêntimos inteiros;
@@ -27,7 +28,8 @@ A aplicação continua PWA estática/local-first. Estado financeiro, apresentaç
 - `sync.js` + `sync-conflict-policy.js`: sincronização cifrada e conflitos;
 - `mobile-menu-toggle.js`: controlador móvel v73;
 - `v75-architecture.js`: hierarquia de navegação;
-- `src/`: módulos e contratos em migração progressiva para TypeScript.
+- `src/`: módulos e contratos em migração progressiva para TypeScript;
+- `app-update.js`: Centro de Versão e Atualizações, isolado do domínio financeiro.
 
 ## 3. Composição pública
 
@@ -41,9 +43,42 @@ Ordem visual relevante:
 4. páginas, Despesas e Mercado v75;
 5. `v76-veggie-menu.css` (`76-veggie-menu2`);
 6. `v75-usability.css`;
-7. `v76-modern-ui.css` (`76-modern-ui1`) como última camada visual.
+7. `v76-modern-ui.css` (`76-modern-ui1`) como última camada visual transversal;
+8. `v76-version-about.css` (`76-version-audit1`) limita-se ao ecrã de versão/atualizações e usa os tokens v76 existentes.
 
-## 4. Navegação
+## 4. Modelo de versionamento
+
+O versionamento passa a ter dimensões explícitas, sem conflitar semver com a release pública:
+
+- **Application Version**: `package.json.version`, atualmente `0.76.0-dev.1`;
+- **Public Release**: `BUILD`/`release-manifest.json`, atualmente `v75`;
+- **Build ID**: primeiros 7 caracteres do SHA Git do código efetivamente compilado;
+- **Build Date**: data ISO gerada no processo de preparação do Pages.
+
+`scripts/prepare-pages.cjs` injeta no `dist/index.html`:
+
+- `meta[name="app-version"]`;
+- `meta[name="app-build"]`;
+- `meta[name="app-build-id"]`;
+- `meta[name="app-build-date"]`.
+
+O Build ID é obtido por `git rev-parse --short=7 HEAD`, com `GITHUB_SHA` como fallback de CI e `local` apenas como fallback final.
+
+## 5. Atualizações PWA
+
+`app-update.js` e `sw.js` implementam atualização controlada:
+
+1. o histórico de release é consultado com `cache: no-store`;
+2. `navigator.serviceWorker.getRegistration()` resolve a instalação atual;
+3. a verificação manual chama `registration.update()` **antes** de qualquer conclusão de “atualizado”;
+4. uma release numericamente igual não bloqueia a procura de um Service Worker de build mais recente;
+5. se existir `registration.waiting`, a instalação só avança por `APPLY_UPDATE` após ação explícita;
+6. `controllerchange` provoca reload controlado;
+7. dados financeiros, PIN e cofre não participam deste protocolo.
+
+Esta ordem segue o princípio técnico usado pelo Foco Jornada: versão visível + identidade da compilação + revalidação real do Service Worker.
+
+## 6. Navegação
 
 Mobile principal:
 
@@ -51,16 +86,14 @@ Mobile principal:
 
 O drawer mantém destinos secundários agrupados. Rotas, IDs, permissões e handlers não são substituídos pelo redesign.
 
-## 5. Cabeçalho mobile
-
-Após validação física, a política vigente é:
+## 7. Cabeçalho mobile
 
 - `.topbar` em fluxo normal com `position: relative`;
 - sem `padding-top` reservado para header fixo;
 - conteúdo começa depois do cabeçalho sem sobreposição;
 - navegação inferior continua persistente por ser navegação global.
 
-## 6. Veggie Burger TypeScript — `76-veggie-menu2`
+## 8. Veggie Burger TypeScript — `76-veggie-menu2`
 
 Fonte: `src/ui/veggie-menu-toggle.ts`. Runtime: `v76-veggie-menu.js`.
 
@@ -73,54 +106,29 @@ Fonte: `src/ui/veggie-menu-toggle.ts`. Runtime: `v76-veggie-menu.js`.
 - com drawer aberto, o botão permanece fora da `.nav-drawer-shell` transformada;
 - reduced-motion e forced-colors preservados.
 
-## 7. Sistema visual master — `76-modern-ui1`
+## 9. Sistema visual master — `76-modern-ui1`
 
 `v76-modern-ui.css` define tokens transversais para background, superfícies, texto, muted, primary/accent, estados, bordas, sombras, raios e foco.
 
-Cobertura explícita:
-
-- `#page-dashboard`;
-- `#page-bills`;
-- `#page-market`;
-- `#page-calendar`;
-- `#page-planning`;
-- `#page-reports`;
-- `#page-goals`;
-- `#page-security`;
-- `#page-diagnostics`;
-- `#page-settings`.
-
-Também cobre tabs, botões, inputs, painéis, tabelas, estados vazios, dialogs, drawer e bottom navigation.
-
-## 8. Princípios UI/UX
-
-- uma família tipográfica principal;
-- hierarquia por tamanho, peso, espaçamento e contraste;
-- ações primárias, secundárias e destrutivas visualmente distintas;
-- superfícies com bordas leves e sombras discretas;
-- alvos tácteis mínimos de 44 px;
-- campos mobile compatíveis com Safari sem zoom automático;
-- `prefers-reduced-motion`, `forced-colors` e pinch-to-zoom preservados;
-- bottom navigation mantém cinco destinos previsíveis.
-
-## 9. Despesas e Mercado
-
-Despesas continuam a usar `renderBills()`/`filterBills()` e domínio financeiro atual. O master UI só altera apresentação.
-
-No Mercado, preço pesquisado continua estimado, preço real continua separado e imagem nunca prova preço. Exatidão de caixa futura exige identidade, quantidade/peso, preço e condições relevantes confirmados.
+Cobertura explícita: Dashboard, Despesas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições, além de tabs, botões, inputs, painéis, tabelas, estados vazios, dialogs, drawer e bottom navigation.
 
 ## 10. Segurança
 
-`76-veggie-menu2` e `76-modern-ui1` não alteram `core.js`, `finance.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sync, QR/scanner, CSP, endpoints ou segredos.
+`76-version-audit1`, `76-veggie-menu2` e `76-modern-ui1` não alteram `core.js`, `finance.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sync, QR/scanner, CSP, endpoints ou segredos.
 
-## 11. Estado publicado e QA
+O novo ecrã de versão não lê nem transmite dados do cofre. A verificação usa apenas `release-manifest.json`, Service Worker e metadados de build da própria distribuição.
 
-PR #76 integrado em `main` no commit `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
+## 11. QA
 
-- TypeScript PR `34537361127`: sucesso;
-- CI PR `34537361274`: sucesso;
-- TypeScript main `34537430909`: sucesso;
-- CI main `34537430967`: sucesso;
-- Pages `34537469989`: sucesso.
+`76-version-audit1` tem regressão específica em `tests/app-update.test.cjs` para:
 
-Validação física pós-publicação continua obrigatória para Safari/iPhone, especialmente animação, swipe, scroll e geometrias 320/375/390/430 px.
+- semver da aplicação;
+- metadados version/release/build/date em `dist`;
+- distribuição do CSS de versão;
+- cache do Service Worker;
+- garantia de que `registration.update()` precede a conclusão “não existe atualização pendente”;
+- prevenção do antigo retorno antecipado quando a release é igual.
+
+CI da branch após correção do teste: `34539811658` — sucesso.
+
+Validação física pós-publicação continua obrigatória para Safari/iPhone/PWA.
