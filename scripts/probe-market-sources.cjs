@@ -5,6 +5,7 @@ const TIMEOUT_MS=12000;
 const EXAMPLES=[
   {
     name:'Continente',
+    marketId:'continente',
     pid:'8167440',
     url:'https://www.continente.pt/produto/compressas-gaze-20-x-20-cm-continente-8167440.html',
     imageHost:'www.continente.pt',
@@ -12,6 +13,7 @@ const EXAMPLES=[
   },
   {
     name:'Pingo Doce',
+    marketId:'pingo-doce',
     pid:'739490',
     url:'https://www.pingodoce.pt/home/produtos/mercearia/arroz-massa-e-leguminosas/arroz/arroz-carolino-cigala-739490.html',
     imageHost:'static.pingodoce.pt',
@@ -19,7 +21,7 @@ const EXAMPLES=[
   }
 ];
 
-function headers(extra={}){return {Origin:ORIGIN,'User-Agent':'ContaDeCasa-MarketSourceAudit/1.4',...extra};}
+function headers(extra={}){return {Origin:ORIGIN,'User-Agent':'ContaDeCasa-MarketSourceAudit/1.5',...extra};}
 function parseSse(text){
   const events=[];
   for(const block of String(text||'').split(/\n\n+/)){
@@ -37,10 +39,32 @@ async function request(url,init={}){
 function urlsFrom(value){
   return [...new Set((String(value||'').replace(/\\\//g,'/').match(/https?:\/\/[^\s"'<>\\)]+/g)||[]).map(url=>url.replace(/[},\]]+$/g,'')))];
 }
+function runtimeSafeOfficialImageUrl(value,marketId,pid){
+  try{
+    const url=new URL(String(value).replace(/&amp;/g,'&'));
+    if(url.protocol!=='https:')return '';
+    const host=url.hostname.toLowerCase();
+    const path=decodeURIComponent(url.pathname);
+    const id=String(pid||'').replace(/\D/g,'');
+    if(marketId==='continente'){
+      if(host!=='www.continente.pt'||!path.includes('/Sites-col-master-catalog/'))return '';
+      if(!/\.(?:jpe?g|png|webp)$/i.test(path)||/noimage|fallback/i.test(path))return '';
+      if(id&&!new RegExp(`(?:/|_)${id}(?:[-_.]|$)`).test(path))return '';
+      return url.href;
+    }
+    if(marketId==='pingo-doce'){
+      if(host!=='static.pingodoce.pt'||!path.includes('/Sites-pingo-doce-master/'))return '';
+      if(!/\/images\/(?:large|medium|small)\//i.test(path)||!/\.(?:jpe?g|png|webp)$/i.test(path))return '';
+      if(id&&!path.split('/').some(segment=>segment.startsWith(`${id}_`)||segment.startsWith(`${id}-`)||segment.startsWith(`${id}.`)))return '';
+      return url.href;
+    }
+    return '';
+  }catch(_error){return '';}
+}
 async function probeCesta(){
   try{
     const common={Accept:'application/json, text/event-stream','Content-Type':'application/json','MCP-Protocol-Version':'2025-06-18'};
-    const init=await request('https://cesta.pt/mcp',{method:'POST',headers:common,body:JSON.stringify({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Conta de Casa source audit',version:'1.4.0'}}})});
+    const init=await request('https://cesta.pt/mcp',{method:'POST',headers:common,body:JSON.stringify({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'Conta de Casa source audit',version:'1.5.0'}}})});
     await request('https://cesta.pt/mcp',{method:'POST',headers:common,body:JSON.stringify({jsonrpc:'2.0',method:'notifications/initialized'})}).catch(()=>null);
     const called=await request('https://cesta.pt/mcp',{method:'POST',headers:common,body:JSON.stringify({jsonrpc:'2.0',id:3,method:'tools/call',params:{name:'search_products',arguments:{query:'leite meio gordo',limit:20}}})});
     const text=called.events?.[0]?.result?.content?.find(item=>item?.type==='text')?.text||'';
@@ -53,8 +77,6 @@ async function probeCesta(){
 async function probeRetailerImage(example){
   try{
     const reader=`https://r.jina.ai/${example.url}`;
-    // Deve espelhar o pedido do browser v61: GET simples, sem cabeçalhos X-* que
-    // provoquem preflight. O Reader retém imagens por omissão.
     const result=await request(reader,{headers:{Accept:'application/json'}});
     const urls=urlsFrom(result.text);
     const exact=urls.find(raw=>{
@@ -63,7 +85,13 @@ async function probeRetailerImage(example){
         return url.hostname===example.imageHost&&decodeURIComponent(url.pathname).includes(example.imagePath)&&decodeURIComponent(url.pathname).includes(example.pid)&&/\.(?:jpe?g|png|webp)$/i.test(url.pathname);
       }catch(_error){return false;}
     });
-    console.log(`${example.name}: reader ${result.response.status}; CORS=${result.response.headers.get('access-control-allow-origin')||'n/a'}; simple-get=true; exact-image=${Boolean(exact)}`);
+    const runtimeAccepted=Boolean(exact&&runtimeSafeOfficialImageUrl(exact,example.marketId,example.pid));
+    let sample='n/a';
+    if(exact){
+      try{sample=decodeURIComponent(new URL(exact).pathname).slice(-180);}catch(_error){}
+    }
+    console.log(`${example.name}: reader ${result.response.status}; CORS=${result.response.headers.get('access-control-allow-origin')||'n/a'}; simple-get=true; exact-image=${Boolean(exact)}; runtime-safe=${runtimeAccepted}; sample=${sample}`);
+    if(exact&&!runtimeAccepted)throw new Error(`${example.name} exact image is rejected by the runtime validator`);
   }catch(error){
     console.warn(`${example.name} image probe indisponível: ${error?.name||'Error'} ${error?.message||''}`);
   }
