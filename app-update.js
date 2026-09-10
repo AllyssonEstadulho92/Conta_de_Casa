@@ -1,62 +1,39 @@
 'use strict';
 
 /*
- * Conta de Casa — Centro de Atualização de Software (v63)
+ * Conta de Casa — Versão e Atualizações (v76 version-audit1)
  *
- * Política de atualização:
- * - o histórico público fica em release-manifest.json, versionado no repositório;
- * - abrir este ecrã pode verificar se existe versão nova, mas não a instala;
- * - a instalação só começa após ação explícita no botão de atualização;
- * - o Service Worker aplica a nova versão e reinicia a aplicação;
+ * Política:
+ * - a versão da aplicação vem do package.json e é injetada no HTML publicado;
+ * - a release pública continua identificada por app-build/release-manifest.json;
+ * - o build exato é identificado pelo SHA curto e data de compilação;
+ * - a verificação manual consulta sempre o Service Worker antes de declarar que está atualizado;
+ * - instalar uma atualização exige ação explícita do utilizador;
  * - dados financeiros, cofre, PIN e IndexedDB não são modificados por esta camada.
  */
 (function installSoftwareUpdateCenter(root){
   const FALLBACK_RELEASE_NOTES=Object.freeze([
     Object.freeze({
+      version:'v75',
+      date:'10 de setembro de 2026',
+      title:'Estabilidade, páginas e experiência móvel',
+      items:Object.freeze([
+        'Revisão transversal de estabilidade e geometria da aplicação.',
+        'Início, Despesas, Planeamento e Mercado receberam refinamentos de apresentação.',
+        'O cofre, os cálculos financeiros e a sincronização cifrada permanecem isolados do sistema de atualização.'
+      ])
+    }),
+    Object.freeze({
+      version:'v74',
+      date:'9 de setembro de 2026',
+      title:'Experiência e navegação refinadas',
+      items:Object.freeze(['Revisão da experiência, navegação e apresentação sem alterar o domínio financeiro.'])
+    }),
+    Object.freeze({
       version:'v63',
       date:'6 de setembro de 2026',
-      title:'Compras organizadas e atualizações controladas',
-      items:Object.freeze([
-        'A Lista de compras passa a ficar organizada por categoria e com alinhamento visual consistente à esquerda.',
-        'A categoria Mercearia / Despensa recebe um ícone mais adequado à função.',
-        'O histórico das versões passa a ser mantido em release-manifest.json.',
-        'Ao confirmar Atualizar agora, o Service Worker instala a nova versão e reinicia a aplicação.',
-        'O cofre e os dados financeiros locais permanecem separados do mecanismo de atualização.'
-      ])
-    }),
-    Object.freeze({
-      version:'v62',
-      date:'6 de setembro de 2026',
-      title:'Mercado text-first e correções no iPhone',
-      items:Object.freeze([
-        'As fotografias deixaram de ocupar espaço na experiência principal do Mercado.',
-        'Foi corrigida a coluna fantasma que comprimira os resultados no Safari/iPhone.',
-        'Metadados técnicos antigos deixaram de gerar conflitos manuais com zero diferenças financeiras.'
-      ])
-    }),
-    Object.freeze({
-      version:'v61',
-      date:'6 de setembro de 2026',
-      title:'Imagens oficiais no browser real',
-      items:Object.freeze(['Corrigida a integração entre os cartões reais do Mercado e o resolvedor de fotografias oficiais.'])
-    }),
-    Object.freeze({
-      version:'v60',
-      date:'6 de setembro de 2026',
-      title:'Imagens oficiais e catálogo alargado',
-      items:Object.freeze(['As fotografias passaram a dar prioridade ao SKU exato das páginas oficiais do retalhista.'])
-    }),
-    Object.freeze({
-      version:'v59',
-      date:'5 de setembro de 2026',
-      title:'Imagens de produto e ampliação',
-      items:Object.freeze(['As miniaturas de produto passaram a permitir ampliação ao toque ou clique.'])
-    }),
-    Object.freeze({
-      version:'v58',
-      date:'5 de setembro de 2026',
       title:'Centro de Atualização de Software',
-      items:Object.freeze(['Foi criado o ecrã Atualização de Software nas Definições.'])
+      items:Object.freeze(['Foi introduzido o histórico público de versões e o fluxo de atualização controlada.'])
     })
   ]);
 
@@ -70,7 +47,11 @@
   let releaseManifest={latestVersion:FALLBACK_RELEASE_NOTES[0].version,releases:FALLBACK_RELEASE_NOTES};
   let reloadAfterUpdate=false;
 
-  const buildVersion=()=>document.querySelector('meta[name="app-build"]')?.content?.trim()||FALLBACK_RELEASE_NOTES[0].version;
+  const metaValue=name=>document.querySelector(`meta[name="${name}"]`)?.content?.trim()||'';
+  const buildVersion=()=>metaValue('app-build')||FALLBACK_RELEASE_NOTES[0].version;
+  const appVersion=()=>metaValue('app-version')||buildVersion();
+  const buildId=()=>metaValue('app-build-id')||'local';
+  const buildDate=()=>metaValue('app-build-date');
   const icon=(name,size=22)=>root.CDCIcons?.markup?.(name,size)||fallbackIcon(name,size);
   const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const versionNumber=value=>{
@@ -78,6 +59,23 @@
     return match?Number(match[1]):-1;
   };
   const isNewerVersion=(candidate,current=buildVersion())=>versionNumber(candidate)>versionNumber(current);
+
+  function isStandaloneMode(){
+    const displayStandalone=typeof matchMedia==='function'&&matchMedia('(display-mode: standalone)').matches;
+    return displayStandalone||navigator.standalone===true;
+  }
+
+  function formatBuildDate(){
+    const raw=buildDate();
+    if(!raw)return 'data de compilação indisponível';
+    const date=new Date(raw);
+    if(Number.isNaN(date.getTime()))return 'data de compilação indisponível';
+    try{
+      return new Intl.DateTimeFormat('pt-PT',{dateStyle:'medium',timeStyle:'short'}).format(date);
+    }catch(_error){
+      return date.toISOString().replace('T',' ').slice(0,16)+' UTC';
+    }
+  }
 
   function fallbackIcon(name,size){
     const path=name==='circleCheck'
@@ -99,25 +97,25 @@
   }
 
   function normalizeManifest(value){
-    if(!value||value.schemaVersion!==1||!/^v\d+$/.test(String(value.latestVersion||''))||!Array.isArray(value.releases)) return null;
+    if(!value||value.schemaVersion!==1||!/^v\d+$/.test(String(value.latestVersion||''))||!Array.isArray(value.releases))return null;
     const releases=value.releases.filter(validRelease).map(release=>({
       version:String(release.version),
       date:String(release.date||''),
       title:String(release.title||''),
       items:release.items.map(item=>String(item||'')).filter(Boolean)
     }));
-    if(!releases.some(release=>release.version===value.latestVersion)) return null;
+    if(!releases.some(release=>release.version===value.latestVersion))return null;
     return {latestVersion:String(value.latestVersion),releases};
   }
 
   async function loadReleaseManifest(force=false){
-    if(manifestInFlight&&!force) return manifestInFlight;
+    if(manifestInFlight&&!force)return manifestInFlight;
     manifestInFlight=(async()=>{
       const suffix=`ts=${Date.now()}`;
       const response=await fetch(`./release-manifest.json?${suffix}`,{cache:'no-store',credentials:'same-origin'});
-      if(!response.ok) throw new Error('release-manifest-unavailable');
+      if(!response.ok)throw new Error('release-manifest-unavailable');
       const normalized=normalizeManifest(await response.json());
-      if(!normalized) throw new Error('release-manifest-invalid');
+      if(!normalized)throw new Error('release-manifest-invalid');
       releaseManifest=normalized;
       availableVersion=isNewerVersion(normalized.latestVersion)?normalized.latestVersion:'';
       return normalized;
@@ -134,19 +132,41 @@
   }
 
   function statusCopy(){
-    if(updateStatus==='checking') return {title:'A verificar atualizações…',subtitle:'A consultar o manifesto público de versões do Conta de Casa.',icon:'refresh',tone:'checking'};
-    if(updateStatus==='available') return {title:`Atualização ${availableVersion} disponível`,subtitle:'A nova versão está pronta para instalar. O cofre e os dados locais não são apagados.',icon:'download',tone:'available'};
-    if(updateStatus==='updating') return {title:`A instalar ${availableVersion||'a atualização'}…`,subtitle:'A preparar os novos ficheiros. A aplicação reinicia automaticamente quando a instalação terminar.',icon:'refresh',tone:'checking'};
-    if(updateStatus==='error') return {title:'Não foi possível verificar agora',subtitle:updateMessage||'Confirme a ligação à Internet e tente novamente.',icon:'info',tone:'warning'};
-    if(updateStatus==='unsupported') return {title:'Atualização automática indisponível',subtitle:'Este navegador não disponibiliza Service Worker. Pode continuar a usar a aplicação online.',icon:'info',tone:'warning'};
-    return {title:'O Conta de Casa está atualizado',subtitle:`Versão ${buildVersion()}`,icon:'circleCheck',tone:'ok'};
+    if(updateStatus==='checking')return {title:'A verificar atualizações…',subtitle:'A comparar esta compilação com a versão publicada.',icon:'refresh',tone:'checking'};
+    if(updateStatus==='available')return {title:`Atualização ${availableVersion||'disponível'}`,subtitle:'Foi encontrada uma compilação mais recente. Pode aplicá-la sem apagar o cofre ou os dados locais.',icon:'download',tone:'available'};
+    if(updateStatus==='updating')return {title:'A instalar a atualização…',subtitle:updateMessage||'A nova compilação está a ser aplicada. A aplicação reinicia quando o Service Worker assumir o controlo.',icon:'refresh',tone:'checking'};
+    if(updateStatus==='error')return {title:'Não foi possível verificar agora',subtitle:updateMessage||'Confirme a ligação à Internet e tente novamente.',icon:'info',tone:'warning'};
+    if(updateStatus==='unsupported')return {title:'Atualização automática indisponível',subtitle:'Este navegador não disponibiliza Service Worker. Pode continuar a usar a aplicação online.',icon:'info',tone:'warning'};
+    return {title:'O Conta de Casa está atualizado',subtitle:updateMessage||`Compilação ${buildId()} · release ${buildVersion()}`,icon:'circleCheck',tone:'ok'};
   }
 
   function actionLabel(){
-    if(updateStatus==='checking') return 'A verificar…';
-    if(updateStatus==='updating') return 'A instalar…';
-    if(updateStatus==='available') return `Atualizar agora para ${availableVersion}`;
-    return 'Verificar atualizações';
+    if(updateStatus==='checking')return 'A verificar…';
+    if(updateStatus==='updating')return 'A instalar…';
+    if(updateStatus==='available')return 'Verificar e atualizar agora';
+    return 'Verificar e atualizar agora';
+  }
+
+  function versionOverviewHtml(){
+    const standalone=isStandaloneMode();
+    const workerActive='serviceWorker' in navigator&&Boolean(navigator.serviceWorker.controller);
+    const online=navigator.onLine!==false;
+    return `<section class="software-version-overview" aria-label="Versão instalada">
+      <div class="software-version-hero">
+        <div class="software-version-copy">
+          <span class="software-version-kicker">VERSÃO INSTALADA</span>
+          <strong>Conta de Casa ${escapeHtml(appVersion())}</strong>
+          <small>${escapeHtml(buildVersion())} · Build <span class="software-version-build-id">${escapeHtml(buildId())}</span> · ${escapeHtml(formatBuildDate())}</small>
+        </div>
+        <span class="software-version-badge">${standalone?'PWA instalada':'Versão Web'}</span>
+      </div>
+      <div class="software-version-facts">
+        <article><span>Aplicação</span><strong>${standalone?'PWA instalada':'Navegador'}</strong></article>
+        <article><span>Atualizações</span><strong>${workerActive?'Service Worker ativo':'Ao abrir online'}</strong></article>
+        <article><span>Rede</span><strong>${online?'Online':'Offline'}</strong></article>
+      </div>
+      <p class="software-version-note"><strong>Deteção por compilação.</strong> A verificação consulta o Service Worker mesmo quando o número da release não mudou, evitando indicar incorretamente que a aplicação está atualizada.</p>
+    </section>`;
   }
 
   function dialogHtml(){
@@ -155,9 +175,11 @@
     return `<div class="software-update-shell">
       <header class="software-update-header">
         <button class="software-update-back" type="button" data-software-update-close aria-label="Voltar">${icon('back',26)}</button>
-        <h2>Atualização de Software</h2>
+        <h2>Versão e Atualizações</h2>
         <span class="software-update-header-spacer" aria-hidden="true"></span>
       </header>
+
+      ${versionOverviewHtml()}
 
       <div class="software-update-options" role="group" aria-label="Opções de atualização">
         <button class="software-update-row" type="button" data-update-explain="controlled">
@@ -176,13 +198,13 @@
       </section>
 
       <section class="software-update-details" ${detailsOpen?'':'hidden'}>
-        <div class="software-update-details-head"><div><strong>Novidades e histórico</strong><span>Alterações armazenadas por versão</span></div><span class="software-update-version-chip">${escapeHtml(buildVersion())}</span></div>
+        <div class="software-update-details-head"><div><strong>Novidades e histórico</strong><span>Alterações armazenadas por release pública</span></div><span class="software-update-version-chip">${escapeHtml(buildVersion())}</span></div>
         ${releaseNotesHtml()}
       </section>
 
       <div class="software-update-actions">
         <button class="btn primary software-update-check" type="button" data-update-check ${actionInFlight?'disabled':''}>${icon(updateStatus==='available'?'download':'refresh',19)}<span>${escapeHtml(actionLabel())}</span></button>
-        <small>A instalação usa apenas recursos da própria aplicação. O cofre, PIN e dados financeiros não são enviados nem substituídos.</small>
+        <small>A verificação e a instalação usam apenas recursos da própria aplicação. O cofre, PIN e dados financeiros não são enviados nem substituídos.</small>
       </div>
     </div>`;
   }
@@ -193,7 +215,7 @@
     if(updateDialog?.isConnected)return updateDialog;
     updateDialog=document.createElement('dialog');
     updateDialog.className='software-update-dialog';
-    updateDialog.setAttribute('aria-label','Atualização de Software');
+    updateDialog.setAttribute('aria-label','Versão e Atualizações');
     updateDialog.addEventListener('cancel',event=>{event.preventDefault();closeDialog();});
     updateDialog.addEventListener('click',event=>{
       if(event.target===updateDialog){closeDialog();return;}
@@ -201,10 +223,10 @@
       if(event.target.closest('[data-update-details], [data-update-details-row]')){detailsOpen=!detailsOpen;renderDialog();return;}
       const explanation=event.target.closest('[data-update-explain]')?.dataset.updateExplain;
       if(explanation==='controlled'){
-        root.toast?.('A aplicação só instala uma nova versão quando confirmar no botão Atualizar agora.');
+        root.toast?.('A aplicação só aplica uma nova compilação quando confirmar em Verificar e atualizar agora.');
         return;
       }
-      if(event.target.closest('[data-update-check]')) runUpdateAction();
+      if(event.target.closest('[data-update-check]'))runUpdateAction();
     });
     document.body.appendChild(updateDialog);renderDialog();return updateDialog;
   }
@@ -214,9 +236,10 @@
     try{
       await loadReleaseManifest(true);
       updateStatus=availableVersion?'available':'ready';
+      if(!availableVersion)updateMessage=`Versão ${appVersion()} · Build ${buildId()}. Use Verificar e atualizar agora para validar a compilação publicada.`;
     }catch(_error){
-      updateStatus='error';
-      updateMessage='Não foi possível ler o histórico público de versões neste momento.';
+      updateStatus='ready';
+      updateMessage=`Versão ${appVersion()} · Build ${buildId()}. O histórico não pôde ser consultado agora; a verificação da compilação continua disponível.`;
     }
     renderDialog();
   }
@@ -237,8 +260,8 @@
     const panel=document.querySelector('#page-settings article.panel.narrow');
     if(!panel||panel.querySelector('[data-open-software-update]'))return;
     const resetButton=panel.querySelector('#resetDataBtn');
-    const block=document.createElement('section');block.className='settings-software-update-block';block.setAttribute('aria-label','Atualização da aplicação');
-    block.innerHTML=`<button class="settings-software-update-row" type="button" data-open-software-update><span class="settings-software-update-icon" aria-hidden="true">${icon('refresh',22)}</span><span class="settings-software-update-copy"><strong>Atualização de Software</strong><small>Versão ${escapeHtml(buildVersion())} · histórico de alterações</small></span><span class="settings-software-update-chevron" aria-hidden="true">${icon('chevron',20)}</span></button>`;
+    const block=document.createElement('section');block.className='settings-software-update-block';block.setAttribute('aria-label','Versão e atualizações da aplicação');
+    block.innerHTML=`<button class="settings-software-update-row" type="button" data-open-software-update><span class="settings-software-update-icon" aria-hidden="true">${icon('refresh',22)}</span><span class="settings-software-update-copy"><strong>Versão e Atualizações</strong><small>Conta de Casa ${escapeHtml(appVersion())} · Build ${escapeHtml(buildId())}</small></span><span class="settings-software-update-chevron" aria-hidden="true">${icon('chevron',20)}</span></button>`;
     panel.insertBefore(block,resetButton?.previousElementSibling||resetButton||null);
     block.querySelector('[data-open-software-update]')?.addEventListener('click',openDialog);
   }
@@ -275,33 +298,55 @@
     if(actionInFlight)return actionInFlight;
     actionInFlight=(async()=>{
       if(!('serviceWorker' in navigator)){updateStatus='unsupported';renderDialog();return;}
-      updateStatus='checking';updateMessage='';renderDialog();
-      try{
-        const manifest=await loadReleaseManifest(true);
-        if(!isNewerVersion(manifest.latestVersion)){
-          availableVersion='';updateStatus='ready';renderDialog();root.toast?.('Não existem atualizações novas.');return;
-        }
-        availableVersion=manifest.latestVersion;
-        updateStatus='updating';renderDialog();
+      if(navigator.onLine===false){
+        updateStatus='error';updateMessage='Sem ligação à Internet. A versão instalada continua disponível; tente novamente quando estiver online.';renderDialog();return;
+      }
 
+      updateStatus='checking';updateMessage='';renderDialog();
+      let manifest=null;
+      let manifestError=false;
+      try{
+        manifest=await loadReleaseManifest(true);
+      }catch(_error){
+        manifestError=true;
+      }
+
+      try{
         let registration=await navigator.serviceWorker.getRegistration();
         if(!registration)registration=await navigator.serviceWorker.register(`./sw.js?v=${buildVersion().replace(/^v/,'')}`,{updateViaCache:'none'});
+
+        // A verificação da compilação é deliberadamente anterior à conclusão "atualizado".
+        // Isto corrige o falso negativo que ocorria quando a release permanecia igual.
         await registration.update();
         const waiting=await waitForWaiting(registration);
         if(waiting){
+          const newerRelease=manifest&&isNewerVersion(manifest.latestVersion)?manifest.latestVersion:'';
+          availableVersion=newerRelease||`${buildVersion()} · nova compilação`;
+          updateStatus='updating';
+          updateMessage=`Nova compilação encontrada. A substituir o Build ${buildId()} sem alterar os dados locais.`;
+          renderDialog();
           armReload();
-          waiting.postMessage({type:'APPLY_UPDATE',version:availableVersion});
+          waiting.postMessage({type:'APPLY_UPDATE',version:availableVersion,buildId:buildId()});
           return;
         }
 
-        // Se o browser ativou imediatamente o worker (por exemplo numa primeira
-        // instalação), recarregar garante que o novo index/assets entram em uso.
-        armReload();
-        setTimeout(()=>location.reload(),350);
+        if(manifest&&isNewerVersion(manifest.latestVersion)){
+          availableVersion=manifest.latestVersion;
+          updateStatus='error';
+          updateMessage=`O histórico indica ${manifest.latestVersion}, mas o navegador ainda não recebeu o novo Service Worker. Tente novamente dentro de alguns instantes.`;
+          renderDialog();
+          return;
+        }
+
+        availableVersion='';
+        updateStatus='ready';
+        updateMessage=`Compilação ${buildId()} verificada. Não existe uma atualização pendente${manifestError?'; o histórico de versões estava temporariamente indisponível':''}.`;
+        renderDialog();
+        root.toast?.(`Build ${buildId()} verificado. Não existem atualizações pendentes.`);
       }catch(_error){
         reloadAfterUpdate=false;
         updateStatus='error';
-        updateMessage='Não foi possível preparar a atualização. A versão atual continua disponível e os seus dados não foram alterados.';
+        updateMessage='Não foi possível verificar a compilação publicada. A versão atual continua disponível e os seus dados não foram alterados.';
         renderDialog();
       }
     })().finally(()=>{actionInFlight=null;renderDialog();});
@@ -327,6 +372,9 @@
     check:probeAvailability,
     update:runUpdateAction,
     version:buildVersion,
+    appVersion,
+    buildId,
+    buildDate,
     get releases(){return releaseManifest.releases;},
     get latest(){return releaseManifest.latestVersion;}
   });

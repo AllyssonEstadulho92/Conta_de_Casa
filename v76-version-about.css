@@ -1,0 +1,109 @@
+/* Conta de Casa v76 — version-audit1.
+   Apresentação da versão instalada e estado de atualização, inspirada no padrão já
+   validado no Foco Jornada. Não altera dados, finanças, PIN, cifragem ou sincronização. */
+
+.software-version-overview{
+  display:grid;
+  gap:12px;
+  margin:16px 0 0;
+}
+.software-version-hero{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  padding:18px;
+  border:1px solid var(--v76-border,var(--border,rgba(15,23,42,.12)));
+  border-radius:18px;
+  background:linear-gradient(145deg,var(--v76-surface,var(--surface,#fff)),var(--v76-surface-accent,var(--surface-2,#f4f8f8)));
+  box-shadow:var(--v76-shadow-sm,var(--shadow-card,0 8px 24px rgba(15,23,42,.05)));
+}
+.software-version-copy{min-width:0;display:grid;gap:5px}
+.software-version-kicker{
+  color:var(--v76-primary,var(--primary,#087b78));
+  font-size:11px;
+  line-height:1.2;
+  font-weight:800;
+  letter-spacing:.14em;
+}
+.software-version-copy>strong{
+  color:var(--v76-text,var(--text,#12343d));
+  font-size:clamp(20px,4vw,26px);
+  line-height:1.15;
+  letter-spacing:-.035em;
+}
+.software-version-copy>small{
+  color:var(--v76-muted,var(--muted,#70858a));
+  font-size:12px;
+  line-height:1.5;
+}
+.software-version-build-id{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  font-weight:700;
+  color:var(--v76-text,var(--text,#12343d));
+}
+.software-version-badge{
+  flex:0 0 auto;
+  padding:7px 10px;
+  border:1px solid color-mix(in srgb,var(--v76-primary,var(--primary,#087b78)) 20%,transparent);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--v76-primary,var(--primary,#087b78)) 9%,transparent);
+  color:var(--v76-primary,var(--primary,#087b78));
+  font-size:11px;
+  line-height:1;
+  font-weight:750;
+  white-space:nowrap;
+}
+.software-version-facts{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+.software-version-facts article{
+  min-width:0;
+  display:grid;
+  gap:4px;
+  padding:12px;
+  border:1px solid var(--v76-border,var(--border,rgba(15,23,42,.12)));
+  border-radius:14px;
+  background:var(--v76-surface,var(--surface,#fff));
+}
+.software-version-facts span{
+  color:var(--v76-muted,var(--muted,#70858a));
+  font-size:10px;
+  line-height:1.2;
+  font-weight:650;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.software-version-facts strong{
+  overflow-wrap:anywhere;
+  color:var(--v76-text,var(--text,#12343d));
+  font-size:12px;
+  line-height:1.35;
+}
+.software-version-note{
+  margin:0;
+  padding:12px 14px;
+  border-radius:14px;
+  background:color-mix(in srgb,var(--v76-primary,var(--primary,#087b78)) 5%,var(--v76-surface,var(--surface,#fff)));
+  color:var(--v76-muted,var(--muted,#70858a));
+  font-size:12px;
+  line-height:1.5;
+}
+.software-version-note strong{color:var(--v76-text,var(--text,#12343d))}
+
+@media(max-width:520px){
+  .software-version-hero{display:grid;padding:15px}
+  .software-version-badge{justify-self:start}
+  .software-version-facts{grid-template-columns:1fr}
+  .software-version-facts article{grid-template-columns:96px minmax(0,1fr);align-items:center}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .software-version-hero,.software-version-facts article{scroll-behavior:auto}
+}
+
+@media(forced-colors:active){
+  .software-version-hero,.software-version-facts article,.software-version-note,.software-version-badge{forced-color-adjust:auto;border:1px solid CanvasText}
+}
