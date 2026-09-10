@@ -83,7 +83,7 @@ Estado: integrado pelo PR #76 como `76-modern-ui1`.
 
 ## D-071 — versão, release e build são identidades separadas; atualização verifica o build real
 
-Data: 10 de setembro de 2026. Estado: aceite para `76-version-audit1`.
+Data: 10 de setembro de 2026. Estado: **integrado em `main` como `76-version-audit1` pelo PR #78**, merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`.
 
 ### Facto que originou a decisão
 
@@ -110,7 +110,7 @@ O Foco Jornada já separa versão visível de identidade de compilação e forç
 
 UI/UX PR #76 integrado como `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`; TypeScript, CI e Pages tiveram sucesso.
 
-`76-version-audit1`: commit funcional `41cd36b662991fc2f29d5736c2b77621c4649e87`; correção do teste `9d6a923c6f10bda2e7128f48053ad278063634ca`; CI `34539811658` com sucesso.
+`76-version-audit1`: PR #78 integrado como `a68de711df1c42ec33948d3fff2f4d5e337e2436`; TypeScript do PR `34540211764`, CI do PR `34540211775`, TypeScript de `main` `34540271567`, CI de `main` `34540271547` e Pages `34540307404`: sucesso.
 
 ## Lacuna técnica preservada
 
