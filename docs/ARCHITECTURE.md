@@ -17,8 +17,7 @@ A aplicação continua PWA estática/local-first. Estado financeiro, apresentaç
 - sincronização opcional apenas do envelope cifrado;
 - nenhum segredo no código público;
 - `estimatedCents` distinto de `actualCents`;
-- `marketId|pid` continua identidade canónica do pipeline especializado de SKU/fotografia;
-- alterações visuais não podem modificar domínio financeiro, segurança ou persistência.
+- `marketId|pid` continua identidade canónica do pipeline especializado de SKU/fotografia.
 
 ## 2. Núcleo funcional
 
@@ -28,25 +27,21 @@ A aplicação continua PWA estática/local-first. Estado financeiro, apresentaç
 - `sync.js` + `sync-conflict-policy.js`: sincronização cifrada e conflitos;
 - `mobile-menu-toggle.js`: controlador móvel v73;
 - `v75-architecture.js`: hierarquia de navegação;
-- `src/`: módulos/contratos migrados progressivamente para TypeScript.
-
-O browser continua a executar JavaScript durante a migração. TypeScript é a fonte verificada para os novos blocos.
+- `src/`: módulos e contratos em migração progressiva para TypeScript.
 
 ## 3. Composição pública
 
-`index.html` é o template. `scripts/prepare-pages.cjs` cria `dist/` por allowlist explícita e injeta revisões de cache. `sw.js` mantém allowlist equivalente.
+`index.html` é o template. `scripts/prepare-pages.cjs` cria `dist/` por allowlist explícita. `sw.js` mantém allowlist e revisão de cache equivalente.
 
 Ordem visual relevante:
 
-1. estilos base e responsive;
+1. base/responsive;
 2. `mobile-menu-toggle.css`;
 3. arquitetura/cabeçalho/estabilidade/layout/drawer v75;
 4. páginas, Despesas e Mercado v75;
-5. `v76-veggie-menu.css`;
+5. `v76-veggie-menu.css` (`76-veggie-menu2`);
 6. `v75-usability.css`;
-7. **`v76-modern-ui.css` como última camada transversal**.
-
-A última camada tem autoridade apenas sobre apresentação, geometria, estados visuais e responsividade.
+7. `v76-modern-ui.css` (`76-modern-ui1`) como última camada visual.
 
 ## 4. Navegação
 
@@ -54,48 +49,35 @@ Mobile principal:
 
 `Início → Despesas → Mercado → Planeamento → Mais`
 
-O drawer completo mantém destinos secundários agrupados. Rotas, IDs, permissões e handlers existentes não são substituídos pelo redesign.
+O drawer mantém destinos secundários agrupados. Rotas, IDs, permissões e handlers não são substituídos pelo redesign.
 
-## 5. Cabeçalho mobile — nova política
+## 5. Cabeçalho mobile
 
-A evidência física em iPhone mostrou que a combinação de header sticky/fixo com padding reservado criava uma composição estranha durante scroll. A política v76 passa a ser:
+Após validação física, a política vigente é:
 
-- `.topbar` no fluxo normal (`position: relative`) em mobile;
-- sem `padding-top` estrutural reservado para header fixo;
-- conteúdo começa imediatamente depois do header;
-- safe areas permanecem respeitadas pelas camadas base/PWA;
-- navegação inferior continua persistente por ser controlo de navegação e não cabeçalho de conteúdo.
+- `.topbar` em fluxo normal com `position: relative`;
+- sem `padding-top` reservado para header fixo;
+- conteúdo começa depois do cabeçalho sem sobreposição;
+- navegação inferior continua persistente por ser navegação global.
 
 ## 6. Veggie Burger TypeScript — `76-veggie-menu2`
 
-Fonte: `src/ui/veggie-menu-toggle.ts`.  
-Runtime browser: `v76-veggie-menu.js`.
-
-O controlo canónico permanece `#mobileMenuBtn`:
+Fonte: `src/ui/veggie-menu-toggle.ts`. Runtime: `v76-veggie-menu.js`.
 
 - fechado: duas barras horizontais;
 - aberto: superior `+45°`, inferior `-45°`;
-- Web Animations API anima explicitamente as duas barras;
-- ambas permanecem visíveis durante a transição;
-- `aria-expanded`/`aria-label` continuam a vir do controlador funcional;
-- com drawer aberto, o mesmo botão fica fora da `.nav-drawer-shell` transformada;
-- `prefers-reduced-motion` desativa animação;
-- não há segundo botão/X funcional.
+- Web Animations API anima explicitamente ambas;
+- as duas barras permanecem visíveis;
+- `#mobileMenuBtn` continua controlo único;
+- `aria-expanded`/`aria-label` continuam associados ao mesmo controlo;
+- com drawer aberto, o botão permanece fora da `.nav-drawer-shell` transformada;
+- reduced-motion e forced-colors preservados.
 
 ## 7. Sistema visual master — `76-modern-ui1`
 
-`v76-modern-ui.css` define tokens transversais para:
+`v76-modern-ui.css` define tokens transversais para background, superfícies, texto, muted, primary/accent, estados, bordas, sombras, raios e foco.
 
-- background/surface/surface-soft;
-- texto e muted;
-- primary/accent;
-- danger/warning/success;
-- bordas;
-- sombras;
-- raios;
-- foco.
-
-Aplica estes contratos de apresentação a todas as páginas:
+Cobertura explícita:
 
 - `#page-dashboard`;
 - `#page-bills`;
@@ -113,51 +95,32 @@ Também cobre tabs, botões, inputs, painéis, tabelas, estados vazios, dialogs,
 ## 8. Princípios UI/UX
 
 - uma família tipográfica principal;
-- hierarquia visual baseada em tamanho, peso, espaçamento e contraste, não em excesso de cores;
-- ações primárias distinguíveis de ações secundárias/destrutivas;
+- hierarquia por tamanho, peso, espaçamento e contraste;
+- ações primárias, secundárias e destrutivas visualmente distintas;
 - superfícies com bordas leves e sombras discretas;
 - alvos tácteis mínimos de 44 px;
-- campos mobile com 16 px para evitar zoom automático Safari;
-- `prefers-reduced-motion` e `forced-colors` preservados;
-- pinch-to-zoom não é bloqueado;
+- campos mobile compatíveis com Safari sem zoom automático;
+- `prefers-reduced-motion`, `forced-colors` e pinch-to-zoom preservados;
 - bottom navigation mantém cinco destinos previsíveis.
 
-## 9. Despesas
+## 9. Despesas e Mercado
 
-`renderBills()`/`filterBills()` permanecem canónicos. `v75-expenses-modern.css` e `v76-modern-ui.css` apenas alteram apresentação. Estados, vencimentos, valores, Total/Pago/Em falta e ações continuam derivados do domínio atual.
+Despesas continuam a usar `renderBills()`/`filterBills()` e domínio financeiro atual. O master UI só altera apresentação.
 
-## 10. Mercado
+No Mercado, preço pesquisado continua estimado, preço real continua separado e imagem nunca prova preço. Exatidão de caixa futura exige identidade, quantidade/peso, preço e condições relevantes confirmados.
 
-A apresentação pode evoluir sem confundir precisão:
+## 10. Segurança
 
-- preço pesquisado continua estimado;
-- preço real continua confirmação distinta;
-- imagem não prova preço;
-- futura exatidão de caixa exige SKU, quantidade/peso, preço aplicável e descontos/regras relevantes confirmados;
-- lacuna conhecida: `pid` extraído pela pesquisa live ainda precisa de persistência explícita com teste próprio.
+`76-veggie-menu2` e `76-modern-ui1` não alteram `core.js`, `finance.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sync, QR/scanner, CSP, endpoints ou segredos.
 
-## 11. Segurança
+## 11. Estado publicado e QA
 
-`76-veggie-menu2` e `76-modern-ui1` não alteram:
+PR #76 integrado em `main` no commit `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
 
-- `core.js`;
-- `finance.js`;
-- IndexedDB;
-- PIN;
-- PBKDF2/AES-GCM;
-- backup;
-- sincronização;
-- QR/scanner;
-- CSP;
-- endpoints ou segredos.
+- TypeScript PR `34537361127`: sucesso;
+- CI PR `34537361274`: sucesso;
+- TypeScript main `34537430909`: sucesso;
+- CI main `34537430967`: sucesso;
+- Pages `34537469989`: sucesso.
 
-## 12. QA
-
-Testes específicos:
-
-- `tests/v76-veggie-menu.test.cjs`;
-- `tests/v76-modern-ui.test.cjs`.
-
-CI do head funcional da branch `fix/v76-menu-flow-modern-ui`: run `34537017339` — sucesso, incluindo todas as regressões existentes e os dois testes v76.
-
-TypeScript strict deve passar no PR antes de integração. Depois do merge, CI + TypeScript + Pages devem ser confirmados novamente.
+Validação física pós-publicação continua obrigatória para Safari/iPhone, especialmente animação, swipe, scroll e geometrias 320/375/390/430 px.
