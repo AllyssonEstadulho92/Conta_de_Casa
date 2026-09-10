@@ -2,128 +2,133 @@
 
 O histórico integral de commits e versões permanece no Git. Este ficheiro mantém as alterações relevantes para continuidade técnica.
 
-## 2026-09-10 — v76 `76-veggie-menu1` — Veggie Burger/X em TypeScript
+## 2026-09-10 — v76 `76-veggie-menu2` + `76-modern-ui1`
 
-### Objetivo
+### Origem
 
-Substituir o ícone móvel de três linhas por um **Veggie Burger de duas linhas** que se transforma no mesmo X, manter o controlo visível durante swipe e reforçar a topbar sticky, sem alterar o domínio financeiro.
+Validação física em iPhone/Safari revelou duas regressões do estado publicado:
 
-### Diagnóstico
+- o Veggie Burger fechado estava presente, mas a transformação para X não era percebida de forma fiável;
+- a topbar sticky/fixa permanecia no viewport durante scroll e quebrava a composição visual do conteúdo.
 
-- `mobile-menu-toggle.js` v73 já controlava abertura/fecho, swipe, foco e ARIA;
-- `#drawerCloseBtn` legado já era ocultado para evitar X duplicado;
-- o controlador movia `#mobileMenuBtn` para `.drawer-head`;
-- `.drawer-head` fica dentro da `.nav-drawer-shell`, superfície transformada durante o gesto horizontal;
-- assim, o próprio controlo podia acompanhar a shell e sair parcialmente da área visível durante swipe.
+A mesma revisão visual indicou falta de consistência premium entre páginas, levando à criação de uma camada UI/UX transversal.
 
-### Alterações
+### Menu
 
-- criado `src/ui/veggie-menu-toggle.ts` como fonte TypeScript strict;
-- criado `v76-veggie-menu.js` como runtime browser derivado;
-- criado `v76-veggie-menu.css`, revisão `76-veggie-menu1`;
-- fechado: exatamente duas barras horizontais;
-- aberto: linha superior `+45°` e linha inferior `-45°`, formando X;
+- `src/ui/veggie-menu-toggle.ts` revisto;
+- `v76-veggie-menu.js` atualizado a partir da fonte TypeScript;
+- `v76-veggie-menu.css` revisto para `76-veggie-menu2`;
+- animação explícita por Web Animations API nas duas barras;
+- superior: `0° → +45°`;
+- inferior: `0° → -45°`;
+- as duas barras mantêm `opacity: 1`;
 - continua a existir apenas um `#mobileMenuBtn`;
-- `aria-expanded` e `aria-label` continuam associados ao mesmo controlo;
-- quando o dialog está aberto, o mesmo botão passa a filho direto de `#mobileDrawer`, fora da shell transformada;
-- o botão mantém-se visível durante `data-dragging` e `data-closing`;
-- `.drawer-head` reserva espaço para não colidir com marca/título;
-- topbar reforçada como sticky no mobile;
-- `prefers-reduced-motion` e `forced-colors` suportados.
+- botão continua fora da `.nav-drawer-shell` durante drawer aberto/swipe;
+- reduced-motion e forced-colors preservados.
 
-### Isolamento e segurança
+### Cabeçalho
 
-Não altera `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, IndexedDB, schema, PIN, PBKDF2, AES-GCM, backup, sync, QR, scanner ou Mercado. Não introduz endpoint, CDN, telemetria, token, chave ou origem CSP.
+- regra sticky anterior removida da camada Veggie;
+- `v76-modern-ui.css` coloca `.topbar` no fluxo normal em mobile;
+- `.main` deixa de reservar espaço para header fixo;
+- conteúdo deixa de competir com a barra durante scroll.
 
-### Distribuição e QA
+### Sistema UI/UX master
 
-- `scripts/prepare-pages.cjs` publica `v76-veggie-menu.css/js?v=76-veggie-menu1`;
-- runtime novo carrega depois de `mobile-menu-toggle.js`;
-- `sw.js` inclui assets e cache `veggie-menu1`;
-- criado `tests/v76-veggie-menu.test.cjs` e integrado em CI/Pages;
-- PR #74 integrado em `main` como `f196545662b5d120a0dd21b2c498a209cfc144d3`;
-- TypeScript final de `main` `34517268279`: **sucesso**;
-- CI final de `main` `34517268450`: **sucesso**;
-- GitHub Pages `34517324242`: **sucesso**.
+Criado `v76-modern-ui.css`, revisão `76-modern-ui1`, carregada como última camada visual após `v75-usability.css`.
 
-### Pendente
+Abrange:
 
-Validação física em iPhone/Safari/PWA: transformação duas linhas ↔ X, swipe de abertura/fecho sem desaparecimento, posição do X, topbar sticky, ausência de segundo X e geometrias 320/375/390/430 px.
+- Início;
+- Despesas/Faturas;
+- Mercado;
+- Calendário;
+- Planeamento;
+- Relatórios;
+- Objetivos;
+- Segurança;
+- Diagnóstico;
+- Definições;
+- dialogs;
+- drawer;
+- bottom navigation;
+- tabs, formulários, botões, tabelas, estados vazios e superfícies.
+
+Introduz tokens coerentes para cor, superfície, borda, raio, sombra, estados e foco, mantendo tema escuro e acessibilidade.
+
+### Build/PWA
+
+- `scripts/prepare-pages.cjs`: `VEGGIE_MENU_REV = 76-veggie-menu2`;
+- nova `MODERN_UI_REV = 76-modern-ui1`;
+- `v76-modern-ui.css` adicionado à allowlist pública;
+- `sw.js` revisto para cache `veggie-menu2-modern-ui1`;
+- novo asset incluído no Service Worker.
+
+### QA
+
+- `tests/v76-veggie-menu.test.cjs` atualizado;
+- criado `tests/v76-modern-ui.test.cjs`;
+- novo teste integrado no CI e no gate de Pages;
+- CI push da branch `fix/v76-menu-flow-modern-ui`, run `34537017339`: **sucesso**;
+- passaram igualmente finanças, faturas, Mercado, scanner, segurança, responsividade, acessibilidade, sincronização e manifest.
+
+TypeScript strict e CI serão novamente exigidos no PR antes do merge. Validação física final continua obrigatória após publicação.
 
 ---
 
-## 2026-09-10 — v75 `75-expenses1` — layout moderno de Despesas
+## 2026-09-10 — v76 `76-veggie-menu1`
 
-- criado `v75-expenses-modern.css`, limitado a `#page-bills`;
-- Lista/Calendário, pesquisa, Nova fatura, filtros, resumo, tabela desktop e cartões mobile modernizados;
-- `Em falta`, vencimento, estado, Total, Pago, Categoria, progresso e ações preservados;
-- domínio financeiro, IndexedDB, segurança, Mercado, QR, scanner e sync inalterados;
+- primeira versão TypeScript do Veggie Burger de duas linhas;
+- PR #74 integrado como `f196545662b5d120a0dd21b2c498a209cfc144d3`;
+- TypeScript `34517268279`, CI `34517268450` e Pages `34517324242`: sucesso;
+- posteriormente revista pela evidência física que originou `76-veggie-menu2`.
+
+---
+
+## 2026-09-10 — v75 `75-expenses1`
+
+- `v75-expenses-modern.css` modernizou Lista/Calendário, pesquisa, filtros, resumo, tabela e cartões mobile;
+- domínio financeiro e persistência inalterados;
 - PR #73 integrado como `176450fcb236a2272afb9d6a6983b42681aa705d`;
-- CI `34496500755`, TypeScript `34496500641` e Pages `34496540096`: sucesso.
+- CI, TypeScript e Pages: sucesso.
 
 ---
 
 ## 2026-09-10 — v76 Bloco 1 — fundação TypeScript
 
-- `docs/TYPESCRIPT_MIGRATION.md` criado;
-- TypeScript apenas como `devDependency`;
+- TypeScript como `devDependency`;
 - `tsconfig.json` strict/noEmit;
-- contratos em `src/types/` e testes em `src/type-tests/`;
-- workflow TypeScript dedicado;
-- PR #72 integrado como `2c1d78508507ab77d6df95850568d9fd7f6b9577`;
-- TypeScript `34485922921`, CI `34485922896` e Pages `34485986996`: sucesso.
+- contratos em `src/types/`;
+- workflow dedicado;
+- PR #72 integrado como `2c1d78508507ab77d6df95850568d9fd7f6b9577`.
 
 ---
 
 ## 2026-09-10 — v75 `75-market1`
 
-- pesquisa live e pesquisa da lista separadas na comunicação;
+- pesquisa live/lista separadas;
 - filtros mobile visíveis;
 - estados `Por comprar`, `Preço por confirmar`, `Comprado`;
-- confirmação de preço real exposta quando necessária;
-- pipeline `marketId|pid` preservado;
-- PR #71 integrado como `c44348dbc5a942b601f360fa38793bd9d8b47a1a`;
-- Pages `34482133540`: sucesso.
+- pipeline `marketId|pid` preservado.
 
 ---
 
 ## 2026-09-10 — v75 `75-assets1`
 
 - biblioteca local-first para fontes, ícones e media;
-- Lucide SVG local permanece principal;
-- loader opt-in com lazy/fallback/reduced-motion;
-- CSP não expandida;
-- PR #69 integrado como `a8e04d6811bd6eb08487de139fb19fb2f12128ec`;
-- CI `34478047035` e Pages `34478091014`: sucesso.
+- Lucide SVG local principal;
+- loader opt-in;
+- CSP não expandida.
 
 ---
 
-## 2026-09-10 — v75 `75-pages1`
+## 2026-09-10 — v75 `75-pages1` / `75-usability1`
 
-- Início, Despesas e Planeamento reorganizados visualmente sem alterar cálculos;
-- PR #68 integrado como `c8ec45893c8936093ecd7c7da9ee08c9a268109c`;
-- CI `34474037338` e Pages `34474069564`: sucesso.
-
----
-
-## 2026-09-10 — v75 `75-usability1`
-
+- Início, Despesas e Planeamento reorganizados sem alterar cálculos;
 - `touch-action: manipulation`;
 - inputs mobile com 16 px;
 - alvos tácteis 44/48 px;
-- pinch-to-zoom preservado;
-- PR #66 integrado como `c352c1883c16fd7df92aa0f26d23e3c5084b0fcf`;
-- CI `34471773663` e Pages `34471814790`: sucesso.
-
----
-
-## 2026-09-10 — `75-startup2` + `75-catalog4` + `75-photo-loader3`
-
-- abertura pós-PIN em dispositivo emparelhado deixa de esperar pela verificação remota;
-- PBKDF2/AES-GCM inalterados;
-- fotografias terminam em estado estável com cooldown;
-- `sourceUrl` oficial exata não dispara resolução redundante;
-- host/path/PID permanecem estritos.
+- pinch-to-zoom preservado.
 
 ## Histórico anterior
 
