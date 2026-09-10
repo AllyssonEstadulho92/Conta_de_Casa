@@ -3,12 +3,11 @@
 Atualizado: 10 de setembro de 2026  
 Build: `v75`  
 Branch pública: `main`  
-SHA público de partida: `c8ec45893c8936093ecd7c7da9ee08c9a268109c`  
-Branch de trabalho atual: `feat/v75-design-asset-library`  
+SHA funcional publicado: `a8e04d6811bd6eb08487de139fb19fb2f12128ec`  
 Distribuição: GitHub Pages / PWA  
 Revisão de usabilidade integrada: `75-usability1`  
 Revisão de páginas integrada: `75-pages1`  
-Revisão de biblioteca de design candidata: `75-assets1`
+Revisão de biblioteca de design integrada: `75-assets1`
 
 ## Baseline preservada
 
@@ -22,71 +21,60 @@ Revisão de biblioteca de design candidata: `75-assets1`
 - arquitetura `75-architecture2`, cabeçalho `75-header2`, estabilidade `75-stability1`, geometria `75-layout1`, drawer `75-drawer2`;
 - startup `75-startup2`, catálogo `75-catalog4`, loader especializado de Mercado `75-photo-loader3`;
 - usabilidade transversal `75-usability1`;
-- páginas Início/Despesas/Planeamento `75-pages1`.
+- páginas Início/Despesas/Planeamento `75-pages1`;
+- biblioteca/loader transversal de assets `75-assets1`.
 
-## Estado confirmado antes de `75-assets1`
+## Estado publicado de `75-assets1`
 
-A Parte 2 foi integrada em `main` através do PR #68, com commit de merge `c8ec45893c8936093ecd7c7da9ee08c9a268109c`. A revisão `75-pages1` está portanto na baseline desta fase. A documentação da Parte 2 ainda continha frases de estado de branch/candidata; esta revisão corrige essa divergência documental.
+A fundação de fontes, ícones, animações e carregamento de assets foi integrada em `main` através do PR #69.
 
-## Objetivo atual
+Evidência de integração/publicação:
 
-Criar uma fundação reutilizável para **fontes, ícones, animações e carregamento de assets** que possa orientar a Conta de Casa e as outras aplicações do projeto Móvel e Computador sem introduzir dependências externas indiscriminadas.
+- branch final antes do merge: `3706d2fc318a5ccae0a4ec808984c19dcfc3eb87`;
+- CI de push da branch: run `34477808822` — sucesso;
+- CI do PR #69: run `34477918443` — sucesso;
+- comparação antes do merge: `behind 0` relativamente a `main`;
+- merge squash em `main`: `a8e04d6811bd6eb08487de139fb19fb2f12128ec`;
+- CI de `main`: run `34478047035` — sucesso;
+- GitHub Pages no mesmo SHA: run `34478091014` — sucesso.
 
-## Factos encontrados
+## Biblioteca e critérios vigentes
 
-1. A Conta de Casa já possui um sistema principal de ícones: **Lucide SVG local**, via `ui-icons.js`/`ui-icons.css`, com licença distribuída em `LUCIDE_LICENSE.txt`.
-2. A tipografia atual está centralizada em `--cdc-font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif`.
-3. A CSP atual mantém `font-src 'self'`; ativar Google Fonts, Adobe Fonts, kits Font Awesome ou outras CDNs exigiria expandir política de rede e prejudicaria o modelo offline-first.
-4. Lottie, Google Fonts, Fontshare, Font Squirrel, DaFont, UNCUT.wtf, Adobe Fonts, MyFonts, Fontpair, Fontjoy, Font Awesome e Material Symbols não têm o mesmo modelo de licença/integração. Estar num catálogo não equivale a autorização para copiar ou incorporar ficheiros.
-5. **Type Icons Font** foi classificada como restrita até existir licença compatível; **Free Icon Font Proyectos** permanece não verificada porque o nome fornecido não identifica uma origem oficial inequívoca.
-6. O Mercado já tem um loader especializado (`75-photo-loader3`) associado a PID, fontes oficiais, cache de imagens e IndexedDB. Um loader genérico não pode substituir essa lógica.
-
-## `75-assets1` implementada na branch
-
-### Catálogo e política
-
-Foi adicionado `design-asset-library.js`, que expõe `CDCDesignAssetLibrary` e regista os fornecedores indicados com estado, categoria, origem, integração e regra de licença.
+`design-asset-library.js` expõe `CDCDesignAssetLibrary` e regista os fornecedores indicados com categoria, origem conhecida, estado, modo de integração, nota de licença e regra operacional.
 
 Critérios principais:
 
-- Lucide local continua a ser o sistema principal de ícones da Conta de Casa;
-- preferir uma família tipográfica; máximo de duas por aplicação;
-- fontes e runtimes externos não são carregados automaticamente;
-- origem e licença devem ser verificadas antes de incorporar ficheiros;
-- preservar CSP e funcionamento offline/PWA;
-- animações devem respeitar `prefers-reduced-motion` e possuir fallback;
-- ícones funcionais necessitam nome acessível; decorativos usam `aria-hidden`.
+- **Lucide local** continua a ser o sistema principal de ícones da Conta de Casa;
+- preferir uma família tipográfica e permitir no máximo duas por aplicação;
+- fontes, ícones e runtimes externos não são carregados automaticamente;
+- origem/licença devem ser verificadas antes de incorporar ficheiros;
+- CSP e funcionamento offline/PWA devem ser preservados;
+- animações devem respeitar `prefers-reduced-motion` e possuir fallback estático quando necessário;
+- ícones funcionais precisam de nome acessível; decorativos usam `aria-hidden`;
+- `Type Icons Font` permanece restrita até existir licença compatível;
+- “Free Icon Font Proyectos” permanece não verificada até existir URL/origem oficial inequívoca.
 
-### Carregamento transversal
+## Carregamento transversal publicado
 
-Foram adicionados `asset-loader.js` e `asset-loader.css`.
+`asset-loader.js` + `asset-loader.css` fornecem uma fundação **opt-in** para recursos visuais:
 
-O loader é **opt-in** e suporta:
+- imagens: `loading="lazy"`, `decoding="async"`, prioridade explícita, `IntersectionObserver` para `data-cdc-src`, estados `loading/ready/error` e fallback visual;
+- vídeo/áudio: `preload="metadata"` por defeito e sem autoplay introduzido pelo loader;
+- Lottie: JSON local por defeito, runtime `window.lottie` previamente aprovado/local, `runtime-missing` se ausente e fallback para `prefers-reduced-motion`;
+- URLs same-origin por defeito e nenhuma injeção automática de `<script>` remoto.
 
-- imagens com `loading="lazy"`, `decoding="async"`, prioridade explícita e pré-carregamento por `IntersectionObserver`;
-- estados `loading`, `ready`, `error` e fallback visual;
-- vídeo/áudio com `preload="metadata"` por defeito e sem autoplay automático;
-- Lottie apenas com JSON local e runtime `window.lottie` previamente aprovado/local;
-- fallback estático quando `prefers-reduced-motion` está ativo;
-- URLs same-origin por defeito, sem injeção de `<script>` remoto.
-
-O loader transversal não seleciona fotos de produtos, não altera PID e não interfere com `market-photo-loader.js`.
-
-### Distribuição e QA
-
-- `scripts/prepare-pages.cjs` inclui `asset-loader.css`, `design-asset-library.js` e `asset-loader.js`, revisionados como `75-assets1`;
-- `sw.js` inclui os três ativos e usa sufixo de cache `assets1`;
-- `tests/design-asset-library.test.cjs` valida catálogo, gate de licenças, CSP, URL policy, loader, build `dist/` e isolamento financeiro/criptográfico;
-- CI e Pages passam a executar/verificar estes ficheiros e o novo teste.
+O loader transversal não seleciona fotografias de produtos, não altera PID e não substitui `market-photo-loader.js`/`75-photo-loader3`.
 
 ## Segurança
 
-`75-assets1` não altera `core.js`, `finance.js`, IndexedDB financeiro, PIN, PBKDF2, AES-GCM, sincronização, pagamentos, QR ou scanner. Não expande CSP, não adiciona tokens/kits e não faz pedidos a fornecedores apenas porque estes constam do catálogo.
+`75-assets1` não altera `core.js`, `finance.js`, IndexedDB financeiro, PIN, PBKDF2, AES-GCM, sincronização, pagamentos, QR ou scanner. A CSP não foi expandida; nenhum kit/token/segredo foi adicionado e nenhum fornecedor é contactado apenas por constar do catálogo.
 
-## Estado da integração
+## Validação ainda pendente
 
-A implementação está na branch `feat/v75-design-asset-library`. Só deve ser integrada em `main` depois de CI completo verde, comparação sem commits em falta relativamente a `main`, revisão do PR e confirmação posterior do CI/Pages no SHA publicado.
+- validar em hardware um componente opt-in com imagem lazy/fallback em Safari/PWA e Android/Chrome;
+- quando for escolhida uma animação Lottie real e o runtime local for incorporado sob licença aprovada, validar `prefers-reduced-motion` e fallback estático;
+- selecionar fontes concretas apenas em alterações futuras, depois de validar a licença exata. Nenhum catálogo completo de fontes foi incorporado.
 
 ## Próximo passo funcional
 
-Depois da integração de `75-assets1`, retomar a Parte 3: auditoria de **Mercado**, usando a nova fundação apenas para estados genéricos onde for apropriado e preservando `75-photo-loader3`, identidade `marketId|pid`, fontes oficiais e separação entre estimativa e valor confirmado.
+Parte 3: auditoria de **Mercado**, com foco em pesquisa, filtros, catálogo, cartões, imagens, estados de carregamento e fluxo de compra. A nova fundação `75-assets1` pode ser usada para estados genéricos onde fizer sentido, mas deve preservar `75-photo-loader3`, identidade `marketId|pid`, fontes oficiais e separação entre preço estimado e valor confirmado.

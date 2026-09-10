@@ -45,12 +45,21 @@ Criada uma fundação reutilizável para as aplicações do projeto Móvel e Com
 - `scripts/prepare-pages.cjs` inclui `asset-loader.css`, `design-asset-library.js` e `asset-loader.js` com `75-assets1`;
 - `asset-loader.css` é injetado antes do loader especializado do Mercado e `v75-usability.css` continua a camada final de interação;
 - `sw.js` inclui os três ativos e acrescenta `assets1` no final da assinatura de cache;
-- criado `tests/design-asset-library.test.cjs` para catálogo, gates, CSP, política de URL, loader, build `dist/` e isolamento financeiro/criptográfico;
-- workflows CI e Pages passaram a fazer syntax check dos novos JS e executar o teste dedicado.
+- criado `tests/design-asset-library.test.cjs` para catálogo, gates, CSP, URL policy, loader, build `dist/` e isolamento financeiro/criptográfico;
+- workflows CI e Pages fazem syntax check dos novos JS e executam o teste dedicado.
 
-### Estado
+### Integração/publicação
 
-Implementação concluída na branch `feat/v75-design-asset-library`. Integração em `main` permanece condicionada a CI verde, comparação sem commits em falta, revisão do PR e validação posterior do GitHub Pages.
+- branch final: `3706d2fc318a5ccae0a4ec808984c19dcfc3eb87`;
+- CI de push da branch: run `34477808822` — sucesso;
+- PR `#69` — CI run `34477918443` — sucesso;
+- branch confirmada `behind 0` antes da integração;
+- PR #69 integrado por squash em `main`;
+- commit funcional publicado: `a8e04d6811bd6eb08487de139fb19fb2f12128ec`;
+- CI de `main`: run `34478047035` — sucesso;
+- GitHub Pages do mesmo SHA: run `34478091014` — sucesso.
+
+A validação em hardware de componentes opt-in ainda está pendente. Nenhuma família de fonte específica nem ficheiro de animação Lottie foi incorporado nesta fase: a fundação exige seleção e licença exatas antes de adicionar esses ficheiros.
 
 ---
 
