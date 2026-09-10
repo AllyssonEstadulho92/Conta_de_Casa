@@ -1,5 +1,43 @@
 # Changelog Técnico — Conta de Casa
 
+## 2026-09-10 — v75 `75-pages1` — Parte 2 da auditoria UX/UI
+
+### Âmbito
+
+Revisão de **Início, Despesas e Planeamento**, com prioridade à equivalência funcional entre mobile e desktop, hierarquia visual, densidade, filtros, estados, ações e responsividade. A alteração é exclusivamente visual e não modifica cálculos, dados, segurança ou persistência.
+
+### Diagnóstico
+
+- **Início** já tinha composição v74/v75 adequada, mas beneficiava de uma hierarquia visual mais clara entre mês, resumo, orçamento, ações rápidas, alertas e categorias.
+- **Despesas** apresentava a principal divergência: no móvel, a composição v74 escondia Lista/Calendário, `bill-filter-grid`, `billSummary` e `billsList`, substituindo-os por `cdcExpenseFeed` simplificado.
+- O feed simplificado permitia Todas/Entradas/Saídas e pesquisa, mas não expunha no móvel os filtros funcionais já existentes de estado, categoria, datas e ordenação, nem a mesma informação de vencimento, progresso e ações dos cartões canónicos.
+- **Planeamento** já utilizava os valores do núcleo e precisava sobretudo de melhor sequência visual e empilhamento dos painéis no móvel.
+- Os ícones necessários nesta fase já estão cobertos pelo sistema Lucide local; não foi adicionada qualquer biblioteca externa.
+
+### Alterações — `75-pages1`
+
+Foi criado `v75-pages.css`:
+
+- **Início:** reforço da leitura mês → resumo → ações rápidas → categorias; resumo mensal com destaque estrutural mais claro; alertas mais compactos no móvel; feedback de interação uniforme; sem reintroduzir os blocos legados duplicados.
+- **Despesas:** Lista/Calendário volta a estar acessível no móvel; filtros de estado, categoria, datas e ordenação voltam a ser apresentados; `billSummary` e `billsList` canónicos voltam a ser visíveis; os cartões móveis existentes passam a concentrar valor em falta, vencimento, total, pago, categoria, progresso e ações; `cdcExpenseFeed`/`cdcExpenseTabs` deixam de ser a vista principal móvel.
+- **Planeamento:** resumo de orçamento e categorias recebe melhor hierarquia; formulário de saldo/orçamento e rendimentos passam a uma coluna em mobile; conciliação e lista de rendimentos ganham melhor legibilidade.
+- Breakpoint muito estreito mantém filtros e ações em coluna para evitar compressão excessiva.
+- `prefers-reduced-motion` e `forced-colors` continuam tratados.
+
+### Distribuição e QA
+
+- `scripts/prepare-pages.cjs` inclui `v75-pages.css?v=75-pages1`;
+- `v75-pages.css` é carregado depois da arquitetura/drawer e antes de `v75-usability.css`, preservando a política final de anti-zoom e alvos tácteis;
+- `sw.js` inclui o novo ativo e invalida o cache com `pages1`;
+- `tests/v75-stability.test.cjs` verifica a visibilidade funcional de Despesas no móvel, o empilhamento de Planeamento, a ordem das camadas, distribuição e isolamento relativamente ao estado financeiro/criptográfico;
+- não foram alterados `core.js`, `finance.js`, `render.js`, IndexedDB, PBKDF2, AES-GCM, PIN, sincronização, pagamentos, QR ou scanner.
+
+### Estado
+
+Implementação concluída na branch `fix/v75-pages-part2`. Integração/publicação dependem de CI verde, comparação sem divergência relativamente a `main` e validação posterior do GitHub Pages.
+
+---
+
 ## 2026-09-10 — v75 `75-usability1` — Parte 1 da auditoria UX/UI
 
 ### Âmbito
