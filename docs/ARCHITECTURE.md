@@ -5,7 +5,7 @@ Build: `v75`
 Distribuição: GitHub Pages / PWA  
 Usabilidade integrada: `75-usability1`  
 Páginas integradas: `75-pages1`  
-Biblioteca de design candidata: `75-assets1`
+Biblioteca de design integrada: `75-assets1`
 
 ## 1. Invariantes
 
@@ -235,4 +235,4 @@ O Service Worker inclui os três ativos e acrescenta `assets1` no fim da revisã
 - isolamento financeiro/criptográfico;
 - presença e ordem dos ativos em `dist/` e Service Worker.
 
-Validação física continua necessária para comportamento visual em Safari/PWA, Android/Chrome e desktop quando os componentes opt-in forem efetivamente usados.
+Publicação funcional confirmada no SHA `a8e04d6811bd6eb08487de139fb19fb2f12128ec`: CI de `main` run `34478047035` e GitHub Pages run `34478091014`, ambos com sucesso. Validação física continua necessária para componentes opt-in em Safari/PWA, Android/Chrome e desktop.
