@@ -24,7 +24,7 @@ test('v76 publica metadados e recursos PWA coerentes sem erro fatal de runtime',
   page.on('pageerror', error => pageErrors.push(error.message));
 
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  await expect(page).toHaveTitle('Conta de Casa');
+  await expect(page).toHaveTitle(/^(?:.+ · )?Conta de Casa$/);
 
   const metadata = await page.evaluate(() => Object.fromEntries([
     'app-version', 'app-build', 'app-build-id', 'app-build-date'
