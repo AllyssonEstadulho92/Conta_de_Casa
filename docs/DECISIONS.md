@@ -57,8 +57,6 @@ Estado vigente: `76-veggie-menu2`, integrado pelo PR #76.
 8. Reduced-motion, foco e alvo táctil permanecem suportados.
 9. A camada não acede ao estado financeiro.
 
-A regra anterior de reforçar topbar sticky foi revogada após evidência física em iPhone/Safari.
-
 ## D-069 — topbar mobile permanece no fluxo normal
 
 Estado: integrado pelo PR #76.
@@ -74,104 +72,106 @@ Estado: integrado pelo PR #76.
 Estado: integrado pelo PR #76 como `76-modern-ui1`.
 
 1. `v76-modern-ui.css` define o design system transversal.
-2. Cobre Dashboard, Despesas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições.
-3. Cobre botões, inputs, tabs, tabelas, dialogs, drawer, bottom navigation e estados vazios.
-4. Não altera handlers, dados, cálculos, IndexedDB, PIN, cifragem, sync, scanner, QR ou CSP.
-5. Tema escuro, reduced-motion, forced-colors, pinch-to-zoom e alvos tácteis permanecem requisitos.
-6. Geometria de viewport móvel pode ser delegada a uma camada posterior específica sem alterar o design system.
+2. Cobre todas as páginas funcionais e componentes partilhados.
+3. Não altera handlers, dados, cálculos, IndexedDB, PIN, cifragem, sync, scanner, QR ou CSP.
+4. Tema escuro, reduced-motion, forced-colors, pinch-to-zoom e alvos tácteis permanecem requisitos.
+5. Geometria do viewport móvel pertence ao shell, não ao design system.
 
-## D-071 — versão, release e build são identidades separadas; atualização verifica o build real
+## D-071 — versão, release e build são identidades separadas
 
-Data: 10 de setembro de 2026. Estado: integrado em `main` como `76-version-audit1` pelo PR #78, merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`.
+Estado: integrado pelo PR #78.
 
-1. `package.json.version` é a fonte da versão da aplicação, atualmente `0.76.0-dev.1`.
-2. `app-build`/`release-manifest.json` representam a release pública, atualmente `v75`.
-3. Cada compilação pública recebe Build ID de 7 caracteres e Build Date ISO.
-4. `scripts/prepare-pages.cjs` injeta aplicação, release, build e data.
-5. `registration.update()` ocorre antes de concluir que não há atualização.
-6. Release igual não prova build igual.
-7. Aplicação de Service Worker em espera continua dependente de ação explícita.
-8. O mecanismo não lê nem transmite estado financeiro, PIN ou cofre.
-9. Não promover `v75` para `v76` sem release formal.
+1. `package.json.version` é a versão da aplicação.
+2. `app-build`/`release-manifest.json` identificam a release pública.
+3. cada compilação pública recebe Build ID de 7 caracteres e Build Date ISO;
+4. `scripts/prepare-pages.cjs` injeta estes metadados;
+5. `registration.update()` ocorre antes de concluir que não há atualização;
+6. release igual não prova build igual;
+7. aplicação de Service Worker em espera depende de ação explícita;
+8. o mecanismo não lê nem transmite estado financeiro, PIN ou cofre.
+
+A decisão anterior de não promover v75 sem release formal é satisfeita pela D-074 e respetivos gates.
 
 ## D-072 — shell móvel tem um único scroll e respeita safe areas
 
-Data: 11 de setembro de 2026. Estado: integrado em `main` como `76-mobile-shell2` pelo PR #80, merge `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`; GitHub Pages publicado com sucesso.
+Estado: integrado em `main` pelo PR #80.
 
-### Factos que originaram a decisão
+1. Em ≤820 px, aplicação desbloqueada usa um único scroll vertical no documento.
+2. `.app-shell` e `.main` não impõem `max-height:100dvh` ou clipping.
+3. Topbar fica no fluxo com compensação de `safe-area-inset-top`.
+4. Bottom navigation persistente entra na reserva inferior das páginas e respeita `safe-area-inset-bottom`.
+5. `v76-mobile-shell.css` é a autoridade de geometria, não de domínio.
+6. Contratos cobrem 320/375/390/430 px e landscape de baixa altura.
+7. Não usar `zoom` nem bloquear pinch-to-zoom.
+8. Foco deve poder ficar acima do dock.
+9. Drawer/dialogs mantêm geometrias próprias.
 
-A validação física em iPhone mostrou a topbar a invadir a status bar e o dock inferior a cobrir o final do conteúdo. A revisão do código confirmou uma arquitetura mista: `mobile-layout.css` ainda impunha um viewport interno `100dvh`/`overflow:hidden`, enquanto `76-modern-ui1` já tinha colocado a topbar no fluxo normal.
+## D-073 — arquitetura UI v76 tem propriedade única por preocupação
+
+Estado: integrado em `main` pelo PR #82, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`.
+
+1. Cada preocupação transversal tem uma autoridade: shell, tokens, components, features, states, domínio, persistência, sync, PWA e segurança.
+2. `v76-mobile-shell.css` é a autoridade de geometria global mobile.
+3. `mobile-layout.css` fica restrito a refinamentos de features.
+4. Não criar novos ficheiros “patch” para corrigir a mesma geometria.
+5. `@layer` só é adotado por domínio completo, preservando precedência.
+6. `!important` novo em shell/components exige justificação e será reduzido progressivamente.
+7. Reflow deve funcionar a 320 CSS px sem perda funcional nem scroll horizontal global.
+8. 44×44 CSS px é baseline tátil interna para controlos primários; WCAG 2.2 mantém o mínimo normativo próprio.
+9. Safe areas usam `env(safe-area-inset-*)`, sem offsets por modelo.
+10. Bottom navigation contém destinos de topo, não ações da vista.
+11. Conteúdo/foco não podem ficar atrás de docks/headers.
+12. Container queries aplicam-se a componentes dependentes do contentor, não substituem shell/safe areas.
+13. Cache Storage e IndexedDB permanecem responsabilidades distintas.
+14. CSP é defesa em profundidade; inputs externos requerem validação sintática e semântica.
+15. Refatorações transversais passam pelos gates financeiros, segurança, sync, responsive, acessibilidade e PWA.
+
+Implementação inicial: contrato `tests/ui-architecture-contract.test.cjs`, remoção da geometria antiga de `mobile-layout.css` e invalidação de cache `architecture-baseline1`.
+
+## D-074 — v76 estável exige um único gate de publicação e validação multi-motor
+
+Data: 11 de setembro de 2026. Estado: em validação na branch `release/v76-ready`.
+
+### Problema
+
+Antes desta decisão, a aplicação tinha CI funcional extenso, TypeScript num workflow separado e Pages que repetia manualmente uma lista própria de testes. Isto criava três riscos:
+
+- o CI principal podia ficar verde sem o TypeScript Foundation fazer parte da mesma conclusão;
+- a lista de validações do Pages podia divergir da lista do CI;
+- não existia execução real do bundle em motores de browser no gate de release.
 
 ### Decisão
 
-1. Em ≤820 px, a aplicação desbloqueada usa **um único scroll vertical no documento**.
-2. `.app-shell` e `.main` deixam de impor `max-height:100dvh` ou clipping na camada final.
-3. A topbar continua `position:relative` e recebe compensação explícita de `safe-area-inset-top`.
-4. A bottom navigation pode continuar fixa, mas a altura do dock e `safe-area-inset-bottom` entram obrigatoriamente na reserva inferior das páginas.
-5. `v76-mobile-shell.css` carrega depois de `v76-modern-ui.css` e só tem autoridade sobre geometria de viewport, não sobre domínio ou regras financeiras.
-6. Existem ajustes para 320/375/390/430 px e landscape de baixa altura.
-7. Nenhuma solução pode usar `zoom`, bloquear pinch-to-zoom ou esconder conteúdo para fazê-lo caber.
-8. Foco de teclado/touch deve poder ser deslocado acima do dock persistente.
-9. Drawer e dialogs mantêm geometrias próprias e não transferem o scroll principal de volta para `.main`.
+1. A versão estável candidata é `0.76.0`; a release pública candidata é `v76`.
+2. A promoção não altera `STATE_VERSION=5`, schema, cêntimos, PBKDF2/AES-GCM, sincronização ou domínio financeiro.
+3. `.github/workflows/ci.yml` é o **gate técnico único** que autoriza deploy automático.
+4. TypeScript `strict` é executado dentro do job `quality`, para que um CI verde inclua obrigatoriamente o typecheck.
+5. O job `quality` mantém todos os testes funcionais, financeiros, segurança, UI, PWA e sync já existentes e acrescenta `release-readiness`.
+6. Um segundo job `browser-smoke`, dependente de `quality`, executa Playwright em Chromium e WebKit.
+7. Os perfis mínimos de browser são desktop 1280×800 e mobile 390×844 em Chromium, e 320×568/430×932 em WebKit.
+8. `tests/release-readiness.test.cjs` verifica coerência de versão/release, `dist/`, referências locais, allowlist pública e cache do Service Worker.
+9. GitHub Pages só publica automaticamente quando o workflow CI completo de `main` concluir com sucesso.
+10. Pages faz checkout do `head_sha` aprovado e confirma que o SHA local é exatamente o SHA testado.
+11. Pages repete apenas gates de integridade de release (TypeScript + release-readiness + metadados do `dist`), em vez de manter uma segunda cópia manual de toda a suíte funcional.
+12. `app-version=0.76.0`, `app-build=v76`, Build ID de 7 hex e `release-manifest.latestVersion=v76` são pré-condições de deploy.
+13. O Service Worker recebe revisão `v76-release1` para invalidar o app shell anterior sem apagar IndexedDB.
+14. Falhas de browser smoke preservam traces temporárias para diagnóstico.
+15. WebKit automatizado reduz risco de compatibilidade do motor, mas **não autoriza afirmar validação física de Safari/PWA em iPhone**. Essa evidência continua separada.
 
-### Fundamento
+### Critério de integração
 
-Uma única origem de scroll elimina a competição entre header relativo, viewport interno e dock fixo. Safe areas passam a ser parte explícita da geometria, em vez de depender de regras históricas da cascata CSS.
+A branch só pode entrar em `main` quando CI completo da branch/PR estiver verde, o diff for revisto e não houver alteração não justificada no núcleo financeiro/segurança. Depois do merge é obrigatório confirmar CI de `main` e Pages do SHA integrado.
 
-## D-073 — arquitetura UI v76 passa a ter propriedade única por preocupação e gates de aceitação
+## Evidência histórica relevante
 
-Data: 11 de setembro de 2026. Estado: integrado em `main` pelo PR #82, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`; CI, TypeScript Foundation e GitHub Pages concluídos com sucesso.
+- PR #76: UI/UX + Veggie Burger v2;
+- PR #78: version audit;
+- PR #80: mobile shell;
+- PR #82: baseline arquitetural v76;
+- PR #83: sincronização documental da baseline.
 
-### Factos que originaram a decisão
+## Lacunas preservadas
 
-A auditoria transversal mostrou que a aplicação acumulou várias folhas de estilo versionadas com responsabilidade sobre os mesmos elementos estruturais. O caso mais objetivo era `mobile-layout.css`: ainda definia `.app-shell`, `.main` e `.topbar`, apesar de `v76-mobile-shell.css` ser a autoridade final. A correção por uma camada posterior funcionava por precedência e `!important`, mas mantinha duas fontes de verdade e aumentava o risco de novas regressões.
-
-### Referencial externo usado
-
-- Apple Human Interface Guidelines: safe areas/layout, toolbars e separação entre ações e navegação;
-- MDN: `env(safe-area-inset-*)`, `viewport-fit=cover`, cascade layers, especificidade e container queries;
-- W3C/WCAG 2.2: Reflow a 320 CSS px, Target Size (Minimum) e Focus Not Obscured;
-- web.dev: arquitetura PWA, Cache Storage, IndexedDB e estratégias de cache;
-- OWASP Cheat Sheet Series: Content Security Policy e validação de inputs.
-
-Estas referências são critérios técnicos; a Apple HIG é orientação de plataforma para iOS e não substitui requisitos web/WCAG.
-
-### Decisão
-
-1. Cada preocupação transversal tem **uma única autoridade**: shell/viewport, tokens visuais, componentes, features, estados, domínio financeiro, persistência, sincronização, PWA e segurança.
-2. `v76-mobile-shell.css` é a única autoridade para `html/body`, `.app-shell`, `.main`, `.topbar`, `.page` e `.mobile-nav` quando a propriedade altera geometria global em ≤820 px.
-3. `mobile-layout.css` deixa de controlar viewport, scroll, topbar ou navegação persistente e fica restrito a refinamentos de features móveis.
-4. `v76-modern-ui.css` mantém aparência e tokens. A geometria global duplicada será removida gradualmente apenas quando o valor computado final puder ser preservado por teste.
-5. Não são aceites novos ficheiros “patch” para corrigir a mesma geometria. A correção deve ocorrer na camada que já é proprietária dessa preocupação.
-6. A migração para `@layer` será feita por domínio completo, não parcialmente: estilos antigos sem layer têm precedência sobre regras normais em layers e uma adoção parcial criaria uma nova cascata ambígua.
-7. `!important` não é proibido retroativamente, mas novas ocorrências em shell/components exigem justificação. O objetivo é reduzi-lo à medida que a propriedade única elimina guerras de especificidade.
-8. O contrato responsive é mobile-first e deve passar a 320 CSS px sem perda de informação/funcionalidade nem scroll bidimensional global; tabelas/diagramas podem ter scroll local quando a própria semântica o exigir.
-9. Alvos tácteis primários adotam 44×44 CSS px como baseline interno para iPhone. WCAG 2.2 AA permanece o mínimo normativo de 24×24 CSS px ou espaçamento equivalente.
-10. Safe areas são parte da geometria e usam `env(safe-area-inset-*)` com `viewport-fit=cover`; não usar offsets por modelo de iPhone.
-11. Navegação inferior contém apenas destinos de topo. Ações da vista ficam na toolbar/corpo/drawer contextual, não no tab bar.
-12. Conteúdo e foco não podem ficar atrás de headers/docks persistentes; a reserva do shell e `scroll-padding`/`scroll-margin` fazem parte do contrato.
-13. Container queries podem ser usados em componentes reutilizáveis quando a adaptação depende do contentor; não substituem breakpoints globais do shell nem safe areas.
-14. Service Worker não pode ser requisito para o núcleo funcionar online. Cache de app shell, dados locais e recursos HTTP permanecem responsabilidades separadas: Cache Storage para recursos de rede; IndexedDB para estado estruturado.
-15. CSP permanece defesa em profundidade. A dependência externa de runtime e `unsafe-inline` devem ser reduzidas em fases, sem alargar origens por conveniência.
-16. Inputs externos são validados semanticamente e sintaticamente no limite de entrada. Dados financeiros nunca são “corrigidos” silenciosamente por dados remotos.
-17. Qualquer refatoração transversal deve passar os testes financeiros, isolamento/cofre, sync, QR/scanner, responsive, acessibilidade, PWA e um gate específico de arquitetura UI.
-
-### Implementação publicada
-
-- removida de `mobile-layout.css` a propriedade histórica do viewport interno e da topbar sticky;
-- criado `tests/ui-architecture-contract.test.cjs` para impedir regressão da propriedade do shell, validar safe areas, zoom, baseline de toque, ordem de build e invalidação PWA;
-- `tests/mobile-layout-regression.test.cjs` passa a testar a arquitetura atual, em vez de exigir a arquitetura antiga;
-- CI passa a executar o novo contrato;
-- cache PWA revisto para `architecture-baseline1`;
-- documentação permanente atualizada com a nova propriedade por preocupação.
-
-## Evidência recente
-
-- UI/UX PR #76: merge `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
-- `76-version-audit1`: PR #78, merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`; CI/TypeScript/Pages verdes.
-- `76-mobile-shell2`: PR #80, merge `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`; TypeScript `34542259212`, CI `34542259148` e Pages `34542303536` com sucesso.
-- baseline arquitetural v76: PR #82, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`; TypeScript Foundation `34577495832`, CI `34577495803` e Pages `34577588233` com sucesso.
-
-## Lacuna técnica preservada
-
-`market-experience.js` extrai `pid` da resposta Cesta, mas a persistência explícita desse `pid` em todo o fluxo ainda necessita teste específico de identidade antes de alteração.
+- `market-experience.js` extrai `pid` da resposta Cesta, mas a persistência explícita em todo o fluxo ainda necessita teste próprio;
+- consolidação das camadas CSS v74/v75/v76 continua progressiva;
+- validação física em iPhone/Safari/PWA continua pendente enquanto não houver evidência real do dispositivo.
