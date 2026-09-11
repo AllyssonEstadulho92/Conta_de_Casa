@@ -1,6 +1,6 @@
-/* Conta de Casa v76 — 76-mobile-shell2.
+/* Conta de Casa v76 — 76-mobile-shell3.
    Autoridade final da geometria mobile após 76-modern-ui1.
-   Corrige safe areas, clipping vertical e reserva do dock sem tocar em dados,
+   Corrige safe areas, clipping vertical, overflow horizontal e reserva do dock sem tocar em dados,
    cálculos, persistência, PIN, cifragem, sincronização, QR ou Mercado. */
 
 @media (max-width:820px){
@@ -18,21 +18,42 @@
   html.cdc-v75.app-active body{
     min-height:100%;
     width:100%;
+    max-width:100%;
     overflow-x:hidden!important;
     overflow-y:auto!important;
     overscroll-behavior-y:auto!important;
   }
 
+  /* A grelha desktop tinha uma coluna lateral intrínseca que podia manter o shell
+     com ~840px mesmo em viewports de 320–430px. No mobile existe drawer próprio,
+     por isso a sidebar desktop sai do fluxo e a aplicação passa a uma coluna real. */
   html.cdc-v75.app-active .app-shell{
+    display:block!important;
+    grid-template-columns:none!important;
+    grid-template-areas:none!important;
     width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
     height:auto!important;
     min-height:100dvh!important;
     max-height:none!important;
     overflow:visible!important;
   }
 
+  html.cdc-v75.app-active .app-shell>.sidebar{
+    display:none!important;
+    width:0!important;
+    min-width:0!important;
+    max-width:0!important;
+    margin:0!important;
+    padding:0!important;
+  }
+
   html.cdc-v75.app-active body .main{
+    display:block!important;
     width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
     height:auto!important;
     min-height:100dvh!important;
     max-height:none!important;
@@ -45,6 +66,12 @@
     scroll-padding-bottom:var(--v76-shell-nav-reserve)!important;
   }
 
+  html.cdc-v75.app-active body .main>*{
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+
   /* Cabeçalho no fluxo, integralmente abaixo da status bar/ilha dinâmica. */
   html.cdc-v75.app-active .main>.topbar,
   html.cdc-v75.app-active[data-v75-page="dashboard"] .main>.topbar{
@@ -55,7 +82,7 @@
     right:auto!important;
     z-index:20!important;
     width:100%!important;
-    max-width:none!important;
+    max-width:100%!important;
     height:auto!important;
     min-height:calc(var(--v76-shell-safe-top) + var(--v76-shell-header-content) + 14px)!important;
     margin:0!important;
@@ -71,6 +98,7 @@
   html.cdc-v75.app-active[data-v75-page="dashboard"] .topbar-actions{
     position:relative!important;
     min-width:0!important;
+    max-width:100%!important;
     height:var(--v76-shell-header-content)!important;
     min-height:var(--v76-shell-header-content)!important;
     align-items:center!important;
@@ -115,6 +143,8 @@
     bottom:var(--v76-shell-safe-bottom)!important;
     z-index:60!important;
     width:auto!important;
+    min-width:0!important;
+    max-width:calc(100% - 20px)!important;
     height:var(--v76-shell-nav-height)!important;
     min-height:var(--v76-shell-nav-height)!important;
     max-height:none!important;
@@ -144,6 +174,8 @@
     #page-dashboard,#page-bills,#page-calendar,#page-market,#page-planning,
     #page-reports,#page-goals,#page-security,#page-diagnostics,#page-settings
   ){
+    min-width:0!important;
+    max-width:100%!important;
     max-height:none!important;
   }
 
@@ -169,6 +201,7 @@
   html.cdc-v75.app-active body .mobile-nav{
     left:max(7px,env(safe-area-inset-left,0px))!important;
     right:max(7px,env(safe-area-inset-right,0px))!important;
+    max-width:calc(100% - 14px)!important;
   }
 }
 
