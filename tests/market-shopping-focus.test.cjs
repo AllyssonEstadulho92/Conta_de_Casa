@@ -41,12 +41,13 @@ assert.match(css,/min-height:44px/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(brand,/\.market-product-photo[\s\S]*display:grid!important/);
 assert.match(experience,/\.cdc-market-home/,'v74 experience must place the shopping list inside the prototype market screen');
-assert.match(architecture,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'v75 must keep Mercado visible in primary navigation');
-assert.match(architecture,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'v75 prototype must keep compact product cards');
+assert.match(architecture,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'v75 architecture asset must keep Mercado visible in primary navigation');
+assert.match(architecture,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'v75 architecture asset must keep compact product cards');
 
-assert.equal(manifest.latestVersion,'v75');
+assert.equal(manifest.latestVersion,'v76');
+assert.equal(manifest.releases[0].version,'v76');
 const v65=manifest.releases.find(release=>release.version==='v65');
-assert.ok(v65,'v65 shopping behavior must remain documented after v75');
+assert.ok(v65,'v65 shopping behavior must remain documented after v76');
 assert.ok(v65.items.some(item=>/Lista de compras/i));
 assert.ok(v65.items.some(item=>/por comprar/i));
 assert.ok(v65.items.some(item=>/comprados/i));
@@ -55,11 +56,12 @@ assert.ok(sw.includes("'./market-shopping-focus.css'"));
 assert.ok(sw.includes("'./market-shopping-focus.js'"));
 assert.ok(sw.includes("'./v74-experience.css'"));
 assert.ok(sw.includes("'./v75-architecture.css'"));
+assert.match(sw,/v76-release1/);
 assert.match(sw,/v74-shopping2/);
 assert.match(sw,/v73-menu8/);
 assert.match(sw,/v74-experience2/);
 assert.match(sw,/v75-architecture2/);
-assert.match(prepare,/const BUILD = 'v75'/);
+assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
 assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
@@ -90,4 +92,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Mobile shopping focus preserved under the final v75 prototype architecture: OK');
+console.log('Mobile shopping focus preserved under the v76 release architecture: OK');
