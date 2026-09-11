@@ -12,19 +12,22 @@ const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 const pkg=JSON.parse(read('package.json'));
 
-assert.match(shell,/Conta de Casa v76 — 76-mobile-shell2/);
+assert.match(shell,/Conta de Casa v76 — 76-mobile-shell3/);
 assert.match(shell,/@media \(max-width:820px\)/);
 assert.match(shell,/--v76-shell-safe-top:max\(24px,env\(safe-area-inset-top,0px\)\)/);
 assert.match(shell,/--v76-shell-safe-bottom:max\(8px,env\(safe-area-inset-bottom,0px\)\)/);
 assert.match(shell,/--v76-shell-nav-reserve:calc\(var\(--v76-shell-nav-height\) \+ var\(--v76-shell-safe-bottom\) \+ 28px\)/);
-assert.match(shell,/html\.cdc-v75\.app-active \.app-shell\{[\s\S]*height:auto!important;[\s\S]*max-height:none!important;[\s\S]*overflow:visible!important/);
-assert.match(shell,/html\.cdc-v75\.app-active body \.main\{[\s\S]*height:auto!important;[\s\S]*max-height:none!important;[\s\S]*overflow:visible!important/);
-assert.match(shell,/html\.cdc-v75\.app-active \.main>\.topbar,[\s\S]*position:relative!important;[\s\S]*padding:calc\(var\(--v76-shell-safe-top\) \+ 6px\) 14px 8px!important/);
+assert.match(shell,/html\.cdc-v75\.app-active \.app-shell\{[\s\S]*display:block!important;[\s\S]*grid-template-columns:none!important;[\s\S]*min-width:0!important;[\s\S]*max-width:100%!important/,'mobile shell must collapse the desktop grid to one real column');
+assert.match(shell,/html\.cdc-v75\.app-active \.app-shell>\.sidebar\{[\s\S]*display:none!important;[\s\S]*max-width:0!important/,'desktop sidebar must leave the mobile layout flow');
+assert.match(shell,/html\.cdc-v75\.app-active body \.main\{[\s\S]*min-width:0!important;[\s\S]*max-width:100%!important;[\s\S]*height:auto!important;[\s\S]*overflow:visible!important/);
+assert.match(shell,/html\.cdc-v75\.app-active body \.main>\*\{[\s\S]*min-width:0!important;[\s\S]*max-width:100%!important/);
+assert.match(shell,/html\.cdc-v75\.app-active \.main>\.topbar,[\s\S]*position:relative!important;[\s\S]*max-width:100%!important;[\s\S]*padding:calc\(var\(--v76-shell-safe-top\) \+ 6px\) 14px 8px!important/);
 assert.match(shell,/html\.cdc-v75\.app-active \.main>\.page\{[\s\S]*padding:16px 14px var\(--v76-shell-nav-reserve\)!important;[\s\S]*overflow:visible!important/);
-assert.match(shell,/html\.cdc-v75\.app-active body \.mobile-nav\{[\s\S]*position:fixed!important;[\s\S]*bottom:var\(--v76-shell-safe-bottom\)!important;[\s\S]*height:var\(--v76-shell-nav-height\)!important/);
+assert.match(shell,/html\.cdc-v75\.app-active body \.mobile-nav\{[\s\S]*position:fixed!important;[\s\S]*max-width:calc\(100% - 20px\)!important;[\s\S]*bottom:var\(--v76-shell-safe-bottom\)!important/);
 assert.doesNotMatch(shell,/\bzoom\s*:/i);
 
 assert.equal(pkg.version,'0.76.0');
+/* The distribution revision is bumped only after browser validation of shell3. */
 assert.match(prepare,/const MOBILE_SHELL_REV = '76-mobile-shell2'/);
 assert.match(prepare,/'v76-mobile-shell\.css'/);
 assert.match(prepare,/v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/);
@@ -44,4 +47,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v76 stable mobile shell safe-area, document-scroll and dock-reserve tests: OK');
+console.log('v76 mobile shell3 single-column, safe-area, document-scroll and dock-reserve tests: OK');
