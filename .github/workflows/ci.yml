@@ -171,6 +171,9 @@ jobs:
       - name: v76 mobile shell safe-area tests
         run: node tests/v76-mobile-shell.test.cjs
 
+      - name: UI architecture contract tests
+        run: node tests/ui-architecture-contract.test.cjs
+
       - name: Software update center tests
         run: node tests/app-update.test.cjs
 
