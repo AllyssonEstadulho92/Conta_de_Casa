@@ -1,12 +1,12 @@
 # Estado do Projeto — Conta de Casa
 
 Atualizado: 11 de setembro de 2026  
-Versão da aplicação: `0.76.0-dev.1`  
-Release pública: `v75`  
-Programa técnico: `v76` — migração incremental TypeScript + revisão UI/UX/arquitetura  
+Versão candidata: `0.76.0`  
+Release candidata: `v76`  
+Release pública anterior: `v75`  
+Programa técnico: `v76` — arquitetura, TypeScript incremental, UI/UX e validação de release  
 Branch pública: `main`  
-HEAD publicado: `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`  
-Build público: `bb0cd65`  
+Branch em validação: `release/v76-ready`  
 Distribuição: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
@@ -19,91 +19,80 @@ Distribuição: GitHub Pages / PWA
 - sincronização GitHub opcional limitada ao envelope cifrado;
 - `estimatedCents` permanece distinto de `actualCents`;
 - `marketId|pid` permanece identidade canónica no pipeline especializado de SKU/fotografia;
-- QR, scanner, backup/restauro, PWA e funcionamento offline não podem regredir por mudanças visuais;
-- alterações UI/UX, shell ou versionamento não podem modificar cálculos, pagamentos, faturas, persistência ou segurança.
+- QR, scanner, backup/restauro, PWA e funcionamento offline não podem regredir por mudanças de release;
+- promoção de versão não pode alterar cálculos, pagamentos, faturas, persistência, cifragem ou regras de Mercado.
 
-## 2. Estado publicado em `main`
+## 2. Baseline integrada antes da release
 
-- `75-market1` — Mercado;
-- `75-expenses1` — Despesas/Faturas;
-- fundação TypeScript — PR #72;
-- `76-veggie-menu1` — PR #74;
-- `76-veggie-menu2` + `76-modern-ui1` — PR #76;
-- `76-version-audit1` — PR #78;
-- `76-mobile-shell2` — PR #80;
-- baseline arquitetural transversal v76 — PR #82, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`.
+A baseline arquitetural transversal v76 foi integrada pelo PR #82 e publicada com CI, TypeScript Foundation e GitHub Pages verdes. O PR #83 sincronizou a documentação permanente. O `v76-mobile-shell.css` é a autoridade da geometria mobile ≤820 px e `mobile-layout.css` fica limitado a refinamentos de feature.
 
-A baseline arquitetural foi validada no PR com CI e TypeScript Foundation verdes. Depois do merge, TypeScript Foundation `34577495832`, CI `34577495803` e GitHub Pages `34577588233` terminaram com sucesso.
+O `main` anterior à preparação da release estava em `cb88e105428a2a54eeebddeb810d9f123e4ac3c2`.
 
-## 3. Diagnóstico arquitetural
+## 3. Release candidate `0.76.0 / v76`
 
-A auditoria de 11/09/2026 confirmou que o problema não era apenas um valor de margem/safe area. A UI acumulou várias folhas de estilo versionadas com responsabilidades sobre os mesmos elementos estruturais. O caso comprovado era `mobile-layout.css`, que ainda definia `.app-shell`, `.main` e `.topbar` apesar de `v76-mobile-shell.css` já ser a autoridade final do viewport móvel.
+Branch: `release/v76-ready`.
 
-Essa arquitetura podia produzir um resultado correto apenas por ordem de carregamento, especificidade e `!important`, tornando cada correção posterior mais frágil. A baseline publicada elimina essa duplicação concreta: `mobile-layout.css` ficou restrito a refinamentos de feature e o shell móvel passou a ter propriedade estrutural explícita.
+Alterações efetuadas para transformar o programa v76 numa release verificável:
 
-Conclusão vigente: não criar novas camadas de override para corrigir a mesma geometria. Consolidar a aplicação por propriedade/responsabilidade e com gates de regressão.
+- `package.json.version` promovido de `0.76.0-dev.1` para `0.76.0`;
+- `release-manifest.json` promovido de `v75` para `v76`, mantendo o histórico anterior;
+- `scripts/prepare-pages.cjs` passa a compilar/publicar `BUILD = 'v76'`;
+- Service Worker recebe cache `v76-release1`, forçando invalidação do app shell antigo sem apagar IndexedDB;
+- novo `tests/release-readiness.test.cjs` valida versão, manifesto, bundle `dist/`, referências locais, allowlist pública e cache PWA;
+- novo `playwright.config.cjs` e `tests/e2e/release-smoke.spec.cjs` executam smoke tests em Chromium e WebKit, desktop e viewports móveis;
+- TypeScript strict deixa de ser apenas workflow paralelo e passa também a fazer parte do job principal do CI;
+- o CI só termina verde depois de `quality` + `browser-smoke`;
+- Pages faz checkout do SHA exato aprovado pelo CI, confirma a identidade da revisão, repete TypeScript + release-readiness, gera `dist/` e valida metadados `0.76.0 / v76 / Build ID` antes do deploy.
 
-## 4. Pesquisa técnica realizada
+## 4. Critério de “pronta para publicar”
 
-Foram revistos referenciais primários/de elevada confiança:
+A v76 só pode ser integrada em `main` quando todos estes gates estiverem verdes:
 
-- Apple Human Interface Guidelines / Apple Developer: safe areas, layout, toolbar e navegação;
-- MDN Web Docs: `env(safe-area-inset-*)`, `viewport-fit=cover`, cascata/especificidade, cascade layers e container queries;
-- W3C/WAI WCAG 2.2: Reflow a 320 CSS px, Target Size e Focus Not Obscured;
-- web.dev: arquitetura PWA, Cache Storage, IndexedDB e estratégias de cache;
-- OWASP Cheat Sheet Series: CSP e validação de inputs.
+1. sintaxe JavaScript e scripts de build;
+2. TypeScript `strict`;
+3. invariantes financeiras e contagem exata;
+4. isolamento/cofre/datas civis;
+5. formulários, faturas e QR;
+6. Mercado, imagens, catálogo, scanner e contabilização;
+7. UI, responsive, navegação, acessibilidade e arquitetura do shell;
+8. segurança;
+9. sync e política de conflitos;
+10. release-readiness do bundle público;
+11. smoke browser em Chromium e WebKit;
+12. validação do manifesto PWA.
 
-A Apple HIG é referência ergonómica/plataforma para iPhone. Os requisitos Web e de acessibilidade continuam ancorados em standards Web/WCAG.
+Depois do merge, o Pages só publica o mesmo SHA aprovado por esse CI.
 
-## 5. Baseline arquitetural publicada
+## 5. O que a validação automatizada comprova
 
-A baseline v76 estabelece:
+Com gates verdes, fica comprovado que o código testado compila, passa as regressões existentes, gera um bundle público coerente, carrega nos motores Chromium/WebKit configurados e mantém os contratos estruturais automatizados.
 
-- `v76-mobile-shell.css` como autoridade declarada para geometria global mobile ≤820 px;
-- `mobile-layout.css` apenas para refinamentos de features móveis;
-- um contrato automatizado em `tests/ui-architecture-contract.test.cjs`;
-- regressão mobile alinhada com a arquitetura atual;
-- invalidação de cache PWA `architecture-baseline1` para distribuir a alteração estrutural;
-- CI com gate explícito de arquitetura UI;
-- documentação permanente sincronizada com a nova propriedade por preocupação.
+Isto **não equivale** a teste físico num iPhone real. WebKit automatizado reduz o risco específico do motor Safari, mas Safari/PWA instalada, safe areas reais, Dynamic Island/status bar, teclado virtual e gestos em hardware Apple continuam a exigir confirmação física. Essa distinção não pode ser apagada da documentação.
 
-Esta etapa não altera `core.js`, `finance.js`, schema, IndexedDB, PBKDF2/AES-GCM, pagamentos, faturas, QR, scanner, sincronização cifrada ou regras financeiras/Mercado.
+## 6. Segurança e dados
 
-## 6. Critério UI/UX v76
+A promoção v76 não altera:
 
-- uma única autoridade por preocupação transversal;
-- mobile-first;
-- reflow a 320 CSS px sem perda de informação/funcionalidade e sem scroll horizontal global;
-- safe areas explícitas em dispositivos edge-to-edge;
-- baseline interna de 44×44 CSS px para controlos tácteis primários no iPhone;
-- foco e último conteúdo nunca escondidos por dock/header persistentes;
-- bottom navigation apenas para destinos de topo; ações da vista ficam na toolbar/corpo/menu contextual;
-- nenhum novo ficheiro “patch” para corrigir a mesma geometria;
-- `@layer` só entra quando o domínio concorrente completo puder ser migrado em conjunto;
-- reduzir `!important` por propriedade comprovadamente consolidada, nunca por remoção cega;
-- container queries apenas para componentes dependentes do contentor;
-- alterações visuais não podem tocar no domínio financeiro ou segurança sem decisão própria.
+- `core.js`/schema persistido;
+- `STATE_VERSION`;
+- PBKDF2-SHA-256/AES-GCM;
+- `PBKDF2_ITERATIONS`;
+- IndexedDB financeiro;
+- valores monetários em cêntimos;
+- backup/restauro cifrado;
+- sincronização cifrada;
+- QR/scanner por efeito da mudança de versão.
 
-## 7. PWA e segurança
+O CI continua a executar os testes de segurança e isolamento antes da publicação.
 
-Critério de evolução:
+## 7. Riscos/lacunas ainda abertas
 
-- Cache Storage para recursos HTTP do app shell/rede escolhidos; IndexedDB para estado estruturado;
-- manifestos/metadados de atualização não devem ficar presos a cache obsoleta;
-- Service Worker não pode ser requisito para o núcleo online funcionar;
-- CSP continua defesa em profundidade e deve ser progressivamente mais restrita;
-- avaliar remoção da dependência runtime externa do ZXing, mantendo licença e funcionalidade;
-- reduzir `style-src 'unsafe-inline'` apenas depois de migrar estilos inline necessários;
-- validar dados remotos/QR/importação de faturas sintática e semanticamente antes de os aceitar no domínio.
-
-## 8. Riscos/lacunas abertas
-
-- validação física do build `bb0cd65` em iPhone/Safari/PWA continua necessária;
-- `v76-modern-ui.css` e camadas v74/v75 ainda contêm sobreposição de responsabilidade e `!important` a consolidar em fases;
-- `main` permanece sem branch protection;
+- validação física da v76 publicada em iPhone/Safari/PWA permanece obrigatória antes de declarar certificação física Apple;
+- `main` permanece sem branch protection ao nível do repositório; o fluxo atual usa PR + CI como controlo operacional, mas proteção administrativa continua recomendada;
+- `v76-modern-ui.css` e camadas v74/v75 ainda têm sobreposição/`!important` a consolidar progressivamente;
 - `market-experience.js` mantém a lacuna conhecida de persistência explícita de `pid` em todo o fluxo;
-- release pública continua `v75` até decisão formal de promoção.
+- a migração do núcleo funcional para TypeScript continua incremental; v76 não é uma reescrita total.
 
-## 9. Próximo passo
+## 8. Próximo passo
 
-Executar a consolidação transversal por domínio, começando por remover de `v76-modern-ui.css` a geometria mobile já pertencente ao shell, preservando o valor computado final. Depois avançar por componentes e features, com comparação visual e regressões verdes em 320/360/375/390/430/768/820/1024+ px. Não fazer refatoração “big-bang”.
+Concluir CI da branch `release/v76-ready`. Se `quality` e `browser-smoke` estiverem verdes, rever o diff, integrar por PR em `main`, confirmar CI do merge e GitHub Pages do SHA integrado. Depois sincronizar estes documentos com SHA/Build ID/run IDs efetivamente publicados e executar a validação física no iPhone/Safari/PWA.
