@@ -29,8 +29,8 @@ assert.match(designCss,/@media\(max-width:820px\)/);
 assert.match(designCss,/@media\(max-width:359px\)/);
 assert.match(designCss,/--mobile-top-safe:max\(20px,calc\(env\(safe-area-inset-top,0px\) \+ 8px\)\)/,'base must keep a touch-safe iPhone top inset');
 assert.match(designCss,/--header-height:calc\(108px \+ var\(--mobile-top-safe\)\)/);
-assert.match(designCss,/html\.app-active \.topbar,[\s\S]*position:fixed!important/,'mobile shell must retain a fixed topbar');
-assert.match(designCss,/html\.app-active \.main\{padding-top:var\(--header-height\)!important/,'content must compensate the fixed topbar');
+assert.match(designCss,/html\.app-active \.topbar,[\s\S]*position:fixed!important/,'mobile shell base must retain its historical fixed-topbar contract before the v76 final geometry layer');
+assert.match(designCss,/html\.app-active \.main\{padding-top:var\(--header-height\)!important/,'base content must compensate the historical fixed topbar');
 assert.match(designCss,/\.mobile-menu-btn\{width:44px!important;[\s\S]*height:44px!important/,'menu target must remain at least 44px');
 assert.match(designCss,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/,'base bottom navigation must reserve five destinations');
 assert.match(designCss,/\.mobile-nav \.nav-btn\.active::before\{background:var\(--primary\)!important\}/,'there must be one canonical active indicator');
@@ -99,7 +99,7 @@ assert.match(events,/openAccountBalanceForm\(\)/);
 
 assert.doesNotMatch(css,/\bzoom\s*:/i,'do not reintroduce CSS zoom as a responsive workaround');
 
-/* Source HTML remains stable; Pages stamps v75. */
+/* Source HTML remains stable; Pages stamps the v76 release. */
 assert.match(index,/name="app-build" content="v53"/);
 assert.match(index,/styles\.css\?v=53/);
 assert.match(index,/design-system\.css\?v=53/);
@@ -107,14 +107,14 @@ assert.match(index,/manifest\.webmanifest\?v=53/);
 for(const asset of ['core','finance','render','forms','sync','events'])assert.match(index,new RegExp(`${asset}\\.js\\?v=53`));
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/conta-de-casa-public-v76-release1-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
 for(const asset of ['./design-system.css','./v74-experience.css','./v75-architecture.css','./market-experience.css','./market-experience.js','./v64-runtime.js','./app-update.css','./app-update.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be available offline`);
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.match(sw,/url\.searchParams\.has\('v'\)/);
 assert.match(sw,/url\.searchParams\.has\('ts'\)/);
 
-assert.match(prepare,/const BUILD = 'v75'/);
+assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 
@@ -122,8 +122,8 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const builtIndex=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(builtIndex,/name="app-build" content="v75"/);
-  assert.match(builtIndex,/design-system\.css\?v=75/);
+  assert.match(builtIndex,/name="app-build" content="v76"/);
+  assert.match(builtIndex,/design-system\.css\?v=76/);
   assert.match(builtIndex,/v74-experience\.css\?v=74-experience2/);
   assert.match(builtIndex,/v74-experience\.js\?v=74-experience2/);
   assert.match(builtIndex,/v75-architecture\.css\?v=75-architecture2/);
@@ -140,4 +140,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Responsive v75 architecture, safe areas, visible five-destination navigation and Pages freshness tests: OK');
+console.log('Responsive v76 release preserves v75 architecture, safe areas, five-destination navigation and Pages freshness: OK');
