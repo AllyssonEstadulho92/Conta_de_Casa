@@ -25,9 +25,11 @@ assert.match(shell,/html\.cdc-v75\.app-active body \.mobile-nav\{[\s\S]*position
 assert.doesNotMatch(shell,/\bzoom\s*:/i);
 
 assert.equal(pkg.version,'0.76.0-dev.1');
+assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui2'/);
 assert.match(prepare,/const MOBILE_SHELL_REV = '76-mobile-shell2'/);
 assert.match(prepare,/'v76-mobile-shell\.css'/);
 assert.match(prepare,/v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/);
+assert.match(sw,/modern-ui2/);
 assert.match(sw,/mobile-shell2/);
 assert.ok(sw.includes("'./v76-mobile-shell.css'"));
 
@@ -36,7 +38,7 @@ try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const builtIndex=read('dist/index.html');
   assert.match(builtIndex,/name="app-version" content="0\.76\.0-dev\.1"/);
-  assert.match(builtIndex,/v76-modern-ui\.css\?v=76-modern-ui1/);
+  assert.match(builtIndex,/v76-modern-ui\.css\?v=76-modern-ui2/);
   assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-mobile-shell2/);
   assert.ok(builtIndex.indexOf('v76-modern-ui.css')<builtIndex.indexOf('v76-mobile-shell.css'),'mobile shell must be the final mobile geometry layer');
   assert.ok(fs.existsSync(path.join(dist,'v76-mobile-shell.css')));
