@@ -42,6 +42,7 @@ test('v76 publica metadados e recursos PWA coerentes sem erro fatal de runtime',
   expect(release.releases?.[0]?.version).toBe('v76');
 
   const swResponse = await request.get('/sw.js?v=76', { headers: { 'cache-control': 'no-cache' } });
+  expect(releaseResponse.ok()).toBeTruthy();
   expect(swResponse.ok()).toBeTruthy();
   expect(await swResponse.text()).toContain('conta-de-casa-public-v76-release1');
 
@@ -103,6 +104,52 @@ test('shell não cria overflow horizontal e mantém controlos móveis dentro do 
     expect(afterScroll).toBeTruthy();
     expect(afterScroll.lastContentBottom).toBeLessThanOrEqual(afterScroll.navTop + 1);
   }
+});
+
+test('topbar móvel permanece visível durante scroll sem sair da safe area', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await exposeAppShell(page);
+
+  const viewport = page.viewportSize();
+  if (!viewport || viewport.width > 820) return;
+
+  const before = await page.evaluate(() => {
+    const topbar = document.querySelector('.topbar');
+    const dashboard = document.querySelector('#page-dashboard');
+    if (!topbar || !dashboard) return null;
+    const spacer = document.createElement('div');
+    spacer.setAttribute('data-v76-scroll-probe', 'true');
+    spacer.style.height = '1600px';
+    spacer.style.pointerEvents = 'none';
+    dashboard.appendChild(spacer);
+    const rect = topbar.getBoundingClientRect();
+    return {
+      top: rect.top,
+      bottom: rect.bottom,
+      position: getComputedStyle(topbar).position,
+      scrollHeight: document.documentElement.scrollHeight
+    };
+  });
+
+  expect(before).toBeTruthy();
+  expect(before.position).toBe('sticky');
+  expect(before.top).toBeGreaterThanOrEqual(-1);
+  expect(before.scrollHeight).toBeGreaterThan(viewport.height + 300);
+
+  await page.evaluate(() => window.scrollTo(0, 420));
+  await page.waitForTimeout(100);
+
+  const after = await page.evaluate(() => {
+    const topbar = document.querySelector('.topbar');
+    if (!topbar) return null;
+    const rect = topbar.getBoundingClientRect();
+    return { top: rect.top, bottom: rect.bottom, scrollY: window.scrollY };
+  });
+
+  expect(after).toBeTruthy();
+  expect(after.scrollY).toBeGreaterThan(100);
+  expect(Math.abs(after.top - before.top)).toBeLessThanOrEqual(1.5);
+  expect(after.bottom).toBeGreaterThan(44);
 });
 
 test('controlo móvel canónico permanece único e acessível', async ({ page }) => {
