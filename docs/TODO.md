@@ -26,10 +26,11 @@ Atualizado: 11 de setembro de 2026
 - [x] `76-veggie-menu2` + `76-modern-ui1` — PR #76.
 - [x] `76-version-audit1` — PR #78.
 - [x] `76-mobile-shell2` — PR #80.
+- [x] Baseline arquitetural transversal v76 — PR #82.
 
 ## P0 — baseline arquitetural transversal v76
 
-Branch: `refactor/v76-architecture-baseline`.
+Estado: publicado em `main` pelo PR #82, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`.
 
 ### Pesquisa e critérios
 
@@ -43,18 +44,20 @@ Branch: `refactor/v76-architecture-baseline`.
 - [x] Definir matriz responsive 320/360/375/390/430/768/820/1024+.
 - [x] Proibir novos “patch files” para a mesma geometria global.
 
-### Implementação inicial
+### Implementação e gates
 
 - [x] Retirar de `mobile-layout.css` a propriedade antiga de `.app-shell`, `.main`, `.topbar` e viewport interno.
 - [x] Manter em `mobile-layout.css` apenas refinamentos de feature do Mercado.
 - [x] Atualizar `tests/mobile-layout-regression.test.cjs` para a arquitetura atual.
 - [x] Criar `tests/ui-architecture-contract.test.cjs`.
 - [x] Adicionar o novo gate à CI.
-- [ ] CI integral da branch verde.
-- [ ] TypeScript Foundation verde.
-- [ ] Rever diff antes de integração.
-- [ ] Integrar em `main` apenas após gates verdes.
-- [ ] Publicar Pages e confirmar build.
+- [x] CI integral do PR verde.
+- [x] TypeScript Foundation verde.
+- [x] Rever diff antes de integração.
+- [x] Integrar em `main` apenas após gates verdes.
+- [x] TypeScript Foundation de `main` `34577495832`: sucesso.
+- [x] CI de `main` `34577495803`: sucesso.
+- [x] GitHub Pages `34577588233`: sucesso.
 
 ### Consolidação seguinte — sem big-bang
 
