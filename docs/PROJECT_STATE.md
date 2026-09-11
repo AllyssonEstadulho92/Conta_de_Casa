@@ -5,8 +5,8 @@ Versão da aplicação: `0.76.0-dev.1`
 Release pública: `v75`  
 Programa técnico: `v76` — migração incremental TypeScript + revisão UI/UX/arquitetura  
 Branch pública: `main`  
-Branch em avaliação: `refactor/v76-architecture-baseline`  
-HEAD funcional publicado: `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`  
+HEAD publicado: `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`  
+Build público: `bb0cd65`  
 Distribuição: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
@@ -30,44 +30,44 @@ Distribuição: GitHub Pages / PWA
 - `76-veggie-menu1` — PR #74;
 - `76-veggie-menu2` + `76-modern-ui1` — PR #76;
 - `76-version-audit1` — PR #78;
-- `76-mobile-shell2` — PR #80, merge funcional `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`;
-- documentação de publicação sincronizada em `main` por `0011e5fe7c77dbc1b02b62ba42688f5914bcb9a3`.
+- `76-mobile-shell2` — PR #80;
+- baseline arquitetural transversal v76 — PR #82, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`.
 
-## 3. Diagnóstico arquitetural atual
+A baseline arquitetural foi validada no PR com CI e TypeScript Foundation verdes. Depois do merge, TypeScript Foundation `34577495832`, CI `34577495803` e GitHub Pages `34577588233` terminaram com sucesso.
 
-A correção `76-mobile-shell2` resolveu a geometria final por precedência, mas a auditoria de 11/09/2026 confirmou uma dívida estrutural maior: a UI acumulou várias folhas de estilo versionadas com responsabilidades sobre os mesmos elementos.
+## 3. Diagnóstico arquitetural
 
-O exemplo objetivo era `mobile-layout.css`, que ainda definia `.app-shell`, `.main` e `.topbar` apesar de `v76-mobile-shell.css` já ser a autoridade final do viewport móvel. O resultado funcional podia ficar correto, mas dependia de ordem de carregamento, especificidade e `!important`. Isto aumenta o risco de regressão a cada nova alteração visual.
+A auditoria de 11/09/2026 confirmou que o problema não era apenas um valor de margem/safe area. A UI acumulou várias folhas de estilo versionadas com responsabilidades sobre os mesmos elementos estruturais. O caso comprovado era `mobile-layout.css`, que ainda definia `.app-shell`, `.main` e `.topbar` apesar de `v76-mobile-shell.css` já ser a autoridade final do viewport móvel.
 
-Conclusão: não continuar a corrigir a aplicação através de novas camadas de override. O próximo ciclo deve consolidar propriedade por preocupação e introduzir gates arquiteturais.
+Essa arquitetura podia produzir um resultado correto apenas por ordem de carregamento, especificidade e `!important`, tornando cada correção posterior mais frágil. A baseline publicada elimina essa duplicação concreta: `mobile-layout.css` ficou restrito a refinamentos de feature e o shell móvel passou a ter propriedade estrutural explícita.
+
+Conclusão vigente: não criar novas camadas de override para corrigir a mesma geometria. Consolidar a aplicação por propriedade/responsabilidade e com gates de regressão.
 
 ## 4. Pesquisa técnica realizada
 
-Foram revistos referenciais primários/de elevada confiança para alinhar o critério da aplicação:
+Foram revistos referenciais primários/de elevada confiança:
 
 - Apple Human Interface Guidelines / Apple Developer: safe areas, layout, toolbar e navegação;
-- MDN Web Docs: `env(safe-area-inset-*)`, `viewport-fit=cover`, cascade/specifity, cascade layers e container queries;
+- MDN Web Docs: `env(safe-area-inset-*)`, `viewport-fit=cover`, cascata/especificidade, cascade layers e container queries;
 - W3C/WAI WCAG 2.2: Reflow a 320 CSS px, Target Size e Focus Not Obscured;
 - web.dev: arquitetura PWA, Cache Storage, IndexedDB e estratégias de cache;
 - OWASP Cheat Sheet Series: CSP e validação de inputs.
 
-A Apple HIG é usada como referência ergonómica/plataforma para iPhone; os requisitos Web e de acessibilidade continuam ancorados em standards Web/WCAG.
+A Apple HIG é referência ergonómica/plataforma para iPhone. Os requisitos Web e de acessibilidade continuam ancorados em standards Web/WCAG.
 
-## 5. Baseline arquitetural em implementação
+## 5. Baseline arquitetural publicada
 
-Branch: `refactor/v76-architecture-baseline`.
+A baseline v76 estabelece:
 
-Alterações já efetuadas na branch:
+- `v76-mobile-shell.css` como autoridade declarada para geometria global mobile ≤820 px;
+- `mobile-layout.css` apenas para refinamentos de features móveis;
+- um contrato automatizado em `tests/ui-architecture-contract.test.cjs`;
+- regressão mobile alinhada com a arquitetura atual;
+- invalidação de cache PWA `architecture-baseline1` para distribuir a alteração estrutural;
+- CI com gate explícito de arquitetura UI;
+- documentação permanente sincronizada com a nova propriedade por preocupação.
 
-- `mobile-layout.css` deixou de possuir viewport, scroll principal, topbar ou bottom navigation;
-- o ficheiro mantém apenas refinamentos móveis de feature do Mercado;
-- `v76-mobile-shell.css` passa a ser a única autoridade declarada para geometria global mobile ≤820 px;
-- `tests/mobile-layout-regression.test.cjs` foi atualizado para testar a arquitetura atual em vez da arquitetura antiga;
-- criado `tests/ui-architecture-contract.test.cjs`;
-- CI passa a executar o novo contrato;
-- `ARCHITECTURE.md`, `DECISIONS.md` e `TODO.md` foram atualizados com o critério transversal.
-
-Ainda não considerar esta baseline integrada/publicada enquanto CI, TypeScript Foundation, revisão do diff, merge e Pages não estiverem concluídos.
+Esta etapa não altera `core.js`, `finance.js`, schema, IndexedDB, PBKDF2/AES-GCM, pagamentos, faturas, QR, scanner, sincronização cifrada ou regras financeiras/Mercado.
 
 ## 6. Critério UI/UX v76
 
@@ -98,8 +98,7 @@ Critério de evolução:
 
 ## 8. Riscos/lacunas abertas
 
-- validação física pós-publicação de `76-mobile-shell2` em iPhone/Safari/PWA continua necessária;
-- a baseline arquitetural atual ainda precisa de CI/TypeScript/merge/Pages;
+- validação física do build `bb0cd65` em iPhone/Safari/PWA continua necessária;
 - `v76-modern-ui.css` e camadas v74/v75 ainda contêm sobreposição de responsabilidade e `!important` a consolidar em fases;
 - `main` permanece sem branch protection;
 - `market-experience.js` mantém a lacuna conhecida de persistência explícita de `pid` em todo o fluxo;
@@ -107,4 +106,4 @@ Critério de evolução:
 
 ## 9. Próximo passo
 
-Concluir os gates da branch `refactor/v76-architecture-baseline`. Se verdes, integrar a baseline e publicar. Depois executar a consolidação transversal por domínio, começando por shell/UI, sem big-bang e sem alterar domínio financeiro. A validação física iPhone/Safari/PWA permanece obrigatória durante esse processo.
+Executar a consolidação transversal por domínio, começando por remover de `v76-modern-ui.css` a geometria mobile já pertencente ao shell, preservando o valor computado final. Depois avançar por componentes e features, com comparação visual e regressões verdes em 320/360/375/390/430/768/820/1024+ px. Não fazer refatoração “big-bang”.

@@ -120,7 +120,7 @@ Uma única origem de scroll elimina a competição entre header relativo, viewpo
 
 ## D-073 — arquitetura UI v76 passa a ter propriedade única por preocupação e gates de aceitação
 
-Data: 11 de setembro de 2026. Estado: em implementação na branch `refactor/v76-architecture-baseline`.
+Data: 11 de setembro de 2026. Estado: integrado em `main` pelo PR #82, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`; CI, TypeScript Foundation e GitHub Pages concluídos com sucesso.
 
 ### Factos que originaram a decisão
 
@@ -156,18 +156,21 @@ Estas referências são critérios técnicos; a Apple HIG é orientação de pla
 16. Inputs externos são validados semanticamente e sintaticamente no limite de entrada. Dados financeiros nunca são “corrigidos” silenciosamente por dados remotos.
 17. Qualquer refatoração transversal deve passar os testes financeiros, isolamento/cofre, sync, QR/scanner, responsive, acessibilidade, PWA e um gate específico de arquitetura UI.
 
-### Implementação inicial
+### Implementação publicada
 
 - removida de `mobile-layout.css` a propriedade histórica do viewport interno e da topbar sticky;
-- criado `tests/ui-architecture-contract.test.cjs` para impedir regressão da propriedade do shell, validar safe areas, zoom, baseline de toque e ordem de build;
+- criado `tests/ui-architecture-contract.test.cjs` para impedir regressão da propriedade do shell, validar safe areas, zoom, baseline de toque, ordem de build e invalidação PWA;
 - `tests/mobile-layout-regression.test.cjs` passa a testar a arquitetura atual, em vez de exigir a arquitetura antiga;
-- CI passa a executar o novo contrato.
+- CI passa a executar o novo contrato;
+- cache PWA revisto para `architecture-baseline1`;
+- documentação permanente atualizada com a nova propriedade por preocupação.
 
 ## Evidência recente
 
 - UI/UX PR #76: merge `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
 - `76-version-audit1`: PR #78, merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`; CI/TypeScript/Pages verdes.
 - `76-mobile-shell2`: PR #80, merge `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`; TypeScript `34542259212`, CI `34542259148` e Pages `34542303536` com sucesso.
+- baseline arquitetural v76: PR #82, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`; TypeScript Foundation `34577495832`, CI `34577495803` e Pages `34577588233` com sucesso.
 
 ## Lacuna técnica preservada
 
