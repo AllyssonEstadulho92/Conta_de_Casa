@@ -12,6 +12,7 @@ const legacyMobile=read('mobile-layout.css');
 const shell=read('v76-mobile-shell.css');
 const modern=read('v76-modern-ui.css');
 const prepare=read('scripts/prepare-pages.cjs');
+const sw=read('sw.js');
 
 // Architecture contract: feature CSS must not own the application viewport.
 assert.doesNotMatch(legacyMobile,/\.app-shell\s*\{/,'mobile-layout.css must not own .app-shell geometry');
@@ -45,4 +46,9 @@ const modernInjection=prepare.indexOf('v76-modern-ui.css?v=${MODERN_UI_REV}');
 const shellInjection=prepare.indexOf('v76-mobile-shell.css?v=${MOBILE_SHELL_REV}');
 assert.ok(modernInjection>=0 && shellInjection>modernInjection,'mobile shell must load after the visual design system');
 
-console.log('UI architecture contract: single mobile shell, safe areas, reflow baseline and touch targets: OK');
+// A shell-architecture change must invalidate the installed PWA cache.
+assert.match(sw,/architecture-baseline1/);
+assert.ok(sw.includes("'./mobile-layout.css'"));
+assert.ok(sw.includes("'./v76-mobile-shell.css'"));
+
+console.log('UI architecture contract: single mobile shell, safe areas, reflow baseline, touch targets and PWA invalidation: OK');
