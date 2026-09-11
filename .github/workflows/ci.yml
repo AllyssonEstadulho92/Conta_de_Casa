@@ -11,7 +11,9 @@ permissions:
 
 jobs:
   quality:
+    name: Quality + TypeScript + release bundle
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,6 +22,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
+
+      - name: Install validation toolchain
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: TypeScript strict check
+        run: npm run typecheck
 
       - name: Probe live market sources
         run: node scripts/probe-market-sources.cjs
@@ -62,6 +70,9 @@ jobs:
           node --check v75-market-flow.js
           node --check sw.js
           node --check scripts/prepare-pages.cjs
+          node --check tests/release-readiness.test.cjs
+          node --check tests/e2e/release-smoke.spec.cjs
+          node --check playwright.config.cjs
 
       - name: Finance tests
         run: node tests/finance.test.cjs
@@ -177,6 +188,9 @@ jobs:
       - name: Software update center tests
         run: node tests/app-update.test.cjs
 
+      - name: Release readiness gate
+        run: npm run check:release
+
       - name: Security hardening tests
         run: node tests/security.test.cjs
 
@@ -204,3 +218,36 @@ jobs:
       - name: Validate manifest
         run: |
           node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8')); console.log('Manifest OK')"
+          node -e "const m=JSON.parse(require('fs').readFileSync('release-manifest.json','utf8')); if(m.latestVersion!=='v76') process.exit(1); console.log('Release manifest v76 OK')"
+
+  browser-smoke:
+    name: Browser smoke (Chromium + WebKit)
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install validation toolchain
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Install Chromium and WebKit
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Release browser smoke tests
+        run: npm run test:e2e
+
+      - name: Preserve Playwright traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-release-traces
+          path: test-results
+          if-no-files-found: ignore
+          retention-days: 7
