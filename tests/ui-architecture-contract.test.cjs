@@ -21,6 +21,14 @@ assert.doesNotMatch(legacyMobile,/\.topbar\s*\{/,'mobile-layout.css must not own
 assert.doesNotMatch(legacyMobile,/\.mobile-nav\s*\{/,'mobile-layout.css must not own persistent navigation geometry');
 assert.doesNotMatch(legacyMobile,/height\s*:\s*100dvh|overflow\s*:\s*hidden/i,'feature CSS must not recreate a clipped viewport');
 
+// The visual design system may style shell elements, but must not duplicate mobile viewport geometry.
+assert.match(modern,/A geometria do shell móvel pertence a v76-mobile-shell\.css/);
+assert.doesNotMatch(modern,/\.main>\.page\{[\s\S]*padding:14px 14px calc\(102px/,'v76-modern-ui.css must not reserve mobile page/dock geometry');
+assert.doesNotMatch(modern,/\.mobile-nav\{[\s\S]*position:fixed!important;[\s\S]*safe-area-inset-bottom/,'v76-modern-ui.css must not position the persistent mobile dock');
+assert.doesNotMatch(modern,/\.topbar,[\s\S]*min-height:76px!important;[\s\S]*padding:12px 14px!important/,'v76-modern-ui.css must not own mobile topbar dimensions');
+assert.doesNotMatch(modern,/@media\(max-width:390px\)\{[\s\S]*\.main>\.page\{padding-inline:11px!important\}/,'narrow viewport page gutters belong to the mobile shell');
+assert.doesNotMatch(modern,/@media\(max-width:390px\)\{[\s\S]*\.mobile-nav\{left:7px!important;right:7px!important\}/,'narrow viewport dock offsets belong to the mobile shell');
+
 // The shell is the single mobile geometry authority and accounts for device safe areas.
 assert.match(shell,/--v76-shell-safe-top:[^;]*env\(safe-area-inset-top/);
 assert.match(shell,/--v76-shell-safe-bottom:[^;]*env\(safe-area-inset-bottom/);

@@ -131,6 +131,17 @@ Drawer e dialogs continuam a usar geometria modal própria; não transferem o sc
 
 Cobertura: Dashboard, Despesas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições, além de tabs, botões, inputs, painéis, tabelas, estados vazios, dialogs, drawer e bottom navigation.
 
+### Consolidação PR #84
+
+A primeira etapa de consolidação transversal retira do design system a geometria mobile que já pertence ao shell. Em ≤820 px:
+
+- `v76-modern-ui.css` pode definir **aparência** da topbar e do dock — cor, borda, raio, sombra, blur e estados;
+- `v76-modern-ui.css` pode definir **composição interna de componentes** que não substitua o viewport — por exemplo `display`, tipografia, ícones, estados e hierarquia visual;
+- `v76-modern-ui.css` não pode definir posição global, offsets de safe area, altura do shell, reserva inferior das páginas, gutters estruturais do shell ou posição fixa do dock;
+- `v76-mobile-shell.css` mantém a propriedade de `position`, `inset`, `top/bottom`, `width`, `height/min-height/max-height`, padding estrutural, overflow/scroll global e safe-area offsets de `.app-shell`, `.main`, `.topbar`, `.main>.page` e `.mobile-nav`.
+
+O objetivo é conservar o resultado final enquanto reduz a dependência da cascata. Não é uma redesign nem alteração de domínio.
+
 ### Propriedade visual v76
 
 A arquitetura passa a separar explicitamente:
@@ -215,6 +226,7 @@ Além dos testes funcionais existentes, a baseline v76 introduz `tests/ui-archit
 O gate verifica:
 
 - `mobile-layout.css` não volta a definir viewport, `.main`, `.topbar` ou bottom navigation persistente;
+- `v76-modern-ui.css` não volta a reservar padding de página para o dock, posicionar o dock persistente, definir dimensões globais da topbar mobile ou repor offsets estruturais ≤390 px;
 - `v76-mobile-shell.css` mantém safe areas e propriedade do documento/scroll;
 - `viewport-fit=cover` está presente sem bloquear zoom do utilizador;
 - controlos críticos mantêm baseline de 44 px;
@@ -234,7 +246,21 @@ Qualquer refatoração transversal deve manter verdes, no mínimo:
 - atualização PWA/manifesto;
 - TypeScript strict.
 
-## 13. Referências técnicas usadas na revisão de 11/09/2026
+## 13. Próxima consolidação visual
+
+Depois do PR #84, a revisão deixa de ser feita por “ficheiro de versão” e passa a ser feita por componente/feature:
+
+1. hierarquia de botões e ações;
+2. grids e composição responsiva;
+3. cards/painéis/toolbars/tabs;
+4. formulários, feedback e estados;
+5. iconografia e acessibilidade semântica;
+6. imagens/fotografias, fallbacks, proporções e origem;
+7. revisão página a página com a matriz responsive definida.
+
+Apagar CSS histórico só é permitido quando a comparação visual e os testes demonstrarem que a propriedade foi integralmente transferida.
+
+## 14. Referências técnicas usadas na revisão de 11/09/2026
 
 Fontes primárias/de referência:
 

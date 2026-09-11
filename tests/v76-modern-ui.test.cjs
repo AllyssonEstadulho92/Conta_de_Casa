@@ -23,9 +23,11 @@ assert.match(css,/\.section-tabs\{/);
 assert.match(css,/\.dialog-shell\{/);
 assert.match(css,/\.mobile-nav\{/);
 assert.match(css,/\.nav-drawer-shell\{/);
-assert.match(css,/A topbar deixa de ser fixa\/sticky/);
-assert.match(css,/position:relative!important/);
-assert.match(css,/\.main>\.page\{[\s\S]*padding:14px 14px calc\(102px/);
+assert.match(css,/A geometria do shell móvel pertence a v76-mobile-shell\.css/);
+assert.match(css,/Bottom navigation: apenas aparência; posição, dimensão e safe area pertencem ao shell/);
+assert.doesNotMatch(css,/\.main>\.page\{[\s\S]*padding:14px 14px calc\(102px/,'master UI must not reserve mobile shell/dock geometry');
+assert.doesNotMatch(css,/\.mobile-nav\{[\s\S]*position:fixed!important;[\s\S]*bottom:max\(8px,env\(safe-area-inset-bottom/,'master UI must not position the persistent mobile dock');
+assert.doesNotMatch(css,/\.topbar,[\s\S]*min-height:76px!important;[\s\S]*padding:12px 14px!important/,'master UI must not own mobile topbar dimensions');
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 assert.match(css,/@media\(forced-colors:active\)/);
 
@@ -37,4 +39,4 @@ assert.match(prepare,/v75-usability\.css\?v=\$\{USABILITY_REV\}[\s\S]*v76-modern
 assert.ok(sw.includes("'./v76-modern-ui.css'"));
 assert.match(sw,/modern-ui1/);
 
-console.log('v76 master UI covers every application page, remains presentation-only and is included in Pages/PWA distribution.');
+console.log('v76 master UI covers every page, stays presentation-only and delegates mobile shell geometry to v76-mobile-shell.css.');

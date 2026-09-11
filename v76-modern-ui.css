@@ -399,23 +399,10 @@ html.cdc-v75 .dialog-close{border-radius:12px!important;background:var(--v76-sur
   }
   html.cdc-v75 .drawer-footer{border-color:rgba(255,255,255,.12)!important}
 
-  /* A topbar deixa de ser fixa/sticky: permanece no fluxo da página e não cobre conteúdo. */
-  html.cdc-v75 .main{
-    padding:0!important;
-    overflow-x:hidden!important;
-  }
+  /* Aparência e composição interna. A geometria do shell móvel pertence a v76-mobile-shell.css. */
   html.cdc-v75 .topbar,
   html.cdc-v75[data-v75-page="dashboard"] .topbar{
-    position:relative!important;
-    inset:auto!important;
-    top:auto!important;
-    z-index:20!important;
-    width:100%!important;
-    height:auto!important;
-    min-height:76px!important;
-    padding:12px 14px!important;
     display:flex!important;
-    align-items:center!important;
     justify-content:space-between!important;
     border:0!important;
     border-radius:0 0 22px 22px!important;
@@ -428,10 +415,7 @@ html.cdc-v75 .dialog-close{border-radius:12px!important;background:var(--v76-sur
   html.cdc-v75 .topbar-actions,
   html.cdc-v75[data-v75-page="dashboard"] .topbar-leading,
   html.cdc-v75[data-v75-page="dashboard"] .topbar-actions{
-    min-height:52px!important;
-    height:52px!important;
     display:flex!important;
-    align-items:center!important;
   }
   html.cdc-v75[data-v75-page="dashboard"] .topbar-leading{
     width:auto!important;
@@ -459,13 +443,6 @@ html.cdc-v75 .dialog-close{border-radius:12px!important;background:var(--v76-sur
     box-shadow:inset 0 1px rgba(255,255,255,.07)!important;
   }
 
-  /* Conteúdo volta a começar depois do cabeçalho, sem padding fantasma de header fixo. */
-  html.cdc-v75 .main>.page{
-    width:100%!important;
-    max-width:640px!important;
-    margin-inline:auto!important;
-    padding:14px 14px calc(102px + env(safe-area-inset-bottom,0px))!important;
-  }
   html.cdc-v75 .page.active{gap:12px!important}
 
   html.cdc-v75 .panel{padding:15px!important;border-radius:17px!important}
@@ -497,15 +474,8 @@ html.cdc-v75 .dialog-close{border-radius:12px!important;background:var(--v76-sur
   html.cdc-v75 #page-market .market-summary-item{min-height:90px!important;padding:12px!important;border-radius:15px!important}
   html.cdc-v75 #page-bills .bill-mobile-card{padding:14px!important;border-radius:17px!important;box-shadow:var(--v76-shadow-sm)!important}
 
-  /* Bottom navigation como dock compacto, mantendo cinco destinos previsíveis. */
+  /* Bottom navigation: apenas aparência; posição, dimensão e safe area pertencem ao shell. */
   html.cdc-v75 .mobile-nav{
-    position:fixed!important;
-    left:10px!important;
-    right:10px!important;
-    bottom:max(8px,env(safe-area-inset-bottom,0px))!important;
-    width:auto!important;
-    min-height:68px!important;
-    padding:6px!important;
     border:1px solid color-mix(in srgb,var(--v76-border) 82%,transparent)!important;
     border-radius:20px!important;
     background:color-mix(in srgb,var(--v76-surface) 92%,transparent)!important;
@@ -514,7 +484,6 @@ html.cdc-v75 .dialog-close{border-radius:12px!important;background:var(--v76-sur
     -webkit-backdrop-filter:blur(18px)!important;
   }
   html.cdc-v75 .mobile-nav .nav-btn{
-    min-height:56px!important;
     border-radius:14px!important;
     color:var(--v76-muted)!important;
   }
@@ -529,12 +498,10 @@ html.cdc-v75 .dialog-close{border-radius:12px!important;background:var(--v76-sur
 }
 
 @media(max-width:390px){
-  html.cdc-v75 .main>.page{padding-inline:11px!important}
-  html.cdc-v75 .topbar{padding-inline:11px!important;border-radius:0 0 18px 18px!important}
+  html.cdc-v75 .topbar{border-radius:0 0 18px 18px!important}
   html.cdc-v75 .page-heading h1{font-size:20px!important}
   html.cdc-v75 #page-dashboard .cdc-quick-actions{gap:7px!important}
   html.cdc-v75 #page-dashboard .cdc-quick-action{min-height:96px!important}
-  html.cdc-v75 .mobile-nav{left:7px!important;right:7px!important}
 }
 
 @media(min-width:821px){

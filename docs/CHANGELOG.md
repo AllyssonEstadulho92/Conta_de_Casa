@@ -2,6 +2,37 @@
 
 O histórico integral de commits e versões permanece no Git. Este ficheiro mantém as alterações relevantes para continuidade técnica.
 
+## 2026-09-11 — v76 primeira consolidação UI/shell — PR #84 em curso
+
+### Objetivo
+
+Executar a primeira etapa da consolidação transversal definida pela baseline arquitetural sem redesign “big-bang” e sem alterar o domínio financeiro.
+
+### Diagnóstico
+
+Depois de `mobile-layout.css` deixar de possuir o viewport, `v76-modern-ui.css` ainda repetia geometria mobile que já era definida posteriormente por `v76-mobile-shell.css`. A duplicação abrangia `.main`, dimensões/posição da `.topbar`, padding estrutural de `.main>.page`, posição/dimensão da `.mobile-nav` e offsets estreitos ≤390 px.
+
+### Alterações
+
+- `v76-modern-ui.css` deixa de definir a geometria global mobile já pertencente ao shell;
+- topbar mantém gradiente, bordas, raios, sombra, tipografia e composição interna, mas não posição/dimensões estruturais;
+- bottom navigation mantém superfície, blur, borda, sombra e estados, mas não posição fixa, offsets, dimensão ou padding estrutural;
+- gutters/offsets estruturais ≤390 px permanecem exclusivamente em `v76-mobile-shell.css`;
+- alvos tácteis de 44 px continuam no design system por serem contrato de componente/acessibilidade;
+- `tests/v76-modern-ui.test.cjs` deixa de exigir a geometria antiga;
+- `tests/ui-architecture-contract.test.cjs` passa a impedir que a geometria removida volte ao design system;
+- documentação permanente atualizada com D-074 e o próximo plano de revisão de botões, grids, cards, formulários, ícones e imagens.
+
+### Isolamento
+
+Não foram alterados `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sincronização cifrada, QR, scanner ou regras financeiras/Mercado.
+
+### Estado
+
+PR #84 aberto em draft. Integração depende de CI + TypeScript Foundation verdes e revisão do diff. Depois desta etapa, a consolidação continua por componentes/features e página a página.
+
+---
+
 ## 2026-09-11 — v76 baseline arquitetural transversal — publicado
 
 ### Pesquisa
