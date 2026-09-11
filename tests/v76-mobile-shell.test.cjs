@@ -23,7 +23,13 @@ assert.match(shell,/html\.cdc-v75\.app-active body \.main\{[\s\S]*min-width:0!im
 assert.match(shell,/html\.cdc-v75\.app-active body \.main>\*\{[\s\S]*min-width:0!important;[\s\S]*max-width:100%!important/);
 assert.match(shell,/html\.cdc-v75\.app-active \.main>\.topbar,[\s\S]*position:relative!important;[\s\S]*max-width:100%!important;[\s\S]*padding:calc\(var\(--v76-shell-safe-top\) \+ 6px\) 14px 8px!important/);
 assert.match(shell,/html\.cdc-v75\.app-active \.main>\.page\{[\s\S]*padding:16px 14px var\(--v76-shell-nav-reserve\)!important;[\s\S]*overflow:visible!important/);
-assert.match(shell,/html\.cdc-v75\.app-active body \.mobile-nav\{[\s\S]*position:fixed!important;[\s\S]*max-width:calc\(100% - 20px\)!important;[\s\S]*bottom:var\(--v76-shell-safe-bottom\)!important/);
+const navBlock=shell.match(/html\.cdc-v75\.app-active body \.mobile-nav\{[\s\S]*?\n  \}/)?.[0]||'';
+assert.ok(navBlock,'mobile dock block must exist');
+assert.match(navBlock,/position:fixed!important/);
+assert.match(navBlock,/bottom:var\(--v76-shell-safe-bottom\)!important/);
+assert.match(navBlock,/min-width:0!important/);
+assert.match(navBlock,/max-width:calc\(100% - 20px\)!important/);
+assert.match(navBlock,/height:var\(--v76-shell-nav-height\)!important/);
 assert.doesNotMatch(shell,/\bzoom\s*:/i);
 
 assert.equal(pkg.version,'0.76.0');
