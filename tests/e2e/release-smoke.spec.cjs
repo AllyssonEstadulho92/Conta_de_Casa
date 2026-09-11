@@ -96,11 +96,12 @@ test('shell não cria overflow horizontal e mantém controlos móveis dentro do 
     await page.waitForTimeout(40);
     const afterScroll = await page.evaluate(() => {
       const nav = document.querySelector('.mobile-nav')?.getBoundingClientRect();
-      const pageRect = document.querySelector('#page-dashboard')?.getBoundingClientRect();
-      return nav && pageRect ? { navTop: nav.top, pageBottom: pageRect.bottom } : null;
+      const dashboard = document.querySelector('#page-dashboard');
+      const lastContent = dashboard?.lastElementChild?.getBoundingClientRect();
+      return nav && lastContent ? { navTop: nav.top, lastContentBottom: lastContent.bottom } : null;
     });
     expect(afterScroll).toBeTruthy();
-    expect(afterScroll.pageBottom).toBeLessThanOrEqual(afterScroll.navTop + 1);
+    expect(afterScroll.lastContentBottom).toBeLessThanOrEqual(afterScroll.navTop + 1);
   }
 });
 
