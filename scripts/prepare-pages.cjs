@@ -16,7 +16,7 @@ const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const VEGGIE_MENU_REV = '76-veggie-menu2';
-const MODERN_UI_REV = '76-modern-ui1';
+const MODERN_UI_REV = '76-modern-ui2';
 const MOBILE_SHELL_REV = '76-mobile-shell2';
 const EXPERIENCE_REV = '74-experience2';
 const ARCHITECTURE_REV = '75-architecture2';
@@ -55,7 +55,7 @@ const BUILD_DATE=new Date().toISOString();
 
 /* Bundle público v75 com programa v76 incremental. Mantém a experiência funcional existente,
    acrescenta metadados de versão/build no padrão do Foco Jornada, o Veggie Burger TypeScript v2,
-   76-modern-ui1 e 76-mobile-shell2. Nenhuma destas camadas altera domínio financeiro,
+   76-modern-ui2 e 76-mobile-shell2. Nenhuma destas camadas altera domínio financeiro,
    persistência, cifragem, sincronização, scanner, QR ou regras de Mercado. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
