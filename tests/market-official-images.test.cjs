@@ -75,10 +75,10 @@ assert.equal(parsed[0].sourceUrl,pingoProduct);
 assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/conta-de-casa-public-v76-release1-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
 for(const asset of ['./market-retailer-image-policy.js','./market-official-images.js','./v64-runtime.js','./market-shopping-focus.js','./mobile-menu-toggle.js','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
-assert.match(prepare,/const BUILD = 'v75'/);
+assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
@@ -89,8 +89,8 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-retailer-image-policy\.js\?v=75/);
-  assert.match(index,/market-official-images\.js\?v=75/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=76/);
+  assert.match(index,/market-official-images\.js\?v=76/);
   assert.doesNotMatch(index,/v64-runtime\.css/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
   assert.match(index,/market-shopping-focus\.js\?v=74-shopping2/);
@@ -111,4 +111,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official-image bridge remains safe under the final v75 prototype architecture: OK');
+console.log('Market official-image bridge remains safe under the v76 release architecture: OK');
