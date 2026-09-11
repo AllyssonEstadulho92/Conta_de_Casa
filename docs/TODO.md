@@ -27,107 +27,100 @@ Atualizado: 11 de setembro de 2026
 - [x] `76-version-audit1` — PR #78.
 - [x] `76-mobile-shell2` — PR #80.
 - [x] Baseline arquitetural transversal v76 — PR #82.
+- [x] Sincronização documental da baseline — PR #83.
+
+## P0 — release estável `0.76.0 / v76`
+
+Branch: `release/v76-ready`.
+
+### Versão e bundle
+
+- [x] Promover `package.json.version` para `0.76.0`.
+- [x] Promover `release-manifest.latestVersion` para `v76`.
+- [x] Adicionar notas de release v76 preservando histórico v75-v64.
+- [x] Alterar `scripts/prepare-pages.cjs` para `BUILD = 'v76'`.
+- [x] Invalidar cache PWA com revisão `v76-release1`.
+- [x] Preservar `STATE_VERSION=5` e formato de dados.
+- [x] Preservar cifragem, cêntimos, sync, QR/scanner e regras financeiras.
+
+### CI e QA automatizado
+
+- [x] Integrar TypeScript strict no job principal `quality`.
+- [x] Manter a suíte funcional/financeira/segurança/sync existente no mesmo gate.
+- [x] Criar `tests/release-readiness.test.cjs`.
+- [x] Validar referências locais do HTML e assets do Service Worker no `dist/`.
+- [x] Validar exclusão de docs/tests/scripts do bundle público.
+- [x] Adicionar Playwright como dependência de desenvolvimento fixada.
+- [x] Criar `playwright.config.cjs`.
+- [x] Criar smoke tests Chromium desktop/mobile.
+- [x] Criar smoke tests WebKit 320/430 px.
+- [x] Preservar traces em falhas de browser smoke.
+- [x] Tornar `browser-smoke` dependente de `quality`.
+- [ ] Confirmar CI completo da branch `release/v76-ready` verde.
+- [ ] Confirmar TypeScript Foundation do PR verde.
+- [ ] Rever diff final da release antes do merge.
+
+### Publicação
+
+- [x] Simplificar Pages para confiar no CI completo como gate funcional.
+- [x] Fazer checkout do SHA exato aprovado pelo CI.
+- [x] Confirmar identidade `git rev-parse HEAD == workflow_run.head_sha`.
+- [x] Repetir TypeScript + release-readiness antes de gerar o bundle.
+- [x] Validar no `dist/`: `0.76.0`, `v76`, Build ID de 7 hex e manifesto v76.
+- [ ] Criar PR da release para `main`.
+- [ ] Integrar apenas com CI/TypeScript verdes.
+- [ ] Confirmar CI completo no SHA de merge em `main`.
+- [ ] Confirmar GitHub Pages publicado a partir do SHA aprovado.
+- [ ] Sincronizar PROJECT_STATE/DECISIONS/TODO/CHANGELOG com SHA, Build ID e run IDs publicados.
+
+### Validação física pós-publicação
+
+- [ ] Abrir build v76 publicado em iPhone/Safari.
+- [ ] Atualizar/instalar PWA e confirmar que o Service Worker v76 assume controlo apenas após ação explícita.
+- [ ] Confirmar Veggie Burger totalmente abaixo da status bar/Dynamic Island.
+- [ ] Confirmar topbar no fluxo durante scroll.
+- [ ] Confirmar último conteúdo integralmente acima do dock.
+- [ ] Confirmar bottom nav sem corte de ícone/rótulo.
+- [ ] Confirmar teclado virtual/foco em formulários.
+- [ ] Confirmar portrait e landscape.
+- [ ] Confirmar Início, Despesas, Mercado, Planeamento, Mais e páginas secundárias.
 
 ## P0 — baseline arquitetural transversal v76
 
-Estado: publicado em `main` pelo PR #82, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`.
+Estado: publicado pelo PR #82.
 
-### Pesquisa e critérios
-
-- [x] Rever Apple HIG/Apple Developer para safe areas, toolbar e navegação de topo.
-- [x] Rever MDN para `env(safe-area-inset-*)`, `viewport-fit=cover`, specificity, `@layer` e container queries.
-- [x] Rever W3C/WCAG 2.2 para Reflow 320 px, Target Size e Focus Not Obscured.
-- [x] Rever web.dev para PWA/cache/IndexedDB/Cache Storage.
-- [x] Rever OWASP para CSP e validação de inputs.
-- [x] Formalizar propriedade única por preocupação em `ARCHITECTURE.md` e D-073.
-- [x] Definir 44×44 CSS px como baseline tátil interno para controlos primários, preservando WCAG 2.2 AA como mínimo normativo.
-- [x] Definir matriz responsive 320/360/375/390/430/768/820/1024+.
-- [x] Proibir novos “patch files” para a mesma geometria global.
-
-### Implementação e gates
-
-- [x] Retirar de `mobile-layout.css` a propriedade antiga de `.app-shell`, `.main`, `.topbar` e viewport interno.
-- [x] Manter em `mobile-layout.css` apenas refinamentos de feature do Mercado.
-- [x] Atualizar `tests/mobile-layout-regression.test.cjs` para a arquitetura atual.
+- [x] Rever Apple HIG/Apple Developer, MDN, W3C/WCAG 2.2, web.dev e OWASP.
+- [x] Formalizar propriedade única por preocupação.
+- [x] Definir reflow 320 px e matriz responsive.
+- [x] Retirar geometria global de `mobile-layout.css`.
+- [x] Manter `v76-mobile-shell.css` como autoridade mobile.
 - [x] Criar `tests/ui-architecture-contract.test.cjs`.
-- [x] Adicionar o novo gate à CI.
-- [x] CI integral do PR verde.
-- [x] TypeScript Foundation verde.
-- [x] Rever diff antes de integração.
-- [x] Integrar em `main` apenas após gates verdes.
-- [x] TypeScript Foundation de `main` `34577495832`: sucesso.
-- [x] CI de `main` `34577495803`: sucesso.
-- [x] GitHub Pages `34577588233`: sucesso.
+- [x] Adicionar gate à CI.
+- [x] CI, TypeScript Foundation e Pages verdes após integração.
 
 ### Consolidação seguinte — sem big-bang
 
 - [ ] Inventariar seletores duplicados entre `v74-*`, `v75-*`, `v76-modern-ui.css` e `v76-mobile-shell.css`.
 - [ ] Classificar cada regra como tokens/shell/components/features/states/utilities.
-- [ ] Remover da camada visual master a geometria global já coberta pelo shell, preservando exatamente o valor computado final.
-- [ ] Medir e reduzir `!important` por domínio, sem remoção cega.
-- [ ] Só introduzir `@layer` quando o domínio concorrente completo puder ser migrado em conjunto.
-- [ ] Usar container queries apenas em componentes cujo comportamento depende do contentor.
-- [ ] Consolidar assets CSS/JS de build sem perder modularidade de source ou capacidade de auditoria.
+- [ ] Remover da camada visual master geometria global já pertencente ao shell, preservando valor computado.
+- [ ] Medir e reduzir `!important` por domínio.
+- [ ] Só introduzir `@layer` quando o domínio concorrente completo puder ser migrado.
 - [ ] Criar comparação visual para todas as páginas antes de apagar CSS histórico.
 
-### Segurança/PWA a consolidar
+## P0 — Segurança/PWA a consolidar
 
-- [ ] Auditar dependência runtime do ZXing remoto e avaliar bundle local com licença preservada.
+- [ ] Auditar dependência runtime ZXing e avaliar bundle local com licença preservada.
 - [ ] Reduzir `style-src 'unsafe-inline'` apenas depois de eliminar estilos inline necessários.
 - [ ] Rever CSP final do `dist/` e justificar cada origem externa.
-- [ ] Classificar cache por tipo de recurso; evitar cache indevido de manifestos/metadata de atualização.
-- [ ] Confirmar que falha/ausência de Service Worker não quebra o núcleo online.
-- [ ] Criar gates de input validation para fontes remotas, QR/código de barras e importação de fatura.
+- [ ] Classificar cache por tipo de recurso.
+- [ ] Confirmar que ausência/falha de Service Worker não quebra o núcleo online.
+- [ ] Criar gates adicionais de input validation para fontes remotas, QR/código de barras e importação de fatura.
 
-## P0 — `76-mobile-shell2`
+## P0 — governação
 
-### Diagnóstico, implementação e publicação
-
-- [x] Confirmar pela captura física que a topbar entra na status bar do iPhone.
-- [x] Confirmar pela captura física que o dock inferior cobre/corta conteúdo final.
-- [x] Identificar conflito entre `mobile-layout.css` (`100dvh` + scroll interno) e `76-modern-ui1` (topbar no fluxo).
-- [x] Criar `v76-mobile-shell.css` como autoridade final da geometria ≤820 px.
-- [x] Mover o scroll principal para o documento e remover clipping final de `.app-shell`/`.main`.
-- [x] Aplicar `safe-area-inset-top` ao cabeçalho.
-- [x] Aplicar `safe-area-inset-bottom` e altura explícita ao dock.
-- [x] Reservar `padding-bottom` de página superior à altura total do dock.
-- [x] Cobrir ≤390 px, ≤359 px e landscape de baixa altura.
-- [x] Preservar pinch-to-zoom; não usar `zoom` CSS.
-- [x] Adicionar `v76-mobile-shell.css` à allowlist Pages e cache PWA.
-- [x] Adicionar `tests/v76-mobile-shell.test.cjs` à CI e ao gate do Pages.
-- [x] CI funcional da branch `34541849503`: sucesso.
-- [x] PR #80: CI + TypeScript strict verdes.
-- [x] Integrar em `main`: `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`.
-- [x] TypeScript Foundation de `main` `34542259212`: sucesso.
-- [x] CI de `main` `34542259148`: sucesso.
-- [x] GitHub Pages `34542303536`: sucesso.
-- [ ] Validar fisicamente a compilação publicada no iPhone/Safari/PWA.
-
-### Validação física obrigatória
-
-- [ ] Veggie Burger totalmente abaixo da hora/status bar.
-- [ ] Topbar rola com o conteúdo e nunca fica presa no viewport.
-- [ ] Scroll chega ao último cartão/ação sem corte.
-- [ ] Último conteúdo fica integralmente acima do dock.
-- [ ] Bottom nav não corta ícone nem rótulo.
-- [ ] 320/375/390/430 px.
-- [ ] vertical e horizontal.
-- [ ] Safari web e PWA instalada.
-- [ ] Início, Despesas, Mercado, Planeamento e Mais.
-- [ ] Calendário, Relatórios, Objetivos, Segurança, Diagnóstico e Definições.
-
-## P0 — `76-version-audit1`
-
-- [x] Corrigir falso “atualizado” antes de `registration.update()`.
-- [x] Separar versão da aplicação, release pública e build exato.
-- [x] Application Version `0.76.0-dev.1`; release pública `v75`.
-- [x] PR #78 integrado; CI/TypeScript/Pages verdes.
-- [ ] Validar fisicamente no iPhone/Safari/PWA o cartão de versão e a verificação manual.
-
-## P0 — Riscos de governação
-
-- [ ] Ativar ou definir proteção equivalente da branch `main`; encontra-se atualmente sem branch protection.
-- [ ] Tornar CI + TypeScript Foundation gates obrigatórios antes de integração quando a configuração do repositório permitir.
+- [ ] Ativar branch protection/ruleset equivalente para `main` quando a configuração administrativa permitir.
+- [ ] Tornar CI obrigatório ao nível das regras do repositório, além do controlo operacional por PR.
+- [ ] Avaliar lockfile para tornar a resolução transitiva da toolchain de CI totalmente reprodutível.
 
 ## P0 — v76 Bloco 2: dinheiro, quantidades e datas
 
@@ -157,7 +150,6 @@ Branch reservada: `feat/v76-money-dates`.
 - [ ] Reconciliar com talão/fatura sem substituir valores silenciosamente.
 - [ ] Corrigir lacuna `pid` com teste específico.
 - [ ] Preferir GTIN/PID para imagens.
-- [ ] Verificar licença/origem de logos SVG antes de incorporar assets locais.
 
 ## P0 — v76 Blocos 7–10
 
@@ -172,4 +164,4 @@ Branch reservada: `feat/v76-money-dates`.
 
 - [ ] Consolidar por propriedade/responsabilidade, não por ficheiro ou número de versão.
 - [ ] Remover CSS histórico apenas com comparação visual e regressões verdes.
-- [ ] Manter uma única fonte estrutural por preocupação sem quebrar compatibilidade PWA/Safari.
+- [ ] Manter uma única fonte estrutural por preocupação sem quebrar PWA/Safari.
