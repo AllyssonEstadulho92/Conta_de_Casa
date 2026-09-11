@@ -40,19 +40,23 @@ assert.match(navBlock,/height:var\(--v76-shell-nav-height\)!important/);
 assert.doesNotMatch(shell,/\bzoom\s*:/i);
 
 assert.equal(pkg.version,'0.76.0');
-assert.match(prepare,/const MOBILE_SHELL_REV = '76-mobile-shell4'/);
+/* A revisão pública permanece em shell2 até o shell4 passar o browser-smoke. O bundle copia o CSS fonte atual. */
+assert.match(prepare,/const MOBILE_SHELL_REV = '76-mobile-shell2'/);
 assert.match(prepare,/'v76-mobile-shell\.css'/);
 assert.match(prepare,/v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/);
-assert.match(sw,/mobile-shell4/);
+assert.match(sw,/mobile-shell2/);
 assert.ok(sw.includes("'./v76-mobile-shell.css'"));
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const builtIndex=read('dist/index.html');
+  const builtShell=read('dist/v76-mobile-shell.css');
   assert.match(builtIndex,/name="app-version" content="0\.76\.0"/);
   assert.match(builtIndex,/v76-modern-ui\.css\?v=76-modern-ui1/);
-  assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-mobile-shell4/);
+  assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-mobile-shell2/);
+  assert.match(builtShell,/Conta de Casa v76 — 76-mobile-shell4/,'release bundle must contain the current sticky-header shell source');
+  assert.match(builtShell,/position:sticky!important/);
   assert.ok(builtIndex.indexOf('v76-modern-ui.css')<builtIndex.indexOf('v76-mobile-shell.css'),'mobile shell must be the final mobile geometry layer');
   assert.ok(fs.existsSync(path.join(dist,'v76-mobile-shell.css')));
 }finally{
