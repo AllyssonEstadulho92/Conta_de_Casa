@@ -48,16 +48,18 @@ assert.match(css,/\.v75-sync-hero/);
 assert.match(css,/background:var\(--v75-surface\)!important/,'v75 must use coherent surfaces instead of mixed hard-coded cards');
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-assert.match(prepare,/const BUILD = 'v75'/);
+assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
-assert.match(sw,/conta-de-casa-public-v75-architecture2/);
+assert.match(sw,/conta-de-casa-public-v76-release1-v75-architecture2/);
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
-assert.equal(release.latestVersion,'v75');
-assert.equal(release.releases[0].version,'v75');
-assert.ok(release.releases[0].items.some(item=>/Mercado.*barra inferior|barra inferior.*Mercado/i.test(item)));
-assert.ok(release.releases[0].items.some(item=>/PIN|cofre/i.test(item)));
+assert.equal(release.latestVersion,'v76');
+assert.equal(release.releases[0].version,'v76');
+const v75=release.releases.find(item=>item.version==='v75');
+assert.ok(v75,'v75 release history must remain available under v76');
+assert.ok(v75.items.some(item=>/Mercado.*barra inferior|barra inferior.*Mercado/i.test(item)));
+assert.ok(v75.items.some(item=>/PIN|cofre/i.test(item)));
 
-console.log('v75 prototype fidelity, information architecture, expense flow, sync hierarchy and navigation tests: OK');
+console.log('v75 prototype fidelity and information architecture preserved under the v76 release: OK');
