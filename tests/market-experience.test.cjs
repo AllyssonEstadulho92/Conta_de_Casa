@@ -20,19 +20,21 @@ const sw=fs.readFileSync('sw.js','utf8');
 const pages=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const events=fs.readFileSync('events.js','utf8');
 
+// Source template/runtime revisions remain historical; prepare-pages promotes them in dist.
 assert.match(index,/<meta name="app-build" content="v53"/);
 assert.match(index,/market-experience\.css\?v=53/);
 assert.match(index,/market-experience\.js\?v=53/);
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/conta-de-casa-public-v76-release1-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/architecture-baseline1/);
 for(const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be cached by the service worker`);
   assert.ok(pages.includes(`'${asset}'`),`${asset} must be included in the Pages bundle`);
 }
 assert.ok(!sw.includes("'./ui-consistency.css'"),'obsolete visual override must not ship');
 assert.ok(!sw.includes("'./v64-runtime.css'"),'obsolete v64 visual shell must not ship');
-assert.match(pages,/const BUILD = 'v75'/);
+assert.match(pages,/const BUILD = 'v76'/);
 assert.match(pages,/const ARCHITECTURE_REV = '75-architecture2'/);
 
 for(const market of ['Pingo Doce','Continente'])assert.ok(js.includes(market));
@@ -62,7 +64,7 @@ assert.match(experienceJs,/safeProductImageUrl/);
 assert.match(experienceCss,/\.cdc-market-home/);
 assert.match(experienceCss,/\.cdc-product-grid/);
 assert.match(experienceCss,/\.cdc-store-grid/);
-assert.match(architectureCss,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'Mercado must remain visible in the v75 primary navigation');
+assert.match(architectureCss,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'Mercado must remain visible in the primary navigation');
 assert.match(architectureCss,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'prototype market grid must remain compact');
 assert.match(architectureJs,/market:\['Mercado','Compras'\]/);
 assert.doesNotMatch(architectureJs,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/,'architecture overlay must not mutate market financial state');
@@ -86,4 +88,4 @@ assert.ok(css.includes('env(safe-area-inset-top)'));
 assert.ok(css.includes('env(safe-area-inset-bottom)'));
 assert.ok(css.includes('min-width:0'));
 
-console.log('Market live sources, verified photos and final v75 prototype architecture remain isolated and safe: OK');
+console.log('Market live sources, verified photos and v76 release architecture remain isolated and safe: OK');
