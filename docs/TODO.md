@@ -63,12 +63,45 @@ Estado: publicado em `main` pelo PR #82, merge `bb0cd65830c617506fdc9e94e8b9abda
 
 - [ ] Inventariar seletores duplicados entre `v74-*`, `v75-*`, `v76-modern-ui.css` e `v76-mobile-shell.css`.
 - [ ] Classificar cada regra como tokens/shell/components/features/states/utilities.
-- [ ] Remover da camada visual master a geometria global já coberta pelo shell, preservando exatamente o valor computado final.
+- [x] Remover da camada visual master a geometria global mobile já coberta pelo shell, preservando a autoridade final do `v76-mobile-shell.css` — implementação no PR #84.
 - [ ] Medir e reduzir `!important` por domínio, sem remoção cega.
 - [ ] Só introduzir `@layer` quando o domínio concorrente completo puder ser migrado em conjunto.
 - [ ] Usar container queries apenas em componentes cujo comportamento depende do contentor.
 - [ ] Consolidar assets CSS/JS de build sem perder modularidade de source ou capacidade de auditoria.
 - [ ] Criar comparação visual para todas as páginas antes de apagar CSS histórico.
+
+### PR #84 — primeira consolidação UI/shell
+
+- [x] Criar branch `feat/v76-ui-consolidation1` a partir de `main`.
+- [x] Remover de `v76-modern-ui.css` a geometria duplicada de `.main`, `.topbar`, `.main>.page` e `.mobile-nav` no breakpoint mobile.
+- [x] Remover offsets/gutters estruturais duplicados em ≤390 px.
+- [x] Preservar aparência, componentes, estados e alvos tácteis.
+- [x] Atualizar `tests/v76-modern-ui.test.cjs`.
+- [x] Reforçar `tests/ui-architecture-contract.test.cjs` para impedir regressão de ownership.
+- [ ] CI integral do PR #84 verde.
+- [ ] TypeScript Foundation do PR #84 verde.
+- [ ] Rever diff final do PR #84.
+- [ ] Integrar em `main` apenas com gates verdes.
+- [ ] Validar GitHub Pages após merge.
+
+### Próxima vaga UI/UX — componentes e páginas
+
+- [ ] Inventariar hierarquia de botões: primary, secondary, danger, icon, link, CTA, ações destrutivas e ações de confirmação.
+- [ ] Inventariar grids e densidade por página: desktop/tablet/mobile, mínimo/máximo de colunas e reflow.
+- [ ] Consolidar cards, painéis, toolbars, tabs e estados vazios/carregamento/erro/sucesso.
+- [ ] Auditar iconografia: sem duplicados semânticos, alinhamento ótico, tamanho, stroke e `aria-label`/`aria-hidden` adequados.
+- [ ] Auditar fotografias/imagens: origem, fallback, proporção, crop, lazy loading, alt text e consistência entre Mercado e restantes áreas.
+- [ ] Rever Início.
+- [ ] Rever Despesas/Faturas.
+- [ ] Rever Mercado.
+- [ ] Rever Calendário.
+- [ ] Rever Planeamento.
+- [ ] Rever Relatórios.
+- [ ] Rever Objetivos.
+- [ ] Rever Segurança.
+- [ ] Rever Diagnóstico.
+- [ ] Rever Definições.
+- [ ] Validar 320/360/375/390/430/768/820/1024+ px, dark mode, teclado, foco e toque.
 
 ### Segurança/PWA a consolidar
 
