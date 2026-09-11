@@ -36,7 +36,8 @@ assert.match(css,/\.market-category-items \.status-chip\{[\s\S]*justify-self:sta
 assert.match(css,/\.market-category-items \.market-mobile-actions\{[\s\S]*justify-content:flex-start/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2/);
+assert.match(sw,/conta-de-casa-public-v76-release1/);
+assert.match(sw,/architecture-baseline1/);
 assert.ok(sw.includes("'./market-category-groups.css'"));
 assert.ok(sw.includes("'./market-category-groups.js'"));
 assert.ok(sw.includes("'./design-system.css'"));
@@ -48,7 +49,7 @@ assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.ok(sw.includes("'./v64-runtime.js'"));
 assert.ok(sw.includes("'./v74-experience.js'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
-assert.match(prepare,/const BUILD = 'v75'/);
+assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const CATEGORY_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
@@ -98,4 +99,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market category grouping preserved under the final v75 prototype architecture and header2: OK');
+console.log('Market category grouping preserved under the v76 release architecture: OK');
