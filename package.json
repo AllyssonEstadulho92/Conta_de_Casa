@@ -1,15 +1,18 @@
 {
   "name": "conta-de-casa",
   "private": true,
-  "version": "0.76.0-dev.1",
-  "description": "Conta de Casa — ferramentas de desenvolvimento para a migração incremental TypeScript v76.",
+  "version": "0.76.0",
+  "description": "Conta de Casa — PWA local-first para gestão doméstica, com validação de release e migração incremental TypeScript.",
   "engines": {
     "node": ">=24"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:e2e": "playwright test tests/e2e/release-smoke.spec.cjs",
+    "check:release": "node tests/release-readiness.test.cjs"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "typescript": "6.0.3"
   }
 }
