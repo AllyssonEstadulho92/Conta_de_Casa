@@ -165,12 +165,38 @@ Estas referências são critérios técnicos; a Apple HIG é orientação de pla
 - cache PWA revisto para `architecture-baseline1`;
 - documentação permanente atualizada com a nova propriedade por preocupação.
 
+## D-074 — `v76-modern-ui.css` deixa de duplicar a geometria mobile do shell
+
+Data: 11 de setembro de 2026. Estado: implementação em curso no PR #84.
+
+### Factos
+
+Depois da baseline do PR #82, `mobile-layout.css` já não possuía o viewport, mas `v76-modern-ui.css` ainda repetia várias propriedades que o `v76-mobile-shell.css` substituía posteriormente: posição/dimensões da topbar, padding estrutural de página, posição/offsets/dimensão do dock e ajustes estreitos de gutters/offsets.
+
+O resultado final podia parecer correto, mas dependia de duas declarações concorrentes e da ordem da cascata.
+
+### Decisão
+
+1. Em ≤820 px, `v76-modern-ui.css` fica responsável pela **aparência** e composição interna dos componentes do shell, não pela geometria global.
+2. `v76-mobile-shell.css` continua a ser a única autoridade para posição, offsets, safe areas, dimensões estruturais, overflow/scroll global e reserva do dock em `.app-shell`, `.main`, `.topbar`, `.main>.page` e `.mobile-nav`.
+3. A topbar pode manter no design system cor, gradiente, borda, raio, sombra, tipografia e composição interna; não pode voltar a definir `position`, `inset`, altura/padding estrutural ou safe area.
+4. A bottom navigation pode manter superfície, borda, raio, sombra, blur, cores e estados; não pode voltar a definir `position:fixed`, `left/right/bottom`, altura/padding estrutural ou safe area.
+5. Ajustes estreitos ≤390 px de gutters da página e offsets do dock pertencem exclusivamente ao shell.
+6. Alvos tácteis de componentes, por exemplo 44×44 px do botão de menu/notificações, continuam no design system porque são contrato do componente/acessibilidade, não geometria do viewport.
+7. O gate `tests/ui-architecture-contract.test.cjs` deve falhar se estas responsabilidades estruturais regressarem ao design system.
+8. Esta decisão não autoriza alteração de cálculos, persistência, segurança, sincronização, QR/scanner ou regras de Mercado.
+
+### Próxima aplicação da decisão
+
+A consolidação seguinte deve avançar por componentes/feature: botões e hierarquia de ações, grids, cards, formulários, iconografia, imagens/fotografias e depois revisão página a página. CSS histórico só é removido com prova de paridade visual e regressões verdes.
+
 ## Evidência recente
 
 - UI/UX PR #76: merge `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
 - `76-version-audit1`: PR #78, merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`; CI/TypeScript/Pages verdes.
 - `76-mobile-shell2`: PR #80, merge `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`; TypeScript `34542259212`, CI `34542259148` e Pages `34542303536` com sucesso.
 - baseline arquitetural v76: PR #82, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`; TypeScript Foundation `34577495832`, CI `34577495803` e Pages `34577588233` com sucesso.
+- consolidação UI/shell: PR #84 em draft; gates em execução antes de integração.
 
 ## Lacuna técnica preservada
 
