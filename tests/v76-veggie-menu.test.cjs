@@ -6,6 +6,7 @@ const ts = fs.readFileSync('src/ui/veggie-menu-toggle.ts','utf8');
 const js = fs.readFileSync('v76-veggie-menu.js','utf8');
 const css = fs.readFileSync('v76-veggie-menu.css','utf8');
 const modern = fs.readFileSync('v76-modern-ui.css','utf8');
+const shell = fs.readFileSync('v76-mobile-shell.css','utf8');
 const legacy = fs.readFileSync('mobile-menu-toggle.js','utf8');
 const prepare = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
@@ -45,9 +46,10 @@ assert.doesNotMatch(css,/\.topbar\{[\s\S]{0,120}position:sticky!important/,'Vegg
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 assert.match(css,/@media\(forced-colors:active\)/);
 
-assert.match(modern,/A topbar deixa de ser fixa\/sticky/);
-assert.match(modern,/\.topbar,[\s\S]*position:relative!important/);
-assert.match(modern,/\.main\{[\s\S]*padding:0!important/);
+assert.match(modern,/A geometria do shell móvel pertence a v76-mobile-shell\.css/);
+assert.doesNotMatch(modern,/\.topbar,[\s\S]*min-height:76px!important;[\s\S]*padding:12px 14px!important/,'master visual layer must not own mobile header geometry');
+assert.match(shell,/\.main>\.topbar,[\s\S]*position:relative!important/,'mobile shell must keep the header in normal flow');
+assert.match(shell,/body \.main\{[\s\S]*padding:0!important/,'mobile shell must own main viewport spacing');
 
 assert.match(legacy,/drawerHead\.insertBefore\(button,drawerHead\.firstChild\)/,'validated v73 drawer controller remains present underneath the TS enhancement');
 assert.match(prepare,/const VEGGIE_MENU_REV = '76-veggie-menu2'/);
@@ -55,12 +57,14 @@ assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui1'/);
 assert.ok(prepare.includes("'v76-veggie-menu.css'"));
 assert.ok(prepare.includes("'v76-veggie-menu.js'"));
 assert.ok(prepare.includes("'v76-modern-ui.css'"));
+assert.ok(prepare.includes("'v76-mobile-shell.css'"));
 assert.match(prepare,/mobile-menu-toggle\.js\?v=\$\{MENU_REV\}[\s\S]*v76-veggie-menu\.js\?v=\$\{VEGGIE_MENU_REV\}/,'TypeScript-derived enhancement must load after validated drawer controller');
-assert.match(prepare,/v75-usability\.css\?v=\$\{USABILITY_REV\}[\s\S]*v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}/,'master UI layer must be loaded last among CSS layers');
+assert.match(prepare,/v75-usability\.css\?v=\$\{USABILITY_REV\}[\s\S]*v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/,'visual system must load before the final mobile geometry shell');
 
 assert.match(sw,/veggie-menu2-modern-ui1/);
 assert.ok(sw.includes("'./v76-veggie-menu.css'"));
 assert.ok(sw.includes("'./v76-veggie-menu.js'"));
 assert.ok(sw.includes("'./v76-modern-ui.css'"));
+assert.ok(sw.includes("'./v76-mobile-shell.css'"));
 
-console.log('v76 Veggie Burger is two-line, animated, swipe-stable and compatible with the non-fixed master header.');
+console.log('v76 Veggie Burger is two-line, animated, swipe-stable and delegates non-fixed mobile header geometry to the shell.');
