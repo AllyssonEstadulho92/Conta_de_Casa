@@ -2,7 +2,7 @@
 
 O histórico integral de commits e versões permanece no Git. Este ficheiro mantém as alterações relevantes para continuidade técnica.
 
-## 2026-09-11 — v76 baseline arquitetural transversal — em avaliação
+## 2026-09-11 — v76 baseline arquitetural transversal — publicado
 
 ### Pesquisa
 
@@ -25,9 +25,10 @@ A aplicação ainda mantinha responsabilidades estruturais duplicadas entre CSS 
 - `mobile-layout.css` fica restrito a refinamentos móveis de feature do Mercado;
 - `v76-mobile-shell.css` é a única autoridade declarada para geometria global em ≤820 px;
 - `tests/mobile-layout-regression.test.cjs` deixa de exigir a arquitetura antiga;
-- criado `tests/ui-architecture-contract.test.cjs` para impedir regressão da propriedade do shell, safe areas, zoom, baseline táctil e ordem de build;
+- criado `tests/ui-architecture-contract.test.cjs` para impedir regressão da propriedade do shell, safe areas, zoom, baseline táctil, ordem de build e invalidação PWA;
 - CI passa a executar o novo contrato;
-- `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md` e `PROJECT_STATE.md` atualizados.
+- cache PWA revisto para `architecture-baseline1`;
+- `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md`, `PROJECT_STATE.md` e `CHANGELOG.md` atualizados.
 
 ### Critério novo
 
@@ -40,13 +41,21 @@ A aplicação ainda mantinha responsabilidades estruturais duplicadas entre CSS 
 - redução de `!important` será progressiva e baseada em propriedade consolidada;
 - PWA/cache e segurança passam a ter critérios de aceitação explícitos.
 
+### QA e publicação
+
+- PR #82 integrado em `main` no commit `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`;
+- TypeScript Foundation de `main` `34577495832`: sucesso;
+- CI de `main` `34577495803`: sucesso;
+- GitHub Pages `34577588233`: sucesso;
+- Build ID publicado: `bb0cd65`.
+
 ### Isolamento
 
 Esta primeira etapa não altera `core.js`, `finance.js`, schema, IndexedDB, PBKDF2/AES-GCM, pagamentos, faturas, QR, scanner, sincronização cifrada ou regras financeiras/Mercado.
 
 ### Pendente
 
-CI integral, TypeScript Foundation, revisão do diff, merge em `main`, publicação Pages e validação física. A baseline não é considerada publicada antes destes gates.
+Validação física do build publicado no iPhone/Safari/PWA e consolidação progressiva da geometria ainda duplicada em `v76-modern-ui.css`/camadas v74-v75. Esta consolidação será feita por domínio e com regressão, não por big-bang.
 
 ---
 
