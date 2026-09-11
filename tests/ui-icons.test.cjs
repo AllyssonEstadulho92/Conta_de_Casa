@@ -94,6 +94,6 @@ assert.match(sw,/v74-experience\.css/,'offline/public asset allowlist must inclu
 assert.match(sw,/v75-architecture\.css/,'offline/public asset allowlist must include the architecture overlay');
 assert.doesNotMatch(sw,/['"]\.\/ui-consistency\.css['"]/,'service worker must not cache obsolete visual normalization CSS');
 assert.doesNotMatch(sw,/['"]\.\/v64-runtime\.css['"]/,'service worker must not cache obsolete v64 shell CSS');
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/,'service worker cache must refresh for the final v75 prototype architecture');
+assert.match(sw,/conta-de-casa-public-v76-release1-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/,'service worker cache must refresh for the v76 release while preserving the v75 architecture revision');
 
-console.log('Lucide UI icons, v74 base and final v75 prototype architecture: OK');
+console.log('Lucide UI icons, v74 base and v75 architecture preserved inside the v76 release: OK');
