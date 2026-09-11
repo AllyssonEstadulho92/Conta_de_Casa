@@ -22,8 +22,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: Checkout tested revision
+      - name: Checkout exact CI-approved revision
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
@@ -33,91 +34,38 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Verify tested revision
+      - name: Confirm revision identity
+        if: ${{ github.event_name == 'workflow_run' }}
         run: |
-          node --check core.js
-          node --check finance.js
-          node --check render.js
-          node --check forms.js
-          node --check events.js
-          node --check mobile-menu-toggle.js
-          node --check v76-veggie-menu.js
-          node --check sync.js
-          node --check sync-conflict-policy.js
-          node --check market-experience.js
-          node --check market-branding.js
-          node --check market-category-groups.js
-          node --check market-shopping-focus.js
-          node --check market-barcode.js
-          node --check ui-icons.js
-          node --check design-asset-library.js
-          node --check asset-loader.js
-          node --check invoice-capture.js
-          node --check app-update.js
-          node --check market-image-library.js
-          node --check market-retailer-image-policy.js
-          node --check market-image-audit.js
-          node --check market-official-images.js
-          node --check market-catalog-image-resolver.js
-          node --check market-visual-catalog.js
-          node --check pingo-doce-photo-library.js
-          node --check market-photo-loader.js
-          node --check v64-runtime.js
-          node --check v74-experience.js
-          node --check v75-architecture.js
-          node --check v75-stability.js
-          node --check v75-market-featured.js
-          node --check v75-market-flow.js
-          node --check sw.js
-          node --check scripts/prepare-pages.cjs
-          node tests/finance.test.cjs
-          node tests/audit.test.cjs
-          node tests/counting-invariants.test.cjs
-          node tests/isolation.test.cjs
-          node tests/date-timezone.test.cjs
-          node tests/form-regression.test.cjs
-          node tests/invoice-capture.test.cjs
-          node tests/market-categories.test.cjs
-          node tests/market-category-groups.test.cjs
-          node tests/market-shopping-focus.test.cjs
-          node tests/market-experience.test.cjs
-          node tests/market-product-images.test.cjs
-          node tests/market-image-audit.test.cjs
-          node tests/market-official-images.test.cjs
-          node tests/market-image-library.test.cjs
-          node tests/market-visual-catalog.test.cjs
-          node tests/pingo-doce-photo-library.test.cjs
-          node tests/market-photo-loader.test.cjs
-          node tests/market-barcode.test.cjs
-          node tests/market-live-accounting.test.cjs
-          node tests/v75-market-flow.test.cjs
-          node tests/v64-runtime.test.cjs
-          node tests/ui-icons.test.cjs
-          node tests/design-asset-library.test.cjs
-          node tests/ui-consistency.test.cjs
-          node tests/v75-architecture.test.cjs
-          node tests/v75-stability.test.cjs
-          node tests/v75-layout-polish.test.cjs
-          node tests/v75-expenses-modern.test.cjs
-          node tests/v75-market-featured.test.cjs
-          node tests/v75-drawer-theme.test.cjs
-          node tests/mobile-menu-toggle.test.cjs
-          node tests/v76-veggie-menu.test.cjs
-          node tests/v76-modern-ui.test.cjs
-          node tests/v76-mobile-shell.test.cjs
-          node tests/app-update.test.cjs
-          node tests/security.test.cjs
-          node tests/responsive.test.cjs
-          node tests/mobile-layout-regression.test.cjs
-          node tests/navigation.test.cjs
-          node tests/accessibility.test.cjs
-          node tests/sync.test.cjs
-          node tests/sync-conflict-policy.test.cjs
-          node tests/sync-runtime.test.cjs
-          node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8')); console.log('Manifest OK')"
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          TESTED_SHA="${{ github.event.workflow_run.head_sha }}"
+          test "$ACTUAL_SHA" = "$TESTED_SHA"
+          echo "Deploying CI-approved revision $ACTUAL_SHA"
+
+      - name: Install validation toolchain
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Revalidate TypeScript and release contract
+        run: |
+          npm run typecheck
+          npm run check:release
 
       - name: Prepare public site allowlist
         run: node scripts/prepare-pages.cjs
+
+      - name: Verify prepared v76 metadata
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const html=fs.readFileSync('dist/index.html','utf8');
+          const manifest=JSON.parse(fs.readFileSync('dist/release-manifest.json','utf8'));
+          const meta=name=>new RegExp(`<meta name="${name}" content="([^"]+)"`).exec(html)?.[1]||'';
+          if(meta('app-version')!=='0.76.0') throw new Error(`Unexpected app version: ${meta('app-version')}`);
+          if(meta('app-build')!=='v76') throw new Error(`Unexpected release: ${meta('app-build')}`);
+          if(!/^[0-9a-f]{7}$/.test(meta('app-build-id'))) throw new Error(`Invalid build id: ${meta('app-build-id')}`);
+          if(manifest.latestVersion!=='v76') throw new Error(`Unexpected manifest release: ${manifest.latestVersion}`);
+          console.log(`Validated Conta de Casa ${meta('app-version')} / ${meta('app-build')} / build ${meta('app-build-id')}`);
+          NODE
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
