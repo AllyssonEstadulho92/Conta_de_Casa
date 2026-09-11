@@ -1,4 +1,4 @@
-/* Conta de Casa v76 — 76-modern-ui1.
+/* Conta de Casa v76 — 76-modern-ui2.
    Sistema visual transversal para todas as páginas.
    Camada exclusivamente de apresentação: não altera dados, cálculos, persistência,
    PIN, cifragem, sincronização, scanner, QR ou regras financeiras. */
@@ -23,6 +23,11 @@
   --v76-radius-sm:12px;
   --v76-radius:16px;
   --v76-radius-lg:20px;
+  --v76-control-height:44px;
+  --v76-control-radius:12px;
+  --v76-icon-control:44px;
+  --v76-grid-gap:12px;
+  --v76-disabled-opacity:.48;
   --v76-focus:0 0 0 3px color-mix(in srgb,var(--v76-primary) 16%,transparent);
 }
 
@@ -87,16 +92,25 @@ html.cdc-v75 :is(.panel,.kpi,.goal-card){transition:border-color .18s ease,box-s
   }
 }
 
-/* Botões */
+/* Hierarquia de ações: primary = ação principal, secondary = alternativa,
+   danger = destrutiva, link = terciária e icon-btn = ação compacta. */
 html.cdc-v75 .btn{
-  min-height:44px!important;
+  min-width:0;
+  min-height:var(--v76-control-height)!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
   padding:10px 15px!important;
-  border-radius:12px!important;
+  border-radius:var(--v76-control-radius)!important;
   font-weight:680!important;
+  line-height:1.2!important;
   letter-spacing:-.01em!important;
+  text-align:center!important;
   box-shadow:none!important;
-  transition:transform .14s ease,background-color .16s ease,border-color .16s ease,box-shadow .16s ease!important;
+  transition:transform .14s ease,background-color .16s ease,border-color .16s ease,box-shadow .16s ease,color .16s ease!important;
 }
+html.cdc-v75 .btn.full{width:100%!important}
 html.cdc-v75 .btn.primary{
   border:1px solid transparent!important;
   color:#fff!important;
@@ -107,20 +121,84 @@ html.cdc-v75 .btn.secondary{
   border:1px solid var(--v76-border)!important;
   color:var(--v76-primary)!important;
   background:var(--v76-surface)!important;
+  box-shadow:var(--v76-shadow-xs)!important;
 }
 html.cdc-v75 .btn.danger{
   border:1px solid color-mix(in srgb,var(--v76-danger) 20%,var(--v76-border))!important;
   color:var(--v76-danger)!important;
   background:color-mix(in srgb,var(--v76-danger) 7%,var(--v76-surface))!important;
 }
-html.cdc-v75 .btn:active{transform:scale(.985)!important}
+html.cdc-v75 .icon-btn{
+  width:var(--v76-icon-control)!important;
+  min-width:var(--v76-icon-control)!important;
+  height:var(--v76-icon-control)!important;
+  min-height:var(--v76-icon-control)!important;
+  display:inline-grid!important;
+  place-items:center!important;
+  padding:0!important;
+  border:1px solid var(--v76-border)!important;
+  border-radius:var(--v76-control-radius)!important;
+  background:var(--v76-surface)!important;
+  color:var(--v76-text)!important;
+  box-shadow:var(--v76-shadow-xs)!important;
+}
+html.cdc-v75 .link-btn{
+  min-height:40px!important;
+  padding:7px 6px!important;
+  border-radius:10px!important;
+  color:var(--v76-primary)!important;
+  font-weight:680!important;
+}
+html.cdc-v75 .button-row{gap:10px!important}
+html.cdc-v75 :is(.panel-head,.section-toolbar)>:is(.btn,.link-btn){flex:0 0 auto}
+html.cdc-v75 .btn :is(.ui-icon-svg,.svg-icon){width:18px!important;height:18px!important}
+html.cdc-v75 .icon-btn :is(.ui-icon-svg,.svg-icon){width:20px!important;height:20px!important}
+html.cdc-v75 .btn:active:not(:disabled):not([aria-disabled="true"]){transform:scale(.985)!important}
 html.cdc-v75 :is(.btn,.icon-btn,.link-btn):focus-visible{outline:0!important;box-shadow:var(--v76-focus)!important}
-html.cdc-v75 .link-btn{color:var(--v76-primary)!important;font-weight:680!important}
+html.cdc-v75 :is(.btn,.icon-btn,.link-btn):is(:disabled,[aria-disabled="true"]){
+  opacity:var(--v76-disabled-opacity)!important;
+  cursor:not-allowed!important;
+  transform:none!important;
+  box-shadow:none!important;
+}
+@media(hover:hover) and (pointer:fine){
+  html.cdc-v75 .btn.primary:hover:not(:disabled):not([aria-disabled="true"]){
+    transform:translateY(-1px);
+    box-shadow:0 8px 20px color-mix(in srgb,var(--v76-primary) 24%,transparent)!important;
+  }
+  html.cdc-v75 .btn.secondary:hover:not(:disabled):not([aria-disabled="true"]),
+  html.cdc-v75 .icon-btn:hover:not(:disabled):not([aria-disabled="true"]){
+    border-color:color-mix(in srgb,var(--v76-primary) 28%,var(--v76-border))!important;
+    background:var(--v76-surface-accent)!important;
+    color:var(--v76-primary)!important;
+  }
+  html.cdc-v75 .btn.danger:hover:not(:disabled):not([aria-disabled="true"]){
+    border-color:color-mix(in srgb,var(--v76-danger) 36%,var(--v76-border))!important;
+    background:color-mix(in srgb,var(--v76-danger) 11%,var(--v76-surface))!important;
+  }
+  html.cdc-v75 .link-btn:hover:not(:disabled):not([aria-disabled="true"]){
+    background:var(--v76-surface-accent)!important;
+  }
+}
+
+/* Grelhas partilhadas: componentes podem variar colunas por feature, mas nunca
+   podem forçar conteúdo a ultrapassar a coluna disponível. */
+html.cdc-v75 :is(
+  .kpi-grid,.dashboard-grid,.two-col,.goal-grid,.bill-summary-grid,.market-summary-grid,
+  .detail-grid,.security-grid,.form-grid,.button-row
+){min-width:0}
+html.cdc-v75 :is(
+  .kpi-grid,.dashboard-grid,.two-col,.goal-grid,.bill-summary-grid,.market-summary-grid,
+  .detail-grid,.security-grid,.form-grid,.button-row
+)>*{min-width:0}
+html.cdc-v75 :is(.kpi-grid,.goal-grid,.bill-summary-grid,.market-summary-grid){gap:var(--v76-grid-gap)!important}
+html.cdc-v75 :is(.panel-head,.section-toolbar){min-width:0}
+html.cdc-v75 :is(.panel-head,.section-toolbar)>div{min-width:0}
 
 /* Campos e formulários */
 html.cdc-v75 :is(input,select,textarea){
   border:1px solid var(--v76-border)!important;
-  border-radius:12px!important;
+  border-radius:var(--v76-control-radius)!important;
   background:var(--v76-surface)!important;
   color:var(--v76-text)!important;
   box-shadow:inset 0 1px 1px rgba(9,49,54,.025)!important;
@@ -130,6 +208,11 @@ html.cdc-v75 :is(input,select,textarea):focus{
   border-color:color-mix(in srgb,var(--v76-primary) 72%,var(--v76-border))!important;
   box-shadow:var(--v76-focus)!important;
   outline:0!important;
+}
+html.cdc-v75 :is(input,select,textarea):disabled{
+  opacity:.68!important;
+  cursor:not-allowed!important;
+  background:var(--v76-surface-soft)!important;
 }
 html.cdc-v75 label{color:var(--v76-text)!important;font-weight:650!important}
 html.cdc-v75 label>span{color:var(--v76-muted)!important}
@@ -287,6 +370,34 @@ html.cdc-v75 #page-market :is(.market-mobile-card,.cdc-product-card,.market-prod
   border-radius:var(--v76-radius)!important;
   background:var(--v76-surface)!important;
   box-shadow:var(--v76-shadow-xs)!important;
+}
+
+/* Fotografias do Mercado: apresentação previsível sem transformar a imagem em prova de preço. */
+html.cdc-v75 #page-market .market-visual-catalog{
+  border-color:var(--v76-border)!important;
+  background:linear-gradient(180deg,var(--v76-surface),color-mix(in srgb,var(--v76-primary) 2%,var(--v76-surface)))!important;
+  box-shadow:var(--v76-shadow-xs)!important;
+}
+html.cdc-v75 #page-market .market-visual-product-card{
+  border-color:var(--v76-border)!important;
+  border-radius:var(--v76-radius)!important;
+  background:var(--v76-surface)!important;
+  box-shadow:var(--v76-shadow-xs)!important;
+}
+html.cdc-v75 #page-market .market-visual-product-media{
+  overflow:hidden!important;
+  border-bottom:1px solid var(--v76-border)!important;
+  background:linear-gradient(180deg,var(--v76-surface-soft),var(--v76-surface))!important;
+}
+html.cdc-v75 #page-market .market-visual-product-media img{
+  display:block!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+html.cdc-v75 #page-market .market-visual-catalog-fallback{
+  border-color:color-mix(in srgb,var(--v76-primary) 16%,var(--v76-border))!important;
+  background:var(--v76-surface-accent)!important;
+  color:var(--v76-primary)!important;
 }
 
 /* Calendário */
@@ -474,6 +585,10 @@ html.cdc-v75 .dialog-close{border-radius:12px!important;background:var(--v76-sur
   html.cdc-v75 #page-market .market-summary-item{min-height:90px!important;padding:12px!important;border-radius:15px!important}
   html.cdc-v75 #page-bills .bill-mobile-card{padding:14px!important;border-radius:17px!important;box-shadow:var(--v76-shadow-sm)!important}
 
+  /* Botões em barras operacionais mantêm prioridade sem esmagar o campo principal. */
+  html.cdc-v75 :is(.bill-command-bar,.market-command-bar)>.btn{white-space:nowrap!important}
+  html.cdc-v75 .panel-head>.link-btn{min-height:40px!important}
+
   /* Bottom navigation: apenas aparência; posição, dimensão e safe area pertencem ao shell. */
   html.cdc-v75 .mobile-nav{
     border:1px solid color-mix(in srgb,var(--v76-border) 82%,transparent)!important;
@@ -517,10 +632,10 @@ html.cdc-v75 .dialog-close{border-radius:12px!important;background:var(--v76-sur
 
 @media(prefers-reduced-motion:reduce){
   html.cdc-v75 .page.active,
-  html.cdc-v75 :is(.panel,.kpi,.goal-card,.btn,.cdc-category-row){animation:none!important;transition:none!important}
+  html.cdc-v75 :is(.panel,.kpi,.goal-card,.btn,.icon-btn,.link-btn,.cdc-category-row){animation:none!important;transition:none!important}
 }
 
 @media(forced-colors:active){
-  html.cdc-v75 :is(.panel,.kpi,.goal-card,.bill-summary-item,.market-summary-item,.mobile-nav,.section-tabs){border:1px solid CanvasText!important}
+  html.cdc-v75 :is(.panel,.kpi,.goal-card,.bill-summary-item,.market-summary-item,.mobile-nav,.section-tabs,.market-visual-product-card){border:1px solid CanvasText!important}
   html.cdc-v75 .btn.primary{border:1px solid ButtonText!important}
 }
