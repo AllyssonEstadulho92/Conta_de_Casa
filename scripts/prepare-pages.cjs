@@ -8,7 +8,7 @@ const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
 const PACKAGE = JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
 const APP_VERSION = String(PACKAGE.version||'').trim();
-const BUILD = 'v75';
+const BUILD = 'v76';
 const APP_UPDATE_REV = '76-version-audit1';
 const UI_REV = '74-ui1';
 const CATEGORY_REV = '64-ui1';
@@ -53,10 +53,10 @@ function resolveBuildId(){
 const BUILD_ID=resolveBuildId();
 const BUILD_DATE=new Date().toISOString();
 
-/* Bundle público v75 com programa v76 incremental. Mantém a experiência funcional existente,
-   acrescenta metadados de versão/build no padrão do Foco Jornada, o Veggie Burger TypeScript v2,
-   76-modern-ui1 e 76-mobile-shell2. Nenhuma destas camadas altera domínio financeiro,
-   persistência, cifragem, sincronização, scanner, QR ou regras de Mercado. */
+/* Bundle público v76 estável. Mantém a experiência funcional existente,
+   metadados de versão/build, o Veggie Burger TypeScript v2, 76-modern-ui1,
+   76-mobile-shell2 e a baseline arquitetural. A promoção de release não altera
+   domínio financeiro, persistência, cifragem, sincronização, scanner, QR ou regras de Mercado. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
