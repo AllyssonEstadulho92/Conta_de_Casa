@@ -100,12 +100,12 @@ assert.match(menuJs,/drawer\.close=animatedDrawerClose/);
 assert.match(menuJs,/touch\.clientX>=root\.innerWidth-swipeEdgeWidth/);
 assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 0 0 auto!important/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2/);
+assert.match(sw,/conta-de-casa-public-v76-release1-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2/);
 for(const asset of ['./design-system.css','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js','./v75-header-refinement.css'])assert.ok(sw.includes(`'${asset}'`));
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 
-assert.match(prepare,/const BUILD = 'v75'/);
+assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
@@ -122,7 +122,7 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/design-system\.css\?v=75/);
+  assert.match(index,/design-system\.css\?v=76/);
   assert.match(index,/market-brand\.css\?v=74-ui1/);
   assert.match(index,/market-shopping-focus\.css\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
@@ -139,4 +139,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Conta de Casa v75 architecture and premium mobile header refinement: OK');
+console.log('Conta de Casa v76 release with preserved v75 architecture and premium mobile header refinement: OK');
