@@ -3,8 +3,9 @@
 Atualizado: 11 de setembro de 2026  
 Versão da aplicação: `0.76.0-dev.1`  
 Release pública: `v75`  
-Programa técnico: `v76` — migração incremental TypeScript + revisão UI/UX  
+Programa técnico: `v76` — migração incremental TypeScript + revisão UI/UX/arquitetura  
 Branch pública: `main`  
+Branch em avaliação: `refactor/v76-architecture-baseline`  
 HEAD funcional publicado: `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`  
 Distribuição: GitHub Pages / PWA
 
@@ -21,77 +22,89 @@ Distribuição: GitHub Pages / PWA
 - QR, scanner, backup/restauro, PWA e funcionamento offline não podem regredir por mudanças visuais;
 - alterações UI/UX, shell ou versionamento não podem modificar cálculos, pagamentos, faturas, persistência ou segurança.
 
-## 2. Estado integrado em `main`
+## 2. Estado publicado em `main`
 
 - `75-market1` — Mercado;
 - `75-expenses1` — Despesas/Faturas;
 - fundação TypeScript — PR #72;
 - `76-veggie-menu1` — PR #74;
-- `76-veggie-menu2` + `76-modern-ui1` — PR #76, merge `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`;
-- `76-version-audit1` — PR #78, merge `a68de711df1c42ec33948d3fff2f4d5e337e2436`;
-- `76-mobile-shell2` — PR #80, merge `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`.
+- `76-veggie-menu2` + `76-modern-ui1` — PR #76;
+- `76-version-audit1` — PR #78;
+- `76-mobile-shell2` — PR #80, merge funcional `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`;
+- documentação de publicação sincronizada em `main` por `0011e5fe7c77dbc1b02b62ba42688f5914bcb9a3`.
 
-## 3. Erro visual confirmado no iPhone e correção publicada
+## 3. Diagnóstico arquitetural atual
 
-A evidência física de 11/09/2026 mostrou dois defeitos de geometria:
+A correção `76-mobile-shell2` resolveu a geometria final por precedência, mas a auditoria de 11/09/2026 confirmou uma dívida estrutural maior: a UI acumulou várias folhas de estilo versionadas com responsabilidades sobre os mesmos elementos.
 
-1. o conteúdo da `.topbar` entrava na área da status bar do iPhone, aproximando/sobrepondo o Veggie Burger à hora e aos indicadores do sistema;
-2. o dock inferior persistente podia cobrir o final da página, deixando categorias/itens visualmente cortados.
+O exemplo objetivo era `mobile-layout.css`, que ainda definia `.app-shell`, `.main` e `.topbar` apesar de `v76-mobile-shell.css` já ser a autoridade final do viewport móvel. O resultado funcional podia ficar correto, mas dependia de ordem de carregamento, especificidade e `!important`. Isto aumenta o risco de regressão a cada nova alteração visual.
 
-A revisão do código confirmou a causa estrutural: `mobile-layout.css` ainda mantinha `.app-shell` e `.main` presos a `100dvh`, com `overflow:hidden` no shell e scroll interno em `.main`, enquanto `76-modern-ui1` já tinha mudado a `.topbar` para fluxo normal. Existiam duas arquiteturas de viewport parcialmente sobrepostas.
+Conclusão: não continuar a corrigir a aplicação através de novas camadas de override. O próximo ciclo deve consolidar propriedade por preocupação e introduzir gates arquiteturais.
 
-`76-mobile-shell2` corrige a geometria móvel com uma camada final específica, carregada depois de `v76-modern-ui.css`:
+## 4. Pesquisa técnica realizada
 
-- um único scroll vertical no documento;
-- `.app-shell` e `.main` sem `max-height:100dvh`/clipping na camada final;
-- topbar no fluxo com compensação explícita de `env(safe-area-inset-top)`;
-- dock inferior fixo com altura conhecida e `safe-area-inset-bottom`;
-- páginas com reserva inferior calculada para manter o último conteúdo acima do dock;
-- ajustes para ≤390 px, ≤359 px e landscape de baixa altura;
-- foco, reduced-motion, forced-colors e pinch-to-zoom preservados.
+Foram revistos referenciais primários/de elevada confiança para alinhar o critério da aplicação:
 
-A versão do programa permanece `0.76.0-dev.1`; o Build ID distingue cada compilação.
+- Apple Human Interface Guidelines / Apple Developer: safe areas, layout, toolbar e navegação;
+- MDN Web Docs: `env(safe-area-inset-*)`, `viewport-fit=cover`, cascade/specifity, cascade layers e container queries;
+- W3C/WAI WCAG 2.2: Reflow a 320 CSS px, Target Size e Focus Not Obscured;
+- web.dev: arquitetura PWA, Cache Storage, IndexedDB e estratégias de cache;
+- OWASP Cheat Sheet Series: CSP e validação de inputs.
 
-## 4. UI/UX vigente
+A Apple HIG é usada como referência ergonómica/plataforma para iPhone; os requisitos Web e de acessibilidade continuam ancorados em standards Web/WCAG.
 
-`76-modern-ui1` continua a ser o design system transversal para Início, Despesas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico, Definições, dialogs, drawer, bottom navigation, tabs, formulários e estados vazios.
+## 5. Baseline arquitetural em implementação
 
-`76-mobile-shell2` não substitui esse design system: resolve apenas viewport, safe areas, scroll e clipping. `76-veggie-menu2` continua a controlar o Veggie Burger/X em TypeScript strict.
+Branch: `refactor/v76-architecture-baseline`.
 
-## 5. Versão e atualização
+Alterações já efetuadas na branch:
 
-`76-version-audit1` mantém três identificadores separados:
+- `mobile-layout.css` deixou de possuir viewport, scroll principal, topbar ou bottom navigation;
+- o ficheiro mantém apenas refinamentos móveis de feature do Mercado;
+- `v76-mobile-shell.css` passa a ser a única autoridade declarada para geometria global mobile ≤820 px;
+- `tests/mobile-layout-regression.test.cjs` foi atualizado para testar a arquitetura atual em vez da arquitetura antiga;
+- criado `tests/ui-architecture-contract.test.cjs`;
+- CI passa a executar o novo contrato;
+- `ARCHITECTURE.md`, `DECISIONS.md` e `TODO.md` foram atualizados com o critério transversal.
 
-- **versão da aplicação:** `0.76.0-dev.1`;
-- **release pública:** `v75`;
-- **build exato:** SHA Git curto + data ISO.
+Ainda não considerar esta baseline integrada/publicada enquanto CI, TypeScript Foundation, revisão do diff, merge e Pages não estiverem concluídos.
 
-`Verificar e atualizar agora` executa `registration.update()` antes de concluir que o build está atualizado. A instalação continua explícita por `APPLY_UPDATE`.
+## 6. Critério UI/UX v76
 
-## 6. Isolamento e segurança
+- uma única autoridade por preocupação transversal;
+- mobile-first;
+- reflow a 320 CSS px sem perda de informação/funcionalidade e sem scroll horizontal global;
+- safe areas explícitas em dispositivos edge-to-edge;
+- baseline interna de 44×44 CSS px para controlos tácteis primários no iPhone;
+- foco e último conteúdo nunca escondidos por dock/header persistentes;
+- bottom navigation apenas para destinos de topo; ações da vista ficam na toolbar/corpo/menu contextual;
+- nenhum novo ficheiro “patch” para corrigir a mesma geometria;
+- `@layer` só entra quando o domínio concorrente completo puder ser migrado em conjunto;
+- reduzir `!important` por propriedade comprovadamente consolidada, nunca por remoção cega;
+- container queries apenas para componentes dependentes do contentor;
+- alterações visuais não podem tocar no domínio financeiro ou segurança sem decisão própria.
 
-`76-mobile-shell2` altera CSS de geometria, distribuição/cache e regressões de layout. Não altera `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, schema, IndexedDB, PIN, PBKDF2, AES-GCM, backup, sincronização cifrada, QR, scanner, CSP ou regras financeiras/Mercado.
+## 7. PWA e segurança
 
-## 7. QA e publicação
+Critério de evolução:
 
-`76-mobile-shell2`:
-
-- teste específico `tests/v76-mobile-shell.test.cjs`: sucesso;
-- CI funcional da branch `34541849503`: sucesso integral;
-- PR #80: CI e TypeScript Foundation concluídos com sucesso;
-- merge em `main`: `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`;
-- TypeScript Foundation de `main` `34542259212`: sucesso;
-- CI de `main` `34542259148`: sucesso;
-- GitHub Pages `34542303536`: sucesso.
+- Cache Storage para recursos HTTP do app shell/rede escolhidos; IndexedDB para estado estruturado;
+- manifestos/metadados de atualização não devem ficar presos a cache obsoleta;
+- Service Worker não pode ser requisito para o núcleo online funcionar;
+- CSP continua defesa em profundidade e deve ser progressivamente mais restrita;
+- avaliar remoção da dependência runtime externa do ZXing, mantendo licença e funcionalidade;
+- reduzir `style-src 'unsafe-inline'` apenas depois de migrar estilos inline necessários;
+- validar dados remotos/QR/importação de faturas sintática e semanticamente antes de os aceitar no domínio.
 
 ## 8. Riscos/lacunas abertas
 
-- validação física pós-publicação de `76-mobile-shell2` em iPhone/Safari/PWA continua obrigatória;
-- validar especialmente topo/status bar, scroll até ao último item e dock em 320/375/390/430 px;
+- validação física pós-publicação de `76-mobile-shell2` em iPhone/Safari/PWA continua necessária;
+- a baseline arquitetural atual ainda precisa de CI/TypeScript/merge/Pages;
+- `v76-modern-ui.css` e camadas v74/v75 ainda contêm sobreposição de responsabilidade e `!important` a consolidar em fases;
 - `main` permanece sem branch protection;
 - `market-experience.js` mantém a lacuna conhecida de persistência explícita de `pid` em todo o fluxo;
 - release pública continua `v75` até decisão formal de promoção.
 
 ## 9. Próximo passo
 
-Validar no iPhone/Safari/PWA que: (a) o Veggie Burger nunca entra na área do sistema, (b) a topbar rola naturalmente com a página e (c) o último conteúdo fica totalmente acessível acima do dock. Se a validação física for positiva, retomar `feat/v76-money-dates`.
+Concluir os gates da branch `refactor/v76-architecture-baseline`. Se verdes, integrar a baseline e publicar. Depois executar a consolidação transversal por domínio, começando por shell/UI, sem big-bang e sem alterar domínio financeiro. A validação física iPhone/Safari/PWA permanece obrigatória durante esse processo.

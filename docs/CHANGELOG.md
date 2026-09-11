@@ -2,6 +2,54 @@
 
 O histórico integral de commits e versões permanece no Git. Este ficheiro mantém as alterações relevantes para continuidade técnica.
 
+## 2026-09-11 — v76 baseline arquitetural transversal — em avaliação
+
+### Pesquisa
+
+Foi feita revisão de fontes primárias/de elevada confiança para substituir correções por sobreposição por um critério estrutural comum à aplicação:
+
+- Apple Human Interface Guidelines / Apple Developer: safe areas, layout, toolbars e navegação;
+- MDN Web Docs: `env(safe-area-inset-*)`, `viewport-fit=cover`, specificity, cascade layers e container queries;
+- W3C/WAI WCAG 2.2: Reflow a 320 CSS px, Target Size e Focus Not Obscured;
+- web.dev: PWA, Cache Storage, IndexedDB e estratégias de cache;
+- OWASP Cheat Sheet Series: Content Security Policy e Input Validation.
+
+### Diagnóstico
+
+A aplicação ainda mantinha responsabilidades estruturais duplicadas entre CSS histórico e camadas v75/v76. O caso comprovado era `mobile-layout.css`: voltava a definir `.app-shell`, `.main` e `.topbar` apesar de `v76-mobile-shell.css` ser a autoridade final. O resultado podia estar correto apenas porque a última camada ganhava a cascata com especificidade/`!important`.
+
+### Alterações da baseline
+
+- definida propriedade única por preocupação: tokens, shell, components, features, states, utilities, domínio, persistência, sync, PWA e segurança;
+- `mobile-layout.css` deixa de possuir viewport, scroll principal, topbar e bottom navigation;
+- `mobile-layout.css` fica restrito a refinamentos móveis de feature do Mercado;
+- `v76-mobile-shell.css` é a única autoridade declarada para geometria global em ≤820 px;
+- `tests/mobile-layout-regression.test.cjs` deixa de exigir a arquitetura antiga;
+- criado `tests/ui-architecture-contract.test.cjs` para impedir regressão da propriedade do shell, safe areas, zoom, baseline táctil e ordem de build;
+- CI passa a executar o novo contrato;
+- `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md` e `PROJECT_STATE.md` atualizados.
+
+### Critério novo
+
+- reflow obrigatório a 320 CSS px sem perda de conteúdo/funcionalidade;
+- baseline tátil interna de 44×44 CSS px para controlos primários no iPhone;
+- safe areas por `env()` e não por modelo de aparelho;
+- bottom navigation apenas para destinos de topo;
+- sem novos ficheiros “patch” para a mesma geometria;
+- `@layer` só entra quando o domínio concorrente puder ser migrado em conjunto;
+- redução de `!important` será progressiva e baseada em propriedade consolidada;
+- PWA/cache e segurança passam a ter critérios de aceitação explícitos.
+
+### Isolamento
+
+Esta primeira etapa não altera `core.js`, `finance.js`, schema, IndexedDB, PBKDF2/AES-GCM, pagamentos, faturas, QR, scanner, sincronização cifrada ou regras financeiras/Mercado.
+
+### Pendente
+
+CI integral, TypeScript Foundation, revisão do diff, merge em `main`, publicação Pages e validação física. A baseline não é considerada publicada antes destes gates.
+
+---
+
 ## 2026-09-11 — v76 `76-mobile-shell2` — publicado
 
 ### Evidência física
