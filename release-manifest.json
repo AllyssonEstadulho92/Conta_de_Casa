@@ -1,9 +1,28 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v75",
-  "publishedAt": "2026-09-09",
+  "latestVersion": "v76",
+  "publishedAt": "2026-09-11",
   "releases": [
+    {
+      "version": "v76",
+      "date": "11 de setembro de 2026",
+      "title": "Baseline arquitetural, validação de release e experiência móvel consolidada",
+      "items": [
+        "A aplicação passa para a versão estável 0.76.0 e a release pública v76, mantendo STATE_VERSION 5 e o formato persistido sem migração de dados.",
+        "A geometria móvel passa a ter uma única autoridade em v76-mobile-shell.css; mobile-layout.css deixa de controlar viewport, scroll global, topbar e navegação inferior.",
+        "O shell móvel usa um único scroll vertical do documento, respeita safe areas, mantém a topbar no fluxo e reserva espaço real para o dock inferior em iPhone, Android, tablet e ecrãs estreitos.",
+        "A arquitetura UI passa a separar tokens, shell, componentes, features, estados e utilities, proibindo novos ficheiros de correção que voltem a sobrepor a mesma responsabilidade estrutural.",
+        "A fundação TypeScript strict permanece integrada e passa a ser executada também dentro do CI principal, tornando o typecheck parte do gate que autoriza publicação.",
+        "O CI ganha validação de release do bundle dist e smoke tests em navegadores reais automatizados Chromium e WebKit, incluindo viewports móveis e desktop.",
+        "O GitHub Pages passa a publicar apenas a revisão exata aprovada pelo CI completo; a preparação do bundle confirma versão da aplicação, release, Build ID, manifesto, Service Worker e referências locais.",
+        "O Service Worker recebe uma nova revisão de cache v76 para invalidar instalações antigas sem apagar IndexedDB, cofre, PIN ou dados financeiros.",
+        "Versão da aplicação, release pública e Build ID continuam separados: 0.76.0 identifica o programa, v76 identifica a release e o SHA curto identifica a compilação concreta.",
+        "Os testes financeiros, faturas, QR, scanner, Mercado, isolamento do cofre, sincronização cifrada, acessibilidade, responsividade, PWA e atualização continuam obrigatórios antes do deploy.",
+        "A release não altera PBKDF2-SHA-256, AES-GCM, PBKDF2_ITERATIONS 250000, cálculos monetários em cêntimos, estimatedCents/actualCents ou a identidade marketId|pid.",
+        "A validação automatizada inclui WebKit, mas a confirmação final de comportamento específico do Safari/PWA instalado em hardware Apple continua dependente de teste físico no dispositivo."
+      ]
+    },
     {
       "version": "v75",
       "date": "9 de setembro de 2026",
