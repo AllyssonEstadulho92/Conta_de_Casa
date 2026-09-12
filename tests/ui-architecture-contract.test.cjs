@@ -46,15 +46,20 @@ assert.match(html,/name="viewport" content="[^"]*width=device-width[^"]*viewport
 assert.doesNotMatch(html,/user-scalable\s*=\s*no|maximum-scale\s*=\s*1(?:\.0+)?/i);
 
 // Touch controls use a 44px mobile baseline, stricter than the WCAG 2.2 AA minimum.
+assert.match(modern,/--v76-control-height:44px/);
+assert.match(modern,/--v76-icon-control:44px/);
 assert.match(modern,/\.mobile-menu-btn,[\s\S]*#notificationsBtn\{[\s\S]*width:44px!important;[\s\S]*height:44px!important/);
-assert.match(modern,/\.btn\{[\s\S]*min-height:44px!important/);
+assert.match(modern,/\.btn\{[\s\S]*min-height:var\(--v76-control-height\)!important/);
+assert.match(modern,/\.icon-btn\{[\s\S]*width:var\(--v76-icon-control\)!important/);
 
 // Build order is explicit: visual system first, geometry authority last.
 const modernInjection=prepare.indexOf('v76-modern-ui.css?v=${MODERN_UI_REV}');
 const shellInjection=prepare.indexOf('v76-mobile-shell.css?v=${MOBILE_SHELL_REV}');
 assert.ok(modernInjection>=0 && shellInjection>modernInjection,'mobile shell must load after the visual design system');
 
-// A shell-architecture change must invalidate the installed PWA cache.
+// Component-system and shell architecture changes must invalidate the installed PWA cache.
+assert.match(sw,/modern-ui2/);
+assert.match(sw,/ui-components1/);
 assert.match(sw,/architecture-baseline1/);
 assert.ok(sw.includes("'./mobile-layout.css'"));
 assert.ok(sw.includes("'./v76-mobile-shell.css'"));
