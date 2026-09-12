@@ -35,7 +35,7 @@
   const q=(selector,node=document)=>node.querySelector(selector);
   const qa=(selector,node=document)=>[...node.querySelectorAll(selector)];
   const clean=value=>String(value??'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim();
-  const esc=value=>clean(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+  const esc=value=>clean(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const attr=esc;
   const isMobile=()=>root.matchMedia?.(MOBILE_QUERY)?.matches??false;
 
