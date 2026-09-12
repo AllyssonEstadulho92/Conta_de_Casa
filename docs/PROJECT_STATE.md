@@ -5,8 +5,8 @@ Versão da aplicação: `0.76.0-dev.1`
 Release pública: `v75`  
 Programa técnico: `v76` — redesign UI/UX + migração incremental para TypeScript  
 Branch pública: `main`  
-Baseline publicada: `5301bd0d66c5ec46ead7be079799ecb76c752237` — PR #88  
-Trabalho atual: `feat/v76-typescript-market-branding1` — segunda substituição segura de JavaScript fonte por TypeScript  
+Baseline publicada: `c59e0a45500fd7965039de27615f574129482b13` — PR #89  
+Trabalho atual: bloco 2 TypeScript concluído/publicado; próximo bloco depende de auditoria real de dependências  
 Fallback técnico: `backup/js-runtime-baseline-20260912`  
 Distribuição: GitHub Pages / PWA
 
@@ -25,57 +25,38 @@ Distribuição: GitHub Pages / PWA
 
 ## 2. Auditoria do site — resolvida
 
-A ausência das mudanças visuais foi explicada por dois factos:
+A ausência das mudanças visuais teve duas causas confirmadas: o redesign estava inicialmente fora de `main`, e uma remoção prematura de `v75-architecture.js` quebrou o CI e impediu o Pages de publicar. PR #87 recuperou o runtime e PR #86 publicou o Dashboard. CI `34695579311`, TypeScript Foundation `34695579282` e Pages `34695600399` ficaram verdes.
 
-1. o redesign real do Dashboard estava no PR #86 e ainda não estava em `main`;
-2. o commit `5d1b1d8f9506ab4309bd2f2d941c13c77dabbd67` removeu `v75-architecture.js` antes de existir substituto, embora CI/build/testes ainda dependessem do ficheiro. O CI `34693676180` falhou e o Pages `34693693840` foi corretamente ignorado.
+## 3. Migração TypeScript — bloco 1 publicado
 
-Recuperação e publicação:
+PR #88, merge `5301bd0d66c5ec46ead7be079799ecb76c752237`:
 
-- PR #87 restaurou o runtime necessário;
-- PR #86 publicou o Dashboard — merge `42557d59f464a2fc7fc22a31eb24564e7dbabad9`;
-- CI `34695579311`, TypeScript Foundation `34695579282` e Pages `34695600399`: sucesso.
-
-## 3. Migração TypeScript publicada — PR #88
-
-O primeiro JavaScript-fonte foi removido com substituição comprovada:
-
-- fonte canónica: `src/ui/veggie-menu-toggle.ts`;
+- `src/ui/veggie-menu-toggle.ts` é a fonte canónica;
 - `v76-veggie-menu.js` manual deixou de ser versionado;
-- `scripts/build-typescript-runtime.cjs` gera `.generated/v76-veggie-menu.js`;
-- `scripts/prepare-pages.cjs` publica o artefacto como `dist/v76-veggie-menu.js`;
-- `.generated/` e `dist/` não são fonte e permanecem ignorados pelo Git.
+- build gera `.generated/v76-veggie-menu.js`;
+- Pages publica `dist/v76-veggie-menu.js`;
+- TypeScript `34699066645`, CI `34699066749` e Pages `34699100855`: sucesso.
 
-Integração:
+O modelo `TypeScript fonte → JavaScript gerado → dist → browser` está comprovado em produção.
 
-- PR #88 mergeado em `main`: `5301bd0d66c5ec46ead7be079799ecb76c752237`;
-- TypeScript Foundation pós-merge `34699066645`: sucesso;
-- CI pós-merge `34699066749`: sucesso integral;
-- Deploy Pages `34699100855`: sucesso, incluindo geração TS, validação, bundle, upload e deploy.
+## 4. Migração TypeScript — bloco 2 publicado
 
-Conclusão: o modelo `TypeScript fonte → JavaScript gerado → dist → browser` está comprovado em produção.
+PR #89, merge `c59e0a45500fd7965039de27615f574129482b13`:
 
-## 4. Trabalho atual — `feat/v76-typescript-market-branding1`
+- `src/ui/market-branding.ts` passa a ser a fonte canónica;
+- fonte manual `market-branding.js` removida;
+- `scripts/build-typescript-runtime.cjs` suporta múltiplos runtimes TS;
+- `scripts/prepare-pages.cjs` mantém o nome público `market-branding.js`, mas publica o artefacto gerado;
+- cache PWA recebe revisão `ts-runtime2-market-branding1` sem alterar a lógica funcional do Service Worker;
+- teste de build prova fonte TS → `.generated` → `dist`.
 
-Segundo módulo escolhido: `market-branding.js`, uma folha de apresentação de baixo risco que não lê nem altera cofre, finanças, preços ou estado persistido.
+Gates pós-merge em `main`:
 
-Implementado:
+- TypeScript Foundation `34700016617`: sucesso;
+- CI integral `34700016615`: sucesso;
+- Deploy Pages `34700037019`: sucesso.
 
-- nova fonte `src/ui/market-branding.ts` com DOM e `MutationObserver` tipados;
-- fonte manual `market-branding.js` removida da branch;
-- build TypeScript generalizado para vários runtimes em `.generated/`;
-- `scripts/prepare-pages.cjs` mantém o nome público `market-branding.js`, mas copia o artefacto gerado;
-- CI, TypeScript Foundation e Pages validam o artefacto gerado;
-- `tests/typescript-runtime-build.test.cjs` prova fonte TS → artefacto → bundle `dist`;
-- cache PWA recebe revisão `ts-runtime2-market-branding1`, sem alterar a lógica do Service Worker.
-
-Gates funcionais da branch antes desta atualização documental:
-
-- TypeScript Foundation `34699847604`: sucesso;
-- CI integral `34699847600`: sucesso;
-- todos os testes de finanças, cofre, datas, faturas, Mercado, UI, Safari/PWA, responsive, acessibilidade, sync e manifesto ficaram verdes.
-
-Durante a auditoria, uma primeira alteração de `sw.js` introduziu deriva acidental na estratégia de fetch e o gate Safari/PWA detetou-a. A correção restaurou exatamente o comportamento publicado e manteve apenas a nova chave de cache. Isto confirma que os gates estão a bloquear regressões reais.
+Uma deriva acidental do Service Worker durante o desenvolvimento foi detetada pelo gate Safari/PWA e revertida antes do merge; o diff final de `sw.js` alterou apenas a chave de cache.
 
 Não foram alterados `core.js`, `finance.js`, IndexedDB, schema, cifragem, sync, QR/scanner, cálculos de Mercado, identidade de SKU ou preços.
 
@@ -85,35 +66,34 @@ Não foram alterados `core.js`, `finance.js`, IndexedDB, schema, cifragem, sync,
 - `76-product-pages1`: composição real do Dashboard;
 - `76-mobile-shell2`: geometria mobile, safe areas, scroll e dock.
 
-O Dashboard continua a usar as fontes reais `n.current`, `n.pending`, `n.overdue`, `n.projected`, pagamentos, vencimentos, orçamento, categorias e atividade existentes.
+O Dashboard continua a usar os dados reais já existentes e não introduz fórmulas financeiras novas.
 
 ## 6. JavaScript ainda existente
 
-A aplicação ainda não é 100% TypeScript. Permanecem fontes JavaScript manuais como `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, `mobile-menu-toggle.js`, sync, vários módulos de Mercado, assets, atualização, runtimes históricos e Service Worker.
+A aplicação ainda não é 100% TypeScript. Permanecem fontes JS manuais como `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, `mobile-menu-toggle.js`, sync, vários módulos de Mercado, assets, atualização, runtimes históricos e Service Worker.
 
-Cada módulo segue:
+Sequência obrigatória por módulo:
 
 `auditar dependências → criar TS strict → provar paridade → gerar artefacto → trocar build/runtime → regressão completa → remover JS fonte`.
 
-Módulos complexos, especialmente `finance.js`, `core.js` e o controlador móvel com gestos, não serão convertidos antes dos módulos folha e funções puras estarem estabilizados.
+Controladores complexos, finanças, persistência/cifra e sync só avançam quando existirem testes de paridade adequados.
 
 ## 7. Fallback
 
-`backup/js-runtime-baseline-20260912` guarda a baseline JavaScript publicada anterior à migração. É apenas referência de rollback e não é carregada em paralelo.
+`backup/js-runtime-baseline-20260912` guarda a baseline JavaScript publicada anterior à migração. É referência de rollback; não é carregada em paralelo.
 
 ## 8. Riscos/lacunas abertas
 
 - `main` ainda não tem branch protection obrigatória;
 - vários módulos JS ainda são copiados diretamente pelo build;
-- `market-experience.js` ainda precisa de teste dedicado para persistência de `pid` em todo o fluxo;
+- `market-experience.js` ainda necessita teste dedicado para persistência de `pid` em todo o fluxo;
 - validação física Safari/iPhone/PWA continua necessária após mudanças visuais;
 - CSS histórico v74/v75 mantém sobreposições a reduzir gradualmente;
-- JavaScript gerado em `dist/` não deve ser confundido com JavaScript fonte manual.
+- JavaScript gerado em `dist/` não deve ser confundido com fonte JavaScript manual.
 
 ## 9. Próximo passo
 
-1. Abrir PR do bloco `market-branding` após revisão final do diff.
-2. Exigir novamente CI + TypeScript Foundation verdes no PR.
-3. Integrar apenas com gates verdes e confirmar CI + Pages pós-merge.
-4. Continuar pelo próximo módulo folha de baixo risco, sempre num bloco separado.
-5. Migrar finanças, persistência/cifra e sync apenas com vetores de paridade e regressão dedicada.
+1. Auditar os módulos JS restantes e escolher o próximo bloco de menor acoplamento real.
+2. Migrar apenas depois de mapear referências em HTML, SW, build, testes e módulos consumidores.
+3. Repetir TypeScript strict + CI integral + Pages antes e depois de cada merge.
+4. Preparar vetores de paridade antes de entrar em funções monetárias, `finance.js`, `core.js`, sync ou controladores complexos.

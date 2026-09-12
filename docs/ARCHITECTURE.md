@@ -42,7 +42,7 @@ Fonte TypeScript:
 - `src/types/`: contratos de domínio;
 - `src/type-tests/`: provas de tipos;
 - `src/ui/veggie-menu-toggle.ts`: controlo Veggie Burger/X;
-- `src/ui/market-branding.ts`: apresentação semântica do Mercado, segunda fonte UI migrada.
+- `src/ui/market-branding.ts`: apresentação semântica do Mercado.
 
 ## 4. Build TypeScript
 
@@ -65,12 +65,10 @@ Regras:
 
 O build mantém um registo explícito em `scripts/build-typescript-runtime.cjs` e um mapa público em `scripts/prepare-pages.cjs`.
 
-Atualmente:
+Atualmente publicados:
 
-- `src/ui/veggie-menu-toggle.ts` → `.generated/v76-veggie-menu.js` → `dist/v76-veggie-menu.js`;
-- `src/ui/market-branding.ts` → `.generated/market-branding.js` → `dist/market-branding.js`.
-
-O primeiro já está publicado pelo PR #88. O segundo está em migração na branch `feat/v76-typescript-market-branding1`.
+- `src/ui/veggie-menu-toggle.ts` → `.generated/v76-veggie-menu.js` → `dist/v76-veggie-menu.js` — PR #88;
+- `src/ui/market-branding.ts` → `.generated/market-branding.js` → `dist/market-branding.js` — PR #89.
 
 `tests/typescript-runtime-build.test.cjs` verifica para cada runtime:
 
@@ -94,18 +92,18 @@ Contrato:
 - CI/Pages verificam diretamente `.generated/*.js` para fontes já migradas;
 - alteração em `main` só é considerada publicada depois de o Deploy Pages concluir com sucesso.
 
-Evidência publicada do modelo:
+Evidência publicada:
 
-- PR #88 merge `5301bd0d66c5ec46ead7be079799ecb76c752237`;
-- TypeScript Foundation `34699066645`: sucesso;
-- CI `34699066749`: sucesso;
-- Pages `34699100855`: sucesso.
+- PR #88 merge `5301bd0d66c5ec46ead7be079799ecb76c752237`: TypeScript `34699066645`, CI `34699066749`, Pages `34699100855` — sucesso;
+- PR #89 merge `c59e0a45500fd7965039de27615f574129482b13`: TypeScript `34700016617`, CI `34700016615`, Pages `34700037019` — sucesso.
 
 ## 6. Incidente e regra de exclusão
 
 Em 12/09/2026, `v75-architecture.js` foi removido prematuramente. CI falhou com `MODULE_NOT_FOUND` e Pages não publicou. PR #87 restaurou o ficheiro.
 
 Consequência arquitetural: **nenhuma fonte JS é eliminada apenas por existir um TS com nome semelhante**. Primeiro o TS é tipado, compilado, mapeado para o bundle e testado; só depois a fonte manual é removida.
+
+O mesmo princípio aplica-se ao Service Worker: invalidação de cache não autoriza alterar estratégia de fetch. No PR #89, o gate Safari/PWA detetou uma deriva durante desenvolvimento e o `sw.js` final ficou funcionalmente idêntico à baseline, exceto pela chave de cache.
 
 ## 7. Fallback
 
