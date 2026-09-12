@@ -2,40 +2,40 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade técnica do programa atual.
 
-## 2026-09-12 — `feat/v76-typescript-runtime2` — primeira fonte JS substituída por TypeScript
+## 2026-09-12 — `feat/v76-typescript-market-branding1` — bloco 2 TypeScript em curso
 
 ### Objetivo
 
-Começar a retirada real de JavaScript manual sem repetir o incidente que bloqueou o GitHub Pages.
+Continuar a retirada de JavaScript manual por blocos pequenos, escolhendo primeiro módulos folha de baixo risco.
 
 ### Alterações
 
-- criada branch de fallback `backup/js-runtime-baseline-20260912` na baseline pública `42557d59f464a2fc7fc22a31eb24564e7dbabad9`;
-- criada `feat/v76-typescript-runtime2` a partir da mesma baseline publicada;
-- `src/ui/veggie-menu-toggle.ts` passa a ser a única fonte versionada do runtime Veggie Burger;
-- removido da branch o ficheiro manual `v76-veggie-menu.js`;
-- criada `.generated/` como área ignorada de artefactos;
-- `scripts/build-typescript-runtime.cjs` gera `.generated/v76-veggie-menu.js` com TypeScript 6;
-- o build rejeita a presença de um `v76-veggie-menu.js` manual na raiz;
-- `scripts/prepare-pages.cjs` gera o runtime automaticamente e publica-o como `dist/v76-veggie-menu.js`;
-- `package.json` separa `typecheck`, `build:runtime` e `build:pages`;
-- CI instala a toolchain TS, gera artefactos e executa regressão completa;
-- TypeScript Foundation valida fonte TS, artefacto gerado e ausência do JS manual;
-- Pages gera novamente o runtime antes da validação e do deploy;
-- criado `tests/typescript-runtime-build.test.cjs`;
-- `tests/v76-veggie-menu.test.cjs` passa a testar o artefacto gerado.
+- criado `src/ui/market-branding.ts` como nova fonte canónica do branding semântico do Mercado;
+- removida da branch a fonte manual `market-branding.js`;
+- `scripts/build-typescript-runtime.cjs` passou de um runtime isolado para um registo explícito de múltiplos runtimes TypeScript;
+- o build gera agora `.generated/v76-veggie-menu.js` e `.generated/market-branding.js`;
+- `scripts/prepare-pages.cjs` mapeia ambos os nomes públicos para os artefactos gerados;
+- `tests/typescript-runtime-build.test.cjs` valida fonte TS, ausência de JS manual, sintaxe, marcadores de comportamento e igualdade exata com o bundle `dist`;
+- CI passa a validar `.generated/market-branding.js`;
+- TypeScript Foundation exige `src/ui/market-branding.ts`, o artefacto gerado e ausência do JS manual;
+- Pages gera e valida o segundo runtime antes do deploy.
 
-### Evidência funcional
+### Domínio e segurança
 
-Antes da atualização documental final:
+`market-branding.ts` apenas altera copy/atributos DOM de apresentação. Não toca em `core.js`, `finance.js`, IndexedDB, schema v5, PBKDF2/AES-GCM, sync, QR/scanner, cálculos de Mercado, SKU/PID, preços ou faturas.
 
-- TypeScript Foundation `34695947847`: sucesso;
-- CI integral `34695947843`: sucesso;
-- todos os gates financeiros, cofre, datas, faturas, Mercado, scanner, UI, responsive, acessibilidade, sync, PWA e manifesto continuaram verdes.
+---
 
-### Segurança e domínio
+## 2026-09-12 — PR #88 — primeira fonte JS substituída por TypeScript — publicado
 
-Nenhum cálculo, IndexedDB, schema, PBKDF2/AES-GCM, sync, QR/scanner, fatura ou regra de Mercado foi alterado. Este bloco substitui apenas a origem do runtime Veggie Burger.
+- merge em `main`: `5301bd0d66c5ec46ead7be079799ecb76c752237`;
+- TypeScript Foundation pós-merge `34699066645`: sucesso;
+- CI pós-merge `34699066749`: sucesso integral;
+- Deploy Pages `34699100855`: sucesso;
+- `src/ui/veggie-menu-toggle.ts` é a fonte canónica;
+- `v76-veggie-menu.js` manual deixou de ser versionado;
+- browser/Service Worker continuam a receber `v76-veggie-menu.js`, mas gerado no build e publicado via `dist`;
+- branch `backup/js-runtime-baseline-20260912` mantém a baseline anterior para rollback.
 
 ---
 
@@ -67,7 +67,7 @@ O commit `5d1b1d8f9506ab4309bd2f2d941c13c77dabbd67` removeu `v75-architecture.js
 ### Impacto
 
 - CI `34693676180` falhou com `MODULE_NOT_FOUND`;
-- Pages `34693693840` foi ignorado porque o CI não ficou verde;
+- Pages `34693693840` foi ignorado;
 - a alteração em `main` não produziu nova versão pública.
 
 ### Correção
@@ -109,6 +109,7 @@ Um `.js` fonte só é eliminado depois de existir `.ts` equivalente, build gerad
 
 ## Histórico v76 recente
 
+- PR #88 — primeira remoção segura de JS fonte e runtime TS gerado;
 - PR #84 — consolidação UI/shell, merge `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`;
 - PR #82 — baseline arquitetural, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`;
 - PR #80 — `76-mobile-shell2`, merge `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`;

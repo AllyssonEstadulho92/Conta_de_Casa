@@ -9,7 +9,8 @@ const DIST = path.join(ROOT, 'dist');
 const GENERATED = path.join(ROOT, '.generated');
 const BUILD_TYPESCRIPT_RUNTIME = path.join(ROOT, 'scripts', 'build-typescript-runtime.cjs');
 const GENERATED_PUBLIC_FILES = Object.freeze({
-  'v76-veggie-menu.js': path.join(GENERATED, 'v76-veggie-menu.js')
+  'v76-veggie-menu.js': path.join(GENERATED, 'v76-veggie-menu.js'),
+  'market-branding.js': path.join(GENERATED, 'market-branding.js')
 });
 const PACKAGE = JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
 const APP_VERSION = String(PACKAGE.version||'').trim();
@@ -60,7 +61,7 @@ const BUILD_ID=resolveBuildId();
 const BUILD_DATE=new Date().toISOString();
 
 /* Bundle público v75 com programa v76 incremental. Mantém a experiência funcional existente,
-   acrescenta metadados de versão/build no padrão do Foco Jornada, o Veggie Burger TypeScript v2,
+   acrescenta metadados de versão/build no padrão do Foco Jornada, runtimes UI gerados por TypeScript,
    76-modern-ui2, 76-product-pages1 e 76-mobile-shell2. Nenhuma destas camadas altera domínio financeiro,
    persistência, cifragem, sincronização, scanner, QR ou regras de Mercado. */
 const PUBLIC_FILES = Object.freeze([
@@ -139,8 +140,14 @@ const PUBLIC_FILES = Object.freeze([
   'LUCIDE_LICENSE.txt'
 ]);
 
-if(fs.existsSync(path.join(ROOT,'v76-veggie-menu.js'))){
-  throw new Error('Committed/manual v76-veggie-menu.js is forbidden. Generate it from src/ui/veggie-menu-toggle.ts.');
+const MANUAL_TYPESCRIPT_RUNTIMES = Object.freeze({
+  'v76-veggie-menu.js': 'src/ui/veggie-menu-toggle.ts',
+  'market-branding.js': 'src/ui/market-branding.ts'
+});
+for(const [manual,source] of Object.entries(MANUAL_TYPESCRIPT_RUNTIMES)){
+  if(fs.existsSync(path.join(ROOT,manual))){
+    throw new Error(`Committed/manual ${manual} is forbidden. Generate it from ${source}.`);
+  }
 }
 execFileSync(process.execPath,[BUILD_TYPESCRIPT_RUNTIME],{cwd:ROOT,stdio:'inherit'});
 
@@ -237,8 +244,10 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry)))throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-if(!fs.existsSync(path.join(DIST,'v76-veggie-menu.js'))){
-  throw new Error('Pages bundle is missing TypeScript-generated v76-veggie-menu.js.');
+for(const name of Object.keys(GENERATED_PUBLIC_FILES)){
+  if(!fs.existsSync(path.join(DIST,name))){
+    throw new Error(`Pages bundle is missing TypeScript-generated ${name}.`);
+  }
 }
 
 console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; veggie-menu ${VEGGIE_MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
