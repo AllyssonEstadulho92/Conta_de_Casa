@@ -8,7 +8,7 @@ Distribuição: GitHub Pages / PWA
 
 ## 1. Princípios e invariantes
 
-A aplicação é uma PWA estática/local-first. Estado financeiro, apresentação, catálogos, imagens e metadados de build são responsabilidades separadas.
+A aplicação é uma PWA estática/local-first. Estado financeiro, apresentação, catálogos, imagens, build e deploy são responsabilidades separadas.
 
 - `STATE_VERSION = 5`;
 - dinheiro persistido em cêntimos inteiros;
@@ -19,11 +19,20 @@ A aplicação é uma PWA estática/local-first. Estado financeiro, apresentaçã
 - nenhum segredo no repositório público;
 - `estimatedCents` distinto de `actualCents`;
 - `marketId|pid` é a identidade canónica do pipeline especializado de SKU/fotografia;
-- imagem/fotografia não é prova de preço nem de transação.
+- fotografia não é prova de preço nem de transação.
 
-## 2. Núcleo funcional atual
+## 2. Repositórios e responsabilidades
 
-Runtime legado ainda existente:
+Existem dois repositórios com nomes semelhantes e não devem ser confundidos:
+
+- `AllyssonEstadulho92/Conta_de_Casa`: aplicação pública, código-fonte, CI e GitHub Pages;
+- `AllyssonEstadulho92/conta-de-casa-`: repositório privado de sincronização/armazenamento, não é o código do site.
+
+Mudanças de template/UI devem ser feitas e publicadas a partir de `Conta_de_Casa`.
+
+## 3. Núcleo funcional atual
+
+Runtime manual ainda existente:
 
 - `core.js`: estado, normalização, IndexedDB, cifragem e backup;
 - `finance.js`: cálculos financeiros;
@@ -37,25 +46,49 @@ Fonte TypeScript atual:
 - `src/type-tests/`: provas de tipos;
 - `src/ui/veggie-menu-toggle.ts`: controlo Veggie Burger/X.
 
-O destino é substituir progressivamente o runtime legado por fonte TypeScript strict, sem alterar o comportamento validado.
+O destino é substituir progressivamente o runtime manual por fonte TypeScript strict, sem alterar comportamento validado.
 
-## 3. Modelo de build e objetivo TypeScript
-
-Hoje `scripts/prepare-pages.cjs` cria `dist/` por allowlist e o browser recebe JavaScript.
+## 4. Modelo de build e objetivo TypeScript
 
 Arquitetura de destino:
 
-`src/**/*.ts` → typecheck strict → compilação/build → JavaScript gerado em `dist/` → GitHub Pages
+`src/**/*.ts` → typecheck strict → compilação → JavaScript gerado em `dist/` → GitHub Pages
 
 Regras:
 
-- o browser nunca depende de TypeScript em runtime;
-- JavaScript gerado é artefacto de build, não fonte manual;
-- nenhum módulo JS legado é removido antes de existir substituto TS equivalente e regressões verdes;
+- TypeScript não é executado diretamente pelo browser;
+- JavaScript gerado em `dist/` é artefacto de build, não fonte manual;
+- nenhum módulo JS legado é removido antes de existir substituto TS equivalente;
+- o substituto deve estar compilado, referenciado pelo build/Pages e coberto por testes;
+- durante a migração, o JS antigo pode permanecer como fallback controlado até o novo runtime estar provado;
 - `strict`, `noImplicitAny`, `strictNullChecks`, `noUncheckedIndexedAccess` e `exactOptionalPropertyTypes` permanecem ativos;
-- a migração não autoriza alteração de schema, cifragem, fórmula ou semântica de preço.
+- não usar `@ts-nocheck` nem `any` em massa;
+- schema, cifragem, fórmulas e semântica de preço não mudam por causa da linguagem.
 
-## 4. Composição visual pública
+## 5. Pipeline de CI e publicação
+
+Fluxo canónico:
+
+`push/PR` → `CI` + `TypeScript Foundation` → merge em `main` → `Deploy Pages` via `workflow_run` → `scripts/prepare-pages.cjs` → `dist/` → GitHub Pages
+
+Contrato de publicação:
+
+- `Deploy Pages` só executa quando o CI de `main` termina com sucesso;
+- `scripts/prepare-pages.cjs` usa uma allowlist explícita e falha quando um asset obrigatório não existe;
+- o Service Worker/cache é versionado e deve incluir apenas assets públicos válidos;
+- uma alteração em `main` não significa automaticamente que o site foi atualizado: o CI e o deployment têm de concluir com sucesso.
+
+Incidente confirmado em 12/09/2026:
+
+- `v75-architecture.js` foi apagado de `main` antes de ser substituído;
+- CI falhou com `MODULE_NOT_FOUND`;
+- o Pages foi corretamente ignorado;
+- PR #87 restaurou exatamente o ficheiro exigido;
+- CI e Pages voltaram a sucesso no merge `6401f1c5156382e9fe364da31afa3fcec4aed9bc`.
+
+Este incidente passa a ser um teste arquitetural: **nenhum ficheiro runtime pode ser apagado enquanto houver referência em CI, build, HTML, Service Worker ou testes.**
+
+## 6. Composição visual pública
 
 Ordem relevante:
 
@@ -64,157 +97,106 @@ Ordem relevante:
 3. camadas v75 de arquitetura/layout/pages/features;
 4. `v76-veggie-menu.css` (`76-veggie-menu2`);
 5. `v75-usability.css`;
-6. `v76-modern-ui.css` (`76-modern-ui2`) — tokens e componentes visuais partilhados;
-7. `v76-mobile-shell.css` (`76-mobile-shell2`) — autoridade final de geometria mobile ≤820 px;
-8. estilos específicos do Centro de Versão.
+6. `v76-modern-ui.css` (`76-modern-ui2`) — tokens e componentes;
+7. `v76-product-pages.css` (`76-product-pages1`) — composição/hierarquia das páginas migradas;
+8. `v76-mobile-shell.css` (`76-mobile-shell2`) — autoridade final da geometria mobile ≤820 px;
+9. estilos específicos do Centro de Versão.
 
-O shell móvel carrega depois do design system de propósito: aparência e geometria são responsabilidades diferentes.
+A ordem é deliberada: `tokens/componentes → composição da página → geometria do shell`.
 
-## 5. Propriedade única por preocupação
+## 7. Propriedade única por preocupação
 
-A arquitetura visual v76 separa:
-
-- **tokens**: cor, tipografia, espaçamento, raio, sombra, foco;
+- **tokens**: cor, tipografia, spacing, raio, sombra e foco;
 - **shell**: viewport, scroll, safe areas, topbar, área principal e navegação persistente;
 - **componentes**: botões, inputs, cards, tabs, dialogs, tabelas, toolbars e estados;
+- **composição de página**: ordem, proporção e prioridade das secções;
 - **features**: Dashboard, Despesas/Faturas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições;
-- **estados**: active, focus, disabled, loading, empty, error, offline, success;
 - **domínio**: regras financeiras, Mercado, persistência, sync e segurança fora das camadas visuais.
 
-Uma propriedade estrutural só pode ter uma autoridade. Não criar novos ficheiros “patch” para substituir seletor já pertencente a outra camada.
+Não criar novos ficheiros “patch” para assumir uma propriedade já pertencente a outra camada.
 
-## 6. Shell móvel — `76-mobile-shell2`
+## 8. Shell móvel — `76-mobile-shell2`
 
 Em ≤820 px, `v76-mobile-shell.css` é a única autoridade da geometria global:
 
-- scroll vertical principal no documento;
+- scroll principal no documento;
 - `.app-shell` com `min-height:100dvh`, sem clipping;
 - `.main` sem scroll container paralelo;
-- `.topbar` no fluxo normal e compensada por `safe-area-inset-top`;
+- `.topbar` no fluxo normal e com `safe-area-inset-top`;
 - páginas com reserva inferior para o dock;
-- `.mobile-nav` persistente e compensada por `safe-area-inset-bottom`;
+- `.mobile-nav` persistente com `safe-area-inset-bottom`;
 - safe areas laterais;
-- contratos para 320/360/375/390/430/768/820 px e landscape de baixa altura;
-- foco e último conteúdo não ficam escondidos por navegação persistente.
+- contratos para 320/360/375/390/430/768/820 px e landscape;
+- foco e conteúdo final não ficam escondidos.
 
-`v76-modern-ui.css` pode estilizar topbar/dock, mas não pode reassumir `position`, offsets, safe area, altura estrutural, overflow global ou reserva de página.
+## 9. Sistema visual — `76-modern-ui2`
 
-## 7. Sistema visual — `76-modern-ui2`
+Hierarquia canónica:
 
-`v76-modern-ui.css` é a autoridade visual transversal para tokens e componentes.
-
-### Hierarquia de ações
-
-- `primary`: única ação dominante do contexto;
-- `secondary`: ação importante mas não dominante;
-- `danger`: ação destrutiva;
-- `link`: ação contextual de baixo peso;
-- `icon button`: comando compacto com rótulo acessível.
+- `primary`: única ação dominante;
+- `secondary`: ação importante não dominante;
+- `danger`: destrutiva;
+- `link`: contextual de baixo peso;
+- `icon button`: comando compacto com nome acessível.
 
 Contratos:
 
-- controlos principais com baseline de 44 px;
-- ícones de botão com métricas consistentes;
-- `focus-visible` claro;
-- estados disabled/`aria-disabled` consistentes;
-- hover apenas quando existe ponteiro fino;
-- reduced-motion e forced-colors preservados.
+- baseline de 44 px para controlos principais;
+- métricas coerentes de ícones;
+- `focus-visible`;
+- disabled/`aria-disabled` consistente;
+- hover apenas para ponteiro fino;
+- reduced-motion e forced-colors preservados;
+- grids com `min-width:0` para evitar overflow.
 
-### Grids e composição
+Fotografias do Mercado usam `contain`/centro/fallback sem alterar SKU, preço ou total.
 
-- componentes partilhados usam `min-width:0` para evitar overflow;
-- gaps usam tokens comuns;
-- topologia de colunas continua pertencente à feature enquanto cada página não for consolidada;
-- não transformar toda a informação em cards; espaço em branco e separadores também são ferramentas de hierarquia.
+## 10. Composição de produto — `76-product-pages1`
 
-### Fotografias do Mercado
+`v76-product-pages.css` traduz a direção dos protótipos para o DOM real, sem inventar domínio.
 
-- `object-fit:contain` e `object-position:center` para não cortar produto;
-- fallback visual consistente;
-- origem/identidade/licença continuam independentes da apresentação;
-- fotografia nunca altera preço, SKU ou total contabilizado.
+Dashboard desktop:
 
-## 8. Navegação e hierarquia do produto
+1. `Saldo atual` como resumo principal;
+2. `Por pagar`, `Em atraso`, `Saldo projetado`;
+3. alertas condicionais;
+4. `Pago no mês`, `Próximos 7 dias`;
+5. vencimentos + orçamento;
+6. atividade + categorias.
 
-Mobile principal:
+Dashboard mobile:
 
-`Início → Despesas → Mercado → Planeamento → Mais`
+1. resumo principal;
+2. KPIs compactos;
+3. métricas secundárias;
+4. vencimentos;
+5. orçamento;
+6. categorias;
+7. atividade.
 
-Desktop:
+A camada pode definir `order`, grids internos, densidade e ênfase, mas não viewport, safe areas, scroll global, topbar estrutural, dock ou regras de negócio.
 
-- sidebar persistente em largura adequada;
-- destinos operacionais primeiro;
-- áreas menos frequentes agrupadas visualmente;
-- mesma arquitetura funcional do mobile, com maior densidade quando existe espaço.
+## 11. Direção das restantes páginas
 
-Princípios:
+- **Mercado:** pesquisa, filtros, catálogo/lista, carrinho, quantidade/preço/estado; total continua `Estimativa` até evidência completa; comparação de preços só com fonte válida.
+- **Planeamento:** trabalhar apenas com saldo atual, saldo inicial, orçamento e rendimentos existentes até novas capacidades serem implementadas formalmente.
+- **Calendário:** vencimentos/pagamentos atuais; não transformar automaticamente em agenda genérica.
+- **Faturas:** pesquisa, filtros, estado, ordenação, tabela desktop/lista mobile; “Nova fatura” como ação principal; sem mudar pagamentos/vencimentos.
 
-- bottom navigation contém destinos, não comandos da vista;
-- toolbar contém título, contexto e ações prioritárias;
-- ações secundárias ficam no corpo/menu contextual/“Mais”;
-- reduzir menus gigantes sem remover funcionalidades;
-- o utilizador deve perceber onde está, o estado atual e a próxima ação em poucos segundos.
-
-## 9. Direção das páginas
-
-Os protótipos aprovados são referência de composição. Só entram dados/funções existentes no domínio real.
-
-### Dashboard
-
-Ordem alvo:
-
-1. header limpo;
-2. resumo financeiro principal real;
-3. KPIs reais e limitados;
-4. ações rápidas;
-5. próximos vencimentos + orçamento;
-6. categorias + atividade recente.
-
-### Mercado
-
-- pesquisa e ação adicionar/ler fatura bem separadas;
-- catálogo/lista e carrinho sem duplicar informação;
-- quantidade/preço/estado visíveis;
-- total `Estimativa` até existir evidência completa;
-- comparação de preços só quando houver fonte identificada e válida;
-- logos/imagens só com origem/direito de utilização adequados.
-
-### Planeamento
-
-O domínio atual inclui saldo atual, saldo inicial, orçamento mensal e rendimentos. Qualquer calendário/tarefa/simulação do protótipo só entra depois de confirmar suporte funcional ou criar decisão de produto própria.
-
-### Calendário
-
-O calendário atual representa vencimentos/pagamentos. Não transformar automaticamente em agenda genérica de tarefas sem alteração de produto aprovada.
-
-### Faturas
-
-- pesquisa/filtros/estado/ordenação preservados;
-- resumo por estado;
-- tabela no desktop e lista legível no mobile;
-- ação “Nova fatura” dominante;
-- nenhuma alteração visual muda cálculo de saldo, pagamento ou vencimento.
-
-## 10. Responsive e acessibilidade
-
-Critério mínimo:
+## 12. Responsive, acessibilidade e temas
 
 - mobile-first;
 - reflow funcional a 320 CSS px;
 - sem scroll horizontal global;
-- safe areas com `env(safe-area-inset-*)`;
-- não bloquear pinch-to-zoom;
-- 44×44 CSS px como baseline interna de toque;
+- safe areas apenas no shell;
+- pinch-to-zoom preservado;
+- 44×44 CSS px como baseline de toque;
 - foco não oculto por header/dock;
-- tipografia de inputs compatível com Safari/iPhone;
-- teclado virtual, landscape e dark mode fazem parte do QA;
-- contraste e estados não dependem apenas de cor.
+- inputs compatíveis com Safari/iPhone;
+- portrait, landscape, teclado virtual, Light/Dark/System fazem parte do QA;
+- contraste/estado não dependem apenas de cor.
 
-## 11. Dark mode
-
-Light, Dark e System devem partilhar tokens sem “inverter branco para preto”. Superfícies, bordas, sombras, texto e cores semânticas precisam de valores próprios por tema.
-
-## 12. Segurança
+## 13. Segurança
 
 UI e migração TypeScript não podem enfraquecer:
 
@@ -226,15 +208,12 @@ UI e migração TypeScript não podem enfraquecer:
 - CSP;
 - ausência de segredos no repositório.
 
-Dados remotos são validados sintática e semanticamente antes de entrarem no domínio.
+## 14. QA e gates
 
-## 13. QA e gates
+Toda mudança transversal deve manter verdes:
 
-Toda refatoração transversal deve manter verdes:
-
-- invariantes financeiros;
-- isolamento/cofre;
-- datas civis;
+- finanças e invariantes de contagem;
+- isolamento/cofre e datas civis;
 - faturas/formulários/QR;
 - Mercado/SKU/imagens/scanner;
 - responsive/mobile;
@@ -242,20 +221,22 @@ Toda refatoração transversal deve manter verdes:
 - sync/conflitos;
 - PWA/manifesto/cache;
 - TypeScript strict;
-- `tests/ui-architecture-contract.test.cjs` enquanto os testes ainda não forem migrados para TypeScript.
+- `tests/ui-architecture-contract.test.cjs`;
+- `tests/v76-product-pages.test.cjs` nas páginas migradas.
 
-## 14. Estratégia de migração de código
+## 15. Estratégia de migração de código
 
-Ordem recomendada e vigente:
+Ordem vigente:
 
-1. tipos e funções puras de dinheiro/datas;
-2. domínio financeiro;
-3. Mercado/modelo e carrinho;
-4. core/persistência/cifra;
-5. sync/conflitos;
-6. render/forms/events e restante UI;
-7. Service Worker/build;
-8. migração dos próprios testes/tooling para TypeScript;
-9. remoção final de JavaScript fonte legado.
+1. pipeline de compilação TS e prova de substituição;
+2. funções puras de dinheiro/datas/quantidades;
+3. domínio financeiro;
+4. Mercado/modelo/carrinho;
+5. core/persistência/cifra;
+6. sync/conflitos;
+7. render/forms/events e UI;
+8. Service Worker/build;
+9. testes/tooling;
+10. remoção final de JavaScript fonte legado.
 
-Uma conversão massiva por renomear `.js` para `.ts` sem tipos reais não é aceite.
+Cada exclusão de `.js` exige prova de ausência de referências, artefacto TS equivalente e regressões verdes.

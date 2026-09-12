@@ -104,7 +104,7 @@ Estado: integrado pelo PR #82.
 
 ## D-074 — `v76-modern-ui.css` deixa de duplicar geometria mobile do shell
 
-Estado: integrado em `main` pelo PR #84, merge `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`.
+Estado: integrado em `main` pelo PR #84.
 
 - design system mantém aparência/composição interna;
 - shell mantém `position`, offsets, safe areas, dimensões estruturais, overflow e reserva do dock;
@@ -114,44 +114,61 @@ Estado: integrado em `main` pelo PR #84, merge `bf55c7cfd9bebe28c1ee57047f066d96
 
 ## D-075 — `76-modern-ui2` define hierarquia visual canónica de componentes
 
-Data: 12 de setembro de 2026. Estado: implementação em `feat/v76-ui-components1`.
+Estado: integrado em `main` pelo PR #85.
 
-1. Ações usam hierarquia explícita: `primary`, `secondary`, `danger`, `link` e `icon button`.
+1. Ações usam hierarquia `primary`, `secondary`, `danger`, `link` e `icon button`.
 2. Controlos principais mantêm mínimo de 44 px; disabled/`aria-disabled`, foco e hover têm estados coerentes.
-3. Ícones dentro de botões usam métricas óticas consistentes; a família de ícones continua auditada separadamente.
-4. Grids partilhados recebem `min-width:0` e gap comum para reduzir overflow sem assumir a topologia de cada feature.
-5. Fotografias de Mercado usam `contain`/centro/fallback. Fonte, licença, identidade e semântica de preço não mudam.
-6. A revisão `76-modern-ui2` invalida cache PWA com `ui-components1`.
-7. Esta decisão não altera domínio financeiro, persistência, cifragem, sync, QR/scanner ou regras de Mercado.
+3. Ícones dentro de botões usam métricas óticas consistentes.
+4. Grids partilhados recebem `min-width:0` e gap comum.
+5. Fotografias de Mercado usam `contain`/centro/fallback sem alterar fonte, identidade ou preço.
+6. Cache PWA é invalidado com `ui-components1`.
+7. A decisão não altera domínio financeiro, persistência, cifragem, sync, QR/scanner ou Mercado.
 
-## D-076 — “100% TypeScript” significa fonte TypeScript; JavaScript é apenas artefacto de build
+## D-076 — “100% TypeScript” significa fonte TypeScript; JavaScript é artefacto de build
 
-Data: 12 de setembro de 2026. Estado: decisão para o programa de migração.
-
-1. O objetivo final é que o código-fonte funcional mantido esteja em `.ts` com `strict`.
-2. O browser continuará a executar JavaScript **gerado pelo build**; JavaScript compilado não será tratado como fonte manual.
-3. Não apagar ficheiros JS runtime antes de o equivalente TypeScript estar compilado, testado e referenciado pelo Pages.
-4. A migração segue blocos: funções puras → domínio financeiro → Mercado → core/persistência/cifra → sync → UI → PWA/build → testes/tooling.
-5. Renomear `.js` para `.ts`, usar `@ts-nocheck` ou introduzir `any` em massa não satisfaz a meta.
-6. Redesign visual e migração de linguagem podem coexistir no programa, mas não devem ser misturados no mesmo bloco quando isso impedir prova de regressão.
+1. O objetivo final é código-fonte funcional mantido em `.ts` com `strict`.
+2. O browser continuará a executar JavaScript gerado pelo build.
+3. Não apagar JS runtime antes de o equivalente TypeScript estar compilado, testado e referenciado pelo Pages.
+4. A migração segue blocos: pipeline → funções puras → domínio financeiro → Mercado → core/persistência/cifra → sync → UI → PWA/build → testes/tooling.
+5. Renomear `.js` para `.ts`, usar `@ts-nocheck` ou `any` em massa não satisfaz a meta.
+6. Redesign e migração podem coexistir, mas os riscos devem permanecer separáveis.
 
 ## D-077 — protótipos são referência de hierarquia, não fonte de dados inventados
 
-Data: 12 de setembro de 2026.
+1. Dashboard, Mercado, Planeamento, Calendário e Faturas seguem a direção visual aprovada.
+2. Valores, métricas, tarefas, comparações, receitas ou simulações inexistentes no domínio não entram automaticamente em produção.
+3. Primeiro reutilizar dados e funções existentes; novas capacidades exigem decisão própria.
+4. Desktop e mobile partilham linguagem visual, com composição adaptativa.
 
-1. Dashboard, Mercado, Planeamento, Calendário e Faturas seguem a direção visual dos protótipos: clean, premium, consistente e responsiva.
-2. Valores, métricas, tarefas, comparações, receitas, simulações ou categorias que não existam no domínio real não entram automaticamente em produção.
-3. Primeiro reutilizar dados e funções existentes; novas capacidades exigem decisão de produto e implementação própria.
-4. A mesma linguagem visual deve ser partilhada por desktop e mobile, com composição adaptativa e não simples redução de escala.
+## D-078 — `v76-product-pages.css` é a autoridade de composição interna das páginas
+
+Estado: PR #86.
+
+1. Carrega depois de `v76-modern-ui.css` e antes de `v76-mobile-shell.css`.
+2. Pode definir ordem visual, grids internos, proporções, densidade e ênfase de secções.
+3. Não pode definir viewport, safe areas, scroll global, topbar estrutural ou dock.
+4. O Dashboard usa `dashboardNumbers()` e os valores existentes, sem fórmula nova.
+5. Desktop e mobile podem ordenar as mesmas secções de forma diferente sem duplicar estado.
+6. `76-product-pages1` tem gate dedicado em `tests/v76-product-pages.test.cjs`.
+
+## D-079 — exclusão de JavaScript exige substituição de runtime comprovada
+
+Data: 12 de setembro de 2026. Estado: vigente após incidente de publicação corrigido pelo PR #87.
+
+1. Um ficheiro `.js` fonte só pode ser eliminado quando existir fonte `.ts` equivalente e funcional.
+2. O módulo TS deve ser compilado pelo pipeline para um artefacto JavaScript em `dist/` e esse artefacto deve ser o que o Pages publica.
+3. Antes da exclusão, devem ser eliminadas ou migradas todas as referências ao JS fonte em HTML, `scripts/prepare-pages.cjs`, Service Worker, CI, workflows e testes.
+4. CI integral + TypeScript Foundation devem ficar verdes depois da remoção.
+5. Até a substituição estar provada, o JS existente pode permanecer como fallback controlado. A presença temporária do fallback não muda a meta de fonte 100% TypeScript.
+6. O commit `5d1b1d8f9506ab4309bd2f2d941c13c77dabbd67` violou esta sequência ao apagar `v75-architecture.js`: o CI falhou com `MODULE_NOT_FOUND` e o Pages não publicou. O PR #87 restaurou exatamente o runtime e o deploy voltou a sucesso.
+7. `main` deve ser tratado como publicável: exclusões diretas de runtime sem gates não são aceites.
 
 ## Evidência recente
 
-- PR #76: `76-veggie-menu2` + `76-modern-ui1` integrado.
-- PR #78: versão/auditoria integrado.
-- PR #80: shell móvel integrado e Pages validado.
-- PR #82: baseline arquitetural integrada.
-- PR #84: consolidação UI/shell integrada em `main`, merge `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`.
-- `feat/v76-ui-components1`: `76-modern-ui2` em preparação para PR e gates.
+- PR #84: consolidação UI/shell integrada.
+- PR #85: `76-modern-ui2`/`ui-components1` integrado.
+- PR #87: restauração de `v75-architecture.js`; CI e Pages verdes no merge `6401f1c5156382e9fe364da31afa3fcec4aed9bc`.
+- PR #86: Dashboard `76-product-pages1`, sincronizado com o `main` restaurado; CI e TypeScript Foundation verdes no head anterior à atualização documental.
 
 ## Lacuna técnica preservada
 

@@ -2,132 +2,125 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade técnica do programa atual.
 
-## 2026-09-12 — `76-modern-ui2` / `ui-components1` — PR #85
+## 2026-09-12 — auditoria de publicação / PR #87 — corrigido e publicado
 
-### Objetivo
+### Facto
 
-Consolidar a linguagem visual partilhada antes do redesign página a página e antes de avançar com a remoção do JavaScript legado.
+O commit `5d1b1d8f9506ab4309bd2f2d941c13c77dabbd67` removeu `v75-architecture.js` diretamente de `main`, mas o ficheiro continuava referenciado pelo CI e pelo bundle público.
 
-### Alterações
+### Impacto
 
-- `v76-modern-ui.css` revisto para `76-modern-ui2`;
-- tokens novos para altura de controlos, raio, ícone, gap e opacidade disabled;
-- hierarquia visual explícita de ações: primary, secondary, danger, link e icon button;
-- controlos principais com baseline 44 px;
-- estados disabled/`aria-disabled`, `focus-visible` e hover de ponteiro fino;
-- métricas coerentes para ícones em botões;
-- `min-width:0` em grids partilhados para reduzir overflow;
-- apresentação de fotografias do Mercado com `object-fit:contain`, centro e fallback;
-- cache PWA revisto para `modern-ui2` + `ui-components1`;
-- testes de modern UI, shell, Veggie Burger e contrato arquitetural alinhados com a revisão;
-- documentação permanente atualizada com a direção visual dos protótipos e a meta de fonte TypeScript.
+- CI `34693676180` falhou no `Syntax check` com `MODULE_NOT_FOUND` para `v75-architecture.js`;
+- o workflow Pages `34693693840` foi ignorado porque só publica depois de CI verde em `main`;
+- portanto, alterar `main` não produziu uma nova versão pública do site.
 
-### Isolamento
+### Correção
 
-Não foram alterados `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sync, QR/scanner, faturas ou regras de Mercado.
+- PR #87 restaurou exatamente o blob anterior de `v75-architecture.js`;
+- TypeScript Foundation e CI do PR passaram;
+- merge em `main`: `6401f1c5156382e9fe364da31afa3fcec4aed9bc`;
+- CI do merge `34695315162`: sucesso;
+- Deploy Pages `34695336131`: sucesso completo, incluindo validação, build, upload e deploy.
 
-### Gates e estado
+### Regra nova
 
-- PR #85 aberto a partir de `feat/v76-ui-components1`;
-- CI do PR `34664678296`: sucesso;
-- TypeScript Foundation `34664678384`: sucesso;
-- diff final revisto contra `main`, sem ficheiros de domínio alterados;
-- commit documental posterior aos gates exige nova confirmação automática antes do merge;
-- integração em `main` e validação GitHub Pages permanecem pendentes.
+Nenhum `.js` runtime pode ser apagado apenas porque existe intenção de migrar para TypeScript. Primeiro o `.ts` equivalente deve ser compilado, usado pelo build/Pages e coberto por testes; depois todas as referências ao JS fonte devem desaparecer; só então o JS fonte é removido.
 
 ---
 
-## 2026-09-12 — direção de produto a partir dos protótipos
+## 2026-09-12 — `76-product-pages1` / PR #86 — Dashboard
 
-- Dashboard: header limpo → resumo financeiro real → KPIs reais → ações rápidas → vencimentos/orçamento → categorias/atividade;
-- Mercado: pesquisa/catálogo/carrinho/estimativa/fatura com identidade e preço rigorosamente separados;
-- Planeamento: redesign apenas sobre saldo atual, saldo inicial, orçamento e rendimentos existentes até novas funções serem aprovadas;
-- Calendário: foco nos vencimentos/pagamentos atualmente suportados;
-- Faturas: pesquisa/filtros/resumo/tabela desktop/lista mobile com “Nova fatura” como ação principal;
-- desktop e mobile usam a mesma linguagem visual, mas composição adaptativa;
-- dados ou ações existentes apenas no mockup não entram em produção sem suporte real.
+### Objetivo
+
+Traduzir a hierarquia visual dos protótipos para o Dashboard real sem criar métricas ou regras financeiras novas.
+
+### Alterações
+
+- criada `v76-product-pages.css` como camada de composição interna das páginas;
+- carregamento depois de `v76-modern-ui.css` e antes de `v76-mobile-shell.css`;
+- `Saldo atual` existente passa a resumo financeiro dominante;
+- `Por pagar`, `Em atraso` e `Saldo projetado` ficam no segundo nível visual;
+- `Pago no mês` e `Próximos 7 dias` tornam-se métricas compactas;
+- desktop reorganiza `Próximos vencimentos + Orçamento` e `Atividade recente + Despesas por categoria`;
+- mobile usa fluxo próprio, sem reduzir literalmente o desktop;
+- `alertsPanel` vazio deixa de ocupar espaço;
+- reduced-motion e forced-colors cobertos;
+- build e Service Worker incluem `76-product-pages1`/`product-pages1`;
+- `tests/v76-product-pages.test.cjs` foi criado e adicionado ao CI.
+
+### Domínio preservado
+
+- `renderDashboard()` continua a chamar `dashboardNumbers()`;
+- `n.current`, `n.pending`, `n.overdue`, `n.projected`, `paymentTotal` e `next7` permanecem as fontes canónicas;
+- vencimentos, orçamento, categorias e atividade reutilizam dados/renderizadores existentes;
+- nenhum cálculo, schema, IndexedDB, cifragem, sync, QR, scanner ou regra de Mercado foi alterado.
+
+### Gates
+
+A branch foi sincronizada com o `main` restaurado no commit `5a75e26d72f73b3d4c96802ae4193e0a28b50835`. CI `34695383919` e TypeScript Foundation `34695383909` passaram integralmente antes desta atualização documental. Os gates serão reconfirmados no head documental final antes do merge.
+
+### Por que ainda não aparecia no site
+
+O redesign encontrava-se no PR #86 e não em `main`. GitHub Pages só publica o conteúdo testado de `main`; por isso os protótipos e a nova camada não podiam aparecer no site antes da integração desse PR.
 
 ---
 
 ## 2026-09-12 — meta de fonte 100% TypeScript
 
-Decisão: a fonte funcional mantida deverá ser TypeScript strict. O browser continuará a receber JavaScript **compilado**, porque TypeScript não é executado diretamente pelo browser.
+Decisão: a fonte funcional mantida deverá tornar-se TypeScript strict. O browser continuará a receber JavaScript compilado.
 
-- nenhum `.js` runtime será apagado antes de existir substituto TypeScript equivalente;
-- não será aceite conversão massiva com `@ts-nocheck` ou `any` em massa;
-- ordem: funções puras → domínio financeiro → Mercado → core/persistência/cifra → sync → UI → PWA/build → testes/tooling;
-- JavaScript gerado deve tornar-se artefacto de build, não fonte manual.
+Estado:
 
----
+- `src/types/` já contém contratos de domínio;
+- `src/type-tests/` contém provas de tipos;
+- `src/ui/veggie-menu-toggle.ts` é o primeiro controlo UI em TS;
+- o runtime principal continua maioritariamente em JavaScript manual.
 
-## 2026-09-11 — PR #84 — consolidação UI/shell — publicado
+Estratégia:
 
-Merge: `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`.
-
-- removida de `v76-modern-ui.css` a geometria mobile duplicada de `.main`, `.topbar`, `.main>.page` e `.mobile-nav`;
-- `v76-mobile-shell.css` permanece autoridade de viewport, safe areas, scroll e dock;
-- design system mantém apenas aparência/composição de shell e componentes;
-- gate arquitetural impede reintrodução da geometria concorrente;
-- domínio financeiro e segurança permaneceram isolados.
-
----
-
-## 2026-09-11 — PR #82 — baseline arquitetural v76 — publicado
-
-Merge: `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`.
-
-- propriedade única por preocupação;
-- `mobile-layout.css` deixa de possuir viewport/topbar/nav persistente;
-- criado `tests/ui-architecture-contract.test.cjs`;
-- cache PWA `architecture-baseline1`;
-- CI, TypeScript Foundation e Pages concluídos com sucesso.
+- separar typecheck de emissão;
+- fazer o pipeline gerar artefactos JS de TypeScript em `dist/`;
+- manter temporariamente JS antigo como fallback quando necessário;
+- migrar por blocos auditáveis;
+- apagar cada `.js` fonte apenas depois de paridade, referências migradas e regressões verdes;
+- não usar `@ts-nocheck` ou `any` em massa.
 
 ---
 
-## 2026-09-11 — PR #80 — `76-mobile-shell2` — publicado
+## 2026-09-12 — `76-modern-ui2` / `ui-components1` — PR #85 — integrado
 
-Merge: `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`.
-
-- scroll principal no documento em mobile;
-- safe areas superiores/inferiores explícitas;
-- topbar no fluxo normal;
-- dock inferior com reserva de página;
-- cobertura 320/375/390/430 e landscape;
-- sem bloquear pinch-to-zoom.
-
----
-
-## 2026-09-10 — PR #78 — `76-version-audit1` — publicado
-
-- separação entre Application Version, Public Release e Build ID;
-- `registration.update()` antes de declarar ausência de atualização;
-- release pública permanece `v75`;
-- domínio financeiro e cofre isolados.
+- hierarquia primary/secondary/danger/link/icon;
+- baseline 44 px;
+- estados disabled/`aria-disabled`, foco e hover coerentes;
+- métricas de ícones;
+- `min-width:0` em grids;
+- fotografias do Mercado com `contain`/centro/fallback;
+- cache PWA `ui-components1`;
+- domínio financeiro e segurança preservados.
 
 ---
 
-## 2026-09-10 — PR #76 — `76-veggie-menu2` + `76-modern-ui1` — publicado
+## 2026-09-12 — direção de produto a partir dos protótipos
 
-Merge: `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
-
-- Veggie Burger/X em TypeScript strict;
-- topbar mobile no fluxo normal;
-- primeiro design system transversal v76;
-- suporte a dark mode, reduced-motion, forced-colors e toque.
+- Dashboard: resumo financeiro real → KPIs reais → vencimentos/orçamento → categorias/atividade;
+- Mercado: pesquisa/catálogo/carrinho/estimativa/fatura com identidade e preço separados;
+- Planeamento: apenas sobre saldo, orçamento e rendimentos existentes até novas funções serem implementadas;
+- Calendário: foco nos vencimentos/pagamentos suportados;
+- Faturas: pesquisa/filtros/resumo/tabela desktop/lista mobile com “Nova fatura” como ação principal;
+- desktop e mobile partilham linguagem visual com composição adaptativa;
+- dados ou ações existentes apenas no mockup não entram em produção sem suporte real.
 
 ---
 
-## 2026-09-10 — PR #73 — `75-expenses1`
+## Histórico v76 recente
 
-- modernização de Faturas/Despesas;
-- `renderBills()`/`filterBills()` e domínio financeiro preservados.
-
-## 2026-09-10 — PR #72 — fundação TypeScript
-
-- TypeScript 6 como ferramenta de desenvolvimento;
-- `tsconfig.json` strict/noEmit;
-- contratos de domínio e type-tests;
-- workflow TypeScript dedicado.
+- PR #84 — consolidação UI/shell, merge `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`;
+- PR #82 — baseline arquitetural, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`;
+- PR #80 — `76-mobile-shell2`, merge `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`;
+- PR #78 — versão/auditoria;
+- PR #76 — `76-veggie-menu2` + `76-modern-ui1`, merge `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`;
+- PR #73 — modernização de Despesas/Faturas;
+- PR #72 — fundação TypeScript strict.
 
 ## Histórico anterior
 
