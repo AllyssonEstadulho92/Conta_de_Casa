@@ -21,12 +21,10 @@ A aplicação é uma PWA estática/local-first. Estado financeiro, apresentaçã
 - `marketId|pid` é a identidade canónica do pipeline especializado de SKU/fotografia;
 - fotografia não é prova de preço nem de transação.
 
-## 2. Repositórios e responsabilidades
+## 2. Repositórios
 
-- `AllyssonEstadulho92/Conta_de_Casa`: aplicação pública, código-fonte, CI e GitHub Pages;
-- `AllyssonEstadulho92/conta-de-casa-`: repositório privado de sincronização/armazenamento, não é o código do site.
-
-Mudanças de template/UI são desenvolvidas e publicadas a partir de `Conta_de_Casa`.
+- `AllyssonEstadulho92/Conta_de_Casa`: aplicação pública, código, CI e GitHub Pages;
+- `AllyssonEstadulho92/conta-de-casa-`: repositório privado de sincronização/armazenamento; não é o código do site.
 
 ## 3. Núcleo funcional atual
 
@@ -36,165 +34,149 @@ Runtime manual ainda existente:
 - `finance.js`: cálculos financeiros;
 - `render.js`, `forms.js`, `events.js`: UI funcional e mutações autorizadas;
 - `sync.js` + `sync-conflict-policy.js`: sincronização cifrada e conflitos;
-- módulos de Mercado, QR, scanner, assets, atualização, navegação e Service Worker em JavaScript.
+- `mobile-menu-toggle.js`: controlador móvel de drawer/gestos;
+- vários módulos de Mercado, QR, scanner, assets, atualização, runtimes históricos e Service Worker.
 
-Fonte TypeScript atual:
+Fonte TypeScript:
 
 - `src/types/`: contratos de domínio;
 - `src/type-tests/`: provas de tipos;
-- `src/ui/veggie-menu-toggle.ts`: controlo Veggie Burger/X e primeiro runtime cuja fonte manual JS foi substituída.
+- `src/ui/veggie-menu-toggle.ts`: controlo Veggie Burger/X;
+- `src/ui/market-branding.ts`: apresentação semântica do Mercado, segunda fonte UI migrada.
 
-## 4. Modelo de build TypeScript
+## 4. Build TypeScript
 
-Arquitetura de destino:
+Fluxo canónico:
 
-`src/**/*.ts` → typecheck strict → compilação → `.generated/*.js` → `scripts/prepare-pages.cjs` → `dist/*.js` → GitHub Pages
+`src/**/*.ts` → `tsc --noEmit` strict → `scripts/build-typescript-runtime.cjs` → `.generated/*.js` → `scripts/prepare-pages.cjs` → `dist/*.js` → GitHub Pages
 
 Regras:
 
 - TypeScript não é executado diretamente pelo browser;
-- `.generated/` e `dist/` são artefactos ignorados pelo Git;
-- JavaScript público em `dist/` pode manter extensão `.js`, mas não é fonte manual;
-- nenhum módulo JS legado é removido antes de existir substituto TS equivalente;
-- o substituto deve estar compilado, referenciado pelo build/Pages e coberto por testes;
-- `strict`, `noImplicitAny`, `strictNullChecks`, `noUncheckedIndexedAccess` e `exactOptionalPropertyTypes` permanecem ativos;
+- `.generated/` e `dist/` são artefactos e não são versionados;
+- o nome público pode continuar `.js` para compatibilidade de HTML/Service Worker;
+- o ficheiro `.js` publicado não conta como fonte manual quando é produzido pelo build;
+- o build falha se reaparecer uma fonte JS manual já migrada;
+- cada substituto TS tem de passar `strict` e regressões antes de eliminar a fonte JS;
 - não usar `@ts-nocheck` nem `any` em massa;
 - schema, cifragem, fórmulas e semântica de preço não mudam por causa da linguagem.
 
-### 4.1 Primeiro runtime efetivamente migrado
+### 4.1 Registo de runtimes gerados
 
-`src/ui/veggie-menu-toggle.ts` é a fonte canónica.
+O build mantém um registo explícito em `scripts/build-typescript-runtime.cjs` e um mapa público em `scripts/prepare-pages.cjs`.
 
-- `scripts/build-typescript-runtime.cjs` usa TypeScript 6 para gerar `.generated/v76-veggie-menu.js`;
-- o build rejeita a presença de `v76-veggie-menu.js` manual na raiz;
-- `scripts/prepare-pages.cjs` chama o build TypeScript e mapeia o nome público `v76-veggie-menu.js` para o artefacto em `.generated/`;
-- `tests/typescript-runtime-build.test.cjs` prova TS → JS gerado → bundle Pages;
-- `tests/v76-veggie-menu.test.cjs` valida o artefacto gerado, não um JS manual;
-- o Service Worker continua a referenciar `./v76-veggie-menu.js` porque esse é o ficheiro que o browser recebe.
+Atualmente:
 
-## 5. Pipeline de CI e publicação
+- `src/ui/veggie-menu-toggle.ts` → `.generated/v76-veggie-menu.js` → `dist/v76-veggie-menu.js`;
+- `src/ui/market-branding.ts` → `.generated/market-branding.js` → `dist/market-branding.js`.
 
-Fluxo canónico:
+O primeiro já está publicado pelo PR #88. O segundo está em migração na branch `feat/v76-typescript-market-branding1`.
 
-`push/PR` → instalar toolchain TS → `typecheck` → gerar artefactos TS → `CI` completo → merge em `main` → `Deploy Pages` via `workflow_run` → gerar novamente artefactos → `prepare-pages` → `dist/` → GitHub Pages
+`tests/typescript-runtime-build.test.cjs` verifica para cada runtime:
+
+- fonte TS presente;
+- fonte JS manual ausente;
+- artefacto `.generated` criado;
+- sintaxe de browser válida;
+- marcadores de comportamento esperados;
+- ausência de acesso ao estado financeiro nos módulos de apresentação;
+- igualdade exata entre artefacto gerado e ficheiro colocado no `dist/`.
+
+## 5. Pipeline CI e publicação
+
+`push/PR` → instalar TypeScript → typecheck → gerar runtimes → CI completo → merge `main` → Pages via `workflow_run` → gerar runtimes novamente → preparar allowlist → validar bundle → deploy
 
 Contrato:
 
 - Pages só executa quando o CI de `main` termina com sucesso;
-- `scripts/prepare-pages.cjs` usa allowlist explícita e falha se faltar asset;
-- runtimes migrados são gerados antes da cópia pública;
-- o Service Worker/cache é versionado;
-- alteração em `main` só é considerada publicada depois do deployment concluir.
+- o build público usa allowlist explícita;
+- runtimes TS são gerados antes da cópia para `dist`;
+- CI/Pages verificam diretamente `.generated/*.js` para fontes já migradas;
+- alteração em `main` só é considerada publicada depois de o Deploy Pages concluir com sucesso.
 
-Incidente de 12/09/2026:
+Evidência publicada do modelo:
 
-- `v75-architecture.js` foi apagado de `main` antes de ser substituído;
-- CI falhou com `MODULE_NOT_FOUND`;
-- Pages foi corretamente ignorado;
-- PR #87 restaurou o ficheiro e o pipeline voltou a verde;
-- PR #86 publicou depois o primeiro redesign real do Dashboard, merge `42557d59f464a2fc7fc22a31eb24564e7dbabad9`, Pages `34695600399` com sucesso.
+- PR #88 merge `5301bd0d66c5ec46ead7be079799ecb76c752237`;
+- TypeScript Foundation `34699066645`: sucesso;
+- CI `34699066749`: sucesso;
+- Pages `34699100855`: sucesso.
 
-Regra arquitetural: nenhum runtime fonte é apagado enquanto houver referência manual sem substituto gerado.
+## 6. Incidente e regra de exclusão
 
-## 6. Estratégia de fallback
+Em 12/09/2026, `v75-architecture.js` foi removido prematuramente. CI falhou com `MODULE_NOT_FOUND` e Pages não publicou. PR #87 restaurou o ficheiro.
 
-A branch `backup/js-runtime-baseline-20260912` aponta para a baseline pública `42557d59f464a2fc7fc22a31eb24564e7dbabad9` e mantém a versão JavaScript validada anterior à migração.
+Consequência arquitetural: **nenhuma fonte JS é eliminada apenas por existir um TS com nome semelhante**. Primeiro o TS é tipado, compilado, mapeado para o bundle e testado; só depois a fonte manual é removida.
 
-Fallback significa rollback de versão/branch em caso de regressão. Não significa carregar simultaneamente o JS antigo e o novo artefacto TS no runtime normal.
+## 7. Fallback
 
-## 7. Composição visual pública
+`backup/js-runtime-baseline-20260912` aponta para a baseline pública anterior à migração. É um rollback técnico, não um segundo runtime carregado em paralelo.
 
-Ordem relevante:
+## 8. Composição visual pública
+
+Ordem principal:
 
 1. estilos base/responsive históricos;
 2. `mobile-layout.css`;
 3. camadas v75;
-4. `v76-veggie-menu.css` (`76-veggie-menu2`);
+4. `v76-veggie-menu.css`;
 5. `v75-usability.css`;
 6. `v76-modern-ui.css` (`76-modern-ui2`) — tokens/componentes;
-7. `v76-product-pages.css` (`76-product-pages1`) — composição das páginas;
-8. `v76-mobile-shell.css` (`76-mobile-shell2`) — geometria mobile final;
-9. estilos específicos do Centro de Versão.
+7. `v76-product-pages.css` (`76-product-pages1`) — composição interna;
+8. `v76-mobile-shell.css` (`76-mobile-shell2`) — geometria mobile final.
 
-A ordem é deliberada: `tokens/componentes → composição da página → geometria do shell`.
+A ordem é `tokens/componentes → composição da página → geometria do shell`.
 
-## 8. Propriedade única por preocupação
+## 9. Propriedade única por preocupação
 
-- **tokens**: cor, tipografia, spacing, raio, sombra e foco;
-- **shell**: viewport, scroll, safe areas, topbar, área principal e navegação persistente;
-- **componentes**: botões, inputs, cards, tabs, dialogs, tabelas, toolbars e estados;
-- **composição de página**: ordem, proporção e prioridade das secções;
-- **features**: Dashboard, Despesas/Faturas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições;
-- **domínio**: finanças, Mercado, persistência, sync e segurança fora da camada visual;
-- **build**: compilação e criação de artefactos, sem lógica de domínio.
+- **tokens:** cor, tipografia, spacing, raio, sombra, foco;
+- **shell:** viewport, scroll, safe areas, topbar, conteúdo e navegação persistente;
+- **componentes:** botões, inputs, cards, tabs, dialogs, tabelas e estados;
+- **composição:** ordem, proporção e prioridade das secções;
+- **features:** Dashboard, Faturas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico, Definições;
+- **domínio:** finanças, Mercado, persistência, sync e segurança;
+- **build:** geração/cópia de artefactos, sem lógica de domínio.
 
-## 9. Shell móvel — `76-mobile-shell2`
+## 10. UI/UX e responsive
 
-Em ≤820 px, `v76-mobile-shell.css` é a autoridade da geometria global: scroll, safe areas, topbar estrutural, reserva de página e dock persistente. Não bloquear pinch-to-zoom e não ocultar foco/conteúdo.
+`v76-mobile-shell.css` é a autoridade da geometria global ≤820 px. `v76-modern-ui.css` define hierarquia `primary`, `secondary`, `danger`, `link`, `icon button`, baseline 44 px e estados acessíveis. `v76-product-pages.css` define composição interna do Dashboard sem alterar fórmulas.
 
-## 10. Sistema visual — `76-modern-ui2`
+Requisitos: reflow a 320 CSS px, sem scroll horizontal global, safe areas no shell, pinch-to-zoom preservado, foco visível, Safari/iPhone, teclado virtual, portrait/landscape, Light/Dark/System, reduced-motion e forced-colors.
 
-Hierarquia canónica: `primary`, `secondary`, `danger`, `link`, `icon button`; baseline 44 px, métricas coerentes de ícones, `focus-visible`, disabled/`aria-disabled`, hover para ponteiro fino, reduced-motion, forced-colors e grids com `min-width:0`.
+## 11. Mercado
 
-Fotografias do Mercado usam `contain`/centro/fallback sem alterar SKU, preço ou total.
+- pesquisa, imagens, barcode, carrinho e experiência permanecem separados;
+- preço pesquisado continua estimativa até evidência completa;
+- fotografia é apoio visual, nunca prova de preço/compra;
+- `marketId|pid` permanece identidade canónica;
+- `market-branding.ts` altera apenas copy/atributos de apresentação no DOM.
 
-## 11. Composição de produto — `76-product-pages1`
+## 12. Segurança
 
-Dashboard publicado:
+Migração TypeScript não pode enfraquecer PIN/palavra-passe, PBKDF2/AES-GCM, isolamento do cofre, sync cifrada, validação de QR/importações, CSP ou política de segredos.
 
-1. `Saldo atual` como resumo principal;
-2. `Por pagar`, `Em atraso`, `Saldo projetado`;
-3. alertas condicionais;
-4. `Pago no mês`, `Próximos 7 dias`;
-5. vencimentos + orçamento;
-6. atividade + categorias.
+## 13. QA e gates
 
-Mobile reorganiza as mesmas fontes de dados numa sequência vertical própria. A camada não altera fórmulas nem estado.
+Toda migração mantém verdes finanças, isolamento/cofre, datas civis, faturas/QR, Mercado/SKU/imagens/scanner, responsive, navegação/acessibilidade, sync, PWA/cache e TypeScript strict.
 
-## 12. Direção das restantes páginas
-
-- **Mercado:** pesquisa, filtros, catálogo/lista, carrinho, quantidade/preço/estado; `Estimativa` até evidência completa;
-- **Planeamento:** saldo, orçamento e rendimentos reais antes de novas capacidades;
-- **Calendário:** vencimentos/pagamentos existentes;
-- **Faturas:** pesquisa, filtros, estado, ordenação, tabela desktop/lista mobile; sem mudar pagamentos/vencimentos.
-
-## 13. Responsive, acessibilidade e temas
-
-- reflow a 320 CSS px;
-- sem scroll horizontal global;
-- safe areas no shell;
-- 44×44 CSS px como baseline de toque;
-- foco não oculto;
-- Safari/iPhone, teclado virtual, portrait/landscape e Light/Dark/System no QA;
-- contraste/estado não dependem apenas de cor.
-
-## 14. Segurança
-
-UI e TypeScript não podem enfraquecer PIN/palavra-passe, PBKDF2/AES-GCM, isolamento do cofre, sync cifrada, validação de QR/importações, CSP ou política de segredos.
-
-## 15. QA e gates
-
-Mudanças transversais exigem regressões verdes para finanças, isolamento/cofre, datas civis, faturas/QR, Mercado/SKU/imagens/scanner, responsive, navegação/acessibilidade, sync, PWA/cache e TypeScript strict.
-
-Gates específicos da migração:
+Gates específicos de fonte TS:
 
 - `tests/typescript-runtime-build.test.cjs`;
-- ausência da fonte manual migrada;
-- artefacto `.generated` válido;
-- bundle `dist` contém o runtime público gerado;
-- CI integral e TypeScript Foundation verdes.
+- ausência das fontes JS manuais já migradas;
+- artefactos `.generated` válidos;
+- bundle `dist` contém exatamente os artefactos esperados;
+- CI integral + TypeScript Foundation verdes.
 
-## 16. Ordem da migração de código
+## 14. Ordem de migração
 
-1. pipeline TS e primeiro runtime de UI;
+1. módulos folha/UI sem estado e pipeline;
 2. funções puras de dinheiro/datas/quantidades;
 3. domínio financeiro;
 4. Mercado/modelo/carrinho;
 5. core/persistência/cifra;
 6. sync/conflitos;
-7. render/forms/events e UI restante;
+7. render/forms/events e controladores complexos;
 8. Service Worker/build;
 9. testes/tooling;
 10. remoção final de JavaScript fonte legado.
 
-Cada exclusão de `.js` exige prova de ausência de referências manuais, artefacto TS equivalente e regressões verdes.
+A ordem pode ser refinada conforme dependências reais, mas nunca encurtando os gates.
