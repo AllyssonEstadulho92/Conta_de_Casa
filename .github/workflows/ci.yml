@@ -21,6 +21,12 @@ jobs:
         with:
           node-version: "24"
 
+      - name: Install TypeScript toolchain
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Generate TypeScript runtime artifacts
+        run: npm run build:runtime
+
       - name: Probe live market sources
         run: node scripts/probe-market-sources.cjs
 
@@ -32,7 +38,7 @@ jobs:
           node --check forms.js
           node --check events.js
           node --check mobile-menu-toggle.js
-          node --check v76-veggie-menu.js
+          node --check dist/v76-veggie-menu.js
           node --check sync.js
           node --check sync-conflict-policy.js
           node --check market-experience.js
@@ -61,7 +67,12 @@ jobs:
           node --check v75-market-featured.js
           node --check v75-market-flow.js
           node --check sw.js
+          node --check scripts/build-typescript-runtime.cjs
+          node --check scripts/prepare-pages-typescript.cjs
           node --check scripts/prepare-pages.cjs
+
+      - name: TypeScript runtime build tests
+        run: node tests/typescript-runtime-build.test.cjs
 
       - name: Finance tests
         run: node tests/finance.test.cjs
