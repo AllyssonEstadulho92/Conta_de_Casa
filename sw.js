@@ -118,21 +118,20 @@ async function navigationResponse(request) {
     return response;
   } catch (_error) {
     if(cached)return cached;
-    return new Response('Aplicação indisponível offline.',{status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});
+    return new Response('Conta de Casa indisponível temporariamente.',{
+      status:503,
+      headers:{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'}
+    });
   } finally {
     clearTimeout(timer);
   }
 }
 
-self.addEventListener('install',event=>{
-  event.waitUntil((async()=>{
-    const cache=await caches.open(CACHE);
-    await cache.addAll(PUBLIC_ASSETS);
-    self.skipWaiting();
-  })());
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(PUBLIC_ASSETS)));
 });
 
-self.addEventListener('activate',event=>{
+self.addEventListener('activate', event => {
   event.waitUntil((async()=>{
     const keys=await caches.keys();
     await Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)));
@@ -141,34 +140,32 @@ self.addEventListener('activate',event=>{
   })());
 });
 
-self.addEventListener('message',event=>{
-  const data=event.data||{};
-  if(data.type==='CDC_APPLY_UPDATE'){
+self.addEventListener('message', event => {
+  if(event.data?.type==='SKIP_WAITING'||event.data?.type==='APPLY_UPDATE'){
     applyRequested=true;
     self.skipWaiting();
   }
 });
 
-self.addEventListener('fetch',event=>{
-  if(event.request.method!=='GET')return;
-  const requestUrl=new URL(event.request.url);
-  if(event.request.mode==='navigate'){
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+
+  if (event.request.mode === 'navigate') {
     event.respondWith(navigationResponse(event.request));
     return;
   }
-  const assetKey=publicAssetKey(event.request.url);
-  if(assetKey&&PUBLIC_ASSET_SET.has(assetKey)){
-    event.respondWith((async()=>{
-      const cache=await caches.open(CACHE);
-      const cached=await cache.match(assetKey);
-      if(cached)return cached;
-      const response=await fetch(event.request);
-      if(response?.ok)cache.put(assetKey,response.clone()).catch(()=>undefined);
+
+  const key = publicAssetKey(event.request.url);
+  if (!key || !PUBLIC_ASSET_SET.has(key)) return;
+  event.respondWith(
+    fetch(event.request,{cache:'no-store'}).then(response => {
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE).then(cache => cache.put(key, copy));
+      }
       return response;
-    })());
-    return;
-  }
-  if(requestUrl.origin===self.location.origin){
-    event.respondWith(fetch(event.request).catch(()=>caches.match(event.request)));
-  }
+    }).catch(() => caches.match(key))
+  );
 });
