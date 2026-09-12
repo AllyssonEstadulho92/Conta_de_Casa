@@ -1,133 +1,103 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 11 de setembro de 2026  
+Atualizado: 12 de setembro de 2026  
 Versão da aplicação: `0.76.0-dev.1`  
 Release pública: `v75`  
-Programa técnico: `v76` — migração incremental TypeScript + revisão UI/UX/arquitetura  
+Programa técnico: `v76` — consolidação UI/UX + migração incremental para TypeScript  
 Branch pública: `main`  
-Última baseline funcional publicada: `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`  
-Build público de referência: `bb0cd65`  
-Trabalho atual: `feat/v76-ui-consolidation1` — PR #84 (draft)  
+Baseline publicada: `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`  
+Trabalho atual: `feat/v76-ui-components1`  
 Distribuição: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
 
-- `STATE_VERSION = 5` enquanto não existir migração de schema aprovada;
-- valores monetários em cêntimos inteiros;
+- `STATE_VERSION = 5` até existir migração de schema aprovada e testada;
+- dinheiro persistido em cêntimos inteiros;
 - estado financeiro em IndexedDB;
 - cofre PBKDF2-SHA-256 + AES-GCM;
 - `PBKDF2_ITERATIONS = 250000`;
 - sincronização GitHub opcional limitada ao envelope cifrado;
 - `estimatedCents` permanece distinto de `actualCents`;
-- `marketId|pid` permanece identidade canónica no pipeline especializado de SKU/fotografia;
-- QR, scanner, backup/restauro, PWA e funcionamento offline não podem regredir por mudanças visuais;
-- alterações UI/UX, shell ou versionamento não podem modificar cálculos, pagamentos, faturas, persistência ou segurança.
+- `marketId|pid` permanece identidade canónica de SKU/fotografia;
+- QR, scanner, backup/restauro, PWA e offline não podem regredir;
+- redesign não pode alterar silenciosamente cálculos, pagamentos, faturas, persistência, autenticação ou segurança.
 
 ## 2. Estado publicado em `main`
 
-- `75-market1` — Mercado;
-- `75-expenses1` — Despesas/Faturas;
-- fundação TypeScript — PR #72;
-- `76-veggie-menu1` — PR #74;
-- `76-veggie-menu2` + `76-modern-ui1` — PR #76;
-- `76-version-audit1` — PR #78;
-- `76-mobile-shell2` — PR #80;
-- baseline arquitetural transversal v76 — PR #82, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`.
+Integrações relevantes já publicadas:
 
-A baseline arquitetural foi validada no PR com CI e TypeScript Foundation verdes. Depois do merge, TypeScript Foundation `34577495832`, CI `34577495803` e GitHub Pages `34577588233` terminaram com sucesso.
+- fundação TypeScript strict — PR #72;
+- Despesas/Faturas `75-expenses1` — PR #73;
+- Veggie Burger TypeScript + `76-modern-ui1` — PR #76;
+- auditoria de versão `76-version-audit1` — PR #78;
+- shell móvel `76-mobile-shell2` — PR #80;
+- baseline arquitetural v76 — PR #82;
+- consolidação da propriedade UI/shell — PR #84, merge `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`.
 
-## 3. Diagnóstico arquitetural
+`v76-mobile-shell.css` é a autoridade da geometria mobile global. `v76-modern-ui.css` não deve voltar a possuir viewport, safe areas, offsets do dock ou reserva estrutural de página.
 
-A auditoria de 11/09/2026 confirmou que o problema não era apenas um valor de margem/safe area. A UI acumulou várias folhas de estilo versionadas com responsabilidades sobre os mesmos elementos estruturais. O caso comprovado inicial era `mobile-layout.css`, que ainda definia `.app-shell`, `.main` e `.topbar` apesar de `v76-mobile-shell.css` já ser a autoridade final do viewport móvel.
+## 3. Trabalho atual — `feat/v76-ui-components1`
 
-A revisão seguinte confirmou uma segunda sobreposição concreta: `v76-modern-ui.css` ainda repetia geometria mobile de `.main`, `.topbar`, `.main>.page` e `.mobile-nav` que já era definida posteriormente por `v76-mobile-shell.css`. O valor final podia manter-se correto apenas porque o shell ganhava a cascata por ordem/especificidade/`!important`.
+A branch está a consolidar componentes visuais partilhados antes de redesenhar páginas individualmente.
 
-Conclusão vigente: não criar novas camadas de override para corrigir a mesma geometria. Consolidar a aplicação por propriedade/responsabilidade e com gates de regressão.
+Já aplicado:
 
-## 4. Pesquisa técnica realizada
+- revisão `76-modern-ui2`;
+- altura mínima de 44 px para controlos principais;
+- hierarquia consistente de `primary`, `secondary`, `danger`, `link` e `icon button`;
+- estado disabled/`aria-disabled`, focus-visible e hover apenas para ponteiro fino;
+- métricas consistentes de ícones dentro de botões;
+- `min-width:0` e gaps comuns em grids partilhados para evitar overflow;
+- apresentação de fotografias do Mercado com `object-fit:contain`, centro e fallback sem alterar identidade/preço;
+- revisão de cache PWA `ui-components1`;
+- testes de `modern-ui`, Veggie Burger, mobile shell e contrato de arquitetura alinhados com `76-modern-ui2`.
 
-Foram revistos referenciais primários/de elevada confiança:
+Não alterado nesta branch: `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, IndexedDB, cifragem, sincronização, QR/scanner, faturas ou regras de Mercado.
 
-- Apple Human Interface Guidelines / Apple Developer: safe areas, layout, toolbar e navegação;
-- MDN Web Docs: `env(safe-area-inset-*)`, `viewport-fit=cover`, cascata/especificidade, cascade layers e container queries;
-- W3C/WAI WCAG 2.2: Reflow a 320 CSS px, Target Size e Focus Not Obscured;
-- web.dev: arquitetura PWA, Cache Storage, IndexedDB e estratégias de cache;
-- OWASP Cheat Sheet Series: CSP e validação de inputs.
+## 4. Direção visual aprovada para implementação
 
-A Apple HIG é referência ergonómica/plataforma para iPhone. Os requisitos Web e de acessibilidade continuam ancorados em standards Web/WCAG.
+Os protótipos recentes passam a ser referência de **hierarquia e composição**, não de dados inventados.
 
-## 5. Baseline arquitetural publicada
+Direção:
 
-A baseline v76 estabelece:
+- interface clean/premium, com pouco ruído visual;
+- teal como identidade principal; cores semânticas apenas para sucesso, atenção e erro;
+- uma única família tipográfica;
+- menos “card dentro de card” e mais espaço em branco;
+- desktop com sidebar e conteúdo amplo;
+- mobile com navegação `Início · Despesas · Mercado · Planeamento · Mais`;
+- ação principal evidente por contexto;
+- Dashboard: resumo principal → KPIs reais → vencimentos/orçamento → categorias/atividade;
+- Mercado: pesquisa/lista/carrinho/estimativa/fatura mantendo distinção entre preço observado e confirmado;
+- Planeamento, Calendário e Faturas devem reutilizar os mesmos tokens, grids, botões, inputs, estados e navegação.
 
-- `v76-mobile-shell.css` como autoridade declarada para geometria global mobile ≤820 px;
-- `mobile-layout.css` apenas para refinamentos de features móveis;
-- um contrato automatizado em `tests/ui-architecture-contract.test.cjs`;
-- regressão mobile alinhada com a arquitetura atual;
-- invalidação de cache PWA `architecture-baseline1` para distribuir a alteração estrutural;
-- CI com gate explícito de arquitetura UI;
-- documentação permanente sincronizada com a nova propriedade por preocupação.
+Qualquer métrica ou função presente num mockup que não exista no domínio atual deve ser validada antes de entrar em código.
 
-Esta etapa não altera `core.js`, `finance.js`, schema, IndexedDB, PBKDF2/AES-GCM, pagamentos, faturas, QR, scanner, sincronização cifrada ou regras financeiras/Mercado.
+## 5. Migração TypeScript
 
-## 6. Consolidação UI em curso — PR #84
+A meta pedida é fonte funcional 100% TypeScript. Isto **não significa ausência de JavaScript no browser**: navegadores executam JavaScript gerado pelo build. A meta correta é:
 
-Objetivo: executar a primeira etapa da consolidação transversal sem mudança funcional nem refatoração “big-bang”.
+- código-fonte funcional mantido em `.ts`;
+- `strict` ativo;
+- sem `any` não justificado;
+- JavaScript gerado apenas no build/deploy e não usado como fonte manual;
+- remoção de cada ficheiro JS legado apenas depois de equivalência funcional provada.
 
-Alterações já aplicadas na branch:
+O repositório ainda contém vários módulos JavaScript de runtime. Apagá-los agora quebraria a aplicação; a remoção será feita por blocos auditáveis.
 
-- removida de `v76-modern-ui.css` a geometria mobile duplicada de `.main`;
-- removidas da camada visual master as dimensões/posicionamento global da `.topbar`, mantendo apenas apresentação e composição interna;
-- removida da camada visual master a reserva geométrica de `.main>.page`, ficando a cargo do shell;
-- removidos de `.mobile-nav` os offsets, posição fixa, dimensão e padding pertencentes ao shell, mantendo superfície, borda, sombra, blur e estados visuais;
-- removidos dos ajustes ≤390 px os gutters/offsets estruturais já definidos pelo shell;
-- preservados alvos tácteis de 44 px, hierarquia visual, cartões, formulários, tabs, dialogs, dashboard, despesas, Mercado e restantes páginas;
-- `tests/v76-modern-ui.test.cjs` e `tests/ui-architecture-contract.test.cjs` agora impedem a reintrodução dessa geometria duplicada.
+## 6. Riscos/lacunas abertas
 
-Escopo explicitamente não alterado: `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, IndexedDB, PIN, PBKDF2/AES-GCM, QR, scanner, backup, sincronização e regras financeiras/Mercado.
+- validação física em iPhone/Safari/PWA continua obrigatória após mudanças de UI;
+- CSS histórico v74/v75 ainda contém sobreposição e `!important` a reduzir por componente;
+- `main` não tem branch protection;
+- `market-experience.js` ainda requer teste dedicado para persistência de `pid` em todo o fluxo;
+- TypeScript ainda cobre fundação/tipos e Veggie Burger, não o runtime completo;
+- os protótipos são referência visual e não podem ser copiados literalmente quando apresentarem dados/ações não suportados pelo código real.
 
-Estado: PR #84 aberto em draft; integração depende de CI + TypeScript Foundation verdes e revisão do diff.
+## 7. Próximo passo
 
-## 7. Critério UI/UX v76
-
-- uma única autoridade por preocupação transversal;
-- mobile-first;
-- reflow a 320 CSS px sem perda de informação/funcionalidade e sem scroll horizontal global;
-- safe areas explícitas em dispositivos edge-to-edge;
-- baseline interna de 44×44 CSS px para controlos tácteis primários no iPhone;
-- foco e último conteúdo nunca escondidos por dock/header persistentes;
-- bottom navigation apenas para destinos de topo; ações da vista ficam na toolbar/corpo/menu contextual;
-- nenhum novo ficheiro “patch” para corrigir a mesma geometria;
-- `@layer` só entra quando o domínio concorrente completo puder ser migrado em conjunto;
-- reduzir `!important` por propriedade comprovadamente consolidada, nunca por remoção cega;
-- container queries apenas para componentes dependentes do contentor;
-- alterações visuais não podem tocar no domínio financeiro ou segurança sem decisão própria.
-
-## 8. PWA e segurança
-
-Critério de evolução:
-
-- Cache Storage para recursos HTTP do app shell/rede escolhidos; IndexedDB para estado estruturado;
-- manifestos/metadados de atualização não devem ficar presos a cache obsoleta;
-- Service Worker não pode ser requisito para o núcleo online funcionar;
-- CSP continua defesa em profundidade e deve ser progressivamente mais restrita;
-- avaliar remoção da dependência runtime externa do ZXing, mantendo licença e funcionalidade;
-- reduzir `style-src 'unsafe-inline'` apenas depois de migrar estilos inline necessários;
-- validar dados remotos/QR/importação de faturas sintática e semanticamente antes de os aceitar no domínio.
-
-## 9. Riscos/lacunas abertas
-
-- validação física do build publicado em iPhone/Safari/PWA continua necessária;
-- PR #84 ainda depende dos gates automáticos e não deve ser integrado antes de ficarem verdes;
-- camadas v74/v75/v76 ainda contêm sobreposição de componentes/features e uso elevado de `!important` a consolidar em fases;
-- `main` permanece sem branch protection;
-- `market-experience.js` mantém a lacuna conhecida de persistência explícita de `pid` em todo o fluxo;
-- release pública continua `v75` até decisão formal de promoção.
-
-## 10. Próximo passo
-
-1. Fechar PR #84 apenas com CI + TypeScript Foundation verdes e diff revisto.
-2. Depois inventariar componentes visuais transversais: hierarquia de botões, grids, cards, formulários, iconografia, imagens/fotografias, estados e toolbars.
-3. Consolidar primeiro componentes partilhados e só depois páginas específicas, verificando Início, Despesas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições.
-4. Validar 320/360/375/390/430/768/820/1024+ px, teclado/foco, toque, dark mode e estados vazio/carregamento/erro/sucesso.
-5. Não apagar CSS histórico nem alterar domínio financeiro/segurança sem prova de paridade e regressões verdes.
+1. Fechar `feat/v76-ui-components1` com CI + TypeScript Foundation verdes e revisão de diff.
+2. Integrar a hierarquia de componentes em `main`.
+3. Abrir bloco de redesign real, começando por Dashboard e reutilizando os componentes nas páginas Mercado, Planeamento, Calendário e Faturas.
+4. Em paralelo controlado, iniciar a migração do runtime JavaScript para TypeScript por módulos, começando por funções puras/determinísticas e só depois domínio financeiro, persistência, sync e UI.
+5. Só remover ficheiros JS legados quando o módulo TypeScript equivalente estiver compilado, testado e usado pelo Pages.
