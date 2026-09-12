@@ -6,6 +6,11 @@ const { execFileSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
+const GENERATED = path.join(ROOT, '.generated');
+const BUILD_TYPESCRIPT_RUNTIME = path.join(ROOT, 'scripts', 'build-typescript-runtime.cjs');
+const GENERATED_PUBLIC_FILES = Object.freeze({
+  'v76-veggie-menu.js': path.join(GENERATED, 'v76-veggie-menu.js')
+});
 const PACKAGE = JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
 const APP_VERSION = String(PACKAGE.version||'').trim();
 const BUILD = 'v75';
@@ -134,11 +139,16 @@ const PUBLIC_FILES = Object.freeze([
   'LUCIDE_LICENSE.txt'
 ]);
 
+if(fs.existsSync(path.join(ROOT,'v76-veggie-menu.js'))){
+  throw new Error('Committed/manual v76-veggie-menu.js is forbidden. Generate it from src/ui/veggie-menu-toggle.ts.');
+}
+execFileSync(process.execPath,[BUILD_TYPESCRIPT_RUNTIME],{cwd:ROOT,stdio:'inherit'});
+
 fs.rmSync(DIST,{recursive:true,force:true});
 fs.mkdirSync(DIST,{recursive:true});
 
 for(const name of PUBLIC_FILES){
-  const source=path.join(ROOT,name);
+  const source=GENERATED_PUBLIC_FILES[name]||path.join(ROOT,name);
   if(!fs.existsSync(source)||!fs.statSync(source).isFile())throw new Error(`Public Pages asset missing: ${name}`);
   fs.copyFileSync(source,path.join(DIST,name));
 }
@@ -225,6 +235,10 @@ if(manifest.latestVersion!==BUILD)throw new Error(`Release manifest latestVersio
 const forbidden=['README.md','SECURITY.md','PRIVACY.md','SPEC.md','CHANGELOG.md','.git','.github','tests','scripts','downloads','ui-consistency.css','v64-runtime.css','v75-drawer-blue.css'];
 for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry)))throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
+}
+
+if(!fs.existsSync(path.join(DIST,'v76-veggie-menu.js'))){
+  throw new Error('Pages bundle is missing TypeScript-generated v76-veggie-menu.js.');
 }
 
 console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; veggie-menu ${VEGGIE_MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
