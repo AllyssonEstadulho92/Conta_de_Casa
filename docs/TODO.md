@@ -80,7 +80,7 @@ Meta: nenhum JavaScript manual como fonte funcional. O browser recebe JavaScript
 - [x] Integrar PR #88 — merge `5301bd0d66c5ec46ead7be079799ecb76c752237`.
 - [x] Confirmar TypeScript, CI e Pages verdes pós-merge.
 
-### Bloco 2 — módulos folha/UI de baixo risco — em curso
+### Bloco 2 — `market-branding` / módulo folha — pronto para PR
 
 - [x] Auditar `market-branding.js`: apresentação DOM, sem escrita em domínio/cofre.
 - [x] Criar `src/ui/market-branding.ts` com DOM tipado.
@@ -89,10 +89,13 @@ Meta: nenhum JavaScript manual como fonte funcional. O browser recebe JavaScript
 - [x] Remover `market-branding.js` manual da branch.
 - [x] Atualizar teste de build para validar os dois artefactos.
 - [x] Atualizar CI, TypeScript Foundation e Pages para o artefacto gerado.
-- [ ] Confirmar TypeScript Foundation da branch.
-- [ ] Confirmar CI integral da branch.
-- [ ] Rever diff final contra `main`.
-- [ ] Abrir PR e integrar apenas com gates verdes.
+- [x] Invalidar cache PWA sem alterar a lógica do Service Worker.
+- [x] Confirmar TypeScript Foundation da branch — `34699847604`.
+- [x] Confirmar CI integral da branch — `34699847600`.
+- [x] Confirmar Safari/PWA startup verde após restaurar o comportamento canónico do SW.
+- [x] Rever diff final contra `main`: nenhum ficheiro de domínio alterado; `sw.js` muda apenas a chave de cache.
+- [ ] Abrir PR e exigir novamente CI + TypeScript Foundation verdes.
+- [ ] Integrar apenas com gates verdes.
 - [ ] Confirmar CI + Pages pós-merge.
 - [ ] Escolher o próximo módulo folha após observar dependências reais.
 
