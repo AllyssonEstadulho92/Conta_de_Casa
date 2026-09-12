@@ -17,6 +17,7 @@ const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const VEGGIE_MENU_REV = '76-veggie-menu2';
 const MODERN_UI_REV = '76-modern-ui2';
+const PRODUCT_PAGES_REV = '76-product-pages1';
 const MOBILE_SHELL_REV = '76-mobile-shell2';
 const EXPERIENCE_REV = '74-experience2';
 const ARCHITECTURE_REV = '75-architecture2';
@@ -55,7 +56,7 @@ const BUILD_DATE=new Date().toISOString();
 
 /* Bundle público v75 com programa v76 incremental. Mantém a experiência funcional existente,
    acrescenta metadados de versão/build no padrão do Foco Jornada, o Veggie Burger TypeScript v2,
-   76-modern-ui2 e 76-mobile-shell2. Nenhuma destas camadas altera domínio financeiro,
+   76-modern-ui2, 76-product-pages1 e 76-mobile-shell2. Nenhuma destas camadas altera domínio financeiro,
    persistência, cifragem, sincronização, scanner, QR ou regras de Mercado. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
@@ -90,6 +91,7 @@ const PUBLIC_FILES = Object.freeze([
   'v75-market-flow.css',
   'v75-usability.css',
   'v76-modern-ui.css',
+  'v76-product-pages.css',
   'v76-mobile-shell.css',
   'core.js',
   'finance.js',
@@ -181,6 +183,7 @@ if(!index.includes('v76-veggie-menu.css'))index=index.replace('</head>',`  <link
 if(!index.includes('v75-market-flow.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-market-flow.css?v=${MARKET_FLOW_REV}" />\n</head>`);
 if(!index.includes('v75-usability.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-usability.css?v=${USABILITY_REV}" />\n</head>`);
 if(!index.includes('v76-modern-ui.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-modern-ui.css?v=${MODERN_UI_REV}" />\n</head>`);
+if(!index.includes('v76-product-pages.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-product-pages.css?v=${PRODUCT_PAGES_REV}" />\n</head>`);
 if(!index.includes('v76-mobile-shell.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-mobile-shell.css?v=${MOBILE_SHELL_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
@@ -224,4 +227,4 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry)))throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; veggie-menu ${VEGGIE_MENU_REV}; modern-ui ${MODERN_UI_REV}; mobile-shell ${MOBILE_SHELL_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; veggie-menu ${VEGGIE_MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
