@@ -121,21 +121,24 @@ Estado: integrado e publicado pelo PR #88, merge `5301bd0d66c5ec46ead7be079799ec
 
 ## D-081 — migração avança por blocos auditáveis de baixo risco
 
-Estado: em implementação em `feat/v76-typescript-market-branding1`.
+Estado: integrado e publicado pelo PR #89, merge `c59e0a45500fd7965039de27615f574129482b13`.
 
 1. Cada bloco migra um conjunto pequeno e coerente; não há exclusão massiva de `.js`.
-2. O bloco seguinte ao Veggie Burger escolhe `market-branding.js`, módulo folha de apresentação que não altera cofre, finanças, preço, SKU ou persistência.
-3. A fonte passa a `src/ui/market-branding.ts`; a fonte manual `market-branding.js` é retirada apenas depois de o build gerar o substituto.
-4. O nome público `market-branding.js` mantém-se para browser/Service Worker, mas passa a vir de `.generated/` e `dist/`.
+2. O segundo bloco escolheu `market-branding.js`, módulo folha de apresentação que não altera cofre, finanças, preço, SKU ou persistência.
+3. A fonte canónica é `src/ui/market-branding.ts`; a fonte manual `market-branding.js` foi removida.
+4. O nome público `market-branding.js` mantém-se para browser/Service Worker, mas é gerado em `.generated/` e publicado por `dist/`.
 5. `scripts/build-typescript-runtime.cjs` mantém um registo explícito de múltiplos runtimes TypeScript para evitar regras ad hoc.
 6. CI, TypeScript Foundation, Pages e `tests/typescript-runtime-build.test.cjs` validam cada artefacto migrado.
-7. Controladores complexos (`mobile-menu-toggle.js`), domínio (`finance.js`) e infraestrutura (`core.js`, sync, Service Worker) ficam para blocos posteriores com testes de paridade próprios.
+7. `sw.js` foi invalidado apenas pela chave de cache; a lógica de fetch permaneceu canónica e o gate Safari/PWA confirmou a regressão antes do merge.
+8. Controladores complexos (`mobile-menu-toggle.js`), domínio (`finance.js`) e infraestrutura (`core.js`, sync, Service Worker) ficam para blocos posteriores com testes de paridade próprios.
+9. Evidência pós-merge: TypeScript `34700016617`, CI `34700016615`, Pages `34700037019`, todos com sucesso.
 
 ## Evidência recente
 
 - PR #87: recuperação do pipeline após remoção prematura; CI/Pages verdes.
 - PR #86: Dashboard real publicado; CI `34695579311`, TypeScript `34695579282`, Pages `34695600399` verdes.
 - PR #88: primeiro JS fonte removido; merge `5301bd0d66c5ec46ead7be079799ecb76c752237`; TypeScript `34699066645`, CI `34699066749`, Pages `34699100855` verdes.
+- PR #89: `market-branding` migrado; merge `c59e0a45500fd7965039de27615f574129482b13`; TypeScript `34700016617`, CI `34700016615`, Pages `34700037019` verdes.
 
 ## Lacuna técnica preservada
 
