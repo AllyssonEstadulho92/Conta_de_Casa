@@ -5,8 +5,8 @@ Versão da aplicação: `0.76.0-dev.1`
 Release pública: `v75`  
 Programa técnico: `v76` — redesign UI/UX + migração incremental para TypeScript  
 Branch pública: `main`  
-Baseline publicada: `2a9cc3148e5750561b14f6a0505934d1a6d74d05` — PR #85  
-Trabalho atual: `redesign/v76-product-hierarchy1` — Dashboard `76-product-pages1`  
+Baseline publicada e novamente validada: `6401f1c5156382e9fe364da31afa3fcec4aed9bc` — PR #87  
+Trabalho atual: `redesign/v76-product-hierarchy1` — PR #86 / Dashboard `76-product-pages1`  
 Distribuição: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
@@ -20,9 +20,27 @@ Distribuição: GitHub Pages / PWA
 - `estimatedCents` permanece distinto de `actualCents`;
 - `marketId|pid` permanece identidade canónica de SKU/fotografia;
 - QR, scanner, backup/restauro, PWA e offline não podem regredir;
-- redesign não pode alterar silenciosamente cálculos, pagamentos, faturas, persistência, autenticação ou segurança.
+- redesign ou migração de linguagem não podem alterar silenciosamente cálculos, pagamentos, faturas, persistência, autenticação ou segurança.
 
-## 2. Estado publicado em `main`
+## 2. Auditoria de publicação — causa confirmada
+
+A ausência das mudanças visuais no site teve duas causas diferentes e confirmadas:
+
+1. O redesign real do Dashboard encontra-se no PR #86 (`redesign/v76-product-hierarchy1`) e ainda não estava integrado em `main`; portanto o GitHub Pages não tinha código para publicar essa nova composição.
+2. Depois disso, o commit `5d1b1d8f9506ab4309bd2f2d941c13c77dabbd67` apagou `v75-architecture.js` diretamente de `main`, embora o ficheiro continuasse referenciado pelo CI, pelo `scripts/prepare-pages.cjs`, pelos testes e pelo bundle público. O CI `34693676180` falhou com `MODULE_NOT_FOUND` e o Deploy Pages `34693693840` foi corretamente ignorado.
+
+Correção efetuada:
+
+- PR #87 restaurou exatamente o blob publicado de `v75-architecture.js`;
+- TypeScript Foundation do PR #87: sucesso;
+- CI integral do PR #87: sucesso;
+- merge em `main`: `6401f1c5156382e9fe364da31afa3fcec4aed9bc`;
+- CI do `main` após o merge: sucesso (`34695315162`);
+- GitHub Pages após o merge: sucesso (`34695336131`).
+
+Conclusão: o pipeline de publicação está novamente funcional. O site só receberá o novo Dashboard quando o PR #86 for integrado e o novo `main` passar novamente por CI + Pages.
+
+## 3. Estado publicado em `main`
 
 Integrações relevantes:
 
@@ -33,102 +51,77 @@ Integrações relevantes:
 - shell móvel `76-mobile-shell2` — PR #80;
 - baseline arquitetural v76 — PR #82;
 - propriedade UI/shell — PR #84;
-- componentes partilhados `76-modern-ui2` / `ui-components1` — PR #85, merge `2a9cc3148e5750561b14f6a0505934d1a6d74d05`.
+- componentes partilhados `76-modern-ui2` / `ui-components1` — PR #85;
+- recuperação do runtime necessário ao build/Pages — PR #87.
 
-Após o merge do PR #85, GitHub Pages iniciou o deploy do novo `main`; a confirmação final do deployment deve ser registada quando o workflow terminar.
+## 4. Trabalho atual — PR #86 / `76-product-pages1`
 
-## 3. Trabalho atual — `redesign/v76-product-hierarchy1`
+O redesign do Dashboard reutiliza os cálculos e renderizadores existentes.
 
-Primeiro bloco do redesign real já iniciado no código.
-
-### Dashboard — `76-product-pages1`
-
-Factos preservados do runtime real:
+Factos preservados:
 
 - `renderDashboard()` continua a usar `dashboardNumbers()`;
 - saldo atual continua a ser `n.current`;
 - por pagar continua a ser `n.pending`;
 - em atraso continua a ser `n.overdue`;
 - saldo projetado continua a ser `n.projected`;
-- “Pago no mês” e “Próximos 7 dias” continuam a vir dos valores existentes;
-- vencimentos, orçamento, categorias e atividade continuam a usar os mesmos renderizadores/dados.
+- “Pago no mês” e “Próximos 7 dias” continuam a usar os valores existentes;
+- vencimentos, orçamento, categorias e atividade mantêm as mesmas fontes de dados.
 
 Alteração visual:
 
-- o cartão de `Saldo atual` existente passa a ser o resumo financeiro dominante;
-- três KPIs reais ficam num nível secundário;
-- alertas deixam de competir com o resumo principal;
+- `Saldo atual` passa a resumo dominante;
+- KPIs reais ficam em segundo nível;
 - métricas secundárias tornam-se compactas;
-- desktop organiza detalhe em `vencimentos + orçamento` e `atividade + categorias`;
-- mobile usa fluxo `resumo → KPIs → métricas → vencimentos → orçamento → categorias → atividade`;
-- nenhum novo cálculo ou métrica foi inventado;
-- reduced-motion e forced-colors têm tratamento explícito.
+- desktop organiza vencimentos/orçamento e atividade/categorias;
+- mobile usa sequência própria e não uma redução literal do desktop;
+- reduced-motion e forced-colors permanecem cobertos.
 
-### Nova camada visual
+A branch foi sincronizada com o `main` restaurado no commit `5a75e26d72f73b3d4c96802ae4193e0a28b50835`. CI e TypeScript Foundation desse head passaram integralmente antes desta atualização documental.
 
-`v76-product-pages.css` é a camada v76 destinada à **composição e hierarquia das páginas**. Ela carrega depois de `v76-modern-ui.css` e antes de `v76-mobile-shell.css`.
+## 5. Arquitetura visual
 
-Ela não pode assumir:
+Responsabilidades vigentes:
 
-- viewport;
-- safe areas;
-- scroll global;
-- posição/dimensões estruturais do topbar;
-- posição/dimensões estruturais do dock mobile.
+- `v76-modern-ui.css` (`76-modern-ui2`): tokens e componentes visuais;
+- `v76-product-pages.css` (`76-product-pages1`): ordem, proporção e hierarquia interna das páginas migradas;
+- `v76-mobile-shell.css` (`76-mobile-shell2`): viewport, safe areas, scroll global, topbar estrutural e dock móvel.
 
-Essas responsabilidades continuam exclusivas de `v76-mobile-shell.css`.
+Os protótipos são referência de hierarquia/composição, não fonte automática de dados ou funcionalidades inexistentes.
 
-### Build/PWA/QA
+## 6. Migração TypeScript
 
-- `scripts/prepare-pages.cjs` publica `v76-product-pages.css` como `76-product-pages1`;
-- `sw.js` inclui a nova camada e invalida o cache com `product-pages1`;
-- `tests/v76-product-pages.test.cjs` verifica ordem visual, responsive, reutilização do domínio existente e separação do shell;
-- CI inclui o novo gate.
+Meta: **fonte funcional 100% TypeScript strict**. O browser continuará a executar JavaScript compilado em `dist/`.
 
-O primeiro CI da branch passou por sintaxe, finanças, Mercado, segurança, responsive, sync e pelo novo teste de hierarquia; conclusão final do workflow ainda deve ser confirmada após a última atualização documental.
+Estado atual:
 
-## 4. Direção visual aprovada
+- `src/types/`: contratos de domínio;
+- `src/type-tests/`: provas de tipos;
+- `src/ui/veggie-menu-toggle.ts`: primeiro controlo UI em TS;
+- runtime principal ainda é JavaScript manual (`core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, sync, Mercado e outros módulos).
 
-Os protótipos são referência de **hierarquia e composição**, não de dados inventados.
+Regra reforçada pela auditoria:
 
-- interface clean/premium com pouco ruído visual;
-- teal como identidade; cores semânticas apenas quando têm função;
-- uma família tipográfica;
-- menos “card dentro de card” e mais espaço em branco;
-- desktop com sidebar e conteúdo amplo;
-- mobile com navegação `Início · Despesas · Mercado · Planeamento · Mais`;
-- uma ação primária clara por contexto;
-- todas as páginas devem reutilizar os mesmos tokens, componentes e estados.
+- não apagar um `.js` fonte enquanto o equivalente `.ts` não estiver compilado, usado pelo build/Pages e coberto por regressões;
+- a exclusão direta de `v75-architecture.js` demonstrou o risco: quebrou o CI e bloqueou a publicação;
+- JavaScript pode existir temporariamente como fallback até a substituição TypeScript ficar provada;
+- no estado final, JavaScript será apenas artefacto gerado, não fonte mantida manualmente.
 
-Próximas páginas nesta branch: Mercado, Planeamento, Calendário e Faturas, sempre sobre funções reais já existentes.
+## 7. Riscos/lacunas abertas
 
-## 5. Migração TypeScript
-
-Meta: fonte funcional 100% TypeScript strict. Isto não significa ausência de JavaScript no browser; o browser recebe JavaScript gerado pelo build.
-
-Regras:
-
-- código-fonte funcional mantido em `.ts`;
-- sem `@ts-nocheck` ou `any` em massa;
-- JavaScript compilado é artefacto, não fonte manual;
-- cada ficheiro JS legado só é removido depois de equivalência funcional provada;
-- migração por blocos: funções puras → domínio financeiro → Mercado → core/persistência/cifra → sync → UI → PWA/build → testes/tooling.
-
-Ainda não é seguro apagar `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js` ou restantes módulos runtime. A remoção imediata quebraria a aplicação.
-
-## 6. Riscos/lacunas abertas
-
-- validação física em iPhone/Safari/PWA continua obrigatória após mudanças de UI;
+- `main` continua sem branch protection obrigatória;
+- o build público ainda copia vários `.js` diretamente da raiz;
+- `scripts/prepare-pages.cjs` e os workflows ainda pressupõem runtime JS manual;
+- validação física em Safari/iPhone/PWA continua necessária depois do redesign;
 - CSS histórico v74/v75 ainda contém sobreposição e `!important` a reduzir gradualmente;
-- `main` não tem branch protection;
-- `market-experience.js` ainda requer teste dedicado para persistência de `pid` em todo o fluxo;
-- TypeScript ainda não cobre o runtime completo;
+- `market-experience.js` continua a necessitar teste dedicado para persistência de `pid` em todo o fluxo;
 - protótipos não podem introduzir silenciosamente tarefas, simulações, comparações ou métricas inexistentes.
 
-## 7. Próximo passo
+## 8. Próximo passo
 
-1. Confirmar CI da branch após a documentação e abrir PR do Dashboard.
-2. Validar visualmente o Dashboard publicado em preview/Pages antes de expandir a mesma camada.
-3. Aplicar `76-product-pages` a Mercado, Planeamento, Calendário e Faturas.
-4. Abrir branch separada para o primeiro módulo runtime TypeScript, sem misturar migração de linguagem com o redesign.
-5. Só remover JavaScript fonte quando o build TypeScript equivalente estiver a alimentar o `dist/` com regressões verdes.
+1. Reconfirmar os gates após esta atualização documental do PR #86.
+2. Integrar o PR #86 apenas com CI + TypeScript Foundation verdes e rever o diff final.
+3. Confirmar o Deploy Pages do novo `main`; só então considerar o novo Dashboard publicado.
+4. A partir do `main` mais recente, criar/atualizar uma branch exclusivamente para a migração TypeScript.
+5. Fazer o pipeline compilar TS → `dist/` e migrar módulos por blocos, mantendo o JS atual apenas como fallback temporário.
+6. Remover cada `.js` fonte somente quando não existir referência de runtime/build/testes e toda a regressão estiver verde.
