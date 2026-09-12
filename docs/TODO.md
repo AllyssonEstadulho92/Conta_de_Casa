@@ -1,208 +1,181 @@
 # TODO — Conta de Casa
 
-Atualizado: 11 de setembro de 2026
+Atualizado: 12 de setembro de 2026
 
 ## P0 — Invariantes
 
 - [x] Manter `STATE_VERSION = 5`, IndexedDB financeiro e valores em cêntimos.
-- [x] Preservar PBKDF2-SHA-256 + AES-GCM.
-- [x] Manter `PBKDF2_ITERATIONS = 250000`.
-- [x] Não alterar cálculos, faturas, pagamentos, QR, scanner ou sync por correções visuais/versionamento.
+- [x] Preservar PBKDF2-SHA-256 + AES-GCM e `PBKDF2_ITERATIONS = 250000`.
 - [x] Preservar `estimatedCents` separado de `actualCents`.
 - [x] Preservar `marketId|pid` no pipeline especializado.
+- [x] Não alterar cálculos, faturas, pagamentos, QR, scanner ou sync por redesign.
 
-## P0 — Base integrada
+## P0 — Base já integrada
 
-- [x] `75-startup2`.
-- [x] `75-photo-loader3`.
-- [x] `75-catalog4`.
-- [x] `75-usability1`.
-- [x] `75-pages1`.
-- [x] `75-assets1`.
-- [x] `75-market1`.
-- [x] `75-expenses1`.
 - [x] Fundação TypeScript — PR #72.
-- [x] `76-veggie-menu1` — PR #74.
+- [x] `75-expenses1` — PR #73.
 - [x] `76-veggie-menu2` + `76-modern-ui1` — PR #76.
 - [x] `76-version-audit1` — PR #78.
 - [x] `76-mobile-shell2` — PR #80.
-- [x] Baseline arquitetural transversal v76 — PR #82.
+- [x] Baseline arquitetural v76 — PR #82.
+- [x] Consolidação UI/shell — PR #84, merge `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`.
 
-## P0 — baseline arquitetural transversal v76
+## P0 — `feat/v76-ui-components1` / PR #85
 
-Estado: publicado em `main` pelo PR #82, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`.
+- [x] Criar revisão `76-modern-ui2`.
+- [x] Consolidar hierarquia `primary`, `secondary`, `danger`, `link`, `icon button`.
+- [x] Baseline 44 px para controlos principais.
+- [x] Estados disabled/`aria-disabled`, foco e hover coerentes.
+- [x] Métricas de ícones dentro de botões.
+- [x] `min-width:0` e gap comum para grids partilhados.
+- [x] Apresentação de fotografias do Mercado com `contain`/centro/fallback.
+- [x] Rever cache PWA para `modern-ui2` + `ui-components1`.
+- [x] Atualizar testes `v76-modern-ui`, Veggie Burger, mobile shell e contrato de arquitetura.
+- [x] Atualizar `PROJECT_STATE`, `ARCHITECTURE`, `DECISIONS`, `TODO` e `CHANGELOG`.
+- [x] Abrir PR #85.
+- [x] CI integral verde — run `34664678296`.
+- [x] TypeScript Foundation verde — run `34664678384`.
+- [x] Rever diff final do PR #85.
+- [ ] Integrar apenas após os gates deste último commit permanecerem verdes.
+- [ ] Confirmar GitHub Pages após merge.
 
-### Pesquisa e critérios
+## P0 — redesign real baseado nos protótipos
 
-- [x] Rever Apple HIG/Apple Developer para safe areas, toolbar e navegação de topo.
-- [x] Rever MDN para `env(safe-area-inset-*)`, `viewport-fit=cover`, specificity, `@layer` e container queries.
-- [x] Rever W3C/WCAG 2.2 para Reflow 320 px, Target Size e Focus Not Obscured.
-- [x] Rever web.dev para PWA/cache/IndexedDB/Cache Storage.
-- [x] Rever OWASP para CSP e validação de inputs.
-- [x] Formalizar propriedade única por preocupação em `ARCHITECTURE.md` e D-073.
-- [x] Definir 44×44 CSS px como baseline tátil interno para controlos primários, preservando WCAG 2.2 AA como mínimo normativo.
-- [x] Definir matriz responsive 320/360/375/390/430/768/820/1024+.
-- [x] Proibir novos “patch files” para a mesma geometria global.
+Princípio: usar os protótipos como referência visual/hierárquica e apenas funções/dados reais do projeto.
 
-### Implementação e gates
+### Dashboard
 
-- [x] Retirar de `mobile-layout.css` a propriedade antiga de `.app-shell`, `.main`, `.topbar` e viewport interno.
-- [x] Manter em `mobile-layout.css` apenas refinamentos de feature do Mercado.
-- [x] Atualizar `tests/mobile-layout-regression.test.cjs` para a arquitetura atual.
-- [x] Criar `tests/ui-architecture-contract.test.cjs`.
-- [x] Adicionar o novo gate à CI.
-- [x] CI integral do PR verde.
-- [x] TypeScript Foundation verde.
-- [x] Rever diff antes de integração.
-- [x] Integrar em `main` apenas após gates verdes.
-- [x] TypeScript Foundation de `main` `34577495832`: sucesso.
-- [x] CI de `main` `34577495803`: sucesso.
-- [x] GitHub Pages `34577588233`: sucesso.
+- [ ] Reorganizar header para título/contexto + mês + ações essenciais.
+- [ ] Identificar no código o resumo financeiro real que pode ocupar a posição principal.
+- [ ] Limitar KPIs a métricas reais e úteis.
+- [ ] Reorganizar próximos vencimentos, orçamento, categorias e atividade recente.
+- [ ] Reduzir “card dentro de card”.
+- [ ] Validar desktop e mobile sem alterar cálculos.
 
-### Consolidação seguinte — sem big-bang
+### Mercado
 
-- [ ] Inventariar seletores duplicados entre `v74-*`, `v75-*`, `v76-modern-ui.css` e `v76-mobile-shell.css`.
-- [ ] Classificar cada regra como tokens/shell/components/features/states/utilities.
-- [x] Remover da camada visual master a geometria global mobile já coberta pelo shell, preservando a autoridade final do `v76-mobile-shell.css` — implementação no PR #84.
-- [ ] Medir e reduzir `!important` por domínio, sem remoção cega.
-- [ ] Só introduzir `@layer` quando o domínio concorrente completo puder ser migrado em conjunto.
-- [ ] Usar container queries apenas em componentes cujo comportamento depende do contentor.
-- [ ] Consolidar assets CSS/JS de build sem perder modularidade de source ou capacidade de auditoria.
-- [ ] Criar comparação visual para todas as páginas antes de apagar CSS histórico.
+- [ ] Consolidar pesquisa, filtros e ação adicionar/ler fatura.
+- [ ] Rever lista/catálogo/carrinho para evitar informação duplicada.
+- [ ] Manter preço observado/estimado/confirmado explicitamente separados.
+- [ ] Rever quantidade/unidade/peso e totais linha a linha.
+- [ ] Auditar imagens, fallbacks, origem e logos.
+- [ ] Não implementar comparação “mais barato” sem fonte e validade comprovadas.
 
-### PR #84 — primeira consolidação UI/shell
+### Planeamento
 
-- [x] Criar branch `feat/v76-ui-consolidation1` a partir de `main`.
-- [x] Remover de `v76-modern-ui.css` a geometria duplicada de `.main`, `.topbar`, `.main>.page` e `.mobile-nav` no breakpoint mobile.
-- [x] Remover offsets/gutters estruturais duplicados em ≤390 px.
-- [x] Preservar aparência, componentes, estados e alvos tácteis.
-- [x] Atualizar `tests/v76-modern-ui.test.cjs`.
-- [x] Reforçar `tests/ui-architecture-contract.test.cjs` para impedir regressão de ownership.
-- [ ] CI integral do PR #84 verde.
-- [ ] TypeScript Foundation do PR #84 verde.
-- [ ] Rever diff final do PR #84.
-- [ ] Integrar em `main` apenas com gates verdes.
-- [ ] Validar GitHub Pages após merge.
+- [ ] Redesenhar apenas sobre saldo atual, saldo inicial, orçamento mensal e rendimentos já existentes.
+- [ ] Não introduzir tarefas/simulações/despesas fixas sem suporte funcional real.
+- [ ] Melhorar formulário, estados e leitura do resumo mensal.
 
-### Próxima vaga UI/UX — componentes e páginas
+### Calendário
 
-- [ ] Inventariar hierarquia de botões: primary, secondary, danger, icon, link, CTA, ações destrutivas e ações de confirmação.
-- [ ] Inventariar grids e densidade por página: desktop/tablet/mobile, mínimo/máximo de colunas e reflow.
-- [ ] Consolidar cards, painéis, toolbars, tabs e estados vazios/carregamento/erro/sucesso.
-- [ ] Auditar iconografia: sem duplicados semânticos, alinhamento ótico, tamanho, stroke e `aria-label`/`aria-hidden` adequados.
-- [ ] Auditar fotografias/imagens: origem, fallback, proporção, crop, lazy loading, alt text e consistência entre Mercado e restantes áreas.
-- [ ] Rever Início.
-- [ ] Rever Despesas/Faturas.
-- [ ] Rever Mercado.
-- [ ] Rever Calendário.
-- [ ] Rever Planeamento.
-- [ ] Rever Relatórios.
-- [ ] Rever Objetivos.
-- [ ] Rever Segurança.
-- [ ] Rever Diagnóstico.
-- [ ] Rever Definições.
-- [ ] Validar 320/360/375/390/430/768/820/1024+ px, dark mode, teclado, foco e toque.
+- [ ] Melhorar mês/agenda/vencimentos existentes.
+- [ ] Não transformar em agenda genérica sem decisão de produto.
+- [ ] Garantir leitura mobile e navegação por teclado.
 
-### Segurança/PWA a consolidar
+### Faturas
 
-- [ ] Auditar dependência runtime do ZXing remoto e avaliar bundle local com licença preservada.
-- [ ] Reduzir `style-src 'unsafe-inline'` apenas depois de eliminar estilos inline necessários.
-- [ ] Rever CSP final do `dist/` e justificar cada origem externa.
-- [ ] Classificar cache por tipo de recurso; evitar cache indevido de manifestos/metadata de atualização.
-- [ ] Confirmar que falha/ausência de Service Worker não quebra o núcleo online.
-- [ ] Criar gates de input validation para fontes remotas, QR/código de barras e importação de fatura.
+- [ ] Manter pesquisa, filtros, ordenação e estados.
+- [ ] Reorganizar resumo por estado.
+- [ ] Tabela legível no desktop; lista/cartões funcionais no mobile.
+- [ ] “Nova fatura” como ação primária.
+- [ ] Preservar `renderBills()`/`filterBills()` e regras financeiras.
 
-## P0 — `76-mobile-shell2`
+### Restantes páginas
 
-### Diagnóstico, implementação e publicação
+- [ ] Relatórios.
+- [ ] Objetivos.
+- [ ] Segurança.
+- [ ] Diagnóstico.
+- [ ] Definições.
 
-- [x] Confirmar pela captura física que a topbar entra na status bar do iPhone.
-- [x] Confirmar pela captura física que o dock inferior cobre/corta conteúdo final.
-- [x] Identificar conflito entre `mobile-layout.css` (`100dvh` + scroll interno) e `76-modern-ui1` (topbar no fluxo).
-- [x] Criar `v76-mobile-shell.css` como autoridade final da geometria ≤820 px.
-- [x] Mover o scroll principal para o documento e remover clipping final de `.app-shell`/`.main`.
-- [x] Aplicar `safe-area-inset-top` ao cabeçalho.
-- [x] Aplicar `safe-area-inset-bottom` e altura explícita ao dock.
-- [x] Reservar `padding-bottom` de página superior à altura total do dock.
-- [x] Cobrir ≤390 px, ≤359 px e landscape de baixa altura.
-- [x] Preservar pinch-to-zoom; não usar `zoom` CSS.
-- [x] Adicionar `v76-mobile-shell.css` à allowlist Pages e cache PWA.
-- [x] Adicionar `tests/v76-mobile-shell.test.cjs` à CI e ao gate do Pages.
-- [x] CI funcional da branch `34541849503`: sucesso.
-- [x] PR #80: CI + TypeScript strict verdes.
-- [x] Integrar em `main`: `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`.
-- [x] TypeScript Foundation de `main` `34542259212`: sucesso.
-- [x] CI de `main` `34542259148`: sucesso.
-- [x] GitHub Pages `34542303536`: sucesso.
-- [ ] Validar fisicamente a compilação publicada no iPhone/Safari/PWA.
+## P0 — Design System final
 
-### Validação física obrigatória
+- [ ] Uma família tipográfica principal.
+- [ ] Escala tipográfica formal: Display/H1/H2/H3/Body/Small/Caption/Label.
+- [ ] Tokens de spacing sem valores aleatórios.
+- [ ] Tokens de raio, borda, elevação e foco.
+- [ ] Paleta semântica: background/surface/text/border/accent/success/warning/error.
+- [ ] Cards apenas quando ajudam a separar informação.
+- [ ] Form states: default/focus/filled/disabled/error/success.
+- [ ] Loading/empty/offline/error/success states partilhados.
+- [ ] Dark/Light/System com tokens próprios.
+- [ ] Auditoria final de ícones e acessibilidade semântica.
 
-- [ ] Veggie Burger totalmente abaixo da hora/status bar.
-- [ ] Topbar rola com o conteúdo e nunca fica presa no viewport.
-- [ ] Scroll chega ao último cartão/ação sem corte.
-- [ ] Último conteúdo fica integralmente acima do dock.
-- [ ] Bottom nav não corta ícone nem rótulo.
-- [ ] 320/375/390/430 px.
-- [ ] vertical e horizontal.
-- [ ] Safari web e PWA instalada.
-- [ ] Início, Despesas, Mercado, Planeamento e Mais.
-- [ ] Calendário, Relatórios, Objetivos, Segurança, Diagnóstico e Definições.
+## P0 — Migração para fonte 100% TypeScript
 
-## P0 — `76-version-audit1`
+Meta: nenhum JavaScript manual como fonte funcional; JavaScript apenas gerado no build/deploy.
 
-- [x] Corrigir falso “atualizado” antes de `registration.update()`.
-- [x] Separar versão da aplicação, release pública e build exato.
-- [x] Application Version `0.76.0-dev.1`; release pública `v75`.
-- [x] PR #78 integrado; CI/TypeScript/Pages verdes.
-- [ ] Validar fisicamente no iPhone/Safari/PWA o cartão de versão e a verificação manual.
+### Bloco 2 — dinheiro, quantidades e datas
 
-## P0 — Riscos de governação
-
-- [ ] Ativar ou definir proteção equivalente da branch `main`; encontra-se atualmente sem branch protection.
-- [ ] Tornar CI + TypeScript Foundation gates obrigatórios antes de integração quando a configuração do repositório permitir.
-
-## P0 — v76 Bloco 2: dinheiro, quantidades e datas
-
-Branch reservada: `feat/v76-money-dates`.
-
-- [ ] Mapear testes atuais.
+- [ ] Mapear funções puras atuais e testes.
 - [ ] Criar vetores de paridade JS→TS.
-- [ ] Migrar funções puras sem mudar resultados.
-- [ ] Criar tipos de `Cents`, datas civis e quantidades escaladas.
-- [ ] Evitar floating point em operações contabilísticas.
-- [ ] Testar limites, inválidos, arredondamento e quantidades fracionárias.
-- [ ] Só substituir runtime com paridade comprovada.
+- [ ] Migrar parsing/formatação monetária e datas civis.
+- [ ] Migrar quantidades com representação controlada.
+- [ ] Testar limites, inválidos e arredondamento.
+- [ ] Só substituir runtime com paridade provada.
 
-## P0 — v76 Bloco 3: domínio financeiro
+### Bloco 3 — domínio financeiro
 
 - [ ] Migrar `finance.js` por subdomínios.
 - [ ] Tipar faturas, pagamentos, rendimentos, orçamento, objetivos e relatórios.
 - [ ] Testar pagamentos parciais, vencimentos, recorrência e arredondamentos.
-- [ ] Manter dinheiro persistido em cêntimos inteiros.
 
-## P0 — v76 Blocos 4–6: Mercado exato, caixa e assets
+### Blocos 4–6 — Mercado
 
-- [ ] Separar identidade, observação de preço, estimativa, confirmação, quantidade/peso e total.
-- [ ] Criar motor de carrinho com aritmética controlada.
-- [ ] Suportar GTIN/EAN, unidades, embalagens e produtos a peso.
-- [ ] Modelar promoções/descontos/cupões apenas com regras conhecidas e testadas.
-- [ ] Reconciliar com talão/fatura sem substituir valores silenciosamente.
-- [ ] Corrigir lacuna `pid` com teste específico.
-- [ ] Preferir GTIN/PID para imagens.
-- [ ] Verificar licença/origem de logos SVG antes de incorporar assets locais.
+- [ ] Migrar modelo de produto/preço/carrinho.
+- [ ] Separar `ObservedPrice`, `ConfirmedPrice`, `estimatedCents`, `actualCents`.
+- [ ] GTIN/EAN, unidade/embalagem/peso com tipos explícitos.
+- [ ] Corrigir lacuna de persistência `pid` com teste específico.
+- [ ] Reconciliar fatura/talão sem substituir valores silenciosamente.
 
-## P0 — v76 Blocos 7–10
+### Bloco 7 — core/persistência/cifra
 
-- [ ] Migrar cofre/IndexedDB sem alterar algoritmos/schema sem decisão própria.
-- [ ] Migrar sync/conflitos com testes de concorrência/offline.
-- [ ] Migrar render/forms/events com tipos DOM e guards.
-- [ ] Migrar Service Worker/build após pipeline TS estável.
-- [ ] Remover JavaScript legado apenas com prova de ausência de referências.
-- [ ] Eliminar `any` não justificado.
+- [ ] Migrar `core.js` depois de domínio estável.
+- [ ] Tipar schema v5, IndexedDB, envelope cifrado e erros.
+- [ ] Não alterar algoritmo criptográfico por causa da linguagem.
 
-## P2 — Consolidação visual
+### Bloco 8 — sync
 
-- [ ] Consolidar por propriedade/responsabilidade, não por ficheiro ou número de versão.
-- [ ] Remover CSS histórico apenas com comparação visual e regressões verdes.
-- [ ] Manter uma única fonte estrutural por preocupação sem quebrar compatibilidade PWA/Safari.
+- [ ] Migrar sync/conflitos com estados discriminados.
+- [ ] Testar offline, timeout, concorrência e envelope inválido.
+
+### Bloco 9 — UI
+
+- [ ] Migrar `render.js`, `forms.js`, `events.js` e restantes controladores.
+- [ ] Tipar DOM com guards; evitar casts que escondam `null`.
+
+### Bloco 10 — PWA/build/limpeza
+
+- [ ] Criar build TypeScript que gere os ficheiros JS usados pelo browser.
+- [ ] Fazer Pages consumir apenas artefactos gerados.
+- [ ] Migrar Service Worker.
+- [ ] Migrar scripts/testes/tooling para TypeScript quando o runtime estiver estável.
+- [ ] Remover ficheiros `.js` fonte legado apenas sem referências e com regressões verdes.
+- [ ] Proibir `@ts-nocheck` e `any` em massa.
+
+## P0 — Segurança/PWA
+
+- [ ] Auditar ZXing remoto e avaliar bundle local com licença preservada.
+- [ ] Reduzir `style-src 'unsafe-inline'` após retirar estilos inline necessários.
+- [ ] Rever CSP final do `dist/` e justificar cada origem externa.
+- [ ] Classificar cache por tipo de recurso.
+- [ ] Confirmar que ausência/falha do Service Worker não quebra o núcleo online.
+- [ ] Gates de validação para fontes remotas, QR/código de barras e importação de faturas.
+
+## P0 — QA
+
+- [ ] 320/360/375/390/430/768/820/1024+ px.
+- [ ] Safari/iPhone web + PWA instalada.
+- [ ] Android/Chrome.
+- [ ] tablet e desktop.
+- [ ] portrait/landscape.
+- [ ] teclado virtual e foco.
+- [ ] Light/Dark/System.
+- [ ] reduced-motion/forced-colors.
+- [ ] comparação visual antes de apagar CSS histórico.
+
+## P0 — Governação
+
+- [ ] Ativar proteção equivalente da `main` quando a configuração permitir.
+- [ ] Tornar CI + TypeScript Foundation gates obrigatórios antes de merge.

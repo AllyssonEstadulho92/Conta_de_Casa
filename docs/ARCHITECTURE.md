@@ -1,274 +1,261 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 11 de setembro de 2026  
+Atualizado: 12 de setembro de 2026  
 Versão da aplicação: `0.76.0-dev.1`  
 Release pública: `v75`  
-Programa técnico: `v76` — migração incremental TypeScript + UI/UX  
+Programa técnico: `v76` — UI/UX + migração incremental TypeScript  
 Distribuição: GitHub Pages / PWA
 
-## 1. Invariantes
+## 1. Princípios e invariantes
 
-A aplicação continua PWA estática/local-first. Estado financeiro, apresentação, recursos visuais, catálogos e metadados de build permanecem separados.
+A aplicação é uma PWA estática/local-first. Estado financeiro, apresentação, catálogos, imagens e metadados de build são responsabilidades separadas.
 
 - `STATE_VERSION = 5`;
-- dinheiro em cêntimos inteiros;
+- dinheiro persistido em cêntimos inteiros;
 - estado financeiro em IndexedDB;
 - PBKDF2-SHA-256 + AES-GCM;
 - `PBKDF2_ITERATIONS = 250000`;
-- sincronização opcional apenas do envelope cifrado;
-- nenhum segredo no código público;
+- sincronização remota opcional apenas do envelope cifrado;
+- nenhum segredo no repositório público;
 - `estimatedCents` distinto de `actualCents`;
-- `marketId|pid` continua identidade canónica do pipeline especializado de SKU/fotografia.
+- `marketId|pid` é a identidade canónica do pipeline especializado de SKU/fotografia;
+- imagem/fotografia não é prova de preço nem de transação.
 
-## 2. Núcleo funcional
+## 2. Núcleo funcional atual
+
+Runtime legado ainda existente:
 
 - `core.js`: estado, normalização, IndexedDB, cifragem e backup;
 - `finance.js`: cálculos financeiros;
 - `render.js`, `forms.js`, `events.js`: UI funcional e mutações autorizadas;
 - `sync.js` + `sync-conflict-policy.js`: sincronização cifrada e conflitos;
-- `mobile-menu-toggle.js`: controlador móvel v73;
-- `v75-architecture.js`: hierarquia de navegação;
-- `src/`: módulos e contratos em migração progressiva para TypeScript;
-- `app-update.js`: Centro de Versão e Atualizações, isolado do domínio financeiro.
+- módulos de Mercado, QR, scanner, assets, atualização e navegação em JavaScript.
 
-## 3. Composição pública
+Fonte TypeScript atual:
 
-`index.html` é o template. `scripts/prepare-pages.cjs` cria `dist/` por allowlist explícita. `sw.js` mantém allowlist e revisão de cache equivalente.
+- `src/types/`: contratos de domínio;
+- `src/type-tests/`: provas de tipos;
+- `src/ui/veggie-menu-toggle.ts`: controlo Veggie Burger/X.
 
-Ordem visual relevante atualmente:
+O destino é substituir progressivamente o runtime legado por fonte TypeScript strict, sem alterar o comportamento validado.
 
-1. base/responsive;
-2. `mobile-layout.css` — apenas refinamentos de features móveis, sem propriedade do viewport;
-3. `mobile-menu-toggle.css`;
-4. arquitetura/cabeçalho/estabilidade/layout/drawer v75;
-5. páginas, Despesas e Mercado v75;
-6. `v76-veggie-menu.css` (`76-veggie-menu2`);
-7. `v75-usability.css`;
-8. `v76-modern-ui.css` (`76-modern-ui1`) — design system transversal;
-9. `v76-mobile-shell.css` (`76-mobile-shell2`) — autoridade final da geometria em ≤820 px;
-10. `v76-version-about.css` (`76-version-audit1`) — apresentação específica do Centro de Versão.
+## 3. Modelo de build e objetivo TypeScript
 
-A ordem de `v76-mobile-shell.css` depois de `v76-modern-ui.css` continua deliberada. O objetivo da consolidação v76 é reduzir a dependência de precedência histórica sem alterar de uma vez todo o valor computado da UI.
+Hoje `scripts/prepare-pages.cjs` cria `dist/` por allowlist e o browser recebe JavaScript.
 
-## 4. Modelo de versionamento
+Arquitetura de destino:
 
-- **Application Version**: `package.json.version`, atualmente `0.76.0-dev.1`;
-- **Public Release**: `BUILD`/`release-manifest.json`, atualmente `v75`;
-- **Build ID**: primeiros 7 caracteres do SHA Git do código compilado;
-- **Build Date**: data ISO gerada no processo de preparação do Pages.
+`src/**/*.ts` → typecheck strict → compilação/build → JavaScript gerado em `dist/` → GitHub Pages
 
-`scripts/prepare-pages.cjs` injeta `app-version`, `app-build`, `app-build-id` e `app-build-date` no HTML público. Alterações dentro da mesma versão de desenvolvimento são distinguidas pelo Build ID, não por aumento artificial da release.
+Regras:
 
-## 5. Atualizações PWA
+- o browser nunca depende de TypeScript em runtime;
+- JavaScript gerado é artefacto de build, não fonte manual;
+- nenhum módulo JS legado é removido antes de existir substituto TS equivalente e regressões verdes;
+- `strict`, `noImplicitAny`, `strictNullChecks`, `noUncheckedIndexedAccess` e `exactOptionalPropertyTypes` permanecem ativos;
+- a migração não autoriza alteração de schema, cifragem, fórmula ou semântica de preço.
 
-`app-update.js` e `sw.js` implementam atualização controlada:
+## 4. Composição visual pública
 
-1. `release-manifest.json` é consultado com `cache: no-store`;
-2. resolve-se a instalação atual por `navigator.serviceWorker.getRegistration()`;
-3. a verificação manual chama `registration.update()` antes de declarar “atualizado”;
-4. uma release igual não bloqueia a procura de um Service Worker mais recente;
-5. um worker em espera só é aplicado por `APPLY_UPDATE` após ação explícita;
-6. `controllerchange` faz reload controlado;
-7. dados financeiros, PIN e cofre não participam deste protocolo.
+Ordem relevante:
 
-Critério v76 para evolução do cache:
+1. estilos base/responsive históricos;
+2. `mobile-layout.css` — apenas refinamentos de features móveis;
+3. camadas v75 de arquitetura/layout/pages/features;
+4. `v76-veggie-menu.css` (`76-veggie-menu2`);
+5. `v75-usability.css`;
+6. `v76-modern-ui.css` (`76-modern-ui2`) — tokens e componentes visuais partilhados;
+7. `v76-mobile-shell.css` (`76-mobile-shell2`) — autoridade final de geometria mobile ≤820 px;
+8. estilos específicos do Centro de Versão.
 
-- Cache Storage fica reservado a recursos HTTP necessários ao app shell e recursos de rede explicitamente escolhidos;
-- IndexedDB continua a ser a persistência de estado estruturado da aplicação;
-- não guardar em cache por rotina endpoints de atualização/manifestos que precisam de frescura;
-- cada estratégia de cache deve ser escolhida por tipo de recurso e testada para offline, atualização e invalidação;
-- o núcleo online não pode depender da existência do Service Worker.
+O shell móvel carrega depois do design system de propósito: aparência e geometria são responsabilidades diferentes.
 
-## 6. Navegação
+## 5. Propriedade única por preocupação
+
+A arquitetura visual v76 separa:
+
+- **tokens**: cor, tipografia, espaçamento, raio, sombra, foco;
+- **shell**: viewport, scroll, safe areas, topbar, área principal e navegação persistente;
+- **componentes**: botões, inputs, cards, tabs, dialogs, tabelas, toolbars e estados;
+- **features**: Dashboard, Despesas/Faturas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições;
+- **estados**: active, focus, disabled, loading, empty, error, offline, success;
+- **domínio**: regras financeiras, Mercado, persistência, sync e segurança fora das camadas visuais.
+
+Uma propriedade estrutural só pode ter uma autoridade. Não criar novos ficheiros “patch” para substituir seletor já pertencente a outra camada.
+
+## 6. Shell móvel — `76-mobile-shell2`
+
+Em ≤820 px, `v76-mobile-shell.css` é a única autoridade da geometria global:
+
+- scroll vertical principal no documento;
+- `.app-shell` com `min-height:100dvh`, sem clipping;
+- `.main` sem scroll container paralelo;
+- `.topbar` no fluxo normal e compensada por `safe-area-inset-top`;
+- páginas com reserva inferior para o dock;
+- `.mobile-nav` persistente e compensada por `safe-area-inset-bottom`;
+- safe areas laterais;
+- contratos para 320/360/375/390/430/768/820 px e landscape de baixa altura;
+- foco e último conteúdo não ficam escondidos por navegação persistente.
+
+`v76-modern-ui.css` pode estilizar topbar/dock, mas não pode reassumir `position`, offsets, safe area, altura estrutural, overflow global ou reserva de página.
+
+## 7. Sistema visual — `76-modern-ui2`
+
+`v76-modern-ui.css` é a autoridade visual transversal para tokens e componentes.
+
+### Hierarquia de ações
+
+- `primary`: única ação dominante do contexto;
+- `secondary`: ação importante mas não dominante;
+- `danger`: ação destrutiva;
+- `link`: ação contextual de baixo peso;
+- `icon button`: comando compacto com rótulo acessível.
+
+Contratos:
+
+- controlos principais com baseline de 44 px;
+- ícones de botão com métricas consistentes;
+- `focus-visible` claro;
+- estados disabled/`aria-disabled` consistentes;
+- hover apenas quando existe ponteiro fino;
+- reduced-motion e forced-colors preservados.
+
+### Grids e composição
+
+- componentes partilhados usam `min-width:0` para evitar overflow;
+- gaps usam tokens comuns;
+- topologia de colunas continua pertencente à feature enquanto cada página não for consolidada;
+- não transformar toda a informação em cards; espaço em branco e separadores também são ferramentas de hierarquia.
+
+### Fotografias do Mercado
+
+- `object-fit:contain` e `object-position:center` para não cortar produto;
+- fallback visual consistente;
+- origem/identidade/licença continuam independentes da apresentação;
+- fotografia nunca altera preço, SKU ou total contabilizado.
+
+## 8. Navegação e hierarquia do produto
 
 Mobile principal:
 
 `Início → Despesas → Mercado → Planeamento → Mais`
 
-O drawer mantém destinos secundários. Rotas, IDs, permissões e handlers não são substituídos por CSS.
+Desktop:
 
-Critério de navegação:
+- sidebar persistente em largura adequada;
+- destinos operacionais primeiro;
+- áreas menos frequentes agrupadas visualmente;
+- mesma arquitetura funcional do mobile, com maior densidade quando existe espaço.
 
-- bottom navigation = destinos de topo, não comandos da vista;
-- toolbar/cabeçalho = título, navegação contextual e ações prioritárias;
-- ações secundárias passam para o corpo, menu contextual ou “Mais” quando o espaço for insuficiente;
-- a hierarquia funcional deve ser equivalente entre mobile e desktop mesmo quando a apresentação muda.
+Princípios:
 
-## 7. Shell móvel — `76-mobile-shell2`
+- bottom navigation contém destinos, não comandos da vista;
+- toolbar contém título, contexto e ações prioritárias;
+- ações secundárias ficam no corpo/menu contextual/“Mais”;
+- reduzir menus gigantes sem remover funcionalidades;
+- o utilizador deve perceber onde está, o estado atual e a próxima ação em poucos segundos.
 
-Estado publicado em `main`: PR #80, merge `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`.
+## 9. Direção das páginas
 
-### Problema histórico
+Os protótipos aprovados são referência de composição. Só entram dados/funções existentes no domínio real.
 
-Existiam duas decisões incompatíveis em cascata:
+### Dashboard
 
-- `mobile-layout.css` mantinha `.app-shell` e `.main` com `height/max-height:100dvh`, `overflow:hidden` no shell e scroll interno em `.main`;
-- `76-modern-ui1` já tinha tornado a `.topbar` relativa e no fluxo normal, mas sem revogar integralmente as limitações do viewport e sem repor `safe-area-inset-top`.
+Ordem alvo:
 
-Em Safari/iPhone isto produziu clipping real: cabeçalho dentro da status bar e conteúdo final por baixo do dock.
+1. header limpo;
+2. resumo financeiro principal real;
+3. KPIs reais e limitados;
+4. ações rápidas;
+5. próximos vencimentos + orçamento;
+6. categorias + atividade recente.
 
-### Estado na arquitetura baseline v76
+### Mercado
 
-`mobile-layout.css` deixou de possuir qualquer geometria global de `.app-shell`, `.main`, `.topbar` ou `.mobile-nav`. O ficheiro fica restrito a refinamentos de features móveis, atualmente densidade dos cartões de Mercado.
+- pesquisa e ação adicionar/ler fatura bem separadas;
+- catálogo/lista e carrinho sem duplicar informação;
+- quantidade/preço/estado visíveis;
+- total `Estimativa` até existir evidência completa;
+- comparação de preços só quando houver fonte identificada e válida;
+- logos/imagens só com origem/direito de utilização adequados.
 
-Em ≤820 px, `v76-mobile-shell.css` é a autoridade do shell e estabelece:
+### Planeamento
 
-- `body` como único scroll vertical da aplicação desbloqueada;
-- `.app-shell`: altura automática, `min-height:100dvh`, sem `max-height` e sem clipping;
-- `.main`: altura automática, sem scroll container paralelo;
-- `.topbar`: `position:relative`, no fluxo, com compensação por `env(safe-area-inset-top)`;
-- `.page`: conteúdo elástico e `padding-bottom` calculado pela reserva do dock;
-- `.mobile-nav`: persistente, com altura explícita e compensação de `safe-area-inset-bottom`;
-- safe areas laterais para não encostar controlos a recortes/arestas;
-- ajustes para ≤390 px, ≤359 px e landscape de baixa altura;
-- `scroll-margin`/reserva suficientes para foco e último conteúdo não ficarem atrás do dock.
+O domínio atual inclui saldo atual, saldo inicial, orçamento mensal e rendimentos. Qualquer calendário/tarefa/simulação do protótipo só entra depois de confirmar suporte funcional ou criar decisão de produto própria.
 
-Drawer e dialogs continuam a usar geometria modal própria; não transferem o scroll principal novamente para `.main`.
+### Calendário
 
-## 8. Sistema visual master — `76-modern-ui1`
+O calendário atual representa vencimentos/pagamentos. Não transformar automaticamente em agenda genérica de tarefas sem alteração de produto aprovada.
 
-`v76-modern-ui.css` define tokens comuns de background, superfícies, texto, muted, primary/accent, estados, bordas, sombras, raios e foco.
+### Faturas
 
-Cobertura: Dashboard, Despesas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições, além de tabs, botões, inputs, painéis, tabelas, estados vazios, dialogs, drawer e bottom navigation.
+- pesquisa/filtros/estado/ordenação preservados;
+- resumo por estado;
+- tabela no desktop e lista legível no mobile;
+- ação “Nova fatura” dominante;
+- nenhuma alteração visual muda cálculo de saldo, pagamento ou vencimento.
 
-### Consolidação PR #84
+## 10. Responsive e acessibilidade
 
-A primeira etapa de consolidação transversal retira do design system a geometria mobile que já pertence ao shell. Em ≤820 px:
-
-- `v76-modern-ui.css` pode definir **aparência** da topbar e do dock — cor, borda, raio, sombra, blur e estados;
-- `v76-modern-ui.css` pode definir **composição interna de componentes** que não substitua o viewport — por exemplo `display`, tipografia, ícones, estados e hierarquia visual;
-- `v76-modern-ui.css` não pode definir posição global, offsets de safe area, altura do shell, reserva inferior das páginas, gutters estruturais do shell ou posição fixa do dock;
-- `v76-mobile-shell.css` mantém a propriedade de `position`, `inset`, `top/bottom`, `width`, `height/min-height/max-height`, padding estrutural, overflow/scroll global e safe-area offsets de `.app-shell`, `.main`, `.topbar`, `.main>.page` e `.mobile-nav`.
-
-O objetivo é conservar o resultado final enquanto reduz a dependência da cascata. Não é uma redesign nem alteração de domínio.
-
-### Propriedade visual v76
-
-A arquitetura passa a separar explicitamente:
-
-- **tokens**: cor, tipografia, espaçamento, raios, sombra, foco;
-- **shell**: viewport, scroll, safe areas, topbar, área principal e navegação persistente;
-- **componentes**: botões, inputs, cards, tabs, dialogs, tabelas e estados;
-- **features**: Dashboard, Despesas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições;
-- **estados**: active, focus, disabled, loading, empty, error, offline;
-- **utilities**: apenas helpers genéricos sem semântica de domínio.
-
-Uma propriedade só deve ter uma autoridade estrutural. Novas correções não devem criar ficheiros “patch” para voltar a substituir o mesmo seletor.
-
-### Estratégia de cascata
-
-A base atual ainda contém CSS histórico e `!important`. A migração para cascade layers será gradual e por domínio completo.
-
-Ordem de destino:
-
-`base → tokens → shell → components → features → states → utilities`
-
-Não introduzir `@layer` apenas num ficheiro novo enquanto o restante código concorrente continuar sem layer, porque regras normais sem layer têm precedência sobre regras normais em layers. A adoção deve preservar o valor computado atual e ser acompanhada por testes.
-
-Preferir seletores de baixa especificidade (`:where()` quando adequado), classes semânticas e composição. `!important` novo exige justificação explícita; o objetivo é eliminá-lo progressivamente onde já não houver conflito de propriedade.
-
-## 9. Responsive, iPhone e acessibilidade
-
-Critério mínimo para toda a aplicação:
+Critério mínimo:
 
 - mobile-first;
-- reflow sem perda de informação/funcionalidade a 320 CSS px;
-- sem scroll horizontal global; exceções apenas em componentes cuja semântica realmente exija duas dimensões, como tabelas largas;
-- `viewport-fit=cover` apenas com `env(safe-area-inset-*)` para conteúdo importante;
-- não codificar offsets por modelo específico de iPhone;
-- 44×44 CSS px como baseline interno para controlos tácteis primários no iPhone;
-- WCAG 2.2 AA mantém o mínimo normativo de 24×24 CSS px ou espaçamento equivalente;
-- foco nunca pode ficar totalmente oculto por header, dock, drawer persistente ou overlay do autor;
-- inputs no iPhone devem manter tipografia que não provoque auto-zoom acidental e nunca bloquear pinch-to-zoom;
-- landscape, teclado virtual e visual viewport entram na matriz de regressão;
-- container queries são preferíveis em componentes reutilizáveis cuja adaptação depende da largura do contentor, mas não substituem safe areas nem breakpoints globais do shell.
+- reflow funcional a 320 CSS px;
+- sem scroll horizontal global;
+- safe areas com `env(safe-area-inset-*)`;
+- não bloquear pinch-to-zoom;
+- 44×44 CSS px como baseline interna de toque;
+- foco não oculto por header/dock;
+- tipografia de inputs compatível com Safari/iPhone;
+- teclado virtual, landscape e dark mode fazem parte do QA;
+- contraste e estados não dependem apenas de cor.
 
-Matriz obrigatória de viewport para QA visual/estrutural:
+## 11. Dark mode
 
-- 320 px;
-- 360/375 px;
-- 390 px;
-- 430 px;
-- 768/820 px;
-- desktop ≥1024 px;
-- portrait e landscape onde aplicável.
+Light, Dark e System devem partilhar tokens sem “inverter branco para preto”. Superfícies, bordas, sombras, texto e cores semânticas precisam de valores próprios por tema.
 
-## 10. Veggie Burger TypeScript — `76-veggie-menu2`
+## 12. Segurança
 
-Fonte: `src/ui/veggie-menu-toggle.ts`. Runtime: `v76-veggie-menu.js`.
+UI e migração TypeScript não podem enfraquecer:
 
-- fechado: duas barras horizontais;
-- aberto: superior `+45°`, inferior `-45°`;
-- Web Animations API anima ambas;
-- `#mobileMenuBtn` é controlo único;
-- `aria-expanded`/`aria-label` preservados;
-- com drawer aberto, o botão permanece fora da shell transformada;
-- reduced-motion e forced-colors preservados.
+- PIN/palavra-passe não persistidos;
+- PBKDF2/AES-GCM;
+- isolamento do cofre;
+- sync cifrada;
+- validação de QR/importações;
+- CSP;
+- ausência de segredos no repositório.
 
-## 11. Segurança
+Dados remotos são validados sintática e semanticamente antes de entrarem no domínio.
 
-Camadas UI não alteram `core.js`, `finance.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sync, QR/scanner, endpoints ou segredos sem decisão própria.
+## 13. QA e gates
 
-Critérios adicionais v76:
+Toda refatoração transversal deve manter verdes:
 
-- CSP é defesa em profundidade, não substituto de validação/escaping;
-- reduzir progressivamente dependências de runtime externas e `unsafe-inline`; não ampliar CSP por conveniência;
-- validar inputs externos no limite de entrada, tanto sintaticamente como semanticamente;
-- nunca tratar dados remotos de preço/fotografia como prova financeira;
-- upload/leitura de faturas deve validar formato, limites e conteúdo antes de persistir dados derivados;
-- nenhum token, palavra-passe ou chave entra no repositório público;
-- mudanças de UI não podem enfraquecer isolamento do cofre ou sincronização cifrada.
-
-## 12. QA e gates arquiteturais
-
-Além dos testes funcionais existentes, a baseline v76 introduz `tests/ui-architecture-contract.test.cjs`.
-
-O gate verifica:
-
-- `mobile-layout.css` não volta a definir viewport, `.main`, `.topbar` ou bottom navigation persistente;
-- `v76-modern-ui.css` não volta a reservar padding de página para o dock, posicionar o dock persistente, definir dimensões globais da topbar mobile ou repor offsets estruturais ≤390 px;
-- `v76-mobile-shell.css` mantém safe areas e propriedade do documento/scroll;
-- `viewport-fit=cover` está presente sem bloquear zoom do utilizador;
-- controlos críticos mantêm baseline de 44 px;
-- `v76-mobile-shell.css` continua depois de `v76-modern-ui.css` no build;
-- a regressão mobile deixa de testar a arquitetura antiga como comportamento obrigatório.
-
-Qualquer refatoração transversal deve manter verdes, no mínimo:
-
-- finance/audit/counting invariants;
+- invariantes financeiros;
 - isolamento/cofre;
 - datas civis;
-- formulários/faturas/QR;
+- faturas/formulários/QR;
 - Mercado/SKU/imagens/scanner;
 - responsive/mobile;
 - navegação/acessibilidade;
 - sync/conflitos;
-- atualização PWA/manifesto;
-- TypeScript strict.
+- PWA/manifesto/cache;
+- TypeScript strict;
+- `tests/ui-architecture-contract.test.cjs` enquanto os testes ainda não forem migrados para TypeScript.
 
-## 13. Próxima consolidação visual
+## 14. Estratégia de migração de código
 
-Depois do PR #84, a revisão deixa de ser feita por “ficheiro de versão” e passa a ser feita por componente/feature:
+Ordem recomendada e vigente:
 
-1. hierarquia de botões e ações;
-2. grids e composição responsiva;
-3. cards/painéis/toolbars/tabs;
-4. formulários, feedback e estados;
-5. iconografia e acessibilidade semântica;
-6. imagens/fotografias, fallbacks, proporções e origem;
-7. revisão página a página com a matriz responsive definida.
+1. tipos e funções puras de dinheiro/datas;
+2. domínio financeiro;
+3. Mercado/modelo e carrinho;
+4. core/persistência/cifra;
+5. sync/conflitos;
+6. render/forms/events e restante UI;
+7. Service Worker/build;
+8. migração dos próprios testes/tooling para TypeScript;
+9. remoção final de JavaScript fonte legado.
 
-Apagar CSS histórico só é permitido quando a comparação visual e os testes demonstrarem que a propriedade foi integralmente transferida.
-
-## 14. Referências técnicas usadas na revisão de 11/09/2026
-
-Fontes primárias/de referência:
-
-- Apple Human Interface Guidelines — Layout, Toolbars e padrões de navegação;
-- Apple Developer — Safe Area Layout Guide;
-- MDN Web Docs — CSS `env()`, safe-area insets, viewport meta, specificity, cascade layers e container queries;
-- W3C/WAI — WCAG 2.2, Reflow, Target Size (Minimum) e Focus Not Obscured;
-- web.dev — Storage for the web e Service Worker caching;
-- OWASP Cheat Sheet Series — Content Security Policy e Input Validation.
-
-Estas fontes orientam os critérios de plataforma, Web, acessibilidade, PWA e segurança. Não substituem testes reais no Safari/iPhone/PWA nem prova de regressão no código do projeto.
+Uma conversão massiva por renomear `.js` para `.ts` sem tipos reais não é aceite.

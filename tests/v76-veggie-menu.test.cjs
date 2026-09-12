@@ -53,7 +53,7 @@ assert.match(shell,/body \.main\{[\s\S]*padding:0!important/,'mobile shell must 
 
 assert.match(legacy,/drawerHead\.insertBefore\(button,drawerHead\.firstChild\)/,'validated v73 drawer controller remains present underneath the TS enhancement');
 assert.match(prepare,/const VEGGIE_MENU_REV = '76-veggie-menu2'/);
-assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui1'/);
+assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui2'/);
 assert.ok(prepare.includes("'v76-veggie-menu.css'"));
 assert.ok(prepare.includes("'v76-veggie-menu.js'"));
 assert.ok(prepare.includes("'v76-modern-ui.css'"));
@@ -61,7 +61,7 @@ assert.ok(prepare.includes("'v76-mobile-shell.css'"));
 assert.match(prepare,/mobile-menu-toggle\.js\?v=\$\{MENU_REV\}[\s\S]*v76-veggie-menu\.js\?v=\$\{VEGGIE_MENU_REV\}/,'TypeScript-derived enhancement must load after validated drawer controller');
 assert.match(prepare,/v75-usability\.css\?v=\$\{USABILITY_REV\}[\s\S]*v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/,'visual system must load before the final mobile geometry shell');
 
-assert.match(sw,/veggie-menu2-modern-ui1/);
+assert.match(sw,/veggie-menu2-modern-ui2/);
 assert.ok(sw.includes("'./v76-veggie-menu.css'"));
 assert.ok(sw.includes("'./v76-veggie-menu.js'"));
 assert.ok(sw.includes("'./v76-modern-ui.css'"));
