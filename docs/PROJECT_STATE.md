@@ -57,16 +57,25 @@ Conclusão: o modelo `TypeScript fonte → JavaScript gerado → dist → browse
 
 ## 4. Trabalho atual — `feat/v76-typescript-market-branding1`
 
-Segundo módulo escolhido: `market-branding.js`, por ser uma folha de apresentação de baixo risco que não lê nem altera cofre, finanças, preços ou estado persistido.
+Segundo módulo escolhido: `market-branding.js`, uma folha de apresentação de baixo risco que não lê nem altera cofre, finanças, preços ou estado persistido.
 
-Alterações em curso:
+Implementado:
 
-- nova fonte `src/ui/market-branding.ts` com DOM tipado e `MutationObserver` tipado;
-- removida a fonte manual `market-branding.js` da branch;
-- build TypeScript generalizado para gerar dois runtimes em `.generated/`;
+- nova fonte `src/ui/market-branding.ts` com DOM e `MutationObserver` tipados;
+- fonte manual `market-branding.js` removida da branch;
+- build TypeScript generalizado para vários runtimes em `.generated/`;
 - `scripts/prepare-pages.cjs` mantém o nome público `market-branding.js`, mas copia o artefacto gerado;
-- CI, TypeScript Foundation e Pages passam a validar o artefacto gerado;
-- `tests/typescript-runtime-build.test.cjs` valida os dois módulos e prova igualdade entre artefacto gerado e bundle publicado.
+- CI, TypeScript Foundation e Pages validam o artefacto gerado;
+- `tests/typescript-runtime-build.test.cjs` prova fonte TS → artefacto → bundle `dist`;
+- cache PWA recebe revisão `ts-runtime2-market-branding1`, sem alterar a lógica do Service Worker.
+
+Gates funcionais da branch antes desta atualização documental:
+
+- TypeScript Foundation `34699847604`: sucesso;
+- CI integral `34699847600`: sucesso;
+- todos os testes de finanças, cofre, datas, faturas, Mercado, UI, Safari/PWA, responsive, acessibilidade, sync e manifesto ficaram verdes.
+
+Durante a auditoria, uma primeira alteração de `sw.js` introduziu deriva acidental na estratégia de fetch e o gate Safari/PWA detetou-a. A correção restaurou exatamente o comportamento publicado e manteve apenas a nova chave de cache. Isto confirma que os gates estão a bloquear regressões reais.
 
 Não foram alterados `core.js`, `finance.js`, IndexedDB, schema, cifragem, sync, QR/scanner, cálculos de Mercado, identidade de SKU ou preços.
 
@@ -103,8 +112,8 @@ Módulos complexos, especialmente `finance.js`, `core.js` e o controlador móvel
 
 ## 9. Próximo passo
 
-1. Concluir gates da branch `feat/v76-typescript-market-branding1`.
-2. Rever o diff e integrar apenas com CI + TypeScript Foundation verdes.
-3. Confirmar CI + Pages pós-merge.
-4. Continuar por módulos folha de baixo risco e funções puras.
+1. Abrir PR do bloco `market-branding` após revisão final do diff.
+2. Exigir novamente CI + TypeScript Foundation verdes no PR.
+3. Integrar apenas com gates verdes e confirmar CI + Pages pós-merge.
+4. Continuar pelo próximo módulo folha de baixo risco, sempre num bloco separado.
 5. Migrar finanças, persistência/cifra e sync apenas com vetores de paridade e regressão dedicada.
