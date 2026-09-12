@@ -42,7 +42,7 @@ jobs:
           node --check sync.js
           node --check sync-conflict-policy.js
           node --check market-experience.js
-          node --check market-branding.js
+          node --check .generated/market-branding.js
           node --check market-category-groups.js
           node --check market-shopping-focus.js
           node --check market-barcode.js
