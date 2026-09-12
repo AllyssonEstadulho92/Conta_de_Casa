@@ -2,7 +2,7 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade técnica do programa atual.
 
-## 2026-09-12 — `76-modern-ui2` / `ui-components1` — em preparação
+## 2026-09-12 — `76-modern-ui2` / `ui-components1` — PR #85
 
 ### Objetivo
 
@@ -26,9 +26,14 @@ Consolidar a linguagem visual partilhada antes do redesign página a página e a
 
 Não foram alterados `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sync, QR/scanner, faturas ou regras de Mercado.
 
-### Estado
+### Gates e estado
 
-Branch: `feat/v76-ui-components1`. PR/CI/TypeScript Foundation ainda pendentes nesta entrada.
+- PR #85 aberto a partir de `feat/v76-ui-components1`;
+- CI do PR `34664678296`: sucesso;
+- TypeScript Foundation `34664678384`: sucesso;
+- diff final revisto contra `main`, sem ficheiros de domínio alterados;
+- commit documental posterior aos gates exige nova confirmação automática antes do merge;
+- integração em `main` e validação GitHub Pages permanecem pendentes.
 
 ---
 
