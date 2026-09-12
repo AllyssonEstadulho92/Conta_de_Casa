@@ -1,250 +1,129 @@
 # Changelog Técnico — Conta de Casa
 
-O histórico integral de commits e versões permanece no Git. Este ficheiro mantém as alterações relevantes para continuidade técnica.
+O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade técnica do programa atual.
 
-## 2026-09-11 — v76 primeira consolidação UI/shell — PR #84 em curso
+## 2026-09-12 — `76-modern-ui2` / `ui-components1` — em preparação
 
 ### Objetivo
 
-Executar a primeira etapa da consolidação transversal definida pela baseline arquitetural sem redesign “big-bang” e sem alterar o domínio financeiro.
-
-### Diagnóstico
-
-Depois de `mobile-layout.css` deixar de possuir o viewport, `v76-modern-ui.css` ainda repetia geometria mobile que já era definida posteriormente por `v76-mobile-shell.css`. A duplicação abrangia `.main`, dimensões/posição da `.topbar`, padding estrutural de `.main>.page`, posição/dimensão da `.mobile-nav` e offsets estreitos ≤390 px.
+Consolidar a linguagem visual partilhada antes do redesign página a página e antes de avançar com a remoção do JavaScript legado.
 
 ### Alterações
 
-- `v76-modern-ui.css` deixa de definir a geometria global mobile já pertencente ao shell;
-- topbar mantém gradiente, bordas, raios, sombra, tipografia e composição interna, mas não posição/dimensões estruturais;
-- bottom navigation mantém superfície, blur, borda, sombra e estados, mas não posição fixa, offsets, dimensão ou padding estrutural;
-- gutters/offsets estruturais ≤390 px permanecem exclusivamente em `v76-mobile-shell.css`;
-- alvos tácteis de 44 px continuam no design system por serem contrato de componente/acessibilidade;
-- `tests/v76-modern-ui.test.cjs` deixa de exigir a geometria antiga;
-- `tests/ui-architecture-contract.test.cjs` passa a impedir que a geometria removida volte ao design system;
-- documentação permanente atualizada com D-074 e o próximo plano de revisão de botões, grids, cards, formulários, ícones e imagens.
+- `v76-modern-ui.css` revisto para `76-modern-ui2`;
+- tokens novos para altura de controlos, raio, ícone, gap e opacidade disabled;
+- hierarquia visual explícita de ações: primary, secondary, danger, link e icon button;
+- controlos principais com baseline 44 px;
+- estados disabled/`aria-disabled`, `focus-visible` e hover de ponteiro fino;
+- métricas coerentes para ícones em botões;
+- `min-width:0` em grids partilhados para reduzir overflow;
+- apresentação de fotografias do Mercado com `object-fit:contain`, centro e fallback;
+- cache PWA revisto para `modern-ui2` + `ui-components1`;
+- testes de modern UI, shell, Veggie Burger e contrato arquitetural alinhados com a revisão;
+- documentação permanente atualizada com a direção visual dos protótipos e a meta de fonte TypeScript.
 
 ### Isolamento
 
-Não foram alterados `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sincronização cifrada, QR, scanner ou regras financeiras/Mercado.
+Não foram alterados `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sync, QR/scanner, faturas ou regras de Mercado.
 
 ### Estado
 
-PR #84 aberto em draft. Integração depende de CI + TypeScript Foundation verdes e revisão do diff. Depois desta etapa, a consolidação continua por componentes/features e página a página.
+Branch: `feat/v76-ui-components1`. PR/CI/TypeScript Foundation ainda pendentes nesta entrada.
 
 ---
 
-## 2026-09-11 — v76 baseline arquitetural transversal — publicado
+## 2026-09-12 — direção de produto a partir dos protótipos
 
-### Pesquisa
-
-Foi feita revisão de fontes primárias/de elevada confiança para substituir correções por sobreposição por um critério estrutural comum à aplicação:
-
-- Apple Human Interface Guidelines / Apple Developer: safe areas, layout, toolbars e navegação;
-- MDN Web Docs: `env(safe-area-inset-*)`, `viewport-fit=cover`, specificity, cascade layers e container queries;
-- W3C/WAI WCAG 2.2: Reflow a 320 CSS px, Target Size e Focus Not Obscured;
-- web.dev: PWA, Cache Storage, IndexedDB e estratégias de cache;
-- OWASP Cheat Sheet Series: Content Security Policy e Input Validation.
-
-### Diagnóstico
-
-A aplicação ainda mantinha responsabilidades estruturais duplicadas entre CSS histórico e camadas v75/v76. O caso comprovado era `mobile-layout.css`: voltava a definir `.app-shell`, `.main` e `.topbar` apesar de `v76-mobile-shell.css` ser a autoridade final. O resultado podia estar correto apenas porque a última camada ganhava a cascata com especificidade/`!important`.
-
-### Alterações da baseline
-
-- definida propriedade única por preocupação: tokens, shell, components, features, states, utilities, domínio, persistência, sync, PWA e segurança;
-- `mobile-layout.css` deixa de possuir viewport, scroll principal, topbar e bottom navigation;
-- `mobile-layout.css` fica restrito a refinamentos móveis de feature do Mercado;
-- `v76-mobile-shell.css` é a única autoridade declarada para geometria global em ≤820 px;
-- `tests/mobile-layout-regression.test.cjs` deixa de exigir a arquitetura antiga;
-- criado `tests/ui-architecture-contract.test.cjs` para impedir regressão da propriedade do shell, safe areas, zoom, baseline táctil, ordem de build e invalidação PWA;
-- CI passa a executar o novo contrato;
-- cache PWA revisto para `architecture-baseline1`;
-- `ARCHITECTURE.md`, `DECISIONS.md`, `TODO.md`, `PROJECT_STATE.md` e `CHANGELOG.md` atualizados.
-
-### Critério novo
-
-- reflow obrigatório a 320 CSS px sem perda de conteúdo/funcionalidade;
-- baseline tátil interna de 44×44 CSS px para controlos primários no iPhone;
-- safe areas por `env()` e não por modelo de aparelho;
-- bottom navigation apenas para destinos de topo;
-- sem novos ficheiros “patch” para a mesma geometria;
-- `@layer` só entra quando o domínio concorrente puder ser migrado em conjunto;
-- redução de `!important` será progressiva e baseada em propriedade consolidada;
-- PWA/cache e segurança passam a ter critérios de aceitação explícitos.
-
-### QA e publicação
-
-- PR #82 integrado em `main` no commit `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`;
-- TypeScript Foundation de `main` `34577495832`: sucesso;
-- CI de `main` `34577495803`: sucesso;
-- GitHub Pages `34577588233`: sucesso;
-- Build ID publicado: `bb0cd65`.
-
-### Isolamento
-
-Esta primeira etapa não altera `core.js`, `finance.js`, schema, IndexedDB, PBKDF2/AES-GCM, pagamentos, faturas, QR, scanner, sincronização cifrada ou regras financeiras/Mercado.
-
-### Pendente
-
-Validação física do build publicado no iPhone/Safari/PWA e consolidação progressiva da geometria ainda duplicada em `v76-modern-ui.css`/camadas v74-v75. Esta consolidação será feita por domínio e com regressão, não por big-bang.
+- Dashboard: header limpo → resumo financeiro real → KPIs reais → ações rápidas → vencimentos/orçamento → categorias/atividade;
+- Mercado: pesquisa/catálogo/carrinho/estimativa/fatura com identidade e preço rigorosamente separados;
+- Planeamento: redesign apenas sobre saldo atual, saldo inicial, orçamento e rendimentos existentes até novas funções serem aprovadas;
+- Calendário: foco nos vencimentos/pagamentos atualmente suportados;
+- Faturas: pesquisa/filtros/resumo/tabela desktop/lista mobile com “Nova fatura” como ação principal;
+- desktop e mobile usam a mesma linguagem visual, mas composição adaptativa;
+- dados ou ações existentes apenas no mockup não entram em produção sem suporte real.
 
 ---
 
-## 2026-09-11 — v76 `76-mobile-shell2` — publicado
+## 2026-09-12 — meta de fonte 100% TypeScript
 
-### Evidência física
+Decisão: a fonte funcional mantida deverá ser TypeScript strict. O browser continuará a receber JavaScript **compilado**, porque TypeScript não é executado diretamente pelo browser.
 
-Captura em iPhone/Safari mostrou dois defeitos concretos:
-
-- topbar/ícone do menu dentro da área ocupada pela hora e indicadores do iOS;
-- conteúdo inferior visualmente cortado/encoberto pelo dock persistente.
-
-### Causa confirmada no código
-
-A aplicação tinha uma arquitetura de viewport mista. `mobile-layout.css` ainda prendia `.app-shell` e `.main` a `100dvh`, com `overflow:hidden` no shell e scroll interno em `.main`. Entretanto, `76-modern-ui1` já tinha colocado a `.topbar` em fluxo normal e removido o padding de header fixo. A cascata mantinha, portanto, restrições antigas de viewport sem a respetiva geometria de cabeçalho.
-
-### Alterações
-
-- criado `v76-mobile-shell.css`, revisão `76-mobile-shell2`, carregado depois de `v76-modern-ui.css`;
-- scroll vertical principal passa a pertencer ao documento em mobile;
-- `.app-shell` e `.main` deixam de impor `max-height:100dvh`/clipping na camada final;
-- topbar mantém-se relativa e recebe compensação por `safe-area-inset-top`;
-- dock mantém-se fixo com altura explícita e `safe-area-inset-bottom`;
-- páginas reservam `padding-bottom` calculado para manter o último conteúdo acima do dock;
-- adicionados ajustes para ≤390 px, ≤359 px e landscape de baixa altura;
-- elementos focáveis usam `scroll-margin-bottom` para permanecer visíveis;
-- sem `zoom` CSS e sem bloqueio de pinch-to-zoom;
-- novo asset incluído em `scripts/prepare-pages.cjs` e no cache PWA;
-- novo teste `tests/v76-mobile-shell.test.cjs` integrado na CI e no gate do GitHub Pages.
-
-### Versionamento
-
-A versão de programa permanece `0.76.0-dev.1` e a release pública permanece `v75`. Esta correção é distinguida pelo Build ID, conforme o modelo de versionamento já adotado.
-
-### QA e publicação
-
-- `tests/v76-mobile-shell.test.cjs`: sucesso;
-- CI funcional da branch `34541849503`: sucesso integral;
-- PR #80 integrado em `main` no commit `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`;
-- TypeScript Foundation de `main` `34542259212`: sucesso;
-- CI de `main` `34542259148`: sucesso;
-- GitHub Pages `34542303536`: sucesso.
-
-### Isolamento
-
-Não foram alterados `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sincronização cifrada, QR, scanner, CSP ou regras financeiras/Mercado.
-
-### Pendente
-
-Validação física da compilação publicada no iPhone/Safari/PWA, incluindo 320/375/390/430 px e scroll até ao último item.
+- nenhum `.js` runtime será apagado antes de existir substituto TypeScript equivalente;
+- não será aceite conversão massiva com `@ts-nocheck` ou `any` em massa;
+- ordem: funções puras → domínio financeiro → Mercado → core/persistência/cifra → sync → UI → PWA/build → testes/tooling;
+- JavaScript gerado deve tornar-se artefacto de build, não fonte manual.
 
 ---
 
-## 2026-09-10 — v76 `76-version-audit1` — auditoria de versão e atualizações — publicado
+## 2026-09-11 — PR #84 — consolidação UI/shell — publicado
 
-### Diagnóstico
+Merge: `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`.
 
-A comparação com o Foco Jornada revelou um defeito confirmado no fluxo manual de atualização do Conta de Casa. Quando `release-manifest.latestVersion` era igual ao `app-build` instalado, `app-update.js` terminava a operação antes de `registration.update()`. Assim, uma compilação nova dentro da mesma release `v75` podia ser tratada como inexistente.
+- removida de `v76-modern-ui.css` a geometria mobile duplicada de `.main`, `.topbar`, `.main>.page` e `.mobile-nav`;
+- `v76-mobile-shell.css` permanece autoridade de viewport, safe areas, scroll e dock;
+- design system mantém apenas aparência/composição de shell e componentes;
+- gate arquitetural impede reintrodução da geometria concorrente;
+- domínio financeiro e segurança permaneceram isolados.
 
-Também existia ambiguidade visual entre a versão semântica do programa, a release pública e o build efetivamente publicado.
+---
 
-### Alterações
+## 2026-09-11 — PR #82 — baseline arquitetural v76 — publicado
 
-- `package.json.version` passa a ser exposto como versão da aplicação: `0.76.0-dev.1`;
+Merge: `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`.
+
+- propriedade única por preocupação;
+- `mobile-layout.css` deixa de possuir viewport/topbar/nav persistente;
+- criado `tests/ui-architecture-contract.test.cjs`;
+- cache PWA `architecture-baseline1`;
+- CI, TypeScript Foundation e Pages concluídos com sucesso.
+
+---
+
+## 2026-09-11 — PR #80 — `76-mobile-shell2` — publicado
+
+Merge: `4c4ed74bdf3afb752147233f34b2bb84a0bd8876`.
+
+- scroll principal no documento em mobile;
+- safe areas superiores/inferiores explícitas;
+- topbar no fluxo normal;
+- dock inferior com reserva de página;
+- cobertura 320/375/390/430 e landscape;
+- sem bloquear pinch-to-zoom.
+
+---
+
+## 2026-09-10 — PR #78 — `76-version-audit1` — publicado
+
+- separação entre Application Version, Public Release e Build ID;
+- `registration.update()` antes de declarar ausência de atualização;
 - release pública permanece `v75`;
-- `scripts/prepare-pages.cjs` injeta `app-version`, `app-build-id` e `app-build-date` no HTML distribuído;
-- Build ID usa SHA Git curto de 7 caracteres, com fallback CI/local controlado;
-- `Versão e Atualizações` passa a mostrar versão instalada, release, Build ID, data, PWA/Web, estado do Service Worker e rede;
-- criado `v76-version-about.css` para a apresentação desse bloco;
-- botão principal passa a `Verificar e atualizar agora`;
-- `registration.update()` é executado antes da conclusão de que não existe atualização;
-- uma release igual já não impede deteção de build mais recente;
-- instalação continua explícita por `APPLY_UPDATE`;
-- cache PWA revisto para `version-audit1`;
-- `tests/app-update.test.cjs` passou a validar ordem, metadados, distribuição e o caso de same-release build.
-
-### QA e publicação
-
-- commit funcional: `41cd36b662991fc2f29d5736c2b77621c4649e87`;
-- teste corrigido em `9d6a923c6f10bda2e7128f48053ad278063634ca`;
-- CI funcional `34539811658`: sucesso;
-- PR #78 integrado em `main` no commit `a68de711df1c42ec33948d3fff2f4d5e337e2436`;
-- TypeScript Foundation de `main` `34540271567`: sucesso;
-- CI de `main` `34540271547`: sucesso;
-- GitHub Pages `34540307404`: sucesso.
-
-### Isolamento
-
-Nenhuma alteração em `core.js`, `finance.js`, estado financeiro, IndexedDB, PIN, PBKDF2/AES-GCM, backup, sincronização cifrada, QR, scanner, CSP ou regras financeiras.
+- domínio financeiro e cofre isolados.
 
 ---
 
-## 2026-09-10 — v76 `76-veggie-menu2` + `76-modern-ui1` — publicado
+## 2026-09-10 — PR #76 — `76-veggie-menu2` + `76-modern-ui1` — publicado
 
-### Origem
+Merge: `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`.
 
-Validação física em iPhone/Safari revelou duas regressões: a transformação Veggie Burger → X não era percebida de forma fiável e a topbar sticky/fixa permanecia no viewport durante scroll. A revisão também confirmou necessidade de uma linguagem UI/UX transversal mais consistente entre páginas.
-
-### Menu e cabeçalho
-
-- `src/ui/veggie-menu-toggle.ts` revisto em TypeScript strict;
-- animação explícita via Web Animations API;
-- superior `0° → +45°` e inferior `0° → -45°`;
-- ambas as barras permanecem visíveis;
-- apenas um `#mobileMenuBtn`;
-- botão fora da `.nav-drawer-shell` durante drawer/swipe;
-- `.topbar` passa ao fluxo normal em mobile;
-- `.main` deixa de reservar espaço para header fixo.
-
-### UI/UX master
-
-Criado `v76-modern-ui.css`, revisão `76-modern-ui1`, cobrindo Início, Despesas/Faturas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições, além de dialogs, drawer, bottom navigation, tabs, formulários, botões, tabelas, estados vazios e superfícies.
-
-### QA e publicação
-
-PR #76 integrado em `main` no commit `6323b0a9ceae0bf234dafd259fad4aa0f7e8721a`; TypeScript main `34537430909`, CI main `34537430967` e GitHub Pages `34537469989`: sucesso.
+- Veggie Burger/X em TypeScript strict;
+- topbar mobile no fluxo normal;
+- primeiro design system transversal v76;
+- suporte a dark mode, reduced-motion, forced-colors e toque.
 
 ---
 
-## 2026-09-10 — v76 `76-veggie-menu1`
+## 2026-09-10 — PR #73 — `75-expenses1`
 
-Primeira versão TypeScript do Veggie Burger. Foi integrada pelo PR #74 e posteriormente revista pela evidência física que originou `76-veggie-menu2`.
+- modernização de Faturas/Despesas;
+- `renderBills()`/`filterBills()` e domínio financeiro preservados.
 
----
+## 2026-09-10 — PR #72 — fundação TypeScript
 
-## 2026-09-10 — v75 `75-expenses1`
-
-- modernização de Lista/Calendário, pesquisa, filtros, resumo, tabela e cartões mobile;
-- domínio financeiro e persistência inalterados;
-- PR #73 integrado como `176450fcb236a2272afb9d6a6983b42681aa705d`.
-
----
-
-## 2026-09-10 — v76 Bloco 1 — fundação TypeScript
-
-- TypeScript como `devDependency`;
+- TypeScript 6 como ferramenta de desenvolvimento;
 - `tsconfig.json` strict/noEmit;
-- contratos em `src/types/`;
-- workflow dedicado;
-- PR #72 integrado como `2c1d78508507ab77d6df95850568d9fd7f6b9577`.
-
----
-
-## 2026-09-10 — v75 `75-market1`
-
-- pesquisa live/lista separadas;
-- filtros mobile visíveis;
-- estados `Por comprar`, `Preço por confirmar`, `Comprado`;
-- pipeline `marketId|pid` preservado.
-
----
-
-## 2026-09-10 — v75 `75-assets1`, `75-pages1`, `75-usability1`
-
-- biblioteca local-first para fontes, ícones e media;
-- reorganização visual de Início, Despesas e Planeamento sem alterar cálculos;
-- alvos tácteis 44/48 px, inputs mobile e pinch-to-zoom preservado.
+- contratos de domínio e type-tests;
+- workflow TypeScript dedicado.
 
 ## Histórico anterior
 
-Revisões anteriores de faturas, pagamentos, navegação, segurança, sincronização, Mercado, catálogo e responsividade permanecem no histórico Git e em `release-manifest.json`. Não remover comportamento histórico sem prova de ausência de referências e regressões.
+Mercado, catálogos, imagens, sincronização, segurança, formulários, QR/scanner, PWA e restantes revisões permanecem no histórico Git. Não remover comportamento histórico sem prova de ausência de referências e regressões verdes.
