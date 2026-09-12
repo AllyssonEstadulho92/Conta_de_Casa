@@ -15,7 +15,7 @@ Este ficheiro mantém as decisões vigentes necessárias para continuidade. O de
 - Falha de fotografia nunca remove o artigo.
 - Releases públicas relevantes usam revisão/cache invalidável.
 - Correções de zoom não podem bloquear pinch-to-zoom.
-- A UI móvel não deve esconder funcionalidades canónicas sem substituição funcional equivalente.
+- A UI móvel não deve esconder funcionalidades canónicas sem substituição equivalente.
 
 ## D-064 — migração TypeScript incremental
 
@@ -45,7 +45,7 @@ Estado: integrado em `main` como `75-expenses1` pelo PR #73. `renderBills()`/`fi
 
 ## D-068 — Veggie Burger/X usa um único controlo TypeScript
 
-Estado: `76-veggie-menu2`, integrado pelo PR #76.
+Estado visual: `76-veggie-menu2`, integrado pelo PR #76.
 
 - duas linhas fechadas; mesmas linhas formam X abertas;
 - `#mobileMenuBtn` é o controlo canónico;
@@ -64,9 +64,7 @@ Estado: integrado pelo PR #76.
 
 ## D-070 — sistema visual transversal é isolado do domínio
 
-Estado inicial: `76-modern-ui1`, PR #76.
-
-`v76-modern-ui.css` define tokens e aparência de componentes partilhados sem alterar handlers, cálculos, IndexedDB, PIN, cifragem, sync, scanner, QR ou CSP.
+Estado inicial: `76-modern-ui1`, PR #76. `v76-modern-ui.css` define tokens e aparência de componentes sem alterar handlers, cálculos, IndexedDB, PIN, cifragem, sync, scanner, QR ou CSP.
 
 ## D-071 — versão, release e build são identidades separadas
 
@@ -75,8 +73,7 @@ Estado: integrado como `76-version-audit1`, PR #78.
 - `package.json.version` = versão da aplicação;
 - release pública continua `v75` até promoção formal;
 - Build ID/data distinguem compilações;
-- verificação de atualização consulta o Service Worker real;
-- mecanismo não lê estado financeiro, PIN ou cofre.
+- verificação de atualização consulta o Service Worker real.
 
 ## D-072 — shell móvel tem um único scroll e respeita safe areas
 
@@ -86,89 +83,86 @@ Estado: integrado como `76-mobile-shell2`, PR #80.
 - `.app-shell`/`.main` sem clipping estrutural;
 - topbar no fluxo com `safe-area-inset-top`;
 - dock persistente com `safe-area-inset-bottom` e reserva de página;
-- sem `zoom`, sem bloquear pinch-to-zoom;
+- sem bloquear pinch-to-zoom;
 - foco e último conteúdo não ficam atrás do dock.
 
 ## D-073 — arquitetura UI tem propriedade única por preocupação
 
 Estado: integrado pelo PR #82.
 
-- shell, tokens, componentes, features, estados, domínio, persistência, sync, PWA e segurança têm responsabilidades separadas;
+- shell, tokens, componentes, features, domínio, persistência, sync, PWA e segurança têm responsabilidades separadas;
 - `v76-mobile-shell.css` é a autoridade da geometria global mobile ≤820 px;
-- não criar novos ficheiros “patch” para a mesma propriedade;
-- `@layer` só será adotado por domínio completo;
-- 44×44 px é a baseline interna de controlos de toque;
+- 44×44 px é baseline interna de controlos de toque;
 - reflow a 320 CSS px e safe areas são requisitos;
-- Service Worker/Cache Storage não substituem IndexedDB;
 - alterações transversais exigem gates financeiros, segurança, PWA, responsive e UI.
 
 ## D-074 — `v76-modern-ui.css` deixa de duplicar geometria mobile do shell
 
-Estado: integrado em `main` pelo PR #84.
+Estado: integrado em `main` pelo PR #84. O design system mantém aparência/composição interna; o shell mantém posição, offsets, safe areas, overflow e reserva do dock.
 
-- design system mantém aparência/composição interna;
-- shell mantém `position`, offsets, safe areas, dimensões estruturais, overflow e reserva do dock;
-- topbar e bottom navigation não podem recuperar geometria estrutural no design system;
-- alvos tácteis continuam propriedade do componente/acessibilidade;
-- `tests/ui-architecture-contract.test.cjs` impede regressão.
-
-## D-075 — `76-modern-ui2` define hierarquia visual canónica de componentes
+## D-075 — `76-modern-ui2` define hierarquia visual canónica
 
 Estado: integrado em `main` pelo PR #85.
 
-1. Ações usam hierarquia `primary`, `secondary`, `danger`, `link` e `icon button`.
-2. Controlos principais mantêm mínimo de 44 px; disabled/`aria-disabled`, foco e hover têm estados coerentes.
-3. Ícones dentro de botões usam métricas óticas consistentes.
-4. Grids partilhados recebem `min-width:0` e gap comum.
-5. Fotografias de Mercado usam `contain`/centro/fallback sem alterar fonte, identidade ou preço.
-6. Cache PWA é invalidado com `ui-components1`.
-7. A decisão não altera domínio financeiro, persistência, cifragem, sync, QR/scanner ou Mercado.
+1. Ações: `primary`, `secondary`, `danger`, `link`, `icon button`.
+2. Controlos principais mantêm 44 px; foco/disabled/hover coerentes.
+3. Ícones têm métricas óticas consistentes.
+4. Grids partilhados usam `min-width:0` e gap comum.
+5. Fotografias de Mercado usam `contain`/centro/fallback sem mudar preço ou identidade.
 
-## D-076 — “100% TypeScript” significa fonte TypeScript; JavaScript é artefacto de build
+## D-076 — “100% TypeScript” significa fonte TypeScript
 
 1. O objetivo final é código-fonte funcional mantido em `.ts` com `strict`.
 2. O browser continuará a executar JavaScript gerado pelo build.
-3. Não apagar JS runtime antes de o equivalente TypeScript estar compilado, testado e referenciado pelo Pages.
-4. A migração segue blocos: pipeline → funções puras → domínio financeiro → Mercado → core/persistência/cifra → sync → UI → PWA/build → testes/tooling.
-5. Renomear `.js` para `.ts`, usar `@ts-nocheck` ou `any` em massa não satisfaz a meta.
-6. Redesign e migração podem coexistir, mas os riscos devem permanecer separáveis.
+3. Não apagar runtime JS antes de o equivalente TypeScript estar compilado, testado e usado pelo Pages.
+4. Renomear `.js` para `.ts`, usar `@ts-nocheck` ou `any` em massa não satisfaz a meta.
 
 ## D-077 — protótipos são referência de hierarquia, não fonte de dados inventados
 
 1. Dashboard, Mercado, Planeamento, Calendário e Faturas seguem a direção visual aprovada.
-2. Valores, métricas, tarefas, comparações, receitas ou simulações inexistentes no domínio não entram automaticamente em produção.
-3. Primeiro reutilizar dados e funções existentes; novas capacidades exigem decisão própria.
-4. Desktop e mobile partilham linguagem visual, com composição adaptativa.
+2. Métricas/tarefas/comparações/simulações inexistentes no domínio não entram automaticamente em produção.
+3. Desktop e mobile partilham linguagem visual, com composição adaptativa.
 
-## D-078 — `v76-product-pages.css` é a autoridade de composição interna das páginas
+## D-078 — `v76-product-pages.css` é autoridade de composição interna
 
-Estado: PR #86.
+Estado: integrado pelo PR #86, merge `42557d59f464a2fc7fc22a31eb24564e7dbabad9`; Pages `34695600399` com sucesso.
 
 1. Carrega depois de `v76-modern-ui.css` e antes de `v76-mobile-shell.css`.
-2. Pode definir ordem visual, grids internos, proporções, densidade e ênfase de secções.
+2. Pode definir ordem visual, grids internos, proporções, densidade e ênfase.
 3. Não pode definir viewport, safe areas, scroll global, topbar estrutural ou dock.
-4. O Dashboard usa `dashboardNumbers()` e os valores existentes, sem fórmula nova.
-5. Desktop e mobile podem ordenar as mesmas secções de forma diferente sem duplicar estado.
-6. `76-product-pages1` tem gate dedicado em `tests/v76-product-pages.test.cjs`.
+4. Dashboard usa `dashboardNumbers()` e valores reais, sem fórmula nova.
+5. `tests/v76-product-pages.test.cjs` é gate dedicado.
 
-## D-079 — exclusão de JavaScript exige substituição de runtime comprovada
+## D-079 — exclusão de JavaScript exige substituição comprovada
 
-Data: 12 de setembro de 2026. Estado: vigente após incidente de publicação corrigido pelo PR #87.
+Estado: vigente após incidente corrigido pelo PR #87.
 
-1. Um ficheiro `.js` fonte só pode ser eliminado quando existir fonte `.ts` equivalente e funcional.
-2. O módulo TS deve ser compilado pelo pipeline para um artefacto JavaScript em `dist/` e esse artefacto deve ser o que o Pages publica.
-3. Antes da exclusão, devem ser eliminadas ou migradas todas as referências ao JS fonte em HTML, `scripts/prepare-pages.cjs`, Service Worker, CI, workflows e testes.
+1. Um `.js` fonte só pode ser eliminado quando existir `.ts` equivalente e funcional.
+2. O módulo TS deve ser compilado e o artefacto gerado deve ser o publicado pelo Pages.
+3. Referências em HTML, build, SW, CI, workflows e testes devem apontar para o artefacto/publicação correta, não para fonte manual removida.
 4. CI integral + TypeScript Foundation devem ficar verdes depois da remoção.
-5. Até a substituição estar provada, o JS existente pode permanecer como fallback controlado. A presença temporária do fallback não muda a meta de fonte 100% TypeScript.
-6. O commit `5d1b1d8f9506ab4309bd2f2d941c13c77dabbd67` violou esta sequência ao apagar `v75-architecture.js`: o CI falhou com `MODULE_NOT_FOUND` e o Pages não publicou. O PR #87 restaurou exatamente o runtime e o deploy voltou a sucesso.
-7. `main` deve ser tratado como publicável: exclusões diretas de runtime sem gates não são aceites.
+5. Até existir paridade, o JS antigo pode permanecer como fallback controlado.
+6. O commit `5d1b1d8f9506ab4309bd2f2d941c13c77dabbd67` apagou `v75-architecture.js` cedo demais, quebrou CI e bloqueou Pages; PR #87 recuperou o runtime.
+7. `main` é sempre tratada como publicável.
+
+## D-080 — artefactos JavaScript gerados não contam como fonte manual
+
+Data: 12 de setembro de 2026. Estado: implementação em `feat/v76-typescript-runtime2`.
+
+1. A fonte canónica do primeiro runtime migrado é `src/ui/veggie-menu-toggle.ts`.
+2. `v76-veggie-menu.js` deixa de existir como ficheiro versionado na raiz.
+3. `scripts/build-typescript-runtime.cjs` gera `.generated/v76-veggie-menu.js` a partir do TS.
+4. `.generated/` e `dist/` são ignorados pelo Git.
+5. `scripts/prepare-pages.cjs` mapeia o artefacto gerado para `dist/v76-veggie-menu.js`, mantendo compatibilidade com o browser e Service Worker.
+6. O build falha se reaparecer um `v76-veggie-menu.js` manual na raiz.
+7. A branch `backup/js-runtime-baseline-20260912` guarda a baseline pública anterior para rollback; não é carregada em paralelo.
+8. Esta estratégia será replicada módulo a módulo, não por exclusão massiva.
 
 ## Evidência recente
 
-- PR #84: consolidação UI/shell integrada.
-- PR #85: `76-modern-ui2`/`ui-components1` integrado.
-- PR #87: restauração de `v75-architecture.js`; CI e Pages verdes no merge `6401f1c5156382e9fe364da31afa3fcec4aed9bc`.
-- PR #86: Dashboard `76-product-pages1`, sincronizado com o `main` restaurado; CI e TypeScript Foundation verdes no head anterior à atualização documental.
+- PR #87: recuperação do pipeline após remoção prematura; CI/Pages verdes.
+- PR #86: Dashboard real publicado; CI `34695579311`, TypeScript `34695579282`, Pages `34695600399` verdes.
+- `feat/v76-typescript-runtime2`: primeiro JS fonte removido; TypeScript Foundation `34695947847` e CI `34695947843` verdes antes da atualização documental.
 
 ## Lacuna técnica preservada
 
