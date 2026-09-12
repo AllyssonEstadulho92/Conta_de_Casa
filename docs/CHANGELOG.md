@@ -2,88 +2,84 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade técnica do programa atual.
 
+## 2026-09-12 — `feat/v76-typescript-runtime2` — primeira fonte JS substituída por TypeScript
+
+### Objetivo
+
+Começar a retirada real de JavaScript manual sem repetir o incidente que bloqueou o GitHub Pages.
+
+### Alterações
+
+- criada branch de fallback `backup/js-runtime-baseline-20260912` na baseline pública `42557d59f464a2fc7fc22a31eb24564e7dbabad9`;
+- criada `feat/v76-typescript-runtime2` a partir da mesma baseline publicada;
+- `src/ui/veggie-menu-toggle.ts` passa a ser a única fonte versionada do runtime Veggie Burger;
+- removido da branch o ficheiro manual `v76-veggie-menu.js`;
+- criada `.generated/` como área ignorada de artefactos;
+- `scripts/build-typescript-runtime.cjs` gera `.generated/v76-veggie-menu.js` com TypeScript 6;
+- o build rejeita a presença de um `v76-veggie-menu.js` manual na raiz;
+- `scripts/prepare-pages.cjs` gera o runtime automaticamente e publica-o como `dist/v76-veggie-menu.js`;
+- `package.json` separa `typecheck`, `build:runtime` e `build:pages`;
+- CI instala a toolchain TS, gera artefactos e executa regressão completa;
+- TypeScript Foundation valida fonte TS, artefacto gerado e ausência do JS manual;
+- Pages gera novamente o runtime antes da validação e do deploy;
+- criado `tests/typescript-runtime-build.test.cjs`;
+- `tests/v76-veggie-menu.test.cjs` passa a testar o artefacto gerado.
+
+### Evidência funcional
+
+Antes da atualização documental final:
+
+- TypeScript Foundation `34695947847`: sucesso;
+- CI integral `34695947843`: sucesso;
+- todos os gates financeiros, cofre, datas, faturas, Mercado, scanner, UI, responsive, acessibilidade, sync, PWA e manifesto continuaram verdes.
+
+### Segurança e domínio
+
+Nenhum cálculo, IndexedDB, schema, PBKDF2/AES-GCM, sync, QR/scanner, fatura ou regra de Mercado foi alterado. Este bloco substitui apenas a origem do runtime Veggie Burger.
+
+---
+
+## 2026-09-12 — `76-product-pages1` / PR #86 — publicado
+
+- merge em `main`: `42557d59f464a2fc7fc22a31eb24564e7dbabad9`;
+- CI `34695579311`: sucesso;
+- TypeScript Foundation `34695579282`: sucesso;
+- Deploy Pages `34695600399`: sucesso;
+- o primeiro redesign real do Dashboard passou a fazer parte do site publicado.
+
+Alterações principais:
+
+- `Saldo atual` existente como resumo financeiro dominante;
+- `Por pagar`, `Em atraso` e `Saldo projetado` em segundo nível;
+- `Pago no mês` e `Próximos 7 dias` compactos;
+- desktop reorganiza vencimentos/orçamento e atividade/categorias;
+- mobile usa composição própria;
+- `renderDashboard()`/`dashboardNumbers()` e fórmulas permanecem inalterados.
+
+---
+
 ## 2026-09-12 — auditoria de publicação / PR #87 — corrigido e publicado
 
 ### Facto
 
-O commit `5d1b1d8f9506ab4309bd2f2d941c13c77dabbd67` removeu `v75-architecture.js` diretamente de `main`, mas o ficheiro continuava referenciado pelo CI e pelo bundle público.
+O commit `5d1b1d8f9506ab4309bd2f2d941c13c77dabbd67` removeu `v75-architecture.js` diretamente de `main`, embora CI e bundle público ainda dependessem do ficheiro.
 
 ### Impacto
 
-- CI `34693676180` falhou no `Syntax check` com `MODULE_NOT_FOUND` para `v75-architecture.js`;
-- o workflow Pages `34693693840` foi ignorado porque só publica depois de CI verde em `main`;
-- portanto, alterar `main` não produziu uma nova versão pública do site.
+- CI `34693676180` falhou com `MODULE_NOT_FOUND`;
+- Pages `34693693840` foi ignorado porque o CI não ficou verde;
+- a alteração em `main` não produziu nova versão pública.
 
 ### Correção
 
-- PR #87 restaurou exatamente o blob anterior de `v75-architecture.js`;
-- TypeScript Foundation e CI do PR passaram;
-- merge em `main`: `6401f1c5156382e9fe364da31afa3fcec4aed9bc`;
-- CI do merge `34695315162`: sucesso;
-- Deploy Pages `34695336131`: sucesso completo, incluindo validação, build, upload e deploy.
+- PR #87 restaurou exatamente o blob anterior;
+- merge `6401f1c5156382e9fe364da31afa3fcec4aed9bc`;
+- CI `34695315162`: sucesso;
+- Pages `34695336131`: sucesso.
 
-### Regra nova
+### Regra
 
-Nenhum `.js` runtime pode ser apagado apenas porque existe intenção de migrar para TypeScript. Primeiro o `.ts` equivalente deve ser compilado, usado pelo build/Pages e coberto por testes; depois todas as referências ao JS fonte devem desaparecer; só então o JS fonte é removido.
-
----
-
-## 2026-09-12 — `76-product-pages1` / PR #86 — Dashboard
-
-### Objetivo
-
-Traduzir a hierarquia visual dos protótipos para o Dashboard real sem criar métricas ou regras financeiras novas.
-
-### Alterações
-
-- criada `v76-product-pages.css` como camada de composição interna das páginas;
-- carregamento depois de `v76-modern-ui.css` e antes de `v76-mobile-shell.css`;
-- `Saldo atual` existente passa a resumo financeiro dominante;
-- `Por pagar`, `Em atraso` e `Saldo projetado` ficam no segundo nível visual;
-- `Pago no mês` e `Próximos 7 dias` tornam-se métricas compactas;
-- desktop reorganiza `Próximos vencimentos + Orçamento` e `Atividade recente + Despesas por categoria`;
-- mobile usa fluxo próprio, sem reduzir literalmente o desktop;
-- `alertsPanel` vazio deixa de ocupar espaço;
-- reduced-motion e forced-colors cobertos;
-- build e Service Worker incluem `76-product-pages1`/`product-pages1`;
-- `tests/v76-product-pages.test.cjs` foi criado e adicionado ao CI.
-
-### Domínio preservado
-
-- `renderDashboard()` continua a chamar `dashboardNumbers()`;
-- `n.current`, `n.pending`, `n.overdue`, `n.projected`, `paymentTotal` e `next7` permanecem as fontes canónicas;
-- vencimentos, orçamento, categorias e atividade reutilizam dados/renderizadores existentes;
-- nenhum cálculo, schema, IndexedDB, cifragem, sync, QR, scanner ou regra de Mercado foi alterado.
-
-### Gates
-
-A branch foi sincronizada com o `main` restaurado no commit `5a75e26d72f73b3d4c96802ae4193e0a28b50835`. CI `34695383919` e TypeScript Foundation `34695383909` passaram integralmente antes desta atualização documental. Os gates serão reconfirmados no head documental final antes do merge.
-
-### Por que ainda não aparecia no site
-
-O redesign encontrava-se no PR #86 e não em `main`. GitHub Pages só publica o conteúdo testado de `main`; por isso os protótipos e a nova camada não podiam aparecer no site antes da integração desse PR.
-
----
-
-## 2026-09-12 — meta de fonte 100% TypeScript
-
-Decisão: a fonte funcional mantida deverá tornar-se TypeScript strict. O browser continuará a receber JavaScript compilado.
-
-Estado:
-
-- `src/types/` já contém contratos de domínio;
-- `src/type-tests/` contém provas de tipos;
-- `src/ui/veggie-menu-toggle.ts` é o primeiro controlo UI em TS;
-- o runtime principal continua maioritariamente em JavaScript manual.
-
-Estratégia:
-
-- separar typecheck de emissão;
-- fazer o pipeline gerar artefactos JS de TypeScript em `dist/`;
-- manter temporariamente JS antigo como fallback quando necessário;
-- migrar por blocos auditáveis;
-- apagar cada `.js` fonte apenas depois de paridade, referências migradas e regressões verdes;
-- não usar `@ts-nocheck` ou `any` em massa.
+Um `.js` fonte só é eliminado depois de existir `.ts` equivalente, build gerado, referências migradas e regressões verdes.
 
 ---
 
@@ -95,7 +91,6 @@ Estratégia:
 - métricas de ícones;
 - `min-width:0` em grids;
 - fotografias do Mercado com `contain`/centro/fallback;
-- cache PWA `ui-components1`;
 - domínio financeiro e segurança preservados.
 
 ---

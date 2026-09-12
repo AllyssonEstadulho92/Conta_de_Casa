@@ -1,9 +1,14 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const {execFileSync}=require('node:child_process');
+
+if(!fs.existsSync('.generated/v76-veggie-menu.js')){
+  execFileSync(process.execPath,['scripts/build-typescript-runtime.cjs'],{stdio:'pipe'});
+}
 
 const ts = fs.readFileSync('src/ui/veggie-menu-toggle.ts','utf8');
-const js = fs.readFileSync('v76-veggie-menu.js','utf8');
+const js = fs.readFileSync('.generated/v76-veggie-menu.js','utf8');
 const css = fs.readFileSync('v76-veggie-menu.css','utf8');
 const modern = fs.readFileSync('v76-modern-ui.css','utf8');
 const shell = fs.readFileSync('v76-mobile-shell.css','utf8');
@@ -11,6 +16,7 @@ const legacy = fs.readFileSync('mobile-menu-toggle.js','utf8');
 const prepare = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
 
+assert.ok(!fs.existsSync('v76-veggie-menu.js'),'manual Veggie Burger JavaScript source must not be committed');
 assert.doesNotThrow(()=>new vm.Script(js), 'compiled Veggie Burger runtime must parse');
 
 assert.match(ts,/Veggie Burger em TypeScript/);
@@ -26,6 +32,7 @@ assert.match(ts,/lowerOpen = \{ top: '8px', transform: 'translateX\(-50%\) rotat
 assert.match(ts,/upperLine\.animate/);
 assert.match(ts,/lowerLine\.animate/);
 
+assert.match(js,/Runtime gerado por TypeScript/);
 assert.match(js,/veggie-menu-toggle/);
 assert.match(js,/glyph\.append\(upperLine, lowerLine\)/);
 assert.match(js,/drawer\.insertBefore\(button, drawerShell\)/,'same control must live outside transformed drawer shell while open');
@@ -54,6 +61,8 @@ assert.match(shell,/body \.main\{[\s\S]*padding:0!important/,'mobile shell must 
 assert.match(legacy,/drawerHead\.insertBefore\(button,drawerHead\.firstChild\)/,'validated v73 drawer controller remains present underneath the TS enhancement');
 assert.match(prepare,/const VEGGIE_MENU_REV = '76-veggie-menu2'/);
 assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui2'/);
+assert.match(prepare,/GENERATED_PUBLIC_FILES/);
+assert.match(prepare,/build-typescript-runtime\.cjs/);
 assert.ok(prepare.includes("'v76-veggie-menu.css'"));
 assert.ok(prepare.includes("'v76-veggie-menu.js'"));
 assert.ok(prepare.includes("'v76-modern-ui.css'"));
@@ -67,4 +76,4 @@ assert.ok(sw.includes("'./v76-veggie-menu.js'"));
 assert.ok(sw.includes("'./v76-modern-ui.css'"));
 assert.ok(sw.includes("'./v76-mobile-shell.css'"));
 
-console.log('v76 Veggie Burger is two-line, animated, swipe-stable and delegates non-fixed mobile header geometry to the shell.');
+console.log('v76 Veggie Burger is TypeScript-source-only, generated for the browser, two-line, animated and shell-safe.');
