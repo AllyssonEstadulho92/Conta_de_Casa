@@ -3,10 +3,10 @@
 Atualizado: 12 de setembro de 2026  
 Versão da aplicação: `0.76.0-dev.1`  
 Release pública: `v75`  
-Programa técnico: `v76` — consolidação UI/UX + migração incremental para TypeScript  
+Programa técnico: `v76` — redesign UI/UX + migração incremental para TypeScript  
 Branch pública: `main`  
-Baseline publicada: `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`  
-Trabalho atual: `feat/v76-ui-components1` — PR #85; gates verdes no commit anterior, reconfirmação pendente após atualização documental  
+Baseline publicada: `2a9cc3148e5750561b14f6a0505934d1a6d74d05` — PR #85  
+Trabalho atual: `redesign/v76-product-hierarchy1` — Dashboard `76-product-pages1`  
 Distribuição: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
@@ -24,7 +24,7 @@ Distribuição: GitHub Pages / PWA
 
 ## 2. Estado publicado em `main`
 
-Integrações relevantes já publicadas:
+Integrações relevantes:
 
 - fundação TypeScript strict — PR #72;
 - Despesas/Faturas `75-expenses1` — PR #73;
@@ -32,75 +32,103 @@ Integrações relevantes já publicadas:
 - auditoria de versão `76-version-audit1` — PR #78;
 - shell móvel `76-mobile-shell2` — PR #80;
 - baseline arquitetural v76 — PR #82;
-- consolidação da propriedade UI/shell — PR #84, merge `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`.
+- propriedade UI/shell — PR #84;
+- componentes partilhados `76-modern-ui2` / `ui-components1` — PR #85, merge `2a9cc3148e5750561b14f6a0505934d1a6d74d05`.
 
-`v76-mobile-shell.css` é a autoridade da geometria mobile global. `v76-modern-ui.css` não deve voltar a possuir viewport, safe areas, offsets do dock ou reserva estrutural de página.
+Após o merge do PR #85, GitHub Pages iniciou o deploy do novo `main`; a confirmação final do deployment deve ser registada quando o workflow terminar.
 
-## 3. Trabalho atual — `feat/v76-ui-components1`
+## 3. Trabalho atual — `redesign/v76-product-hierarchy1`
 
-A branch está a consolidar componentes visuais partilhados antes de redesenhar páginas individualmente.
+Primeiro bloco do redesign real já iniciado no código.
 
-Já aplicado:
+### Dashboard — `76-product-pages1`
 
-- revisão `76-modern-ui2`;
-- altura mínima de 44 px para controlos principais;
-- hierarquia consistente de `primary`, `secondary`, `danger`, `link` e `icon button`;
-- estado disabled/`aria-disabled`, focus-visible e hover apenas para ponteiro fino;
-- métricas consistentes de ícones dentro de botões;
-- `min-width:0` e gaps comuns em grids partilhados para evitar overflow;
-- apresentação de fotografias do Mercado com `object-fit:contain`, centro e fallback sem alterar identidade/preço;
-- revisão de cache PWA `ui-components1`;
-- testes de `modern-ui`, Veggie Burger, mobile shell e contrato de arquitetura alinhados com `76-modern-ui2`.
+Factos preservados do runtime real:
 
-Gates do PR #85 antes desta atualização documental: CI `34664678296` e TypeScript Foundation `34664678384`, ambos com sucesso. O diff foi revisto e não contém alterações de domínio. Como a documentação alterou o SHA da branch, os gates devem permanecer verdes no novo head antes do merge.
+- `renderDashboard()` continua a usar `dashboardNumbers()`;
+- saldo atual continua a ser `n.current`;
+- por pagar continua a ser `n.pending`;
+- em atraso continua a ser `n.overdue`;
+- saldo projetado continua a ser `n.projected`;
+- “Pago no mês” e “Próximos 7 dias” continuam a vir dos valores existentes;
+- vencimentos, orçamento, categorias e atividade continuam a usar os mesmos renderizadores/dados.
 
-Não alterado nesta branch: `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, IndexedDB, cifragem, sincronização, QR/scanner, faturas ou regras de Mercado.
+Alteração visual:
 
-## 4. Direção visual aprovada para implementação
+- o cartão de `Saldo atual` existente passa a ser o resumo financeiro dominante;
+- três KPIs reais ficam num nível secundário;
+- alertas deixam de competir com o resumo principal;
+- métricas secundárias tornam-se compactas;
+- desktop organiza detalhe em `vencimentos + orçamento` e `atividade + categorias`;
+- mobile usa fluxo `resumo → KPIs → métricas → vencimentos → orçamento → categorias → atividade`;
+- nenhum novo cálculo ou métrica foi inventado;
+- reduced-motion e forced-colors têm tratamento explícito.
 
-Os protótipos recentes passam a ser referência de **hierarquia e composição**, não de dados inventados.
+### Nova camada visual
 
-Direção:
+`v76-product-pages.css` é a camada v76 destinada à **composição e hierarquia das páginas**. Ela carrega depois de `v76-modern-ui.css` e antes de `v76-mobile-shell.css`.
 
-- interface clean/premium, com pouco ruído visual;
-- teal como identidade principal; cores semânticas apenas para sucesso, atenção e erro;
-- uma única família tipográfica;
+Ela não pode assumir:
+
+- viewport;
+- safe areas;
+- scroll global;
+- posição/dimensões estruturais do topbar;
+- posição/dimensões estruturais do dock mobile.
+
+Essas responsabilidades continuam exclusivas de `v76-mobile-shell.css`.
+
+### Build/PWA/QA
+
+- `scripts/prepare-pages.cjs` publica `v76-product-pages.css` como `76-product-pages1`;
+- `sw.js` inclui a nova camada e invalida o cache com `product-pages1`;
+- `tests/v76-product-pages.test.cjs` verifica ordem visual, responsive, reutilização do domínio existente e separação do shell;
+- CI inclui o novo gate.
+
+O primeiro CI da branch passou por sintaxe, finanças, Mercado, segurança, responsive, sync e pelo novo teste de hierarquia; conclusão final do workflow ainda deve ser confirmada após a última atualização documental.
+
+## 4. Direção visual aprovada
+
+Os protótipos são referência de **hierarquia e composição**, não de dados inventados.
+
+- interface clean/premium com pouco ruído visual;
+- teal como identidade; cores semânticas apenas quando têm função;
+- uma família tipográfica;
 - menos “card dentro de card” e mais espaço em branco;
 - desktop com sidebar e conteúdo amplo;
 - mobile com navegação `Início · Despesas · Mercado · Planeamento · Mais`;
-- ação principal evidente por contexto;
-- Dashboard: resumo principal → KPIs reais → vencimentos/orçamento → categorias/atividade;
-- Mercado: pesquisa/lista/carrinho/estimativa/fatura mantendo distinção entre preço observado e confirmado;
-- Planeamento, Calendário e Faturas devem reutilizar os mesmos tokens, grids, botões, inputs, estados e navegação.
+- uma ação primária clara por contexto;
+- todas as páginas devem reutilizar os mesmos tokens, componentes e estados.
 
-Qualquer métrica ou função presente num mockup que não exista no domínio atual deve ser validada antes de entrar em código.
+Próximas páginas nesta branch: Mercado, Planeamento, Calendário e Faturas, sempre sobre funções reais já existentes.
 
 ## 5. Migração TypeScript
 
-A meta pedida é fonte funcional 100% TypeScript. Isto **não significa ausência de JavaScript no browser**: navegadores executam JavaScript gerado pelo build. A meta correta é:
+Meta: fonte funcional 100% TypeScript strict. Isto não significa ausência de JavaScript no browser; o browser recebe JavaScript gerado pelo build.
+
+Regras:
 
 - código-fonte funcional mantido em `.ts`;
-- `strict` ativo;
-- sem `any` não justificado;
-- JavaScript gerado apenas no build/deploy e não usado como fonte manual;
-- remoção de cada ficheiro JS legado apenas depois de equivalência funcional provada.
+- sem `@ts-nocheck` ou `any` em massa;
+- JavaScript compilado é artefacto, não fonte manual;
+- cada ficheiro JS legado só é removido depois de equivalência funcional provada;
+- migração por blocos: funções puras → domínio financeiro → Mercado → core/persistência/cifra → sync → UI → PWA/build → testes/tooling.
 
-O repositório ainda contém vários módulos JavaScript de runtime. Apagá-los agora quebraria a aplicação; a remoção será feita por blocos auditáveis.
+Ainda não é seguro apagar `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js` ou restantes módulos runtime. A remoção imediata quebraria a aplicação.
 
 ## 6. Riscos/lacunas abertas
 
 - validação física em iPhone/Safari/PWA continua obrigatória após mudanças de UI;
-- CSS histórico v74/v75 ainda contém sobreposição e `!important` a reduzir por componente;
+- CSS histórico v74/v75 ainda contém sobreposição e `!important` a reduzir gradualmente;
 - `main` não tem branch protection;
 - `market-experience.js` ainda requer teste dedicado para persistência de `pid` em todo o fluxo;
-- TypeScript ainda cobre fundação/tipos e Veggie Burger, não o runtime completo;
-- os protótipos são referência visual e não podem ser copiados literalmente quando apresentarem dados/ações não suportados pelo código real.
+- TypeScript ainda não cobre o runtime completo;
+- protótipos não podem introduzir silenciosamente tarefas, simulações, comparações ou métricas inexistentes.
 
 ## 7. Próximo passo
 
-1. Reconfirmar CI + TypeScript Foundation no head atual do PR #85.
-2. Integrar a hierarquia de componentes em `main` após os gates verdes.
-3. Confirmar GitHub Pages no merge.
-4. Abrir bloco de redesign real, começando por Dashboard e reutilizando os componentes nas páginas Mercado, Planeamento, Calendário e Faturas.
-5. Em paralelo controlado, iniciar a migração do runtime JavaScript para TypeScript por módulos, começando por funções puras/determinísticas e só depois domínio financeiro, persistência, sync e UI.
-6. Só remover ficheiros JS legados quando o módulo TypeScript equivalente estiver compilado, testado e usado pelo Pages.
+1. Confirmar CI da branch após a documentação e abrir PR do Dashboard.
+2. Validar visualmente o Dashboard publicado em preview/Pages antes de expandir a mesma camada.
+3. Aplicar `76-product-pages` a Mercado, Planeamento, Calendário e Faturas.
+4. Abrir branch separada para o primeiro módulo runtime TypeScript, sem misturar migração de linguagem com o redesign.
+5. Só remover JavaScript fonte quando o build TypeScript equivalente estiver a alimentar o `dist/` com regressões verdes.
