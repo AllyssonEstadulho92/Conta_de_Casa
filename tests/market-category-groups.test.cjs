@@ -65,7 +65,7 @@ assert.ok(publicFilesBlock.includes("'v75-header-refinement.css'"));
 
 const dist=path.join(ROOT,'dist');
 try{
-  execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
+  execFileSync(process.execPath,['scripts/prepare-pages-typescript.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
   assert.match(index,/market-brand\.css\?v=74-ui1/);
   assert.match(index,/market-branding\.js\?v=74-ui1/);
@@ -91,11 +91,12 @@ try{
   assert.ok(index.indexOf('market-shopping-focus.js')<index.indexOf('mobile-menu-toggle.js'));
   assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v74-experience.js'));
   assert.ok(index.indexOf('v74-experience.js')<index.indexOf('v75-architecture.js'));
-  for(const asset of ['market-category-groups.css','market-category-groups.js','design-system.css','v64-runtime.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-header-refinement.css','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  for(const asset of ['market-category-groups.css','market-category-groups.js','design-system.css','v64-runtime.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-header-refinement.css','release-manifest.json','v76-veggie-menu.js'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  assert.ok(!fs.existsSync(path.join(ROOT,'v76-veggie-menu.js')),'generated Veggie Burger runtime must not remain as root source after the build');
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market category grouping preserved under the final v75 prototype architecture and header2: OK');
+console.log('Market category grouping preserved under the final v75 prototype architecture and TypeScript-aware Pages build: OK');
