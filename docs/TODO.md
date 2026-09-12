@@ -20,7 +20,7 @@ Atualizado: 12 de setembro de 2026
 - [x] Baseline arquitetural v76 — PR #82.
 - [x] Consolidação UI/shell — PR #84, merge `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`.
 
-## P0 — `feat/v76-ui-components1`
+## P0 — `feat/v76-ui-components1` / PR #85
 
 - [x] Criar revisão `76-modern-ui2`.
 - [x] Consolidar hierarquia `primary`, `secondary`, `danger`, `link`, `icon button`.
@@ -32,12 +32,12 @@ Atualizado: 12 de setembro de 2026
 - [x] Rever cache PWA para `modern-ui2` + `ui-components1`.
 - [x] Atualizar testes `v76-modern-ui`, Veggie Burger, mobile shell e contrato de arquitetura.
 - [x] Atualizar `PROJECT_STATE`, `ARCHITECTURE`, `DECISIONS`, `TODO` e `CHANGELOG`.
-- [ ] Abrir PR.
-- [ ] CI integral verde.
-- [ ] TypeScript Foundation verde.
-- [ ] Rever diff final.
-- [ ] Integrar apenas após gates verdes.
-- [ ] Confirmar Pages após merge.
+- [x] Abrir PR #85.
+- [x] CI integral verde — run `34664678296`.
+- [x] TypeScript Foundation verde — run `34664678384`.
+- [x] Rever diff final do PR #85.
+- [ ] Integrar apenas após os gates deste último commit permanecerem verdes.
+- [ ] Confirmar GitHub Pages após merge.
 
 ## P0 — redesign real baseado nos protótipos
 
