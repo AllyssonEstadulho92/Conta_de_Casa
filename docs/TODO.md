@@ -10,26 +10,24 @@ Atualizado: 12 de setembro de 2026
 - [x] Preservar `marketId|pid` no pipeline especializado.
 - [x] Não alterar cálculos, faturas, pagamentos, QR, scanner ou sync por redesign/migração.
 
-## P0 — Publicação / incidente de 12-09-2026
+## P0 — Publicação
 
-- [x] Identificar a causa de o site não refletir a alteração.
-- [x] Confirmar CI `34693676180` falhado por `v75-architecture.js` ausente.
-- [x] Confirmar Pages `34693693840` ignorado após falha do CI.
-- [x] Restaurar exatamente `v75-architecture.js` no PR #87.
-- [x] Integrar PR #87 — merge `6401f1c5156382e9fe364da31afa3fcec4aed9bc`.
-- [x] Confirmar CI e Pages verdes após recuperação.
-- [x] Integrar PR #86 — Dashboard `76-product-pages1`, merge `42557d59f464a2fc7fc22a31eb24564e7dbabad9`.
-- [x] CI pós-PR86 `34695579311` verde.
-- [x] TypeScript Foundation `34695579282` verde.
-- [x] Pages pós-PR86 `34695600399` verde.
+- [x] Identificar porque o site não refletiu a alteração.
+- [x] Recuperar remoção prematura de `v75-architecture.js` no PR #87.
+- [x] Publicar Dashboard `76-product-pages1` no PR #86.
+- [x] Confirmar CI/TypeScript/Pages do PR #86.
+- [x] Integrar PR #88 — primeira remoção segura de JS fonte.
+- [x] TypeScript Foundation pós-PR88 `34699066645` verde.
+- [x] CI pós-PR88 `34699066749` verde.
+- [x] Pages pós-PR88 `34699100855` verde.
 - [ ] Ativar branch protection/required checks quando a configuração permitir.
 
 ## P0 — UI/UX
 
 ### Dashboard
 
-- [x] `Saldo atual` / `n.current` como resumo principal real.
-- [x] `Por pagar`, `Em atraso` e `Saldo projetado` em segundo nível.
+- [x] `Saldo atual` como resumo principal real.
+- [x] `Por pagar`, `Em atraso`, `Saldo projetado` em segundo nível.
 - [x] `Pago no mês` e `Próximos 7 dias` compactos.
 - [x] Reorganizar vencimentos, orçamento, categorias e atividade.
 - [x] Composição distinta desktop/tablet/mobile.
@@ -66,45 +64,52 @@ Atualizado: 12 de setembro de 2026
 
 ## P0 — Migração para fonte 100% TypeScript
 
-Meta: nenhum JavaScript manual como fonte funcional. O browser recebe JavaScript gerado pelo build. A baseline JavaScript de rollback está em `backup/js-runtime-baseline-20260912`.
+Meta: nenhum JavaScript manual como fonte funcional. O browser recebe JavaScript gerado pelo build. A baseline de rollback está em `backup/js-runtime-baseline-20260912`.
 
-### Bloco 1 — pipeline e primeiro runtime
+### Bloco 1 — pipeline e primeiro runtime — concluído/publicado
 
-- [x] `tsconfig.json` strict/noEmit para typecheck.
-- [x] Criar `feat/v76-typescript-runtime2` a partir do `main` publicado mais recente.
-- [x] Separar `typecheck`, `build:runtime` e `build:pages` em `package.json`.
-- [x] Ignorar `.generated/` e `dist/` no Git.
+- [x] `tsconfig.json` strict/noEmit.
+- [x] Separar `typecheck`, `build:runtime` e `build:pages`.
+- [x] Ignorar `.generated/` e `dist/`.
 - [x] Criar `scripts/build-typescript-runtime.cjs`.
-- [x] Gerar `.generated/v76-veggie-menu.js` de `src/ui/veggie-menu-toggle.ts`.
-- [x] Remover o ficheiro manual/versionado `v76-veggie-menu.js` da branch.
-- [x] Fazer `scripts/prepare-pages.cjs` gerar e publicar `dist/v76-veggie-menu.js` automaticamente.
-- [x] Criar `tests/typescript-runtime-build.test.cjs`.
-- [x] Atualizar `tests/v76-veggie-menu.test.cjs` para validar o artefacto gerado.
-- [x] Atualizar CI para instalar TypeScript, gerar runtime e executar regressão completa.
-- [x] Atualizar TypeScript Foundation para exigir fonte TS e ausência do JS manual.
-- [x] Atualizar Pages para gerar o runtime TS antes de validar/publicar.
-- [x] TypeScript Foundation funcional verde — `34695947847`.
-- [x] CI integral funcional verde — `34695947843`.
-- [ ] Reconfirmar ambos os gates depois da documentação final.
-- [ ] Rever diff final contra `main`.
-- [ ] Abrir PR da primeira remoção segura de JavaScript fonte.
-- [ ] Integrar apenas com gates verdes.
-- [ ] Confirmar CI + Pages pós-merge.
+- [x] `src/ui/veggie-menu-toggle.ts` como fonte canónica.
+- [x] Remover `v76-veggie-menu.js` manual.
+- [x] Gerar `.generated/v76-veggie-menu.js`.
+- [x] Publicar `dist/v76-veggie-menu.js` via `prepare-pages`.
+- [x] Criar gate `tests/typescript-runtime-build.test.cjs`.
+- [x] Integrar PR #88 — merge `5301bd0d66c5ec46ead7be079799ecb76c752237`.
+- [x] Confirmar TypeScript, CI e Pages verdes pós-merge.
 
-### Bloco 2 — funções puras
+### Bloco 2 — módulos folha/UI de baixo risco — em curso
+
+- [x] Auditar `market-branding.js`: apresentação DOM, sem escrita em domínio/cofre.
+- [x] Criar `src/ui/market-branding.ts` com DOM tipado.
+- [x] Generalizar `scripts/build-typescript-runtime.cjs` para múltiplos runtimes.
+- [x] Mapear `market-branding.js` público para `.generated/market-branding.js`.
+- [x] Remover `market-branding.js` manual da branch.
+- [x] Atualizar teste de build para validar os dois artefactos.
+- [x] Atualizar CI, TypeScript Foundation e Pages para o artefacto gerado.
+- [ ] Confirmar TypeScript Foundation da branch.
+- [ ] Confirmar CI integral da branch.
+- [ ] Rever diff final contra `main`.
+- [ ] Abrir PR e integrar apenas com gates verdes.
+- [ ] Confirmar CI + Pages pós-merge.
+- [ ] Escolher o próximo módulo folha após observar dependências reais.
+
+### Bloco 3 — funções puras
 
 - [ ] Mapear parsing/formatação monetária, datas civis e quantidades.
 - [ ] Criar vetores de paridade JS→TS.
 - [ ] Migrar e testar limites, inválidos e arredondamento.
-- [ ] Remover JS fonte apenas depois de o build usar o artefacto TS.
+- [ ] Remover JS fonte apenas depois de o build usar artefactos TS.
 
-### Bloco 3 — domínio financeiro
+### Bloco 4 — domínio financeiro
 
 - [ ] Migrar `finance.js` por subdomínios.
 - [ ] Tipar faturas, pagamentos, rendimentos, orçamento, objetivos e relatórios.
 - [ ] Testar pagamentos parciais, vencimentos, recorrência e arredondamentos.
 
-### Blocos 4–6 — Mercado
+### Bloco 5 — Mercado/modelo/carrinho
 
 - [ ] Migrar modelo de produto/preço/carrinho.
 - [ ] Tipar `ObservedPrice`, `ConfirmedPrice`, `estimatedCents`, `actualCents`.
@@ -112,23 +117,24 @@ Meta: nenhum JavaScript manual como fonte funcional. O browser recebe JavaScript
 - [ ] Corrigir/testar persistência de `pid`.
 - [ ] Reconciliar fatura/talão sem substituição silenciosa de valores.
 
-### Bloco 7 — core/persistência/cifra
+### Bloco 6 — core/persistência/cifra
 
 - [ ] Migrar `core.js` depois do domínio estável.
 - [ ] Tipar schema v5, IndexedDB, envelope cifrado e erros.
 - [ ] Não alterar PBKDF2/AES-GCM por causa da linguagem.
 
-### Bloco 8 — sync
+### Bloco 7 — sync
 
 - [ ] Migrar sync/conflitos com estados discriminados.
 - [ ] Testar offline, timeout, concorrência e envelope inválido.
 
-### Bloco 9 — UI restante
+### Bloco 8 — UI/controladores complexos
 
-- [ ] Migrar `render.js`, `forms.js`, `events.js` e restantes controladores.
+- [ ] Migrar `render.js`, `forms.js`, `events.js` e controladores restantes.
+- [ ] Migrar `mobile-menu-toggle.js` com tipos explícitos para gestos/touches/dialog.
 - [ ] Tipar DOM com guards, sem casts que escondam `null`.
 
-### Bloco 10 — PWA/build/limpeza
+### Bloco 9 — PWA/build/limpeza
 
 - [ ] Migrar Service Worker.
 - [ ] Migrar scripts/testes/tooling para TypeScript quando o runtime estiver estável.
