@@ -30,9 +30,18 @@ jobs:
       - name: TypeScript strict check
         run: npm run typecheck
 
-      - name: Confirm no runtime switch in foundation block
+      - name: Generate first TypeScript runtime artifact
+        run: npm run build:runtime
+
+      - name: Validate generated runtime
         run: |
-          test ! -e dist
+          node --check dist/v76-veggie-menu.js
+          node tests/typescript-runtime-build.test.cjs
+
+      - name: Confirm migration remains isolated
+        run: |
           grep -q "'core.js'" scripts/prepare-pages.cjs
           grep -q "'finance.js'" scripts/prepare-pages.cjs
           grep -q "'events.js'" scripts/prepare-pages.cjs
+          test -f src/ui/veggie-menu-toggle.ts
+          test -f dist/v76-veggie-menu.js
