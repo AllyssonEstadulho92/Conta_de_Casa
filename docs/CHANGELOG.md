@@ -2,7 +2,7 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade técnica do programa atual.
 
-## 2026-09-12 — `feat/v76-typescript-market-branding1` — bloco 2 TypeScript em curso
+## 2026-09-12 — PR #89 — `market-branding` migrado para TypeScript — publicado
 
 ### Objetivo
 
@@ -10,15 +10,25 @@ Continuar a retirada de JavaScript manual por blocos pequenos, escolhendo primei
 
 ### Alterações
 
-- criado `src/ui/market-branding.ts` como nova fonte canónica do branding semântico do Mercado;
-- removida da branch a fonte manual `market-branding.js`;
+- `src/ui/market-branding.ts` é a fonte canónica do branding semântico do Mercado;
+- removida a fonte manual `market-branding.js`;
 - `scripts/build-typescript-runtime.cjs` passou de um runtime isolado para um registo explícito de múltiplos runtimes TypeScript;
-- o build gera agora `.generated/v76-veggie-menu.js` e `.generated/market-branding.js`;
-- `scripts/prepare-pages.cjs` mapeia ambos os nomes públicos para os artefactos gerados;
-- `tests/typescript-runtime-build.test.cjs` valida fonte TS, ausência de JS manual, sintaxe, marcadores de comportamento e igualdade exata com o bundle `dist`;
-- CI passa a validar `.generated/market-branding.js`;
-- TypeScript Foundation exige `src/ui/market-branding.ts`, o artefacto gerado e ausência do JS manual;
-- Pages gera e valida o segundo runtime antes do deploy.
+- o build gera `.generated/v76-veggie-menu.js` e `.generated/market-branding.js`;
+- `scripts/prepare-pages.cjs` mapeia ambos os nomes públicos para artefactos gerados e copia-os para `dist`;
+- `tests/typescript-runtime-build.test.cjs` valida fonte TS, ausência de JS manual, sintaxe, marcadores de comportamento e igualdade com o bundle público;
+- CI, TypeScript Foundation e Pages validam diretamente o segundo runtime gerado;
+- a chave do cache PWA foi invalidada para `ts-runtime2-market-branding1`.
+
+### QA e incidente controlado
+
+Durante o desenvolvimento, uma alteração demasiado ampla de `sw.js` introduziu deriva na estratégia de fetch. O teste Safari/PWA falhou e bloqueou o avanço. A lógica publicada foi restaurada exatamente e o diff final do Service Worker ficou limitado à chave de cache.
+
+### Publicação
+
+- merge em `main`: `c59e0a45500fd7965039de27615f574129482b13`;
+- TypeScript Foundation pós-merge `34700016617`: sucesso;
+- CI pós-merge `34700016615`: sucesso integral;
+- Deploy Pages `34700037019`: sucesso.
 
 ### Domínio e segurança
 
@@ -109,6 +119,7 @@ Um `.js` fonte só é eliminado depois de existir `.ts` equivalente, build gerad
 
 ## Histórico v76 recente
 
+- PR #89 — segunda remoção segura de JS fonte (`market-branding`), merge `c59e0a45500fd7965039de27615f574129482b13`;
 - PR #88 — primeira remoção segura de JS fonte e runtime TS gerado;
 - PR #84 — consolidação UI/shell, merge `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`;
 - PR #82 — baseline arquitetural, merge `bb0cd65830c617506fdc9e94e8b9abdac6a2d86b`;
