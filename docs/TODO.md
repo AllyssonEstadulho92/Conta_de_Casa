@@ -17,9 +17,10 @@ Atualizado: 12 de setembro de 2026
 - [x] Publicar Dashboard `76-product-pages1` no PR #86.
 - [x] Confirmar CI/TypeScript/Pages do PR #86.
 - [x] Integrar PR #88 — primeira remoção segura de JS fonte.
-- [x] TypeScript Foundation pós-PR88 `34699066645` verde.
-- [x] CI pós-PR88 `34699066749` verde.
-- [x] Pages pós-PR88 `34699100855` verde.
+- [x] Integrar PR #89 — segunda remoção segura de JS fonte (`market-branding`).
+- [x] TypeScript Foundation pós-PR89 `34700016617` verde.
+- [x] CI pós-PR89 `34700016615` verde.
+- [x] Pages pós-PR89 `34700037019` verde.
 - [ ] Ativar branch protection/required checks quando a configuração permitir.
 
 ## P0 — UI/UX
@@ -74,37 +75,31 @@ Meta: nenhum JavaScript manual como fonte funcional. O browser recebe JavaScript
 - [x] Criar `scripts/build-typescript-runtime.cjs`.
 - [x] `src/ui/veggie-menu-toggle.ts` como fonte canónica.
 - [x] Remover `v76-veggie-menu.js` manual.
-- [x] Gerar `.generated/v76-veggie-menu.js`.
-- [x] Publicar `dist/v76-veggie-menu.js` via `prepare-pages`.
-- [x] Criar gate `tests/typescript-runtime-build.test.cjs`.
-- [x] Integrar PR #88 — merge `5301bd0d66c5ec46ead7be079799ecb76c752237`.
-- [x] Confirmar TypeScript, CI e Pages verdes pós-merge.
+- [x] Gerar e publicar o artefacto JS a partir de TS.
+- [x] Integrar PR #88 e confirmar TypeScript/CI/Pages verdes.
 
-### Bloco 2 — `market-branding` / módulo folha — pronto para PR
+### Bloco 2 — `market-branding` — concluído/publicado
 
 - [x] Auditar `market-branding.js`: apresentação DOM, sem escrita em domínio/cofre.
 - [x] Criar `src/ui/market-branding.ts` com DOM tipado.
 - [x] Generalizar `scripts/build-typescript-runtime.cjs` para múltiplos runtimes.
 - [x] Mapear `market-branding.js` público para `.generated/market-branding.js`.
-- [x] Remover `market-branding.js` manual da branch.
-- [x] Atualizar teste de build para validar os dois artefactos.
-- [x] Atualizar CI, TypeScript Foundation e Pages para o artefacto gerado.
-- [x] Invalidar cache PWA sem alterar a lógica do Service Worker.
-- [x] Confirmar TypeScript Foundation da branch — `34699847604`.
-- [x] Confirmar CI integral da branch — `34699847600`.
-- [x] Confirmar Safari/PWA startup verde após restaurar o comportamento canónico do SW.
-- [x] Rever diff final contra `main`: nenhum ficheiro de domínio alterado; `sw.js` muda apenas a chave de cache.
-- [ ] Abrir PR e exigir novamente CI + TypeScript Foundation verdes.
-- [ ] Integrar apenas com gates verdes.
-- [ ] Confirmar CI + Pages pós-merge.
-- [ ] Escolher o próximo módulo folha após observar dependências reais.
+- [x] Remover `market-branding.js` manual.
+- [x] Atualizar teste de build, CI, TypeScript Foundation e Pages.
+- [x] Invalidar cache PWA sem alterar lógica do Service Worker.
+- [x] Gate Safari/PWA detetou deriva de SW durante desenvolvimento; comportamento canónico restaurado.
+- [x] PR #89 integrado — merge `c59e0a45500fd7965039de27615f574129482b13`.
+- [x] TypeScript Foundation pós-merge `34700016617`.
+- [x] CI integral pós-merge `34700016615`.
+- [x] Deploy Pages pós-merge `34700037019`.
 
-### Bloco 3 — funções puras
+### Bloco 3 — próximo módulo folha / funções puras — próximo
 
-- [ ] Mapear parsing/formatação monetária, datas civis e quantidades.
-- [ ] Criar vetores de paridade JS→TS.
-- [ ] Migrar e testar limites, inválidos e arredondamento.
-- [ ] Remover JS fonte apenas depois de o build usar artefactos TS.
+- [ ] Auditar tamanho, dependências, efeitos laterais e consumidores dos JS restantes.
+- [ ] Escolher o próximo módulo com menor acoplamento real; não assumir pelo nome.
+- [ ] Se for função pura, criar vetores de paridade JS→TS antes da troca.
+- [ ] Migrar e testar limites, inválidos e arredondamento quando houver dinheiro/datas/quantidades.
+- [ ] Remover JS fonte apenas depois de o build usar artefactos TS e todos os gates ficarem verdes.
 
 ### Bloco 4 — domínio financeiro
 
