@@ -33,6 +33,7 @@ assert.match(index,/market-experience\.js\?v=53/);
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/ts-runtime2-market-branding1/,'Service Worker cache must change when the generated Market branding runtime changes');
 for(const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be cached by the service worker`);
   assert.ok(pages.includes(`'${asset}'`),`${asset} must be included in the Pages bundle`);
@@ -97,4 +98,4 @@ assert.ok(css.includes('env(safe-area-inset-top)'));
 assert.ok(css.includes('env(safe-area-inset-bottom)'));
 assert.ok(css.includes('min-width:0'));
 
-console.log('Market live sources, TS-generated branding, verified photos and final v75 prototype architecture remain isolated and safe: OK');
+console.log('Market live sources, TS-generated branding, PWA cache revision, verified photos and final v75 prototype architecture remain isolated and safe: OK');
