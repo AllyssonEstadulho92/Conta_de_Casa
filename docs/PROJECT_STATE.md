@@ -6,7 +6,7 @@ Release pública: `v75`
 Programa técnico: `v76` — consolidação UI/UX + migração incremental para TypeScript  
 Branch pública: `main`  
 Baseline publicada: `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`  
-Trabalho atual: `feat/v76-ui-components1`  
+Trabalho atual: `feat/v76-ui-components1` — PR #85; gates verdes no commit anterior, reconfirmação pendente após atualização documental  
 Distribuição: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
@@ -52,6 +52,8 @@ Já aplicado:
 - revisão de cache PWA `ui-components1`;
 - testes de `modern-ui`, Veggie Burger, mobile shell e contrato de arquitetura alinhados com `76-modern-ui2`.
 
+Gates do PR #85 antes desta atualização documental: CI `34664678296` e TypeScript Foundation `34664678384`, ambos com sucesso. O diff foi revisto e não contém alterações de domínio. Como a documentação alterou o SHA da branch, os gates devem permanecer verdes no novo head antes do merge.
+
 Não alterado nesta branch: `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, IndexedDB, cifragem, sincronização, QR/scanner, faturas ou regras de Mercado.
 
 ## 4. Direção visual aprovada para implementação
@@ -96,8 +98,9 @@ O repositório ainda contém vários módulos JavaScript de runtime. Apagá-los 
 
 ## 7. Próximo passo
 
-1. Fechar `feat/v76-ui-components1` com CI + TypeScript Foundation verdes e revisão de diff.
-2. Integrar a hierarquia de componentes em `main`.
-3. Abrir bloco de redesign real, começando por Dashboard e reutilizando os componentes nas páginas Mercado, Planeamento, Calendário e Faturas.
-4. Em paralelo controlado, iniciar a migração do runtime JavaScript para TypeScript por módulos, começando por funções puras/determinísticas e só depois domínio financeiro, persistência, sync e UI.
-5. Só remover ficheiros JS legados quando o módulo TypeScript equivalente estiver compilado, testado e usado pelo Pages.
+1. Reconfirmar CI + TypeScript Foundation no head atual do PR #85.
+2. Integrar a hierarquia de componentes em `main` após os gates verdes.
+3. Confirmar GitHub Pages no merge.
+4. Abrir bloco de redesign real, começando por Dashboard e reutilizando os componentes nas páginas Mercado, Planeamento, Calendário e Faturas.
+5. Em paralelo controlado, iniciar a migração do runtime JavaScript para TypeScript por módulos, começando por funções puras/determinísticas e só depois domínio financeiro, persistência, sync e UI.
+6. Só remover ficheiros JS legados quando o módulo TypeScript equivalente estiver compilado, testado e usado pelo Pages.
