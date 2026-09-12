@@ -18,39 +18,39 @@ Atualizado: 12 de setembro de 2026
 - [x] `76-version-audit1` — PR #78.
 - [x] `76-mobile-shell2` — PR #80.
 - [x] Baseline arquitetural v76 — PR #82.
-- [x] Consolidação UI/shell — PR #84, merge `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`.
+- [x] Consolidação UI/shell — PR #84.
+- [x] `76-modern-ui2` / `ui-components1` — PR #85, merge `2a9cc3148e5750561b14f6a0505934d1a6d74d05`.
+- [x] CI final do PR #85 verde.
+- [x] TypeScript Foundation final do PR #85 verde.
+- [ ] Revalidar deployment Pages do PR #85: workflow posterior terminou cancelado/skipped e não conta como confirmação positiva.
 
-## P0 — `feat/v76-ui-components1` / PR #85
+## P0 — `redesign/v76-product-hierarchy1`
 
-- [x] Criar revisão `76-modern-ui2`.
-- [x] Consolidar hierarquia `primary`, `secondary`, `danger`, `link`, `icon button`.
-- [x] Baseline 44 px para controlos principais.
-- [x] Estados disabled/`aria-disabled`, foco e hover coerentes.
-- [x] Métricas de ícones dentro de botões.
-- [x] `min-width:0` e gap comum para grids partilhados.
-- [x] Apresentação de fotografias do Mercado com `contain`/centro/fallback.
-- [x] Rever cache PWA para `modern-ui2` + `ui-components1`.
-- [x] Atualizar testes `v76-modern-ui`, Veggie Burger, mobile shell e contrato de arquitetura.
-- [x] Atualizar `PROJECT_STATE`, `ARCHITECTURE`, `DECISIONS`, `TODO` e `CHANGELOG`.
-- [x] Abrir PR #85.
-- [x] CI integral verde — run `34664678296`.
-- [x] TypeScript Foundation verde — run `34664678384`.
-- [x] Rever diff final do PR #85.
-- [ ] Integrar apenas após os gates deste último commit permanecerem verdes.
-- [ ] Confirmar GitHub Pages após merge.
+### Infraestrutura de composição
 
-## P0 — redesign real baseado nos protótipos
-
-Princípio: usar os protótipos como referência visual/hierárquica e apenas funções/dados reais do projeto.
+- [x] Criar `v76-product-pages.css` revisão `76-product-pages1`.
+- [x] Carregar depois de `v76-modern-ui.css` e antes de `v76-mobile-shell.css`.
+- [x] Incluir a camada no build Pages.
+- [x] Incluir a camada no cache PWA `product-pages1`.
+- [x] Criar `tests/v76-product-pages.test.cjs`.
+- [x] Adicionar gate dedicado ao CI.
+- [x] Documentar propriedade da nova camada.
+- [ ] Confirmar CI verde no head documental final da branch.
+- [ ] Abrir PR do primeiro bloco de redesign.
+- [ ] Rever diff antes de merge.
 
 ### Dashboard
 
-- [ ] Reorganizar header para título/contexto + mês + ações essenciais.
-- [ ] Identificar no código o resumo financeiro real que pode ocupar a posição principal.
-- [ ] Limitar KPIs a métricas reais e úteis.
-- [ ] Reorganizar próximos vencimentos, orçamento, categorias e atividade recente.
-- [ ] Reduzir “card dentro de card”.
-- [ ] Validar desktop e mobile sem alterar cálculos.
+- [ ] Reorganizar header para título/contexto + mês + ações essenciais. Esta parte ainda não foi alterada.
+- [x] Identificar o resumo financeiro real: `Saldo atual` / `n.current`.
+- [x] Tornar o saldo atual o resumo visual dominante sem criar fórmula nova.
+- [x] Hierarquizar os KPIs reais `Por pagar`, `Em atraso` e `Saldo projetado`.
+- [x] Tornar `Pago no mês` e `Próximos 7 dias` métricas secundárias compactas.
+- [x] Reorganizar próximos vencimentos, orçamento, categorias e atividade recente.
+- [x] Criar composição adaptativa distinta para desktop/tablet/mobile.
+- [x] Preservar `renderDashboard()` e `dashboardNumbers()` sem alteração de domínio.
+- [x] Adicionar reduced-motion e forced-colors à nova composição.
+- [ ] Validar visualmente no browser real e em iPhone/PWA antes de considerar o Dashboard concluído.
 
 ### Mercado
 
@@ -96,7 +96,9 @@ Princípio: usar os protótipos como referência visual/hierárquica e apenas fu
 - [ ] Tokens de spacing sem valores aleatórios.
 - [ ] Tokens de raio, borda, elevação e foco.
 - [ ] Paleta semântica: background/surface/text/border/accent/success/warning/error.
-- [ ] Cards apenas quando ajudam a separar informação.
+- [x] Hierarquia base Primary/Secondary/Danger/Link/Icon.
+- [x] Baseline interna de 44 px para controlos principais.
+- [ ] Reduzir cards onde espaço/separadores são suficientes.
 - [ ] Form states: default/focus/filled/disabled/error/success.
 - [ ] Loading/empty/offline/error/success states partilhados.
 - [ ] Dark/Light/System com tokens próprios.
@@ -105,6 +107,12 @@ Princípio: usar os protótipos como referência visual/hierárquica e apenas fu
 ## P0 — Migração para fonte 100% TypeScript
 
 Meta: nenhum JavaScript manual como fonte funcional; JavaScript apenas gerado no build/deploy.
+
+### Bloco 1 — pipeline de emissão
+
+- [ ] Auditar `tsconfig`, Pages e CI para separar typecheck de emissão.
+- [ ] Fazer o build TypeScript gerar pelo menos um módulo runtime existente antes de apagar a sua cópia JS fonte.
+- [ ] Provar que o Pages usa o artefacto gerado e não um ficheiro JS manual.
 
 ### Bloco 2 — dinheiro, quantidades e datas
 
@@ -147,8 +155,7 @@ Meta: nenhum JavaScript manual como fonte funcional; JavaScript apenas gerado no
 
 ### Bloco 10 — PWA/build/limpeza
 
-- [ ] Criar build TypeScript que gere os ficheiros JS usados pelo browser.
-- [ ] Fazer Pages consumir apenas artefactos gerados.
+- [ ] Fazer Pages consumir apenas artefactos gerados para todos os módulos migrados.
 - [ ] Migrar Service Worker.
 - [ ] Migrar scripts/testes/tooling para TypeScript quando o runtime estiver estável.
 - [ ] Remover ficheiros `.js` fonte legado apenas sem referências e com regressões verdes.
