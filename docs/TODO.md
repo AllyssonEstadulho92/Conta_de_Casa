@@ -12,65 +12,37 @@ Atualizado: 12 de setembro de 2026
 
 ## P0 — Publicação / incidente de 12-09-2026
 
-- [x] Identificar por que o site não refletiu a alteração de `main`.
+- [x] Identificar a causa de o site não refletir a alteração.
 - [x] Confirmar CI `34693676180` falhado por `v75-architecture.js` ausente.
-- [x] Confirmar Pages `34693693840` ignorado porque CI de `main` falhou.
+- [x] Confirmar Pages `34693693840` ignorado após falha do CI.
 - [x] Restaurar exatamente `v75-architecture.js` no PR #87.
-- [x] CI e TypeScript Foundation do PR #87 verdes.
 - [x] Integrar PR #87 — merge `6401f1c5156382e9fe364da31afa3fcec4aed9bc`.
-- [x] CI do novo `main` verde — run `34695315162`.
-- [x] GitHub Pages do novo `main` verde — run `34695336131`.
-- [ ] Impedir futuras exclusões diretas de runtime sem substituto TS e gates.
+- [x] Confirmar CI e Pages verdes após recuperação.
+- [x] Integrar PR #86 — Dashboard `76-product-pages1`, merge `42557d59f464a2fc7fc22a31eb24564e7dbabad9`.
+- [x] CI pós-PR86 `34695579311` verde.
+- [x] TypeScript Foundation `34695579282` verde.
+- [x] Pages pós-PR86 `34695600399` verde.
 - [ ] Ativar branch protection/required checks quando a configuração permitir.
 
-## P0 — Base já integrada
-
-- [x] Fundação TypeScript — PR #72.
-- [x] `75-expenses1` — PR #73.
-- [x] `76-veggie-menu2` + `76-modern-ui1` — PR #76.
-- [x] `76-version-audit1` — PR #78.
-- [x] `76-mobile-shell2` — PR #80.
-- [x] Baseline arquitetural v76 — PR #82.
-- [x] Consolidação UI/shell — PR #84.
-- [x] `76-modern-ui2` / `ui-components1` — PR #85.
-- [x] Recuperação do pipeline Pages — PR #87.
-
-## P0 — PR #86 / `redesign/v76-product-hierarchy1`
-
-### Infraestrutura de composição
-
-- [x] Criar `v76-product-pages.css` revisão `76-product-pages1`.
-- [x] Carregar depois de `v76-modern-ui.css` e antes de `v76-mobile-shell.css`.
-- [x] Incluir no build Pages e cache PWA.
-- [x] Criar `tests/v76-product-pages.test.cjs` e gate no CI.
-- [x] Documentar propriedade da camada.
-- [x] Abrir PR #86.
-- [x] Sincronizar branch com `main` restaurado.
-- [x] CI integral verde no head sincronizado `5a75e26d72f73b3d4c96802ae4193e0a28b50835`.
-- [x] TypeScript Foundation verde no mesmo head.
-- [ ] Reconfirmar gates depois desta atualização documental.
-- [ ] Rever diff final.
-- [ ] Marcar PR #86 pronto para review.
-- [ ] Integrar em `main`.
-- [ ] Confirmar CI + Pages pós-merge.
+## P0 — UI/UX
 
 ### Dashboard
 
-- [ ] Reorganizar header para título/contexto + mês + ações essenciais; ainda não concluído.
-- [x] Usar `Saldo atual` / `n.current` como resumo principal real.
-- [x] Hierarquizar `Por pagar`, `Em atraso` e `Saldo projetado`.
-- [x] Tornar `Pago no mês` e `Próximos 7 dias` métricas secundárias compactas.
+- [x] `Saldo atual` / `n.current` como resumo principal real.
+- [x] `Por pagar`, `Em atraso` e `Saldo projetado` em segundo nível.
+- [x] `Pago no mês` e `Próximos 7 dias` compactos.
 - [x] Reorganizar vencimentos, orçamento, categorias e atividade.
-- [x] Criar composição distinta desktop/tablet/mobile.
+- [x] Composição distinta desktop/tablet/mobile.
 - [x] Preservar `renderDashboard()` e `dashboardNumbers()`.
 - [x] Cobrir reduced-motion e forced-colors.
-- [ ] Validar visualmente desktop/mobile e iPhone/PWA depois do deploy.
+- [ ] Refinar header/contexto/mês/ações essenciais.
+- [ ] Validar fisicamente desktop/mobile e iPhone/PWA.
 
 ### Próximas páginas
 
 - [ ] Mercado: pesquisa/filtros/adicionar/ler fatura, lista/carrinho e preço observado/estimado/confirmado.
-- [ ] Planeamento: trabalhar sobre saldo, orçamento e rendimentos reais.
-- [ ] Calendário: melhorar vencimentos/pagamentos existentes.
+- [ ] Planeamento: saldo, orçamento e rendimentos reais.
+- [ ] Calendário: vencimentos/pagamentos existentes.
 - [ ] Faturas: pesquisa/filtros/resumo/tabela desktop/lista mobile; preservar `renderBills()`/`filterBills()`.
 - [ ] Relatórios.
 - [ ] Objetivos.
@@ -94,22 +66,37 @@ Atualizado: 12 de setembro de 2026
 
 ## P0 — Migração para fonte 100% TypeScript
 
-Meta: nenhum JavaScript manual como fonte funcional; JavaScript apenas gerado no build/deploy. O JS atual permanece fallback temporário até paridade comprovada.
+Meta: nenhum JavaScript manual como fonte funcional. O browser recebe JavaScript gerado pelo build. A baseline JavaScript de rollback está em `backup/js-runtime-baseline-20260912`.
 
-### Bloco 1 — pipeline TS
+### Bloco 1 — pipeline e primeiro runtime
 
-- [x] Confirmar que `tsconfig.json` está em strict/noEmit para a fundação.
-- [x] Provar experimentalmente emissão do Veggie Burger TS numa branch de migração.
-- [ ] Refazer/atualizar a branch de migração a partir do `main` mais recente após o PR #86.
-- [ ] Separar oficialmente `typecheck` de `build:runtime`.
-- [ ] Fazer o Pages gerar artefactos JS de TS antes de `prepare-pages`.
-- [ ] Criar gate que falha se um JS fonte for removido mas ainda estiver referenciado em CI/build/SW/HTML/testes.
+- [x] `tsconfig.json` strict/noEmit para typecheck.
+- [x] Criar `feat/v76-typescript-runtime2` a partir do `main` publicado mais recente.
+- [x] Separar `typecheck`, `build:runtime` e `build:pages` em `package.json`.
+- [x] Ignorar `.generated/` e `dist/` no Git.
+- [x] Criar `scripts/build-typescript-runtime.cjs`.
+- [x] Gerar `.generated/v76-veggie-menu.js` de `src/ui/veggie-menu-toggle.ts`.
+- [x] Remover o ficheiro manual/versionado `v76-veggie-menu.js` da branch.
+- [x] Fazer `scripts/prepare-pages.cjs` gerar e publicar `dist/v76-veggie-menu.js` automaticamente.
+- [x] Criar `tests/typescript-runtime-build.test.cjs`.
+- [x] Atualizar `tests/v76-veggie-menu.test.cjs` para validar o artefacto gerado.
+- [x] Atualizar CI para instalar TypeScript, gerar runtime e executar regressão completa.
+- [x] Atualizar TypeScript Foundation para exigir fonte TS e ausência do JS manual.
+- [x] Atualizar Pages para gerar o runtime TS antes de validar/publicar.
+- [x] TypeScript Foundation funcional verde — `34695947847`.
+- [x] CI integral funcional verde — `34695947843`.
+- [ ] Reconfirmar ambos os gates depois da documentação final.
+- [ ] Rever diff final contra `main`.
+- [ ] Abrir PR da primeira remoção segura de JavaScript fonte.
+- [ ] Integrar apenas com gates verdes.
+- [ ] Confirmar CI + Pages pós-merge.
 
 ### Bloco 2 — funções puras
 
 - [ ] Mapear parsing/formatação monetária, datas civis e quantidades.
 - [ ] Criar vetores de paridade JS→TS.
 - [ ] Migrar e testar limites, inválidos e arredondamento.
+- [ ] Remover JS fonte apenas depois de o build usar o artefacto TS.
 
 ### Bloco 3 — domínio financeiro
 
@@ -136,23 +123,23 @@ Meta: nenhum JavaScript manual como fonte funcional; JavaScript apenas gerado no
 - [ ] Migrar sync/conflitos com estados discriminados.
 - [ ] Testar offline, timeout, concorrência e envelope inválido.
 
-### Bloco 9 — UI
+### Bloco 9 — UI restante
 
-- [ ] Migrar `render.js`, `forms.js`, `events.js` e controladores restantes.
+- [ ] Migrar `render.js`, `forms.js`, `events.js` e restantes controladores.
 - [ ] Tipar DOM com guards, sem casts que escondam `null`.
 
 ### Bloco 10 — PWA/build/limpeza
 
-- [ ] Fazer Pages consumir apenas artefactos gerados nos módulos migrados.
 - [ ] Migrar Service Worker.
 - [ ] Migrar scripts/testes/tooling para TypeScript quando o runtime estiver estável.
-- [ ] Remover cada `.js` fonte apenas sem referências e com regressões verdes.
+- [ ] Garantir que todos os módulos migrados são publicados apenas como artefactos gerados.
+- [ ] Remover os últimos `.js` fonte sem referências manuais.
 - [ ] Proibir `@ts-nocheck` e `any` em massa.
 
 ## P0 — Segurança/PWA
 
 - [ ] Auditar ZXing remoto e avaliar bundle local com licença preservada.
-- [ ] Reduzir `style-src 'unsafe-inline'` quando os estilos inline forem removidos.
+- [ ] Reduzir `style-src 'unsafe-inline'` quando possível.
 - [ ] Rever CSP final do `dist/` e justificar origens externas.
 - [ ] Classificar cache por tipo de recurso.
 - [ ] Confirmar que falha/ausência do Service Worker não quebra o núcleo online.
