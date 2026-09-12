@@ -65,10 +65,15 @@ Ordem relevante:
 4. `v76-veggie-menu.css` (`76-veggie-menu2`);
 5. `v75-usability.css`;
 6. `v76-modern-ui.css` (`76-modern-ui2`) — tokens e componentes visuais partilhados;
-7. `v76-mobile-shell.css` (`76-mobile-shell2`) — autoridade final de geometria mobile ≤820 px;
-8. estilos específicos do Centro de Versão.
+7. `v76-product-pages.css` (`76-product-pages1`) — hierarquia e composição das páginas v76;
+8. `v76-mobile-shell.css` (`76-mobile-shell2`) — autoridade final de geometria mobile ≤820 px;
+9. estilos específicos do Centro de Versão.
 
-O shell móvel carrega depois do design system de propósito: aparência e geometria são responsabilidades diferentes.
+A ordem é deliberada:
+
+`tokens/componentes → composição de página → geometria do shell`.
+
+`v76-product-pages.css` pode organizar conteúdo dentro de uma página, mas não pode possuir viewport, safe areas, overflow global, topbar estrutural ou dock persistente.
 
 ## 5. Propriedade única por preocupação
 
@@ -77,6 +82,7 @@ A arquitetura visual v76 separa:
 - **tokens**: cor, tipografia, espaçamento, raio, sombra, foco;
 - **shell**: viewport, scroll, safe areas, topbar, área principal e navegação persistente;
 - **componentes**: botões, inputs, cards, tabs, dialogs, tabelas, toolbars e estados;
+- **composição de página**: ordem, proporção e prioridade entre secções dentro de cada feature;
 - **features**: Dashboard, Despesas/Faturas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico e Definições;
 - **estados**: active, focus, disabled, loading, empty, error, offline, success;
 - **domínio**: regras financeiras, Mercado, persistência, sync e segurança fora das camadas visuais.
@@ -97,7 +103,7 @@ Em ≤820 px, `v76-mobile-shell.css` é a única autoridade da geometria global:
 - contratos para 320/360/375/390/430/768/820 px e landscape de baixa altura;
 - foco e último conteúdo não ficam escondidos por navegação persistente.
 
-`v76-modern-ui.css` pode estilizar topbar/dock, mas não pode reassumir `position`, offsets, safe area, altura estrutural, overflow global ou reserva de página.
+Nenhuma camada de composição pode reassumir `position`, offsets, safe area, altura estrutural, overflow global ou reserva de página.
 
 ## 7. Sistema visual — `76-modern-ui2`
 
@@ -124,7 +130,7 @@ Contratos:
 
 - componentes partilhados usam `min-width:0` para evitar overflow;
 - gaps usam tokens comuns;
-- topologia de colunas continua pertencente à feature enquanto cada página não for consolidada;
+- topologia de página pertence a `v76-product-pages.css` quando uma feature é migrada para a nova composição;
 - não transformar toda a informação em cards; espaço em branco e separadores também são ferramentas de hierarquia.
 
 ### Fotografias do Mercado
@@ -134,7 +140,55 @@ Contratos:
 - origem/identidade/licença continuam independentes da apresentação;
 - fotografia nunca altera preço, SKU ou total contabilizado.
 
-## 8. Navegação e hierarquia do produto
+## 8. Composição de produto — `76-product-pages1`
+
+`v76-product-pages.css` é a camada que traduz os protótipos aprovados para o DOM real, sem inventar domínio.
+
+### Dashboard atual
+
+A implementação reutiliza integralmente `renderDashboard()` e `dashboardNumbers()`.
+
+Hierarquia desktop:
+
+1. `Saldo atual` existente como resumo principal;
+2. `Por pagar`, `Em atraso` e `Saldo projetado` como indicadores secundários;
+3. alertas condicionais;
+4. `Pago no mês` e `Próximos 7 dias` como métricas compactas;
+5. `Próximos vencimentos` + `Orçamento`;
+6. `Atividade recente` + `Despesas por categoria`.
+
+Hierarquia mobile:
+
+1. resumo principal;
+2. KPIs em linhas compactas;
+3. métricas secundárias;
+4. vencimentos;
+5. orçamento;
+6. categorias;
+7. atividade.
+
+O CSS não cria valores novos. O teste `tests/v76-product-pages.test.cjs` confirma que o redesign continua dependente de `dashboardNumbers()` e que a camada não possui geometria do shell.
+
+### Propriedade da camada
+
+Pode definir:
+
+- `order` de secções dentro da página;
+- grid/flex interno da feature;
+- ênfase visual de secções;
+- densidade desktop/tablet/mobile;
+- apresentação de painéis da feature.
+
+Não pode definir:
+
+- `.app-shell`;
+- geometria global de `.main`;
+- `.mobile-nav` persistente;
+- safe areas;
+- scroll global;
+- regras de negócio.
+
+## 9. Navegação e hierarquia do produto
 
 Mobile principal:
 
@@ -155,20 +209,13 @@ Princípios:
 - reduzir menus gigantes sem remover funcionalidades;
 - o utilizador deve perceber onde está, o estado atual e a próxima ação em poucos segundos.
 
-## 9. Direção das páginas
+## 10. Direção das páginas
 
 Os protótipos aprovados são referência de composição. Só entram dados/funções existentes no domínio real.
 
 ### Dashboard
 
-Ordem alvo:
-
-1. header limpo;
-2. resumo financeiro principal real;
-3. KPIs reais e limitados;
-4. ações rápidas;
-5. próximos vencimentos + orçamento;
-6. categorias + atividade recente.
+Estado: primeiro bloco implementado em `76-product-pages1`.
 
 ### Mercado
 
@@ -195,14 +242,14 @@ O calendário atual representa vencimentos/pagamentos. Não transformar automati
 - ação “Nova fatura” dominante;
 - nenhuma alteração visual muda cálculo de saldo, pagamento ou vencimento.
 
-## 10. Responsive e acessibilidade
+## 11. Responsive e acessibilidade
 
 Critério mínimo:
 
 - mobile-first;
 - reflow funcional a 320 CSS px;
 - sem scroll horizontal global;
-- safe areas com `env(safe-area-inset-*)`;
+- safe areas com `env(safe-area-inset-*)` apenas no shell;
 - não bloquear pinch-to-zoom;
 - 44×44 CSS px como baseline interna de toque;
 - foco não oculto por header/dock;
@@ -210,11 +257,11 @@ Critério mínimo:
 - teclado virtual, landscape e dark mode fazem parte do QA;
 - contraste e estados não dependem apenas de cor.
 
-## 11. Dark mode
+## 12. Dark mode
 
 Light, Dark e System devem partilhar tokens sem “inverter branco para preto”. Superfícies, bordas, sombras, texto e cores semânticas precisam de valores próprios por tema.
 
-## 12. Segurança
+## 13. Segurança
 
 UI e migração TypeScript não podem enfraquecer:
 
@@ -228,7 +275,7 @@ UI e migração TypeScript não podem enfraquecer:
 
 Dados remotos são validados sintática e semanticamente antes de entrarem no domínio.
 
-## 13. QA e gates
+## 14. QA e gates
 
 Toda refatoração transversal deve manter verdes:
 
@@ -242,9 +289,10 @@ Toda refatoração transversal deve manter verdes:
 - sync/conflitos;
 - PWA/manifesto/cache;
 - TypeScript strict;
-- `tests/ui-architecture-contract.test.cjs` enquanto os testes ainda não forem migrados para TypeScript.
+- `tests/ui-architecture-contract.test.cjs`;
+- `tests/v76-product-pages.test.cjs` para páginas já migradas para a composição v76.
 
-## 14. Estratégia de migração de código
+## 15. Estratégia de migração de código
 
 Ordem recomendada e vigente:
 
