@@ -114,7 +114,7 @@ Estado: integrado em `main` pelo PR #84, merge `bf55c7cfd9bebe28c1ee57047f066d96
 
 ## D-075 — `76-modern-ui2` define hierarquia visual canónica de componentes
 
-Data: 12 de setembro de 2026. Estado: implementação em `feat/v76-ui-components1`.
+Data: 12 de setembro de 2026. Estado: integrado em `main` pelo PR #85, merge `2a9cc3148e5750561b14f6a0505934d1a6d74d05`.
 
 1. Ações usam hierarquia explícita: `primary`, `secondary`, `danger`, `link` e `icon button`.
 2. Controlos principais mantêm mínimo de 44 px; disabled/`aria-disabled`, foco e hover têm estados coerentes.
@@ -144,14 +144,29 @@ Data: 12 de setembro de 2026.
 3. Primeiro reutilizar dados e funções existentes; novas capacidades exigem decisão de produto e implementação própria.
 4. A mesma linguagem visual deve ser partilhada por desktop e mobile, com composição adaptativa e não simples redução de escala.
 
+## D-078 — `v76-product-pages.css` é a autoridade de composição interna das páginas
+
+Data: 12 de setembro de 2026. Estado: implementação em `redesign/v76-product-hierarchy1`.
+
+1. `v76-product-pages.css` carrega depois de `v76-modern-ui.css` e antes de `v76-mobile-shell.css`.
+2. A camada pode definir ordem visual, grids internos, proporções, densidade e ênfase de secções dentro de uma feature.
+3. A camada não pode definir viewport, safe areas, scroll global, geometria estrutural do topbar ou posição/dimensões do dock móvel.
+4. O primeiro alvo é o Dashboard. O resumo dominante reutiliza o `Saldo atual` já calculado por `dashboardNumbers()`; nenhuma fórmula nova foi criada para imitar o protótipo.
+5. `Por pagar`, `Em atraso`, `Saldo projetado`, `Pago no mês`, `Próximos 7 dias`, vencimentos, orçamento, categorias e atividade mantêm as fontes de dados e renderizadores existentes.
+6. Desktop e mobile podem ordenar visualmente as mesmas secções de forma diferente, sem duplicar estado nem criar uma segunda lógica funcional.
+7. A revisão `76-product-pages1` invalida o cache PWA e tem gate dedicado em `tests/v76-product-pages.test.cjs`.
+8. Mercado, Planeamento, Calendário e Faturas só serão incorporados nesta camada depois de confirmar quais elementos dos protótipos existem realmente no domínio.
+
 ## Evidência recente
 
 - PR #76: `76-veggie-menu2` + `76-modern-ui1` integrado.
 - PR #78: versão/auditoria integrado.
-- PR #80: shell móvel integrado e Pages validado.
+- PR #80: shell móvel integrado.
 - PR #82: baseline arquitetural integrada.
-- PR #84: consolidação UI/shell integrada em `main`, merge `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`.
-- `feat/v76-ui-components1`: `76-modern-ui2` em preparação para PR e gates.
+- PR #84: consolidação UI/shell integrada em `main`.
+- PR #85: `76-modern-ui2`/`ui-components1` integrado em `main`, merge `2a9cc3148e5750561b14f6a0505934d1a6d74d05`.
+- `redesign/v76-product-hierarchy1`: Dashboard `76-product-pages1` em desenvolvimento e protegido por novo gate de CI.
+- O workflow Pages disparado após o PR #85 terminou cancelado/skipped por concorrência/condição de workflow; não é registado como validação de deploy bem-sucedida.
 
 ## Lacuna técnica preservada
 
