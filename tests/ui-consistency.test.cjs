@@ -57,11 +57,20 @@ assert.match(architectureCss,/\.invoice-scan-overlay[\s\S]*inset:0!important/);
 assert.match(architectureCss,/background:var\(--v75-surface\)!important/);
 assert.match(architectureCss,/prefers-reduced-motion:reduce/);
 
-assert.match(headerCss,/refinamento premium do cabeçalho móvel/);
+/* v76-ui-audit1: o header móvel final é uma superfície neutra e acessível.
+   Não pode recuperar o antigo gradiente escuro/ícones brancos por cascade. */
+assert.match(headerCss,/cabeçalho móvel compatível com o design system atual/i);
 assert.match(headerCss,/#cdcMobileGreeting[\s\S]*display:none!important/);
 assert.match(headerCss,/#notificationsBtn[\s\S]*order:99!important/);
 assert.match(headerCss,/--v75-header-row:60px/);
+assert.match(headerCss,/background:var\(--v76-surface,#fff\)!important/);
+assert.match(headerCss,/color:var\(--v76-text,#12343d\)!important/);
+assert.match(headerCss,/\.mobile-menu-btn,[\s\S]*#notificationsBtn\{[\s\S]*width:44px!important/);
+assert.match(headerCss,/border-bottom:1px solid var\(--v76-border,#dce7e8\)!important/);
+assert.doesNotMatch(headerCss,/linear-gradient\(/,'mobile header must not use decorative gradients');
+assert.doesNotMatch(headerCss,/color:#fff!important/,'mobile header controls must not force white on a light surface');
 assert.match(headerCss,/prefers-reduced-motion:reduce/);
+assert.match(headerCss,/forced-colors:active/);
 
 assert.match(marketBrand,/Conta de Casa v74/);
 assert.match(marketBrand,/\.market-product-photo[\s\S]*display:grid!important/);
@@ -69,6 +78,9 @@ assert.doesNotMatch(marketBrand,/\.market-product-photo[^\{]*\{[^}]*display:none
 assert.match(shopping,/Conta de Casa v74/);
 assert.match(shopping,/grid-template-columns:38px 54px minmax\(0,1fr\) auto!important/);
 
+/* A navegação v74 ainda é dependência de compatibilidade até ao bloco dedicado
+   de migração; a auditoria regista esta dívida sem a confundir com a autoridade
+   visual final do shell v76. */
 assert.match(experience,/Conta de Casa v74/);
 for(const marker of ["['dashboard','Início','home']","['bills','Despesas','bill']","['market','Mercado','market']","['planning','Planeamento','plan']","['settings','Mais','more']"])assert.ok(experience.includes(marker));
 assert.match(experience,/data-v74-action="expense"/);
@@ -139,4 +151,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Conta de Casa v75 architecture and premium mobile header refinement: OK');
+console.log('Conta de Casa UI consistency, compatibility layers and neutral mobile header audit: OK');

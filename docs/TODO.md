@@ -9,103 +9,117 @@ Atualizado: 13 de setembro de 2026
 - [x] PBKDF2-SHA-256 + AES-GCM, 250000 iterações.
 - [x] IndexedDB financeiro preservado.
 - [x] `estimatedCents` separado de `actualCents`.
-- [x] `marketId|pid` preservado como identidade canónica.
-- [x] Redesign/migração sem alterar silenciosamente cálculos, faturas, pagamentos, QR, scanner ou sync.
+- [x] `marketId|pid` preservado.
+- [x] Redesign/migração sem alteração silenciosa de domínio.
 
-## P0 — Incidente PIN / Dashboard — `76-auth-transition1`
+## P0 — Auth/Safari
 
-- [x] Reproduzir por evidência física: cofre visível + dock autenticado sobreposto em Safari/iPhone.
-- [x] Identificar espera bloqueante de `syncStartupGate()` durante `enterApp()`.
-- [x] Identificar startup guard a voltar a mostrar o cofre durante `app-active`.
-- [x] Tornar a entrada local-first: PIN válido abre Dashboard imediatamente.
-- [x] Manter sync opcional em background.
-- [x] Tornar cofre e app estados visuais exclusivos.
-- [x] Proibir `#app`/dock enquanto `#vaultScreen` estiver visível.
-- [x] Implementar rollback seguro se `enterApp()` falhar.
-- [x] Invalidar cache PWA com `auth-transition1`.
-- [x] Atualizar regressão Safari/PWA.
-- [x] Atualizar regressão do mobile shell.
-- [x] PR #96 integrado, merge `d18d274141b1032ab0e909729739b3f86cabfb9e`.
-- [x] TypeScript Foundation `34780407487` verde.
-- [x] CI `34780407473` verde.
-- [x] Pages `34780437328` verde.
-- [ ] Repetir teste físico no mesmo iPhone/Safari após atualização do Service Worker.
-- [ ] Repetir teste em PWA instalada, não apenas Safari.
+- [x] PR #96: entrada local-first, sync não bloqueia Dashboard.
+- [x] PR #98: `[hidden]` explícito evita cofre e shell simultâneos.
+- [x] CI + TypeScript + Pages verdes após PR #98.
+- [ ] Repetir validação física no mesmo iPhone/Safari.
+- [ ] Repetir validação em PWA instalada.
 
-## P0 — UI/UX e arquitetura
+## P0 — Auditoria UI/UX transversal `76-ui-audit1`
 
-### Acesso
+### Executado na branch atual
 
-- [x] `76-auth1`: visual limpo, keypad circular, CTA principal único.
-- [x] `76-auth-transition1`: shell não pode vazar para o ecrã bloqueado.
-- [ ] Consolidar regras do cofre hoje em `v75-usability.css` para uma camada v76 dedicada quando a cascade estiver simplificada.
+- [x] Auditar arquitetura visual v74/v75/v76 e contratos de auth/nav/header.
+- [x] Consultar Apple HIG, Material/Android accessibility, WCAG 2.2 e web.dev.
+- [x] Corrigir header móvel: superfície neutra, sem gradiente e sem branco forçado.
+- [x] Garantir menu/notificações 44×44 px e foco visível.
+- [x] Consolidar visual do dock móvel e selected state.
+- [x] Neutralizar onboarding v74 que podia mascarar `76-auth1`.
+- [x] Invalidar cache PWA para `ui-audit1`.
+- [x] Atualizar testes de consistência e mobile shell.
+- [x] Criar `docs/UI_UX_AUDIT.md`.
+- [ ] Executar CI/TypeScript do PR do bloco e corrigir regressões.
+- [ ] Publicar Pages e validar no dispositivo real.
+
+### Dívida ALTA a resolver imediatamente depois
+
+- [ ] Consolidar navegação móvel numa única autoridade.
+- [ ] Remover/restringir `ensureMobileNav()` v74 após paridade.
+- [ ] Parar criação runtime de `cdcMobileGreeting`, `cdcMobileMonthWrap`, `cdcMonthHero`, `cdcQuickActions`, `cdcDashboardCategories`.
+- [ ] Parar criação de `cdcWelcome` depois de provar que o fluxo `vaultCreate` cobre primeiro acesso/importação.
+- [ ] Reduzir dependência de `!important` entre v74/v75/v76.
+
+## P0 — Revisão página a página
 
 ### Dashboard
 
-- [x] Saldo atual como resumo principal real.
-- [x] Por pagar / Em atraso / Saldo projetado como segundo nível.
-- [x] Pago no mês / Próximos 7 dias compactos.
-- [x] PR #94 suprime visualmente cinco blocos v74 duplicados.
-- [ ] Parar de criar esses cinco blocos dentro de `v74-experience.js`, em vez de apenas escondê-los.
-- [ ] Corrigir/consolidar contraste e autoridade do header móvel.
-- [ ] Validar fisicamente desktop + iPhone/PWA.
+- [x] Resumo principal real e indicadores canónicos.
+- [x] Blocos v74 duplicados visualmente suprimidos.
+- [x] Header e dock alinhados com direção v76 na branch atual.
+- [ ] Remover criação DOM v74 substituída.
+- [ ] Validar desktop + iPhone/PWA.
 
-### Navegação móvel
+### Faturas
 
-- [ ] Escolher uma única autoridade canónica para destinos e labels.
-- [ ] Remover a reescrita concorrente de `v74-experience.js` depois de provar paridade.
-- [ ] Garantir `aria-current`, drawer e `Mais` sem duplicações.
-- [ ] Testar 320/360/375/390/430/768/820 px.
+- [ ] Rever pesquisa, filtros, resumo e estados.
+- [ ] Rever tabela desktop/lista mobile.
+- [ ] Rever detalhe, editar, pagar, excluir e captura/QR.
+- [ ] Uniformizar empty/loading/error/success.
+- [ ] Confirmar foco/teclado/dialogs.
 
-### Páginas seguintes
+### Mercado
 
-- [ ] Faturas: pesquisa, filtros, resumo, tabela desktop, lista mobile, editar/pagar/detalhes/excluir/captura.
-- [ ] Mercado: pesquisa, filtros, catálogo/lista, quantidade, scanner, imagens, estimativa vs real.
-- [ ] Mercado: criar teste ponta a ponta para persistência de `pid`.
-- [ ] Planeamento: usar apenas saldo/orçamento/rendimentos realmente suportados.
-- [ ] Calendário: vencimentos/pagamentos reais.
-- [ ] Relatórios.
-- [ ] Objetivos.
-- [ ] Segurança.
-- [ ] Diagnóstico.
-- [ ] Definições.
+- [ ] Rever pesquisa, filtros, catálogo/lista, quantidade e carrinho.
+- [ ] Rever scanner, imagens e fallback.
+- [ ] Manter estimativa ≠ valor real.
+- [ ] Criar teste ponta a ponta para persistência `marketId|pid`.
+- [ ] Auditar logos/imagens/licenças antes de ampliar catálogo visual.
+
+### Planeamento + Calendário
+
+- [ ] Consolidar hierarquia com dados reais suportados.
+- [ ] Preservar mesma informação essencial mobile/desktop.
+- [ ] Rever datas, vencimentos e estados.
+
+### Relatórios + Objetivos
+
+- [ ] Rever visualizações, legendas, contraste e leitura sem depender apenas de cor.
+- [ ] Rever empty states e densidade.
+
+### Segurança + Diagnóstico + Definições
+
+- [ ] Rever forms, estados, feedback e linguagem.
+- [ ] Garantir ações destrutivas claramente distintas.
+- [ ] Rever dark mode e forced-colors.
 
 ## P0 — Fonte 100% TypeScript
 
 ### Concluído
 
-- [x] Fundação TypeScript strict — PR #72.
-- [x] Veggie menu TS — PR #88.
-- [x] Market branding TS — PR #89.
-- [x] Sync conflict policy TS — PR #95.
+- [x] Fundação strict — PR #72.
+- [x] Veggie menu — PR #88.
+- [x] Market branding — PR #89.
+- [x] Sync conflict policy — PR #95.
 
 ### Próximos blocos
 
-- [ ] Auditar módulos folha restantes por dependências e efeitos laterais.
-- [ ] Migrar próximo módulo de baixo acoplamento com paridade antes de remover JS.
-- [ ] Criar vetores de paridade antes de módulos com dinheiro, datas ou quantidades.
-- [ ] Migrar domínio financeiro por subdomínios.
-- [ ] Migrar modelo/carrinho Mercado.
-- [ ] Migrar core/persistência/cifra apenas depois do domínio estabilizado.
-- [ ] Migrar sync principal.
-- [ ] Migrar `render.js`, `forms.js`, `events.js` e controladores complexos.
+- [ ] Migrar módulos UI folha/baixo acoplamento restantes.
+- [ ] Criar configuração canónica de navegação em TypeScript antes de remover autoridade v74.
+- [ ] Criar vetores de paridade para dinheiro/datas/quantidades.
+- [ ] Migrar domínio por subdomínios.
+- [ ] Migrar `render/forms/events` depois dos contratos visuais estabilizarem.
+- [ ] Migrar core/persistência/cifra apenas com vetores próprios.
 - [ ] Migrar Service Worker/tooling no bloco final.
-- [ ] Proibir os últimos JS manuais no build quando já não houver consumidores.
 
 ## P0 — Segurança/PWA
 
-- [x] PIN local não depende de rede para entrar.
-- [x] Estratégia SW não foi alterada no PR #96.
+- [x] PIN local não depende de rede.
+- [x] `[hidden]` do auth protegido em Safari/WebKit.
 - [ ] Auditar ZXing remoto e considerar bundle local com licença preservada.
-- [ ] Reduzir `style-src 'unsafe-inline'` quando tecnicamente possível.
+- [ ] Reduzir `style-src 'unsafe-inline'` quando possível.
 - [ ] Rever origens CSP finais.
-- [ ] Confirmar comportamento offline/atualização em PWA instalada após cada bloco de cache.
-- [ ] Ativar required checks/branch protection quando a configuração permitir.
+- [ ] Confirmar offline/update em PWA após cada invalidação de cache.
+- [ ] Ativar required checks/branch protection quando disponível.
 
 ## P0 — QA final
 
 - [ ] Safari/iPhone web.
-- [ ] Safari/iPhone PWA instalada.
+- [ ] Safari/iPhone PWA.
 - [ ] Android/Chrome.
 - [ ] tablet.
 - [ ] desktop.
@@ -113,15 +127,9 @@ Atualizado: 13 de setembro de 2026
 - [ ] teclado virtual/foco.
 - [ ] Light/Dark/System.
 - [ ] reduced-motion/forced-colors.
+- [ ] 320/360/375/390/430/768/820 px.
 - [ ] comparação visual antes/depois antes de eliminar CSS histórico.
 
 ## Critério de conclusão
 
-A aplicação só é considerada alinhada quando:
-
-1. todas as páginas principais têm hierarquia UI/UX coerente em desktop/mobile;
-2. navegação e autenticação têm uma única autoridade funcional;
-3. CI/Pages ficam verdes após cada bloco;
-4. não existem regressões conhecidas em dinheiro, cofre, sync, Mercado ou PWA;
-5. fonte funcional manual JavaScript foi substituída por TypeScript conforme o plano;
-6. validação física confirma o resultado em dispositivos reais.
+Só concluir quando todas as rotas partilharem sistema visual e comportamento coerentes, mobile/desktop preservarem informação essencial, não houver sobreposição/overflow conhecido, acessibilidade estiver coberta, CI/Pages estiverem verdes, validação física confirmar o produto e JS manual tiver sido substituído por TypeScript conforme o plano.

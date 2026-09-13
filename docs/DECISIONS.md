@@ -2,107 +2,108 @@
 
 Atualizado: 13 de setembro de 2026
 
-Este ficheiro contém as decisões vigentes necessárias para continuidade. O detalhe histórico integral permanece no Git.
-
 ## D-064 — migração TypeScript incremental
-
-Estado: vigente desde PR #72.
 
 - destino: fonte funcional TypeScript com `strict`;
 - browser continua a executar JavaScript compilado;
-- não introduzir framework apenas para mudar linguagem;
-- cada runtime só substitui JS manual depois de paridade e regressões;
-- schema, cifragem e fórmulas não mudam por causa da linguagem;
-- `@ts-nocheck` e `any` em massa não satisfazem a meta.
+- sem framework novo apenas para mudar linguagem;
+- cada runtime substitui JS manual apenas depois de paridade e regressões;
+- schema, cifragem e fórmulas não mudam por causa da linguagem.
 
 ## D-065 — total de Mercado exige evidência completa
 
-Um total só pode ser apresentado como exato quando SKU, quantidade/peso, preço aplicável, promoções/condições e ajustes relevantes estiverem confirmados. Caso contrário é `Estimativa` ou `Preço por confirmar`.
+Um total só é exato quando SKU, quantidade/peso, preço aplicável, promoções/condições e ajustes relevantes estiverem confirmados. Caso contrário é estimativa.
 
 ## D-066 — imagem não é prova de preço
 
-Fotografias e logos são apresentação/identidade. Não podem, por si, definir `actualCents` nem provar uma transação.
+Fotografias/logos são apresentação e identidade; não definem `actualCents` nem provam uma transação.
 
-## D-072 — shell móvel com uma única autoridade
+## D-072 — shell móvel com uma única autoridade geométrica
 
-`v76-mobile-shell.css` é a autoridade final para viewport autenticado, safe areas, scroll, reserva e posição do dock móvel. Outras folhas podem estilizar componentes, mas não recriar a geometria global.
+`v76-mobile-shell.css` é a autoridade final de viewport autenticado, safe areas, scroll, reserva e posição do dock.
 
-## D-073 — propriedade única por preocupação
+## D-073 — propriedade por preocupação
 
 - tokens/componentes: design system;
-- composição interna: product pages;
+- composição: product pages;
 - geometria mobile: mobile shell;
 - domínio: finanças/Mercado;
 - persistência/cifra: core;
 - sync: camada própria;
-- build/PWA: tooling e Service Worker.
+- build/PWA: tooling + Service Worker.
 
 ## D-075 — hierarquia visual canónica
 
-`76-modern-ui2` define primary, secondary, danger, link e icon-button, baseline tátil de 44 px, foco visível e estados disabled/hover coerentes.
+`76-modern-ui2` define primary, secondary, danger, link, icon-button, baseline tátil 44 px, foco e estados disabled/hover.
 
 ## D-076 — “100% TypeScript” significa fonte TypeScript
 
-O nome público `.js` pode continuar a existir como artefacto de build. O que deve desaparecer é JavaScript manual mantido como fonte funcional, módulo a módulo.
+`.js` público gerado pode continuar a existir. O que deve desaparecer é JavaScript manual mantido como fonte funcional.
 
-## D-077 — protótipo não autoriza dados ou funções inventadas
+## D-077 — protótipo não autoriza funções inventadas
 
-Dashboard, Mercado, Planeamento, Calendário e Faturas usam os protótipos como referência de hierarquia. Métricas, tarefas, comparação de preços, biometria ou outras funções só entram se existirem no domínio real e forem implementadas/testadas.
+Protótipos são referência de hierarquia. Métricas, biometria, comparação de preços, tarefas ou outras funções só entram se existirem no domínio real e forem implementadas/testadas.
 
-## D-078 — composição v76 não altera domínio
+## D-078 — composição não altera domínio
 
-`v76-product-pages.css` pode ordenar, dimensionar e priorizar secções, mas não calcular dinheiro, escrever IndexedDB ou alterar fluxo de segurança.
+CSS pode ordenar/priorizar, mas não calcular dinheiro, escrever IndexedDB ou alterar segurança.
 
 ## D-079 — exclusão de JS exige substituição comprovada
 
-Um `.js` manual só é removido depois de existir `.ts` equivalente, build gerado, consumidores migrados e gates verdes. Esta regra surgiu após a remoção prematura de `v75-architecture.js` quebrar CI/Pages.
+Um JS manual só sai depois de TS equivalente, build gerado, consumidores migrados e gates verdes.
 
-## D-080 — artefactos JS gerados não contam como fonte manual
+## D-080 — JS gerado é artefacto
 
-`.generated/*.js` e `dist/*.js` produzidos a partir de TypeScript são artefactos e não devem ser editados/versionados como fonte.
+`.generated/*.js` e `dist/*.js` produzidos a partir de TypeScript não são fonte manual.
 
-## D-081 — migração avança por blocos auditáveis
+## D-081 — migração por blocos auditáveis
 
-Módulos de baixo acoplamento primeiro; domínio financeiro, core/cifra e controladores complexos apenas depois de contratos de tipos e vetores de paridade suficientes.
+Baixo acoplamento primeiro; finanças, core/cifra e controladores complexos apenas com contratos e vetores de paridade suficientes.
 
-Runtimes já migrados:
+Runtimes migrados: Veggie menu (#88), Market branding (#89), Sync conflict policy (#95).
 
-- Veggie menu — PR #88;
-- Market branding — PR #89;
-- Sync conflict policy — PR #95.
+## D-082 — mudança visual tem de ser perceptível
 
-## D-082 — mudança visual tem de ser realmente perceptível
+Não comunicar build/cache/TypeScript como redesign se a composição visível não mudou.
 
-Não comunicar alterações de build/cache/TypeScript como redesign quando a composição visível não mudou. `76-auth1` foi o primeiro bloco explicitamente orientado a essa regra.
+## D-083 — PIN local válido não depende de sync remoto
 
-## D-083 — PIN local válido não depende de sincronização remota
-
-Estado: integrado/publicado pelo PR #96, merge `d18d274141b1032ab0e909729739b3f86cabfb9e`.
-
-Decisão:
-
-1. O cofre local é a autoridade para autenticar a sessão local.
-2. Depois de `unlockVault()` validar e decifrar o estado, a aplicação deve abrir o Dashboard imediatamente.
-3. A sincronização GitHub é opcional e não pode bloquear o primeiro ecrã autenticado.
-4. O sync real continua em background e pode atualizar o estado/status depois da abertura.
-5. `#vaultScreen` e `#app` são estados visuais mutuamente exclusivos.
-6. O dock móvel nunca pode ser renderizado por cima do cofre.
-7. Em falha da transição, retirar `app-active`, esconder `#app` e restaurar o cofre.
-8. A decisão não altera PBKDF2-SHA-256, AES-GCM, IndexedDB, `STATE_VERSION`, finanças nem política de conflitos.
-
-Motivo: em Safari/iPhone foi observado PIN/cofre ainda visível enquanto o dock autenticado já aparecia e cobria a zona inferior. A causa era a espera por `syncStartupGate()` combinada com o guard de startup que voltava a mostrar o cofre.
-
-Evidência:
-
-- TypeScript Foundation `34780407487`: sucesso;
-- CI `34780407473`: sucesso;
-- Deploy Pages `34780437328`: sucesso.
+Publicado pelo PR #96. Depois de `unlockVault()` validar o cofre local, o Dashboard abre imediatamente; sync continua em background. Cofre e shell são estados exclusivos e a falha de transição faz rollback visual seguro.
 
 ## D-084 — regressão física tem prioridade sobre contrato legado
 
-Quando uma captura/dispositivo real contradiz um teste verde, o teste deve ser revisto para cobrir o comportamento final desejado. Não preservar comportamento v74 apenas porque um teste histórico o exige.
+Se dispositivo real contradiz teste verde, o teste deve ser revisto para o comportamento final desejado.
 
-Aplicação atual: `safari-startup.test.cjs` cobre transição local-first/rollback e `v76-mobile-shell.test.cjs` proíbe o app shell/dock enquanto o cofre estiver visível.
+## D-085 — `hidden` é autoridade explícita no auth
+
+Publicado pelo PR #98.
+
+- `#vaultScreen[hidden]` e `#app[hidden]` devem ser `display:none!important` na camada final;
+- cofre visível exclui shell autenticado;
+- nenhuma regra `display:* !important` pode neutralizar o estado `hidden` do runtime;
+- a correção não altera criptografia, persistência ou finanças.
+
+## D-086 — auditoria UI usa referências externas, não cópia de design
+
+A partir de `76-ui-audit1`, decisões importantes de UI/UX são confrontadas com Apple HIG, Material Design 3/Android accessibility, WCAG 2.2/W3C e web.dev. A solução é adaptada à PWA real e aos seus contratos; não se copia interface proprietária.
+
+## D-087 — header móvel final é neutro
+
+O antigo gradiente teal do v75 não é mais a direção final. O header móvel deve usar superfície do design system, texto/ícones com contraste, borda subtil, sem sombra pesada, controlos de 44 px e foco visível. A cor de marca fica reservada para seleção/ação/status.
+
+Motivo: havia conflito real entre `v75-header-refinement.css` (fundo escuro + branco forçado) e `v76-product-pages.css` (superfície clara).
+
+## D-088 — onboarding v74 não mascara `76-auth1`
+
+Enquanto `v74-experience.js` permanecer por compatibilidade, `cdcWelcome` não pode substituir visualmente o formulário real do cofre. A camada final oculta o onboarding v74 e força o `vaultCreate` real a permanecer visível. A criação runtime histórica será removida apenas no bloco de limpeza v74 com regressões verdes.
+
+## D-089 — dock móvel: consistência antes de decoração
+
+O dock final usa superfície neutra, 3–5 destinos primários, selected state discreto, ícones lineares e labels coerentes; respeita safe areas, reduced-motion, forced-colors e foco visível. Sombras/blur devem ser mínimos e nunca comprometer legibilidade.
+
+## D-090 — navegação móvel precisa de uma única autoridade funcional
+
+A duplicação atual entre `core/render` e `v74-experience` é dívida ALTA. A remoção será feita num bloco dedicado, preferencialmente com configuração TypeScript canónica, depois de paridade de destinos, `aria-current`, drawer e labels.
 
 ## Invariantes vigentes
 

@@ -91,11 +91,14 @@ assert.match(architectureCss,/Conta de Casa v75/);
 assert.match(stabilityJs,/revision:'75-stability1'/);
 assert.match(stabilityCss,/revisão transversal de estabilidade visual/i);
 assert.match(layoutCss,/revisão 75-layout1/i);
-assert.match(drawerCss,/revisão 75-drawer2/i);
+assert.match(drawerCss,/revisão 76-drawer-neutral1/i);
+assert.match(drawerCss,/background:var\(--v76-drawer-surface\)!important/);
+assert.doesNotMatch(drawerCss,/linear-gradient\(/,'drawer must keep the neutral v76 contract');
 
 assert.match(sw, /version-audit1/);
 assert.match(sw, /conta-de-casa-public-v75-architecture2/);
 assert.match(sw, /stability1-layout1-drawer2/);
+assert.match(sw, /ui-audit1/);
 for(const asset of ['./app-update.css','./app-update.js','./v76-version-about.css','./design-system.css','./v64-runtime.js','./market-shopping-focus.css','./market-shopping-focus.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js','./v75-stability.css','./v75-stability.js','./v75-layout-polish.css','./v75-drawer-theme.css','./release-manifest.json'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be cached`);
 assert.ok(!sw.includes("'./v75-drawer-blue.css'"));
 assert.ok(!sw.includes("'./ui-consistency.css'"));
@@ -176,6 +179,7 @@ try {
   assert.ok(index.indexOf('v74-experience.js?v=74-experience2') < index.indexOf('v75-architecture.js?v=75-architecture2'));
   assert.ok(index.indexOf('v75-architecture.js?v=75-architecture2') < index.indexOf('v75-stability.js?v=75-stability1'));
   for(const asset of ['app-update.css','v76-version-about.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-stability.css','v75-stability.js','v75-layout-polish.css','v75-drawer-theme.css','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  assert.match(fs.readFileSync(path.join(dist,'v75-drawer-theme.css'),'utf8'),/76-drawer-neutral1/);
   assert.ok(!fs.existsSync(path.join(dist,'v75-drawer-blue.css')));
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
