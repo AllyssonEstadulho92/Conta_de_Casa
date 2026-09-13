@@ -2,6 +2,43 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade técnica do programa atual.
 
+## 2026-09-13 — `76-auth1` — redesign visível do acesso ao cofre — em validação
+
+### Motivo
+
+Foi confirmado que os blocos recentes de TypeScript/build não alteravam materialmente o primeiro ecrã visto pelo utilizador. O acesso ao cofre continuava com o mesmo cartão grande, fundo decorativo, keypad em cartões retangulares, CTA em gradiente e várias ações secundárias com peso visual semelhante.
+
+### Alterações
+
+- branch `feat/v76-auth-redesign1` criada a partir de `main` `47439e4cb7bd85acc7bf0d98c033a81ea9ba99e3`;
+- nova revisão visual `v76-auth1` adicionada ao `v75-usability.css` como ponte de compatibilidade com a cascade existente do cofre;
+- fundo de autenticação passa a neutro e sem radial decorativo dominante;
+- em mobile, `.vault-card` deixa de funcionar visualmente como cartão pesado e passa a composição quase full-bleed;
+- branding é reduzido e usa `icon.svg` real;
+- `Acesso seguro` deixa de competir com o título;
+- título, ajuda e campo PIN recebem hierarquia mais simples;
+- keypad passa para teclas circulares e as letras secundárias ficam ocultas;
+- `Entrar` passa a CTA sólido único, sem gradiente ou sombra pesada;
+- `Usar palavra-passe` passa a ação terciária;
+- ações de mostrar/alterar PIN, ajuda/recuperação e importação de cofre permanecem acessíveis, mas visualmente secundárias;
+- modo palavra-passe esconde o keypad PIN;
+- nenhuma biometria inexistente foi adicionada;
+- dark mode, safe areas, reduced-motion e forced-colors permanecem cobertos;
+- `sw.js` recebe apenas revisão de cache `auth1` para atualizar PWA instalada;
+- `tests/v75-stability.test.cjs` passa a verificar o contrato visual e a proibir biometria apenas decorativa.
+
+### Domínio e segurança
+
+Não foram alterados `index.html`, `events.js`, `core.js`, `finance.js`, IndexedDB, `STATE_VERSION`, PIN/palavra-passe, PBKDF2, AES-GCM, recuperação, sync, QR/scanner, faturas, Mercado ou cálculos.
+
+### QA
+
+CI da branch `34729499227`: sucesso integral. Passaram finanças, auditoria financeira, isolamento/cofre, datas, faturas/QR, Mercado, Safari/PWA, UI, responsive, acessibilidade, segurança, sync e manifesto.
+
+Publicação ainda pendente de PR/merge/Pages e validação física em iPhone/Safari/PWA.
+
+---
+
 ## 2026-09-12 — PR #89 — `market-branding` migrado para TypeScript — publicado
 
 ### Objetivo
@@ -21,7 +58,7 @@ Continuar a retirada de JavaScript manual por blocos pequenos, escolhendo primei
 
 ### QA e incidente controlado
 
-Durante o desenvolvimento, uma alteração demasiado ampla de `sw.js` introduziu deriva na estratégia de fetch. O teste Safari/PWA falhou e bloqueou o avanço. A lógica publicada foi restaurada exatamente e o diff final do Service Worker ficou limitado à chave de cache.
+Durante o desenvolvimento, uma alteração demasiado ampla de `sw.js` introduziu deriva na estratégia de fetch. O teste Safari/PWA falhou e bloqueou o avanço. A lógica publicada foi restaurada e o diff final do Service Worker ficou limitado à chave de cache.
 
 ### Publicação
 
@@ -119,6 +156,8 @@ Um `.js` fonte só é eliminado depois de existir `.ts` equivalente, build gerad
 
 ## Histórico v76 recente
 
+- `76-auth1` — primeiro bloco explicitamente orientado a mudança visual perceptível no cofre;
+- PR #90 — documentação pós-bloco 2 TypeScript;
 - PR #89 — segunda remoção segura de JS fonte (`market-branding`), merge `c59e0a45500fd7965039de27615f574129482b13`;
 - PR #88 — primeira remoção segura de JS fonte e runtime TS gerado;
 - PR #84 — consolidação UI/shell, merge `bf55c7cfd9bebe28c1ee57047f066d96e80b9835`;
