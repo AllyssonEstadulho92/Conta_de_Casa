@@ -84,7 +84,8 @@ Contrato:
 Evidência publicada:
 
 - PR #88 merge `5301bd0d66c5ec46ead7be079799ecb76c752237`: TypeScript `34699066645`, CI `34699066749`, Pages `34699100855` — sucesso;
-- PR #89 merge `c59e0a45500fd7965039de27615f574129482b13`: TypeScript `34700016617`, CI `34700016615`, Pages `34700037019` — sucesso.
+- PR #89 merge `c59e0a45500fd7965039de27615f574129482b13`: TypeScript `34700016617`, CI `34700016615`, Pages `34700037019` — sucesso;
+- PR #91 merge `a1d44cc541c514893fac96fa17467cadee7b5bb3`: TypeScript `34729738657`, CI `34729738645`, Pages `34729762294` — sucesso.
 
 ## 6. Incidente e regra de exclusão
 
@@ -111,7 +112,7 @@ Ordem principal da aplicação publicada:
 7. `v76-product-pages.css` (`76-product-pages1`) — composição interna das páginas;
 8. `v76-mobile-shell.css` (`76-mobile-shell2`) — geometria mobile final.
 
-### 8.1 Bloco `76-auth1`
+### 8.1 Bloco `76-auth1` — publicado no PR #91
 
 O ecrã `#vaultScreen` é anterior ao shell autenticado e não deve herdar a densidade visual das páginas internas.
 
@@ -125,7 +126,7 @@ Responsabilidades:
 
 A colocação de `76-auth1` em `v75-usability.css` é uma ponte de compatibilidade com a cascade histórica, não autorização para voltar a misturar lógica ou geometria global. Numa consolidação futura, as regras visuais podem migrar para uma folha v76 dedicada sem alterar comportamento.
 
-Contrato visual do cofre:
+Contrato visual publicado do cofre:
 
 - sem fundo decorativo dominante;
 - mobile quase full-bleed, sem cartão pesado;
@@ -172,13 +173,18 @@ No bloco `76-auth1` não são alterados `unlockPassphrase`, `unlockVaultBtn`, KD
 
 Toda alteração mantém verdes finanças, isolamento/cofre, datas civis, faturas/QR, Mercado/SKU/imagens/scanner, responsive, navegação/acessibilidade, sync, PWA/cache e TypeScript strict quando aplicável.
 
-`tests/v75-stability.test.cjs` inclui agora contrato de `76-auth1`: teclado circular, CTA sólido dominante, modo texto sem keypad, ações secundárias preservadas e proibição de biometria apenas decorativa.
+`tests/v75-stability.test.cjs` inclui contrato de `76-auth1`: teclado circular, CTA sólido dominante, modo texto sem keypad, ações secundárias preservadas e proibição de biometria apenas decorativa.
 
-CI da branch `feat/v76-auth-redesign1`: `34729499227`, sucesso integral.
+Evidência do bloco publicado:
+
+- CI da branch `34729499227`: sucesso integral;
+- CI do PR `34729704048`: sucesso;
+- TypeScript do PR `34729704041`: sucesso;
+- pós-merge em `main`: CI `34729738645`, TypeScript `34729738657` e Pages `34729762294`: sucesso.
 
 ## 14. Ordem de evolução
 
-1. concluir/publicar `76-auth1` e validar fisicamente;
+1. validar fisicamente `76-auth1` em Safari/iPhone/PWA e desktop;
 2. continuar blocos visuais perceptíveis por página, sem alterar domínio;
 3. manter migração TypeScript por módulos de baixo acoplamento;
 4. preparar vetores de paridade antes de dinheiro/datas/quantidades;
