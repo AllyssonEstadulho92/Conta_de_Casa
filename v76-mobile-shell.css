@@ -3,6 +3,16 @@
    Corrige safe areas, clipping vertical e reserva do dock sem tocar em dados,
    cálculos, persistência, PIN, cifragem, sincronização, QR ou Mercado. */
 
+/* 76-auth-hidden1 — contrato de visibilidade explícito para Safari/WebKit.
+   v76-auth1 usa display:grid!important no cofre. Em WebKit esse estilo de autor
+   pode prevalecer sobre a apresentação nativa do atributo hidden, deixando o
+   cofre no fluxo mesmo depois de um PIN válido. O estado hidden do runtime é a
+   autoridade: cofre e shell nunca podem renderizar quando estão marcados hidden. */
+html.cdc-v75 #vaultScreen[hidden],
+html.cdc-v75 #app[hidden]{
+  display:none!important;
+}
+
 /* 76-auth-transition1 — isolamento visual entre cofre e shell autenticado.
    Se o cofre está visível, a aplicação não pode aparecer por baixo nem o dock
    pode sobrepor o botão Entrar. A propriedade hidden continua a ser controlada
