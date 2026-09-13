@@ -40,8 +40,8 @@ Depois de um PIN local válido:
 2. `v75-startup-guard.js` substitui apenas o gate de sync durante essa transição por um resultado imediato;
 3. a implementação canónica de `enterApp()` termina e o Dashboard torna-se visível;
 4. o gate de sincronização real é restaurado e executado em background;
-5. `syncAuthVisibility()` garante exclusividade visual entre `#vaultScreen` e `#app`;
-6. `v76-mobile-shell.css` contém uma defesa adicional: se `#vaultScreen` está visível, o `#app` adjacente não pode renderizar.
+5. `syncAuthVisibility()` garante exclusividade lógica entre `#vaultScreen` e `#app`;
+6. `v76-mobile-shell.css` impede `#app` de renderizar enquanto `#vaultScreen` está visível.
 
 Consequência: disponibilidade do GitHub/sync não bloqueia a abertura do produto local nem pode fazer o dock móvel aparecer por cima do PIN.
 
@@ -51,6 +51,24 @@ Falha na transição:
 - esconde `#app`;
 - volta a mostrar o cofre;
 - não altera dados financeiros nem material criptográfico.
+
+### 2.3 Contrato visual `76-auth-hidden1`
+
+A validação física em Safari/WebKit mostrou que o atributo HTML `hidden` não deve depender apenas da folha de estilo nativa do browser quando uma camada de autor declara `display:* !important` no mesmo elemento.
+
+`v75-usability.css` contém `#vaultScreen.vault-screen { display:grid!important; }` para o layout `76-auth1`. Por isso, a camada final `v76-mobile-shell.css` define explicitamente:
+
+- `#vaultScreen[hidden] { display:none!important; }`;
+- `#app[hidden] { display:none!important; }`;
+- `#vaultScreen:not([hidden]) + #app { display:none!important; }`.
+
+Este trio é o contrato canónico de visibilidade da autenticação:
+
+1. cofre marcado `hidden` nunca renderiza;
+2. shell marcado `hidden` nunca renderiza;
+3. cofre visível exclui o shell autenticado.
+
+O runtime continua a controlar os atributos `hidden`; CSS apenas materializa esse estado de forma determinística em Safari/WebKit e restantes browsers.
 
 ## 3. Navegação e páginas
 
@@ -67,7 +85,7 @@ Rotas canónicas em `PAGE_META`:
 - `diagnostics`;
 - `settings`.
 
-`renderPage()` é o dispatcher funcional. O gate introduzido no PR #93 valida que cada rota tem exatamente uma secção HTML e um ramo de renderização, e que os assets locais existem no bundle Pages.
+`renderPage()` é o dispatcher funcional. O gate de integridade valida que cada rota tem exatamente uma secção HTML e um ramo de renderização, e que os assets locais existem no bundle Pages.
 
 Existe dívida arquitetural: `v74-experience.js` ainda reescreve a navegação móvel e injeta apresentação histórica. A consolidação deve terminar com uma única autoridade de navegação, sem remover funcionalidades existentes antes da substituição.
 
@@ -78,7 +96,7 @@ Ordem de responsabilidades:
 - estilos base/históricos: compatibilidade;
 - `v76-modern-ui.css`: tokens e componentes;
 - `v76-product-pages.css`: composição interna das páginas;
-- `v76-mobile-shell.css`: única autoridade final de geometria mobile, safe areas, scroll e dock;
+- `v76-mobile-shell.css`: autoridade final de geometria mobile, safe areas, scroll, dock e contrato visual cofre/shell;
 - `v75-usability.css`: contém temporariamente `76-auth1` por compatibilidade histórica do cofre.
 
 Regras:
@@ -89,7 +107,8 @@ Regras:
 - touch baseline 44 px;
 - reflow mínimo 320 CSS px;
 - pinch-to-zoom permanece disponível;
-- reduced-motion e forced-colors devem continuar cobertos.
+- reduced-motion e forced-colors devem continuar cobertos;
+- `[hidden]` em `#vaultScreen` e `#app` é autoritativo e testado.
 
 ## 5. Runtime funcional atual
 
@@ -126,12 +145,12 @@ Pipeline:
 
 A alteração só é considerada publicada quando `Deploy Pages` termina com sucesso.
 
-Baseline PR #96:
+Baseline PR #98:
 
-- merge `d18d274141b1032ab0e909729739b3f86cabfb9e`;
-- TypeScript `34780407487` verde;
-- CI `34780407473` verde;
-- Pages `34780437328` verde.
+- merge `56f909846c5f02c466f047792c99a61f7fbac1c7`;
+- TypeScript `34781128824` verde;
+- CI `34781128879` verde;
+- Pages `34781156741` verde.
 
 ## 8. Service Worker
 
@@ -139,7 +158,8 @@ Baseline PR #96:
 - assets públicos: network-first/no-store, com fallback de cache;
 - allowlist explícita;
 - revisões de cache invalidam instalações anteriores;
-- `auth-transition1` foi apenas uma invalidação de cache, sem mudança de estratégia.
+- `auth-transition1` invalidou a publicação da primeira correção de transição;
+- `auth-hidden1` invalida a cache para distribuir o contrato explícito `[hidden]` sem alterar a estratégia de fetch.
 
 ## 9. Segurança
 
@@ -149,7 +169,8 @@ Baseline PR #96:
 - anexos reais bloqueados enquanto cifragem de ficheiros não estiver implementada;
 - bloqueio de sessão por inatividade/perda de foco permanece em `core.js`;
 - UI/UX não pode introduzir biometria fictícia;
-- migração de linguagem não pode enfraquecer KDF/cifra.
+- migração de linguagem não pode enfraquecer KDF/cifra;
+- correções de visibilidade não podem alterar material criptográfico nem persistência.
 
 ## 10. Mercado
 
@@ -160,8 +181,9 @@ Baseline PR #96:
 
 ## 11. Próxima consolidação arquitetural
 
-1. uma autoridade única para navegação móvel;
-2. deixar de criar no runtime v74 os blocos de Dashboard já substituídos;
-3. reduzir a cascade histórica v74/v75 sem alterar comportamento;
-4. migrar módulos JS por dependência e risco;
-5. manter finanças/core/cifra para fases posteriores com vetores de paridade próprios.
+1. repetir validação física PIN → Dashboard no Safari/PWA após PR #98;
+2. uma autoridade única para navegação móvel;
+3. deixar de criar no runtime v74 os blocos de Dashboard já substituídos;
+4. reduzir a cascade histórica v74/v75 sem alterar comportamento;
+5. migrar módulos JS por dependência e risco;
+6. manter finanças/core/cifra para fases posteriores com vetores de paridade próprios.
