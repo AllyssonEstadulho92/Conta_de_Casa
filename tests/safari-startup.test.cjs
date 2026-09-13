@@ -12,22 +12,31 @@ const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
 const core=read('core.js');
 
-assert.match(guard,/75-startup2/);
-assert.match(guard,/appActive&&vault\.hidden&&app\.hidden/);
-assert.match(guard,/vault\.hidden=false/);
-assert.match(guard,/aria-busy/);
-assert.match(guard,/A preparar a aplicação com segurança…/);
-assert.match(guard,/active&&!app\.hidden/);
-assert.match(guard,/MutationObserver/);
+// 76-auth-transition1: PIN local válido abre a aplicação sem depender do sync remoto.
+assert.match(guard,/76-auth-transition1/);
+assert.match(guard,/function syncAuthVisibility\(\)/);
+assert.match(guard,/if\(!appActive\)[\s\S]*app\.hidden=true[\s\S]*vault\.hidden=false/);
+assert.match(guard,/if\(!app\.hidden&&!vault\.hidden\)vault\.hidden=true/);
+assert.match(guard,/function installNonBlockingEnterApp\(\)/);
+assert.match(guard,/root\.syncStartupGate=async\(\)=> 'synced'/);
+assert.match(guard,/await originalEnterApp\(\)/);
+assert.match(guard,/root\.showPage\('dashboard'\)/);
+assert.match(guard,/Promise\.resolve\(realGate\(\)\)\.catch/);
+assert.match(guard,/classList\.remove\('app-active'\)/);
+assert.match(guard,/if\(app\)app\.hidden=true/);
+assert.match(guard,/if\(vault\)vault\.hidden=false/);
+
+// A otimização de sync emparelhado continua disponível, mas em background.
 assert.match(guard,/installFastPairedSyncGate/);
 assert.match(guard,/meta\?\.pairedAt&&meta\?\.lastRemoteSha/);
 assert.match(guard,/loadSyncToken\(\)/);
 assert.match(guard,/syncNow\('startup-background'\)/);
 assert.match(guard,/return 'offline-paired'/);
-assert.doesNotMatch(guard,/amountCents|estimatedCents|actualCents|saveState\(|persistState\(|commit\s*\(/,'startup optimization must not manipulate financial state');
+assert.doesNotMatch(guard,/amountCents|estimatedCents|actualCents|saveState\(|persistState\(|commit\s*\(/,'auth transition must not manipulate financial state');
 assert.match(core,/PBKDF2_ITERATIONS = 250000/,'PIN KDF strength must remain unchanged');
 
-assert.match(sw,/catalog4-pd-photo1-photo-loader3-startup2/);
+// Nova revisão invalida PWA antiga; estratégia network-first/fallback permanece intacta.
+assert.match(sw,/auth-transition1/);
 assert.match(sw,/const NAVIGATION_TIMEOUT_MS = 4000/);
 assert.match(sw,/async function navigationResponse\(request\)/);
 assert.match(sw,/new AbortController\(\)/);
@@ -39,6 +48,7 @@ assert.doesNotMatch(sw,/event\.respondWith\(fetch\(event\.request\)\.catch/);
 assert.match(sw,/status:503/);
 assert.ok(sw.includes("'./v75-startup-guard.js'"));
 
+// O nome do asset permanece estável; a revisão de cache é a autoridade desta correção.
 assert.match(prepare,/const STARTUP_REV = '75-startup2'/);
 assert.ok(prepare.includes("'v75-startup-guard.js'"));
 assert.match(prepare,/v75-startup-guard\.js\?v=\$\{STARTUP_REV\}/);
@@ -50,8 +60,9 @@ try{
   assert.match(index,/v75-startup-guard\.js\?v=75-startup2/);
   assert.ok(index.indexOf('v75-startup-guard.js')>index.indexOf('v75-stability.js'),'startup guard must load after stability');
   assert.ok(fs.existsSync(path.join(dist,'v75-startup-guard.js')));
+  assert.match(fs.readFileSync(path.join(dist,'v75-startup-guard.js'),'utf8'),/76-auth-transition1/);
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Safari/PWA startup keeps a secure visible state, bounded navigation and non-blocking paired sync: OK');
+console.log('Safari/PWA PIN transition is local-first, mutually exclusive and sync remains non-blocking: OK');
