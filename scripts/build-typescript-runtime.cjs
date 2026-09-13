@@ -21,6 +21,13 @@ const RUNTIMES=Object.freeze([
     output:'market-branding.js',
     marker:'installMarketBranding',
     label:'Market branding'
+  },
+  {
+    source:'src/sync/sync-conflict-policy.ts',
+    manual:'sync-conflict-policy.js',
+    output:'sync-conflict-policy.js',
+    marker:'installSyncConflictPolicy',
+    label:'Sync conflict policy'
   }
 ]);
 
