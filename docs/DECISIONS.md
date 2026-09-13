@@ -1,6 +1,6 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 12 de setembro de 2026
+Atualizado: 13 de setembro de 2026
 
 Este ficheiro mantém as decisões vigentes necessárias para continuidade. O detalhe histórico permanece no Git.
 
@@ -129,16 +129,34 @@ Estado: integrado e publicado pelo PR #89, merge `c59e0a45500fd7965039de27615f57
 4. O nome público `market-branding.js` mantém-se para browser/Service Worker, mas é gerado em `.generated/` e publicado por `dist/`.
 5. `scripts/build-typescript-runtime.cjs` mantém um registo explícito de múltiplos runtimes TypeScript para evitar regras ad hoc.
 6. CI, TypeScript Foundation, Pages e `tests/typescript-runtime-build.test.cjs` validam cada artefacto migrado.
-7. `sw.js` foi invalidado apenas pela chave de cache; a lógica de fetch permaneceu canónica e o gate Safari/PWA confirmou a regressão antes do merge.
-8. Controladores complexos (`mobile-menu-toggle.js`), domínio (`finance.js`) e infraestrutura (`core.js`, sync, Service Worker) ficam para blocos posteriores com testes de paridade próprios.
+7. `sw.js` foi invalidado apenas pela chave de cache; a lógica de fetch permaneceu canónica.
+8. Controladores complexos, domínio e infraestrutura ficam para blocos posteriores com testes de paridade próprios.
 9. Evidência pós-merge: TypeScript `34700016617`, CI `34700016615`, Pages `34700037019`, todos com sucesso.
+
+## D-082 — primeiro ecrã do produto tem de demonstrar mudança visual real
+
+Estado: implementado na branch `feat/v76-auth-redesign1`; integração pendente de PR/Pages.
+
+1. Alterações de build ou migração TypeScript não devem ser comunicadas como redesign visual quando a composição visível permanece igual.
+2. O primeiro bloco de correção perceptível é o acesso ao cofre, revisão `76-auth1`.
+3. O acesso deve parecer uma interface de produto limpa, não uma landing page ou conjunto de cartões promocionais.
+4. Em mobile, o contentor do cofre é quase full-bleed, sem fundo radial dominante nem cartão pesado.
+5. O teclado PIN usa teclas circulares simples; letras secundárias deixam de competir com o número.
+6. `Entrar` é a única ação dominante. `Usar palavra-passe`, recuperação, alteração de PIN e importação continuam acessíveis mas visualmente terciárias.
+7. O modo palavra-passe oculta o keypad PIN para evitar duas interfaces de entrada concorrentes.
+8. Nenhum Face ID, Touch ID ou biometria é mostrado sem implementação funcional e revisão de segurança reais.
+9. Os IDs/handlers existentes, PIN/palavra-passe, recuperação, PBKDF2, AES-GCM, IndexedDB e envelope cifrado permanecem inalterados.
+10. A revisão altera a chave de cache PWA para evitar que instalações existentes mantenham a folha visual anterior.
+11. O contrato é coberto em `tests/v75-stability.test.cjs`; CI da branch `34729499227` ficou verde integralmente.
+12. A camada `76-auth1` está temporariamente em `v75-usability.css` por compatibilidade com a cascade histórica do cofre; consolidação futura pode movê-la para uma folha v76 dedicada sem mudar comportamento.
 
 ## Evidência recente
 
-- PR #87: recuperação do pipeline após remoção prematura; CI/Pages verdes.
 - PR #86: Dashboard real publicado; CI `34695579311`, TypeScript `34695579282`, Pages `34695600399` verdes.
+- PR #87: recuperação do pipeline após remoção prematura; CI/Pages verdes.
 - PR #88: primeiro JS fonte removido; merge `5301bd0d66c5ec46ead7be079799ecb76c752237`; TypeScript `34699066645`, CI `34699066749`, Pages `34699100855` verdes.
 - PR #89: `market-branding` migrado; merge `c59e0a45500fd7965039de27615f574129482b13`; TypeScript `34700016617`, CI `34700016615`, Pages `34700037019` verdes.
+- `76-auth1`: CI de branch `34729499227` verde antes da integração.
 
 ## Lacuna técnica preservada
 
