@@ -3,6 +3,14 @@
    Corrige safe areas, clipping vertical e reserva do dock sem tocar em dados,
    cálculos, persistência, PIN, cifragem, sincronização, QR ou Mercado. */
 
+/* 76-auth-transition1 — isolamento visual entre cofre e shell autenticado.
+   Se o cofre está visível, a aplicação não pode aparecer por baixo nem o dock
+   pode sobrepor o botão Entrar. A propriedade hidden continua a ser controlada
+   pelo runtime; esta regra é apenas defesa visual de transição. */
+html.cdc-v75 #vaultScreen:not([hidden]) + #app{
+  display:none!important;
+}
+
 @media (max-width:820px){
   :root{
     --v76-shell-safe-top:max(24px,env(safe-area-inset-top,0px));
