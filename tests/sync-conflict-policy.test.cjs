@@ -3,9 +3,13 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const { execFileSync } = require('node:child_process');
 
 const syncSource = fs.readFileSync('sync.js','utf8');
-const policySource = fs.readFileSync('sync-conflict-policy.js','utf8');
+if(!fs.existsSync('.generated/sync-conflict-policy.js')){
+  execFileSync(process.execPath,['scripts/build-typescript-runtime.cjs'],{stdio:'pipe'});
+}
+const policySource = fs.readFileSync('.generated/sync-conflict-policy.js','utf8');
 new Function(policySource);
 
 const context = vm.createContext({
@@ -90,5 +94,6 @@ assert.ok(policySource.includes("'imageSource'"));
 assert.ok(policySource.includes("'imageMatchedAt'"));
 assert.ok(policySource.includes("'productCode'"));
 assert.doesNotMatch(policySource, /estimatedCents|actualCents|purchasedAt|quantity/);
+assert.match(policySource,/Runtime gerado por TypeScript/);
 
-console.log('Sync technical-conflict policy tests: OK');
+console.log('Sync technical-conflict policy TypeScript runtime tests: OK');
