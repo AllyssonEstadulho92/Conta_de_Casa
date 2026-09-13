@@ -4,192 +4,124 @@ Atualizado: 13 de setembro de 2026
 
 ## P0 — Invariantes
 
-- [x] Manter `STATE_VERSION = 5`, IndexedDB financeiro e valores em cêntimos.
-- [x] Preservar PBKDF2-SHA-256 + AES-GCM e `PBKDF2_ITERATIONS = 250000`.
-- [x] Preservar `estimatedCents` separado de `actualCents`.
-- [x] Preservar `marketId|pid` no pipeline especializado.
-- [x] Não alterar cálculos, faturas, pagamentos, QR, scanner ou sync por redesign/migração.
+- [x] `STATE_VERSION = 5`.
+- [x] Dinheiro em cêntimos inteiros.
+- [x] PBKDF2-SHA-256 + AES-GCM, 250000 iterações.
+- [x] IndexedDB financeiro preservado.
+- [x] `estimatedCents` separado de `actualCents`.
+- [x] `marketId|pid` preservado como identidade canónica.
+- [x] Redesign/migração sem alterar silenciosamente cálculos, faturas, pagamentos, QR, scanner ou sync.
 
-## P0 — Publicação
+## P0 — Incidente PIN / Dashboard — `76-auth-transition1`
 
-- [x] Identificar porque alterações anteriores nem sempre chegaram ao site.
-- [x] Recuperar remoção prematura de `v75-architecture.js` no PR #87.
-- [x] Publicar Dashboard `76-product-pages1` no PR #86.
-- [x] Integrar PR #88 — primeira remoção segura de JS fonte.
-- [x] Integrar PR #89 — segunda remoção segura de JS fonte (`market-branding`).
-- [x] TypeScript Foundation pós-PR89 `34700016617` verde.
-- [x] CI pós-PR89 `34700016615` verde.
-- [x] Pages pós-PR89 `34700037019` verde.
-- [x] Integrar PR #90 — documentação pós-bloco 2.
-- [x] Integrar `76-auth1` no PR #91 — merge `a1d44cc541c514893fac96fa17467cadee7b5bb3`.
-- [x] TypeScript Foundation pós-PR91 `34729738657` verde.
-- [x] CI pós-PR91 `34729738645` verde.
-- [x] Pages pós-PR91 `34729762294` verde.
-- [ ] Confirmar fisicamente no site/PWA que a alteração de autenticação é perceptível e sem regressões de layout.
-- [ ] Ativar branch protection/required checks quando a configuração permitir.
+- [x] Reproduzir por evidência física: cofre visível + dock autenticado sobreposto em Safari/iPhone.
+- [x] Identificar espera bloqueante de `syncStartupGate()` durante `enterApp()`.
+- [x] Identificar startup guard a voltar a mostrar o cofre durante `app-active`.
+- [x] Tornar a entrada local-first: PIN válido abre Dashboard imediatamente.
+- [x] Manter sync opcional em background.
+- [x] Tornar cofre e app estados visuais exclusivos.
+- [x] Proibir `#app`/dock enquanto `#vaultScreen` estiver visível.
+- [x] Implementar rollback seguro se `enterApp()` falhar.
+- [x] Invalidar cache PWA com `auth-transition1`.
+- [x] Atualizar regressão Safari/PWA.
+- [x] Atualizar regressão do mobile shell.
+- [x] PR #96 integrado, merge `d18d274141b1032ab0e909729739b3f86cabfb9e`.
+- [x] TypeScript Foundation `34780407487` verde.
+- [x] CI `34780407473` verde.
+- [x] Pages `34780437328` verde.
+- [ ] Repetir teste físico no mesmo iPhone/Safari após atualização do Service Worker.
+- [ ] Repetir teste em PWA instalada, não apenas Safari.
 
-## P0 — UI/UX
+## P0 — UI/UX e arquitetura
 
-### Acesso/cofre — `76-auth1`
+### Acesso
 
-- [x] Confirmar que a ausência de mudança visual não era apenas cache: o markup/regras de autenticação continuavam visualmente antigos.
-- [x] Criar branch isolada `feat/v76-auth-redesign1`.
-- [x] Remover fundo decorativo dominante do ecrã de acesso.
-- [x] Reduzir peso do cartão; mobile passa a composição quase full-bleed.
-- [x] Compactar branding usando o ícone real da aplicação.
-- [x] Ocultar rótulo redundante `Acesso seguro`.
-- [x] Reforçar hierarquia título → instrução → PIN → ação principal.
-- [x] Converter teclado PIN em teclas circulares limpas.
-- [x] Retirar letras secundárias do teclado para reduzir ruído.
-- [x] Tornar `Entrar` a única ação visual dominante, sólida e sem gradiente.
-- [x] Transformar `Usar palavra-passe` em ação terciária.
-- [x] Manter `Mostrar PIN`, `Alterar PIN`, recuperação e importação acessíveis sem competir visualmente.
-- [x] Ocultar keypad quando o modo palavra-passe está ativo.
-- [x] Preservar PIN/palavra-passe, handlers, recuperação, PBKDF2/AES-GCM e IndexedDB.
-- [x] Não inventar Face ID/Touch ID/biometria.
-- [x] Invalidar cache PWA com revisão `auth1` sem alterar estratégia de fetch.
-- [x] Adicionar contrato de regressão visual em `tests/v75-stability.test.cjs`.
-- [x] CI integral da branch `34729499227` verde.
-- [x] Rever diff final contra `main`.
-- [x] Abrir PR #91, repetir CI e integrar.
-- [x] Confirmar CI/TypeScript/Pages pós-merge verdes.
-- [ ] Validar fisicamente Safari/iPhone web + PWA instalada.
-- [ ] Validar desktop e Android/Chrome.
+- [x] `76-auth1`: visual limpo, keypad circular, CTA principal único.
+- [x] `76-auth-transition1`: shell não pode vazar para o ecrã bloqueado.
+- [ ] Consolidar regras do cofre hoje em `v75-usability.css` para uma camada v76 dedicada quando a cascade estiver simplificada.
 
 ### Dashboard
 
-- [x] `Saldo atual` como resumo principal real.
-- [x] `Por pagar`, `Em atraso`, `Saldo projetado` em segundo nível.
-- [x] `Pago no mês` e `Próximos 7 dias` compactos.
-- [x] Reorganizar vencimentos, orçamento, categorias e atividade.
-- [x] Composição distinta desktop/tablet/mobile.
-- [x] Preservar `renderDashboard()` e `dashboardNumbers()`.
-- [x] Cobrir reduced-motion e forced-colors.
-- [ ] Refinar header/contexto/mês/ações essenciais com mudança visual perceptível.
-- [ ] Reduzir “card soup” e melhorar densidade visual.
-- [ ] Validar fisicamente desktop/mobile e iPhone/PWA.
+- [x] Saldo atual como resumo principal real.
+- [x] Por pagar / Em atraso / Saldo projetado como segundo nível.
+- [x] Pago no mês / Próximos 7 dias compactos.
+- [x] PR #94 suprime visualmente cinco blocos v74 duplicados.
+- [ ] Parar de criar esses cinco blocos dentro de `v74-experience.js`, em vez de apenas escondê-los.
+- [ ] Corrigir/consolidar contraste e autoridade do header móvel.
+- [ ] Validar fisicamente desktop + iPhone/PWA.
 
-### Próximas páginas
+### Navegação móvel
 
-- [ ] Mercado: pesquisa/filtros/adicionar/ler fatura, lista/carrinho e preço observado/estimado/confirmado.
-- [ ] Planeamento: saldo, orçamento e rendimentos reais.
-- [ ] Calendário: vencimentos/pagamentos existentes.
-- [ ] Faturas: pesquisa/filtros/resumo/tabela desktop/lista mobile; preservar `renderBills()`/`filterBills()`.
+- [ ] Escolher uma única autoridade canónica para destinos e labels.
+- [ ] Remover a reescrita concorrente de `v74-experience.js` depois de provar paridade.
+- [ ] Garantir `aria-current`, drawer e `Mais` sem duplicações.
+- [ ] Testar 320/360/375/390/430/768/820 px.
+
+### Páginas seguintes
+
+- [ ] Faturas: pesquisa, filtros, resumo, tabela desktop, lista mobile, editar/pagar/detalhes/excluir/captura.
+- [ ] Mercado: pesquisa, filtros, catálogo/lista, quantidade, scanner, imagens, estimativa vs real.
+- [ ] Mercado: criar teste ponta a ponta para persistência de `pid`.
+- [ ] Planeamento: usar apenas saldo/orçamento/rendimentos realmente suportados.
+- [ ] Calendário: vencimentos/pagamentos reais.
 - [ ] Relatórios.
 - [ ] Objetivos.
 - [ ] Segurança.
 - [ ] Diagnóstico.
 - [ ] Definições.
 
-## P0 — Design System final
+## P0 — Fonte 100% TypeScript
 
-- [ ] Uma família tipográfica principal.
-- [ ] Escala tipográfica formal.
-- [ ] Consolidar tokens de spacing, raio, borda, elevação e foco.
-- [ ] Consolidar paleta semântica.
-- [x] Hierarquia Primary/Secondary/Danger/Link/Icon.
-- [x] Baseline interna de 44 px.
-- [ ] Reduzir cards redundantes em todas as páginas.
-- [ ] Estados de formulário default/focus/filled/disabled/error/success.
-- [ ] Estados loading/empty/offline/error/success partilhados.
-- [ ] Dark/Light/System com tokens próprios.
-- [ ] Auditoria final de ícones e acessibilidade.
-- [ ] Consolidar a ponte `76-auth1` de `v75-usability.css` numa camada v76 dedicada quando a cascade histórica estiver simplificada.
+### Concluído
 
-## P0 — Migração para fonte 100% TypeScript
+- [x] Fundação TypeScript strict — PR #72.
+- [x] Veggie menu TS — PR #88.
+- [x] Market branding TS — PR #89.
+- [x] Sync conflict policy TS — PR #95.
 
-Meta: nenhum JavaScript manual como fonte funcional. O browser recebe JavaScript gerado pelo build. A baseline de rollback está em `backup/js-runtime-baseline-20260912`.
+### Próximos blocos
 
-### Bloco 1 — pipeline e primeiro runtime — concluído/publicado
-
-- [x] `tsconfig.json` strict/noEmit.
-- [x] Separar `typecheck`, `build:runtime` e `build:pages`.
-- [x] Ignorar `.generated/` e `dist/`.
-- [x] Criar `scripts/build-typescript-runtime.cjs`.
-- [x] `src/ui/veggie-menu-toggle.ts` como fonte canónica.
-- [x] Remover `v76-veggie-menu.js` manual.
-- [x] Gerar e publicar o artefacto JS a partir de TS.
-- [x] Integrar PR #88 e confirmar TypeScript/CI/Pages verdes.
-
-### Bloco 2 — `market-branding` — concluído/publicado
-
-- [x] Auditar `market-branding.js`: apresentação DOM, sem escrita em domínio/cofre.
-- [x] Criar `src/ui/market-branding.ts` com DOM tipado.
-- [x] Generalizar `scripts/build-typescript-runtime.cjs` para múltiplos runtimes.
-- [x] Mapear `market-branding.js` público para `.generated/market-branding.js`.
-- [x] Remover `market-branding.js` manual.
-- [x] Atualizar teste de build, CI, TypeScript Foundation e Pages.
-- [x] Invalidar cache PWA sem alterar lógica do Service Worker.
-- [x] PR #89 integrado — merge `c59e0a45500fd7965039de27615f574129482b13`.
-- [x] TypeScript Foundation pós-merge `34700016617`.
-- [x] CI integral pós-merge `34700016615`.
-- [x] Deploy Pages pós-merge `34700037019`.
-
-### Bloco 3 — próximo módulo folha / funções puras
-
-- [ ] Retomar após validação física do bloco visual `76-auth1`.
-- [ ] Auditar tamanho, dependências, efeitos laterais e consumidores dos JS restantes.
-- [ ] Escolher o próximo módulo com menor acoplamento real; não assumir pelo nome.
-- [ ] Se for função pura, criar vetores de paridade JS→TS antes da troca.
-- [ ] Migrar e testar limites, inválidos e arredondamento quando houver dinheiro/datas/quantidades.
-- [ ] Remover JS fonte apenas depois de o build usar artefactos TS e todos os gates ficarem verdes.
-
-### Bloco 4 — domínio financeiro
-
-- [ ] Migrar `finance.js` por subdomínios.
-- [ ] Tipar faturas, pagamentos, rendimentos, orçamento, objetivos e relatórios.
-- [ ] Testar pagamentos parciais, vencimentos, recorrência e arredondamentos.
-
-### Bloco 5 — Mercado/modelo/carrinho
-
-- [ ] Migrar modelo de produto/preço/carrinho.
-- [ ] Tipar `ObservedPrice`, `ConfirmedPrice`, `estimatedCents`, `actualCents`.
-- [ ] Tipar GTIN/EAN, unidade/embalagem/peso.
-- [ ] Corrigir/testar persistência de `pid`.
-- [ ] Reconciliar fatura/talão sem substituição silenciosa de valores.
-
-### Bloco 6 — core/persistência/cifra
-
-- [ ] Migrar `core.js` depois do domínio estável.
-- [ ] Tipar schema v5, IndexedDB, envelope cifrado e erros.
-- [ ] Não alterar PBKDF2/AES-GCM por causa da linguagem.
-
-### Bloco 7 — sync
-
-- [ ] Migrar sync/conflitos com estados discriminados.
-- [ ] Testar offline, timeout, concorrência e envelope inválido.
-
-### Bloco 8 — UI/controladores complexos
-
-- [ ] Migrar `render.js`, `forms.js`, `events.js` e controladores restantes.
-- [ ] Migrar `mobile-menu-toggle.js` com tipos explícitos para gestos/touches/dialog.
-- [ ] Tipar DOM com guards, sem casts que escondam `null`.
-
-### Bloco 9 — PWA/build/limpeza
-
-- [ ] Migrar Service Worker.
-- [ ] Migrar scripts/testes/tooling para TypeScript quando o runtime estiver estável.
-- [ ] Garantir que todos os módulos migrados são publicados apenas como artefactos gerados.
-- [ ] Remover os últimos `.js` fonte sem referências manuais.
-- [ ] Proibir `@ts-nocheck` e `any` em massa.
+- [ ] Auditar módulos folha restantes por dependências e efeitos laterais.
+- [ ] Migrar próximo módulo de baixo acoplamento com paridade antes de remover JS.
+- [ ] Criar vetores de paridade antes de módulos com dinheiro, datas ou quantidades.
+- [ ] Migrar domínio financeiro por subdomínios.
+- [ ] Migrar modelo/carrinho Mercado.
+- [ ] Migrar core/persistência/cifra apenas depois do domínio estabilizado.
+- [ ] Migrar sync principal.
+- [ ] Migrar `render.js`, `forms.js`, `events.js` e controladores complexos.
+- [ ] Migrar Service Worker/tooling no bloco final.
+- [ ] Proibir os últimos JS manuais no build quando já não houver consumidores.
 
 ## P0 — Segurança/PWA
 
-- [ ] Auditar ZXing remoto e avaliar bundle local com licença preservada.
-- [ ] Reduzir `style-src 'unsafe-inline'` quando possível.
-- [ ] Rever CSP final do `dist/` e justificar origens externas.
-- [ ] Classificar cache por tipo de recurso.
-- [ ] Confirmar que falha/ausência do Service Worker não quebra o núcleo online.
-- [ ] Gates para fontes remotas, QR/código de barras e importação de faturas.
+- [x] PIN local não depende de rede para entrar.
+- [x] Estratégia SW não foi alterada no PR #96.
+- [ ] Auditar ZXing remoto e considerar bundle local com licença preservada.
+- [ ] Reduzir `style-src 'unsafe-inline'` quando tecnicamente possível.
+- [ ] Rever origens CSP finais.
+- [ ] Confirmar comportamento offline/atualização em PWA instalada após cada bloco de cache.
+- [ ] Ativar required checks/branch protection quando a configuração permitir.
 
-## P0 — QA
+## P0 — QA final
 
-- [ ] 320/360/375/390/430/768/820/1024+ px.
-- [ ] Safari/iPhone web + PWA instalada.
+- [ ] Safari/iPhone web.
+- [ ] Safari/iPhone PWA instalada.
 - [ ] Android/Chrome.
-- [ ] tablet e desktop.
+- [ ] tablet.
+- [ ] desktop.
 - [ ] portrait/landscape.
-- [ ] teclado virtual e foco.
+- [ ] teclado virtual/foco.
 - [ ] Light/Dark/System.
-- [x] `76-auth1`: reduced-motion/forced-colors cobertos por CSS e CI.
-- [ ] comparação visual antes de apagar CSS histórico.
+- [ ] reduced-motion/forced-colors.
+- [ ] comparação visual antes/depois antes de eliminar CSS histórico.
+
+## Critério de conclusão
+
+A aplicação só é considerada alinhada quando:
+
+1. todas as páginas principais têm hierarquia UI/UX coerente em desktop/mobile;
+2. navegação e autenticação têm uma única autoridade funcional;
+3. CI/Pages ficam verdes após cada bloco;
+4. não existem regressões conhecidas em dinheiro, cofre, sync, Mercado ou PWA;
+5. fonte funcional manual JavaScript foi substituída por TypeScript conforme o plano;
+6. validação física confirma o resultado em dispositivos reais.
