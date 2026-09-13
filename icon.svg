@@ -1,20 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Conta de Casa">
-  <defs>
-    <linearGradient id="bg" x1="72" y1="56" x2="440" y2="456" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0C7C78"/>
-      <stop offset="1" stop-color="#075B63"/>
-    </linearGradient>
-    <linearGradient id="leaf" x1="330" y1="96" x2="408" y2="190" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#9BE15D"/>
-      <stop offset="1" stop-color="#17B890"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <path d="M104 244 256 116l152 128" fill="none" stroke="#fff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M145 226v170h222V226" fill="#fff" opacity=".98"/>
-  <rect x="214" y="300" width="84" height="96" rx="14" fill="#E3F1F0"/>
-  <circle cx="256" cy="257" r="63" fill="#E4F8F2" stroke="#17B890" stroke-width="11"/>
-  <path d="M231 244c7-18 43-21 55-5M228 261h54M233 278c10 17 42 14 52-2" fill="none" stroke="#075B63" stroke-width="15" stroke-linecap="round"/>
-  <path d="M337 112c36 7 60 29 67 67-33-2-59-14-76-38 1-12 4-21 9-29Z" fill="url(#leaf)"/>
-  <path d="M335 177c10-23 25-40 48-53" fill="none" stroke="#075B63" stroke-width="8" stroke-linecap="round" opacity=".68"/>
+  <rect width="512" height="512" rx="112" fill="#087B78"/>
+  <path d="M128 242 256 136l128 106" fill="none" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M164 226v154h184V226" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="296" r="53" fill="#FFFFFF"/>
+  <path d="M278 266c-8-7-18-10-30-10-23 0-40 17-40 40s17 40 40 40c12 0 22-3 30-10M202 285h65M202 307h57" fill="none" stroke="#087B78" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
