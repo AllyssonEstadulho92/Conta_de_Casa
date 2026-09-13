@@ -17,6 +17,9 @@ assert.match(shell,/76-auth-hidden1/);
 assert.match(shell,/#vaultScreen\[hidden\],[\s\S]*#app\[hidden\]\{[\s\S]*display:none!important/,'hidden must remain authoritative even when auth CSS declares display:grid!important');
 assert.match(shell,/76-auth-transition1/);
 assert.match(shell,/#vaultScreen:not\(\[hidden\]\) \+ #app\{[\s\S]*display:none!important/,'visible vault must suppress the authenticated app shell and mobile dock');
+assert.match(shell,/76-ui-audit1/);
+assert.match(shell,/#vaultScreen #cdcWelcome\{[\s\S]*display:none!important/,'legacy v74 onboarding must not mask the real vault create flow');
+assert.match(shell,/#vaultScreen #vaultCreate\.cdc-vault-create-collapsed\{[\s\S]*display:grid!important/,'real vault create form must remain visible even if v74 decorates it');
 assert.match(shell,/@media \(max-width:820px\)/);
 assert.match(shell,/--v76-shell-safe-top:max\(24px,env\(safe-area-inset-top,0px\)\)/);
 assert.match(shell,/--v76-shell-safe-bottom:max\(8px,env\(safe-area-inset-bottom,0px\)\)/);
@@ -25,7 +28,11 @@ assert.match(shell,/html\.cdc-v75\.app-active \.app-shell\{[\s\S]*height:auto!im
 assert.match(shell,/html\.cdc-v75\.app-active body \.main\{[\s\S]*height:auto!important;[\s\S]*max-height:none!important;[\s\S]*overflow:visible!important/);
 assert.match(shell,/html\.cdc-v75\.app-active \.main>\.topbar,[\s\S]*position:relative!important;[\s\S]*padding:calc\(var\(--v76-shell-safe-top\) \+ 6px\) 14px 8px!important/);
 assert.match(shell,/html\.cdc-v75\.app-active \.main>\.page\{[\s\S]*padding:16px 14px var\(--v76-shell-nav-reserve\)!important;[\s\S]*overflow:visible!important/);
-assert.match(shell,/html\.cdc-v75\.app-active body \.mobile-nav\{[\s\S]*position:fixed!important;[\s\S]*bottom:var\(--v76-shell-safe-bottom\)!important;[\s\S]*height:var\(--v76-shell-nav-height\)!important/);
+assert.match(shell,/html\.cdc-v75\.app-active body \.mobile-nav\{[\s\S]*position:fixed!important;[\s\S]*bottom:var\(--v76-shell-safe-bottom\)!important;[\s\S]*height:var\(--v76-shell-nav-height\)!important;[\s\S]*background:color-mix/);
+assert.match(shell,/\.mobile-nav \.nav-btn\.active,[\s\S]*background:var\(--v76-surface-accent/,'active destination must use one restrained selected state');
+assert.match(shell,/\.mobile-nav \.nav-btn:focus-visible\{[\s\S]*outline:3px solid/,'mobile nav keyboard focus must remain visible');
+assert.match(shell,/prefers-reduced-motion:reduce/);
+assert.match(shell,/forced-colors:active/);
 assert.doesNotMatch(shell,/\bzoom\s*:/i);
 
 assert.equal(pkg.version,'0.76.0-dev.1');
@@ -48,10 +55,13 @@ try{
   assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-mobile-shell2/);
   assert.ok(builtIndex.indexOf('v76-modern-ui.css')<builtIndex.indexOf('v76-mobile-shell.css'),'mobile shell must be the final mobile geometry layer');
   assert.ok(fs.existsSync(path.join(dist,'v76-mobile-shell.css')));
-  assert.match(read('dist/v76-mobile-shell.css'),/#vaultScreen\[hidden\],[\s\S]*#app\[hidden\]/);
-  assert.match(read('dist/v76-mobile-shell.css'),/#vaultScreen:not\(\[hidden\]\) \+ #app/);
+  const builtShell=read('dist/v76-mobile-shell.css');
+  assert.match(builtShell,/#vaultScreen\[hidden\],[\s\S]*#app\[hidden\]/);
+  assert.match(builtShell,/#vaultScreen:not\(\[hidden\]\) \+ #app/);
+  assert.match(builtShell,/#vaultScreen #cdcWelcome\{[\s\S]*display:none!important/);
+  assert.match(builtShell,/\.mobile-nav \.nav-btn\.active/);
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v76 mobile shell: safe areas, document scroll, dock reserve and vault isolation: OK');
+console.log('v76 mobile shell: safe areas, auth visibility, restrained dock, focus and legacy onboarding suppression: OK');
