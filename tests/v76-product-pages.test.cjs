@@ -45,13 +45,13 @@ assert.match(css,/\.main>\.topbar\{[\s\S]*box-shadow:none!important/);
 assert.match(css,/data-v75-page=\"dashboard\"[\s\S]*\.page-heading \.eyebrow[\s\S]*display:none!important/);
 
 // A nova camada tem propriedade de composição de página, carrega antes do shell e entra no PWA.
-assert.match(prepare,/const PRODUCT_PAGES_REV = '76-product-pages1'/);
+assert.match(prepare,/const PRODUCT_PAGES_REV = '76-dashboard-clean1'/);
 assert.ok(prepare.includes("'v76-product-pages.css'"));
 const modern=prepare.indexOf('v76-modern-ui.css?v=${MODERN_UI_REV}');
 const product=prepare.indexOf('v76-product-pages.css?v=${PRODUCT_PAGES_REV}');
 const shell=prepare.indexOf('v76-mobile-shell.css?v=${MOBILE_SHELL_REV}');
 assert.ok(modern>=0 && product>modern && shell>product,'product pages must load after visual tokens and before the mobile shell');
-assert.match(sw,/product-pages1/);
+assert.match(sw,/dashboard-clean1/);
 assert.ok(sw.includes("'./v76-product-pages.css'"));
 
 // A camada de composição não pode assumir geometria global do shell.
