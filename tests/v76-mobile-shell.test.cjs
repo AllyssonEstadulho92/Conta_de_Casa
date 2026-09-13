@@ -13,6 +13,8 @@ const sw=read('sw.js');
 const pkg=JSON.parse(read('package.json'));
 
 assert.match(shell,/Conta de Casa v76 — 76-mobile-shell2/);
+assert.match(shell,/76-auth-hidden1/);
+assert.match(shell,/#vaultScreen\[hidden\],[\s\S]*#app\[hidden\]\{[\s\S]*display:none!important/,'hidden must remain authoritative even when auth CSS declares display:grid!important');
 assert.match(shell,/76-auth-transition1/);
 assert.match(shell,/#vaultScreen:not\(\[hidden\]\) \+ #app\{[\s\S]*display:none!important/,'visible vault must suppress the authenticated app shell and mobile dock');
 assert.match(shell,/@media \(max-width:820px\)/);
@@ -34,6 +36,7 @@ assert.match(prepare,/v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile
 assert.match(sw,/modern-ui2/);
 assert.match(sw,/mobile-shell2/);
 assert.match(sw,/auth-transition1/);
+assert.match(sw,/auth-hidden1/);
 assert.ok(sw.includes("'./v76-mobile-shell.css'"));
 
 const dist=path.join(ROOT,'dist');
@@ -45,6 +48,7 @@ try{
   assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-mobile-shell2/);
   assert.ok(builtIndex.indexOf('v76-modern-ui.css')<builtIndex.indexOf('v76-mobile-shell.css'),'mobile shell must be the final mobile geometry layer');
   assert.ok(fs.existsSync(path.join(dist,'v76-mobile-shell.css')));
+  assert.match(read('dist/v76-mobile-shell.css'),/#vaultScreen\[hidden\],[\s\S]*#app\[hidden\]/);
   assert.match(read('dist/v76-mobile-shell.css'),/#vaultScreen:not\(\[hidden\]\) \+ #app/);
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
