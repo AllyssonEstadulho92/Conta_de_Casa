@@ -308,3 +308,62 @@ html.cdc-v75 #page-dashboard .dashboard-grid .panel-head p{
   html.cdc-v75 #page-dashboard .dashboard-secondary-card{border:1px solid CanvasText!important}
   html.cdc-v75 #page-dashboard .account-balance-kpi::after{display:none!important}
 }
+
+/* --------------------------------------------------------------------------
+   v76-dashboard-clean1 — remove a composição protótipo v74 que duplicava o
+   Dashboard funcional. O mês continua no #monthPicker; notificações no topbar;
+   ações no botão Adicionar; categorias em #categoryBars; orçamento em
+   #budgetPanel. Nenhuma função fica sem caminho equivalente.
+   -------------------------------------------------------------------------- */
+html.cdc-v75 #page-dashboard :is(
+  #cdcMobileGreeting,
+  #cdcMobileMonthWrap,
+  #cdcMonthHero,
+  #cdcQuickActions,
+  #cdcDashboardCategories
+){
+  display:none!important;
+}
+
+/* O resumo financeiro fica deliberadamente sóbrio: conteúdo acima de decoração. */
+html.cdc-v75 #page-dashboard .account-balance-kpi{
+  border-color:var(--v76-border)!important;
+  background:var(--v76-surface)!important;
+  box-shadow:none!important;
+}
+html.cdc-v75 #page-dashboard .account-balance-kpi::after{display:none!important}
+html.cdc-v75 #page-dashboard .kpi-grid>.kpi:not(.account-balance-kpi),
+html.cdc-v75 #page-dashboard .dashboard-grid>.panel{
+  box-shadow:none!important;
+}
+
+/* Cabeçalho de página: uma hierarquia curta, sem transformar controlos auxiliares
+   em ações concorrentes. A geometria mobile continua propriedade do shell. */
+html.cdc-v75.app-active .main>.topbar{
+  border-bottom:1px solid color-mix(in srgb,var(--v76-border) 78%,transparent)!important;
+  background:color-mix(in srgb,var(--v76-surface) 96%,transparent)!important;
+  box-shadow:none!important;
+}
+html.cdc-v75.app-active .topbar .page-heading h1{
+  font-weight:760!important;
+  letter-spacing:-.035em!important;
+}
+html.cdc-v75.app-active .topbar .page-heading .eyebrow{
+  color:var(--v76-muted)!important;
+  font-weight:620!important;
+  letter-spacing:.01em!important;
+  text-transform:none!important;
+}
+html.cdc-v75.app-active .topbar #syncHeaderStatus{
+  box-shadow:none!important;
+}
+
+@media(max-width:820px){
+  html.cdc-v75.app-active[data-v75-page="dashboard"] .topbar .page-heading .eyebrow{
+    display:none!important;
+  }
+  html.cdc-v75.app-active[data-v75-page="dashboard"] .topbar .page-heading h1{
+    font-size:1.5rem!important;
+    line-height:1.05!important;
+  }
+}
