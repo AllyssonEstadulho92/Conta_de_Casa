@@ -101,7 +101,7 @@ html.cdc-v75 #vaultScreen:not([hidden]) + #app{
     height:auto!important;
     max-height:none!important;
     margin-inline:auto!important;
-    padding:16px 14px var(--v76-shell-nav-reserve\)!important;
+    padding:16px 14px var(--v76-shell-nav-reserve)!important;
     box-sizing:border-box!important;
     overflow:visible!important;
   }
