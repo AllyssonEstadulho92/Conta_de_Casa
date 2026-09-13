@@ -4,8 +4,8 @@ Atualizado: 13 de setembro de 2026
 Versão: `0.76.0-dev.1`  
 Release pública: `v75`  
 Programa técnico: `v76` — consolidação UI/UX + migração incremental TypeScript  
-Baseline pública antes do bloco atual: `56f909846c5f02c466f047792c99a61f7fbac1c7` — PR #98  
-Branch de trabalho: `feat/v76-ui-audit-system1`  
+Baseline pública: `add93b922fd8c91d6ec8ad7fffcc8bf5984d673c` — PR #99  
+Branch de trabalho: `feat/v76-brand-icons1`  
 Distribuição: GitHub Pages / PWA  
 Fallback técnico: `backup/js-runtime-baseline-20260912`
 
@@ -25,36 +25,38 @@ Fallback técnico: `backup/js-runtime-baseline-20260912`
 
 PR #96 (`76-auth-transition1`) tornou a entrada local-first: PIN local válido abre a aplicação sem depender do sync remoto.
 
-PR #98 (`76-auth-hidden1`) corrigiu a regressão física observada em Safari/WebKit em que o cofre continuava renderizado apesar de `hidden=true`. A camada final passou a tornar `#vaultScreen[hidden]` e `#app[hidden]` explicitamente `display:none!important`.
+PR #98 (`76-auth-hidden1`) corrigiu a regressão física observada em Safari/WebKit em que o cofre continuava renderizado apesar de `hidden=true`.
 
-Evidência PR #98:
+PR #99 (`76-ui-audit1`) foi integrado e publicado. Consolidou header móvel, drawer, dock, auth visual e regressões transversais sem alterar domínio financeiro, cofre ou persistência.
 
-- merge `56f909846c5f02c466f047792c99a61f7fbac1c7`;
-- TypeScript Foundation `34781128824`: sucesso;
-- CI `34781128879`: sucesso;
-- Pages `34781156741`: sucesso.
+Evidência PR #99:
 
-## Auditoria UI/UX atual — `76-ui-audit1`
+- merge `add93b922fd8c91d6ec8ad7fffcc8bf5984d673c`;
+- CI pós-merge `34782068003`: sucesso integral;
+- Pages `34782098996`: sucesso.
 
-A auditoria passou a seguir formalmente Apple HIG, Material 3, WCAG 2.2 e web.dev como referências adaptadas ao contexto da PWA.
+## Bloco atual — `76-brand-icons1`
 
-Problemas altos confirmados:
+Problemas confirmados no código:
 
-1. header v75 escuro/gradiente em conflito com superfície clara v76;
-2. onboarding v74 ainda capaz de mascarar o fluxo visual `76-auth1`;
-3. navegação móvel com duas autoridades (`core/render` e `v74-experience`);
-4. runtime v74 ainda cria blocos de Dashboard já substituídos;
-5. cascade histórica v74/v75/v76 excessivamente dependente de `!important`.
+1. `icon.svg` usava casa + euro + folha + dois gradientes, demasiado complexo para tamanhos pequenos;
+2. a aplicação instalada usava `icon.svg`, mas `.brand-mark` era hidratado como ícone Lucide `home`, criando duas identidades visuais;
+3. HTML ainda contém glifos Unicode de fallback (`⌂`, `◉`, `⌁`, `☼`, `⌄`) antes da hidratação;
+4. Mercado acumulava pseudo-ícones decorativos próprios além do sistema Lucide: carrinho no título, chevron extra de sync, scanner no botão “Adicionar item” e ícones coloridos nos cartões de resumo;
+5. o botão “Adicionar item” recebia `Plus` semântico por JavaScript, mas CSS escondia-o e mostrava um scanner, criando discrepância entre ação e símbolo.
 
-Correções já aplicadas na branch atual:
+Correções aplicadas na branch:
 
-- header móvel neutro, sem gradiente decorativo e sem branco forçado;
-- menu/notificações com 44 px, foco visível e forced-colors;
-- dock móvel com selected state discreto, foco e tipografia consistentes;
-- onboarding v74 ocultado pela autoridade CSS final, mantendo o formulário real do cofre;
-- cache PWA preparada para invalidação `ui-audit1`;
-- testes de consistência/header/mobile shell atualizados;
-- auditoria detalhada registada em `docs/UI_UX_AUDIT.md`.
+- `icon.svg` simplificado para marca única casa + euro, teal sólido `#087B78`, branco e sem folha/gradientes;
+- `.brand-mark` passa a reutilizar `icon.svg`; o Lucide `home` que ainda é hidratado internamente fica visualmente neutralizado;
+- Lucide permanece a única família de ícones funcionais;
+- pseudo-ícones decorativos/duplicados do Mercado são neutralizados pela autoridade CSS final;
+- “Adicionar item” volta a mostrar o ícone semântico `Plus`;
+- stroke funcional normalizado em 2 px;
+- cache PWA invalidada com `brand-icons1`;
+- teste de iconografia atualizado para proteger marca, semântica e ausência de decoração duplicada.
+
+Nenhuma alteração foi feita a `finance.js`, estado financeiro, IndexedDB, PIN, PBKDF2/AES-GCM, sync, QR, scanner, quantidades ou preços.
 
 ## Migração TypeScript
 
@@ -70,19 +72,22 @@ Ainda permanecem JS manuais críticos (`core.js`, `finance.js`, `render.js`, `fo
 
 ## Riscos/lacunas abertas
 
-- validar fisicamente a baseline PR #98 e o próximo bloco no mesmo iPhone/Safari/PWA;
+- validar fisicamente a nova marca e iconografia no mesmo iPhone/Safari/PWA e Android/Chrome;
+- o ícone do ecrã principal de uma PWA já instalada pode depender do refresh/reinstalação do sistema operativo; não assumir atualização instantânea;
+- remover futuramente os glifos Unicode do HTML apenas depois de provar que o fallback não é necessário;
+- deixar de hidratar `.brand-mark` como Lucide `home` numa limpeza posterior, quando os consumidores estiverem comprovados;
 - consolidar navegação móvel para uma única fonte;
-- parar a criação runtime dos blocos v74 já escondidos;
+- parar criação runtime dos blocos v74 já escondidos;
 - rever todas as páginas reais: Faturas → Mercado → Planeamento → Calendário → Relatórios/Objetivos → Segurança/Diagnóstico/Definições;
-- consolidar escalas tipográficas e iconografia após estabilização de página;
 - criar teste ponta a ponta da persistência `marketId|pid`;
 - reduzir CSS legado apenas depois de prova de não utilização;
-- `main` ainda sem required checks/branch protection obrigatório.
+- `main` continua sem required checks/branch protection obrigatório.
 
 ## Próximo passo
 
-1. executar CI integral da branch `feat/v76-ui-audit-system1`;
-2. corrigir qualquer regressão encontrada;
-3. integrar/publicar apenas com TypeScript + CI + Pages verdes;
-4. iniciar bloco dedicado de navegação móvel e remoção da criação visual v74 substituída;
-5. continuar revisão página a página conforme `docs/UI_UX_AUDIT.md`.
+1. concluir documentação do bloco `76-brand-icons1`;
+2. abrir PR e executar TypeScript Foundation + CI integral;
+3. corrigir qualquer regressão sem restaurar iconografia contraditória;
+4. integrar/publicar apenas com CI verde;
+5. validar visualmente marca, navegação, ações, Mercado e PWA em dispositivo real;
+6. depois retomar consolidação estrutural de navegação e revisão página a página.
