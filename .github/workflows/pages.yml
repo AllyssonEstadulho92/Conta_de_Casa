@@ -49,7 +49,7 @@ jobs:
           node --check mobile-menu-toggle.js
           node --check .generated/v76-veggie-menu.js
           node --check sync.js
-          node --check sync-conflict-policy.js
+          node --check .generated/sync-conflict-policy.js
           node --check market-experience.js
           node --check .generated/market-branding.js
           node --check market-category-groups.js
@@ -133,10 +133,13 @@ jobs:
         run: |
           test -f dist/v76-veggie-menu.js
           test -f dist/market-branding.js
+          test -f dist/sync-conflict-policy.js
           test ! -f v76-veggie-menu.js
           test ! -f market-branding.js
+          test ! -f sync-conflict-policy.js
           node --check dist/v76-veggie-menu.js
           node --check dist/market-branding.js
+          node --check dist/sync-conflict-policy.js
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
