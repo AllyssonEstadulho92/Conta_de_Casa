@@ -3,126 +3,98 @@
 Atualizado: 13 de setembro de 2026  
 Versão da aplicação: `0.76.0-dev.1`  
 Release pública: `v75`  
-Programa técnico: `v76` — redesign UI/UX + migração incremental para TypeScript  
+Programa técnico: `v76` — auditoria integral, redesign UI/UX e migração incremental TypeScript  
 Branch pública: `main`  
-Baseline publicada: `a1d44cc541c514893fac96fa17467cadee7b5bb3` — PR #91  
-Trabalho atual: `76-auth1` publicado; próxima etapa é validação física e o próximo bloco visual perceptível  
+Baseline publicada: `a557ba3d93fec89bd31468183de89008a9181eb2` — PR #95  
 Fallback técnico: `backup/js-runtime-baseline-20260912`  
 Distribuição: GitHub Pages / PWA
 
 ## 1. Invariantes obrigatórias
 
-- `STATE_VERSION = 5` até existir migração de schema aprovada e testada;
+- `STATE_VERSION = 5`;
 - dinheiro persistido em cêntimos inteiros;
 - estado financeiro em IndexedDB;
-- cofre PBKDF2-SHA-256 + AES-GCM;
-- `PBKDF2_ITERATIONS = 250000`;
+- cofre PBKDF2-SHA-256 + AES-GCM, `PBKDF2_ITERATIONS = 250000`;
 - sincronização GitHub opcional limitada ao envelope cifrado;
 - `estimatedCents` permanece distinto de `actualCents`;
 - `marketId|pid` permanece identidade canónica de SKU/fotografia;
+- fotografia não prova preço nem transação;
 - QR, scanner, backup/restauro, PWA e offline não podem regredir;
 - redesign ou migração de linguagem não podem alterar silenciosamente cálculos, pagamentos, faturas, persistência, autenticação ou segurança.
 
-## 2. Diagnóstico da reclamação “a aplicação continua na mesma”
+## 2. Estado auditado da aplicação
 
-Facto confirmado: os PRs #88, #89 e #90 foram principalmente migração de fonte JavaScript para TypeScript, build, cache e documentação. Esses blocos não tinham como objetivo alterar materialmente a aparência do ecrã de acesso ao cofre.
+A aplicação publicada contém 10 rotas canónicas: `dashboard`, `bills`, `calendar`, `planning`, `market`, `reports`, `goals`, `security`, `diagnostics` e `settings`.
 
-O ecrã de autenticação continuava a usar a composição e as regras visuais históricas: cartão grande, fundo decorativo, teclado numérico com botões em formato de cartões, CTA em gradiente e várias ações secundárias a competir visualmente.
+O PR #93 introduziu um gate permanente que compara `PAGE_META`, as secções `page-*`, os ramos de `renderPage()` e os alvos estáticos `data-page`/`data-go`. O mesmo gate prepara o `dist/` real e verifica IDs duplicados, assets referidos pelo HTML, allowlist do Service Worker, scripts `defer` e exclusão de conteúdo interno do bundle público.
 
-Conclusão: a ausência de diferença visual percebida não era apenas cache. Faltava uma alteração visual real no componente que o utilizador vê primeiro.
+Conclusão atual: não foram encontrados page IDs duplicados, rotas órfãs ou assets locais referidos pelo bundle sem ficheiro correspondente. Esse contrato passa agora a falhar o CI se a divergência reaparecer.
 
-## 3. Bloco visual `76-auth1` — publicado
+## 3. UI/UX publicada
 
-PR #91, merge `a1d44cc541c514893fac96fa17467cadee7b5bb3`.
+### Acesso — `76-auth1`
 
-Alterações publicadas:
+PR #91. O acesso ao cofre usa composição limpa, PIN circular, uma ação dominante, opções de recuperação/importação terciárias e sem biometria fictícia. PIN/palavra-passe, KDF, cifra e IndexedDB permanecem inalterados.
 
-- fundo do acesso neutro e limpo, sem decoração radial dominante;
-- em telemóvel, composição quase full-bleed em vez de cartão pesado sobre outro fundo;
-- branding reduzido e alinhado com o ícone real da aplicação;
-- rótulo redundante `Acesso seguro` removido visualmente;
-- título, texto de apoio e campo PIN com hierarquia mais clara;
-- teclado PIN com teclas circulares simples em vez de botões retangulares tipo cartão;
-- letras secundárias das teclas ocultas para reduzir ruído;
-- `Entrar` como única ação visual dominante, sólida e sem gradiente;
-- `Usar palavra-passe`, `Mostrar PIN`, `Alterar PIN` e recuperação continuam funcionais, mas passam a hierarquia terciária;
-- importação de cofre permanece acessível num disclosure discreto;
-- modo palavra-passe deixa de mostrar simultaneamente o teclado PIN;
-- dark mode, reduced-motion, forced-colors, safe areas e alvo tátil mínimo continuam considerados;
-- não foram adicionados Face ID, Touch ID ou mecanismos inexistentes no produto.
+### Dashboard — `76-dashboard-clean1`
 
-Ficheiros do bloco:
+PR #94, merge `fa09d934162a95a2ad5be78e22a6ed1d9b76ed58`.
 
-- `v75-usability.css` — ponte de compatibilidade contendo as regras `v76-auth1`;
-- `sw.js` — apenas revisão da chave de cache `auth1`;
-- `tests/v75-stability.test.cjs` — contrato específico do novo visual;
-- cinco documentos permanentes atualizados.
+A auditoria encontrou uma sobreposição real: `v74-experience.js` continuava a injetar um segundo resumo, mês, saudação/avatar, ações rápidas e categorias no Dashboard, enquanto o v76 já tinha a sua composição canónica. O v76 passa a suprimir apenas os cinco componentes redundantes (`cdcMobileGreeting`, `cdcMobileMonthWrap`, `cdcMonthHero`, `cdcQuickActions`, `cdcDashboardCategories`) e mantém os caminhos funcionais reais: `#monthPicker`, topbar/notificações, `#kpiGrid`, ação `Adicionar`, `#categoryBars` e `#budgetPanel`.
 
-Gates pós-merge em `main`:
+O saldo principal e os painéis ficam mais sóbrios, sem decoração/elevação desnecessária. `dashboardNumbers()` e fórmulas financeiras não foram alterados.
 
-- TypeScript Foundation `34729738657`: sucesso;
-- CI integral `34729738645`: sucesso;
-- Deploy Pages `34729762294`: sucesso, incluindo preparação do bundle, upload e deploy.
-
-Conclusão: `76-auth1` está integrado e publicado pelo pipeline. A validação física final em iPhone/Safari/PWA continua necessária para confirmar o resultado renderizado no dispositivo real.
+A revisão pública do CSS é agora `v76-product-pages.css?v=76-dashboard-clean1`.
 
 ## 4. Migração TypeScript publicada
 
-### Bloco 1 — PR #88
+O destino é fonte funcional TypeScript strict. O browser continua a receber JavaScript gerado.
 
-Merge `5301bd0d66c5ec46ead7be079799ecb76c752237`:
+Runtimes já migrados e sem fonte JS manual:
 
-- `src/ui/veggie-menu-toggle.ts` é fonte canónica;
-- `v76-veggie-menu.js` manual foi removido;
-- build gera `.generated/v76-veggie-menu.js` e Pages publica o runtime gerado;
-- TypeScript `34699066645`, CI `34699066749` e Pages `34699100855`: sucesso.
+1. PR #88 — `src/ui/veggie-menu-toggle.ts` → `.generated/v76-veggie-menu.js`;
+2. PR #89 — `src/ui/market-branding.ts` → `.generated/market-branding.js`;
+3. PR #95 — `src/sync/sync-conflict-policy.ts` → `.generated/sync-conflict-policy.js`.
 
-### Bloco 2 — PR #89
+No terceiro bloco, a política de sync continua a remover apenas metadados técnicos do Mercado (`productCode`, `imageUrl`, `imageSource`, `imageMatchedAt`) da comparação de negócio; diferenças financeiras continuam a produzir conflito. A fonte manual `sync-conflict-policy.js` foi eliminada.
 
-Merge `c59e0a45500fd7965039de27615f574129482b13`:
+O build falha se qualquer fonte JS manual já migrada reaparecer.
 
-- `src/ui/market-branding.ts` é fonte canónica;
-- `market-branding.js` manual foi removido;
-- build suporta múltiplos runtimes TS;
-- TypeScript `34700016617`, CI `34700016615` e Pages `34700037019`: sucesso.
+## 5. Publicação comprovada da baseline atual
 
-O modelo `TypeScript fonte → JavaScript gerado → dist → browser` está comprovado em produção.
+PR #95, merge `a557ba3d93fec89bd31468183de89008a9181eb2`:
 
-## 5. UI/UX publicada
+- TypeScript Foundation `34768413602`: sucesso;
+- CI integral `34768413588`: sucesso, incluindo finanças, cofre, faturas/QR, Mercado, UI, responsive, acessibilidade, segurança, sync e manifesto;
+- Deploy Pages `34768438493`: sucesso, incluindo geração dos três runtimes TypeScript, validação do bundle, upload e deploy.
 
-- `76-modern-ui2`: tokens/componentes e hierarquia de ações;
-- `76-product-pages1`: composição real do Dashboard;
-- `76-mobile-shell2`: geometria mobile, safe areas, scroll e dock;
-- `76-auth1`: primeiro redesign do acesso ao cofre orientado explicitamente a diferença visual perceptível.
-
-O Dashboard continua a usar os dados reais já existentes e não introduz fórmulas financeiras novas.
+Esse deploy também contém o gate de páginas do PR #93 e o Dashboard limpo do PR #94.
 
 ## 6. JavaScript ainda existente
 
-A aplicação ainda não é 100% TypeScript. Permanecem fontes JS manuais como `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, `mobile-menu-toggle.js`, sync, vários módulos de Mercado, assets, atualização, runtimes históricos e Service Worker.
+A aplicação ainda não é 100% TypeScript. Permanecem fontes JS manuais em domínio, persistência, UI e infraestrutura, incluindo `core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, `sync.js`, `mobile-menu-toggle.js`, vários módulos do Mercado, runtimes históricos e `sw.js`.
 
-Sequência obrigatória por módulo:
+Regra de migração:
 
-`auditar dependências → criar TS strict → provar paridade → gerar artefacto → trocar build/runtime → regressão completa → remover JS fonte`.
+`auditar dependências → criar TS strict → provar paridade → gerar artefacto → trocar runtime/build → CI integral → remover JS fonte → publicar → documentar`.
 
-A migração TypeScript continua, mas não deve impedir a execução dos blocos visuais necessários para alinhar o produto com a direção UI/UX pedida.
+Não será feita exclusão em massa.
 
-## 7. Fallback
-
-`backup/js-runtime-baseline-20260912` guarda a baseline JavaScript publicada anterior à migração. É referência de rollback; não é carregada em paralelo.
-
-## 8. Riscos/lacunas abertas
+## 7. Riscos e lacunas abertas
 
 - `main` ainda não tem branch protection obrigatória;
-- `76-auth1` precisa de validação física em iPhone/Safari/PWA instalada e desktop após publicação;
-- vários módulos JS ainda são copiados diretamente pelo build;
-- `market-experience.js` ainda necessita teste dedicado para persistência de `pid` em todo o fluxo;
-- CSS histórico v74/v75 mantém sobreposições a consolidar gradualmente;
-- JavaScript gerado em `dist/` não deve ser confundido com fonte JavaScript manual.
+- validação física visual em iPhone/Safari/PWA instalada e Android/desktop continua necessária; CI não substitui inspeção num dispositivo real;
+- `market-experience.js` ainda necessita teste dedicado de persistência de `pid` em todo o fluxo;
+- camadas históricas v74/v75 ainda têm CSS/JS redundante a retirar gradualmente depois de provar equivalência;
+- o código-fonte funcional ainda é maioritariamente JavaScript;
+- CSP/ZXing/origens remotas e cache por tipo de recurso continuam na auditoria de segurança.
 
-## 9. Próximo passo
+## 8. Próximos blocos
 
-1. Validar fisicamente o ecrã de acesso publicado em iPhone/Safari/PWA e desktop.
-2. Se a renderização publicada não corresponder ao contrato `76-auth1`, tratar a discrepância antes de avançar.
-3. Avançar para o próximo bloco visual perceptível — header/Dashboard e depois páginas funcionais — mantendo regressões financeiras e de segurança.
-4. Continuar a migração TypeScript em paralelo, sempre por módulos auditáveis e sem atrasar correções visuais prioritárias.
+1. Faturas: auditar todos os filtros, resumo, tabela/lista mobile, detalhes, editar, pagar, excluir e captura/QR; consolidar hierarquia visual sem tocar em `filterBills()` nem cálculos.
+2. Mercado: auditar pesquisa, scanner, imagens, lista/carrinho, quantidade, preço estimado/real, identidade `marketId|pid` e fatura.
+3. Planeamento e Calendário: validar orçamento, rendimentos, saldo, vencimentos e navegação.
+4. Relatórios, Objetivos, Segurança, Diagnóstico e Definições: validar rotas, estados e acessibilidade.
+5. TypeScript: continuar módulos pequenos/pureza comprovada antes de entrar em `finance.js`, `core.js`, `sync.js` e controladores complexos.
+
+A programação não é considerada concluída enquanto estes blocos e a limpeza final de JavaScript fonte não estiverem fechados com testes e documentação.
