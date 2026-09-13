@@ -135,7 +135,7 @@ Estado: integrado e publicado pelo PR #89, merge `c59e0a45500fd7965039de27615f57
 
 ## D-082 — primeiro ecrã do produto tem de demonstrar mudança visual real
 
-Estado: implementado na branch `feat/v76-auth-redesign1`; integração pendente de PR/Pages.
+Estado: integrado e publicado pelo PR #91, merge `a1d44cc541c514893fac96fa17467cadee7b5bb3`.
 
 1. Alterações de build ou migração TypeScript não devem ser comunicadas como redesign visual quando a composição visível permanece igual.
 2. O primeiro bloco de correção perceptível é o acesso ao cofre, revisão `76-auth1`.
@@ -147,8 +147,10 @@ Estado: implementado na branch `feat/v76-auth-redesign1`; integração pendente 
 8. Nenhum Face ID, Touch ID ou biometria é mostrado sem implementação funcional e revisão de segurança reais.
 9. Os IDs/handlers existentes, PIN/palavra-passe, recuperação, PBKDF2, AES-GCM, IndexedDB e envelope cifrado permanecem inalterados.
 10. A revisão altera a chave de cache PWA para evitar que instalações existentes mantenham a folha visual anterior.
-11. O contrato é coberto em `tests/v75-stability.test.cjs`; CI da branch `34729499227` ficou verde integralmente.
+11. O contrato é coberto em `tests/v75-stability.test.cjs`.
 12. A camada `76-auth1` está temporariamente em `v75-usability.css` por compatibilidade com a cascade histórica do cofre; consolidação futura pode movê-la para uma folha v76 dedicada sem mudar comportamento.
+13. Evidência pós-merge: TypeScript Foundation `34729738657`, CI `34729738645` e Deploy Pages `34729762294`, todos com sucesso.
+14. A publicação pelo pipeline não substitui validação física da renderização em Safari/iPhone/PWA instalada.
 
 ## Evidência recente
 
@@ -156,7 +158,7 @@ Estado: implementado na branch `feat/v76-auth-redesign1`; integração pendente 
 - PR #87: recuperação do pipeline após remoção prematura; CI/Pages verdes.
 - PR #88: primeiro JS fonte removido; merge `5301bd0d66c5ec46ead7be079799ecb76c752237`; TypeScript `34699066645`, CI `34699066749`, Pages `34699100855` verdes.
 - PR #89: `market-branding` migrado; merge `c59e0a45500fd7965039de27615f574129482b13`; TypeScript `34700016617`, CI `34700016615`, Pages `34700037019` verdes.
-- `76-auth1`: CI de branch `34729499227` verde antes da integração.
+- PR #91: `76-auth1` publicado; merge `a1d44cc541c514893fac96fa17467cadee7b5bb3`; TypeScript `34729738657`, CI `34729738645`, Pages `34729762294` verdes.
 
 ## Lacuna técnica preservada
 
