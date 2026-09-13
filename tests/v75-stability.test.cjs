@@ -86,7 +86,7 @@ assert.match(finance,/function sumCents/);
 
 assert.match(prepare,/const STABILITY_REV = '75-stability1'/);
 assert.match(prepare,/const PAGES_REV = '75-pages1'/);
-assert.match(prepare,/const USABILITY_REV = '75-usability1'/);
+assert.match(prepare,/const USABILITY_REV = '76-auth1'/);
 assert.ok(prepare.includes("'v75-stability.css'"));
 assert.ok(prepare.includes("'v75-stability.js'"));
 assert.ok(prepare.includes("'v75-pages.css'"));
@@ -109,7 +109,7 @@ try{
   assert.match(builtIndex,/v75-header-refinement\.css\?v=75-header2/);
   assert.match(builtIndex,/v75-stability\.css\?v=75-stability1/);
   assert.match(builtIndex,/v75-pages\.css\?v=75-pages1/);
-  assert.match(builtIndex,/v75-usability\.css\?v=75-usability1/);
+  assert.match(builtIndex,/v75-usability\.css\?v=76-auth1/);
   assert.match(builtIndex,/v75-architecture\.js\?v=75-architecture2/);
   assert.match(builtIndex,/v75-stability\.js\?v=75-stability1/);
   assert.ok(builtIndex.indexOf('v75-stability.css')>builtIndex.indexOf('v75-header-refinement.css'),'stability CSS must load after header refinement');
