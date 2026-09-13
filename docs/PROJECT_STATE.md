@@ -4,8 +4,8 @@ Atualizado: 13 de setembro de 2026
 Versão: `0.76.0-dev.1`  
 Release pública: `v75`  
 Programa técnico: `v76` — consolidação UI/UX + migração incremental TypeScript  
-Baseline pública: `add93b922fd8c91d6ec8ad7fffcc8bf5984d673c` — PR #99  
-Branch de trabalho: `feat/v76-brand-icons1`  
+Baseline pública: `5b9689f04e844b9216626729b3b5aae5bf1acc09` — PR #100  
+Branch de trabalho: `main` após `76-brand-icons1`  
 Distribuição: GitHub Pages / PWA  
 Fallback técnico: `backup/js-runtime-baseline-20260912`
 
@@ -23,38 +23,38 @@ Fallback técnico: `backup/js-runtime-baseline-20260912`
 
 ## Estado funcional publicado
 
-PR #96 (`76-auth-transition1`) tornou a entrada local-first: PIN local válido abre a aplicação sem depender do sync remoto.
+- PR #96 (`76-auth-transition1`): PIN local válido abre a aplicação sem depender do sync remoto;
+- PR #98 (`76-auth-hidden1`): Safari/WebKit respeita explicitamente o estado `hidden` entre cofre e shell;
+- PR #99 (`76-ui-audit1`): header, drawer, dock e auth visual consolidados;
+- PR #100 (`76-brand-icons1`): marca e iconografia consolidadas.
 
-PR #98 (`76-auth-hidden1`) corrigiu a regressão física observada em Safari/WebKit em que o cofre continuava renderizado apesar de `hidden=true`.
+Evidência PR #100:
 
-PR #99 (`76-ui-audit1`) foi integrado e publicado. Consolidou header móvel, drawer, dock, auth visual e regressões transversais sem alterar domínio financeiro, cofre ou persistência.
+- merge `5b9689f04e844b9216626729b3b5aae5bf1acc09`;
+- TypeScript Foundation main `34783537256`: sucesso;
+- CI main `34783537266`: sucesso integral;
+- Pages `34783564467`: sucesso.
 
-Evidência PR #99:
-
-- merge `add93b922fd8c91d6ec8ad7fffcc8bf5984d673c`;
-- CI pós-merge `34782068003`: sucesso integral;
-- Pages `34782098996`: sucesso.
-
-## Bloco atual — `76-brand-icons1`
+## `76-brand-icons1` — publicado
 
 Problemas confirmados no código:
 
 1. `icon.svg` usava casa + euro + folha + dois gradientes, demasiado complexo para tamanhos pequenos;
-2. a aplicação instalada usava `icon.svg`, mas `.brand-mark` era hidratado como ícone Lucide `home`, criando duas identidades visuais;
+2. a PWA usava `icon.svg`, mas `.brand-mark` era hidratado como Lucide `home`, criando duas identidades visuais;
 3. HTML ainda contém glifos Unicode de fallback (`⌂`, `◉`, `⌁`, `☼`, `⌄`) antes da hidratação;
-4. Mercado acumulava pseudo-ícones decorativos próprios além do sistema Lucide: carrinho no título, chevron extra de sync, scanner no botão “Adicionar item” e ícones coloridos nos cartões de resumo;
-5. o botão “Adicionar item” recebia `Plus` semântico por JavaScript, mas CSS escondia-o e mostrava um scanner, criando discrepância entre ação e símbolo.
+4. Mercado acumulava pseudo-ícones decorativos além do sistema Lucide;
+5. “Adicionar item” recebia `Plus` semântico, mas CSS escondia-o e mostrava scanner, contradizendo a ação.
 
-Correções aplicadas na branch:
+Correções publicadas:
 
-- `icon.svg` simplificado para marca única casa + euro, teal sólido `#087B78`, branco e sem folha/gradientes;
-- `.brand-mark` passa a reutilizar `icon.svg`; o Lucide `home` que ainda é hidratado internamente fica visualmente neutralizado;
+- `icon.svg` simplificado para casa + euro, teal sólido `#087B78`, branco, sem folha ou gradientes;
+- `.brand-mark` reutiliza `icon.svg`; o Lucide `home` redundante é visualmente neutralizado;
 - Lucide permanece a única família de ícones funcionais;
-- pseudo-ícones decorativos/duplicados do Mercado são neutralizados pela autoridade CSS final;
-- “Adicionar item” volta a mostrar o ícone semântico `Plus`;
+- pseudo-ícones decorativos/duplicados do Mercado neutralizados;
+- “Adicionar item” volta a mostrar `Plus`;
 - stroke funcional normalizado em 2 px;
 - cache PWA invalidada com `brand-icons1`;
-- teste de iconografia atualizado para proteger marca, semântica e ausência de decoração duplicada.
+- teste de iconografia protege marca, semântica e ausência de duplicação.
 
 Nenhuma alteração foi feita a `finance.js`, estado financeiro, IndexedDB, PIN, PBKDF2/AES-GCM, sync, QR, scanner, quantidades ou preços.
 
@@ -73,21 +73,19 @@ Ainda permanecem JS manuais críticos (`core.js`, `finance.js`, `render.js`, `fo
 ## Riscos/lacunas abertas
 
 - validar fisicamente a nova marca e iconografia no mesmo iPhone/Safari/PWA e Android/Chrome;
-- o ícone do ecrã principal de uma PWA já instalada pode depender do refresh/reinstalação do sistema operativo; não assumir atualização instantânea;
-- remover futuramente os glifos Unicode do HTML apenas depois de provar que o fallback não é necessário;
-- deixar de hidratar `.brand-mark` como Lucide `home` numa limpeza posterior, quando os consumidores estiverem comprovados;
+- o ícone do ecrã principal de uma PWA já instalada pode depender do refresh/reinstalação do sistema operativo;
+- remover futuramente glifos Unicode do HTML apenas depois de provar que o fallback não é necessário;
+- deixar de hidratar `.brand-mark` como Lucide `home` numa limpeza posterior;
 - consolidar navegação móvel para uma única fonte;
 - parar criação runtime dos blocos v74 já escondidos;
-- rever todas as páginas reais: Faturas → Mercado → Planeamento → Calendário → Relatórios/Objetivos → Segurança/Diagnóstico/Definições;
+- rever páginas reais: Faturas → Mercado → Planeamento → Calendário → Relatórios/Objetivos → Segurança/Diagnóstico/Definições;
 - criar teste ponta a ponta da persistência `marketId|pid`;
 - reduzir CSS legado apenas depois de prova de não utilização;
 - `main` continua sem required checks/branch protection obrigatório.
 
 ## Próximo passo
 
-1. concluir documentação do bloco `76-brand-icons1`;
-2. abrir PR e executar TypeScript Foundation + CI integral;
-3. corrigir qualquer regressão sem restaurar iconografia contraditória;
-4. integrar/publicar apenas com CI verde;
-5. validar visualmente marca, navegação, ações, Mercado e PWA em dispositivo real;
-6. depois retomar consolidação estrutural de navegação e revisão página a página.
+1. validar visualmente marca, navegação, ações, Mercado e PWA no dispositivo real;
+2. corrigir qualquer problema físico observado antes de remover fallback histórico;
+3. consolidar navegação móvel numa única autoridade;
+4. continuar a revisão página a página e a limpeza controlada do CSS/runtime v74/v75.
