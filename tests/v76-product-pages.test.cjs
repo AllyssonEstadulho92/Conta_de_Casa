@@ -12,6 +12,7 @@ const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 const render=read('render.js');
 const finance=read('finance.js');
+const v74=read('v74-experience.js');
 
 assert.match(css,/76-product-pages1/);
 assert.match(css,/#page-dashboard>#kpiGrid\{order:1\}/);
@@ -30,6 +31,19 @@ assert.match(finance,/pendingCount:/);
 assert.match(finance,/overdueCount:/);
 assert.match(finance,/next7Count:/);
 
+// A camada v74 ainda existe por compatibilidade, mas a composição duplicada do Dashboard
+// deixa de participar no produto v76. Cada conteúdo mantém um equivalente funcional real.
+for(const legacyId of ['cdcMobileGreeting','cdcMobileMonthWrap','cdcMonthHero','cdcQuickActions','cdcDashboardCategories']){
+  assert.match(v74,new RegExp(`id=\\"${legacyId}\\"`),`audit must prove legacy ${legacyId} is still injected by v74 before it is suppressed`);
+  assert.match(css,new RegExp(`#${legacyId}`),`v76 dashboard composition must explicitly suppress duplicate ${legacyId}`);
+}
+assert.match(css,/v76-dashboard-clean1/);
+assert.match(css,/#cdcMobileGreeting,[\s\S]*#cdcMobileMonthWrap,[\s\S]*#cdcMonthHero,[\s\S]*#cdcQuickActions,[\s\S]*#cdcDashboardCategories[\s\S]*display:none!important/);
+assert.match(css,/\.account-balance-kpi\{[\s\S]*background:var\(--v76-surface\)!important;[\s\S]*box-shadow:none!important/);
+assert.match(css,/\.account-balance-kpi::after\{display:none!important\}/);
+assert.match(css,/\.main>\.topbar\{[\s\S]*box-shadow:none!important/);
+assert.match(css,/data-v75-page=\"dashboard\"[\s\S]*\.page-heading \.eyebrow[\s\S]*display:none!important/);
+
 // A nova camada tem propriedade de composição de página, carrega antes do shell e entra no PWA.
 assert.match(prepare,/const PRODUCT_PAGES_REV = '76-product-pages1'/);
 assert.ok(prepare.includes("'v76-product-pages.css'"));
@@ -46,4 +60,4 @@ assert.doesNotMatch(css,/body \.main\s*\{/);
 assert.doesNotMatch(css,/\.mobile-nav\s*\{/);
 assert.doesNotMatch(css,/safe-area-inset-/);
 
-console.log('v76 product page hierarchy: dashboard composition, responsive order and PWA integration: OK');
+console.log('v76 product page hierarchy: canonical Dashboard only, responsive order and PWA integration: OK');
