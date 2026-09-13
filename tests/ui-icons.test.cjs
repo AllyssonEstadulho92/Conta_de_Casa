@@ -7,6 +7,7 @@ const design=fs.readFileSync('design-system.css','utf8');
 const experience=fs.readFileSync('v74-experience.css','utf8');
 const architecture=fs.readFileSync('v75-architecture.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
+const iconSvg=fs.readFileSync('icon.svg','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const pages=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const publicFilesStart=pages.indexOf('const PUBLIC_FILES');
@@ -33,6 +34,11 @@ assert.match(js,/MutationObserver/,'dynamic dialogs and rendered lists must be h
 assert.doesNotMatch(js,/https?:\/\//,'runtime icon code must remain local and add no icon CDN/font dependency');
 assert.doesNotMatch(js,/[⌂◉⌁☼☾×]/,'icon runtime must not depend on legacy Unicode glyphs');
 
+assert.match(iconSvg,/fill="#087B78"/,'application mark must use the canonical teal as a single solid brand field');
+assert.match(iconSvg,/stroke="#FFFFFF"/,'application mark must remain legible on the brand field');
+assert.doesNotMatch(iconSvg,/linearGradient|radialGradient/,'brand mark must not depend on decorative gradients');
+assert.doesNotMatch(iconSvg,/leaf/i,'brand mark must not reintroduce the unrelated leaf motif');
+
 assert.match(css,/Conta de Casa v56/,'base icon layer must remain traceable');
 assert.match(css,/\.ui-icon-svg[\s\S]*height:20px!important/,'icon height must explicitly override legacy svg height:auto');
 assert.match(css,/\.market-browser-search>\.ui-icon-svg[\s\S]*height:22px!important/,'market search icon must keep a fixed Safari-safe box');
@@ -40,16 +46,20 @@ assert.match(css,/input\[type="search"\]::\-webkit-search-decoration/,'Safari na
 assert.match(css,/\.ui-select-control>select[\s\S]*appearance:none!important/,'platform-specific select arrows must be suppressed');
 assert.match(css,/bill-new-btn\[data-ui-iconized="true"\]::before[\s\S]*content:none!important/,'legacy CSS plus must not duplicate the Lucide add icon');
 assert.match(css,/\.sync-header-status \.sync-dot[\s\S]*width:18px!important/,'sync dot slot must become a proper icon slot');
-assert.match(css,/html\.market-prototype-active \.page-heading h1::before/,'market heading keeps the historical icon anchor before the final shell suppresses page-specific topbar decoration on mobile');
-assert.match(css,/#page-market #newMarketBtn\[data-ui-iconized="true"\]::after/,'secondary market action must be represented as a scan control');
-assert.match(css,/#page-market \.market-summary-item::before/,'market summary cards retain semantic icon anchors');
-assert.match(css,/#page-market \.market-mobile-head::before/,'market mobile cards keep the historical avatar rule overridden by the verified-image layer');
-assert.match(css,/market-mobile-card:not\(\.purchased\) \.market-mobile-real\{display:none!important/,'pending items must not expose unnecessary real-price controls');
-assert.match(css,/market-browser \.svg-icon[\s\S]*stroke-width:2/,'legacy contextual SVGs must visually align to the Lucide metric');
+assert.match(css,/\.market-browser \.svg-icon[\s\S]*stroke-width:2/,'legacy contextual SVGs must visually align to the Lucide metric');
 assert.match(css,/vector-effect:non-scaling-stroke/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/ui-icon-spin/);
 assert.match(css,/ui-alert-pulse/);
+
+/* v76 final authority: one brand asset and no decorative icon duplicates. */
+assert.match(css,/v76 — identidade e iconografia finais/);
+assert.match(css,/\.brand-mark\{[\s\S]*background:url\('\.\/icon\.svg'\) center\/cover no-repeat!important/,'all brand marks must reuse icon.svg');
+assert.match(css,/\.brand-mark>\.ui-icon-svg\{display:none!important\}/,'brand mark must not display a second Lucide home glyph on top of the logo');
+assert.match(css,/html\.market-prototype-active \.page-heading h1::before,[\s\S]*#page-market \.market-summary-item::before\{[\s\S]*content:none!important;[\s\S]*display:none!important/,'decorative duplicated market icons must be neutralized by final authority');
+assert.match(css,/#page-market #newMarketBtn\[data-ui-iconized="true"\]>.ui-icon-svg\{display:block!important\}/,'Add item must keep its semantic Lucide add icon');
+assert.match(css,/#page-market #newMarketBtn\[data-ui-iconized="true"\]::after,[\s\S]*content:none!important/,'the misleading legacy scanner pseudo-icon must be suppressed');
+assert.match(css,/:is\(\.nav-btn,\.icon-btn,\.icon-text-btn,\.btn\)[\s\S]*stroke-width:2!important/,'interactive icons must share one stroke metric');
 
 assert.match(design,/Conta de Casa v74/);
 assert.match(design,/\.ui-icon-svg,\.svg-icon\{[\s\S]*stroke-width:2!important/,'v74 design system must normalize all application SVG metrics');
@@ -96,4 +106,4 @@ assert.doesNotMatch(sw,/['"]\.\/ui-consistency\.css['"]/,'service worker must no
 assert.doesNotMatch(sw,/['"]\.\/v64-runtime\.css['"]/,'service worker must not cache obsolete v64 shell CSS');
 assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/,'service worker cache must refresh for the final v75 prototype architecture');
 
-console.log('Lucide UI icons, v74 base and final v75 prototype architecture: OK');
+console.log('Conta de Casa brand mark and Lucide UI icon authority: OK');
