@@ -24,6 +24,13 @@ const runtimes=Object.freeze([
     manual:'market-branding.js',
     output:'market-branding.js',
     marker:/installMarketBranding/
+  },
+  {
+    label:'Sync conflict policy',
+    source:'src/sync/sync-conflict-policy.ts',
+    manual:'sync-conflict-policy.js',
+    output:'sync-conflict-policy.js',
+    marker:/installSyncConflictPolicy/
   }
 ]);
 
@@ -59,6 +66,15 @@ assert.match(branding,/new MutationObserver/);
 assert.match(branding,/attributeFilter: \['data-mode'\]/);
 assert.match(branding,/fotografia de produto validada/);
 
+const syncPolicy=generatedByName.get('sync-conflict-policy.js');
+assert.match(syncPolicy,/MARKET_TECHNICAL_FIELDS/);
+assert.match(syncPolicy,/productCode/);
+assert.match(syncPolicy,/imageUrl/);
+assert.match(syncPolicy,/imageSource/);
+assert.match(syncPolicy,/imageMatchedAt/);
+assert.match(syncPolicy,/root\.syncBusinessView = businessView/);
+assert.doesNotMatch(syncPolicy,/estimatedCents|actualCents|purchasedAt|quantity/);
+
 execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
 for(const runtime of runtimes){
   const publicPath=path.join(DIST,runtime.output);
@@ -69,4 +85,4 @@ for(const runtime of runtimes){
 }
 
 fs.rmSync(DIST,{recursive:true,force:true});
-console.log('TypeScript runtime build: multiple source-only TS modules -> generated JS artifacts -> Pages bundle, with no committed JS sources.');
+console.log('TypeScript runtime build: three source-only TS modules -> generated JS artifacts -> Pages bundle, with no committed JS sources.');

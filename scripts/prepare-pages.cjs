@@ -10,7 +10,8 @@ const GENERATED = path.join(ROOT, '.generated');
 const BUILD_TYPESCRIPT_RUNTIME = path.join(ROOT, 'scripts', 'build-typescript-runtime.cjs');
 const GENERATED_PUBLIC_FILES = Object.freeze({
   'v76-veggie-menu.js': path.join(GENERATED, 'v76-veggie-menu.js'),
-  'market-branding.js': path.join(GENERATED, 'market-branding.js')
+  'market-branding.js': path.join(GENERATED, 'market-branding.js'),
+  'sync-conflict-policy.js': path.join(GENERATED, 'sync-conflict-policy.js')
 });
 const PACKAGE = JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
 const APP_VERSION = String(PACKAGE.version||'').trim();
@@ -23,7 +24,7 @@ const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const VEGGIE_MENU_REV = '76-veggie-menu2';
 const MODERN_UI_REV = '76-modern-ui2';
-const PRODUCT_PAGES_REV = '76-product-pages1';
+const PRODUCT_PAGES_REV = '76-dashboard-clean1';
 const MOBILE_SHELL_REV = '76-mobile-shell2';
 const EXPERIENCE_REV = '74-experience2';
 const ARCHITECTURE_REV = '75-architecture2';
@@ -34,7 +35,7 @@ const LAYOUT_REV = '75-layout1';
 const PAGES_REV = '75-pages1';
 const EXPENSES_REV = '75-expenses1';
 const DRAWER_REV = '75-drawer2';
-const USABILITY_REV = '75-usability1';
+const USABILITY_REV = '76-auth1';
 const ASSETS_REV = '75-assets1';
 const MARKET_FLOW_REV = '75-market1';
 const FEATURED_REV = '75-featured1';
@@ -61,8 +62,8 @@ const BUILD_ID=resolveBuildId();
 const BUILD_DATE=new Date().toISOString();
 
 /* Bundle público v75 com programa v76 incremental. Mantém a experiência funcional existente,
-   acrescenta metadados de versão/build no padrão do Foco Jornada, runtimes UI gerados por TypeScript,
-   76-modern-ui2, 76-product-pages1 e 76-mobile-shell2. Nenhuma destas camadas altera domínio financeiro,
+   acrescenta metadados de versão/build, runtimes gerados por TypeScript, 76-modern-ui2,
+   76-dashboard-clean1 e 76-mobile-shell2. Nenhuma destas camadas altera domínio financeiro,
    persistência, cifragem, sincronização, scanner, QR ou regras de Mercado. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
@@ -142,7 +143,8 @@ const PUBLIC_FILES = Object.freeze([
 
 const MANUAL_TYPESCRIPT_RUNTIMES = Object.freeze({
   'v76-veggie-menu.js': 'src/ui/veggie-menu-toggle.ts',
-  'market-branding.js': 'src/ui/market-branding.ts'
+  'market-branding.js': 'src/ui/market-branding.ts',
+  'sync-conflict-policy.js': 'src/sync/sync-conflict-policy.ts'
 });
 for(const [manual,source] of Object.entries(MANUAL_TYPESCRIPT_RUNTIMES)){
   if(fs.existsSync(path.join(ROOT,manual))){

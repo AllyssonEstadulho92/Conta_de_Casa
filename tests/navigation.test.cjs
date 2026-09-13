@@ -68,10 +68,11 @@ try {
 
   assert.match(builtIndex, /<meta name="app-build" content="v75"\s*\/>/);
   assert.match(builtIndex, /<meta name="app-version" content="0\.76\.0-dev\.1"\s*\/>/);
-  assert.match(builtIndex, /<meta name="app-build-id" content="[0-9a-f]{7}|local"\s*\/>/);
+  assert.match(builtIndex, /<meta name="app-build-id" content="(?:[0-9a-f]{7}|local)"\s*\/>/);
   assert.match(builtIndex, /v76-modern-ui\.css\?v=76-modern-ui2/);
-  assert.match(builtIndex, /v76-product-pages\.css\?v=76-product-pages1/);
+  assert.match(builtIndex, /v76-product-pages\.css\?v=76-dashboard-clean1/);
   assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-mobile-shell2/);
+  assert.match(builtIndex, /v75-usability\.css\?v=76-auth1/);
 
   const builtIds = [...builtIndex.matchAll(/\sid="([^"]+)"/g)].map(match=>match[1]);
   const builtDuplicateIds = [...new Set(builtIds.filter((id,indexOfId)=>builtIds.indexOf(id)!==indexOfId))];
