@@ -16,27 +16,38 @@ Atualizado: 13 de setembro de 2026
 
 - [x] PR #96: entrada local-first, sync não bloqueia Dashboard.
 - [x] PR #98: `[hidden]` explícito evita cofre e shell simultâneos.
-- [x] CI + TypeScript + Pages verdes após PR #98.
+- [x] PR #99: auditoria UI/UX transversal integrada e Pages publicada.
 - [ ] Repetir validação física no mesmo iPhone/Safari.
 - [ ] Repetir validação em PWA instalada.
 
-## P0 — Auditoria UI/UX transversal `76-ui-audit1`
+## P0 — Marca e iconografia `76-brand-icons1`
 
 ### Executado na branch atual
 
-- [x] Auditar arquitetura visual v74/v75/v76 e contratos de auth/nav/header.
-- [x] Consultar Apple HIG, Material/Android accessibility, WCAG 2.2 e web.dev.
-- [x] Corrigir header móvel: superfície neutra, sem gradiente e sem branco forçado.
-- [x] Garantir menu/notificações 44×44 px e foco visível.
-- [x] Consolidar visual do dock móvel e selected state.
-- [x] Neutralizar onboarding v74 que podia mascarar `76-auth1`.
-- [x] Invalidar cache PWA para `ui-audit1`.
-- [x] Atualizar testes de consistência e mobile shell.
-- [x] Criar `docs/UI_UX_AUDIT.md`.
-- [ ] Executar CI/TypeScript do PR do bloco e corrigir regressões.
-- [ ] Publicar Pages e validar no dispositivo real.
+- [x] Auditar `icon.svg`, `.brand-mark`, subset Lucide e pseudo-ícones históricos.
+- [x] Confirmar que existiam duas identidades: `icon.svg` e Lucide `home` na marca interna.
+- [x] Simplificar `icon.svg` para casa + euro, teal sólido e branco.
+- [x] Remover folha e gradientes decorativos da marca.
+- [x] Fazer sidebar/drawer/cofre reutilizarem a mesma marca `icon.svg`.
+- [x] Manter Lucide como única família de ícones funcionais.
+- [x] Neutralizar ícone decorativo do título do Mercado.
+- [x] Neutralizar chevron extra do estado de sync no Mercado.
+- [x] Restaurar `Plus` semântico no botão “Adicionar item” em vez de scanner pseudo-icon.
+- [x] Neutralizar pseudo-ícones coloridos dos cartões de resumo do Mercado.
+- [x] Proteger a nova autoridade em `tests/ui-icons.test.cjs`.
+- [x] Invalidar cache PWA com `brand-icons1`.
+- [ ] Executar TypeScript Foundation + CI integral do PR.
+- [ ] Publicar Pages apenas com gates verdes.
+- [ ] Validar nova marca e ícones em Safari/iPhone, PWA instalada, Android/Chrome e desktop.
 
-### Dívida ALTA a resolver imediatamente depois
+### Limpeza posterior segura
+
+- [ ] Remover glifos Unicode de fallback do HTML apenas depois de prova de que não são necessários.
+- [ ] Deixar de hidratar `.brand-mark` como Lucide `home` no runtime e remover esse trabalho redundante.
+- [ ] Remover regras pseudo-icon antigas do Mercado apenas depois de confirmar que a autoridade final as tornou inutilizadas em todos os estados.
+- [ ] Rever contraste não textual dos ícones em light/dark e forced-colors no dispositivo/browser real.
+
+## P0 — Dívida estrutural UI/UX
 
 - [ ] Consolidar navegação móvel numa única autoridade.
 - [ ] Remover/restringir `ensureMobileNav()` v74 após paridade.
@@ -50,7 +61,7 @@ Atualizado: 13 de setembro de 2026
 
 - [x] Resumo principal real e indicadores canónicos.
 - [x] Blocos v74 duplicados visualmente suprimidos.
-- [x] Header e dock alinhados com direção v76 na branch atual.
+- [x] Header e dock alinhados com direção v76 pelo PR #99.
 - [ ] Remover criação DOM v74 substituída.
 - [ ] Validar desktop + iPhone/PWA.
 
@@ -64,6 +75,7 @@ Atualizado: 13 de setembro de 2026
 
 ### Mercado
 
+- [x] Primeira limpeza transversal de iconografia em `76-brand-icons1`.
 - [ ] Rever pesquisa, filtros, catálogo/lista, quantidade e carrinho.
 - [ ] Rever scanner, imagens e fallback.
 - [ ] Manter estimativa ≠ valor real.

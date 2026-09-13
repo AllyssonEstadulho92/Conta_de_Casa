@@ -45,7 +45,7 @@ Isto evita que Safari/WebKit mantenha o cofre renderizado quando uma regra hist�
 
 ### `76-ui-audit1`
 
-A camada final também neutraliza o onboarding `cdcWelcome` do v74 e mantém o formulário real `#vaultCreate` visível quando a classe histórica `cdc-vault-create-collapsed` é aplicada. É uma mitigação visual segura; a remoção definitiva da criação runtime fica para o bloco de limpeza v74.
+A camada final neutraliza o onboarding `cdcWelcome` do v74 e mantém o formulário real `#vaultCreate` visível quando a classe histórica `cdc-vault-create-collapsed` é aplicada. É uma mitigação visual segura; a remoção definitiva da criação runtime fica para o bloco de limpeza v74.
 
 ## 3. Rotas e navegação
 
@@ -78,6 +78,8 @@ Autoridades pretendidas:
 - tokens/componentes: `v76-modern-ui.css`;
 - composição de página: `v76-product-pages.css`;
 - geometria mobile/safe areas/dock: `v76-mobile-shell.css`;
+- identidade da aplicação: `icon.svg`;
+- iconografia funcional: subset Lucide local em `ui-icons.js` + métricas em `ui-icons.css`;
 - compatibilidade histórica: v74/v75, apenas enquanto existirem consumidores.
 
 ### Contratos de `76-ui-audit1`
@@ -87,9 +89,20 @@ Autoridades pretendidas:
 - `forced-colors` e `prefers-reduced-motion` continuam suportados;
 - visual não altera lógica financeira ou de segurança.
 
+### Contratos de `76-brand-icons1`
+
+- `icon.svg` é a única marca gráfica canónica da Conta de Casa em PWA, sidebar, drawer e cofre;
+- a marca reduz-se a casa + euro, teal sólido e branco, sem gradientes ou símbolos decorativos não relacionados;
+- Lucide é reservado a ações, estados e navegação, não substitui a marca;
+- todos os ícones funcionais usam `viewBox 24×24`, `currentColor`, stroke coerente de 2 px e caixas explícitas;
+- o símbolo deve corresponder semanticamente à ação: por exemplo, “Adicionar item” usa `Plus`, não `Scan`;
+- pseudo-ícones decorativos que duplicam título, resumo ou estado são neutralizados;
+- ícones não podem ser a única fonte de significado quando texto/estado é necessário;
+- glifos Unicode históricos podem permanecer temporariamente no markup como fallback, mas não são a autoridade visual final.
+
 ## 5. Design system
 
-`v76-modern-ui.css` já contém tokens de cor, superfície, borda, radius, sombras, control-height, icon-control, focus ring e estados disabled/hover.
+`v76-modern-ui.css` contém tokens de cor, superfície, borda, radius, sombras, control-height, icon-control, focus ring e estados disabled/hover.
 
 Direção de consolidação:
 
@@ -99,16 +112,17 @@ Direção de consolidação:
 - hierarquia por espaço/tipografia antes de cartões;
 - ícones lineares coerentes;
 - alvos essenciais >=44 px;
-- WCAG 2.2 AA como referência mínima quando aplicável.
+- WCAG 2.2 AA como referência mínima quando aplicável;
+- marca e ícones funcionais têm papéis separados.
 
 ## 6. Páginas
 
 Estado atual:
 
 - Acesso: `76-auth1` + `76-auth-transition1` + `76-auth-hidden1`;
-- Dashboard: `76-dashboard-clean1` já usa renderização canónica e suprime visualmente blocos v74 duplicados;
+- Dashboard: `76-dashboard-clean1` usa renderização canónica e suprime visualmente blocos v74 duplicados;
 - Faturas e Planeamento: têm recuperação funcional mobile v75, mas precisam do acabamento final v76;
-- Mercado: funcionalidade espalhada por múltiplas camadas e precisa auditoria de identidade/preço/fotografia;
+- Mercado: funcionalidade espalhada por múltiplas camadas; `76-brand-icons1` remove duplicações visuais, mas catálogo/lista/preço/fotografia ainda precisam auditoria de produto;
 - Calendário, Relatórios, Objetivos, Segurança, Diagnóstico e Definições: ainda sem consolidação visual final equivalente ao Dashboard.
 
 ## 7. Runtime e TypeScript
@@ -138,7 +152,7 @@ Service Worker:
 - allowlist explícita;
 - revisões de cache para distribuir mudanças de UI/JS.
 
-`76-ui-audit1` acrescenta apenas nova invalidação de cache; a estratégia não muda.
+`76-brand-icons1` muda apenas identidade/apresentação e invalida o cache para distribuir `icon.svg` e `ui-icons.css`; a estratégia não muda.
 
 ## 9. Segurança e acessibilidade
 
@@ -150,16 +164,18 @@ Service Worker:
 - safe areas cobertas;
 - reduced-motion/forced-colors cobertos;
 - UI não pode introduzir biometria fictícia;
-- alterações visuais não podem alterar KDF/cifra/schema.
+- alterações visuais não podem alterar KDF/cifra/schema;
+- ícones de controlo devem manter contraste não textual adequado e área clicável fornecida pelo controlo, não pelo desenho do SVG.
 
 ## 10. Próxima consolidação
 
-1. uma autoridade de navegação móvel;
-2. impedir que v74 crie componentes já substituídos;
-3. terminar Faturas e Mercado;
-4. Planeamento + Calendário;
-5. Relatórios + Objetivos;
-6. Segurança + Diagnóstico + Definições;
-7. consolidar tipografia/iconografia;
-8. remover CSS/runtime histórico apenas com prova de não utilização e regressões verdes;
-9. continuar migração TypeScript por risco, deixando `core/finance/cifra` para fases com vetores de paridade próprios.
+1. validar `76-brand-icons1` em CI e hardware;
+2. uma autoridade de navegação móvel;
+3. impedir que v74 crie componentes já substituídos;
+4. terminar Faturas e Mercado;
+5. Planeamento + Calendário;
+6. Relatórios + Objetivos;
+7. Segurança + Diagnóstico + Definições;
+8. consolidar tipografia/iconografia residual e remover fallbacks históricos comprovadamente dispensáveis;
+9. remover CSS/runtime histórico apenas com prova de não utilização e regressões verdes;
+10. continuar migração TypeScript por risco, deixando `core/finance/cifra` para fases com vetores de paridade próprios.

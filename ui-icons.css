@@ -623,3 +623,42 @@ html.market-prototype-active .sync-header-status::after{
   #page-market .market-mobile-head{grid-template-columns:42px 52px minmax(0,1fr) auto!important;gap:9px!important}
   #page-market .market-mobile-head>.market-product-photo{width:52px;height:52px;flex-basis:52px}
 }
+
+/* v76 — identidade e iconografia finais.
+   Uma marca = icon.svg; ações = Lucide. Remove duplicações decorativas e mantém significado semântico. */
+.brand-mark{
+  background:url('./icon.svg') center/cover no-repeat!important;
+  color:transparent!important;
+  font-size:0!important;
+  box-shadow:none!important;
+  border-color:transparent!important;
+}
+.brand-mark>.ui-icon-svg{display:none!important}
+.vault-card .vault-brand .brand-mark{
+  background:url('./icon.svg') center/cover no-repeat!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+.footer-icon,.vault-disclosure-icon{font-size:0}
+
+/* Ações e estados usam apenas o sistema Lucide. O título da página não recebe um segundo ícone decorativo. */
+html.market-prototype-active .page-heading h1::before,
+html.market-prototype-active .sync-header-status::after,
+#page-market #newMarketBtn[data-ui-iconized="true"]::after,
+#page-market .market-summary-item::before{
+  content:none!important;
+  display:none!important;
+}
+#page-market #newMarketBtn[data-ui-iconized="true"]>.ui-icon-svg{display:block!important}
+#page-market #newMarketBtn[data-ui-iconized="true"]{
+  color:var(--primary)!important;
+  box-shadow:none!important;
+}
+
+/* Iconografia funcional: uma única métrica visual, sem glyphs de fonte como substitutos. */
+:is(.nav-btn,.icon-btn,.icon-text-btn,.btn)>.ui-icon-svg,
+:is(.nav-btn,.icon-btn,.icon-text-btn,.btn) .ui-icon-svg{
+  stroke-width:2!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}

@@ -1,134 +1,172 @@
-# Auditoria Visual de Ícones — Conta de Casa
+# Auditoria Visual de Marca e Ícones — Conta de Casa
 
-Data: 5 de setembro de 2026
-Âmbito: aplicação completa, sem alteração de estrutura, rotas, dados ou regras financeiras.
+Atualizado: 13 de setembro de 2026  
+Âmbito: aplicação completa, identidade da PWA e iconografia funcional, sem alteração de estrutura, rotas, dados ou regras financeiras.
 
-## Evidência
+## 1. Evidência anterior
 
-Duas capturas reais de Safari/iPhone expuseram problemas diferentes:
+Capturas reais de Safari/iPhone já tinham exposto problemas de iconografia:
 
 1. no diálogo **Adicionar produto**, a lupa apareceu parcialmente cortada;
-2. na página **Faturas**, a pesquisa mostrou uma lupa com aparência nativa/desproporcional, os filtros mostraram setas nativas duplas e o botão compacto de nova fatura apresentou mais de um símbolo.
+2. em **Faturas**, a pesquisa mostrou decoração nativa/desproporcional, filtros mostraram setas duplicadas e o botão compacto apresentou símbolos sobrepostos.
 
-A segunda captura permitiu confirmar que o problema não era apenas a geometria do SVG: existia mistura entre ícones da aplicação, decoração nativa do browser e pseudo-elementos CSS legados.
+Esses problemas levaram à criação de uma camada Lucide local e à remoção de decorações nativas/duplicadas em pesquisa, selects e ações.
 
-## Constatações técnicas
+## 2. Factos confirmados na revisão `76-brand-icons1`
 
-Antes desta revisão coexistiam:
+A nova auditoria encontrou um problema mais amplo de identidade:
 
-- `ICONS` / `icon()` em `core.js`;
-- SVGs próprios em módulos contextuais;
-- glifos Unicode no HTML/JS;
-- decoração nativa de `input[type="search"]` no Safari;
-- setas nativas dos `select`;
-- `::before` com `content:"+"` nos botões mobile de Faturas/Mercado;
-- a camada SVG anterior, que podia acrescentar outro símbolo ao mesmo botão.
+- `icon.svg` era a marca usada pela PWA e combinava casa, euro, folha e dois gradientes;
+- `.brand-mark` no HTML continha `⌂`, mas `ui-icons.js` hidratava esse slot como Lucide `home`;
+- portanto, o ícone instalado e a marca interna da aplicação não eram a mesma identidade;
+- o HTML ainda contém glifos Unicode históricos de fallback (`⌂`, `◉`, `⌁`, `☼`, `⌄`), embora a camada Lucide substitua a maioria no runtime;
+- o Mercado ainda possuía uma segunda camada de pseudo-ícones CSS, além do Lucide oficial;
+- o título do Mercado recebia um carrinho decorativo via `::before`;
+- o estado de sync recebia um chevron decorativo extra via `::after`;
+- `#newMarketBtn` recebia `Plus` via JavaScript, mas o CSS escondia-o e apresentava um ícone de scanner, apesar da ação ser “Adicionar item”;
+- cartões de resumo do Mercado recebiam ícones grandes e cores próprias por pseudo-elementos.
 
-O CSS base também contém `svg { height:auto }`, pelo que ícones de interface exigem caixas explícitas para não herdarem comportamento pensado para imagens/conteúdo responsivo.
+Conclusão: o problema não era falta de biblioteca de ícones. Era **falta de uma autoridade final clara entre marca, ícones funcionais e decoração histórica**.
 
-## Biblioteca escolhida
+## 3. Autoridades finais
 
-Foi escolhida **Lucide Icons** como linguagem visual oficial.
+### Marca
+
+`icon.svg` é a marca gráfica canónica da Conta de Casa.
+
+Direção final:
+
+- casa = contexto doméstico;
+- euro = finanças domésticas;
+- teal `#087B78` = cor de marca;
+- branco = contraste principal;
+- sem folha;
+- sem gradientes;
+- sem detalhes pequenos que percam legibilidade em favicon/PWA/sidebar.
+
+A mesma marca deve aparecer em:
+
+- PWA/manifest;
+- favicon;
+- cofre;
+- sidebar desktop;
+- drawer móvel.
+
+### Iconografia funcional
+
+Foi mantido **Lucide Icons** como sistema oficial de ícones funcionais.
 
 Snapshot de referência:
 
 `94e4cb9d9db5907053ebf3636a97c45529cf776b`
 
-A aplicação não carrega Lucide por CDN, NPM ou Web Font em runtime. Apenas os vetores necessários são mantidos em `ui-icons.js`.
+A aplicação não carrega icon fonts nem biblioteca de ícones por CDN em runtime. Apenas o subset necessário é mantido localmente em `ui-icons.js`, com licença distribuída em `LUCIDE_LICENSE.txt`.
 
-### Motivos
-
-- linguagem linear e moderna adequada à interface atual;
-- geometria 24×24 consistente;
-- boa legibilidade em 16–24 px;
-- fácil adaptação por `currentColor`;
-- funcionamento offline;
-- nenhuma nova origem CSP ou tracking;
-- permite preservar a API `icon()` existente e evitar reestruturação das páginas.
-
-Material Symbols, Font Awesome e Bootstrap Icons são tecnicamente adequados, mas não trazem vantagem suficiente para justificar nova dependência/font runtime. Flaticon e Iconfinder são catálogos de ativos úteis, mas misturar famílias/licenças reduziria a coerência e tornaria a manutenção mais difícil.
-
-## Licença
-
-O subset é associado ao commit Lucide fixo e o bundle público inclui `LUCIDE_LICENSE.txt` com:
-
-- licença ISC do Lucide;
-- aviso MIT aplicável aos ícones derivados de Feather.
-
-## Sistema final
-
-Os ícones funcionais usam:
+Métrica final:
 
 - `viewBox 0 0 24 24`;
 - `stroke-width: 2`;
 - `stroke-linecap: round`;
 - `stroke-linejoin: round`;
 - `currentColor`;
-- dimensões explícitas de 16/20/24/28 px;
-- `vector-effect: non-scaling-stroke` onde necessário.
+- caixas explícitas de 16/20/24/28 px;
+- controlos clicáveis com área definida pelo componente, não pelo SVG.
 
-## Elementos normalizados
+## 4. Correções `76-brand-icons1`
 
-- marca e navegação desktop/mobile;
-- menu hambúrguer;
-- Home, Faturas, Planeamento, Mercado, Relatórios, Objetivos, Segurança e Definições;
-- privacidade, bloqueio e tema;
-- notificações e sincronização;
-- adicionar, editar, eliminar, duplicar, pagar e filtros;
-- fechar, voltar e expansão;
-- teclado de PIN;
-- pesquisa comum e pesquisa do Mercado;
-- selects/filtros;
-- leitores de código de barras e QR de faturas;
-- câmara, imagem e lanterna;
-- ações rápidas e botões dinâmicos.
+### Logótipo
 
-## Correções específicas da captura de Faturas
+`icon.svg` foi simplificado para uma composição de casa + euro em teal sólido e branco. Foram removidos folha, gradientes e decoração secundária.
 
-### Pesquisa
+### Marca interna
 
-A decoração `::-webkit-search-decoration` é removida e a lupa Lucide é posicionada pela aplicação. O input continua a ser um `input type="search"` real.
+A autoridade CSS final faz `.brand-mark` reutilizar `icon.svg`. O `home` Lucide que ainda é inserido pelo hidratador fica oculto dentro da marca para evitar duas identidades sobrepostas.
 
-### Filtros
+A remoção dessa hidratação redundante do runtime fica para uma limpeza posterior, depois de provar que nenhum consumidor depende dela.
 
-O `select` continua nativo e acessível, mas a seta visual do sistema operativo é removida com `appearance:none`. Um único `ChevronDown` Lucide é desenhado no wrapper.
+### Mercado
 
-### Botão Nova fatura
+Foram neutralizados pela camada final:
 
-Quando a camada Lucide já inseriu `Plus`, os pseudo-elementos `::before` antigos são forçados a `content:none`. Em mobile o rótulo pode ficar visualmente escondido, mas deixa de existir o `+` duplicado/ícone solto observado na imagem.
+- carrinho decorativo antes do título;
+- chevron extra do sync;
+- scanner pseudo-icon do botão “Adicionar item”;
+- ícones decorativos grandes dos cartões de resumo.
 
-### Sincronização
+O botão “Adicionar item” volta a apresentar o `Plus` Lucide que corresponde à ação real.
 
-O ponto genérico passa a ser um slot contextual: cloud/check, refresh, cloud-off ou warning conforme o estado. A cor continua a reforçar o significado sem ser o único indicador.
+### Glifos Unicode
 
-## Movimento
+Os glifos históricos permanecem temporariamente no markup por compatibilidade, mas não são a autoridade visual final. Slots hidratados usam SVG Lucide e os fallbacks visuais são neutralizados onde necessário.
 
-Movimento é limitado a estados com significado:
+Não serão apagados do HTML até existir prova de não utilização em startup/fallback.
 
-- refresh durante sincronização;
-- badge de alerta;
-- expansão;
-- scanners;
-- microfeedback hover apenas com pointer fino.
+## 5. Critério semântico
 
-`prefers-reduced-motion: reduce` desativa o movimento não essencial.
+Ícones funcionais passam a obedecer a esta regra:
 
-## O que não foi alterado
+- ação de adicionar → `Plus`;
+- pesquisar → `Search`;
+- filtrar → `Filter`;
+- digitalizar → `Scan`/`Camera` apenas quando realmente abre scanner/câmara;
+- editar → `Edit`;
+- eliminar → `Trash`;
+- bloquear → `Lock`;
+- privacidade → `Eye/EyeOff`;
+- sincronização → `Cloud/CloudCheck/CloudOff/Refresh/Warning` conforme estado.
 
-- gráficos, estatísticas e barras de progresso;
-- schema e cálculos financeiros;
+Não usar um símbolo apenas porque “fica bonito” se a semântica for diferente.
+
+## 6. Acessibilidade
+
+A iconografia não substitui labels acessíveis. Mantêm-se:
+
+- `aria-label` nos icon buttons;
+- texto visível nas ações principais quando o espaço permite;
+- estado não comunicado apenas por cor;
+- `currentColor` para herdar contraste do componente;
+- foco visível no controlo;
+- `prefers-reduced-motion` para animação não essencial;
+- `forced-colors` nas camadas finais relevantes.
+
+Referência mínima: WCAG 2.2 AA quando tecnicamente aplicável. Alvos de interação importantes continuam >=44 px no design system, acima do mínimo WCAG de 24×24 CSS px.
+
+## 7. O que não foi alterado
+
+- cálculos e estatísticas;
+- schema financeiro;
 - IndexedDB e cofre cifrado;
 - PBKDF2/AES-GCM/PIN;
 - backups e sincronização de dados;
-- rotas, hierarquia de páginas e fluxos funcionais.
+- rotas e renderers;
+- scanner/QR;
+- `estimatedCents` e `actualCents`;
+- `marketId|pid`.
 
-## Validação necessária em hardware
+## 8. Validação ainda necessária
 
-Ainda é necessária confirmação física em Safari/iPhone e Android/Chrome. Na página **Faturas** deve ser verificado especificamente:
+Antes de considerar o bloco concluído:
 
-- exatamente uma lupa dentro da pesquisa;
-- exatamente um símbolo `+` no botão compacto;
-- exatamente um chevron por filtro;
-- nenhum SVG cortado ou desalinhado;
-- estados Sync/offline/erro legíveis;
-- comportamento em 320, 375, 390 e 430 px, retrato/paisagem e tema claro/escuro.
+- TypeScript Foundation verde;
+- CI integral verde;
+- Pages publicada sem regressões;
+- Safari/iPhone web;
+- PWA instalada no iPhone;
+- Android/Chrome;
+- desktop;
+- light/dark;
+- 320/360/375/390/430/768/820 px;
+- verificar que existe exatamente uma marca visual por localização;
+- verificar que “Adicionar item” mostra `Plus` e scanner/câmara aparecem apenas no fluxo de leitura;
+- confirmar que nenhum ícone é cortado/desalinhado;
+- confirmar contraste não textual em light/dark;
+- confirmar atualização do ícone PWA, sabendo que o sistema operativo pode manter cache do ícone instalado e exigir refresh/reinstalação.
+
+## 9. Limpeza futura
+
+Depois da validação física:
+
+1. retirar a hidratação Lucide `home` de `.brand-mark`;
+2. remover glifos Unicode históricos comprovadamente dispensáveis;
+3. eliminar as regras pseudo-icon antigas que já estão neutralizadas pela autoridade final;
+4. continuar a revisão página a página para garantir que novos componentes usam apenas a marca canónica ou o subset Lucide conforme o respetivo papel.

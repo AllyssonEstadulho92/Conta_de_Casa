@@ -105,6 +105,19 @@ O dock final usa superfície neutra, 3–5 destinos primários, selected state d
 
 A duplicação atual entre `core/render` e `v74-experience` é dívida ALTA. A remoção será feita num bloco dedicado, preferencialmente com configuração TypeScript canónica, depois de paridade de destinos, `aria-current`, drawer e labels.
 
+## D-091 — marca e iconografia têm autoridades distintas
+
+A partir de `76-brand-icons1`:
+
+- `icon.svg` é a marca gráfica canónica da Conta de Casa e deve ser reutilizado em PWA, sidebar, drawer e cofre;
+- a marca usa casa + euro, teal sólido e branco; gradientes, folha e símbolos decorativos não pertencem à identidade final;
+- Lucide continua a ser a família canónica de ícones funcionais para navegação, ações e estados;
+- um ícone funcional deve representar a ação real; não substituir `Plus` por `Scan` num botão “Adicionar item”;
+- títulos, cartões e estados não recebem pseudo-ícones apenas para ornamentação quando já existe texto/hierarquia suficiente;
+- não se usa o ícone Lucide `home` como substituto do logótipo.
+
+Motivo: o código apresentava duas identidades visuais simultâneas e vários pseudo-ícones do Mercado que duplicavam ou contradiziam o significado dos controlos.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;
