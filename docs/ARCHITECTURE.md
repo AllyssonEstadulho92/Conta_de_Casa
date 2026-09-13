@@ -1,6 +1,6 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 12 de setembro de 2026  
+Atualizado: 13 de setembro de 2026  
 Versão da aplicação: `0.76.0-dev.1`  
 Release pública: `v75`  
 Programa técnico: `v76` — UI/UX + migração incremental TypeScript  
@@ -63,33 +63,22 @@ Regras:
 
 ### 4.1 Registo de runtimes gerados
 
-O build mantém um registo explícito em `scripts/build-typescript-runtime.cjs` e um mapa público em `scripts/prepare-pages.cjs`.
-
 Atualmente publicados:
 
 - `src/ui/veggie-menu-toggle.ts` → `.generated/v76-veggie-menu.js` → `dist/v76-veggie-menu.js` — PR #88;
 - `src/ui/market-branding.ts` → `.generated/market-branding.js` → `dist/market-branding.js` — PR #89.
 
-`tests/typescript-runtime-build.test.cjs` verifica para cada runtime:
-
-- fonte TS presente;
-- fonte JS manual ausente;
-- artefacto `.generated` criado;
-- sintaxe de browser válida;
-- marcadores de comportamento esperados;
-- ausência de acesso ao estado financeiro nos módulos de apresentação;
-- igualdade exata entre artefacto gerado e ficheiro colocado no `dist/`.
+`tests/typescript-runtime-build.test.cjs` verifica fonte TS, ausência de fonte JS manual já migrada, artefacto gerado, sintaxe, comportamento esperado e igualdade com o ficheiro publicado em `dist/`.
 
 ## 5. Pipeline CI e publicação
 
-`push/PR` → instalar TypeScript → typecheck → gerar runtimes → CI completo → merge `main` → Pages via `workflow_run` → gerar runtimes novamente → preparar allowlist → validar bundle → deploy
+`push/PR` → instalar TypeScript → gerar runtimes → CI completo → merge `main` → Pages via `workflow_run` → gerar runtimes novamente → preparar allowlist → validar bundle → deploy
 
 Contrato:
 
 - Pages só executa quando o CI de `main` termina com sucesso;
 - o build público usa allowlist explícita;
 - runtimes TS são gerados antes da cópia para `dist`;
-- CI/Pages verificam diretamente `.generated/*.js` para fontes já migradas;
 - alteração em `main` só é considerada publicada depois de o Deploy Pages concluir com sucesso.
 
 Evidência publicada:
@@ -101,34 +90,59 @@ Evidência publicada:
 
 Em 12/09/2026, `v75-architecture.js` foi removido prematuramente. CI falhou com `MODULE_NOT_FOUND` e Pages não publicou. PR #87 restaurou o ficheiro.
 
-Consequência arquitetural: **nenhuma fonte JS é eliminada apenas por existir um TS com nome semelhante**. Primeiro o TS é tipado, compilado, mapeado para o bundle e testado; só depois a fonte manual é removida.
+Consequência: nenhuma fonte JS é eliminada apenas por existir um TS com nome semelhante. Primeiro o TS é tipado, compilado, mapeado para o bundle e testado; só depois a fonte manual é removida.
 
-O mesmo princípio aplica-se ao Service Worker: invalidação de cache não autoriza alterar estratégia de fetch. No PR #89, o gate Safari/PWA detetou uma deriva durante desenvolvimento e o `sw.js` final ficou funcionalmente idêntico à baseline, exceto pela chave de cache.
+O mesmo princípio aplica-se ao Service Worker: invalidação de cache não autoriza alterar estratégia de fetch. O `sw.js` só deve mudar funcionalmente em bloco próprio.
 
 ## 7. Fallback
 
 `backup/js-runtime-baseline-20260912` aponta para a baseline pública anterior à migração. É um rollback técnico, não um segundo runtime carregado em paralelo.
 
-## 8. Composição visual pública
+## 8. Composição visual e cascade
 
-Ordem principal:
+Ordem principal da aplicação publicada:
 
 1. estilos base/responsive históricos;
 2. `mobile-layout.css`;
 3. camadas v75;
 4. `v76-veggie-menu.css`;
 5. `v75-usability.css`;
-6. `v76-modern-ui.css` (`76-modern-ui2`) — tokens/componentes;
-7. `v76-product-pages.css` (`76-product-pages1`) — composição interna;
+6. `v76-modern-ui.css` (`76-modern-ui2`) — tokens/componentes transversais;
+7. `v76-product-pages.css` (`76-product-pages1`) — composição interna das páginas;
 8. `v76-mobile-shell.css` (`76-mobile-shell2`) — geometria mobile final.
 
-A ordem é `tokens/componentes → composição da página → geometria do shell`.
+### 8.1 Bloco `76-auth1`
+
+O ecrã `#vaultScreen` é anterior ao shell autenticado e não deve herdar a densidade visual das páginas internas.
+
+Responsabilidades:
+
+- `index.html`: estrutura e IDs canónicos do cofre;
+- `events.js`: alternância PIN/palavra-passe, teclado PIN, recuperação e alteração do PIN;
+- `core.js`: cifragem, desbloqueio, persistência e segurança;
+- `v75-usability.css`: contém atualmente a camada de compatibilidade visual `v76-auth1`, porque já é a camada tardia de usabilidade que trata viewport/safe-area do cofre;
+- `sw.js`: apenas invalida a cache `auth1` para instalações PWA existentes receberem o novo CSS.
+
+A colocação de `76-auth1` em `v75-usability.css` é uma ponte de compatibilidade com a cascade histórica, não autorização para voltar a misturar lógica ou geometria global. Numa consolidação futura, as regras visuais podem migrar para uma folha v76 dedicada sem alterar comportamento.
+
+Contrato visual do cofre:
+
+- sem fundo decorativo dominante;
+- mobile quase full-bleed, sem cartão pesado;
+- branding compacto;
+- uma única ação dominante (`Entrar`);
+- teclado PIN circular e limpo;
+- ações de recuperação/importação continuam acessíveis, porém terciárias;
+- modo palavra-passe não apresenta simultaneamente o teclado PIN;
+- nenhuma biometria é apresentada sem implementação funcional real;
+- dark mode, foco, forced-colors, reduced-motion e safe areas permanecem suportados.
 
 ## 9. Propriedade única por preocupação
 
 - **tokens:** cor, tipografia, spacing, raio, sombra, foco;
-- **shell:** viewport, scroll, safe areas, topbar, conteúdo e navegação persistente;
+- **shell:** viewport autenticado, scroll, safe areas, topbar, conteúdo e navegação persistente;
 - **componentes:** botões, inputs, cards, tabs, dialogs, tabelas e estados;
+- **autenticação visual:** composição do `#vaultScreen`, sem tocar em KDF/cifra/persistência;
 - **composição:** ordem, proporção e prioridade das secções;
 - **features:** Dashboard, Faturas, Mercado, Calendário, Planeamento, Relatórios, Objetivos, Segurança, Diagnóstico, Definições;
 - **domínio:** finanças, Mercado, persistência, sync e segurança;
@@ -136,9 +150,9 @@ A ordem é `tokens/componentes → composição da página → geometria do shel
 
 ## 10. UI/UX e responsive
 
-`v76-mobile-shell.css` é a autoridade da geometria global ≤820 px. `v76-modern-ui.css` define hierarquia `primary`, `secondary`, `danger`, `link`, `icon button`, baseline 44 px e estados acessíveis. `v76-product-pages.css` define composição interna do Dashboard sem alterar fórmulas.
+`v76-mobile-shell.css` é autoridade da geometria global do shell autenticado ≤820 px. O `#vaultScreen` tem regras próprias por existir antes desse shell, mantendo `100dvh`, safe areas e scroll seguro.
 
-Requisitos: reflow a 320 CSS px, sem scroll horizontal global, safe areas no shell, pinch-to-zoom preservado, foco visível, Safari/iPhone, teclado virtual, portrait/landscape, Light/Dark/System, reduced-motion e forced-colors.
+Requisitos transversais: reflow a 320 CSS px, sem scroll horizontal global, pinch-to-zoom preservado, foco visível, Safari/iPhone, teclado virtual, portrait/landscape, Light/Dark/System, reduced-motion e forced-colors.
 
 ## 11. Mercado
 
@@ -150,31 +164,29 @@ Requisitos: reflow a 320 CSS px, sem scroll horizontal global, safe areas no she
 
 ## 12. Segurança
 
-Migração TypeScript não pode enfraquecer PIN/palavra-passe, PBKDF2/AES-GCM, isolamento do cofre, sync cifrada, validação de QR/importações, CSP ou política de segredos.
+Redesign e migração TypeScript não podem enfraquecer PIN/palavra-passe, PBKDF2/AES-GCM, isolamento do cofre, sync cifrada, validação de QR/importações, CSP ou política de segredos.
+
+No bloco `76-auth1` não são alterados `unlockPassphrase`, `unlockVaultBtn`, KDF, envelope cifrado, IndexedDB, handlers de recuperação nem a política de alteração do PIN. A mudança é visual.
 
 ## 13. QA e gates
 
-Toda migração mantém verdes finanças, isolamento/cofre, datas civis, faturas/QR, Mercado/SKU/imagens/scanner, responsive, navegação/acessibilidade, sync, PWA/cache e TypeScript strict.
+Toda alteração mantém verdes finanças, isolamento/cofre, datas civis, faturas/QR, Mercado/SKU/imagens/scanner, responsive, navegação/acessibilidade, sync, PWA/cache e TypeScript strict quando aplicável.
 
-Gates específicos de fonte TS:
+`tests/v75-stability.test.cjs` inclui agora contrato de `76-auth1`: teclado circular, CTA sólido dominante, modo texto sem keypad, ações secundárias preservadas e proibição de biometria apenas decorativa.
 
-- `tests/typescript-runtime-build.test.cjs`;
-- ausência das fontes JS manuais já migradas;
-- artefactos `.generated` válidos;
-- bundle `dist` contém exatamente os artefactos esperados;
-- CI integral + TypeScript Foundation verdes.
+CI da branch `feat/v76-auth-redesign1`: `34729499227`, sucesso integral.
 
-## 14. Ordem de migração
+## 14. Ordem de evolução
 
-1. módulos folha/UI sem estado e pipeline;
-2. funções puras de dinheiro/datas/quantidades;
-3. domínio financeiro;
-4. Mercado/modelo/carrinho;
-5. core/persistência/cifra;
-6. sync/conflitos;
-7. render/forms/events e controladores complexos;
-8. Service Worker/build;
-9. testes/tooling;
-10. remoção final de JavaScript fonte legado.
+1. concluir/publicar `76-auth1` e validar fisicamente;
+2. continuar blocos visuais perceptíveis por página, sem alterar domínio;
+3. manter migração TypeScript por módulos de baixo acoplamento;
+4. preparar vetores de paridade antes de dinheiro/datas/quantidades;
+5. migrar domínio financeiro;
+6. migrar Mercado/modelo/carrinho;
+7. migrar core/persistência/cifra;
+8. migrar sync/conflitos;
+9. migrar render/forms/events e controladores complexos;
+10. consolidar Service Worker/build e remover JavaScript fonte legado.
 
-A ordem pode ser refinada conforme dependências reais, mas nunca encurtando os gates.
+A ordem pode ser refinada conforme dependências reais, mas nunca encurtando os gates de segurança e regressão.
