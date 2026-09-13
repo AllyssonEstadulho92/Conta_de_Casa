@@ -24,6 +24,7 @@ interface SyncConflictPolicyRoot {
 (function installSyncConflictPolicy(root: SyncConflictPolicyRoot): void {
   const originalBusinessView = root.syncBusinessView;
   if (typeof originalBusinessView !== 'function') return;
+  const callBusinessView: SyncBusinessView = originalBusinessView;
 
   const MARKET_TECHNICAL_FIELDS = Object.freeze([
     'productCode',
@@ -33,7 +34,7 @@ interface SyncConflictPolicyRoot {
   ] as const);
 
   function businessView(entity: string, item: unknown): unknown {
-    const view = originalBusinessView(entity, item);
+    const view = callBusinessView(entity, item);
     if (entity !== 'market' || !view || typeof view !== 'object') return view;
 
     const mutableView = view as Record<string, unknown>;
