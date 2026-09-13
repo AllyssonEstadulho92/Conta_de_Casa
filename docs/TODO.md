@@ -22,29 +22,33 @@ Atualizado: 13 de setembro de 2026
 
 ## P0 — Marca e iconografia `76-brand-icons1`
 
-### Executado na branch atual
+### Publicado — PR #100
 
 - [x] Auditar `icon.svg`, `.brand-mark`, subset Lucide e pseudo-ícones históricos.
-- [x] Confirmar que existiam duas identidades: `icon.svg` e Lucide `home` na marca interna.
+- [x] Confirmar duas identidades: `icon.svg` e Lucide `home` na marca interna.
 - [x] Simplificar `icon.svg` para casa + euro, teal sólido e branco.
 - [x] Remover folha e gradientes decorativos da marca.
 - [x] Fazer sidebar/drawer/cofre reutilizarem a mesma marca `icon.svg`.
 - [x] Manter Lucide como única família de ícones funcionais.
 - [x] Neutralizar ícone decorativo do título do Mercado.
 - [x] Neutralizar chevron extra do estado de sync no Mercado.
-- [x] Restaurar `Plus` semântico no botão “Adicionar item” em vez de scanner pseudo-icon.
+- [x] Restaurar `Plus` semântico no botão “Adicionar item”.
 - [x] Neutralizar pseudo-ícones coloridos dos cartões de resumo do Mercado.
 - [x] Proteger a nova autoridade em `tests/ui-icons.test.cjs`.
 - [x] Invalidar cache PWA com `brand-icons1`.
-- [ ] Executar TypeScript Foundation + CI integral do PR.
-- [ ] Publicar Pages apenas com gates verdes.
+- [x] TypeScript Foundation do PR verde.
+- [x] CI integral do PR verde.
+- [x] Merge PR #100: `5b9689f04e844b9216626729b3b5aae5bf1acc09`.
+- [x] TypeScript Foundation main `34783537256` verde.
+- [x] CI main `34783537266` verde.
+- [x] Pages `34783564467` publicada com sucesso.
 - [ ] Validar nova marca e ícones em Safari/iPhone, PWA instalada, Android/Chrome e desktop.
 
 ### Limpeza posterior segura
 
 - [ ] Remover glifos Unicode de fallback do HTML apenas depois de prova de que não são necessários.
-- [ ] Deixar de hidratar `.brand-mark` como Lucide `home` no runtime e remover esse trabalho redundante.
-- [ ] Remover regras pseudo-icon antigas do Mercado apenas depois de confirmar que a autoridade final as tornou inutilizadas em todos os estados.
+- [ ] Deixar de hidratar `.brand-mark` como Lucide `home` no runtime.
+- [ ] Remover regras pseudo-icon antigas do Mercado apenas depois de confirmar não utilização em todos os estados.
 - [ ] Rever contraste não textual dos ícones em light/dark e forced-colors no dispositivo/browser real.
 
 ## P0 — Dívida estrutural UI/UX
@@ -75,7 +79,7 @@ Atualizado: 13 de setembro de 2026
 
 ### Mercado
 
-- [x] Primeira limpeza transversal de iconografia em `76-brand-icons1`.
+- [x] Primeira limpeza transversal de iconografia em PR #100.
 - [ ] Rever pesquisa, filtros, catálogo/lista, quantidade e carrinho.
 - [ ] Rever scanner, imagens e fallback.
 - [ ] Manter estimativa ≠ valor real.

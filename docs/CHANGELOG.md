@@ -2,17 +2,17 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
-## 2026-09-13 — `76-brand-icons1` — identidade e iconografia — em validação
+## 2026-09-13 — PR #100 / `76-brand-icons1` — identidade e iconografia — publicado
 
 ### Problemas confirmados
 
 - `icon.svg` combinava casa, euro, folha e dois gradientes, criando demasiada informação em tamanhos pequenos;
 - a PWA usava `icon.svg`, enquanto `.brand-mark` era hidratado com Lucide `home`, produzindo duas identidades visuais;
 - o Mercado acumulava pseudo-ícones próprios além do sistema Lucide;
-- o botão “Adicionar item” recebia `Plus`, mas CSS escondia esse ícone e mostrava `Scan`, contradizendo a ação;
+- “Adicionar item” recebia `Plus`, mas CSS escondia esse ícone e mostrava `Scan`, contradizendo a ação;
 - existiam ícones decorativos adicionais no título, sync e cartões de resumo.
 
-### Correções executadas
+### Correções publicadas
 
 - `icon.svg` simplificado para casa + euro, teal sólido `#087B78` e branco;
 - removidos folha e gradientes da marca;
@@ -21,18 +21,25 @@ O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheir
 - pseudo-ícones decorativos/duplicados do Mercado são neutralizados pela autoridade CSS final;
 - “Adicionar item” volta a apresentar `Plus` semântico;
 - stroke funcional normalizado em 2 px;
-- `tests/ui-icons.test.cjs` passa a proteger identidade, semântica e ausência de duplicação;
+- `tests/ui-icons.test.cjs` protege identidade, semântica e ausência de duplicação;
 - cache Service Worker recebe `brand-icons1` para distribuir a alteração.
 
 ### Preservado
 
 Sem alterações a `STATE_VERSION`, cálculos, `finance.js`, IndexedDB, PBKDF2/AES-GCM, PIN, sync, QR, scanner, preços, quantidades ou regras de Mercado.
 
-### Pendente antes de publicar
+### Evidência
 
-- TypeScript Foundation + CI integral;
-- Pages verde;
-- validação física em Safari/iPhone/PWA e verificação do ícone instalado, que pode depender de refresh/reinstalação do sistema operativo.
+- merge PR #100: `5b9689f04e844b9216626729b3b5aae5bf1acc09`;
+- TypeScript Foundation PR: sucesso;
+- CI PR `34783486604`: sucesso integral;
+- TypeScript Foundation main `34783537256`: sucesso;
+- CI main `34783537266`: sucesso integral;
+- Pages `34783564467`: sucesso.
+
+### Validação física pendente
+
+Safari/iPhone/PWA, Android/Chrome e desktop. O ícone do ecrã principal de uma PWA já instalada pode continuar em cache pelo sistema operativo e exigir refresh/reinstalação; não é tratado como regressão confirmada sem teste físico.
 
 ---
 
