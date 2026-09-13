@@ -40,7 +40,7 @@ jobs:
           node --check mobile-menu-toggle.js
           node --check .generated/v76-veggie-menu.js
           node --check sync.js
-          node --check sync-conflict-policy.js
+          node --check .generated/sync-conflict-policy.js
           node --check market-experience.js
           node --check .generated/market-branding.js
           node --check market-category-groups.js
