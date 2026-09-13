@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 12 de setembro de 2026
+Atualizado: 13 de setembro de 2026
 
 ## P0 — Invariantes
 
@@ -12,18 +12,46 @@ Atualizado: 12 de setembro de 2026
 
 ## P0 — Publicação
 
-- [x] Identificar porque o site não refletiu a alteração.
+- [x] Identificar porque alterações anteriores nem sempre chegaram ao site.
 - [x] Recuperar remoção prematura de `v75-architecture.js` no PR #87.
 - [x] Publicar Dashboard `76-product-pages1` no PR #86.
-- [x] Confirmar CI/TypeScript/Pages do PR #86.
 - [x] Integrar PR #88 — primeira remoção segura de JS fonte.
 - [x] Integrar PR #89 — segunda remoção segura de JS fonte (`market-branding`).
 - [x] TypeScript Foundation pós-PR89 `34700016617` verde.
 - [x] CI pós-PR89 `34700016615` verde.
 - [x] Pages pós-PR89 `34700037019` verde.
+- [x] Integrar PR #90 — documentação pós-bloco 2.
+- [ ] Integrar `76-auth1` apenas com CI verde.
+- [ ] Confirmar CI + Pages pós-merge de `76-auth1`.
+- [ ] Confirmar no site publicado que a alteração de autenticação é perceptível.
 - [ ] Ativar branch protection/required checks quando a configuração permitir.
 
 ## P0 — UI/UX
+
+### Acesso/cofre — `76-auth1`
+
+- [x] Confirmar que a ausência de mudança visual não era apenas cache: o markup/regras de autenticação continuavam visualmente antigos.
+- [x] Criar branch isolada `feat/v76-auth-redesign1`.
+- [x] Remover fundo decorativo dominante do ecrã de acesso.
+- [x] Reduzir peso do cartão; mobile passa a composição quase full-bleed.
+- [x] Compactar branding usando o ícone real da aplicação.
+- [x] Ocultar rótulo redundante `Acesso seguro`.
+- [x] Reforçar hierarquia título → instrução → PIN → ação principal.
+- [x] Converter teclado PIN em teclas circulares limpas.
+- [x] Retirar letras secundárias do teclado para reduzir ruído.
+- [x] Tornar `Entrar` a única ação visual dominante, sólida e sem gradiente.
+- [x] Transformar `Usar palavra-passe` em ação terciária.
+- [x] Manter `Mostrar PIN`, `Alterar PIN`, recuperação e importação acessíveis sem competir visualmente.
+- [x] Ocultar keypad quando o modo palavra-passe está ativo.
+- [x] Preservar PIN/palavra-passe, handlers, recuperação, PBKDF2/AES-GCM e IndexedDB.
+- [x] Não inventar Face ID/Touch ID/biometria.
+- [x] Invalidar cache PWA com revisão `auth1` sem alterar estratégia de fetch.
+- [x] Adicionar contrato de regressão visual em `tests/v75-stability.test.cjs`.
+- [x] CI integral da branch `34729499227` verde.
+- [ ] Rever diff final contra `main`.
+- [ ] Abrir PR, repetir CI e integrar.
+- [ ] Validar fisicamente Safari/iPhone web + PWA instalada.
+- [ ] Validar desktop e Android/Chrome.
 
 ### Dashboard
 
@@ -34,7 +62,8 @@ Atualizado: 12 de setembro de 2026
 - [x] Composição distinta desktop/tablet/mobile.
 - [x] Preservar `renderDashboard()` e `dashboardNumbers()`.
 - [x] Cobrir reduced-motion e forced-colors.
-- [ ] Refinar header/contexto/mês/ações essenciais.
+- [ ] Refinar header/contexto/mês/ações essenciais com mudança visual perceptível.
+- [ ] Reduzir “card soup” e melhorar densidade visual.
 - [ ] Validar fisicamente desktop/mobile e iPhone/PWA.
 
 ### Próximas páginas
@@ -57,11 +86,12 @@ Atualizado: 12 de setembro de 2026
 - [ ] Consolidar paleta semântica.
 - [x] Hierarquia Primary/Secondary/Danger/Link/Icon.
 - [x] Baseline interna de 44 px.
-- [ ] Reduzir cards redundantes.
+- [ ] Reduzir cards redundantes em todas as páginas.
 - [ ] Estados de formulário default/focus/filled/disabled/error/success.
 - [ ] Estados loading/empty/offline/error/success partilhados.
 - [ ] Dark/Light/System com tokens próprios.
 - [ ] Auditoria final de ícones e acessibilidade.
+- [ ] Consolidar a ponte `76-auth1` de `v75-usability.css` numa camada v76 dedicada quando a cascade histórica estiver simplificada.
 
 ## P0 — Migração para fonte 100% TypeScript
 
@@ -87,14 +117,14 @@ Meta: nenhum JavaScript manual como fonte funcional. O browser recebe JavaScript
 - [x] Remover `market-branding.js` manual.
 - [x] Atualizar teste de build, CI, TypeScript Foundation e Pages.
 - [x] Invalidar cache PWA sem alterar lógica do Service Worker.
-- [x] Gate Safari/PWA detetou deriva de SW durante desenvolvimento; comportamento canónico restaurado.
 - [x] PR #89 integrado — merge `c59e0a45500fd7965039de27615f574129482b13`.
 - [x] TypeScript Foundation pós-merge `34700016617`.
 - [x] CI integral pós-merge `34700016615`.
 - [x] Deploy Pages pós-merge `34700037019`.
 
-### Bloco 3 — próximo módulo folha / funções puras — próximo
+### Bloco 3 — próximo módulo folha / funções puras
 
+- [ ] Retomar depois de publicar/validar o bloco visual `76-auth1`.
 - [ ] Auditar tamanho, dependências, efeitos laterais e consumidores dos JS restantes.
 - [ ] Escolher o próximo módulo com menor acoplamento real; não assumir pelo nome.
 - [ ] Se for função pura, criar vetores de paridade JS→TS antes da troca.
@@ -158,5 +188,5 @@ Meta: nenhum JavaScript manual como fonte funcional. O browser recebe JavaScript
 - [ ] portrait/landscape.
 - [ ] teclado virtual e foco.
 - [ ] Light/Dark/System.
-- [ ] reduced-motion/forced-colors.
+- [x] `76-auth1`: reduced-motion/forced-colors cobertos por CSS e CI.
 - [ ] comparação visual antes de apagar CSS histórico.

@@ -41,6 +41,18 @@ assert.match(usability,/safe-area-inset-top/);
 assert.match(usability,/--v75-usability-tap-target:44px/);
 assert.doesNotMatch(index,/maximum-scale\s*=|user-scalable\s*=\s*no/i,'manual browser zoom must remain available for accessibility');
 
+/* v76-auth1: a mudança visual do cofre tem de ser concreta, sem inventar autenticação biométrica. */
+assert.match(usability,/v76-auth1/);
+assert.match(usability,/#vaultScreen\.vault-screen/);
+assert.match(usability,/\.vault-eyebrow\{display:none!important\}/);
+assert.match(usability,/\.vault-key\{[\s\S]*border-radius:50%!important/,'PIN keypad must use clean circular keys instead of card buttons');
+assert.match(usability,/\.vault-enter-btn\{[\s\S]*background:var\(--v76-primary/,'unlock must have one solid dominant action');
+assert.match(usability,/\.vault-keyboard-toggle\{[\s\S]*background:transparent!important/,'password switch must remain tertiary');
+assert.match(usability,/\.pin-recovery-actions\{/,'recovery functions must remain reachable but visually secondary');
+assert.match(usability,/text-entry-mode \.vault-pin-pad\{display:none!important\}/,'text mode must not compete visually with the PIN keypad');
+assert.doesNotMatch(usability,/Face ID|Touch ID|biometric/i,'visual redesign must not advertise unsupported biometrics');
+assert.match(sw,/market-branding1-auth1/,'PWA cache must invalidate for the visible auth redesign');
+
 /* Parte 2: Início, Despesas e Planeamento continuam puramente visuais. */
 assert.match(pages,/auditoria de páginas 75-pages1/i);
 assert.match(pages,/#page-dashboard/);
@@ -112,4 +124,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v75 cross-application stability, usability, page audit, image fallback and distribution tests: OK');
+console.log('v75 cross-application stability, usability, v76-auth1, page audit, image fallback and distribution tests: OK');
