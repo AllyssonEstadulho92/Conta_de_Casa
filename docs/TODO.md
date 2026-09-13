@@ -21,9 +21,11 @@ Atualizado: 13 de setembro de 2026
 - [x] CI pós-PR89 `34700016615` verde.
 - [x] Pages pós-PR89 `34700037019` verde.
 - [x] Integrar PR #90 — documentação pós-bloco 2.
-- [ ] Integrar `76-auth1` apenas com CI verde.
-- [ ] Confirmar CI + Pages pós-merge de `76-auth1`.
-- [ ] Confirmar no site publicado que a alteração de autenticação é perceptível.
+- [x] Integrar `76-auth1` no PR #91 — merge `a1d44cc541c514893fac96fa17467cadee7b5bb3`.
+- [x] TypeScript Foundation pós-PR91 `34729738657` verde.
+- [x] CI pós-PR91 `34729738645` verde.
+- [x] Pages pós-PR91 `34729762294` verde.
+- [ ] Confirmar fisicamente no site/PWA que a alteração de autenticação é perceptível e sem regressões de layout.
 - [ ] Ativar branch protection/required checks quando a configuração permitir.
 
 ## P0 — UI/UX
@@ -48,8 +50,9 @@ Atualizado: 13 de setembro de 2026
 - [x] Invalidar cache PWA com revisão `auth1` sem alterar estratégia de fetch.
 - [x] Adicionar contrato de regressão visual em `tests/v75-stability.test.cjs`.
 - [x] CI integral da branch `34729499227` verde.
-- [ ] Rever diff final contra `main`.
-- [ ] Abrir PR, repetir CI e integrar.
+- [x] Rever diff final contra `main`.
+- [x] Abrir PR #91, repetir CI e integrar.
+- [x] Confirmar CI/TypeScript/Pages pós-merge verdes.
 - [ ] Validar fisicamente Safari/iPhone web + PWA instalada.
 - [ ] Validar desktop e Android/Chrome.
 
@@ -124,7 +127,7 @@ Meta: nenhum JavaScript manual como fonte funcional. O browser recebe JavaScript
 
 ### Bloco 3 — próximo módulo folha / funções puras
 
-- [ ] Retomar depois de publicar/validar o bloco visual `76-auth1`.
+- [ ] Retomar após validação física do bloco visual `76-auth1`.
 - [ ] Auditar tamanho, dependências, efeitos laterais e consumidores dos JS restantes.
 - [ ] Escolher o próximo módulo com menor acoplamento real; não assumir pelo nome.
 - [ ] Se for função pura, criar vetores de paridade JS→TS antes da troca.

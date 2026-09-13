@@ -2,7 +2,7 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade técnica do programa atual.
 
-## 2026-09-13 — `76-auth1` — redesign visível do acesso ao cofre — em validação
+## 2026-09-13 — PR #91 / `76-auth1` — redesign visível do acesso ao cofre — publicado
 
 ### Motivo
 
@@ -31,11 +31,17 @@ Foi confirmado que os blocos recentes de TypeScript/build não alteravam materia
 
 Não foram alterados `index.html`, `events.js`, `core.js`, `finance.js`, IndexedDB, `STATE_VERSION`, PIN/palavra-passe, PBKDF2, AES-GCM, recuperação, sync, QR/scanner, faturas, Mercado ou cálculos.
 
-### QA
+### QA e publicação
 
-CI da branch `34729499227`: sucesso integral. Passaram finanças, auditoria financeira, isolamento/cofre, datas, faturas/QR, Mercado, Safari/PWA, UI, responsive, acessibilidade, segurança, sync e manifesto.
+- CI da branch `34729499227`: sucesso integral;
+- CI do PR `34729704048`: sucesso;
+- TypeScript Foundation do PR `34729704041`: sucesso;
+- merge em `main`: `a1d44cc541c514893fac96fa17467cadee7b5bb3`;
+- TypeScript Foundation pós-merge `34729738657`: sucesso;
+- CI pós-merge `34729738645`: sucesso integral;
+- Deploy Pages `34729762294`: sucesso, incluindo preparação do bundle, upload e deploy.
 
-Publicação ainda pendente de PR/merge/Pages e validação física em iPhone/Safari/PWA.
+A publicação técnica está confirmada pelo pipeline. Continua pendente a validação física da renderização em iPhone/Safari/PWA instalada e desktop.
 
 ---
 
@@ -156,7 +162,7 @@ Um `.js` fonte só é eliminado depois de existir `.ts` equivalente, build gerad
 
 ## Histórico v76 recente
 
-- `76-auth1` — primeiro bloco explicitamente orientado a mudança visual perceptível no cofre;
+- PR #91 — `76-auth1`, primeiro bloco explicitamente orientado a mudança visual perceptível no cofre, merge `a1d44cc541c514893fac96fa17467cadee7b5bb3`;
 - PR #90 — documentação pós-bloco 2 TypeScript;
 - PR #89 — segunda remoção segura de JS fonte (`market-branding`), merge `c59e0a45500fd7965039de27615f574129482b13`;
 - PR #88 — primeira remoção segura de JS fonte e runtime TS gerado;
