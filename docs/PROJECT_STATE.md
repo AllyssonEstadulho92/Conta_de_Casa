@@ -5,8 +5,8 @@ Versão da aplicação: `0.76.0-dev.1`
 Release pública: `v75`  
 Programa técnico: `v76` — redesign UI/UX + migração incremental para TypeScript  
 Branch pública: `main`  
-Baseline de `main`: `47439e4cb7bd85acc7bf0d98c033a81ea9ba99e3` — PR #90  
-Trabalho atual: `feat/v76-auth-redesign1` — primeiro bloco visual explicitamente orientado a mudança perceptível  
+Baseline publicada: `a1d44cc541c514893fac96fa17467cadee7b5bb3` — PR #91  
+Trabalho atual: `76-auth1` publicado; próxima etapa é validação física e o próximo bloco visual perceptível  
 Fallback técnico: `backup/js-runtime-baseline-20260912`  
 Distribuição: GitHub Pages / PWA
 
@@ -31,33 +31,40 @@ O ecrã de autenticação continuava a usar a composição e as regras visuais h
 
 Conclusão: a ausência de diferença visual percebida não era apenas cache. Faltava uma alteração visual real no componente que o utilizador vê primeiro.
 
-## 3. Bloco visual atual — `76-auth1`
+## 3. Bloco visual `76-auth1` — publicado
 
-Branch: `feat/v76-auth-redesign1`.
+PR #91, merge `a1d44cc541c514893fac96fa17467cadee7b5bb3`.
 
-Implementado até ao momento:
+Alterações publicadas:
 
-- fundo do acesso passa a neutro e limpo, sem decoração radial dominante;
-- no telemóvel, o contentor deixa de parecer um cartão grande sobre outro fundo e passa a uma composição quase full-bleed;
+- fundo do acesso neutro e limpo, sem decoração radial dominante;
+- em telemóvel, composição quase full-bleed em vez de cartão pesado sobre outro fundo;
 - branding reduzido e alinhado com o ícone real da aplicação;
-- removido visualmente o rótulo redundante `Acesso seguro`;
-- título, texto de apoio e campo PIN recebem hierarquia mais clara;
-- teclado PIN passa de botões retangulares tipo cartão para teclas circulares simples;
-- letras secundárias das teclas ficam ocultas para reduzir ruído;
-- `Entrar` torna-se a única ação visual dominante, em cor sólida e sem gradiente;
-- `Usar palavra-passe`, `Mostrar PIN`, `Alterar PIN` e recuperação permanecem funcionais, mas com hierarquia terciária;
+- rótulo redundante `Acesso seguro` removido visualmente;
+- título, texto de apoio e campo PIN com hierarquia mais clara;
+- teclado PIN com teclas circulares simples em vez de botões retangulares tipo cartão;
+- letras secundárias das teclas ocultas para reduzir ruído;
+- `Entrar` como única ação visual dominante, sólida e sem gradiente;
+- `Usar palavra-passe`, `Mostrar PIN`, `Alterar PIN` e recuperação continuam funcionais, mas passam a hierarquia terciária;
 - importação de cofre permanece acessível num disclosure discreto;
 - modo palavra-passe deixa de mostrar simultaneamente o teclado PIN;
 - dark mode, reduced-motion, forced-colors, safe areas e alvo tátil mínimo continuam considerados;
-- não foram adicionados Face ID, Touch ID ou outros mecanismos inexistentes no produto.
+- não foram adicionados Face ID, Touch ID ou mecanismos inexistentes no produto.
 
-Ficheiros alterados no bloco:
+Ficheiros do bloco:
 
-- `v75-usability.css` — regras de apresentação `v76-auth1`, mantendo compatibilidade com a cadeia CSS atual;
-- `sw.js` — apenas revisão da chave de cache para forçar atualização PWA;
-- `tests/v75-stability.test.cjs` — contrato específico para o novo visual e para a ausência de biometria inventada.
+- `v75-usability.css` — ponte de compatibilidade contendo as regras `v76-auth1`;
+- `sw.js` — apenas revisão da chave de cache `auth1`;
+- `tests/v75-stability.test.cjs` — contrato específico do novo visual;
+- cinco documentos permanentes atualizados.
 
-CI da branch `34729499227`: sucesso integral, incluindo finanças, cofre, Mercado, Safari/PWA, segurança, responsive, acessibilidade e sync.
+Gates pós-merge em `main`:
+
+- TypeScript Foundation `34729738657`: sucesso;
+- CI integral `34729738645`: sucesso;
+- Deploy Pages `34729762294`: sucesso, incluindo preparação do bundle, upload e deploy.
+
+Conclusão: `76-auth1` está integrado e publicado pelo pipeline. A validação física final em iPhone/Safari/PWA continua necessária para confirmar o resultado renderizado no dispositivo real.
 
 ## 4. Migração TypeScript publicada
 
@@ -81,11 +88,12 @@ Merge `c59e0a45500fd7965039de27615f574129482b13`:
 
 O modelo `TypeScript fonte → JavaScript gerado → dist → browser` está comprovado em produção.
 
-## 5. UI/UX publicada antes deste bloco
+## 5. UI/UX publicada
 
 - `76-modern-ui2`: tokens/componentes e hierarquia de ações;
 - `76-product-pages1`: composição real do Dashboard;
-- `76-mobile-shell2`: geometria mobile, safe areas, scroll e dock.
+- `76-mobile-shell2`: geometria mobile, safe areas, scroll e dock;
+- `76-auth1`: primeiro redesign do acesso ao cofre orientado explicitamente a diferença visual perceptível.
 
 O Dashboard continua a usar os dados reais já existentes e não introduz fórmulas financeiras novas.
 
@@ -106,7 +114,7 @@ A migração TypeScript continua, mas não deve impedir a execução dos blocos 
 ## 8. Riscos/lacunas abertas
 
 - `main` ainda não tem branch protection obrigatória;
-- `76-auth1` ainda precisa de validação física em iPhone/Safari/PWA após publicação;
+- `76-auth1` precisa de validação física em iPhone/Safari/PWA instalada e desktop após publicação;
 - vários módulos JS ainda são copiados diretamente pelo build;
 - `market-experience.js` ainda necessita teste dedicado para persistência de `pid` em todo o fluxo;
 - CSS histórico v74/v75 mantém sobreposições a consolidar gradualmente;
@@ -114,8 +122,7 @@ A migração TypeScript continua, mas não deve impedir a execução dos blocos 
 
 ## 9. Próximo passo
 
-1. Rever o diff de `feat/v76-auth-redesign1` e integrar apenas com CI verde.
-2. Confirmar CI + Deploy Pages pós-merge e validar que a mudança é efetivamente visível no site/PWA.
-3. Fazer validação física do ecrã de acesso em iPhone/Safari e desktop.
-4. Avançar para o próximo bloco visual perceptível — header/Dashboard e depois páginas funcionais — mantendo regressões financeiras e de segurança.
-5. Continuar a migração TypeScript em paralelo, sempre por módulos auditáveis e sem atrasar correções visuais prioritárias.
+1. Validar fisicamente o ecrã de acesso publicado em iPhone/Safari/PWA e desktop.
+2. Se a renderização publicada não corresponder ao contrato `76-auth1`, tratar a discrepância antes de avançar.
+3. Avançar para o próximo bloco visual perceptível — header/Dashboard e depois páginas funcionais — mantendo regressões financeiras e de segurança.
+4. Continuar a migração TypeScript em paralelo, sempre por módulos auditáveis e sem atrasar correções visuais prioritárias.
