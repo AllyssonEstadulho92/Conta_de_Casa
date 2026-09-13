@@ -104,6 +104,29 @@ Quando uma captura/dispositivo real contradiz um teste verde, o teste deve ser r
 
 Aplicação atual: `safari-startup.test.cjs` cobre transição local-first/rollback e `v76-mobile-shell.test.cjs` proíbe o app shell/dock enquanto o cofre estiver visível.
 
+## D-085 — `hidden` é autoridade explícita nos estados de autenticação
+
+Estado: integrado/publicado pelo PR #98, merge `56f909846c5f02c466f047792c99a61f7fbac1c7`.
+
+Decisão:
+
+1. `#vaultScreen[hidden]` deve ser `display:none!important` na camada CSS final.
+2. `#app[hidden]` deve obedecer ao mesmo contrato.
+3. Quando `#vaultScreen` não está `hidden`, o shell autenticado continua proibido de renderizar.
+4. Nenhuma regra visual `display:* !important` pode neutralizar o estado `hidden` definido pelo runtime.
+5. O contrato é transversal a Safari/WebKit e restantes browsers; não é um hack específico de um único viewport.
+6. A correção é de apresentação/estado visual e não altera autenticação criptográfica, persistência, finanças ou sync.
+
+Motivo: a segunda captura física mostrou o cofre ainda no fluxo depois de `vaultScreen.hidden = true`. A causa foi `#vaultScreen.vault-screen { display:grid!important; }` da camada `76-auth1`, que podia prevalecer visualmente sobre o comportamento nativo do atributo `hidden` em Safari/WebKit.
+
+Evidência:
+
+- TypeScript Foundation PR `34781082212`: sucesso;
+- CI PR `34781082224`: sucesso;
+- TypeScript Foundation pós-merge `34781128824`: sucesso;
+- CI pós-merge `34781128879`: sucesso;
+- Deploy Pages `34781156741`: sucesso.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;
