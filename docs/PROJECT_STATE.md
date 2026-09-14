@@ -1,11 +1,11 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 13 de setembro de 2026  
+Atualizado: 14 de setembro de 2026  
 Versão: `0.76.0-dev.1`  
 Release pública: `v75`  
 Programa técnico: `v76` — consolidação UI/UX + migração incremental TypeScript  
-Baseline pública: `5b9689f04e844b9216626729b3b5aae5bf1acc09` — PR #100  
-Branch de trabalho: `main` após `76-brand-icons1`  
+Baseline pública: `36231cb518570a66a6974de90047517ee6109c27` — documentação após PR #100  
+Branch de trabalho: `feat/v76-icon-semantics2`  
 Distribuição: GitHub Pages / PWA  
 Fallback técnico: `backup/js-runtime-baseline-20260912`
 
@@ -26,37 +26,45 @@ Fallback técnico: `backup/js-runtime-baseline-20260912`
 - PR #96 (`76-auth-transition1`): PIN local válido abre a aplicação sem depender do sync remoto;
 - PR #98 (`76-auth-hidden1`): Safari/WebKit respeita explicitamente o estado `hidden` entre cofre e shell;
 - PR #99 (`76-ui-audit1`): header, drawer, dock e auth visual consolidados;
-- PR #100 (`76-brand-icons1`): marca e iconografia consolidadas.
+- PR #100 (`76-brand-icons1`): marca e iconografia base consolidadas;
+- PR #101: memória permanente atualizada depois da publicação de #100.
 
-Evidência PR #100:
+Evidência da baseline pública de runtime (#100):
 
 - merge `5b9689f04e844b9216626729b3b5aae5bf1acc09`;
 - TypeScript Foundation main `34783537256`: sucesso;
 - CI main `34783537266`: sucesso integral;
 - Pages `34783564467`: sucesso.
 
-## `76-brand-icons1` — publicado
+A atualização documental #101 também passou CI e Pages sem alterar runtime.
+
+## Bloco atual — `76-icon-semantics2`
+
+Feedback físico no iPhone mostrou que a limpeza anterior deixou o dock demasiado neutro: ícones inativos quase todos cinzentos e `Planeamento` truncado como `Planeame…`.
 
 Problemas confirmados no código:
 
-1. `icon.svg` usava casa + euro + folha + dois gradientes, demasiado complexo para tamanhos pequenos;
-2. a PWA usava `icon.svg`, mas `.brand-mark` era hidratado como Lucide `home`, criando duas identidades visuais;
-3. HTML ainda contém glifos Unicode de fallback (`⌂`, `◉`, `⌁`, `☼`, `⌄`) antes da hidratação;
-4. Mercado acumulava pseudo-ícones decorativos além do sistema Lucide;
-5. “Adicionar item” recebia `Plus` semântico, mas CSS escondia-o e mostrava scanner, contradizendo a ação.
+1. `plan` no subset Lucide local usava geometria semelhante a carteira/inbox, pouco clara para planeamento;
+2. `settings` usava sliders em vez da engrenagem convencional;
+3. o menu `Mais` do runtime v74 pedia nomes não canónicos (`income`, `security`, `sync`) e podia cair no fallback `more`/reticências;
+4. a navegação móvel tinha cinco destinos com pouco contraste cromático e o label `Planeamento` não cabia no dock;
+5. notificações e outros controlos globais ficaram visualmente demasiado neutros depois do bloco anterior.
 
-Correções publicadas:
+Correções implementadas na branch:
 
-- `icon.svg` simplificado para casa + euro, teal sólido `#087B78`, branco, sem folha ou gradientes;
-- `.brand-mark` reutiliza `icon.svg`; o Lucide `home` redundante é visualmente neutralizado;
-- Lucide permanece a única família de ícones funcionais;
-- pseudo-ícones decorativos/duplicados do Mercado neutralizados;
-- “Adicionar item” volta a mostrar `Plus`;
-- stroke funcional normalizado em 2 px;
-- cache PWA invalidada com `brand-icons1`;
-- teste de iconografia protege marca, semântica e ausência de duplicação.
+- `plan` passa para a geometria oficial Lucide `clipboard-list` do snapshot já fixado no projeto;
+- `settings` passa para engrenagem oficial Lucide;
+- `activity` é adicionado para Diagnóstico;
+- menu `Mais` usa nomes canónicos: `report`, `goal`, `shield`, `cloudCheck`, `activity`;
+- label móvel `Planeamento` é reduzido para `Plano`, sem alterar rota ou título da página;
+- criada paleta semântica controlada para ícones em light/dark: teal, índigo, verde, âmbar, roxo, azul e rosa apenas por função;
+- estado ativo continua identificado por fundo/texto/`aria-current`, portanto cor não é o único sinal;
+- ações destrutivas, sucesso, aviso, sync, edição e filtros recebem acentos semânticos;
+- `forced-colors` mantém autoridade do sistema operativo;
+- Service Worker recebe `icon-semantics2` para invalidar o cache da PWA;
+- testes de iconografia e consistência foram atualizados para proteger geometria, nomes canónicos, paleta e label móvel.
 
-Nenhuma alteração foi feita a `finance.js`, estado financeiro, IndexedDB, PIN, PBKDF2/AES-GCM, sync, QR, scanner, quantidades ou preços.
+Nenhuma alteração foi feita a `finance.js`, estado financeiro, IndexedDB, PIN, PBKDF2/AES-GCM, sync de dados, QR, scanner, quantidades ou preços.
 
 ## Migração TypeScript
 
@@ -68,16 +76,16 @@ Fontes manuais JS já substituídas:
 
 Fluxo: `TypeScript strict → .generated/*.js → dist/*.js → browser`.
 
-Ainda permanecem JS manuais críticos (`core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, `sync.js`, Mercado e Service Worker). Nenhum será apagado antes de existir substituto TypeScript com paridade e regressões verdes.
+Ainda permanecem JS manuais críticos (`core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, `sync.js`, Mercado, iconografia e Service Worker). Nenhum será apagado antes de existir substituto TypeScript com paridade e regressões verdes.
 
 ## Riscos/lacunas abertas
 
-- validar fisicamente a nova marca e iconografia no mesmo iPhone/Safari/PWA e Android/Chrome;
+- `76-icon-semantics2` ainda precisa de TypeScript Foundation + CI integral + Pages antes de ser considerado publicado;
+- validar fisicamente a nova cor/semântica no mesmo iPhone/Safari/PWA e Android/Chrome;
 - o ícone do ecrã principal de uma PWA já instalada pode depender do refresh/reinstalação do sistema operativo;
-- remover futuramente glifos Unicode do HTML apenas depois de provar que o fallback não é necessário;
-- deixar de hidratar `.brand-mark` como Lucide `home` numa limpeza posterior;
-- consolidar navegação móvel para uma única fonte;
+- consolidar navegação móvel para uma única fonte; `ensureMobileNav()` v74 continua autoridade concorrente;
 - parar criação runtime dos blocos v74 já escondidos;
+- remover glifos Unicode/fallbacks apenas depois de prova de não utilização;
 - rever páginas reais: Faturas → Mercado → Planeamento → Calendário → Relatórios/Objetivos → Segurança/Diagnóstico/Definições;
 - criar teste ponta a ponta da persistência `marketId|pid`;
 - reduzir CSS legado apenas depois de prova de não utilização;
@@ -85,7 +93,8 @@ Ainda permanecem JS manuais críticos (`core.js`, `finance.js`, `render.js`, `fo
 
 ## Próximo passo
 
-1. validar visualmente marca, navegação, ações, Mercado e PWA no dispositivo real;
-2. corrigir qualquer problema físico observado antes de remover fallback histórico;
-3. consolidar navegação móvel numa única autoridade;
-4. continuar a revisão página a página e a limpeza controlada do CSS/runtime v74/v75.
+1. executar TypeScript Foundation + CI integral do bloco `76-icon-semantics2`;
+2. corrigir regressões sem voltar à iconografia cinzenta/genérica;
+3. integrar e publicar apenas com gates verdes;
+4. validar o resultado no iPhone/PWA real;
+5. depois consolidar a autoridade da navegação móvel e continuar a revisão página a página.
