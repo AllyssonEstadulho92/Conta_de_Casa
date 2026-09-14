@@ -23,8 +23,6 @@ function contrast(a,b){
 
 assert.match(shell,/Conta de Casa v76 — 76-mobile-shell2/);
 
-/* Auditoria transversal final: contraste AA, overflow, conteúdo longo, tabelas,
-   tabs, diálogos e grelhas estreitas ficam protegidos na última camada CSS. */
 assert.match(shell,/76-full-page-audit1/);
 assert.match(shell,/--v76-muted:#61767b/);
 assert.match(shell,/--v76-danger:#c33b50/);
@@ -47,7 +45,6 @@ assert.match(shell,/@media\(max-width:560px\)[\s\S]*\.bill-filter-grid,\.market-
 assert.match(shell,/@media\(max-width:390px\)[\s\S]*\.bill-summary-grid,\.market-summary-grid[\s\S]*grid-template-columns:minmax\(0,1fr\)!important/);
 assert.match(shell,/:is\(\.section-tab,\.nav-btn,\.icon-text-btn,\.sync-header-status\):focus-visible/);
 
-/* 76-page-polish1: as dez rotas recebem contratos explícitos de apresentação. */
 assert.match(shell,/76-page-polish1/);
 for(const page of [
   'page-dashboard','page-bills','page-calendar','page-market','page-planning',
@@ -79,8 +76,8 @@ assert.match(shell,/#vaultScreen\[hidden\],[\s\S]*#app\[hidden\]\{[\s\S]*display
 assert.match(shell,/76-auth-transition1/);
 assert.match(shell,/#vaultScreen:not\(\[hidden\]\) \+ #app\{[\s\S]*display:none!important/,'visible vault must suppress the authenticated app shell and mobile dock');
 assert.match(shell,/76-ui-audit1/);
-assert.match(shell,/#vaultScreen #cdcWelcome\{[\s\S]*display:none!important/,'legacy v74 onboarding must not mask the real vault create flow');
-assert.match(shell,/#vaultScreen #vaultCreate\.cdc-vault-create-collapsed\{[\s\S]*display:grid!important/,'real vault create form must remain visible even if v74 decorates it');
+assert.match(shell,/#vaultScreen #cdcWelcome\{[\s\S]*display:none!important/,'legacy onboarding selector must not mask the real vault create flow');
+assert.match(shell,/#vaultScreen #vaultCreate\.cdc-vault-create-collapsed\{[\s\S]*display:grid!important/,'real vault create form must remain visible even if a historical class is present');
 assert.match(shell,/@media \(max-width:820px\)/);
 assert.match(shell,/--v76-shell-safe-top:max\(24px,env\(safe-area-inset-top,0px\)\)/);
 assert.match(shell,/--v76-shell-safe-bottom:max\(8px,env\(safe-area-inset-bottom,0px\)\)/);
@@ -95,11 +92,14 @@ assert.match(shell,/\.mobile-nav \.nav-btn:focus-visible\{[\s\S]*outline:3px sol
 assert.match(shell,/prefers-reduced-motion:reduce/);
 assert.match(shell,/forced-colors:active/);
 
-assert.equal(pkg.version,'0.76.0-dev.1');
+assert.equal(pkg.version,'0.76.0');
+assert.match(prepare,/const BUILD = 'v76'/);
+assert.match(prepare,/const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui2'/);
 assert.match(prepare,/const MOBILE_SHELL_REV = '76-mobile-shell2'/);
 assert.match(prepare,/'v76-mobile-shell\.css'/);
 assert.match(prepare,/v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/);
+assert.match(sw,/v76-version-alignment1/);
 assert.match(sw,/modern-ui2/);
 assert.match(sw,/mobile-shell2/);
 assert.match(sw,/full-page-audit1/);
@@ -112,7 +112,8 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const builtIndex=read('dist/index.html');
-  assert.match(builtIndex,/name="app-version" content="0\.76\.0-dev\.1"/);
+  assert.match(builtIndex,/name="app-version" content="0\.76\.0"/);
+  assert.match(builtIndex,/name="app-build" content="v76"/);
   assert.match(builtIndex,/v76-modern-ui\.css\?v=76-modern-ui2/);
   assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-mobile-shell2/);
   assert.ok(builtIndex.indexOf('v76-modern-ui.css')<builtIndex.indexOf('v76-mobile-shell.css'),'mobile shell must be the final mobile geometry layer');
@@ -128,4 +129,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v76 page polish + full-page audit + mobile shell: ten-route hierarchy, responsive density, AA contrast, overflow, safe areas and auth contracts: OK');
+console.log('v76 stable page polish + full-page audit + mobile shell: ten-route hierarchy, responsive density, AA contrast, overflow, safe areas and auth contracts: OK');
