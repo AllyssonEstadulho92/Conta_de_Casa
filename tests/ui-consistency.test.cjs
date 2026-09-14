@@ -82,7 +82,7 @@ assert.match(shopping,/grid-template-columns:38px 54px minmax\(0,1fr\) auto!impo
    de migração; a auditoria regista esta dívida sem a confundir com a autoridade
    visual final do shell v76. */
 assert.match(experience,/Conta de Casa v74/);
-for(const marker of ["['dashboard','Início','home']","['bills','Despesas','bill']","['market','Mercado','market']","['planning','Planeamento','plan']","['settings','Mais','more']"])assert.ok(experience.includes(marker));
+for(const marker of ["['dashboard','Início','home']","['bills','Despesas','bill']","['market','Mercado','market']","['planning','Plano','plan']","['settings','Mais','more']"])assert.ok(experience.includes(marker));
 assert.match(experience,/data-v74-action="expense"/);
 assert.match(experience,/data-v74-action="invoice"/);
 assert.match(experience,/data-v74-action="market"/);
