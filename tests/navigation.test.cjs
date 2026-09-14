@@ -66,8 +66,8 @@ try {
   execFileSync(process.execPath, ['scripts/prepare-pages.cjs'], { cwd: ROOT, stdio: 'pipe' });
   const builtIndex = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
 
-  assert.match(builtIndex, /<meta name="app-build" content="v75"\s*\/>/);
-  assert.match(builtIndex, /<meta name="app-version" content="0\.76\.0-dev\.1"\s*\/>/);
+  assert.match(builtIndex, /<meta name="app-build" content="v76"\s*\/>/);
+  assert.match(builtIndex, /<meta name="app-version" content="0\.76\.0"\s*\/>/);
   assert.match(builtIndex, /<meta name="app-build-id" content="(?:[0-9a-f]{7}|local)"\s*\/>/);
   assert.match(builtIndex, /v76-modern-ui\.css\?v=76-modern-ui2/);
   assert.match(builtIndex, /v76-product-pages\.css\?v=76-dashboard-clean1/);
