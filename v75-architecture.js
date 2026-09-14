@@ -13,6 +13,11 @@
  *
  * 76-retire-v74-nav-marker1:
  * - elimina data-v74-nav, que servia apenas um runtime v74 já removido do repositório.
+ *
+ * 76-expense-mode-stability1:
+ * - Manual / Ler fatura / QR Code passam a ser modos determinísticos e acessíveis;
+ * - mudar de modo deixa de abrir automaticamente ficheiro ou câmara;
+ * - ações de captura são explícitas e ficam a cargo de invoice-capture.js.
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
@@ -279,7 +284,17 @@
     if(!form||form.querySelector('.v75-bill-tabs'))return;
     const isNew=!String(form.elements.id?.value||'');
     if(!isNew)return;
-    form.insertAdjacentHTML('afterbegin',`<nav class="v75-bill-tabs full-row" aria-label="Modo de registo"><button type="button" class="active" data-v75-bill-mode="manual">Manual</button><button type="button" data-v75-bill-mode="image">Ler fatura</button><button type="button" data-v75-bill-mode="qr">QR Code</button></nav>`);
+    form.insertAdjacentHTML('afterbegin',`<div class="v75-bill-tabs full-row" role="tablist" aria-label="Modo de registo"><button type="button" class="active" role="tab" aria-selected="true" tabindex="0" data-v75-bill-mode="manual">Manual</button><button type="button" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="image">Ler fatura</button><button type="button" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="qr">QR Code</button></div>`);
+  }
+
+  function syncBillModeButtons(form,mode){
+    const effective=['manual','image','qr'].includes(mode)?mode:'manual';
+    qa('.v75-bill-tabs [data-v75-bill-mode]',form).forEach(button=>{
+      const on=button.dataset.v75BillMode===effective;
+      button.classList.toggle('active',on);
+      button.setAttribute('aria-selected',String(on));
+      button.tabIndex=on?0:-1;
+    });
   }
 
   function syncBillDialog(){
@@ -292,10 +307,8 @@
     const isNew=!String(form.elements.id?.value||'');
     const title=byId('dialogTitle');
     if(title)title.textContent=isNew?'Adicionar despesa':'Editar despesa';
-    if(!dialog.dataset.v75BillMode)dialog.dataset.v75BillMode='manual';
-    const preview=byId('invoiceCapturePreview');
-    if(preview&&!preview.hidden&&dialog.dataset.v75BillMode!=='manual')dialog.dataset.v75BillMode='review';
-    qa('.v75-bill-tabs [data-v75-bill-mode]',form).forEach(button=>button.classList.toggle('active',button.dataset.v75BillMode===dialog.dataset.v75BillMode||dialog.dataset.v75BillMode==='review'&&button.dataset.v75BillMode==='qr'));
+    if(!['manual','image','qr'].includes(dialog.dataset.v75BillMode||''))dialog.dataset.v75BillMode='manual';
+    syncBillModeButtons(form,dialog.dataset.v75BillMode);
   }
 
   function syncScannerState(){
@@ -349,11 +362,28 @@
   function setBillMode(mode){
     const dialog=byId('formDialog');
     const form=byId('billForm');
-    if(!dialog||!form)return;
+    if(!dialog||!form||!['manual','image','qr'].includes(mode))return;
     dialog.dataset.v75BillMode=mode;
-    qa('.v75-bill-tabs [data-v75-bill-mode]',form).forEach(button=>button.classList.toggle('active',button.dataset.v75BillMode===mode));
-    if(mode==='image')setTimeout(()=>byId('invoiceImageInput')?.click(),0);
-    if(mode==='qr')setTimeout(()=>q('[data-invoice-camera]',form)?.click(),0);
+    syncBillModeButtons(form,mode);
+    dialog.dispatchEvent(new CustomEvent('cdc:bill-mode-change',{bubbles:true,detail:{mode}}));
+  }
+
+  function handleBillModeKeydown(event){
+    const current=event.target.closest?.('.v75-bill-tabs [data-v75-bill-mode]');
+    if(!current)return;
+    const buttons=qa('.v75-bill-tabs [data-v75-bill-mode]',current.closest('.v75-bill-tabs'));
+    const index=buttons.indexOf(current);
+    let next=index;
+    if(event.key==='ArrowRight'||event.key==='ArrowDown')next=(index+1)%buttons.length;
+    else if(event.key==='ArrowLeft'||event.key==='ArrowUp')next=(index-1+buttons.length)%buttons.length;
+    else if(event.key==='Home')next=0;
+    else if(event.key==='End')next=buttons.length-1;
+    else return;
+    event.preventDefault();
+    const button=buttons[next];
+    setBillMode(button.dataset.v75BillMode);
+    button.focus({preventScroll:true});
+    schedule();
   }
 
   function apply(){
@@ -388,6 +418,7 @@
       if(event.target.closest?.('[data-v75-preferences]')){event.preventDefault();handlePreferences();schedule();return;}
       setTimeout(schedule,0);
     },true);
+    document.addEventListener('keydown',handleBillModeKeydown,true);
     window.addEventListener('hashchange',schedule,{passive:true});
     root.matchMedia?.(MOBILE_QUERY)?.addEventListener?.('change',schedule);
     observer=new MutationObserver(schedule);
