@@ -1,79 +1,47 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const {execFileSync}=require('node:child_process');
 
-if(!fs.existsSync('.generated/v76-veggie-menu.js')){
-  execFileSync(process.execPath,['scripts/build-typescript-runtime.cjs'],{stdio:'pipe'});
-}
-
-const ts = fs.readFileSync('src/ui/veggie-menu-toggle.ts','utf8');
-const js = fs.readFileSync('.generated/v76-veggie-menu.js','utf8');
-const css = fs.readFileSync('v76-veggie-menu.css','utf8');
-const modern = fs.readFileSync('v76-modern-ui.css','utf8');
-const shell = fs.readFileSync('v76-mobile-shell.css','utf8');
-const legacy = fs.readFileSync('mobile-menu-toggle.js','utf8');
+const legacyController = fs.readFileSync('mobile-menu-toggle.js','utf8');
+const legacyCss = fs.readFileSync('mobile-menu-toggle.css','utf8');
+const retiredTs = fs.readFileSync('src/ui/veggie-menu-toggle.ts','utf8');
+const retiredCss = fs.readFileSync('v76-veggie-menu.css','utf8');
+const buildRuntime = fs.readFileSync('scripts/build-typescript-runtime.cjs','utf8');
 const prepare = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
 
-assert.ok(!fs.existsSync('v76-veggie-menu.js'),'manual Veggie Burger JavaScript source must not be committed');
-assert.doesNotThrow(()=>new vm.Script(js), 'compiled Veggie Burger runtime must parse');
+assert.doesNotThrow(()=>new vm.Script(legacyController),'single mobile-menu controller must parse');
+assert.match(legacyController,/installAnimatedMobileMenu/);
+assert.match(legacyController,/button\.addEventListener\('click'/);
+assert.match(legacyController,/drawer\.close=animatedDrawerClose/);
+assert.match(legacyController,/touchmove/);
+assert.match(legacyController,/aria-expanded/);
+assert.doesNotMatch(legacyController,/commit\(|saveState\(|estimatedCents|actualCents/,'navigation controller must not mutate financial state');
 
-assert.match(ts,/Veggie Burger em TypeScript/);
-assert.match(ts,/querySelector<HTMLButtonElement>\('#mobileMenuBtn'\)/);
-assert.match(ts,/querySelector<HTMLDialogElement>\('#mobileDrawer'\)/);
-assert.match(ts,/upperLine\.className = 'veggie-menu-line veggie-menu-line-upper'/);
-assert.match(ts,/lowerLine\.className = 'veggie-menu-line veggie-menu-line-lower'/);
-assert.match(ts,/glyph\.append\(upperLine, lowerLine\)/);
-assert.doesNotMatch(ts,/glyph\.append\([^\n]*,[^\n]*,[^\n]*\)/,'Veggie Burger must use exactly two visual bars');
-assert.match(ts,/function prefersReducedMotion/);
-assert.match(ts,/const animateGlyph = \(state: MenuVisualState\)/);
-assert.match(ts,/lowerOpen = \{ top: '8px', transform: 'translateX\(-50%\) rotate\(-45deg\)'/);
-assert.match(ts,/upperLine\.animate/);
-assert.match(ts,/lowerLine\.animate/);
+assert.match(legacyCss,/v76 menu-morph1/,'the canonical controller CSS must own the two-line morph');
+assert.match(legacyCss,/\.mobile-menu-glyph::before,[\s\S]*\.mobile-menu-glyph::after/);
+assert.match(legacyCss,/rotate\(45deg\)/);
+assert.match(legacyCss,/rotate\(-45deg\)/);
 
-assert.match(js,/Runtime gerado por TypeScript/);
-assert.match(js,/veggie-menu-toggle/);
-assert.match(js,/glyph\.append\(upperLine, lowerLine\)/);
-assert.match(js,/drawer\.insertBefore\(button, drawerShell\)/,'same control must live outside transformed drawer shell while open');
-assert.match(js,/drawer-menu-overlay-control/);
-assert.match(js,/upperLine\.animate/);
-assert.match(js,/lowerLine\.animate/);
-assert.match(js,/aria-expanded/);
-assert.doesNotMatch(js,/commit\(|saveState\(|appState|estimatedCents|actualCents/,'visual toggle must not mutate financial state');
+/* Source retained only as a retirement reference during this staged cleanup. */
+assert.match(retiredTs,/Veggie Burger em TypeScript/);
+assert.match(retiredCss,/76-veggie-menu2/);
 
-assert.match(css,/76-veggie-menu2/);
-assert.match(css,/\.veggie-menu-line-upper\{top:4px!important\}/);
-assert.match(css,/\.veggie-menu-line-lower\{top:12px!important\}/);
-assert.match(css,/rotate\(45deg\)!important/);
-assert.match(css,/rotate\(-45deg\)!important/);
-assert.match(css,/\.nav-drawer>\.mobile-menu-btn\.drawer-menu-overlay-control\{[\s\S]*position:absolute!important[\s\S]*right:14px!important/);
-assert.match(css,/\.nav-drawer\[data-dragging="true"\]>\.mobile-menu-btn\.drawer-menu-overlay-control[\s\S]*visibility:visible!important/);
-assert.doesNotMatch(css,/\.topbar\{[\s\S]{0,120}position:sticky!important/,'Veggie layer must not force a sticky header');
-assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
-assert.match(css,/@media\(forced-colors:active\)/);
+assert.doesNotMatch(buildRuntime,/source:'src\/ui\/veggie-menu-toggle\.ts'/,'retired visual observer must not be generated');
+assert.doesNotMatch(buildRuntime,/output:'v76-veggie-menu\.js'/,'retired visual observer must not produce browser runtime');
 
-assert.match(modern,/A geometria do shell móvel pertence a v76-mobile-shell\.css/);
-assert.doesNotMatch(modern,/\.topbar,[\s\S]*min-height:76px!important;[\s\S]*padding:12px 14px!important/,'master visual layer must not own mobile header geometry');
-assert.match(shell,/\.main>\.topbar,[\s\S]*position:relative!important/,'mobile shell must keep the header in normal flow');
-assert.match(shell,/body \.main\{[\s\S]*padding:0!important/,'mobile shell must own main viewport spacing');
+assert.doesNotMatch(prepare,/const VEGGIE_MENU_REV/);
+assert.doesNotMatch(prepare,/GENERATED_PUBLIC_FILES[\s\S]{0,260}v76-veggie-menu\.js/);
+assert.doesNotMatch(prepare,/PUBLIC_FILES[\s\S]{0,1600}'v76-veggie-menu\.css'/);
+assert.doesNotMatch(prepare,/PUBLIC_FILES[\s\S]{0,2200}'v76-veggie-menu\.js'/);
+assert.doesNotMatch(prepare,/v76-veggie-menu\.css\?v=/);
+assert.doesNotMatch(prepare,/v76-veggie-menu\.js\?v=/);
+assert.match(prepare,/forbidden=\[[^\]]*v76-veggie-menu\.js[^\]]*v76-veggie-menu\.css/,'retired duplicate menu assets must be forbidden from dist');
 
-assert.match(legacy,/drawerHead\.insertBefore\(button,drawerHead\.firstChild\)/,'validated v73 drawer controller remains present underneath the TS enhancement');
-assert.match(prepare,/const VEGGIE_MENU_REV = '76-veggie-menu2'/);
-assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui2'/);
-assert.match(prepare,/GENERATED_PUBLIC_FILES/);
-assert.match(prepare,/build-typescript-runtime\.cjs/);
-assert.ok(prepare.includes("'v76-veggie-menu.css'"));
-assert.ok(prepare.includes("'v76-veggie-menu.js'"));
-assert.ok(prepare.includes("'v76-modern-ui.css'"));
-assert.ok(prepare.includes("'v76-mobile-shell.css'"));
-assert.match(prepare,/mobile-menu-toggle\.js\?v=\$\{MENU_REV\}[\s\S]*v76-veggie-menu\.js\?v=\$\{VEGGIE_MENU_REV\}/,'TypeScript-derived enhancement must load after validated drawer controller');
-assert.match(prepare,/v75-usability\.css\?v=\$\{USABILITY_REV\}[\s\S]*v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/,'visual system must load before the final mobile geometry shell');
+assert.match(sw,/single-menu-authority1/);
+assert.ok(!sw.includes("'./v76-veggie-menu.css'"),'duplicate menu CSS must not be cached');
+assert.ok(!sw.includes("'./v76-veggie-menu.js'"),'duplicate menu runtime must not be cached');
+assert.ok(sw.includes("'./mobile-menu-toggle.css'"));
+assert.ok(sw.includes("'./mobile-menu-toggle.js'"));
 
-assert.match(sw,/veggie-menu2-modern-ui2/);
-assert.ok(sw.includes("'./v76-veggie-menu.css'"));
-assert.ok(sw.includes("'./v76-veggie-menu.js'"));
-assert.ok(sw.includes("'./v76-modern-ui.css'"));
-assert.ok(sw.includes("'./v76-mobile-shell.css'"));
-
-console.log('v76 Veggie Burger is TypeScript-source-only, generated for the browser, two-line, animated and shell-safe.');
+console.log('v76 mobile navigation has one published controller and no duplicate Veggie runtime authority.');

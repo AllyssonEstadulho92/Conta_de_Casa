@@ -35,9 +35,9 @@ jobs:
 
       - name: Validate generated runtimes
         run: |
-          node --check .generated/v76-veggie-menu.js
           node --check .generated/market-branding.js
           node --check .generated/sync-conflict-policy.js
+          test ! -f .generated/v76-veggie-menu.js
           node tests/typescript-runtime-build.test.cjs
 
       - name: Confirm migration remains isolated
@@ -48,7 +48,7 @@ jobs:
           test -f src/ui/veggie-menu-toggle.ts
           test -f src/ui/market-branding.ts
           test -f src/sync/sync-conflict-policy.ts
-          test -f .generated/v76-veggie-menu.js
+          test ! -f .generated/v76-veggie-menu.js
           test -f .generated/market-branding.js
           test -f .generated/sync-conflict-policy.js
           test ! -f v76-veggie-menu.js
