@@ -95,7 +95,7 @@ assert.match(invoiceCss,/data-v75-bill-mode="qr"\]::before/,'QR mode must expose
 assert.match(invoiceCss,/\.v75-bill-tabs button\.active\{[\s\S]*background:linear-gradient\(135deg[\s\S]*color:#fff!important/,'active expense mode must have a strong teal selected state');
 assert.match(invoiceCss,/\.v75-bill-tabs button:focus-visible\{[\s\S]*box-shadow:0 0 0 3px/,'expense mode control must expose a keyboard focus ring');
 assert.match(invoiceCss,/@media\(max-width:430px\)[\s\S]*\.v75-bill-tabs button/,'expense mode control must adapt to narrow iPhone widths');
-assert.match(invoiceCss,/@media\(prefers-reduced-motion:reduce\)[\s\S]*\.v75-bill-tabs button\{transition:none!important\}/);
+assert.match(invoiceCss,/@media\(prefers-reduced-motion:reduce\)[\s\S]*\.v75-bill-tabs button[\s\S]*transition:none!important/,'expense mode tabs must remain motion-free even when grouped in a shared reduced-motion selector');
 assert.match(invoiceCss,/@media\(forced-colors:active\)[\s\S]*\.v75-bill-tabs button\.active/);
 
 assert.match(prepare,/const BUILD = 'v76'/);
@@ -107,6 +107,7 @@ assert.match(sw,/conta-de-casa-public-v76-version-alignment1-v75-architecture2/)
 assert.match(sw,/expense-mode1/,'PWA cache must retain the improved expense mode control');
 assert.match(sw,/expense-mode-stability1/,'PWA cache must refresh deterministic expense mode behavior');
 assert.match(sw,/prototype-system1/,'PWA cache must refresh the approved prototype composition');
+assert.match(sw,/expense-ios-touch1/,'PWA cache must refresh the iOS expense-dialog touch fix');
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
 assert.ok(sw.includes("'./invoice-capture.css'"));
