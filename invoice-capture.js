@@ -3,10 +3,27 @@
 /* Conta de Casa — captura assistida de faturas portuguesas.
  * Lê o Código QR definido pela AT a partir da câmara ou de uma imagem local.
  * O ficheiro/imagem nunca é guardado; os dados só preenchem o formulário após confirmação.
+ * 76-expense-mode-stability1 mantém imagem e câmara como ações explícitas, sem OCR fictício.
  */
 (function installInvoiceCapture(root){
   const MAX_IMAGE_BYTES=15*1024*1024;
   const ZXING_LOAD_TIMEOUT_MS=12000;
+  const MODE_COPY=Object.freeze({
+    image:Object.freeze({
+      title:'Ler fatura por imagem',
+      subtitle:'Fotografia com QR da Autoridade Tributária',
+      description:'Selecione uma fotografia da fatura. A aplicação procura o código QR da AT na imagem; não faz OCR do texto completo. A imagem é processada neste dispositivo e não é guardada nem enviada.',
+      icon:'image',
+      action:'Selecionar imagem'
+    }),
+    qr:Object.freeze({
+      title:'Ler QR da fatura',
+      subtitle:'Câmara · Código QR da Autoridade Tributária',
+      description:'Abra a câmara e aponte para o código QR impresso na fatura. A leitura acontece neste dispositivo e nenhum fotograma é guardado ou enviado.',
+      icon:'qr',
+      action:'Abrir câmara'
+    })
+  });
   let observer=null;
   let scannerControls=null;
   let scannerSession=0;
@@ -82,6 +99,33 @@
 
   function icon(name,size=20){
     return root.CDCIcons?.markup?.(name,size)||'';
+  }
+
+  function currentCaptureMode(){
+    const mode=document.querySelector('#formDialog')?.dataset?.v75BillMode||'manual';
+    return mode==='image'||mode==='qr'?mode:'manual';
+  }
+
+  function setNodeText(selector,value){
+    const node=document.querySelector(selector);
+    if(node&&node.textContent!==value)node.textContent=value;
+  }
+
+  function syncCaptureMode(requestedMode=currentCaptureMode()){
+    const section=document.querySelector('[data-invoice-capture]');
+    if(!section)return;
+    const mode=requestedMode==='image'||requestedMode==='qr'?requestedMode:'manual';
+    section.dataset.invoiceMode=mode;
+    if(mode==='manual')return;
+    const copy=MODE_COPY[mode];
+    setNodeText('[data-invoice-mode-title]',copy.title);
+    setNodeText('[data-invoice-mode-subtitle]',copy.subtitle);
+    setNodeText('[data-invoice-mode-description]',copy.description);
+    const mark=section.querySelector('[data-invoice-mode-mark]');
+    const markup=icon(copy.icon,22);
+    if(mark&&mark.innerHTML!==markup)mark.innerHTML=markup;
+    if(mode==='image')setNodeText('[data-invoice-image-label]',copy.action);
+    if(mode==='qr')setNodeText('[data-invoice-camera-label]',copy.action);
   }
 
   function readerSource(){
@@ -172,15 +216,15 @@
   }
 
   function captureUiHtml(){
-    return `<section class="invoice-capture full-row" data-invoice-capture aria-labelledby="invoiceCaptureTitle">
+    return `<section class="invoice-capture full-row" data-invoice-capture data-invoice-mode="manual" aria-labelledby="invoiceCaptureTitle">
       <div class="invoice-capture-head">
-        <span class="invoice-capture-mark" aria-hidden="true">${icon('receipt',22)}</span>
-        <div><strong id="invoiceCaptureTitle">Ler dados da fatura</strong><small>Código QR da Autoridade Tributária</small></div>
+        <span class="invoice-capture-mark" data-invoice-mode-mark aria-hidden="true">${icon('receipt',22)}</span>
+        <div><strong id="invoiceCaptureTitle" data-invoice-mode-title>Ler dados da fatura</strong><small data-invoice-mode-subtitle>Código QR da Autoridade Tributária</small></div>
       </div>
-      <p>Use a câmara ou selecione uma imagem da fatura. A leitura acontece neste dispositivo; a imagem não é guardada nem enviada.</p>
+      <p data-invoice-mode-description>Escolha “Ler fatura” para selecionar uma fotografia ou “QR Code” para utilizar a câmara.</p>
       <div class="invoice-capture-actions">
-        <button class="btn secondary" type="button" data-invoice-camera>${icon('qr',19)}<span>Ler QR com câmara</span></button>
-        <label class="btn secondary file-btn invoice-image-button">${icon('image',19)}<span>Ler imagem da fatura</span><input id="invoiceImageInput" type="file" accept="image/*" hidden></label>
+        <button class="btn secondary" type="button" data-invoice-camera>${icon('qr',19)}<span data-invoice-camera-label>Abrir câmara</span></button>
+        <label class="btn secondary file-btn invoice-image-button">${icon('image',19)}<span data-invoice-image-label>Selecionar imagem</span><input id="invoiceImageInput" type="file" accept="image/*" hidden></label>
       </div>
       <p id="invoiceCaptureStatus" class="invoice-capture-status" role="status" aria-live="polite" hidden></p>
       <div id="invoiceCapturePreview" class="invoice-capture-preview" hidden></div>
@@ -189,13 +233,16 @@
 
   function ensureCaptureUi(){
     const form=document.querySelector('#billForm');
-    if(!form||form.querySelector('[data-invoice-capture]'))return;
+    if(!form)return;
+    const existing=form.querySelector('[data-invoice-capture]');
+    if(existing){syncCaptureMode();return;}
     if(String(form.elements.id?.value||''))return;
     const wrapper=document.createElement('div');
     wrapper.innerHTML=captureUiHtml();
     const section=wrapper.firstElementChild;
     const first=form.querySelector('label');
     form.insertBefore(section,first||form.firstChild);
+    syncCaptureMode();
   }
 
   function stopScanner(){
@@ -238,6 +285,7 @@
 
   async function openCamera(){
     ensureCaptureUi();
+    if(currentCaptureMode()!=='qr')return;
     if(!root.isSecureContext||!navigator.mediaDevices?.getUserMedia){
       status('A leitura pela câmara exige HTTPS e um navegador com acesso à câmara.','warning');
       return;
@@ -275,9 +323,10 @@
 
   async function scanImage(file){
     if(!file)return;
+    if(currentCaptureMode()!=='image')return;
     if(!String(file.type||'').startsWith('image/')){status('Selecione uma imagem da fatura. PDFs não são processados nesta versão.','warning');return;}
     if(file.size<=0||file.size>MAX_IMAGE_BYTES){status('A imagem deve ter no máximo 15 MB.','warning');return;}
-    status('A analisar o QR da imagem local…');
+    status('A procurar o QR da AT na imagem local…');
     const objectUrl=URL.createObjectURL(file);
     try{
       const zxing=await loadZxing();
@@ -302,7 +351,11 @@
   }
 
   function handleClick(event){
-    if(event.target.closest?.('[data-invoice-camera]')){event.preventDefault();openCamera().catch(()=>status('Não foi possível abrir a câmara.','warning'));return;}
+    if(event.target.closest?.('[data-invoice-camera]')){
+      event.preventDefault();
+      if(currentCaptureMode()==='qr')openCamera().catch(()=>status('Não foi possível abrir a câmara.','warning'));
+      return;
+    }
     if(event.target.closest?.('[data-invoice-scanner-close]')){event.preventDefault();closeScanner();return;}
     if(event.target.closest?.('[data-invoice-torch]')){event.preventDefault();toggleTorch();return;}
     if(event.target.closest?.('[data-invoice-apply]')){event.preventDefault();applyInvoiceToForm();}
@@ -311,21 +364,30 @@
   function handleChange(event){
     if(event.target?.id!=='invoiceImageInput')return;
     const file=event.target.files?.[0]||null;
+    if(currentCaptureMode()!=='image'){event.target.value='';return;}
     scanImage(file).finally(()=>{event.target.value='';});
+  }
+
+  function handleModeChange(event){
+    const mode=event.detail?.mode||currentCaptureMode();
+    closeScanner();
+    syncCaptureMode(mode);
+    if(document.querySelector('#invoiceCapturePreview')?.hidden!==false)status('');
   }
 
   function installDom(){
     document.addEventListener('click',handleClick);
     document.addEventListener('change',handleChange);
-    observer=new MutationObserver(()=>ensureCaptureUi());
+    document.addEventListener('cdc:bill-mode-change',handleModeChange);
+    observer=new MutationObserver(()=>{ensureCaptureUi();syncCaptureMode();});
     const body=document.body;
-    if(body)observer.observe(body,{childList:true,subtree:true});
+    if(body)observer.observe(body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-v75-bill-mode','open']});
     ensureCaptureUi();
     document.addEventListener('visibilitychange',()=>{if(document.hidden)closeScanner();});
     root.addEventListener('pagehide',closeScanner);
   }
 
-  root.CDCInvoiceCapture=Object.freeze({parseAtInvoiceQr,parseMoneyCents,parseAtDate});
+  root.CDCInvoiceCapture=Object.freeze({parseAtInvoiceQr,parseMoneyCents,parseAtDate,syncCaptureMode,currentCaptureMode});
   if(typeof document!=='undefined'){
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installDom,{once:true});
     else installDom();
