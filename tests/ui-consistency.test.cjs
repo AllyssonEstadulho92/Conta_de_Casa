@@ -93,7 +93,10 @@ assert.match(architecture,/CDCV75/);
 assert.doesNotMatch(architecture,/placeDashboardGreeting/,'retired dashboard greeting must not return through architecture');
 assert.doesNotMatch(architecture,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/);
 
-assert.match(menuCss,/Conta de Casa v73/);
+assert.match(menuCss,/Conta de Casa v76/);
+assert.match(menuCss,/v76 menu-morph1/);
+assert.match(menuCss,/\.mobile-menu-glyph>span\{display:none!important\}/);
+assert.match(menuCss,/\.mobile-menu-glyph::before,[\s\S]*\.mobile-menu-glyph::after/);
 assert.match(menuCss,/\.mobile-menu-btn\[aria-expanded="true"\]/);
 assert.match(menuJs,/line\.animate\(frames/);
 assert.match(menuJs,/drawer\.close=animatedDrawerClose/);
@@ -103,6 +106,7 @@ assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
 assert.match(sw,/retire-assets1/);
 assert.match(sw,/v76-version-alignment1/);
+assert.match(sw,/menu-morph1/);
 for(const asset of ['./design-system.css','./v75-architecture.css','./v76-planning-more.css','./v75-architecture.js','./v75-header-refinement.css'])assert.ok(sw.includes(`'${asset}'`));
 for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be cached`);
 assert.ok(!sw.includes("'./ui-consistency.css'"));
