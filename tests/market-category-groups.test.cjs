@@ -36,7 +36,7 @@ assert.match(css,/\.market-category-items \.status-chip\{[\s\S]*justify-self:sta
 assert.match(css,/\.market-category-items \.market-mobile-actions\{[\s\S]*justify-content:flex-start/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2/);
+assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
 assert.ok(sw.includes("'./market-category-groups.css'"));
 assert.ok(sw.includes("'./market-category-groups.js'"));
 assert.ok(sw.includes("'./design-system.css'"));
@@ -46,7 +46,7 @@ assert.ok(sw.includes("'./v75-header-refinement.css'"));
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.ok(sw.includes("'./v64-runtime.js'"));
-assert.ok(sw.includes("'./v74-experience.js'"));
+assert.ok(!sw.includes("'./v74-experience.js'"),'market category grouping must not depend on the retired v74 runtime');
 assert.ok(sw.includes("'./v75-architecture.js'"));
 assert.match(prepare,/const BUILD = 'v75'/);
 assert.match(prepare,/const UI_REV = '74-ui1'/);
@@ -58,6 +58,7 @@ assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 assert.match(prepare,/const HEADER_REV = '75-header2'/);
 assert.doesNotMatch(publicFilesBlock,/'ui-consistency\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'v64-runtime\.css'/);
+assert.doesNotMatch(publicFilesBlock,/'v74-experience\.js'/);
 assert.ok(publicFilesBlock.includes("'v64-runtime.js'"));
 assert.ok(publicFilesBlock.includes("'v74-experience.css'"));
 assert.ok(publicFilesBlock.includes("'v75-architecture.css'"));
@@ -77,7 +78,7 @@ try{
   assert.match(index,/market-shopping-focus\.css\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/v74-experience\.css\?v=74-experience2/);
-  assert.match(index,/v74-experience\.js\?v=74-experience2/);
+  assert.doesNotMatch(index,/v74-experience\.js/);
   assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
   assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
   assert.match(index,/v75-header-refinement\.css\?v=75-header2/);
@@ -89,13 +90,13 @@ try{
   assert.ok(index.indexOf('market-branding.js')<index.indexOf('market-category-groups.js'));
   assert.ok(index.indexOf('market-category-groups.js')<index.indexOf('v64-runtime.js'));
   assert.ok(index.indexOf('market-shopping-focus.js')<index.indexOf('mobile-menu-toggle.js'));
-  assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v74-experience.js'));
-  assert.ok(index.indexOf('v74-experience.js')<index.indexOf('v75-architecture.js'));
-  for(const asset of ['market-category-groups.css','market-category-groups.js','design-system.css','v64-runtime.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-header-refinement.css','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v75-architecture.js'));
+  for(const asset of ['market-category-groups.css','market-category-groups.js','design-system.css','v64-runtime.js','v74-experience.css','v75-architecture.css','v75-architecture.js','v75-header-refinement.css','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')));
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market category grouping preserved under the final v75 prototype architecture and header2: OK');
+console.log('Market category grouping preserved with v76 architecture and no published v74 runtime: OK');
