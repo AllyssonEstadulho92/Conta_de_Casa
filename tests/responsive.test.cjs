@@ -10,17 +10,16 @@ const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const legacyCss=read('styles.css');
 const designCss=read('design-system.css');
 const experienceCss=read('v74-experience.css');
-const migrationCss=read('v75-market-featured.css');
+const planningMore=read('v76-planning-more.css');
 const architectureCss=read('v75-architecture.css');
 const menuCss=read('mobile-menu-toggle.css');
-const css=`${legacyCss}\n${designCss}\n${migrationCss}\n${architectureCss}\n${menuCss}`;
+const css=`${legacyCss}\n${designCss}\n${planningMore}\n${architectureCss}\n${menuCss}`;
 const events=read('events.js');
 const index=read('index.html');
 const render=read('render.js');
 const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
 
-/* Shell and canonical breakpoints remain in the consolidated design base. */
 assert.match(designCss,/Conta de Casa v74 — sistema visual consolidado/);
 assert.match(designCss,/--content-max:1480px/);
 assert.match(designCss,/--sidebar-expanded:232px/);
@@ -28,46 +27,41 @@ assert.match(designCss,/--sidebar-rail:72px/);
 assert.match(designCss,/html\.sidebar-collapsed\{--sidebar-current:var\(--sidebar-rail\)\}/);
 assert.match(designCss,/@media\(max-width:820px\)/);
 assert.match(designCss,/@media\(max-width:359px\)/);
-assert.match(designCss,/--mobile-top-safe:max\(20px,calc\(env\(safe-area-inset-top,0px\) \+ 8px\)\)/,'base must keep a touch-safe iPhone top inset');
+assert.match(designCss,/--mobile-top-safe:max\(20px,calc\(env\(safe-area-inset-top,0px\) \+ 8px\)\)/);
 assert.match(designCss,/--header-height:calc\(108px \+ var\(--mobile-top-safe\)\)/);
-assert.match(designCss,/html\.app-active \.topbar,[\s\S]*position:fixed!important/,'mobile shell must retain a fixed topbar');
-assert.match(designCss,/html\.app-active \.main\{padding-top:var\(--header-height\)!important/,'content must compensate the fixed topbar');
-assert.match(designCss,/\.mobile-menu-btn\{width:44px!important;[\s\S]*height:44px!important/,'menu target must remain at least 44px');
-assert.match(designCss,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/,'base bottom navigation must reserve five destinations');
-assert.match(designCss,/\.mobile-nav \.nav-btn\.active::before\{background:var\(--primary\)!important\}/,'there must be one canonical active indicator');
+assert.match(designCss,/html\.app-active \.topbar,[\s\S]*position:fixed!important/);
+assert.match(designCss,/html\.app-active \.main\{padding-top:var\(--header-height\)!important/);
+assert.match(designCss,/\.mobile-menu-btn\{width:44px!important;[\s\S]*height:44px!important/);
+assert.match(designCss,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/);
+assert.match(designCss,/\.mobile-nav \.nav-btn\.active::before\{background:var\(--primary\)!important\}/);
 assert.match(designCss,/prefers-reduced-motion:reduce/);
 
-/* v74-experience.css já não participa na geometria. */
 assert.match(experienceCss,/76-retire-v74-css-behavior1/);
-assert.doesNotMatch(experienceCss,/\{[^}]*\}/,'retired v74 stylesheet must contain no visual rule blocks');
+assert.doesNotMatch(experienceCss,/\{[^}]*\}/,'retired v74 stylesheet source must contain no visual rule blocks');
 
-/* Estruturas ainda criadas pela arquitetura atual têm regras explícitas na ponte v76. */
-assert.match(migrationCss,/Conta de Casa v76 — ponte de retirada 75-featured1/i);
-assert.match(migrationCss,/@media\(max-width:820px\)/);
-assert.match(migrationCss,/@media\(min-width:821px\)/);
-for(const marker of ['.cdc-empty-note','.cdc-avatar','.cdc-category-dot','.cdc-planning-overview','.cdc-budget-ring','.cdc-plan-track','.cdc-more-menu','.cdc-preferences-details'])assert.ok(migrationCss.includes(marker));
-assert.match(migrationCss,/\.cdc-planning-overview,[\s\S]*\.cdc-more-menu[\s\S]*display:none!important/,'mobile-only architecture shells must remain hidden on desktop');
-assert.match(migrationCss,/\.cdc-preferences-details\{display:contents\}/,'desktop preferences must remain normal page content');
-assert.match(migrationCss,/\.cdc-plan-track i[\s\S]*linear-gradient/);
+assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-more1/i);
+assert.match(planningMore,/@media\(max-width:820px\)/);
+assert.match(planningMore,/@media\(min-width:821px\)/);
+for(const marker of ['.cdc-empty-note','.cdc-avatar','.cdc-category-dot','.cdc-planning-overview','.cdc-budget-ring','.cdc-plan-track','.cdc-more-menu','.cdc-preferences-details'])assert.ok(planningMore.includes(marker));
+assert.match(planningMore,/\.cdc-planning-overview,[\s\S]*\.cdc-more-menu[\s\S]*display:none!important/);
+assert.match(planningMore,/\.cdc-preferences-details\{display:contents\}/);
+assert.match(planningMore,/\.cdc-plan-track i[\s\S]*linear-gradient/);
 
-/* v75/v76 explicitly repairs the hidden Mercado destination and owns current page components. */
-assert.match(legacyCss,/\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:hidden\}/,'legacy hidden third destination is the regression being repaired');
+assert.match(legacyCss,/\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:hidden\}/);
 assert.match(architectureCss,/Conta de Casa v75/);
-assert.match(architectureCss,/html\.cdc-v75 \.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:visible!important;display:grid!important/,'Mercado must be visible');
+assert.match(architectureCss,/html\.cdc-v75 \.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:visible!important;display:grid!important/);
 assert.match(architectureCss,/html\.cdc-v75 \.mobile-nav\{[\s\S]*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/);
 assert.match(architectureCss,/\.v75-budget-summary/);
 assert.match(architectureCss,/\.v75-more-group/);
 assert.match(architectureCss,/\.vault-keypad\{display:grid!important;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
 assert.match(architectureCss,/prefers-reduced-motion:reduce/);
 
-/* Right-side navigation controller from v73 remains valid. */
 assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 0 0 auto!important/);
 assert.match(menuCss,/\.main\{[\s\S]*margin-left:0!important;[\s\S]*margin-right:var\(--sidebar-current\)!important/);
 assert.match(menuCss,/\.nav-drawer\{[\s\S]*inset:0 0 0 auto/);
 assert.match(menuCss,/safe-area-inset-top/);
 assert.match(menuCss,/safe-area-inset-bottom/);
 
-/* Adaptive events and keyboard remain in the existing functional controller. */
 assert.match(events,/function updateAdaptiveNavigation\(\)/);
 assert.match(events,/function openMobileDrawer\(\)/);
 assert.match(events,/function closeMobileDrawer\(\)/);
@@ -76,16 +70,12 @@ assert.match(events,/keyboard-open/);
 assert.match(events,/--visual-vw/);
 assert.match(events,/--visual-top/);
 
-/* DOM anchors and accessibility foundations must survive the redesign. */
-for(const id of ['appSidebar','sidebarToggle','mobileMenuBtn','mobileDrawer','drawerNav','mobileNav','vaultPinPad','vaultKeyboardModeToggle','kpiGrid','dashboardSecondary','accountBalance','accountBalanceInfo','billsList','marketList','marketStatusFilter']){
-  assert.match(index,new RegExp(`id="${id}"`),`missing required responsive/application anchor #${id}`);
-}
+for(const id of ['appSidebar','sidebarToggle','mobileMenuBtn','mobileDrawer','drawerNav','mobileNav','vaultPinPad','vaultKeyboardModeToggle','kpiGrid','dashboardSecondary','accountBalance','accountBalanceInfo','billsList','marketList','marketStatusFilter'])assert.match(index,new RegExp(`id="${id}"`),`missing required responsive/application anchor #${id}`);
 assert.match(index,/data-pin-key="1"/);
 assert.match(events,/function wireVaultPinPad\(\)/);
 assert.match(events,/input\.readOnly=pinMode/);
 assert.match(events,/input\.setAttribute\('inputmode',pinMode\?'none':'text'\)/);
 
-/* Desktop/mobile lists continue to share the same data and handlers. */
 assert.match(render,/function billTableHtml\(list\)/);
 assert.match(render,/class="bill-table"/);
 assert.match(render,/class="bill-mobile-list"/);
@@ -100,10 +90,8 @@ assert.match(render,/\['Pago no mês',paidBills,'Pagamentos confirmados'\]/);
 assert.match(render,/setHTML\('#dashboardSecondary'/);
 assert.match(render,/data-update-balance/);
 assert.match(events,/openAccountBalanceForm\(\)/);
+assert.doesNotMatch(css,/\bzoom\s*:/i);
 
-assert.doesNotMatch(css,/\bzoom\s*:/i,'do not reintroduce CSS zoom as a responsive workaround');
-
-/* Source HTML remains stable; Pages stamps v75. */
 assert.match(index,/name="app-build" content="v53"/);
 assert.match(index,/styles\.css\?v=53/);
 assert.match(index,/design-system\.css\?v=53/);
@@ -112,16 +100,19 @@ for(const asset of ['core','finance','render','forms','sync','events'])assert.ma
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
-for(const asset of ['./design-system.css','./v74-experience.css','./v75-market-featured.css','./v75-architecture.css','./market-experience.css','./market-experience.js','./v64-runtime.js','./app-update.css','./app-update.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be available offline`);
-assert.ok(!sw.includes("'./v74-experience.js'"),'retired v74 runtime must not be available offline');
+assert.match(sw,/retire-assets1/);
+for(const asset of ['./design-system.css','./v76-planning-more.css','./v75-architecture.css','./market-experience.css','./market-experience.js','./v64-runtime.js','./app-update.css','./app-update.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be available offline`);
+for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be available offline`);
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.match(sw,/url\.searchParams\.has\('v'\)/);
 assert.match(sw,/url\.searchParams\.has\('ts'\)/);
 
 assert.match(prepare,/const BUILD = 'v75'/);
-assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
+assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-more1'/);
+assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
+assert.doesNotMatch(prepare,/const FEATURED_REV/);
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -129,23 +120,18 @@ try{
   const builtIndex=fs.readFileSync(path.join(dist,'index.html'),'utf8');
   assert.match(builtIndex,/name="app-build" content="v75"/);
   assert.match(builtIndex,/design-system\.css\?v=75/);
-  assert.match(builtIndex,/v74-experience\.css\?v=74-experience2/);
-  assert.match(builtIndex,/v75-market-featured\.css\?v=75-featured1/);
-  assert.doesNotMatch(builtIndex,/v74-experience\.js\?v=74-experience2/);
   assert.match(builtIndex,/v75-architecture\.css\?v=75-architecture2/);
+  assert.match(builtIndex,/v76-planning-more\.css\?v=76-planning-more1/);
   assert.match(builtIndex,/v75-architecture\.js\?v=75-architecture2/);
   assert.match(builtIndex,/mobile-menu-toggle\.css\?v=73-menu8/);
+  assert.doesNotMatch(builtIndex,/v74-experience\.(?:css|js)/);
+  assert.doesNotMatch(builtIndex,/v75-market-featured\.(?:css|js)/);
   assert.doesNotMatch(builtIndex,/ui-consistency\.css/);
   assert.doesNotMatch(builtIndex,/v64-runtime\.css/);
-  assert.ok(fs.existsSync(path.join(dist,'design-system.css')));
-  assert.ok(fs.existsSync(path.join(dist,'v74-experience.css')));
-  assert.ok(fs.existsSync(path.join(dist,'v75-market-featured.css')));
-  assert.match(fs.readFileSync(path.join(dist,'v74-experience.css'),'utf8'),/76-retire-v74-css-behavior1/);
-  assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')),'retired v74 runtime must not exist in dist');
-  assert.ok(fs.existsSync(path.join(dist,'v75-architecture.css')));
-  assert.ok(fs.existsSync(path.join(dist,'v75-architecture.js')));
+  for(const asset of ['design-system.css','v76-planning-more.css','v75-architecture.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  for(const retired of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(dist,retired)),`${retired} must not exist in dist`);
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Responsive v76 architecture, migration bridge, safe areas, five-destination navigation and retired v74 CSS/JS authority: OK');
+console.log('Responsive v76 architecture, safe areas and five-destination navigation survive physical retirement of v74/Featured assets: OK');
