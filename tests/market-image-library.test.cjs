@@ -28,10 +28,7 @@ assert.doesNotMatch(library,/\bcommit\s*\(/);
 assert.doesNotMatch(library,/Authorization|api[_-]?key|tokenGitHub/i);
 
 const listeners={};
-const sandbox={
-  console,URL,Date,Map,Set,Promise,setTimeout,clearTimeout,
-  addEventListener(type,fn){listeners[type]=fn;}
-};
+const sandbox={console,URL,Date,Map,Set,Promise,setTimeout,clearTimeout,addEventListener(type,fn){listeners[type]=fn;}};
 sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(library,sandbox,{filename:'market-image-library.js'});
@@ -42,7 +39,6 @@ const continenteProduct='https://www.continente.pt/produto/compressas-gaze-20-x-
 const continenteImage='https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dwa5dd802e/images/col/816/8167440-frente.jpg?sw=2000&sh=2000';
 const pingoProduct='https://www.pingodoce.pt/home/produtos/mercearia/arroz-massa-e-leguminosas/arroz/arroz-carolino-cigala-739490.html';
 const pingoImage='https://static.pingodoce.pt/dw/image/v2/BLJJ_PRD/on/demandware.static/-/Sites-pingo-doce-master/default/dw8cff88d2/images/large/739490_93c013c8bbf2545978b1e875cb8563de.jpg';
-
 assert.deepEqual(JSON.parse(JSON.stringify(sandbox.CDCMarketImageLibrary.identity({marketId:'continente',pid:'8167440'}))),{marketId:'continente',pid:'8167440',key:'continente|8167440'});
 assert.equal(sandbox.CDCMarketImageLibrary.safeProductUrl(continenteProduct,'continente','8167440'),continenteProduct);
 assert.equal(sandbox.CDCMarketImageLibrary.safeProductUrl(pingoProduct,'pingo-doce','739490'),pingoProduct);
@@ -53,9 +49,7 @@ assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoImage,'ping
 assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoImage,'pingo-doce','111111'),'');
 
 (async()=>{
-  const stored=await sandbox.CDCMarketImageLibrary.remember({
-    marketId:'continente',pid:'8167440',name:'Compressas Gaze',imageUrl:continenteImage,sourceUrl:continenteProduct
-  });
+  const stored=await sandbox.CDCMarketImageLibrary.remember({marketId:'continente',pid:'8167440',name:'Compressas Gaze',imageUrl:continenteImage,sourceUrl:continenteProduct});
   assert.ok(stored);
   const cached=await sandbox.CDCMarketImageLibrary.get({marketId:'continente',pid:'8167440'});
   assert.equal(cached.imageUrl,continenteImage);
@@ -66,8 +60,11 @@ assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoImage,'ping
 
   assert.match(prepare,/const IMAGE_LIBRARY_REV = '75-image-library1'/);
   assert.match(prepare,/market-image-library\.js/);
-  assert.match(sw,/featured1-image-library1/);
+  assert.match(sw,/image-library1/);
+  assert.match(sw,/planning-more1/);
+  assert.match(sw,/retire-assets1/);
   assert.match(sw,/\.\/market-image-library\.js/);
+  assert.doesNotMatch(sw,/\.\/v75-market-featured\.(?:css|js)/);
 
   const dist=path.join(ROOT,'dist');
   try{
@@ -77,9 +74,9 @@ assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoImage,'ping
     assert.ok(index.indexOf('market-image-library.js')<index.indexOf('market-retailer-image-policy.js'));
     assert.ok(index.indexOf('market-image-library.js')<index.indexOf('market-official-images.js'));
     assert.ok(fs.existsSync(path.join(dist,'market-image-library.js')));
-  }finally{
-    fs.rmSync(dist,{recursive:true,force:true});
-  }
+    assert.ok(!fs.existsSync(path.join(dist,'v75-market-featured.js')));
+    assert.ok(!fs.existsSync(path.join(dist,'v75-market-featured.css')));
+  }finally{fs.rmSync(dist,{recursive:true,force:true});}
 
-  console.log('Persistent official market image library remains isolated, exact-SKU and distributable: OK');
+  console.log('Persistent official market image library remains isolated, exact-SKU and distributable after Featured retirement: OK');
 })().catch(error=>{console.error(error);process.exitCode=1;});
