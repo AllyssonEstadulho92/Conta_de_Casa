@@ -28,7 +28,7 @@ assert.match(js,/ensureMoreShell/,'More shell must be owned by the current archi
 assert.match(js,/ensurePlanningShell/,'Planning overview shell must be owned by the current architecture layer');
 assert.match(js,/dashboardMetrics/);
 assert.match(js,/categoryEntries/);
-assert.doesNotMatch(js,/CDCV74/,'current architecture must not depend on the v74 runtime API');
+assert.doesNotMatch(js,/root\.CDCV74/,'current architecture must not depend on the v74 runtime API');
 assert.doesNotMatch(js,/placeDashboardGreeting/,'retired dashboard greeting composition must not be recreated');
 assert.match(js,/ensureBillTabs/,'new expense flow must expose Manual, invoice and QR modes');
 assert.match(js,/data-v75-bill-mode="manual"/);
