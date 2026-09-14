@@ -19,7 +19,7 @@ const render=read('render.js');
 const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
 
-for(const retiredSource of ['v74-experience.css','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(ROOT,retiredSource)),`${retiredSource} must be physically deleted`);
+for(const retiredSource of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(ROOT,retiredSource)),`${retiredSource} must be physically deleted`);
 
 assert.match(designCss,/Conta de Casa v74 — sistema visual consolidado/);
 assert.match(designCss,/--content-max:1480px/);
@@ -99,6 +99,7 @@ assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
 assert.match(sw,/retire-assets1/);
+assert.match(sw,/v76-version-alignment1/);
 for(const asset of ['./design-system.css','./v76-planning-more.css','./v75-architecture.css','./market-experience.css','./market-experience.js','./v64-runtime.js','./app-update.css','./app-update.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be available offline`);
 for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be available offline`);
 assert.ok(!sw.includes("'./ui-consistency.css'"));
@@ -106,7 +107,8 @@ assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.match(sw,/url\.searchParams\.has\('v'\)/);
 assert.match(sw,/url\.searchParams\.has\('ts'\)/);
 
-assert.match(prepare,/const BUILD = 'v75'/);
+assert.match(prepare,/const BUILD = 'v76'/);
+assert.match(prepare,/const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-more1'/);
 assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
@@ -116,8 +118,8 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const builtIndex=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(builtIndex,/name="app-build" content="v75"/);
-  assert.match(builtIndex,/design-system\.css\?v=75/);
+  assert.match(builtIndex,/name="app-build" content="v76"/);
+  assert.match(builtIndex,/design-system\.css\?v=76/);
   assert.match(builtIndex,/v75-architecture\.css\?v=75-architecture2/);
   assert.match(builtIndex,/v76-planning-more\.css\?v=76-planning-more1/);
   assert.match(builtIndex,/v75-architecture\.js\?v=75-architecture2/);
@@ -132,4 +134,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Responsive v76 architecture, safe areas and five-destination navigation survive physical retirement of v74/Featured sources: OK');
+console.log('Responsive official v76 build, safe areas and five-destination navigation remain intact: OK');
