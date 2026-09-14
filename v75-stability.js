@@ -6,7 +6,8 @@
  * - marcar estados de carregamento/erro das imagens do Mercado;
  * - reavaliar esses estados após re-renderizações;
  * - estabilizar a navegação móvel final enquanto as camadas históricas v74/v75 coexistem;
- * - remover blocos v74 do Dashboard que já foram integralmente substituídos por v76.
+ * - remover blocos v74 do Dashboard que já foram integralmente substituídos por v76;
+ * - alinhar iconografia semântica do menu Mais sem alterar rotas ou handlers.
  * Não lê nem escreve valores financeiros, IndexedDB, cofre ou sincronização.
  */
 (function installV75Stability(root){
@@ -20,6 +21,15 @@
     Object.freeze({page:'market',label:'Mercado',icon:'market'}),
     Object.freeze({page:'planning',label:'Plano',icon:'plan'}),
     Object.freeze({page:'settings',label:'Mais',icon:'more'})
+  ]);
+  const MORE_ICON_MAP=Object.freeze([
+    Object.freeze({selector:'[data-v74-go="market"]',icon:'market'}),
+    Object.freeze({selector:'[data-v74-go="planning"]',icon:'plan'}),
+    Object.freeze({selector:'[data-v74-go="reports"]',icon:'report'}),
+    Object.freeze({selector:'[data-v74-go="goals"]',icon:'goal'}),
+    Object.freeze({selector:'[data-v74-go="security"]',icon:'shield'}),
+    Object.freeze({selector:'[data-v74-more="sync"]',icon:'cloudCheck'}),
+    Object.freeze({selector:'[data-v74-go="diagnostics"]',icon:'activity'})
   ]);
   const LEGACY_DASHBOARD_IDS=Object.freeze([
     'cdcMobileGreeting','cdcMobileMonthWrap','cdcMonthHero','cdcQuickActions','cdcDashboardCategories'
@@ -199,6 +209,19 @@
     });
   }
 
+  function syncMoreMenuIcons(){
+    const menu=document.querySelector('#cdcMoreMenu');
+    if(!menu)return;
+    for(const item of MORE_ICON_MAP){
+      const button=menu.querySelector(item.selector);
+      const slot=button?.querySelector(':scope > span:first-child');
+      if(!slot||slot.dataset.v76SemanticIcon===item.icon)continue;
+      slot.innerHTML=mobileNavIcon(item.icon,20);
+      slot.dataset.v76SemanticIcon=item.icon;
+      slot.setAttribute('aria-hidden','true');
+    }
+  }
+
   function pruneLegacyDashboardNodes(){
     if(!html.classList.contains('cdc-v75'))return;
     for(const id of LEGACY_DASHBOARD_IDS)document.getElementById(id)?.remove();
@@ -207,6 +230,7 @@
   function runRuntimeAudit(){
     runtimeFrame=0;
     syncMobileNavigation();
+    syncMoreMenuIcons();
     pruneLegacyDashboardNodes();
   }
 
@@ -264,6 +288,7 @@
     syncThemeColor,
     auditProductImages,
     syncMobileNavigation,
+    syncMoreMenuIcons,
     pruneLegacyDashboardNodes
   });
 })(window);
