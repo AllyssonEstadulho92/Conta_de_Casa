@@ -15,8 +15,8 @@ const GENERATED_PUBLIC_FILES = Object.freeze({
 });
 const PACKAGE = JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
 const APP_VERSION = String(PACKAGE.version||'').trim();
-const BUILD = 'v75';
-const APP_UPDATE_REV = '76-version-audit1';
+const BUILD = 'v76';
+const APP_UPDATE_REV = '76-version-alignment1';
 const UI_REV = '74-ui1';
 const CATEGORY_REV = '64-ui1';
 const RUNTIME_REV = '64-runtime1';
@@ -60,12 +60,11 @@ function resolveBuildId(){
 const BUILD_ID=resolveBuildId();
 const BUILD_DATE=new Date().toISOString();
 
-/* Bundle público v75 com programa v76 incremental. Mantém a experiência funcional existente,
-   acrescenta metadados de versão/build, runtimes gerados por TypeScript e as camadas v76.
-   Os antigos v74-experience.css e v75-market-featured.{css,js} permanecem apenas como fontes
-   históricas no repositório e são explicitamente proibidos no bundle público. Planeamento e
-   Mais passam a usar v76-planning-more.css. Nenhuma destas camadas altera domínio financeiro,
-   persistência, cifragem, sincronização, scanner, QR ou regras de Mercado. */
+/* Bundle público v76. A composição atual combina camadas consolidadas v75/v76 enquanto
+   a distribuição, versão, manifesto e cache usam uma única identidade de release. Os
+   runtimes/CSS v74 e Featured já foram fisicamente retirados do repositório e continuam
+   explicitamente proibidos no bundle. Nenhuma camada de apresentação altera domínio
+   financeiro, persistência, cifragem, sincronização, scanner, QR ou regras de Mercado. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
