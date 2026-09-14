@@ -9,26 +9,16 @@ const ROOT=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 
 const planningMore=read('v76-planning-more.css');
-const historicalCss=read('v75-market-featured.css');
-const legacyCss=read('v74-experience.css');
-const historicalJs=read('v75-market-featured.js');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 const publicFilesStart=prepare.indexOf('const PUBLIC_FILES');
 const publicFilesEnd=prepare.indexOf(']);',publicFilesStart);
 const publicFilesBlock=prepare.slice(publicFilesStart,publicFilesEnd+3);
 
-/* Fontes históricas permanecem auditáveis no repositório, mas não são executadas. */
-assert.match(historicalJs,/compatibilidade de retirada do antigo Featured 75-featured1/i);
-assert.match(historicalJs,/revision:'75-featured1'/);
-assert.match(historicalJs,/retired:true/);
-assert.match(historicalJs,/function upgrade\(\)\{return false;\}/);
-assert.doesNotMatch(historicalJs,/MutationObserver|addEventListener|requestAnimationFrame|scrollTo\(/);
-assert.doesNotMatch(historicalJs,/\bfetch\s*\(|world\.openfoodfacts|continente\.pt|pingodoce\.pt/i);
-assert.doesNotMatch(historicalJs,/\bappState\b|\bcommit\s*\(|\bsaveState\s*\(|estimatedCents|actualCents|quantity\s*=/);
-assert.match(historicalCss,/Conta de Casa v76 — ponte de retirada 75-featured1/i);
-assert.match(legacyCss,/76-retire-v74-css-behavior1/);
-assert.doesNotMatch(legacyCss,/\{[^}]*\}/,'retired v74 stylesheet source must contain no CSS rule blocks');
+/* As fontes históricas já não existem no repositório. */
+for(const retired of ['v74-experience.css','v75-market-featured.css','v75-market-featured.js']){
+  assert.ok(!fs.existsSync(path.join(ROOT,retired)),`${retired} must be physically deleted from repository`);
+}
 
 /* Planeamento/Mais têm agora uma camada canónica v76. */
 assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-more1/i);
@@ -66,4 +56,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Planning/More are owned by v76 and retired v74/Featured assets are excluded from Pages: OK');
+console.log('Planning/More are owned by v76 and retired v74/Featured sources no longer exist: OK');
