@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Conta de Casa — Versão e Atualizações (v76 version-audit1)
+ * Conta de Casa — Versão e Atualizações (v76 update-fallback1)
  *
  * Política:
  * - a versão da aplicação vem do package.json e é injetada no HTML publicado;
@@ -14,9 +14,20 @@
 (function installSoftwareUpdateCenter(root){
   const FALLBACK_RELEASE_NOTES=Object.freeze([
     Object.freeze({
+      version:'v76',
+      date:'14 de setembro de 2026',
+      title:'Arquitetura consolidada, versão estável e interface alinhada',
+      items:Object.freeze([
+        'A release pública, o package, o build e o cache PWA usam a identidade v76.',
+        'A navegação móvel mantém Início, Despesas, Mercado, Planeamento e Mais como cinco destinos principais.',
+        'Os runtimes e estilos v74/Featured retirados permanecem fora do bundle público.',
+        'Cálculos financeiros, cofre/PIN, IndexedDB, QR, scanner, Mercado e sincronização mantêm os mesmos contratos funcionais.'
+      ])
+    }),
+    Object.freeze({
       version:'v75',
-      date:'10 de setembro de 2026',
-      title:'Estabilidade, páginas e experiência móvel',
+      date:'9 de setembro de 2026',
+      title:'Reestruturação da interface, estabilidade e Mercado visual progressivo',
       items:Object.freeze([
         'Revisão transversal de estabilidade e geometria da aplicação.',
         'Início, Despesas, Planeamento e Mercado receberam refinamentos de apresentação.',
