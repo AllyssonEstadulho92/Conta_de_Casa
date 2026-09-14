@@ -59,4 +59,21 @@ assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/invoice-scan-overlay/);
 assert.match(css,/invoice-capture-preview-grid/);
 
-console.log('Invoice capture tests: exact AT QR parser plus deterministic image/QR modes: OK');
+/* 76-expense-form-professional1: the expense dialog is a single coherent flow,
+   without changing the financial form contract. */
+assert.match(css,/76-expense-form-professional1/);
+assert.match(css,/#formDialog\[data-v75-kind="expense"\][\s\S]*width:min\(720px,calc\(100vw - 32px\)\)!important/);
+assert.match(css,/#formDialog\[data-v75-kind="expense"\] \.dialog-shell[\s\S]*grid-template-rows:auto minmax\(0,1fr\)!important/);
+assert.match(css,/#formDialog\[data-v75-kind="expense"\] #billForm[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
+assert.match(css,/data-v75-bill-mode="manual"\] \[data-invoice-capture\]\{display:none!important\}/,'manual mode must not show an irrelevant capture card');
+assert.match(css,/data-v75-bill-mode="image"\] \[data-invoice-camera\]\{display:none!important\}/,'image mode must only expose the image action');
+assert.match(css,/data-v75-bill-mode="qr"\] \.invoice-image-button\{display:none!important\}/,'QR mode must only expose the camera action');
+assert.match(css,/#billForm>label:nth-of-type\(1\)\{order:10!important\}/,'description must remain in the essential section');
+assert.match(css,/#billForm>label:nth-of-type\(4\)\{order:11!important\}/,'amount must remain in the essential section');
+assert.match(css,/#billForm::after[\s\S]*content:"Detalhes adicionais"/,'secondary invoice metadata must be visually separated');
+assert.match(css,/@media\(max-width:620px\)[\s\S]*#formDialog\[data-v75-kind="expense"\][\s\S]*width:100vw!important[\s\S]*height:100dvh!important/,'mobile expense dialog must be a safe full-screen flow');
+assert.match(css,/safe-area-inset-bottom/,'mobile expense flow must reserve the bottom safe area');
+assert.match(css,/forced-colors:active/,'expense flow must retain forced-colors accessibility');
+assert.doesNotMatch(css,/amountCents|totalCents|appState|commit\(|saveState\(|idbPut/,'expense visual layer must not touch financial or persistence state');
+
+console.log('Invoice capture tests: exact AT QR parser plus deterministic image/QR modes and professional expense UI: OK');
