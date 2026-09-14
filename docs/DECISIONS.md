@@ -1,6 +1,6 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 13 de setembro de 2026
+Atualizado: 14 de setembro de 2026
 
 ## D-064 — migração TypeScript incremental
 
@@ -76,47 +76,49 @@ Se dispositivo real contradiz teste verde, o teste deve ser revisto para o compo
 
 ## D-085 — `hidden` é autoridade explícita no auth
 
-Publicado pelo PR #98.
-
-- `#vaultScreen[hidden]` e `#app[hidden]` devem ser `display:none!important` na camada final;
-- cofre visível exclui shell autenticado;
-- nenhuma regra `display:* !important` pode neutralizar o estado `hidden` do runtime;
-- a correção não altera criptografia, persistência ou finanças.
+Publicado pelo PR #98. `#vaultScreen[hidden]` e `#app[hidden]` devem ser `display:none!important`; cofre visível exclui shell autenticado.
 
 ## D-086 — auditoria UI usa referências externas, não cópia de design
 
-A partir de `76-ui-audit1`, decisões importantes de UI/UX são confrontadas com Apple HIG, Material Design 3/Android accessibility, WCAG 2.2/W3C e web.dev. A solução é adaptada à PWA real e aos seus contratos; não se copia interface proprietária.
+Decisões importantes de UI/UX são confrontadas com Apple HIG, Material Design 3/Android accessibility, WCAG 2.2/W3C e web.dev. A solução é adaptada à PWA real; não se copia interface proprietária.
 
 ## D-087 — header móvel final é neutro
 
-O antigo gradiente teal do v75 não é mais a direção final. O header móvel deve usar superfície do design system, texto/ícones com contraste, borda subtil, sem sombra pesada, controlos de 44 px e foco visível. A cor de marca fica reservada para seleção/ação/status.
-
-Motivo: havia conflito real entre `v75-header-refinement.css` (fundo escuro + branco forçado) e `v76-product-pages.css` (superfície clara).
+Superfície do design system, texto/ícones com contraste, borda subtil, sem gradiente pesado, controlos de 44 px e foco visível. A cor de marca fica reservada a ação, seleção e estado.
 
 ## D-088 — onboarding v74 não mascara `76-auth1`
 
-Enquanto `v74-experience.js` permanecer por compatibilidade, `cdcWelcome` não pode substituir visualmente o formulário real do cofre. A camada final oculta o onboarding v74 e força o `vaultCreate` real a permanecer visível. A criação runtime histórica será removida apenas no bloco de limpeza v74 com regressões verdes.
+Enquanto `v74-experience.js` permanecer por compatibilidade, `cdcWelcome` não pode substituir visualmente o formulário real do cofre.
 
 ## D-089 — dock móvel: consistência antes de decoração
 
-O dock final usa superfície neutra, 3–5 destinos primários, selected state discreto, ícones lineares e labels coerentes; respeita safe areas, reduced-motion, forced-colors e foco visível. Sombras/blur devem ser mínimos e nunca comprometer legibilidade.
+O dock usa superfície neutra, cinco destinos primários, selected state discreto, ícones lineares e labels coerentes; respeita safe areas, reduced-motion, forced-colors e foco visível.
 
-## D-090 — navegação móvel precisa de uma única autoridade funcional
+## D-090 — navegação móvel tem autoridade final transitória em v75 stability
 
-A duplicação atual entre `core/render` e `v74-experience` é dívida ALTA. A remoção será feita num bloco dedicado, preferencialmente com configuração TypeScript canónica, depois de paridade de destinos, `aria-current`, drawer e labels.
+Após PR #104, `v75-stability.js` instala e mantém a assinatura canónica do dock, marca a autoridade v76 e impede que a camada v74 volte a reescrever a mesma estrutura. Isto é uma consolidação transitória até a configuração final migrar para TypeScript.
 
 ## D-091 — marca e iconografia têm autoridades distintas
 
-A partir de `76-brand-icons1`:
+- `icon.svg` é a marca gráfica canónica da Conta de Casa;
+- Lucide local é a família canónica de ícones funcionais;
+- um ícone funcional deve representar a ação real;
+- títulos/cartões não recebem ícones decorativos redundantes;
+- não se usa Lucide `home` como substituto do logótipo.
 
-- `icon.svg` é a marca gráfica canónica da Conta de Casa e deve ser reutilizado em PWA, sidebar, drawer e cofre;
-- a marca usa casa + euro, teal sólido e branco; gradientes, folha e símbolos decorativos não pertencem à identidade final;
-- Lucide continua a ser a família canónica de ícones funcionais para navegação, ações e estados;
-- um ícone funcional deve representar a ação real; não substituir `Plus` por `Scan` num botão “Adicionar item”;
-- títulos, cartões e estados não recebem pseudo-ícones apenas para ornamentação quando já existe texto/hierarquia suficiente;
-- não se usa o ícone Lucide `home` como substituto do logótipo.
+## D-092 — cor dos ícones é semântica, não decorativa
 
-Motivo: o código apresentava duas identidades visuais simultâneas e vários pseudo-ícones do Mercado que duplicavam ou contradiziam o significado dos controlos.
+`76-icon-semantics3` restaura cor nos ícones porque a validação física mostrou uma interface excessivamente cinzenta e sem hierarquia. A paleta é pequena e estável por função: teal, índigo, verde, âmbar, roxo, azul, rosa e danger já existente.
+
+A cor nunca é o único sinal: navegação mantém label, `aria-current`, fundo selecionado, foco e estrutura. Dark mode tem tokens próprios; `forced-colors` devolve autoridade ao sistema operativo/browser.
+
+## D-093 — label compacto do dock não altera a rota
+
+A página continua `planning` e o título continua Planeamento. Apenas o label da navegação inferior muda de `Planeamento` para `Plano`, evitando truncagem (`Planeame…`) em iPhone e outros ecrãs compactos.
+
+## D-094 — semântica de ícones tem prioridade sobre compatibilidade nominal
+
+Quando uma camada antiga pede um nome genérico/inexistente (`income`, `security`, `sync`) e o sistema Lucide cairia em `more`, a camada de estabilidade pode reidratar apenas o slot visual com o símbolo semântico correto (`goal`, `shield`, `cloudCheck`, `activity`) sem alterar rotas, handlers ou dados.
 
 ## Invariantes vigentes
 
