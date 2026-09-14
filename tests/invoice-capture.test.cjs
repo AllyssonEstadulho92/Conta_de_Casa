@@ -71,9 +71,26 @@ assert.match(css,/data-v75-bill-mode="qr"\] \.invoice-image-button\{display:none
 assert.match(css,/#billForm>label:nth-of-type\(1\)\{order:10!important\}/,'description must remain in the essential section');
 assert.match(css,/#billForm>label:nth-of-type\(4\)\{order:11!important\}/,'amount must remain in the essential section');
 assert.match(css,/#billForm::after[\s\S]*content:"Detalhes adicionais"/,'secondary invoice metadata must be visually separated');
-assert.match(css,/@media\(max-width:620px\)[\s\S]*#formDialog\[data-v75-kind="expense"\][\s\S]*width:100vw!important[\s\S]*height:100dvh!important/,'mobile expense dialog must be a safe full-screen flow');
 assert.match(css,/safe-area-inset-bottom/,'mobile expense flow must reserve the bottom safe area');
 assert.match(css,/forced-colors:active/,'expense flow must retain forced-colors accessibility');
 assert.doesNotMatch(css,/amountCents|totalCents|appState|commit\(|saveState\(|idbPut/,'expense visual layer must not touch financial or persistence state');
 
-console.log('Invoice capture tests: exact AT QR parser plus deterministic image/QR modes and professional expense UI: OK');
+/* 76-expense-ios-touch1: Safari must have one and only one scroll owner in the
+   full-screen expense flow. Nested 100dvh scroll containers caused the rendered
+   modal to stop receiving reliable taps on iOS. */
+assert.match(css,/76-expense-ios-touch1/);
+const mobileTouchBlock=css.match(/\/\* --------------------------------------------------------------------------\n   76-expense-ios-touch1[\s\S]*?(?=\n@media\(max-width:430px\))/)?.[0]||'';
+assert.ok(mobileTouchBlock,'iOS touch stability block must exist');
+assert.match(mobileTouchBlock,/#formDialog\[data-v75-kind="expense"\]\{[\s\S]*overflow-y:auto!important/,'native dialog must own vertical scrolling on mobile');
+assert.match(mobileTouchBlock,/\.dialog-shell\{[\s\S]*height:auto!important[\s\S]*max-height:none!important[\s\S]*overflow:visible!important/,'dialog shell must not create a nested mobile scroll port');
+assert.match(mobileTouchBlock,/#dialogBody\{[\s\S]*overflow:visible!important/,'dialog body must not create a second mobile scroll port');
+assert.match(mobileTouchBlock,/\.v75-bill-tabs button\{[\s\S]*pointer-events:auto!important[\s\S]*touch-action:manipulation!important/,'expense mode tabs must remain tappable on iOS');
+assert.match(css,/#billForm :is\(input,select,textarea\)\{[\s\S]*pointer-events:auto!important[\s\S]*touch-action:manipulation!important/,'expense fields must remain interactive');
+assert.match(mobileTouchBlock,/\.dialog-close\{[\s\S]*text-indent:-9999px!important[\s\S]*color:transparent!important/,'original multiplication glyph must be visually removed on mobile');
+assert.match(mobileTouchBlock,/\.dialog-close::before\{[\s\S]*mask:url\([^\n]*m15 18-6-6 6-6/,'mobile close control must render only the back chevron');
+assert.doesNotMatch(mobileTouchBlock,/\.dialog-shell\{[\s\S]{0,260}overflow:auto!important/,'dialog shell must never become the mobile scroll owner again');
+
+const sw=fs.readFileSync('sw.js','utf8');
+assert.match(sw,/expense-form-professional1-expense-ios-touch1/,'PWA cache must invalidate the frozen iOS expense dialog revision');
+
+console.log('Invoice capture tests: exact AT QR parser plus deterministic modes, professional expense UI and iOS touch stability: OK');
