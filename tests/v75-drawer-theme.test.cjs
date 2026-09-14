@@ -29,17 +29,35 @@ assert.match(css,/border-radius:24px 0 0 24px!important/);
 assert.match(css,/\.drawer-head>:is\(\.mobile-menu-btn,#drawerCloseBtn,\.icon-btn\)\{[\s\S]*width:44px!important/,'drawer close control must retain a 44px target');
 
 /* Grid contract: every navigation group becomes a two-column card grid. */
-assert.match(css,/\.nav-drawer\[open\] \.drawer-nav \.nav-group-items\{[\s\S]*display:grid!important[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
-assert.match(css,/\.nav-drawer\[open\] \.drawer-nav \.nav-btn\{[\s\S]*display:grid!important[\s\S]*grid-template-columns:32px minmax\(0,1fr\)!important[\s\S]*min-height:70px!important/);
-assert.match(css,/\.drawer-nav \.nav-btn :is\(\.svg-icon,\.ui-icon-svg\)\{[\s\S]*width:32px!important[\s\S]*border-radius:10px!important/);
-assert.match(css,/\.nav-drawer\[open\] \.drawer-nav \.nav-label\{[\s\S]*white-space:normal!important[\s\S]*overflow-wrap:anywhere!important/);
+const groupGrid=/\.nav-drawer\[open\] \.drawer-nav \.nav-group-items\{([\s\S]*?)\n  \}/.exec(css)?.[1]||'';
+assert.match(groupGrid,/display:grid!important/);
+assert.match(groupGrid,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
+assert.match(groupGrid,/gap:8px!important/);
+
+const cardRule=/\.nav-drawer\[open\] \.drawer-nav \.nav-btn\{([\s\S]*?)\n  \}/.exec(css)?.[1]||'';
+assert.match(cardRule,/display:grid!important/);
+assert.match(cardRule,/grid-template-columns:32px minmax\(0,1fr\)!important/);
+assert.match(cardRule,/min-height:70px!important/);
+assert.match(cardRule,/border-radius:var\(--v76-drawer-card-radius\)!important/);
+assert.match(cardRule,/text-align:left!important/);
+
+const iconRule=/\.drawer-nav \.nav-btn :is\(\.svg-icon,\.ui-icon-svg\)\{([\s\S]*?)\n  \}/.exec(css)?.[1]||'';
+assert.match(iconRule,/width:32px!important/);
+assert.match(iconRule,/height:32px!important/);
+assert.match(iconRule,/border-radius:10px!important/);
+
+const labelRule=/\.nav-drawer\[open\] \.drawer-nav \.nav-label\{([\s\S]*?)\n  \}/.exec(css)?.[1]||'';
+assert.match(labelRule,/white-space:normal!important/);
+assert.match(labelRule,/overflow-wrap:anywhere!important/);
 assert.match(css,/\.drawer-nav \.nav-btn\.active/);
 assert.match(css,/background:var\(--v76-drawer-active\)!important/);
 assert.match(css,/active :is\(\.svg-icon,\.ui-icon-svg\)[\s\S]*background:var\(--v76-drawer-primary\)!important/);
 assert.match(css,/\.drawer-nav \.nav-btn:focus-visible\{[\s\S]*outline:3px solid/);
 
 /* Footer follows the same grid system and an odd last action spans both columns. */
-assert.match(css,/\.nav-drawer\[open\] \.drawer-footer\{[\s\S]*display:grid!important[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
+const footerRule=/\.nav-drawer\[open\] \.drawer-footer\{([\s\S]*?)\n  \}/.exec(css)?.[1]||'';
+assert.match(footerRule,/display:grid!important/);
+assert.match(footerRule,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
 assert.match(css,/\.drawer-footer \.icon-text-btn:last-child:nth-child\(odd\)\{[\s\S]*grid-column:1 \/ -1!important/);
 
 assert.match(css,/76-drawer-open-guard1/);
