@@ -9,47 +9,61 @@ const ROOT=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 
 const css=read('v75-market-featured.css');
+const legacyCss=read('v74-experience.css');
 const js=read('v75-market-featured.js');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 
-/* O CSS permanece temporariamente no bundle até à remoção física conjunta. */
-assert.match(css,/revisão 75-featured1/i);
-assert.match(css,/scroll-snap-type:x mandatory/);
-assert.match(css,/cdc-featured-fallback/);
-
-/* O runtime legado torna-se um stub sem custo operacional. */
+/* O runtime Featured continua retirado. */
 assert.match(js,/compatibilidade de retirada do antigo Featured 75-featured1/i);
 assert.match(js,/revision:'75-featured1'/);
 assert.match(js,/retired:true/);
 assert.match(js,/function upgrade\(\)\{return false;\}/);
-assert.doesNotMatch(js,/MutationObserver|addEventListener|requestAnimationFrame|scrollTo\(/,'retired Featured must not install observers or UI listeners');
-assert.doesNotMatch(js,/\bfetch\s*\(|world\.openfoodfacts|continente\.pt|pingodoce\.pt/i,'retired Featured must not perform network work');
-assert.doesNotMatch(js,/\bappState\b|\bcommit\s*\(|\bsaveState\s*\(|estimatedCents|actualCents|quantity\s*=/,'retired Featured must not touch application or financial state');
+assert.doesNotMatch(js,/MutationObserver|addEventListener|requestAnimationFrame|scrollTo\(/);
+assert.doesNotMatch(js,/\bfetch\s*\(|world\.openfoodfacts|continente\.pt|pingodoce\.pt/i);
+assert.doesNotMatch(js,/\bappState\b|\bcommit\s*\(|\bsaveState\s*\(|estimatedCents|actualCents|quantity\s*=/);
 
-/* Compatibilidade de distribuição é preservada nesta etapa. */
+/* 75-featured1 é agora a ponte temporária para as estruturas v76 ainda vivas. */
+assert.match(css,/Conta de Casa v76 — ponte de retirada 75-featured1/i);
+for(const selector of ['.cdc-empty-note','.cdc-avatar','.cdc-category-dot','.cdc-planning-overview','.cdc-budget-ring','.cdc-plan-track','.cdc-more-menu','.cdc-preferences-details']){
+  assert.ok(css.includes(selector),`migration bridge must own ${selector}`);
+}
+assert.match(css,/@media\(max-width:820px\)/);
+assert.match(css,/@media\(min-width:821px\)/);
+assert.match(css,/\.cdc-preferences-details\{display:contents\}/);
+assert.match(css,/\.cdc-planning-overview,[\s\S]*\.cdc-more-menu[\s\S]*display:none!important/);
+assert.match(css,/prefers-reduced-motion:reduce/);
+assert.doesNotMatch(css,/cdc-featured-carousel|cdc-featured-card|scroll-snap-type/,'retired Featured visual behavior must not remain');
+
+/* v74 CSS deixa de exercer qualquer autoridade visual. */
+assert.match(legacyCss,/76-retire-v74-css-behavior1/);
+assert.doesNotMatch(legacyCss,/\{[^}]*\}/,'retired v74 stylesheet must contain no CSS rule blocks');
+
+/* Distribuição permanece compatível até à remoção física dos nomes legados. */
 assert.match(prepare,/const FEATURED_REV = '75-featured1'/);
 assert.match(prepare,/'v75-market-featured\.css'/);
 assert.match(prepare,/'v75-market-featured\.js'/);
-assert.match(prepare,/v75-market-featured\.css\?v=\$\{FEATURED_REV\}/);
-assert.match(prepare,/v75-market-featured\.js\?v=\$\{FEATURED_REV\}/);
-assert.match(sw,/featured1/);
+assert.match(prepare,/'v74-experience\.css'/);
 assert.match(sw,/'\.\/v75-market-featured\.css'/);
 assert.match(sw,/'\.\/v75-market-featured\.js'/);
+assert.match(sw,/'\.\/v74-experience\.css'/);
 
 const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=read('dist/index.html');
+  assert.match(index,/v74-experience\.css\?v=74-experience2/);
   assert.match(index,/v75-market-featured\.css\?v=75-featured1/);
   assert.match(index,/v75-market-featured\.js\?v=75-featured1/);
-  assert.ok(fs.existsSync(path.join(dist,'v75-market-featured.css')));
-  assert.ok(fs.existsSync(path.join(dist,'v75-market-featured.js')));
+  const builtLegacy=read('dist/v74-experience.css');
+  const builtBridge=read('dist/v75-market-featured.css');
   const builtJs=read('dist/v75-market-featured.js');
+  assert.match(builtLegacy,/76-retire-v74-css-behavior1/);
+  assert.doesNotMatch(builtLegacy,/\{[^}]*\}/);
+  assert.match(builtBridge,/\.cdc-preferences-details\{display:contents\}/);
   assert.match(builtJs,/retired:true/);
-  assert.doesNotMatch(builtJs,/MutationObserver|\bfetch\s*\(/);
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Retired Featured compatibility stub ships with no observers, listeners, network or financial-state access: OK');
+console.log('v74 CSS authority retired; live Planning/More structures are owned by the v76 migration bridge: OK');
