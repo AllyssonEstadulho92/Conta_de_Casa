@@ -10,7 +10,6 @@ const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const js=read('market-shopping-focus.js');
 const css=read('market-shopping-focus.css');
 const brand=read('market-brand.css');
-const experience=read('v74-experience.css');
 const architecture=read('v75-architecture.css');
 const planningMore=read('v76-planning-more.css');
 const sw=read('sw.js');
@@ -41,8 +40,7 @@ assert.match(css,/\.market-item-details>summary/);
 assert.match(css,/min-height:44px/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(brand,/\.market-product-photo[\s\S]*display:grid!important/);
-assert.match(experience,/76-retire-v74-css-behavior1/);
-assert.doesNotMatch(experience,/\{[^}]*\}/,'retired v74 CSS source must remain rule-free');
+assert.ok(!fs.existsSync(path.join(ROOT,'v74-experience.css')),'retired v74 CSS source must be deleted from repository');
 assert.match(architecture,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'v75 must keep Mercado visible in primary navigation');
 assert.match(architecture,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'v76 architecture must keep compact product cards where that component is used');
 assert.match(planningMore,/76-planning-more1/);
@@ -99,4 +97,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Mobile shopping focus preserved with v76 architecture and retired v74/Featured assets excluded from distribution: OK');
+console.log('Mobile shopping focus preserved with v76 architecture and retired v74/Featured sources removed from repository/distribution: OK');
