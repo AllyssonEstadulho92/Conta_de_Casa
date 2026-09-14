@@ -75,8 +75,9 @@ assert.equal(parsed[0].sourceUrl,pingoProduct);
 assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
-for(const asset of ['./market-retailer-image-policy.js','./market-official-images.js','./v64-runtime.js','./market-shopping-focus.js','./mobile-menu-toggle.js','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`));
+assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
+for(const asset of ['./market-retailer-image-policy.js','./market-official-images.js','./v64-runtime.js','./market-shopping-focus.js','./mobile-menu-toggle.js','./v74-experience.css','./v75-architecture.css','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`));
+assert.ok(!sw.includes("'./v74-experience.js'"),'retired v74 runtime must not be cached');
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.match(prepare,/const BUILD = 'v75'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
@@ -96,19 +97,19 @@ try{
   assert.match(index,/market-shopping-focus\.js\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.js\?v=73-menu8/);
   assert.match(index,/v74-experience\.css\?v=74-experience2/);
-  assert.match(index,/v74-experience\.js\?v=74-experience2/);
+  assert.doesNotMatch(index,/v74-experience\.js\?v=74-experience2/);
   assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
   assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.ok(index.indexOf('market-official-images.js')<index.indexOf('v64-runtime.js'));
   assert.ok(index.indexOf('v64-runtime.js')<index.indexOf('market-shopping-focus.js'));
   assert.ok(index.indexOf('market-shopping-focus.js')<index.indexOf('mobile-menu-toggle.js'));
-  assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v74-experience.js'));
-  assert.ok(index.indexOf('v74-experience.js')<index.indexOf('v75-architecture.js'));
-  for(const asset of ['market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','market-shopping-focus.js','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v75-architecture.js'));
+  for(const asset of ['market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','market-shopping-focus.js','mobile-menu-toggle.js','v74-experience.css','v75-architecture.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')),'retired v74 runtime must not exist in dist');
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official-image bridge remains safe under the final v75 prototype architecture: OK');
+console.log('Market official-image bridge remains safe under v76 architecture without published v74 runtime: OK');
