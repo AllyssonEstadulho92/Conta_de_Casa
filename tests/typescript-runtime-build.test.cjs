@@ -12,13 +12,6 @@ const DIST=path.join(ROOT,'dist');
 
 const runtimes=Object.freeze([
   {
-    label:'Veggie Burger',
-    source:'src/ui/veggie-menu-toggle.ts',
-    manual:'v76-veggie-menu.js',
-    output:'v76-veggie-menu.js',
-    marker:/installVeggieMenuToggle/
-  },
-  {
     label:'Market branding',
     source:'src/ui/market-branding.ts',
     manual:'market-branding.js',
@@ -41,6 +34,13 @@ for(const runtime of runtimes){
 
 execFileSync(process.execPath,['scripts/build-typescript-runtime.cjs'],{cwd:ROOT,stdio:'pipe'});
 
+/* O antigo Veggie Burger duplicava o controlador funcional mobile-menu-toggle.js.
+   O source TS permanece temporariamente como referência de retirada, mas o build não o
+   transforma nem publica enquanto a arquitetura converge para uma única autoridade. */
+assert.ok(fs.existsSync(path.join(ROOT,'src/ui/veggie-menu-toggle.ts')),'retirement reference remains available during staged cleanup');
+assert.ok(!fs.existsSync(path.join(GENERATED,'v76-veggie-menu.js')),'TypeScript build must not emit the retired duplicate menu observer');
+assert.ok(!fs.existsSync(path.join(ROOT,'v76-veggie-menu.js')),'manual duplicate menu runtime must remain absent');
+
 const generatedByName=new Map();
 for(const runtime of runtimes){
   const generatedPath=path.join(GENERATED,runtime.output);
@@ -52,12 +52,6 @@ for(const runtime of runtimes){
   assert.doesNotMatch(generated,/commit\(|saveState\(|appState|estimatedCents|actualCents/);
   assert.doesNotThrow(()=>new vm.Script(generated),`${runtime.label} generated runtime must parse as a classic browser script`);
 }
-
-const veggie=generatedByName.get('v76-veggie-menu.js');
-assert.match(veggie,/glyph\.append\(upperLine, lowerLine\)/);
-assert.match(veggie,/drawer\.insertBefore\(button, drawerShell\)/);
-assert.match(veggie,/upperLine\.animate/);
-assert.match(veggie,/lowerLine\.animate/);
 
 const branding=generatedByName.get('market-branding.js');
 assert.match(branding,/MARKET_BRAND_NOTICE_SELECTOR/);
@@ -83,6 +77,8 @@ for(const runtime of runtimes){
   const published=fs.readFileSync(publicPath,'utf8');
   assert.equal(published,generatedByName.get(runtime.output),`${runtime.output} must be exactly the TypeScript-generated runtime`);
 }
+assert.ok(!fs.existsSync(path.join(DIST,'v76-veggie-menu.js')),'Pages bundle must not contain retired duplicate menu runtime');
+assert.ok(!fs.existsSync(path.join(DIST,'v76-veggie-menu.css')),'Pages bundle must not contain retired duplicate menu CSS');
 
 fs.rmSync(DIST,{recursive:true,force:true});
-console.log('TypeScript runtime build: three source-only TS modules -> generated JS artifacts -> Pages bundle, with no committed JS sources.');
+console.log('TypeScript runtime build: only active TS modules are generated; duplicate Veggie menu runtime stays retired from Pages.');
