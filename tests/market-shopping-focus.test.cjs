@@ -40,9 +40,10 @@ assert.match(css,/\.market-item-details>summary/);
 assert.match(css,/min-height:44px/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(brand,/\.market-product-photo[\s\S]*display:grid!important/);
-assert.match(experience,/\.cdc-market-home/,'legacy CSS is still temporarily available while its live selectors are migrated');
+assert.match(experience,/76-retire-v74-css-behavior1/);
+assert.doesNotMatch(experience,/\{[^}]*\}/,'shopping focus must not receive layout from retired v74 CSS');
 assert.match(architecture,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'v75 must keep Mercado visible in primary navigation');
-assert.match(architecture,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'v75 prototype must keep compact product cards');
+assert.match(architecture,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'v76 architecture must keep compact product cards where that component is used');
 
 assert.equal(manifest.latestVersion,'v75');
 const v65=manifest.releases.find(release=>release.version==='v65');
@@ -87,9 +88,10 @@ try{
   assert.ok(index.indexOf('market-shopping-focus.js')<index.indexOf('mobile-menu-toggle.js'));
   assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v75-architecture.js'));
   for(const asset of ['market-shopping-focus.css','market-shopping-focus.js','v74-experience.css','v75-architecture.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  assert.match(fs.readFileSync(path.join(dist,'v74-experience.css'),'utf8'),/76-retire-v74-css-behavior1/);
   assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Mobile shopping focus preserved with v76 architecture and no published v74 runtime: OK');
+console.log('Mobile shopping focus preserved with v76 architecture and no v74 runtime/CSS authority: OK');

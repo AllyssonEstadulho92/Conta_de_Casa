@@ -64,7 +64,8 @@ assert.match(css,/\.market-product-photo img/);
 assert.match(css,/object-fit:contain/);
 assert.match(brandCss,/fotografias[\s\S]*verificadas/);
 assert.match(brandCss,/\.market-product-photo[\s\S]*display:grid!important/);
-assert.match(experienceCss,/\.cdc-product-image img\{width:100%;height:100%;object-fit:contain/);
+assert.match(experienceCss,/76-retire-v74-css-behavior1/);
+assert.doesNotMatch(experienceCss,/\{[^}]*\}/,'retired v74 CSS must not control product images');
 assert.match(architectureCss,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/);
 assert.match(architectureCss,/\.cdc-product-image img[\s\S]*object-fit:contain!important/,'current architecture must preserve uncropped verified product photos');
 assert.doesNotMatch(architectureJs,/root\.CDCV74/,'current architecture must remain independent from retired v74 runtime');
@@ -83,4 +84,4 @@ assert.match(sw,/\.\/v75-architecture\.js/);
 assert.match(runtime,/productCode=scan\.code/);
 assert.doesNotMatch(runtime,/imageUrl\s*=/);
 
-console.log('Market real/official images remain isolated and visible under v76 architecture without published v74 runtime: OK');
+console.log('Market real/official images remain isolated and visible under v76 architecture without v74 runtime/CSS authority: OK');

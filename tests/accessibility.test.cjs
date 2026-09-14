@@ -6,8 +6,10 @@ const fs=require('node:fs');
 const design=fs.readFileSync('design-system.css','utf8');
 const base=fs.readFileSync('styles.css','utf8');
 const experience=fs.readFileSync('v74-experience.css','utf8');
+const architecture=fs.readFileSync('v75-architecture.css','utf8');
+const migrationBridge=fs.readFileSync('v75-market-featured.css','utf8');
 const menu=fs.readFileSync('mobile-menu-toggle.css','utf8');
-const css=`${base}\n${design}\n${experience}\n${menu}`;
+const css=`${base}\n${design}\n${architecture}\n${migrationBridge}\n${menu}`;
 const render=fs.readFileSync('render.js','utf8');
 const events=fs.readFileSync('events.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
@@ -84,11 +86,15 @@ assert.match(index,/id="billsList"[\s\S]*aria-live="polite"/);
 assert.match(index,/id="accountBalanceInfo"[\s\S]*aria-live="polite"/);
 assert.match(index,/id="toast"[\s\S]*role="status" aria-live="polite"/);
 
-/* O modelo v74 usa conteúdo textual real e não substitui informação por decoração. */
-assert.match(experience,/\.cdc-mobile-greeting/);
-assert.match(experience,/\.cdc-mobile-month/);
-assert.match(experience,/\.cdc-expense-feed/);
-assert.match(experience,/\.cdc-more-menu/);
-assert.doesNotMatch(experience,/pointer-events:none!important;[^}]*\.cdc-quick-action/,'quick actions must remain interactive');
+/* A camada v74 já não possui apresentação. Estruturas ainda vivas são validadas
+   nas camadas atuais, sem recuperar shells decorativos retirados. */
+assert.match(experience,/76-retire-v74-css-behavior1/);
+assert.doesNotMatch(experience,/\{[^}]*\}/,'retired v74 CSS must remain rule-free');
+assert.match(migrationBridge,/\.cdc-planning-overview/);
+assert.match(migrationBridge,/\.cdc-more-menu/);
+assert.match(migrationBridge,/\.cdc-preferences-details/);
+assert.match(architecture,/\.v75-more-group/);
+assert.match(architecture,/\.v75-budget-summary/);
+assert.doesNotMatch(css,/pointer-events:none!important;[^}]*\.cdc-quick-action/,'interactive controls must not be disabled by presentation CSS');
 
-console.log('Accessibility contrast, focus, touch targets, semantic state and mobile safe-area tests for v74: OK');
+console.log('Accessibility contrast, focus, touch targets, semantic state and mobile safe-area tests for v76: OK');

@@ -10,16 +10,17 @@ const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const legacyCss=read('styles.css');
 const designCss=read('design-system.css');
 const experienceCss=read('v74-experience.css');
+const migrationCss=read('v75-market-featured.css');
 const architectureCss=read('v75-architecture.css');
 const menuCss=read('mobile-menu-toggle.css');
-const css=`${legacyCss}\n${designCss}\n${experienceCss}\n${architectureCss}\n${menuCss}`;
+const css=`${legacyCss}\n${designCss}\n${migrationCss}\n${architectureCss}\n${menuCss}`;
 const events=read('events.js');
 const index=read('index.html');
 const render=read('render.js');
 const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
 
-/* Shell and canonical breakpoints remain in the v74 consolidated base. */
+/* Shell and canonical breakpoints remain in the consolidated design base. */
 assert.match(designCss,/Conta de Casa v74 — sistema visual consolidado/);
 assert.match(designCss,/--content-max:1480px/);
 assert.match(designCss,/--sidebar-expanded:232px/);
@@ -36,17 +37,20 @@ assert.match(designCss,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,
 assert.match(designCss,/\.mobile-nav \.nav-btn\.active::before\{background:var\(--primary\)!important\}/,'there must be one canonical active indicator');
 assert.match(designCss,/prefers-reduced-motion:reduce/);
 
-/* v74 CSS remains temporarily as the composition base while the JS runtime is retired. */
-assert.match(experienceCss,/Conta de Casa v74 — composição visual do protótipo móvel/);
-assert.match(experienceCss,/@media\(max-width:820px\)/);
-assert.match(experienceCss,/--cdc-prototype-header:#003b48/);
-assert.match(experienceCss,/--cdc-screen:#f2f5f6/);
-assert.match(experienceCss,/html\.app-active \.main\{padding-top:var\(--header-height\)!important;[\s\S]*padding-bottom:calc\(var\(--mobile-nav-height\) \+ env\(safe-area-inset-bottom,0px\) \+ 24px\)!important/);
-assert.match(experienceCss,/html\.app-active \.topbar,\.topbar\{[\s\S]*left:0!important;[\s\S]*right:0!important;[\s\S]*width:100%!important/);
-assert.match(experienceCss,/\.cdc-quick-actions\{display:grid!important;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
-for(const marker of ['.cdc-mobile-greeting','.cdc-mobile-month','.cdc-expense-feed','.cdc-market-home','.cdc-planning-overview','.cdc-report-summary','.cdc-more-menu'])assert.ok(experienceCss.includes(marker));
+/* v74-experience.css já não participa na geometria. */
+assert.match(experienceCss,/76-retire-v74-css-behavior1/);
+assert.doesNotMatch(experienceCss,/\{[^}]*\}/,'retired v74 stylesheet must contain no visual rule blocks');
 
-/* v75 explicitly repairs the hidden Mercado destination and theme consistency. */
+/* Estruturas ainda criadas pela arquitetura atual têm regras explícitas na ponte v76. */
+assert.match(migrationCss,/Conta de Casa v76 — ponte de retirada 75-featured1/i);
+assert.match(migrationCss,/@media\(max-width:820px\)/);
+assert.match(migrationCss,/@media\(min-width:821px\)/);
+for(const marker of ['.cdc-empty-note','.cdc-avatar','.cdc-category-dot','.cdc-planning-overview','.cdc-budget-ring','.cdc-plan-track','.cdc-more-menu','.cdc-preferences-details'])assert.ok(migrationCss.includes(marker));
+assert.match(migrationCss,/\.cdc-planning-overview,[\s\S]*\.cdc-more-menu[\s\S]*display:none!important/,'mobile-only architecture shells must remain hidden on desktop');
+assert.match(migrationCss,/\.cdc-preferences-details\{display:contents\}/,'desktop preferences must remain normal page content');
+assert.match(migrationCss,/\.cdc-plan-track i[\s\S]*linear-gradient/);
+
+/* v75/v76 explicitly repairs the hidden Mercado destination and owns current page components. */
 assert.match(legacyCss,/\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:hidden\}/,'legacy hidden third destination is the regression being repaired');
 assert.match(architectureCss,/Conta de Casa v75/);
 assert.match(architectureCss,/html\.cdc-v75 \.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:visible!important;display:grid!important/,'Mercado must be visible');
@@ -108,7 +112,7 @@ for(const asset of ['core','finance','render','forms','sync','events'])assert.ma
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
-for(const asset of ['./design-system.css','./v74-experience.css','./v75-architecture.css','./market-experience.css','./market-experience.js','./v64-runtime.js','./app-update.css','./app-update.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be available offline`);
+for(const asset of ['./design-system.css','./v74-experience.css','./v75-market-featured.css','./v75-architecture.css','./market-experience.css','./market-experience.js','./v64-runtime.js','./app-update.css','./app-update.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be available offline`);
 assert.ok(!sw.includes("'./v74-experience.js'"),'retired v74 runtime must not be available offline');
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
@@ -126,6 +130,7 @@ try{
   assert.match(builtIndex,/name="app-build" content="v75"/);
   assert.match(builtIndex,/design-system\.css\?v=75/);
   assert.match(builtIndex,/v74-experience\.css\?v=74-experience2/);
+  assert.match(builtIndex,/v75-market-featured\.css\?v=75-featured1/);
   assert.doesNotMatch(builtIndex,/v74-experience\.js\?v=74-experience2/);
   assert.match(builtIndex,/v75-architecture\.css\?v=75-architecture2/);
   assert.match(builtIndex,/v75-architecture\.js\?v=75-architecture2/);
@@ -134,6 +139,8 @@ try{
   assert.doesNotMatch(builtIndex,/v64-runtime\.css/);
   assert.ok(fs.existsSync(path.join(dist,'design-system.css')));
   assert.ok(fs.existsSync(path.join(dist,'v74-experience.css')));
+  assert.ok(fs.existsSync(path.join(dist,'v75-market-featured.css')));
+  assert.match(fs.readFileSync(path.join(dist,'v74-experience.css'),'utf8'),/76-retire-v74-css-behavior1/);
   assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')),'retired v74 runtime must not exist in dist');
   assert.ok(fs.existsSync(path.join(dist,'v75-architecture.css')));
   assert.ok(fs.existsSync(path.join(dist,'v75-architecture.js')));
@@ -141,4 +148,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Responsive v76 architecture, safe areas, visible five-destination navigation and retired v74 runtime distribution: OK');
+console.log('Responsive v76 architecture, migration bridge, safe areas, five-destination navigation and retired v74 CSS/JS authority: OK');
