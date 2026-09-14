@@ -52,6 +52,9 @@ assert.match(updateJs, /APPLY_UPDATE/);
 assert.match(updateJs, /controllerchange/);
 assert.match(updateJs, /location\.reload\(\)/);
 assert.doesNotMatch(updateJs, /https?:\/\//, 'The update center must not contact external endpoints.');
+assert.match(updateJs,/FALLBACK_RELEASE_NOTES=Object\.freeze\(\[\s*Object\.freeze\(\{\s*version:'v76'/,'offline/update-manifest fallback must identify the installed stable release as v76');
+assert.match(updateJs,/const buildVersion=\(\)=>metaValue\('app-build'\)\|\|FALLBACK_RELEASE_NOTES\[0\]\.version/,'build fallback must resolve through the first v76 fallback release');
+assert.ok(updateJs.indexOf("version:'v76'")<updateJs.indexOf("version:'v75'"),'v76 fallback notes must precede v75 history');
 
 const updateAction=updateJs.slice(updateJs.indexOf('async function runUpdateAction()'),updateJs.indexOf('function install()'));
 const registrationUpdateIndex=updateAction.indexOf('await registration.update()');
