@@ -12,6 +12,7 @@ const css=read('market-shopping-focus.css');
 const brand=read('market-brand.css');
 const experience=read('v74-experience.css');
 const architecture=read('v75-architecture.css');
+const planningMore=read('v76-planning-more.css');
 const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
 const manifest=JSON.parse(read('release-manifest.json'));
@@ -41,9 +42,10 @@ assert.match(css,/min-height:44px/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(brand,/\.market-product-photo[\s\S]*display:grid!important/);
 assert.match(experience,/76-retire-v74-css-behavior1/);
-assert.doesNotMatch(experience,/\{[^}]*\}/,'shopping focus must not receive layout from retired v74 CSS');
+assert.doesNotMatch(experience,/\{[^}]*\}/,'retired v74 CSS source must remain rule-free');
 assert.match(architecture,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'v75 must keep Mercado visible in primary navigation');
 assert.match(architecture,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'v76 architecture must keep compact product cards where that component is used');
+assert.match(planningMore,/76-planning-more1/);
 
 assert.equal(manifest.latestVersion,'v75');
 const v65=manifest.releases.find(release=>release.version==='v65');
@@ -54,19 +56,22 @@ assert.ok(v65.items.some(item=>/comprados/i));
 
 assert.ok(sw.includes("'./market-shopping-focus.css'"));
 assert.ok(sw.includes("'./market-shopping-focus.js'"));
-assert.ok(sw.includes("'./v74-experience.css'"));
-assert.ok(!sw.includes("'./v74-experience.js'"),'shopping focus must not depend on the retired v74 runtime');
 assert.ok(sw.includes("'./v75-architecture.css'"));
+assert.ok(sw.includes("'./v76-planning-more.css'"));
+for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be cached`);
 assert.match(sw,/v74-shopping2/);
 assert.match(sw,/v73-menu8/);
-assert.match(sw,/v74-experience2/);
+assert.match(sw,/planning-more1/);
 assert.match(sw,/v75-architecture2/);
 assert.match(sw,/retire-v74-runtime1/);
+assert.match(sw,/retire-assets1/);
 assert.match(prepare,/const BUILD = 'v75'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
-assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
+assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-more1'/);
+assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
+assert.doesNotMatch(prepare,/const FEATURED_REV/);
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -77,21 +82,21 @@ try{
   assert.match(index,/market-shopping-focus\.js\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/mobile-menu-toggle\.js\?v=73-menu8/);
-  assert.match(index,/v74-experience\.css\?v=74-experience2/);
-  assert.doesNotMatch(index,/v74-experience\.js/);
   assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
+  assert.match(index,/v76-planning-more\.css\?v=76-planning-more1/);
   assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
+  assert.doesNotMatch(index,/v74-experience\.(?:css|js)/);
+  assert.doesNotMatch(index,/v75-market-featured\.(?:css|js)/);
   assert.ok(index.indexOf('market-shopping-focus.css')<index.indexOf('mobile-menu-toggle.css'));
-  assert.ok(index.indexOf('mobile-menu-toggle.css')<index.indexOf('v74-experience.css'));
-  assert.ok(index.indexOf('v74-experience.css')<index.indexOf('v75-architecture.css'));
+  assert.ok(index.indexOf('mobile-menu-toggle.css')<index.indexOf('v75-architecture.css'));
+  assert.ok(index.indexOf('v75-architecture.css')<index.indexOf('v76-planning-more.css'));
   assert.ok(index.indexOf('market-category-groups.js')<index.indexOf('market-shopping-focus.js'));
   assert.ok(index.indexOf('market-shopping-focus.js')<index.indexOf('mobile-menu-toggle.js'));
   assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v75-architecture.js'));
-  for(const asset of ['market-shopping-focus.css','market-shopping-focus.js','v74-experience.css','v75-architecture.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
-  assert.match(fs.readFileSync(path.join(dist,'v74-experience.css'),'utf8'),/76-retire-v74-css-behavior1/);
-  assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')));
+  for(const asset of ['market-shopping-focus.css','market-shopping-focus.js','v75-architecture.css','v76-planning-more.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  for(const retired of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(dist,retired)),`${retired} must stay out of dist`);
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Mobile shopping focus preserved with v76 architecture and no v74 runtime/CSS authority: OK');
+console.log('Mobile shopping focus preserved with v76 architecture and retired v74/Featured assets excluded from distribution: OK');
