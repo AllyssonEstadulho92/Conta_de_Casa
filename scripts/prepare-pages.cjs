@@ -9,7 +9,6 @@ const DIST = path.join(ROOT, 'dist');
 const GENERATED = path.join(ROOT, '.generated');
 const BUILD_TYPESCRIPT_RUNTIME = path.join(ROOT, 'scripts', 'build-typescript-runtime.cjs');
 const GENERATED_PUBLIC_FILES = Object.freeze({
-  'v76-veggie-menu.js': path.join(GENERATED, 'v76-veggie-menu.js'),
   'market-branding.js': path.join(GENERATED, 'market-branding.js'),
   'sync-conflict-policy.js': path.join(GENERATED, 'sync-conflict-policy.js')
 });
@@ -22,7 +21,6 @@ const CATEGORY_REV = '64-ui1';
 const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
-const VEGGIE_MENU_REV = '76-veggie-menu2';
 const MODERN_UI_REV = '76-modern-ui2';
 const PRODUCT_PAGES_REV = '76-dashboard-clean1';
 const MOBILE_SHELL_REV = '76-mobile-shell2';
@@ -61,10 +59,9 @@ const BUILD_ID=resolveBuildId();
 const BUILD_DATE=new Date().toISOString();
 
 /* Bundle público v76. A composição atual combina camadas consolidadas v75/v76 enquanto
-   a distribuição, versão, manifesto e cache usam uma única identidade de release. Os
-   runtimes/CSS v74 e Featured já foram fisicamente retirados do repositório e continuam
-   explicitamente proibidos no bundle. Nenhuma camada de apresentação altera domínio
-   financeiro, persistência, cifragem, sincronização, scanner, QR ou regras de Mercado. */
+   a distribuição, versão, manifesto e cache usam uma única identidade de release. O menu
+   móvel tem uma única autoridade funcional: mobile-menu-toggle.js. Camadas visuais que
+   voltam a mover o mesmo botão ou observar o mesmo drawer são proibidas no bundle. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -78,7 +75,6 @@ const PUBLIC_FILES = Object.freeze([
   'asset-loader.css',
   'market-shopping-focus.css',
   'mobile-menu-toggle.css',
-  'v76-veggie-menu.css',
   'invoice-capture.css',
   'app-update.css',
   'v76-version-about.css',
@@ -107,7 +103,6 @@ const PUBLIC_FILES = Object.freeze([
   'sync-conflict-policy.js',
   'events.js',
   'mobile-menu-toggle.js',
-  'v76-veggie-menu.js',
   'market-experience.js',
   'market-branding.js',
   'market-category-groups.js',
@@ -139,7 +134,6 @@ const PUBLIC_FILES = Object.freeze([
 ]);
 
 const MANUAL_TYPESCRIPT_RUNTIMES = Object.freeze({
-  'v76-veggie-menu.js': 'src/ui/veggie-menu-toggle.ts',
   'market-branding.js': 'src/ui/market-branding.ts',
   'sync-conflict-policy.js': 'src/sync/sync-conflict-policy.ts'
 });
@@ -170,10 +164,12 @@ index=index.replace(/<meta name="theme-color" content="[^"]+"\s*\/>/,'<meta name
 index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${APP_VERSION} · ${BUILD}</strong>`);
 
-/* Remove referências históricas caso um source HTML antigo volte a introduzi-las. */
+/* Remove referências históricas/retiradas caso um source HTML antigo volte a introduzi-las. */
 index=index.replace(/\s*<link[^>]+v74-experience\.css[^>]*>\s*/gi,'\n');
 index=index.replace(/\s*<link[^>]+v75-market-featured\.css[^>]*>\s*/gi,'\n');
 index=index.replace(/\s*<script[^>]+v75-market-featured\.js[^>]*><\/script>\s*/gi,'\n');
+index=index.replace(/\s*<link[^>]+v76-veggie-menu\.css[^>]*>\s*/gi,'\n');
+index=index.replace(/\s*<script[^>]+v76-veggie-menu\.js[^>]*><\/script>\s*/gi,'\n');
 
 index=index.replace(
   "img-src 'self' data: blob: https://images.openfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://world.openfoodfacts.org;",
@@ -199,7 +195,6 @@ if(!index.includes('market-photo-loader.css'))index=index.replace('</head>',`  <
 if(!index.includes('v75-drawer-theme.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-drawer-theme.css?v=${DRAWER_REV}" />\n</head>`);
 if(!index.includes('v75-pages.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-pages.css?v=${PAGES_REV}" />\n</head>`);
 if(!index.includes('v75-expenses-modern.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-expenses-modern.css?v=${EXPENSES_REV}" />\n</head>`);
-if(!index.includes('v76-veggie-menu.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-veggie-menu.css?v=${VEGGIE_MENU_REV}" />\n</head>`);
 if(!index.includes('v75-market-flow.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-market-flow.css?v=${MARKET_FLOW_REV}" />\n</head>`);
 if(!index.includes('v75-usability.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v75-usability.css?v=${USABILITY_REV}" />\n</head>`);
 if(!index.includes('v76-modern-ui.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-modern-ui.css?v=${MODERN_UI_REV}" />\n</head>`);
@@ -225,7 +220,6 @@ if(!index.includes('market-category-groups.js'))index=index.replace('</body>',` 
 if(!index.includes('v64-runtime.js'))index=index.replace('</body>',`  <script src="./v64-runtime.js?v=${RUNTIME_REV}" defer></script>\n</body>`);
 if(!index.includes('market-shopping-focus.js'))index=index.replace('</body>',`  <script src="./market-shopping-focus.js?v=${SHOPPING_REV}" defer></script>\n</body>`);
 if(!index.includes('mobile-menu-toggle.js'))index=index.replace('</body>',`  <script src="./mobile-menu-toggle.js?v=${MENU_REV}" defer></script>\n</body>`);
-if(!index.includes('v76-veggie-menu.js'))index=index.replace('</body>',`  <script src="./v76-veggie-menu.js?v=${VEGGIE_MENU_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-architecture.js'))index=index.replace('</body>',`  <script src="./v75-architecture.js?v=${ARCHITECTURE_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-stability.js'))index=index.replace('</body>',`  <script src="./v75-stability.js?v=${STABILITY_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-startup-guard.js'))index=index.replace('</body>',`  <script src="./v75-startup-guard.js?v=${STARTUP_REV}" defer></script>\n</body>`);
@@ -240,7 +234,7 @@ fs.writeFileSync(distEvents,events);
 const manifest=JSON.parse(fs.readFileSync(path.join(DIST,'release-manifest.json'),'utf8'));
 if(manifest.latestVersion!==BUILD)throw new Error(`Release manifest latestVersion ${manifest.latestVersion} does not match ${BUILD}`);
 
-const forbidden=['README.md','SECURITY.md','PRIVACY.md','SPEC.md','CHANGELOG.md','.git','.github','tests','scripts','downloads','ui-consistency.css','v64-runtime.css','v74-experience.js','v74-experience.css','v75-market-featured.js','v75-market-featured.css','v75-drawer-blue.css'];
+const forbidden=['README.md','SECURITY.md','PRIVACY.md','SPEC.md','CHANGELOG.md','.git','.github','tests','scripts','downloads','ui-consistency.css','v64-runtime.css','v74-experience.js','v74-experience.css','v75-market-featured.js','v75-market-featured.css','v75-drawer-blue.css','v76-veggie-menu.js','v76-veggie-menu.css'];
 for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry)))throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
@@ -251,4 +245,4 @@ for(const name of Object.keys(GENERATED_PUBLIC_FILES)){
   }
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; veggie-menu ${VEGGIE_MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; architecture ${ARCHITECTURE_REV}; planning-more ${PLANNING_MORE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; architecture ${ARCHITECTURE_REV}; planning-more ${PLANNING_MORE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
