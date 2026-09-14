@@ -38,12 +38,14 @@ assert.match(designCss,/\.mobile-nav \.nav-btn\.active::before\{background:var\(
 assert.match(designCss,/prefers-reduced-motion:reduce/);
 
 assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-more1/i);
+assert.match(planningMore,/76-prototype-planning1/);
 assert.match(planningMore,/@media\(max-width:820px\)/);
 assert.match(planningMore,/@media\(min-width:821px\)/);
 for(const marker of ['.cdc-empty-note','.cdc-avatar','.cdc-category-dot','.cdc-planning-overview','.cdc-budget-ring','.cdc-plan-track','.cdc-more-menu','.cdc-preferences-details'])assert.ok(planningMore.includes(marker));
 assert.match(planningMore,/\.cdc-planning-overview,[\s\S]*\.cdc-more-menu[\s\S]*display:none!important/);
 assert.match(planningMore,/\.cdc-preferences-details\{display:contents\}/);
-assert.match(planningMore,/\.cdc-plan-track i[\s\S]*linear-gradient/);
+assert.match(planningMore,/\.cdc-plan-track i[\s\S]*background:var\(--v76-primary/,'category progress should use the restrained solid prototype primary, not a decorative gradient');
+assert.match(planningMore,/\.cdc-budget-ring\.is-unset/,'an undefined budget must keep a neutral responsive state');
 
 assert.match(legacyCss,/\.mobile-nav \.nav-btn:nth-child\(3\)\{visibility:hidden\}/);
 assert.match(architectureCss,/Conta de Casa v75/);
@@ -100,6 +102,7 @@ assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
 assert.match(sw,/retire-assets1/);
 assert.match(sw,/v76-version-alignment1/);
+assert.match(sw,/prototype-system1/);
 for(const asset of ['./design-system.css','./v76-planning-more.css','./v75-architecture.css','./market-experience.css','./market-experience.js','./v64-runtime.js','./app-update.css','./app-update.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be available offline`);
 for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be available offline`);
 assert.ok(!sw.includes("'./ui-consistency.css'"));
@@ -134,4 +137,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Responsive official v76 build, safe areas and five-destination navigation remain intact: OK');
+console.log('Responsive official v76 build, truthful Planning state, safe areas and five-destination navigation remain intact: OK');
