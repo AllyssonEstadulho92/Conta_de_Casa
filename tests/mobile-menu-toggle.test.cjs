@@ -6,6 +6,7 @@ const js = fs.readFileSync('mobile-menu-toggle.js','utf8');
 const css = fs.readFileSync('mobile-menu-toggle.css','utf8');
 const icons = fs.readFileSync('ui-icons.js','utf8');
 const architecture = fs.readFileSync('v75-architecture.js','utf8');
+const index = fs.readFileSync('index.html','utf8');
 const prepare = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
 const manifest = JSON.parse(fs.readFileSync('release-manifest.json','utf8'));
@@ -22,6 +23,15 @@ assert.match(js, /expanded\?'Fechar menu':'Abrir menu'/);
 assert.match(js, /setAttribute\('aria-expanded',String\(expanded\)\)/);
 assert.match(js, /button\.dataset\.menuState=state/);
 assert.match(js, /drawer\.dataset\.menuState=state/);
+
+/* O header é único e exterior às páginas. Todas as rotas usam exatamente o mesmo
+   controlo de menu, portanto não podem divergir para um ícone/menu próprio. */
+assert.equal((index.match(/id="mobileMenuBtn"/g)||[]).length,1,'there must be exactly one global mobile menu button');
+assert.ok(index.indexOf('id="mobileMenuBtn"')<index.indexOf('id="page-dashboard"'),'global menu control must live in the shared header before every page');
+for(const page of ['page-dashboard','page-bills','page-calendar','page-market','page-planning','page-reports','page-goals','page-security','page-diagnostics','page-settings']){
+  assert.ok(index.includes(`id="${page}"`),`${page} must remain under the shared shell`);
+}
+assert.match(index,/<header class="topbar">[\s\S]*id="mobileMenuBtn"[\s\S]*id="pageTitle"[\s\S]*<\/header>/,'shared header must contain menu and current page title');
 
 assert.match(icons, /fillIcon\(document\.querySelector\('#mobileMenuBtn'\),'menu',22\)/);
 assert.match(js, /button\.querySelector\(':scope > svg\.ui-icon-svg'\)/);
@@ -79,7 +89,7 @@ assert.match(prepare, /const PLANNING_MORE_REV = '76-planning-more1'/);
 assert.doesNotMatch(prepare, /const EXPERIENCE_REV/);
 assert.doesNotMatch(prepare, /const FEATURED_REV/);
 assert.match(sw, /v73-menu8/);
-assert.match(sw, /menu-morph1/,'service worker cache must be invalidated for the new visible morph');
+assert.match(sw, /menu-morph1/,'service worker cache must be invalidated for the visible hamburger-to-X morph');
 assert.match(sw, /planning-more1/);
 assert.match(sw, /v75-architecture2/);
 assert.match(sw, /retire-assets1/);
@@ -95,4 +105,4 @@ assert.ok(v73.items.some(item=>/lado direito|direita/i.test(item)));
 assert.ok(v73.items.some(item=>/swipe|gesto/i.test(item)));
 assert.ok(v73.items.some(item=>/cabeçalho|header/i.test(item)));
 
-console.log('v76 two-line menu morph, right-side drawer controller and retired-asset boundaries: OK');
+console.log('v76 global shared header uses one animated hamburger-to-X controller across all ten routes: OK');
