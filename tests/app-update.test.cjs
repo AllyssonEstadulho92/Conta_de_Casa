@@ -84,7 +84,7 @@ assert.match(shoppingJs,/Conta de Casa v65/);
 assert.match(shoppingCss,/Conta de Casa v74/);
 assert.match(menuJs,/Conta de Casa v73/);
 assert.match(menuCss,/Conta de Casa v73/);
-assert.match(experienceJs,/Conta de Casa v74/);
+assert.match(experienceJs,/Conta de Casa v74/,'historical source remains in the repository for controlled retirement');
 assert.match(experienceCss,/Conta de Casa v74/);
 assert.match(architectureJs,/Conta de Casa v76/);
 assert.match(architectureJs,/76-architecture-consolidation1/);
@@ -101,8 +101,9 @@ assert.match(sw, /version-audit1/);
 assert.match(sw, /conta-de-casa-public-v75-architecture2/);
 assert.match(sw, /stability1-layout1-drawer2/);
 assert.match(sw, /ui-audit1/);
-assert.match(sw, /architecture-consolidation1/);
-for(const asset of ['./app-update.css','./app-update.js','./v76-version-about.css','./design-system.css','./v64-runtime.js','./market-shopping-focus.css','./market-shopping-focus.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js','./v75-stability.css','./v75-stability.js','./v75-layout-polish.css','./v75-drawer-theme.css','./release-manifest.json'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be cached`);
+assert.match(sw, /architecture-consolidation1-retire-v74-runtime1/);
+for(const asset of ['./app-update.css','./app-update.js','./v76-version-about.css','./design-system.css','./v64-runtime.js','./market-shopping-focus.css','./market-shopping-focus.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v74-experience.css','./v75-architecture.css','./v75-architecture.js','./v75-stability.css','./v75-stability.js','./v75-layout-polish.css','./v75-drawer-theme.css','./release-manifest.json'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be cached`);
+assert.ok(!sw.includes("'./v74-experience.js'"),'retired v74 runtime must not be cached');
 assert.ok(!sw.includes("'./v75-drawer-blue.css'"));
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
@@ -130,10 +131,12 @@ assert.match(prepare, /const HEADER_REV = '75-header2'/);
 assert.match(prepare, /const STABILITY_REV = '75-stability1'/);
 assert.match(prepare, /const LAYOUT_REV = '75-layout1'/);
 assert.match(prepare, /const DRAWER_REV = '75-drawer2'/);
-for(const asset of ['app-update.css','v76-version-about.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-stability.css','v75-stability.js','v75-layout-polish.css','v75-drawer-theme.css','release-manifest.json'])assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be copied to dist`);
+for(const asset of ['app-update.css','v76-version-about.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v75-architecture.css','v75-architecture.js','v75-stability.css','v75-stability.js','v75-layout-polish.css','v75-drawer-theme.css','release-manifest.json'])assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be copied to dist`);
+assert.doesNotMatch(publicFilesBlock,/'v74-experience\.js'/,'retired v74 runtime must not be copied to dist');
 assert.doesNotMatch(publicFilesBlock,/'v75-drawer-blue\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'ui-consistency\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'v64-runtime\.css'/);
+assert.match(prepare, /forbidden=\[[^\]]*'v74-experience\.js'/s);
 assert.match(prepare, /manifest\.latestVersion!==BUILD/);
 assert.match(prepare, /theme-color" content="#f4f8f8"/);
 
@@ -165,7 +168,7 @@ try {
   assert.match(index, /v75-layout-polish\.css\?v=75-layout1/);
   assert.match(index, /v75-drawer-theme\.css\?v=75-drawer2/);
   assert.doesNotMatch(index, /v75-drawer-blue\.css/);
-  assert.match(index, /v74-experience\.js\?v=74-experience2/);
+  assert.doesNotMatch(index, /v74-experience\.js/,'built application must not load the retired v74 runtime');
   assert.match(index, /v75-architecture\.js\?v=75-architecture2/);
   assert.match(index, /v75-stability\.js\?v=75-stability1/);
   assert.doesNotMatch(index, /ui-consistency\.css/);
@@ -178,10 +181,10 @@ try {
   assert.equal(distWebManifest.theme_color,'#f4f8f8');
   assert.ok(index.indexOf('sync.js?v=75') < index.indexOf('sync-conflict-policy.js?v=74-ui1'));
   assert.ok(index.indexOf('market-shopping-focus.js?v=74-shopping2') < index.indexOf('mobile-menu-toggle.js?v=73-menu8'));
-  assert.ok(index.indexOf('mobile-menu-toggle.js?v=73-menu8') < index.indexOf('v74-experience.js?v=74-experience2'));
-  assert.ok(index.indexOf('v74-experience.js?v=74-experience2') < index.indexOf('v75-architecture.js?v=75-architecture2'));
+  assert.ok(index.indexOf('mobile-menu-toggle.js?v=73-menu8') < index.indexOf('v75-architecture.js?v=75-architecture2'));
   assert.ok(index.indexOf('v75-architecture.js?v=75-architecture2') < index.indexOf('v75-stability.js?v=75-stability1'));
-  for(const asset of ['app-update.css','v76-version-about.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-stability.css','v75-stability.js','v75-layout-polish.css','v75-drawer-theme.css','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  for(const asset of ['app-update.css','v76-version-about.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v74-experience.css','v75-architecture.css','v75-architecture.js','v75-stability.css','v75-stability.js','v75-layout-polish.css','v75-drawer-theme.css','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')),'retired v74 runtime must not exist in dist');
   assert.match(fs.readFileSync(path.join(dist,'v75-drawer-theme.css'),'utf8'),/76-drawer-neutral1/);
   assert.ok(!fs.existsSync(path.join(dist,'v75-drawer-blue.css')));
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
@@ -190,4 +193,4 @@ try {
   fs.rmSync(dist, { recursive:true, force:true });
 }
 
-console.log(`Version metadata ${packageJson.version}, same-release Service Worker verification and controlled updates: OK`);
+console.log(`Version metadata ${packageJson.version}, controlled updates and retired v74 runtime distribution: OK`);
