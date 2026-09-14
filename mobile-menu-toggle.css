@@ -1,4 +1,4 @@
-/* Conta de Casa v73 — navegação lateral à direita, hambúrguer/X animado e drawer off-canvas suave. */
+/* Conta de Casa v76 — navegação lateral à direita e morph premium de duas linhas para X. */
 
 /* A camada final de navegação mantém a mesma sidebar no desktop, mas posiciona-a no lado direito.
    O conteúdo continua a usar a largura disponível sem reflow inesperado. */
@@ -87,54 +87,63 @@
 
   .mobile-menu-icon-sentinel{display:none!important}
 
+  /*
+   * v76 menu-morph1
+   * O controlador histórico continua a criar três spans para compatibilidade, mas a apresentação
+   * final usa apenas dois traços pseudo-elementos. Isto elimina o desaparecimento de uma terceira
+   * linha durante o gesto e produz um morph geométrico e simétrico para X.
+   */
   .mobile-menu-glyph{
     position:relative;
     display:block;
-    width:24px;
-    height:18px;
+    width:26px;
+    height:20px;
     pointer-events:none;
+    transform:none!important;
     transform-origin:center;
-    will-change:transform;
+    will-change:auto;
   }
 
-  .mobile-menu-glyph>span{
+  .mobile-menu-glyph>span{display:none!important}
+
+  .mobile-menu-glyph::before,
+  .mobile-menu-glyph::after{
+    content:"";
     position:absolute;
     left:50%;
-    height:2.25px;
+    top:50%;
+    width:24px;
+    height:3px;
     border-radius:999px;
     background:currentColor;
-    transform:translateX(-50%) rotate(0deg) scaleX(1);
     transform-origin:center;
-    will-change:top,width,transform,opacity;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    will-change:transform,width;
     transition:
-      top .24s cubic-bezier(.32,.72,0,1),
-      width .24s cubic-bezier(.32,.72,0,1),
-      transform .24s cubic-bezier(.32,.72,0,1),
-      opacity .12s ease-out;
+      transform .28s cubic-bezier(.22,1,.36,1),
+      width .22s cubic-bezier(.22,1,.36,1),
+      opacity .14s ease-out;
   }
 
-  .mobile-menu-glyph>span:nth-child(1){top:1px;width:22px}
-  .mobile-menu-glyph>span:nth-child(2){top:8px;width:18px}
-  .mobile-menu-glyph>span:nth-child(3){top:15px;width:14px}
-
-  .mobile-menu-btn[aria-expanded="true"] .mobile-menu-glyph>span:nth-child(1),
-  .mobile-menu-btn[data-menu-state="open"] .mobile-menu-glyph>span:nth-child(1){
-    top:8px;
-    width:22px;
-    transform:translateX(-50%) rotate(45deg) scaleX(1);
+  .mobile-menu-glyph::before{
+    transform:translate(-50%,-50%) translateY(-4px) rotate(0deg);
   }
 
-  .mobile-menu-btn[aria-expanded="true"] .mobile-menu-glyph>span:nth-child(2),
-  .mobile-menu-btn[data-menu-state="open"] .mobile-menu-glyph>span:nth-child(2){
-    opacity:0;
-    transform:translateX(-50%) rotate(0deg) scaleX(.18);
+  .mobile-menu-glyph::after{
+    transform:translate(-50%,-50%) translateY(4px) rotate(0deg);
   }
 
-  .mobile-menu-btn[aria-expanded="true"] .mobile-menu-glyph>span:nth-child(3),
-  .mobile-menu-btn[data-menu-state="open"] .mobile-menu-glyph>span:nth-child(3){
-    top:8px;
-    width:22px;
-    transform:translateX(-50%) rotate(-45deg) scaleX(1);
+  .mobile-menu-btn[aria-expanded="true"] .mobile-menu-glyph::before,
+  .mobile-menu-btn[data-menu-state="open"] .mobile-menu-glyph::before{
+    width:23px;
+    transform:translate(-50%,-50%) translateY(0) rotate(45deg);
+  }
+
+  .mobile-menu-btn[aria-expanded="true"] .mobile-menu-glyph::after,
+  .mobile-menu-btn[data-menu-state="open"] .mobile-menu-glyph::after{
+    width:23px;
+    transform:translate(-50%,-50%) translateY(0) rotate(-45deg);
   }
 
   .nav-drawer{
@@ -402,7 +411,8 @@
 
 @media(prefers-reduced-motion:reduce){
   .mobile-menu-btn,
-  .mobile-menu-glyph>span,
+  .mobile-menu-glyph::before,
+  .mobile-menu-glyph::after,
   .nav-drawer-shell,
   .nav-drawer::backdrop,
   .drawer-nav .nav-btn,
