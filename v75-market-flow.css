@@ -215,3 +215,128 @@
   #page-market .market-price-confirmation,
   #formDialog[data-mode="market-browser"] .market-flow-estimate-note{border:1px solid CanvasText;background:Canvas;color:CanvasText}
 }
+
+/* 76-market-canonical-flow1 — a lista funcional criada por renderMarket() é a
+   única fonte de verdade da página. Esta camada assume também a visibilidade dos
+   seus próprios command bar, filtros, resumo e resultados, em vez de depender de
+   restauros genéricos posteriores. */
+html.cdc-v75 #page-market>.market-command-bar{
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+html.cdc-v75 #page-market>#marketSummary{
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+html.cdc-v75 #page-market>#marketList{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+html.cdc-v75 #page-market>.market-results-head{
+  display:flex!important;
+  align-items:baseline!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  min-width:0!important;
+}
+html.cdc-v75 #page-market>.market-results-head>strong,
+html.cdc-v75 #page-market>.market-results-head>#marketResultCount{
+  display:block!important;
+  min-width:0!important;
+}
+html.cdc-v75 #page-market>.market-results-head>#marketResultCount{
+  flex:0 0 auto!important;
+  margin-left:auto!important;
+  text-align:right!important;
+  white-space:nowrap!important;
+}
+
+@media(max-width:820px){
+  /* Pesquisa e ação continuam visíveis; filtros tornam-se uma única faixa
+     horizontal com labels reais. Assim não ocupam quase todo o primeiro ecrã. */
+  html.cdc-v75 #page-market>.market-command-bar{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:8px!important;
+    padding:8px!important;
+    margin-bottom:8px!important;
+  }
+  html.cdc-v75 #page-market>.market-command-bar #newMarketBtn{
+    display:inline-flex!important;
+    min-width:44px!important;
+    min-height:46px!important;
+    visibility:visible!important;
+    opacity:1!important;
+    pointer-events:auto!important;
+  }
+  html.cdc-v75 #page-market>.market-filter-grid{
+    display:flex!important;
+    grid-template-columns:none!important;
+    align-items:flex-end!important;
+    gap:8px!important;
+    width:100%!important;
+    margin:0 0 10px!important;
+    padding:2px 0 8px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    overscroll-behavior-inline:contain!important;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    scroll-snap-type:x proximity;
+  }
+  html.cdc-v75 #page-market>.market-filter-grid::-webkit-scrollbar{display:none}
+  html.cdc-v75 #page-market>.market-filter-grid .market-filter-field{
+    flex:0 0 164px!important;
+    min-width:164px!important;
+    max-width:164px!important;
+    scroll-snap-align:start;
+  }
+  html.cdc-v75 #page-market>.market-filter-grid .market-filter-field:nth-child(3){
+    grid-column:auto!important;
+    flex-basis:190px!important;
+    min-width:190px!important;
+    max-width:190px!important;
+  }
+  html.cdc-v75 #page-market>.market-filter-grid .market-filter-clear{
+    grid-column:auto!important;
+    flex:0 0 auto!important;
+    align-self:flex-end!important;
+    min-height:48px!important;
+    margin:0!important;
+  }
+  html.cdc-v75 #page-market>#marketSummary{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    margin-bottom:10px!important;
+  }
+  html.cdc-v75 #page-market>.market-results-head{
+    min-height:34px!important;
+    padding:2px 2px 6px!important;
+  }
+  html.cdc-v75 #page-market>.market-results-head>strong{font-size:.84rem!important}
+  html.cdc-v75 #page-market>.market-results-head>#marketResultCount{font-size:.7rem!important}
+}
+
+@media(max-width:430px){
+  html.cdc-v75 #page-market>.market-command-bar{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  html.cdc-v75 #page-market>.market-command-bar #newMarketBtn{
+    width:100%!important;
+  }
+  html.cdc-v75 #page-market>#marketSummary{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:350px){
+  html.cdc-v75 #page-market>#marketSummary{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}

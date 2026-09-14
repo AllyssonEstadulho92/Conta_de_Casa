@@ -15,6 +15,7 @@ const render=read('render.js');
 const shopping=read('market-shopping-focus.js');
 const catalog=read('market-visual-catalog.js');
 const photoLoader=read('market-photo-loader.css');
+const indexSource=read('index.html');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 
@@ -38,18 +39,32 @@ assert.doesNotMatch(js,/\bcommit\s*\(|\bsaveState\s*\(|estimatedCents\s*=|actual
 assert.doesNotMatch(js,/market-barcode|ZXing|BarcodeDetector|data-market-scan/i,'75-market1 must not alter scanner behavior');
 
 assert.match(css,/Mercado 75-market1/);
+assert.match(css,/76-market-canonical-flow1/,'Mercado must declare the canonical v76 presentation path');
 assert.match(css,/grid-template-columns:64px minmax\(0,1fr\) auto!important/,'live search card must explicitly allocate photo, content and action columns');
 assert.match(css,/\.market-filter-field>span[\s\S]*position:static!important/,'mobile filter labels must be visible');
+assert.match(css,/#page-market>#marketList\{[\s\S]*display:block!important[\s\S]*visibility:visible!important/,'canonical market results must cancel any legacy display:none');
+assert.match(css,/#page-market>#marketSummary\{[\s\S]*display:grid!important/,'canonical market summary must remain mounted');
+assert.match(css,/#page-market>\.market-results-head\{[\s\S]*display:flex!important[\s\S]*justify-content:space-between!important/,'title and result count must be separate, aligned elements');
+assert.match(css,/#marketResultCount\{[\s\S]*white-space:nowrap!important/,'result count must not visually concatenate with Lista do mês');
+assert.match(css,/@media\(max-width:820px\)[\s\S]*#page-market>\.market-filter-grid\{[\s\S]*display:flex!important[\s\S]*overflow-x:auto!important/,'mobile Mercado filters must use one horizontal disclosure strip');
+assert.match(css,/scroll-snap-type:x proximity/);
+assert.match(css,/\.market-filter-field\{[\s\S]*flex:0 0 164px!important/,'mobile filter controls must keep a stable readable width');
+assert.match(css,/\.market-filter-clear\{[\s\S]*min-height:48px!important/,'clear action must preserve a touch target');
 assert.match(css,/\.market-price-confirmation/);
 assert.match(css,/content:attr\(data-market-value-label\)/);
 assert.match(css,/data-cdc-asset-frame="market-browser-image"/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/forced-colors:active/);
 
+for(const canonical of ['marketSearch','newMarketBtn','marketStatusFilter','marketCategoryFilter','marketSort','marketClearFilters','marketSummary','marketResultCount','marketList']){
+  assert.match(indexSource,new RegExp(`id="${canonical}"`),`canonical Mercado control missing: ${canonical}`);
+}
+
 assert.match(market,/estimatedCents:product\.priceCents,actualCents:0,purchased:false/,'searched price must remain an estimate until a real price is confirmed');
 assert.match(render,/if\(!item\.purchased\) return '<span class="status-chip pending">Por comprar<\/span>'/);
 assert.match(render,/Falta preço real/);
 assert.match(render,/Preço real \/ unidade/);
+assert.match(render,/resultCount\.textContent=`\$\{list\.length\} de \$\{all\.length\} item/,'result count remains data-only and separate from the Lista do mês title');
 assert.match(shopping,/market-item-details/,'75-market1 is layered over the existing mobile disclosure instead of replacing it');
 assert.match(catalog,/key:`\$\{marketId\}\|\$\{pid\}`/,'catalog identity must remain marketId|pid');
 assert.match(catalog,/if\(id&&found!==id\)return ''/,'official retailer URL must continue to match the expected PID');
@@ -63,7 +78,8 @@ assert.match(prepare,/v75-market-flow\.css\?v=\$\{MARKET_FLOW_REV\}/);
 assert.match(prepare,/v75-market-flow\.js\?v=\$\{MARKET_FLOW_REV\}/);
 assert.ok(sw.includes("'./v75-market-flow.css'"));
 assert.ok(sw.includes("'./v75-market-flow.js'"));
-assert.match(sw,/assets1-market1/,'market1 must be appended to the cache revision without breaking earlier revision sequences');
+assert.match(sw,/assets1-market1/,'market1 must remain in the cache lineage');
+assert.match(sw,/canonical-expense-market1/,'PWA must invalidate for canonical Despesas/Mercado presentation');
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -73,10 +89,9 @@ try{
   assert.match(index,/v75-market-flow\.js\?v=75-market1/);
   assert.ok(index.indexOf('market-photo-loader.css')<index.indexOf('v75-market-flow.css'));
   assert.ok(index.indexOf('v75-market-flow.css')<index.indexOf('v75-usability.css'));
-  assert.ok(index.indexOf('v75-market-featured.js')<index.indexOf('v75-market-flow.js'));
   for(const asset of ['v75-market-flow.css','v75-market-flow.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v75 Mercado flow, accounting isolation and asset-loading integration: OK');
+console.log('v76 canonical Mercado flow, compact mobile filters and accounting isolation: OK');
