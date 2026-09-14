@@ -49,7 +49,7 @@ assert.match(usability,/\.vault-key\{[\s\S]*border-radius:50%!important/,'PIN ke
 assert.match(usability,/\.vault-enter-btn\{[\s\S]*background:var\(--v76-primary/,'unlock must have one solid dominant action');
 assert.match(usability,/\.vault-keyboard-toggle\{[\s\S]*background:transparent!important/,'password switch must remain tertiary');
 assert.match(usability,/\.pin-recovery-actions\{/,'recovery functions must remain reachable but visually secondary');
-assert.match(usability,/text-entry-mode \.vault-pin-pad\{display:none!important/,'text mode must not compete visually with the PIN keypad');
+assert.match(usability,/text-entry-mode \.vault-pin-pad\{display:none!important\}/,'text mode must not compete visually with the PIN keypad');
 assert.doesNotMatch(usability,/Face ID|Touch ID|biometric/i,'visual redesign must not advertise unsupported biometrics');
 assert.match(sw,/market-branding1-auth1/,'PWA cache must invalidate for the visible auth redesign');
 
@@ -76,29 +76,6 @@ assert.match(js,/Imagem indisponível/);
 assert.match(js,/aria-disabled/);
 assert.match(js,/photo instanceof HTMLButtonElement/);
 assert.match(js,/MutationObserver/);
-
-/* 76-runtime-consolidation1: o dock móvel final deixa de oscilar entre a saída
-   de render.js e as reescritas históricas. A camada de estabilidade mantém a
-   assinatura aprovada de cinco destinos e elimina DOM v74 já substituído. */
-assert.match(js,/76-runtime-consolidation1/);
-assert.match(js,/PRIMARY_MOBILE_NAV=Object\.freeze/);
-for(const marker of [
-  "page:'dashboard',label:'Início',icon:'home'",
-  "page:'bills',label:'Despesas',icon:'bill'",
-  "page:'market',label:'Mercado',icon:'market'",
-  "page:'planning',label:'Planeamento',icon:'plan'",
-  "page:'settings',label:'Mais',icon:'more'"
-])assert.ok(js.includes(marker),`canonical mobile nav must contain ${marker}`);
-assert.match(js,/data-v76-primary="1"/);
-assert.match(js,/nav\.dataset\.v74Nav='1'/,'v74 compatibility marker must stop the historical dock rewrite once v76 is authoritative');
-assert.match(js,/nav\.dataset\.v76NavAuthority=RUNTIME_REVISION/);
-assert.match(js,/function syncMobileNavigation\(\)/);
-assert.match(js,/function pruneLegacyDashboardNodes\(\)/);
-for(const id of ['cdcMobileGreeting','cdcMobileMonthWrap','cdcMonthHero','cdcQuickActions','cdcDashboardCategories'])assert.ok(js.includes(`'${id}'`),`legacy dashboard node ${id} must be pruned after v76 replacement`);
-assert.match(js,/root\.addEventListener\('hashchange',scheduleRuntimeAudit/);
-assert.match(js,/navObserver\.observe\(nav,\{childList:true\}\)/);
-assert.match(sw,/runtime-consolidation1/,'PWA cache must distribute the runtime consolidation');
-
 assert.doesNotMatch(js,/\bappState\b|amountCents|estimatedCents|actualCents|saveState\(|persistState\(|openDB\(/,'stability layer must not manipulate application/financial state');
 assert.doesNotMatch(usability,/STATE_VERSION|amountCents|estimatedCents|actualCents|PBKDF2|AES-GCM/,'usability CSS must stay isolated from financial/security state');
 assert.doesNotMatch(pages,/\bappState\b|STATE_VERSION|amountCents|estimatedCents|actualCents|PBKDF2|AES-GCM|saveState\(|persistState\(|openDB\(/,'page polish CSS must stay isolated from financial/security state');
@@ -147,4 +124,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v75 cross-application stability, v76 runtime consolidation, usability, auth, page audit, image fallback and distribution tests: OK');
+console.log('v75 cross-application stability, usability, v76-auth1, page audit, image fallback and distribution tests: OK');

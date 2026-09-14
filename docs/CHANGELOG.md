@@ -2,6 +2,44 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-14 — `76-icon-semantics2` — cor e semântica de ícones — em validação
+
+### Origem
+
+Validação física no iPhone mostrou que a limpeza anterior deixou a navegação demasiado cinzenta, com pouco contraste entre destinos, e o label `Planeamento` aparecia truncado como `Planeame…`.
+
+### Problemas confirmados no código
+
+- `plan` no subset Lucide local não representava claramente planeamento/checklist;
+- `settings` usava sliders em vez da engrenagem convencional;
+- o menu `Mais` pedia nomes não canónicos (`income`, `security`, `sync`) que podiam cair no fallback genérico `more`;
+- vários controlos globais tinham ficado visualmente neutros demais;
+- o label móvel `Planeamento` não cabia no espaço disponível do dock.
+
+### Correções executadas
+
+- `plan` passa para a geometria oficial Lucide `clipboard-list` do snapshot fixado no projeto;
+- `settings` passa para a engrenagem Lucide oficial;
+- novo `activity` para Diagnóstico;
+- menu `Mais`: Relatórios → `report`, Metas → `goal`, Segurança → `shield`, Sincronização → `cloudCheck`, Diagnóstico → `activity`;
+- dock mostra `Plano` sem alterar a rota `planning` nem o título da página;
+- criada paleta semântica controlada para light/dark;
+- dock, header, menu Mais, editar/apagar/pagar/avisar/filtrar/sync recebem acentos funcionais;
+- ativo continua protegido por `aria-current`, fundo e texto; cor não é o único sinal;
+- `forced-colors` continua sob controlo do sistema operativo;
+- cache Service Worker recebe `icon-semantics2`;
+- testes `ui-icons` e `ui-consistency` atualizados.
+
+### Preservado
+
+Sem alterações a `STATE_VERSION`, cálculos, `finance.js`, IndexedDB, PBKDF2/AES-GCM, PIN, sync de dados, QR, scanner, preços, quantidades ou regras de Mercado.
+
+### Estado
+
+A branch ainda precisa de TypeScript Foundation + CI integral, merge e Pages. A validação física final permanece pendente; não declarar o bloco publicado antes desses gates.
+
+---
+
 ## 2026-09-13 — PR #100 / `76-brand-icons1` — identidade e iconografia — publicado
 
 ### Problemas confirmados
@@ -16,93 +54,49 @@ O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheir
 
 - `icon.svg` simplificado para casa + euro, teal sólido `#087B78` e branco;
 - removidos folha e gradientes da marca;
-- `.brand-mark` passa a reutilizar `icon.svg` em vez de exibir genericamente Lucide `home`;
+- `.brand-mark` passa a reutilizar `icon.svg`;
 - Lucide mantém-se como autoridade para navegação, ações e estados;
-- pseudo-ícones decorativos/duplicados do Mercado são neutralizados pela autoridade CSS final;
+- pseudo-ícones decorativos/duplicados do Mercado neutralizados;
 - “Adicionar item” volta a apresentar `Plus` semântico;
 - stroke funcional normalizado em 2 px;
-- `tests/ui-icons.test.cjs` protege identidade, semântica e ausência de duplicação;
-- cache Service Worker recebe `brand-icons1` para distribuir a alteração.
-
-### Preservado
-
-Sem alterações a `STATE_VERSION`, cálculos, `finance.js`, IndexedDB, PBKDF2/AES-GCM, PIN, sync, QR, scanner, preços, quantidades ou regras de Mercado.
+- cache Service Worker recebe `brand-icons1`.
 
 ### Evidência
 
 - merge PR #100: `5b9689f04e844b9216626729b3b5aae5bf1acc09`;
-- TypeScript Foundation PR: sucesso;
 - CI PR `34783486604`: sucesso integral;
 - TypeScript Foundation main `34783537256`: sucesso;
 - CI main `34783537266`: sucesso integral;
 - Pages `34783564467`: sucesso.
 
-### Validação física pendente
-
-Safari/iPhone/PWA, Android/Chrome e desktop. O ícone do ecrã principal de uma PWA já instalada pode continuar em cache pelo sistema operativo e exigir refresh/reinstalação; não é tratado como regressão confirmada sem teste físico.
-
 ---
 
 ## 2026-09-13 — PR #99 / `76-ui-audit1` — auditoria transversal UI/UX — publicado
 
-### Âmbito
-
-Auditoria de header, auth, dock móvel, design system, cascade v74/v75/v76, responsividade, acessibilidade e autoridade de navegação. Referências usadas: Apple HIG, Material/Android accessibility, WCAG 2.2/W3C e web.dev, adaptadas à PWA real.
-
-### Problemas confirmados
-
-- header móvel v75 ainda impunha gradiente escuro e texto/ícones brancos, enquanto v76 já usava superfície clara;
-- onboarding `cdcWelcome` do v74 continuava a poder mascarar o fluxo visual `76-auth1` no primeiro acesso;
-- navegação móvel continua com duas autoridades (`core/render` e `v74-experience`);
-- v74 ainda cria blocos de Dashboard que `76-dashboard-clean1` apenas esconde;
-- cascade histórica continua dependente de múltiplos `!important`.
-
-### Correções publicadas
-
-- `v75-header-refinement.css` refeito como camada de compatibilidade neutra: superfície do design system, sem gradiente, sem branco forçado, sem sombra pesada;
-- controlos de menu/notificação 44×44 px, foco claro, hover/active discretos e forced-colors;
-- `v76-mobile-shell.css` mantém contratos de `76-auth-hidden1`, neutraliza `cdcWelcome` e mantém `vaultCreate` real visível;
-- dock móvel passa a superfície única, selected state subtil, ícones/labels coerentes e foco visível;
-- cache Service Worker recebe `ui-audit1`;
-- auditoria detalhada em `docs/UI_UX_AUDIT.md`.
-
-### Evidência
-
+- header móvel final neutro e acessível;
+- drawer e dock consolidados;
+- onboarding v74 neutralizado visualmente;
+- safe areas, focus, reduced-motion e forced-colors protegidos;
 - merge `add93b922fd8c91d6ec8ad7fffcc8bf5984d673c`;
-- CI pós-merge `34782068003`: sucesso integral;
-- Pages `34782098996`: sucesso.
+- CI `34782068003` e Pages `34782098996`: sucesso.
 
 ---
 
 ## 2026-09-13 — PR #98 / `76-auth-hidden1` — Safari respeita `hidden` no cofre — publicado
 
-Segunda validação física mostrou que, apesar do PR #96, o cofre podia continuar visualmente no fluxo enquanto a página `Mais` aparecia por baixo. A causa foi a regra `display:grid!important` do auth competir com o comportamento nativo de `[hidden]` em Safari/WebKit.
-
-Correção:
-
 - `#vaultScreen[hidden]` e `#app[hidden]` explícitos como `display:none!important`;
-- proteção anterior de cofre visível → shell oculto preservada;
+- proteção cofre visível → shell oculto preservada;
 - cache `auth-hidden1`;
-- regressão adicionada ao mobile shell.
-
-Evidência:
-
-- merge `56f909846c5f02c466f047792c99a61f7fbac1c7`;
-- TypeScript Foundation `34781128824`: sucesso;
-- CI `34781128879`: sucesso;
-- Pages `34781156741`: sucesso.
+- CI/TypeScript/Pages verdes.
 
 ---
 
-## 2026-09-13 — PR #96 / `76-auth-transition1` — PIN abre Dashboard e dock deixa de sobrepor cofre — publicado
+## 2026-09-13 — PR #96 / `76-auth-transition1` — PIN abre Dashboard — publicado
 
 - entrada local-first depois de PIN válido;
 - sync remoto continua em background;
 - rollback seguro em falha de transição;
-- shell não pode aparecer enquanto cofre está visível;
-- Safari/PWA startup e mobile shell protegidos por testes.
-
-Merge `d18d274141b1032ab0e909729739b3f86cabfb9e`; CI/TypeScript/Pages verdes.
+- shell não aparece sobre o cofre.
 
 ---
 
@@ -110,8 +104,7 @@ Merge `d18d274141b1032ab0e909729739b3f86cabfb9e`; CI/TypeScript/Pages verdes.
 
 - `src/sync/sync-conflict-policy.ts` canónico;
 - JS manual removido;
-- runtime público gerado pelo build;
-- diferenças técnicas não criam falsos conflitos; diferenças financeiras continuam a exigir revisão.
+- runtime público gerado pelo build.
 
 ---
 
@@ -152,6 +145,7 @@ Valida rota ↔ secção ↔ renderer, IDs duplicados, assets do `dist`, allowli
 - regressão real em dispositivo tem prioridade sobre teste legado;
 - UI final usa conteúdo/hierarquia antes de decoração;
 - `icon.svg` é a marca canónica e Lucide é a iconografia funcional;
+- cor semântica é permitida, mas nunca como único sinal de estado;
 - navegação móvel precisa de uma única autoridade;
 - blocos v74 substituídos devem deixar de ser criados;
 - migração TypeScript continua por blocos com paridade e regressões.

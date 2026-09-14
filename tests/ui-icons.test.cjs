@@ -5,6 +5,7 @@ const js=fs.readFileSync('ui-icons.js','utf8');
 const css=fs.readFileSync('ui-icons.css','utf8');
 const design=fs.readFileSync('design-system.css','utf8');
 const experience=fs.readFileSync('v74-experience.css','utf8');
+const experienceJs=fs.readFileSync('v74-experience.js','utf8');
 const architecture=fs.readFileSync('v75-architecture.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const iconSvg=fs.readFileSync('icon.svg','utf8');
@@ -20,9 +21,14 @@ assert.match(js,/Object\.assign\(ICONS,LUCIDE_ICONS\)/,'Lucide registry must ext
 assert.match(js,/globalThis\.CDCIcons/,'shared icon renderer must remain available to contextual modules');
 assert.match(js,/source:'Lucide'/);
 assert.match(js,/stroke-width="2"/,'Lucide stroke weight must remain consistent');
-for(const name of ['home','bill','calendar','plan','market','report','goal','shield','settings','search','eye','eyeOff','sun','moon','camera','qr','receipt','close','plus','edit','trash','filter','scan','cloudCheck','cloudOff']){
+for(const name of ['home','bill','calendar','plan','market','report','goal','shield','settings','activity','search','eye','eyeOff','sun','moon','camera','qr','receipt','close','plus','edit','trash','filter','scan','cloudCheck','cloudOff']){
   assert.match(js,new RegExp(`\\b${name}:`),`missing Lucide semantic icon ${name}`);
 }
+
+/* v76-icon-semantics2: planeamento, definições e diagnóstico usem símbolos reconhecíveis do snapshot Lucide fixado. */
+assert.match(js,/plan:'<rect width="8" height="4" x="8" y="2" rx="1" ry="1"\/><path d="M16 4h2/,'planning must use the pinned Lucide clipboard-list geometry');
+assert.match(js,/settings:'<path d="M9\.671 4\.136/,'settings must use the pinned Lucide gear geometry');
+assert.match(js,/activity:'<path d="M22 12h-2\.48/,'diagnostics must use the pinned Lucide activity geometry');
 
 assert.match(js,/input\[type="search"\]/,'search controls must receive the shared Lucide search icon');
 assert.match(js,/function decorateSelect/,'native select arrows must be normalized by the icon layer');
@@ -60,6 +66,23 @@ assert.match(css,/html\.market-prototype-active \.page-heading h1::before,[\s\S]
 assert.match(css,/#page-market #newMarketBtn\[data-ui-iconized="true"\]>.ui-icon-svg\{display:block!important\}/,'Add item must keep its semantic Lucide add icon');
 assert.match(css,/#page-market #newMarketBtn\[data-ui-iconized="true"\]::after,[\s\S]*content:none!important/,'the misleading legacy scanner pseudo-icon must be suppressed');
 assert.match(css,/:is\(\.nav-btn,\.icon-btn,\.icon-text-btn,\.btn\)[\s\S]*stroke-width:2!important/,'interactive icons must share one stroke metric');
+
+/* v76-icon-semantics2: colour is controlled, semantic and never the only state cue. */
+assert.match(css,/v76 — iconografia semântica e cor controlada/);
+for(const token of ['--v76-icon-home','--v76-icon-bills','--v76-icon-market','--v76-icon-planning','--v76-icon-more','--v76-icon-report','--v76-icon-goal','--v76-icon-security','--v76-icon-settings','--v76-icon-diagnostics','--v76-icon-alert']){
+  assert.ok(css.includes(token),`missing semantic icon token ${token}`);
+}
+assert.match(css,/html\[data-theme="dark"\][\s\S]*--v76-icon-home:#4dd5c2/,'dark mode must receive a dedicated readable icon palette');
+for(const page of ['dashboard','bills','market','planning','settings'])assert.match(css,new RegExp(`data-mobile="${page}"`),`mobile destination ${page} must have a semantic accent`);
+assert.match(css,/\.mobile-nav \.nav-btn\.active,[\s\S]*aria-current="page"/,'selected mobile state must remain visible independently from icon colour');
+assert.match(css,/#notificationsBtn>\.ui-icon-svg\{color:var\(--v76-icon-alert\)!important\}/,'notification icon must have a semantic warning accent');
+assert.match(css,/forced-colors:active/,'forced-colors users must not depend on the custom palette');
+
+/* The compatibility runtime must request only canonical names so CDCIcons does not fall back to ellipsis. */
+assert.match(experienceJs,/\['planning','Plano','plan'\]/,'short mobile planning label must avoid ellipsis truncation');
+for(const mapping of ["['reports','Relatórios','report']","['goals','Metas de poupança','goal']","['security','Segurança e privacidade','shield']","['sync','Sincronização','cloudCheck']","['diagnostics','Diagnóstico e integridade','activity']"]){
+  assert.ok(experienceJs.includes(mapping),`More menu must use canonical semantic mapping ${mapping}`);
+}
 
 assert.match(design,/Conta de Casa v74/);
 assert.match(design,/\.ui-icon-svg,\.svg-icon\{[\s\S]*stroke-width:2!important/,'v74 design system must normalize all application SVG metrics');
@@ -104,6 +127,6 @@ assert.match(sw,/v74-experience\.css/,'offline/public asset allowlist must inclu
 assert.match(sw,/v75-architecture\.css/,'offline/public asset allowlist must include the architecture overlay');
 assert.doesNotMatch(sw,/['"]\.\/ui-consistency\.css['"]/,'service worker must not cache obsolete visual normalization CSS');
 assert.doesNotMatch(sw,/['"]\.\/v64-runtime\.css['"]/,'service worker must not cache obsolete v64 shell CSS');
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/,'service worker cache must refresh for the final v75 prototype architecture');
+assert.match(sw,/icon-semantics2/,'service worker cache must invalidate for the semantic icon palette');
 
-console.log('Conta de Casa brand mark and Lucide UI icon authority: OK');
+console.log('Conta de Casa brand mark, Lucide icon semantics and controlled colour authority: OK');
