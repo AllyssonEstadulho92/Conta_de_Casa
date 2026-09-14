@@ -37,6 +37,7 @@ assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
 assert.match(sw,/retire-assets1/);
+assert.match(sw,/v76-version-alignment1/);
 assert.match(sw,/ts-runtime2-market-branding1/,'Service Worker cache must change when the generated Market branding runtime changes');
 for(const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','v75-architecture.css','v76-planning-more.css','v75-architecture.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be cached by the service worker`);
@@ -52,7 +53,8 @@ assert.match(pages,/forbidden=\[[^\]]*'v75-market-featured\.js'/s,'retired Featu
 assert.match(pages,/forbidden=\[[^\]]*'v75-market-featured\.css'/s,'retired Featured CSS should remain explicitly forbidden in dist');
 assert.ok(!sw.includes("'./ui-consistency.css'"),'obsolete visual override must not ship');
 assert.ok(!sw.includes("'./v64-runtime.css'"),'obsolete v64 visual shell must not ship');
-assert.match(pages,/const BUILD = 'v75'/);
+assert.match(pages,/const BUILD = 'v76'/);
+assert.match(pages,/const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(pages,/const ARCHITECTURE_REV = '75-architecture2'/);
 assert.match(pages,/const PLANNING_MORE_REV = '76-planning-more1'/);
 assert.match(pages,/['"]market-branding\.js['"]:\s*path\.join\(GENERATED,\s*['"]market-branding\.js['"]\)/);
@@ -104,4 +106,4 @@ assert.ok(css.includes('env(safe-area-inset-top)'));
 assert.ok(css.includes('env(safe-area-inset-bottom)'));
 assert.ok(css.includes('min-width:0'));
 
-console.log('Market live sources and TypeScript branding remain safe with v74/Featured sources physically absent: OK');
+console.log('Market live sources and TypeScript branding remain safe under the official v76 release with retired sources physically absent: OK');
