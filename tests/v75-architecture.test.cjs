@@ -17,6 +17,7 @@ const release=JSON.parse(read('release-manifest.json'));
 assert.match(js,/Conta de Casa v76/);
 assert.match(js,/76-architecture-consolidation1/);
 assert.match(js,/76-retire-v74-nav-marker1/);
+assert.match(js,/76-expense-mode-stability1/);
 assert.match(js,/bills:\['Despesas','Movimentos'\]/);
 assert.match(js,/market:\['Mercado','Compras'\]/);
 assert.match(js,/settings:\['Mais','Conta e aplicação'\]/);
@@ -34,9 +35,16 @@ assert.doesNotMatch(js,/root\.CDCV74/,'current architecture must not depend on t
 assert.doesNotMatch(js,/dataset\.v74Nav\s*=/,'current navigation must not emit the compatibility dataset consumed by the physically retired v74 runtime');
 assert.doesNotMatch(js,/placeDashboardGreeting/,'retired dashboard greeting composition must not be recreated');
 assert.match(js,/ensureBillTabs/,'new expense flow must expose Manual, invoice and QR modes');
+assert.match(js,/role="tablist"/,'expense modes must expose segmented-tab semantics');
+assert.match(js,/role="tab" aria-selected="true"/);
 assert.match(js,/data-v75-bill-mode="manual"/);
 assert.match(js,/data-v75-bill-mode="image"/);
 assert.match(js,/data-v75-bill-mode="qr"/);
+assert.match(js,/syncBillModeButtons/);
+assert.match(js,/handleBillModeKeydown/,'expense mode tabs must support arrow-key navigation');
+assert.match(js,/cdc:bill-mode-change/,'mode selection must notify the capture surface without launching an action');
+assert.doesNotMatch(js,/if\(mode==='image'\)setTimeout\(\(\)=>byId\('invoiceImageInput'\)\?\.click/,'selecting image mode must not open the file picker automatically');
+assert.doesNotMatch(js,/if\(mode==='qr'\)setTimeout\(\(\)=>q\('\[data-invoice-camera\]'/,'selecting QR mode must not launch the camera automatically');
 assert.match(js,/v75-sync-hero/,'synchronization must expose a concise state-first composition');
 assert.doesNotMatch(js,/MORE_GROUPS[\s\S]{0,900}As minhas listas/,'More must not duplicate the Mercado primary destination');
 assert.doesNotMatch(js,/MORE_GROUPS[\s\S]{0,900}Planeamento e orçamento/,'More must not duplicate the Planeamento primary destination');
@@ -58,8 +66,8 @@ assert.match(css,/\.v75-sync-hero/);
 assert.match(css,/background:var\(--v75-surface\)!important/,'v75 architecture layer must use coherent surfaces instead of mixed hard-coded cards');
 assert.match(css,/prefers-reduced-motion:reduce/);
 
-/* 76-expense-mode1: Manual / Ler fatura / QR Code tornam-se um único controlo
-   segmentado, mantendo os handlers existentes e melhorando apenas apresentação. */
+/* 76-expense-mode1: Manual / Ler fatura / QR Code use one segmented control.
+   76-expense-mode-stability1 adds deterministic behavior without changing QR/parser logic. */
 assert.match(invoiceCss,/76-expense-mode1/);
 assert.match(invoiceCss,/#formDialog\[data-v75-kind="expense"\] \.v75-bill-tabs\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
 assert.match(invoiceCss,/\.v75-bill-tabs button\{[\s\S]*min-height:52px!important[\s\S]*display:inline-flex!important/,'expense mode controls must preserve generous touch targets');
@@ -78,7 +86,8 @@ assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
 assert.ok(prepare.includes("'invoice-capture.css'"));
 assert.match(sw,/conta-de-casa-public-v76-version-alignment1-v75-architecture2/);
-assert.match(sw,/expense-mode1/,'PWA cache must refresh the improved expense mode control');
+assert.match(sw,/expense-mode1/,'PWA cache must retain the improved expense mode control');
+assert.match(sw,/expense-mode-stability1/,'PWA cache must refresh deterministic expense mode behavior');
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
 assert.ok(sw.includes("'./invoice-capture.css'"));
@@ -87,4 +96,4 @@ assert.equal(release.releases[0].version,'v76');
 assert.ok(release.releases[0].items.some(item=>/Início.*Despesas.*Mercado.*Planeamento.*Mais/i.test(item)));
 assert.ok(release.releases[0].items.some(item=>/cofre\/PIN|PIN|cofre/i.test(item)));
 
-console.log('v76 consolidated presentation architecture with premium expense mode control: OK');
+console.log('v76 consolidated presentation architecture with deterministic expense registration modes: OK');
