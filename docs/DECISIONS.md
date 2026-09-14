@@ -1,6 +1,6 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 13 de setembro de 2026
+Atualizado: 14 de setembro de 2026
 
 ## D-064 — migração TypeScript incremental
 
@@ -89,34 +89,43 @@ A partir de `76-ui-audit1`, decisões importantes de UI/UX são confrontadas com
 
 ## D-087 — header móvel final é neutro
 
-O antigo gradiente teal do v75 não é mais a direção final. O header móvel deve usar superfície do design system, texto/ícones com contraste, borda subtil, sem sombra pesada, controlos de 44 px e foco visível. A cor de marca fica reservada para seleção/ação/status.
-
-Motivo: havia conflito real entre `v75-header-refinement.css` (fundo escuro + branco forçado) e `v76-product-pages.css` (superfície clara).
+O antigo gradiente teal do v75 não é mais a direção final. O header móvel usa superfície do design system, texto/ícones com contraste, borda subtil, sem sombra pesada, controlos de 44 px e foco visível.
 
 ## D-088 — onboarding v74 não mascara `76-auth1`
 
-Enquanto `v74-experience.js` permanecer por compatibilidade, `cdcWelcome` não pode substituir visualmente o formulário real do cofre. A camada final oculta o onboarding v74 e força o `vaultCreate` real a permanecer visível. A criação runtime histórica será removida apenas no bloco de limpeza v74 com regressões verdes.
+Enquanto `v74-experience.js` permanecer por compatibilidade, `cdcWelcome` não pode substituir visualmente o formulário real do cofre.
 
 ## D-089 — dock móvel: consistência antes de decoração
 
-O dock final usa superfície neutra, 3–5 destinos primários, selected state discreto, ícones lineares e labels coerentes; respeita safe areas, reduced-motion, forced-colors e foco visível. Sombras/blur devem ser mínimos e nunca comprometer legibilidade.
+O dock final usa superfície neutra, 3–5 destinos primários, selected state claro, ícones lineares e labels coerentes; respeita safe areas, reduced-motion, forced-colors e foco visível.
 
 ## D-090 — navegação móvel precisa de uma única autoridade funcional
 
-A duplicação atual entre `core/render` e `v74-experience` é dívida ALTA. A remoção será feita num bloco dedicado, preferencialmente com configuração TypeScript canónica, depois de paridade de destinos, `aria-current`, drawer e labels.
+A duplicação atual entre `core/render` e `v74-experience` é dívida ALTA. A remoção será feita num bloco dedicado, preferencialmente com configuração TypeScript canónica.
 
 ## D-091 — marca e iconografia têm autoridades distintas
 
 A partir de `76-brand-icons1`:
 
-- `icon.svg` é a marca gráfica canónica da Conta de Casa e deve ser reutilizado em PWA, sidebar, drawer e cofre;
-- a marca usa casa + euro, teal sólido e branco; gradientes, folha e símbolos decorativos não pertencem à identidade final;
-- Lucide continua a ser a família canónica de ícones funcionais para navegação, ações e estados;
-- um ícone funcional deve representar a ação real; não substituir `Plus` por `Scan` num botão “Adicionar item”;
-- títulos, cartões e estados não recebem pseudo-ícones apenas para ornamentação quando já existe texto/hierarquia suficiente;
-- não se usa o ícone Lucide `home` como substituto do logótipo.
+- `icon.svg` é a marca gráfica canónica;
+- Lucide é a família canónica de ícones funcionais;
+- símbolo funcional deve representar a ação real;
+- títulos/cartões não recebem pseudo-ícones apenas por decoração.
 
-Motivo: o código apresentava duas identidades visuais simultâneas e vários pseudo-ícones do Mercado que duplicavam ou contradiziam o significado dos controlos.
+## D-092 — cor semântica é permitida, mas controlada
+
+`76-icon-semantics2` corrige a neutralização excessiva observada fisicamente no iPhone.
+
+- a interface continua baseada em superfícies neutras;
+- ícones podem usar uma pequena paleta por função/destino para melhorar orientação e reconhecimento;
+- ativo/inativo, sucesso, aviso e erro não podem depender apenas de cor: fundo, texto, símbolo e atributos semânticos continuam presentes;
+- light e dark recebem tokens próprios;
+- `forced-colors` tem prioridade sobre a paleta da aplicação;
+- cores aleatórias ou decorativas fora do sistema não são permitidas.
+
+## D-093 — consumidores devem usar nomes canónicos do registo Lucide
+
+Um módulo que chama `CDCIcons.markup(name)` só pode pedir nomes existentes no registo local. `76-icon-semantics2` corrige o menu `Mais` para `report`, `goal`, `shield`, `cloudCheck` e `activity`, evitando fallback genérico para reticências. Planeamento usa `plan` com geometria `clipboard-list`; Definições usa `settings` com engrenagem.
 
 ## Invariantes vigentes
 
