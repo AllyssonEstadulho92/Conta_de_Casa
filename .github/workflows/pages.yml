@@ -69,7 +69,6 @@ jobs:
           node --check pingo-doce-photo-library.js
           node --check market-photo-loader.js
           node --check v64-runtime.js
-          node --check v74-experience.js
           node --check v75-architecture.js
           node --check v75-stability.js
           node --check v75-market-flow.js
