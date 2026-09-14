@@ -31,6 +31,17 @@ assert.equal(context.CDCInvoiceCapture.parseAtInvoiceQr('not-an-at-qr'),null);
 assert.equal(context.CDCInvoiceCapture.parseMoneyCents('123.45'),12345);
 assert.equal(context.CDCInvoiceCapture.parseMoneyCents('123,45'),null,'AT QR decimal separator is dot');
 
+assert.match(source,/76-expense-mode-stability1/);
+assert.match(source,/MODE_COPY=Object\.freeze/);
+assert.match(source,/Ler fatura por imagem/);
+assert.match(source,/Fotografia com QR da Autoridade Tributária/);
+assert.match(source,/não faz OCR do texto completo/,'image mode must describe the real QR-in-image capability instead of promising OCR');
+assert.match(source,/Ler QR da fatura/);
+assert.match(source,/Abrir câmara/);
+assert.match(source,/Selecionar imagem/);
+assert.match(source,/cdc:bill-mode-change/,'capture surface must react to the selected registration mode');
+assert.match(source,/currentCaptureMode\(\)!=='qr'/,'camera must only start from explicit QR mode');
+assert.match(source,/currentCaptureMode\(\)!=='image'/,'image decoding must stay scoped to image mode');
 assert.match(source,/BrowserQRCodeReader/);
 assert.match(source,/decodeFromImageUrl/);
 assert.match(source,/facingMode:\{ideal:'environment'\}/);
@@ -48,4 +59,4 @@ assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/invoice-scan-overlay/);
 assert.match(css,/invoice-capture-preview-grid/);
 
-console.log('Invoice capture tests: OK');
+console.log('Invoice capture tests: exact AT QR parser plus deterministic image/QR modes: OK');
