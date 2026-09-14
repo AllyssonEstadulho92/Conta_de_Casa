@@ -73,12 +73,11 @@ assert.match(brandingJs,/installMarketBranding/);
 assert.match(brandingJs,/marketProductImages\s*=\s*'verified'/);
 assert.doesNotMatch(brandingJs,/appState|estimatedCents|actualCents|saveState|commit\(/,'branding must not mutate financial state');
 
-/* Historical v74 source stays available for audit only; live Mercado no longer loads it. */
+/* Fontes v74 ficam apenas para auditoria/compatibilidade; Mercado atual usa os módulos canónicos. */
 assert.match(experienceJs,/SUPPORTED_STORES=\[[\s\S]*Continente[\s\S]*Pingo Doce/);
 assert.doesNotMatch(experienceJs,/Auchan|Lidl|Mercadona/);
-assert.match(experienceCss,/\.cdc-market-home/);
-assert.match(experienceCss,/\.cdc-product-grid/);
-assert.match(experienceCss,/\.cdc-store-grid/);
+assert.match(experienceCss,/76-retire-v74-css-behavior1/);
+assert.doesNotMatch(experienceCss,/\{[^}]*\}/,'retired v74 CSS must not style Mercado');
 assert.match(architectureCss,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'Mercado must remain visible in the primary navigation');
 assert.match(architectureCss,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'current market grid must remain compact');
 assert.match(architectureJs,/market:\['Mercado','Compras'\]/);
@@ -104,4 +103,4 @@ assert.ok(css.includes('env(safe-area-inset-top)'));
 assert.ok(css.includes('env(safe-area-inset-bottom)'));
 assert.ok(css.includes('min-width:0'));
 
-console.log('Market live sources, TS-generated branding and v76 architecture remain safe without published v74 runtime: OK');
+console.log('Market live sources, TS-generated branding and v76 architecture remain safe without v74 runtime/CSS authority: OK');
