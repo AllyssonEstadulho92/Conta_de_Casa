@@ -16,9 +16,16 @@ const forms=read('forms.js');
 const market=read('market-experience.js');
 
 assert.match(css,/76-product-pages1/);
+assert.match(css,/76-prototype-dashboard1/);
 assert.match(css,/#page-dashboard>#kpiGrid\{order:1\}/);
 assert.match(css,/\.account-balance-kpi\{[\s\S]*grid-column:1\/-1!important/);
+assert.match(css,/\.account-balance-kpi\{[\s\S]*background:var\(--v76-primary-strong,var\(--v76-primary\)\)!important[\s\S]*box-shadow:none!important/,'Saldo atual deve ser o hero teal sólido do protótipo');
+assert.match(css,/\.account-balance-kpi>strong\{[\s\S]*color:#fff!important/);
+assert.match(css,/\.account-balance-kpi>small\{[\s\S]*color:rgba\(255,255,255,.76\)!important/);
+assert.match(css,/\.account-balance-kpi>\.kpi-action\{[\s\S]*min-height:44px!important/,'Atualizar saldo deve manter touch target acessível');
 assert.match(css,/\.kpi-grid\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
+assert.match(css,/@media\(max-width:820px\)[\s\S]*\.kpi-grid\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/,'mobile moderno mantém três indicadores compactos abaixo do hero');
+assert.match(css,/@media\(max-width:359px\)[\s\S]*\.kpi-grid\{grid-template-columns:1fr!important\}/,'iPhone muito estreito deve regressar a uma coluna legível');
 assert.match(css,/grid-template-areas:[\s\S]*"upcoming budget"[\s\S]*"activity category"/);
 assert.match(css,/@media\(max-width:820px\)[\s\S]*grid-template-areas:[\s\S]*"upcoming"[\s\S]*"budget"[\s\S]*"category"[\s\S]*"activity"/);
 assert.match(css,/@media\(forced-colors:active\)/);
@@ -27,6 +34,9 @@ assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 // O redesign reutiliza os cálculos reais existentes; não inventa um novo modelo financeiro.
 assert.match(render,/const n = dashboardNumbers\(\);/);
 assert.match(render,/account-balance-kpi/);
+assert.match(render,/\['Por pagar',n\.pending/);
+assert.match(render,/\['Em atraso',n\.overdue/);
+assert.match(render,/\['Saldo projetado',n\.projected/);
 assert.match(finance,/function dashboardNumbers\(/);
 assert.match(finance,/pendingCount:/);
 assert.match(finance,/overdueCount:/);
@@ -40,7 +50,6 @@ for(const legacyId of ['cdcMobileGreeting','cdcMobileMonthWrap','cdcMonthHero','
 }
 assert.match(css,/v76-dashboard-clean1/);
 assert.match(css,/#cdcMobileGreeting,[\s\S]*#cdcMobileMonthWrap,[\s\S]*#cdcMonthHero,[\s\S]*#cdcQuickActions,[\s\S]*#cdcDashboardCategories[\s\S]*display:none!important/);
-assert.match(css,/\.account-balance-kpi\{[\s\S]*background:var\(--v76-surface\)!important;[\s\S]*box-shadow:none!important/);
 assert.match(css,/\.account-balance-kpi::after\{display:none!important\}/);
 assert.match(css,/\.main>\.topbar\{[\s\S]*box-shadow:none!important/);
 assert.match(css,/data-v75-page=\"dashboard\"[\s\S]*\.page-heading \.eyebrow[\s\S]*display:none!important/);
@@ -69,6 +78,7 @@ const product=prepare.indexOf('v76-product-pages.css?v=${PRODUCT_PAGES_REV}');
 const shell=prepare.indexOf('v76-mobile-shell.css?v=${MOBILE_SHELL_REV}');
 assert.ok(modern>=0 && product>modern && shell>product,'product pages must load after visual tokens and before the mobile shell');
 assert.match(sw,/dashboard-clean1/);
+assert.match(sw,/prototype-dashboard1/,'PWA cache must refresh the prototype Dashboard');
 assert.match(sw,/mobile-drawer-actions1/);
 assert.ok(sw.includes("'./v76-product-pages.css'"));
 
@@ -78,4 +88,4 @@ assert.doesNotMatch(css,/body \.main\s*\{/);
 assert.doesNotMatch(css,/\.mobile-nav\s*\{/);
 assert.doesNotMatch(css,/safe-area-inset-/);
 
-console.log('v76 product page hierarchy: dashboard plus visible Mercado/Faturas actions and PWA integration: OK');
+console.log('v76 product page hierarchy: prototype Dashboard plus visible Mercado/Faturas actions and PWA integration: OK');
