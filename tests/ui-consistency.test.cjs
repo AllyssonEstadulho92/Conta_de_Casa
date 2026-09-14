@@ -102,12 +102,14 @@ assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 
 
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
 assert.match(sw,/retire-assets1/);
+assert.match(sw,/v76-version-alignment1/);
 for(const asset of ['./design-system.css','./v75-architecture.css','./v76-planning-more.css','./v75-architecture.js','./v75-header-refinement.css'])assert.ok(sw.includes(`'${asset}'`));
 for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be cached`);
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 
-assert.match(prepare,/const BUILD = 'v75'/);
+assert.match(prepare,/const BUILD = 'v76'/);
+assert.match(prepare,/const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
@@ -129,7 +131,8 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/design-system\.css\?v=75/);
+  assert.match(index,/name="app-build" content="v76"/);
+  assert.match(index,/design-system\.css\?v=76/);
   assert.match(index,/market-brand\.css\?v=74-ui1/);
   assert.match(index,/market-shopping-focus\.css\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
@@ -148,4 +151,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Conta de Casa UI consistency: v76 owns presentation/runtime composition and retired v74/Featured sources are physically absent.');
+console.log('Conta de Casa UI consistency: official v76 build owns release identity while current v75/v76 layer contracts remain intact.');
