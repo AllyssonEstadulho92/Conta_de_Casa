@@ -60,7 +60,6 @@ jobs:
           node --check pingo-doce-photo-library.js
           node --check market-photo-loader.js
           node --check v64-runtime.js
-          node --check v74-experience.js
           node --check v75-architecture.js
           node --check v75-stability.js
           node --check v75-startup-guard.js
@@ -135,7 +134,7 @@ jobs:
       - name: v75 Mercado flow tests
         run: node tests/v75-market-flow.test.cjs
 
-      - name: v64 scanner, billing-cycle and v74 shell tests
+      - name: v64 scanner, billing-cycle and current shell tests
         run: node tests/v64-runtime.test.cjs
 
       - name: Unified icon audit tests
@@ -144,7 +143,7 @@ jobs:
       - name: Design asset library and loader tests
         run: node tests/design-asset-library.test.cjs
 
-      - name: Visual consistency and v74 base tests
+      - name: Visual consistency and current base tests
         run: node tests/ui-consistency.test.cjs
 
       - name: v75 information architecture tests
@@ -162,7 +161,7 @@ jobs:
       - name: v75 modern expenses UI tests
         run: node tests/v75-expenses-modern.test.cjs
 
-      - name: v75 featured Mercado prototype tests
+      - name: Retired Featured contract tests
         run: node tests/v75-market-featured.test.cjs
 
       - name: v75 right teal drawer tests
