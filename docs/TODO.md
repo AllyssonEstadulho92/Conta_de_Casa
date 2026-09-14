@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 13 de setembro de 2026
+Atualizado: 14 de setembro de 2026
 
 ## P0 — Invariantes
 
@@ -14,64 +14,52 @@ Atualizado: 13 de setembro de 2026
 
 ## P0 — Auth/Safari
 
-- [x] PR #96: entrada local-first, sync não bloqueia Dashboard.
+- [x] PR #96: entrada local-first; sync não bloqueia Dashboard.
 - [x] PR #98: `[hidden]` explícito evita cofre e shell simultâneos.
-- [x] PR #99: auditoria UI/UX transversal integrada e Pages publicada.
-- [ ] Repetir validação física no mesmo iPhone/Safari.
+- [x] PR #99: auditoria UI/UX transversal integrada.
+- [ ] Repetir validação física no mesmo iPhone/Safari após o bloco visual atual.
 - [ ] Repetir validação em PWA instalada.
 
-## P0 — Marca e iconografia `76-brand-icons1`
+## P0 — Auditoria visual transversal
 
-### Publicado — PR #100
+- [x] PR #100: marca `icon.svg` simplificada e Lucide como família funcional.
+- [x] PR #102: contraste, overflow, diálogos, tabs, tabelas e responsive auditados.
+- [x] PR #103: polish página a página das 10 rotas.
+- [x] PR #104: dock móvel consolidado em `v75-stability.js`; DOM v74 substituído do Dashboard é removido.
 
-- [x] Auditar `icon.svg`, `.brand-mark`, subset Lucide e pseudo-ícones históricos.
-- [x] Confirmar duas identidades: `icon.svg` e Lucide `home` na marca interna.
-- [x] Simplificar `icon.svg` para casa + euro, teal sólido e branco.
-- [x] Remover folha e gradientes decorativos da marca.
-- [x] Fazer sidebar/drawer/cofre reutilizarem a mesma marca `icon.svg`.
-- [x] Manter Lucide como única família de ícones funcionais.
-- [x] Neutralizar ícone decorativo do título do Mercado.
-- [x] Neutralizar chevron extra do estado de sync no Mercado.
-- [x] Restaurar `Plus` semântico no botão “Adicionar item”.
-- [x] Neutralizar pseudo-ícones coloridos dos cartões de resumo do Mercado.
-- [x] Proteger a nova autoridade em `tests/ui-icons.test.cjs`.
-- [x] Invalidar cache PWA com `brand-icons1`.
-- [x] TypeScript Foundation do PR verde.
-- [x] CI integral do PR verde.
-- [x] Merge PR #100: `5b9689f04e844b9216626729b3b5aae5bf1acc09`.
-- [x] TypeScript Foundation main `34783537256` verde.
-- [x] CI main `34783537266` verde.
-- [x] Pages `34783564467` publicada com sucesso.
-- [ ] Validar nova marca e ícones em Safari/iPhone, PWA instalada, Android/Chrome e desktop.
+## P0 — `76-icon-semantics3`
 
-### Limpeza posterior segura
+- [x] Auditar screenshot físico do iPhone e confirmar excesso de cinzento nos ícones.
+- [x] Trocar `plan` por clipboard/checklist.
+- [x] Trocar `settings` por engrenagem reconhecível.
+- [x] Adicionar `activity` para Diagnóstico.
+- [x] Alterar apenas o label do dock `Planeamento` → `Plano` sem alterar a rota.
+- [x] Criar paleta semântica controlada para light/dark.
+- [x] Preservar `aria-current`, fundo selecionado e foco para não depender apenas de cor.
+- [x] Preservar `forced-colors`.
+- [x] Reidratar slots do menu `Mais` com ícones semânticos reais.
+- [x] Invalidar cache PWA com `icon-semantics3`.
+- [x] Atualizar teste de estabilidade para a nova paleta/label.
+- [ ] Abrir PR.
+- [ ] TypeScript Foundation verde.
+- [ ] CI integral verde.
+- [ ] Merge em `main`.
+- [ ] CI/TypeScript pós-merge verdes.
+- [ ] GitHub Pages publicado.
+- [ ] Validar visualmente no mesmo iPhone/Safari/PWA.
 
-- [ ] Remover glifos Unicode de fallback do HTML apenas depois de prova de que não são necessários.
-- [ ] Deixar de hidratar `.brand-mark` como Lucide `home` no runtime.
-- [ ] Remover regras pseudo-icon antigas do Mercado apenas depois de confirmar não utilização em todos os estados.
-- [ ] Rever contraste não textual dos ícones em light/dark e forced-colors no dispositivo/browser real.
-
-## P0 — Dívida estrutural UI/UX
-
-- [ ] Consolidar navegação móvel numa única autoridade.
-- [ ] Remover/restringir `ensureMobileNav()` v74 após paridade.
-- [ ] Parar criação runtime de `cdcMobileGreeting`, `cdcMobileMonthWrap`, `cdcMonthHero`, `cdcQuickActions`, `cdcDashboardCategories`.
-- [ ] Parar criação de `cdcWelcome` depois de provar que o fluxo `vaultCreate` cobre primeiro acesso/importação.
-- [ ] Reduzir dependência de `!important` entre v74/v75/v76.
-
-## P0 — Revisão página a página
+## P0 — Revisão página a página restante
 
 ### Dashboard
 
 - [x] Resumo principal real e indicadores canónicos.
-- [x] Blocos v74 duplicados visualmente suprimidos.
-- [x] Header e dock alinhados com direção v76 pelo PR #99.
-- [ ] Remover criação DOM v74 substituída.
-- [ ] Validar desktop + iPhone/PWA.
+- [x] Nós v74 substituídos removidos em runtime pela autoridade PR #104.
+- [x] Header/dock alinhados com v76.
+- [ ] Revalidar iPhone/PWA após `icon-semantics3`.
 
 ### Faturas
 
-- [ ] Rever pesquisa, filtros, resumo e estados.
+- [ ] Rever pesquisa, filtros, resumo e estados reais.
 - [ ] Rever tabela desktop/lista mobile.
 - [ ] Rever detalhe, editar, pagar, excluir e captura/QR.
 - [ ] Uniformizar empty/loading/error/success.
@@ -79,7 +67,7 @@ Atualizado: 13 de setembro de 2026
 
 ### Mercado
 
-- [x] Primeira limpeza transversal de iconografia em PR #100.
+- [x] Marca/iconografia transversal sem duplicações decorativas.
 - [ ] Rever pesquisa, filtros, catálogo/lista, quantidade e carrinho.
 - [ ] Rever scanner, imagens e fallback.
 - [ ] Manter estimativa ≠ valor real.
@@ -88,6 +76,7 @@ Atualizado: 13 de setembro de 2026
 
 ### Planeamento + Calendário
 
+- [x] Label móvel compacto `Plano` preparado sem alterar rota/página.
 - [ ] Consolidar hierarquia com dados reais suportados.
 - [ ] Preservar mesma informação essencial mobile/desktop.
 - [ ] Rever datas, vencimentos e estados.
@@ -99,9 +88,10 @@ Atualizado: 13 de setembro de 2026
 
 ### Segurança + Diagnóstico + Definições
 
+- [x] Ícones funcionais próprios preparados: shield, activity e settings/gear.
 - [ ] Rever forms, estados, feedback e linguagem.
 - [ ] Garantir ações destrutivas claramente distintas.
-- [ ] Rever dark mode e forced-colors.
+- [ ] Rever dark mode e forced-colors em hardware/browser real.
 
 ## P0 — Fonte 100% TypeScript
 
@@ -114,10 +104,9 @@ Atualizado: 13 de setembro de 2026
 
 ### Próximos blocos
 
-- [ ] Migrar módulos UI folha/baixo acoplamento restantes.
-- [ ] Criar configuração canónica de navegação em TypeScript antes de remover autoridade v74.
+- [ ] Migrar módulos UI de baixo acoplamento restantes.
+- [ ] Migrar configuração final de navegação para TypeScript depois da estabilização visual.
 - [ ] Criar vetores de paridade para dinheiro/datas/quantidades.
-- [ ] Migrar domínio por subdomínios.
 - [ ] Migrar `render/forms/events` depois dos contratos visuais estabilizarem.
 - [ ] Migrar core/persistência/cifra apenas com vetores próprios.
 - [ ] Migrar Service Worker/tooling no bloco final.
@@ -126,6 +115,7 @@ Atualizado: 13 de setembro de 2026
 
 - [x] PIN local não depende de rede.
 - [x] `[hidden]` do auth protegido em Safari/WebKit.
+- [x] Cache PWA versionada por mudança visual relevante.
 - [ ] Auditar ZXing remoto e considerar bundle local com licença preservada.
 - [ ] Reduzir `style-src 'unsafe-inline'` quando possível.
 - [ ] Rever origens CSP finais.
