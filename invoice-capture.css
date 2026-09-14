@@ -1,22 +1,23 @@
-/* Conta de Casa — captura local de QR de faturas portuguesas. */
+/* Conta de Casa v76 — captura local e formulário profissional de despesas.
+   76-expense-mode1 + 76-expense-form-professional1 + 76-expense-ios-touch1.
+   Esta folha é apenas apresentação/interação visual: não altera cálculos, estado,
+   persistência, PIN/cofre, sincronização ou o parser QR da AT. */
+
+/* --------------------------------------------------------------------------
+   Captura local de fatura / QR
+   -------------------------------------------------------------------------- */
 .invoice-capture{
   min-width:0;
   margin:2px 0 10px;
   padding:14px;
   border:1px solid color-mix(in srgb,var(--primary) 16%,var(--border));
   border-radius:16px;
-  background:linear-gradient(145deg,color-mix(in srgb,var(--primary-2) 30%,var(--surface)),var(--surface));
+  background:color-mix(in srgb,var(--primary-2) 26%,var(--surface));
 }
 .invoice-capture-head{display:flex;align-items:center;gap:11px;margin-bottom:7px}
 .invoice-capture-mark{
-  width:42px;
-  height:42px;
-  display:grid;
-  place-items:center;
-  flex:0 0 auto;
-  border-radius:13px;
-  background:var(--primary-2);
-  color:var(--primary);
+  width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;
+  border-radius:13px;background:var(--primary-2);color:var(--primary)
 }
 .invoice-capture-head>div{min-width:0;display:grid;gap:1px}
 .invoice-capture-head strong{font-size:.9375rem;line-height:1.3}
@@ -27,26 +28,16 @@
 .invoice-image-button{cursor:pointer}
 
 .invoice-capture-status{
-  margin:11px 0 0!important;
-  padding:9px 11px;
-  border:1px solid var(--border);
-  border-radius:11px;
-  background:var(--surface);
-  color:var(--muted)!important;
-  font-size:.78125rem!important;
-  line-height:1.45!important;
+  margin:11px 0 0!important;padding:9px 11px;
+  border:1px solid var(--border);border-radius:11px;background:var(--surface);
+  color:var(--muted)!important;font-size:.78125rem!important;line-height:1.45!important
 }
 .invoice-capture-status.success{border-color:color-mix(in srgb,var(--success) 24%,var(--border));background:var(--success-bg);color:var(--success)!important}
 .invoice-capture-status.warning{border-color:color-mix(in srgb,var(--warning) 24%,var(--border));background:var(--warning-bg);color:var(--warning)!important}
 
 .invoice-capture-preview{
-  display:grid;
-  gap:11px;
-  margin-top:11px;
-  padding:12px;
-  border:1px solid var(--border);
-  border-radius:13px;
-  background:var(--surface);
+  display:grid;gap:11px;margin-top:11px;padding:12px;
+  border:1px solid var(--border);border-radius:13px;background:var(--surface)
 }
 .invoice-capture-preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .invoice-capture-preview-head>div{display:flex;align-items:center;gap:7px;color:var(--success)}
@@ -58,87 +49,328 @@
 .invoice-capture-preview-grid strong{display:block;margin-top:2px;font-size:.8125rem;overflow-wrap:anywhere}
 .invoice-capture-review-note{font-size:.75rem;line-height:1.45;color:var(--muted)}
 
+/* --------------------------------------------------------------------------
+   Scanner QR — top layer próprio, independente do scroll do formulário.
+   -------------------------------------------------------------------------- */
 .invoice-scan-overlay{
-  position:fixed;
-  z-index:90;
-  inset:0;
-  display:grid;
-  place-items:center;
+  position:fixed;z-index:90;inset:0;display:grid;place-items:center;
   padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));
-  background:rgba(8,15,26,.68);
-  backdrop-filter:blur(8px);
+  background:rgba(8,15,26,.68);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)
 }
 .invoice-scan-panel{
   width:min(620px,100%);
   max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  display:grid;
-  gap:13px;
-  overflow:auto;
-  padding:16px;
-  border:1px solid color-mix(in srgb,var(--border) 72%,transparent);
-  border-radius:22px;
-  background:var(--surface);
-  color:var(--text);
-  box-shadow:var(--shadow-overlay);
+  display:grid;gap:13px;overflow:auto;padding:16px;
+  border:1px solid color-mix(in srgb,var(--border) 72%,transparent);border-radius:22px;
+  background:var(--surface);color:var(--text);box-shadow:var(--shadow-overlay)
 }
 .invoice-scan-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .invoice-scan-head>div{min-width:0;display:grid;gap:1px}
-.invoice-scan-head strong{font-size:1rem}
-.invoice-scan-head small{font-size:.75rem;color:var(--muted)}
+.invoice-scan-head strong{font-size:1rem}.invoice-scan-head small{font-size:.75rem;color:var(--muted)}
 .invoice-scan-close{
-  width:44px;
-  height:44px;
-  display:grid;
-  place-items:center;
-  flex:0 0 auto;
-  padding:0;
-  border:0;
-  border-radius:12px;
-  background:transparent;
-  color:var(--muted);
+  width:44px;height:44px;display:grid;place-items:center;flex:0 0 auto;padding:0;
+  border:0;border-radius:12px;background:transparent;color:var(--muted)
 }
 .invoice-scan-camera{position:relative;min-height:340px;overflow:hidden;border-radius:17px;background:#05080d}
 .invoice-scan-camera video{width:100%;height:100%;min-height:340px;display:block;object-fit:cover;background:#05080d}
 .invoice-scan-guide{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;background:rgba(0,0,0,.08)}
 .invoice-scan-guide::before{
-  content:"";
-  width:min(68%,270px);
-  aspect-ratio:1;
-  border:2px solid rgba(255,255,255,.94);
-  border-radius:18px;
-  box-shadow:0 0 0 999px rgba(0,0,0,.34);
+  content:"";width:min(68%,270px);aspect-ratio:1;border:2px solid rgba(255,255,255,.94);
+  border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.34)
 }
 .invoice-scan-guide span{
-  position:absolute;
-  width:min(58%,230px);
-  height:2px;
-  border-radius:999px;
-  background:rgba(255,255,255,.9);
-  box-shadow:0 0 12px rgba(255,255,255,.48);
-  animation:invoice-qr-scan 1.9s ease-in-out infinite alternate;
+  position:absolute;width:min(58%,230px);height:2px;border-radius:999px;
+  background:rgba(255,255,255,.9);box-shadow:0 0 12px rgba(255,255,255,.48);
+  animation:invoice-qr-scan 1.9s ease-in-out infinite alternate
 }
 @keyframes invoice-qr-scan{from{transform:translateY(-78px)}to{transform:translateY(78px)}}
 .invoice-scan-state{
-  position:absolute;
-  left:50%;
-  bottom:14px;
-  transform:translateX(-50%);
-  width:max-content;
-  max-width:calc(100% - 28px);
-  padding:7px 10px;
-  border-radius:999px;
-  background:rgba(5,9,16,.78);
-  color:#fff;
-  font-size:.75rem;
-  line-height:1.3;
-  text-align:center;
-  backdrop-filter:blur(8px);
+  position:absolute;left:50%;bottom:14px;transform:translateX(-50%);width:max-content;
+  max-width:calc(100% - 28px);padding:7px 10px;border-radius:999px;
+  background:rgba(5,9,16,.78);color:#fff;font-size:.75rem;line-height:1.3;text-align:center;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)
 }
 .invoice-scan-panel>p{margin:0;color:var(--muted);font-size:.8125rem;line-height:1.48}
 .invoice-scan-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 .invoice-scan-actions .btn{min-height:44px}
 .invoice-scan-torch[aria-pressed="true"]{border-color:color-mix(in srgb,var(--primary) 35%,var(--border));background:var(--primary-2);color:var(--primary)}
 .invoice-scan-close:focus-visible,.invoice-scan-torch:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+
+/* --------------------------------------------------------------------------
+   76-expense-mode1 — Manual / Ler fatura / QR Code
+   -------------------------------------------------------------------------- */
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:6px!important;min-width:0!important;min-height:64px!important;margin:2px 0 4px!important;
+  padding:5px!important;border:1px solid var(--v76-border,var(--v75-border,var(--border)))!important;
+  border-radius:18px!important;background:color-mix(in srgb,var(--v76-surface-soft,#f7fafa) 90%,var(--v76-surface,#fff))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 1px 2px rgba(7,57,63,.03)!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button{
+  position:relative!important;z-index:1!important;min-width:0!important;min-height:52px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;
+  padding:9px 10px!important;border:1px solid transparent!important;border-radius:14px!important;
+  background:transparent!important;color:var(--v76-muted,var(--v75-muted,var(--muted)))!important;
+  box-shadow:none!important;font-size:.82rem!important;line-height:1.1!important;font-weight:680!important;
+  letter-spacing:-.015em!important;white-space:nowrap!important;pointer-events:auto!important;
+  -webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;
+  transition:background-color .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .14s ease!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button::before{
+  content:"";width:20px;height:20px;flex:0 0 20px;display:block;background:currentColor;
+  -webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;
+  mask-position:center;mask-repeat:no-repeat;mask-size:contain
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button[data-v75-bill-mode="manual"]::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z'/%3E%3C/svg%3E")
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button[data-v75-bill-mode="image"]::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M6 2h8l4 4v16H6zM14 2v5h5M9 12h6M9 16h6'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M6 2h8l4 4v16H6zM14 2v5h5M9 12h6M9 16h6'/%3E%3C/svg%3E")
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button[data-v75-bill-mode="qr"]::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M8 8h8v8H8z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M8 8h8v8H8z'/%3E%3C/svg%3E")
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button.active{
+  border-color:color-mix(in srgb,var(--v76-primary,#087b78) 82%,transparent)!important;
+  background:linear-gradient(135deg,var(--v76-primary,#087b78),var(--v76-primary-strong,#005d65))!important;
+  color:#fff!important;box-shadow:0 5px 14px color-mix(in srgb,var(--v76-primary,#087b78) 18%,transparent)!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button:active{transform:scale(.975)!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button:focus-visible{
+  outline:0!important;border-color:var(--v76-primary,var(--v75-primary,var(--primary)))!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--v76-primary,#087b78) 22%,transparent)!important
+}
+@media(hover:hover) and (pointer:fine){
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button:not(.active):hover{
+    background:var(--v76-surface,var(--v75-surface,var(--surface)))!important;
+    color:var(--v76-primary,var(--v75-primary,var(--primary)))!important;
+    border-color:color-mix(in srgb,var(--v76-primary,#087b78) 12%,var(--v76-border,#dce7e8))!important
+  }
+}
+
+/* --------------------------------------------------------------------------
+   76-expense-form-professional1 — formulário desktop/tablet.
+   -------------------------------------------------------------------------- */
+html.cdc-v75 #formDialog[data-v75-kind="expense"]{
+  width:min(720px,calc(100vw - 32px))!important;max-width:720px!important;
+  max-height:min(92dvh,900px)!important;padding:0!important;border:0!important;
+  background:transparent!important;pointer-events:auto!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"]::backdrop{
+  background:rgba(7,28,33,.42)!important;backdrop-filter:blur(6px)!important;-webkit-backdrop-filter:blur(6px)!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-shell{
+  width:100%!important;max-width:none!important;max-height:min(92dvh,900px)!important;
+  display:grid!important;grid-template-rows:auto minmax(0,1fr)!important;padding:0!important;
+  overflow:hidden!important;border:1px solid var(--v76-border,var(--border))!important;
+  border-radius:24px!important;background:var(--v76-surface,var(--surface))!important;
+  box-shadow:0 24px 64px rgba(7,38,43,.16)!important;pointer-events:auto!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head{
+  position:relative!important;z-index:4!important;min-height:74px!important;display:flex!important;
+  align-items:center!important;justify-content:space-between!important;gap:14px!important;margin:0!important;
+  padding:18px 20px 14px!important;border-bottom:1px solid var(--v76-border,var(--border))!important;
+  background:var(--v76-surface,var(--surface))!important;pointer-events:auto!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head>div{min-width:0!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head .eyebrow{display:none!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #dialogTitle{
+  margin:0!important;color:var(--v76-text,var(--text))!important;font-size:1.22rem!important;
+  line-height:1.15!important;font-weight:760!important;letter-spacing:-.035em!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close{
+  flex:0 0 44px!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;
+  border:1px solid transparent!important;border-radius:12px!important;background:transparent!important;
+  color:var(--v76-muted,var(--muted))!important;box-shadow:none!important;pointer-events:auto!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close:active{
+  border-color:var(--v76-border,var(--border))!important;background:var(--v76-surface-soft,var(--surface-2))!important;
+  color:var(--v76-text,var(--text))!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #dialogBody{
+  min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  padding:18px 20px 22px!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+  background:var(--v76-surface,var(--surface))!important;pointer-events:auto!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm{
+  min-width:0!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:14px 12px!important;align-items:start!important;pointer-events:auto!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs{
+  grid-column:1/-1!important;order:0!important;min-height:56px!important;margin:0 0 2px!important;
+  padding:4px!important;gap:4px!important;border-radius:15px!important;
+  background:var(--v76-surface-soft,var(--surface-2))!important;box-shadow:none!important
+}
+
+/* A captura só aparece quando o modo correspondente foi escolhido. */
+html.cdc-v75 #formDialog[data-v75-kind="expense"][data-v75-bill-mode="manual"] [data-invoice-capture]{display:none!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"][data-v75-bill-mode="image"] [data-invoice-camera]{display:none!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"][data-v75-bill-mode="qr"] .invoice-image-button{display:none!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>[data-invoice-capture]{
+  grid-column:1/-1!important;order:2!important;margin:0!important;padding:16px!important;
+  border:1px solid color-mix(in srgb,var(--v76-primary,var(--primary)) 16%,var(--v76-border,var(--border)))!important;
+  border-radius:16px!important;background:color-mix(in srgb,var(--v76-primary,var(--primary)) 2.5%,var(--v76-surface,var(--surface)))!important;
+  box-shadow:none!important;pointer-events:auto!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .invoice-capture-head{margin-bottom:8px!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .invoice-capture-mark{
+  width:40px!important;height:40px!important;border-radius:12px!important;
+  background:var(--v76-surface-accent,var(--primary-2))!important;color:var(--v76-primary,var(--primary))!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .invoice-capture>p{margin-bottom:12px!important;color:var(--v76-muted,var(--muted))!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .invoice-capture-actions{display:grid!important;grid-template-columns:minmax(0,1fr)!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .invoice-capture-actions .btn,
+html.cdc-v75 #formDialog[data-v75-kind="expense"] .invoice-capture-actions label.btn{
+  width:100%!important;min-height:48px!important;justify-content:center!important;
+  border-color:color-mix(in srgb,var(--v76-primary,var(--primary)) 28%,var(--v76-border,var(--border)))!important;
+  background:var(--v76-surface,var(--surface))!important;color:var(--v76-primary,var(--primary))!important;
+  pointer-events:auto!important
+}
+
+/* Hierarquia do formulário. */
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label{
+  min-width:0!important;margin:0!important;gap:7px!important;color:var(--v76-text,var(--text))!important;
+  font-size:.79rem!important;line-height:1.25!important;font-weight:690!important;letter-spacing:-.01em!important;
+  pointer-events:auto!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(1){order:10!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(4){order:11!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(5){order:12!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(3){order:13!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(2){order:14!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(7){order:15!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(10){grid-column:1/-1!important;order:16!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm::after{
+  content:"Detalhes adicionais";grid-column:1/-1!important;order:18!important;display:block!important;
+  margin:3px 0 -1px!important;padding-top:14px!important;border-top:1px solid var(--v76-border,var(--border))!important;
+  color:var(--v76-muted,var(--muted))!important;font-size:.69rem!important;line-height:1.2!important;
+  font-weight:760!important;letter-spacing:.07em!important;text-transform:uppercase!important;pointer-events:none!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(6){order:20!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(8){order:21!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(9){grid-column:1/-1!important;order:22!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea){
+  width:100%!important;min-width:0!important;min-height:50px!important;margin:0!important;padding:11px 13px!important;
+  border:1px solid var(--v76-border,var(--border))!important;border-radius:12px!important;
+  background:var(--v76-surface,var(--surface))!important;color:var(--v76-text,var(--text))!important;
+  box-shadow:inset 0 1px 1px rgba(9,49,54,.02)!important;font-size:.9rem!important;line-height:1.3!important;
+  pointer-events:auto!important;touch-action:manipulation!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm textarea{min-height:96px!important;resize:vertical!important}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea):focus{
+  outline:0!important;border-color:color-mix(in srgb,var(--v76-primary,var(--primary)) 66%,var(--v76-border,var(--border)))!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--v76-primary,var(--primary)) 13%,transparent)!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row{
+  grid-column:1/-1!important;order:30!important;display:grid!important;
+  grid-template-columns:auto minmax(190px,230px)!important;justify-content:end!important;gap:9px!important;
+  margin-top:5px!important;padding-top:16px!important;border-top:1px solid var(--v76-border,var(--border))!important;
+  pointer-events:auto!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn{
+  min-height:50px!important;border-radius:12px!important;padding-inline:18px!important;pointer-events:auto!important
+}
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn.primary{
+  background:var(--v76-primary,var(--primary))!important;border-color:var(--v76-primary,var(--primary))!important;
+  box-shadow:0 5px 14px color-mix(in srgb,var(--v76-primary,var(--primary)) 18%,transparent)!important
+}
+
+/* --------------------------------------------------------------------------
+   76-expense-ios-touch1 — Safari/iOS: UM único proprietário de scroll.
+   O bug anterior usava dialog 100dvh + shell 100dvh + #dialogBody overflow:auto.
+   Em WebKit isso podia deixar a top-layer desenhada, mas prender hit-testing/touch.
+   Agora o próprio <dialog> rola; shell/body deixam de criar scroll nested.
+   -------------------------------------------------------------------------- */
+@media(max-width:620px){
+  html.cdc-v75 #formDialog[data-v75-kind="expense"]{
+    position:fixed!important;inset:0!important;width:100vw!important;max-width:none!important;
+    height:100dvh!important;max-height:100dvh!important;margin:0!important;padding:0!important;
+    overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior-y:contain!important;
+    -webkit-overflow-scrolling:touch!important;pointer-events:auto!important;background:var(--v76-surface,var(--surface))!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-shell{
+    width:100%!important;min-height:100%!important;height:auto!important;max-height:none!important;
+    display:block!important;overflow:visible!important;border:0!important;border-radius:0!important;
+    box-shadow:none!important;pointer-events:auto!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head{
+    position:sticky!important;top:0!important;z-index:20!important;
+    min-height:calc(env(safe-area-inset-top,0px) + 62px)!important;
+    padding:calc(env(safe-area-inset-top,0px) + 8px) 16px 8px!important;
+    justify-content:center!important;background:var(--v76-surface,var(--surface))!important;
+    pointer-events:auto!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head>div{width:100%!important;text-align:center!important}
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #dialogTitle{
+    padding-inline:46px!important;font-size:1.08rem!important;white-space:nowrap!important;
+    overflow:hidden!important;text-overflow:ellipsis!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close{
+    position:absolute!important;left:10px!important;bottom:8px!important;margin:0!important;
+    overflow:hidden!important;text-indent:-9999px!important;font-size:0!important;line-height:0!important;
+    color:transparent!important;pointer-events:auto!important;touch-action:manipulation!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close::before{
+    content:"";position:absolute;inset:0;margin:auto;width:22px;height:22px;display:block;
+    background:var(--v76-text,var(--text));
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='m15 18-6-6 6-6'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='m15 18-6-6 6-6'/%3E%3C/svg%3E") center/contain no-repeat
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #dialogBody{
+    min-height:0!important;overflow:visible!important;overscroll-behavior:auto!important;
+    padding:14px 16px calc(34px + env(safe-area-inset-bottom,0px))!important;
+    background:var(--v76-surface,var(--surface))!important;pointer-events:auto!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm{
+    grid-template-columns:minmax(0,1fr)!important;gap:12px!important;pointer-events:auto!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs{
+    grid-column:1!important;min-height:54px!important;margin-bottom:2px!important;pointer-events:auto!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs button{
+    min-height:44px!important;gap:6px!important;padding-inline:7px!important;font-size:.76rem!important;
+    pointer-events:auto!important;touch-action:manipulation!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs button::before{
+    width:17px!important;height:17px!important;flex-basis:17px!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>[data-invoice-capture],
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label,
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(10),
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(9),
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm::after,
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row{grid-column:1!important}
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label{font-size:.8rem!important}
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea){
+    min-height:52px!important;padding:12px 13px!important;border-radius:13px!important;font-size:1rem!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm textarea{min-height:94px!important}
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm::after{margin-top:3px!important;padding-top:15px!important}
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row{
+    grid-template-columns:minmax(0,1fr)!important;margin-top:4px!important;padding-top:14px!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn{width:100%!important;min-height:52px!important}
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn.primary{order:-1!important}
+}
+
+@media(max-width:430px){
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs{gap:4px!important;padding:4px!important;border-radius:16px!important}
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button{gap:5px!important;padding-inline:5px!important;font-size:.72rem!important}
+}
+@media(max-width:350px){
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button{gap:4px!important;font-size:.68rem!important}
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button::before{display:none!important}
+}
+@media(max-width:620px) and (orientation:landscape) and (max-height:520px){
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head{
+    min-height:calc(env(safe-area-inset-top,0px) + 54px)!important;
+    padding-top:calc(env(safe-area-inset-top,0px) + 4px)!important;padding-bottom:4px!important
+  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close{bottom:4px!important}
+}
 
 @media(max-width:620px){
   .invoice-capture-actions{display:grid;grid-template-columns:1fr}
@@ -155,503 +387,16 @@
   .invoice-scan-panel{padding:13px}
   .invoice-scan-camera,.invoice-scan-camera video{min-height:44dvh}
 }
-@media(prefers-reduced-motion:reduce){.invoice-scan-guide span{animation:none!important}}
-
-/* 76-expense-mode1 — controlo segmentado premium para Manual / Ler fatura / QR Code.
-   Camada exclusivamente visual: os handlers de captura, QR e formulário continuam
-   a ser propriedade dos runtimes existentes. */
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs{
-  display:grid!important;
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  gap:6px!important;
-  min-width:0!important;
-  min-height:64px!important;
-  margin:2px 0 4px!important;
-  padding:5px!important;
-  border:1px solid var(--v76-border,var(--v75-border,var(--border)))!important;
-  border-radius:18px!important;
-  background:color-mix(in srgb,var(--v76-surface-soft,#f7fafa) 90%,var(--v76-surface,#fff))!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 1px 2px rgba(7,57,63,.03)!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button{
-  position:relative!important;
-  min-width:0!important;
-  min-height:52px!important;
-  display:inline-flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:8px!important;
-  padding:9px 10px!important;
-  border:1px solid transparent!important;
-  border-radius:14px!important;
-  background:transparent!important;
-  color:var(--v76-muted,var(--v75-muted,var(--muted)))!important;
-  box-shadow:none!important;
-  font-size:.82rem!important;
-  line-height:1.1!important;
-  font-weight:680!important;
-  letter-spacing:-.015em!important;
-  white-space:nowrap!important;
-  -webkit-tap-highlight-color:transparent!important;
-  touch-action:manipulation!important;
-  transition:background-color .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .14s ease!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button::before{
-  content:"";
-  width:20px;
-  height:20px;
-  flex:0 0 20px;
-  display:block;
-  background:currentColor;
-  -webkit-mask-position:center;
-  -webkit-mask-repeat:no-repeat;
-  -webkit-mask-size:contain;
-  mask-position:center;
-  mask-repeat:no-repeat;
-  mask-size:contain;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button[data-v75-bill-mode="manual"]::before{
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z'/%3E%3C/svg%3E");
-  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z'/%3E%3C/svg%3E");
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button[data-v75-bill-mode="image"]::before{
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M6 2h8l4 4v16H6zM14 2v5h5M9 12h6M9 16h6'/%3E%3C/svg%3E");
-  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M6 2h8l4 4v16H6zM14 2v5h5M9 12h6M9 16h6'/%3E%3C/svg%3E");
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button[data-v75-bill-mode="qr"]::before{
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M8 8h8v8H8z'/%3E%3C/svg%3E");
-  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M8 8h8v8H8z'/%3E%3C/svg%3E");
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button.active{
-  border-color:color-mix(in srgb,var(--v76-primary,#087b78) 82%,transparent)!important;
-  background:linear-gradient(135deg,var(--v76-primary,#087b78),var(--v76-primary-strong,#005d65))!important;
-  color:#fff!important;
-  box-shadow:0 7px 18px color-mix(in srgb,var(--v76-primary,#087b78) 20%,transparent)!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button:active{
-  transform:scale(.975)!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button:focus-visible{
-  outline:0!important;
-  border-color:var(--v76-primary,var(--v75-primary,var(--primary)))!important;
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--v76-primary,#087b78) 22%,transparent)!important;
-}
-@media(hover:hover) and (pointer:fine){
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button:not(.active):hover{
-    background:var(--v76-surface,var(--v75-surface,var(--surface)))!important;
-    color:var(--v76-primary,var(--v75-primary,var(--primary)))!important;
-    border-color:color-mix(in srgb,var(--v76-primary,#087b78) 12%,var(--v76-border,#dce7e8))!important;
-  }
-}
-@media(max-width:430px){
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs{
-    gap:4px!important;
-    padding:4px!important;
-    border-radius:16px!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button{
-    min-height:50px!important;
-    gap:6px!important;
-    padding-inline:6px!important;
-    border-radius:12px!important;
-    font-size:.75rem!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button::before{
-    width:18px;
-    height:18px;
-    flex-basis:18px;
-  }
-}
-@media(max-width:350px){
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button{
-    gap:4px!important;
-    font-size:.7rem!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button::before{
-    width:16px;
-    height:16px;
-    flex-basis:16px;
-  }
-}
 @media(prefers-reduced-motion:reduce){
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button{transition:none!important}
-}
-@media(forced-colors:active){
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs,
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button{border:1px solid ButtonText!important}
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs button.active{background:Highlight!important;color:HighlightText!important}
-}
-
-/* 76-expense-form-professional1 — composição final do fluxo Adicionar despesa.
-   Mantém os mesmos campos, handlers e dados; altera apenas hierarquia, densidade,
-   modos de captura, responsividade e apresentação do modal. */
-html.cdc-v75 #formDialog[data-v75-kind="expense"]{
-  width:min(720px,calc(100vw - 32px))!important;
-  max-width:720px!important;
-  max-height:min(92dvh,900px)!important;
-  padding:0!important;
-  border:0!important;
-  background:transparent!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"]::backdrop{
-  background:rgba(7,28,33,.42)!important;
-  backdrop-filter:blur(6px)!important;
-  -webkit-backdrop-filter:blur(6px)!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-shell{
-  width:100%!important;
-  max-width:none!important;
-  max-height:min(92dvh,900px)!important;
-  display:grid!important;
-  grid-template-rows:auto minmax(0,1fr)!important;
-  padding:0!important;
-  overflow:hidden!important;
-  border:1px solid var(--v76-border,var(--border))!important;
-  border-radius:24px!important;
-  background:var(--v76-surface,var(--surface))!important;
-  box-shadow:0 24px 64px rgba(7,38,43,.16)!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head{
-  position:relative!important;
-  z-index:4!important;
-  min-height:74px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:14px!important;
-  margin:0!important;
-  padding:18px 20px 14px!important;
-  border-bottom:1px solid var(--v76-border,var(--border))!important;
-  background:var(--v76-surface,var(--surface))!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head>div{min-width:0!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head .eyebrow{display:none!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #dialogTitle{
-  margin:0!important;
-  color:var(--v76-text,var(--text))!important;
-  font-size:1.22rem!important;
-  line-height:1.15!important;
-  font-weight:760!important;
-  letter-spacing:-.035em!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close{
-  flex:0 0 44px!important;
-  width:44px!important;
-  min-width:44px!important;
-  height:44px!important;
-  min-height:44px!important;
-  border:1px solid transparent!important;
-  border-radius:12px!important;
-  background:transparent!important;
-  color:var(--v76-muted,var(--muted))!important;
-  box-shadow:none!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close:active{
-  border-color:var(--v76-border,var(--border))!important;
-  background:var(--v76-surface-soft,var(--surface-2))!important;
-  color:var(--v76-text,var(--text))!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #dialogBody{
-  min-height:0!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  padding:18px 20px 22px!important;
-  overscroll-behavior:contain!important;
-  -webkit-overflow-scrolling:touch!important;
-  background:var(--v76-surface,var(--surface))!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm{
-  min-width:0!important;
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  gap:14px 12px!important;
-  align-items:start!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs{
-  grid-column:1/-1!important;
-  order:0!important;
-  min-height:56px!important;
-  margin:0 0 2px!important;
-  padding:4px!important;
-  gap:4px!important;
-  border-radius:15px!important;
-  background:var(--v76-surface-soft,var(--surface-2))!important;
-  box-shadow:none!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs button{
-  min-height:46px!important;
-  border-radius:11px!important;
-  font-size:.79rem!important;
-  font-weight:690!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs button.active{
-  border-color:var(--v76-primary,var(--primary))!important;
-  background:var(--v76-primary,var(--primary))!important;
-  color:#fff!important;
-  box-shadow:0 3px 10px color-mix(in srgb,var(--v76-primary,var(--primary)) 16%,transparent)!important;
-}
-
-/* A captura só aparece quando o modo correspondente foi escolhido. */
-html.cdc-v75 #formDialog[data-v75-kind="expense"][data-v75-bill-mode="manual"] [data-invoice-capture]{display:none!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"][data-v75-bill-mode="image"] [data-invoice-camera]{display:none!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"][data-v75-bill-mode="qr"] .invoice-image-button{display:none!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>[data-invoice-capture]{
-  grid-column:1/-1!important;
-  order:2!important;
-  margin:0!important;
-  padding:16px!important;
-  border:1px solid color-mix(in srgb,var(--v76-primary,var(--primary)) 16%,var(--v76-border,var(--border)))!important;
-  border-radius:16px!important;
-  background:color-mix(in srgb,var(--v76-primary,var(--primary)) 2.5%,var(--v76-surface,var(--surface)))!important;
-  box-shadow:none!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .invoice-capture-head{margin-bottom:8px!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .invoice-capture-mark{
-  width:40px!important;
-  height:40px!important;
-  border-radius:12px!important;
-  background:var(--v76-surface-accent,var(--primary-2))!important;
-  color:var(--v76-primary,var(--primary))!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .invoice-capture>p{
-  margin-bottom:12px!important;
-  color:var(--v76-muted,var(--muted))!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .invoice-capture-actions{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr)!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] .invoice-capture-actions .btn{
-  width:100%!important;
-  min-height:48px!important;
-  justify-content:center!important;
-  border-color:color-mix(in srgb,var(--v76-primary,var(--primary)) 28%,var(--v76-border,var(--border)))!important;
-  background:var(--v76-surface,var(--surface))!important;
-  color:var(--v76-primary,var(--primary))!important;
-}
-
-/* Hierarquia do formulário: essenciais primeiro; dados administrativos depois. */
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label{
-  min-width:0!important;
-  margin:0!important;
-  gap:7px!important;
-  color:var(--v76-text,var(--text))!important;
-  font-size:.79rem!important;
-  line-height:1.25!important;
-  font-weight:690!important;
-  letter-spacing:-.01em!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(1){order:10!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(4){order:11!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(5){order:12!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(3){order:13!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(2){order:14!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(7){order:15!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(10){grid-column:1/-1!important;order:16!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm::after{
-  content:"Detalhes adicionais";
-  grid-column:1/-1!important;
-  order:18!important;
-  display:block!important;
-  margin:3px 0 -1px!important;
-  padding-top:14px!important;
-  border-top:1px solid var(--v76-border,var(--border))!important;
-  color:var(--v76-muted,var(--muted))!important;
-  font-size:.69rem!important;
-  line-height:1.2!important;
-  font-weight:760!important;
-  letter-spacing:.07em!important;
-  text-transform:uppercase!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(6){order:20!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(8){order:21!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(9){grid-column:1/-1!important;order:22!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea){
-  width:100%!important;
-  min-width:0!important;
-  min-height:50px!important;
-  margin:0!important;
-  padding:11px 13px!important;
-  border:1px solid var(--v76-border,var(--border))!important;
-  border-radius:12px!important;
-  background:var(--v76-surface,var(--surface))!important;
-  color:var(--v76-text,var(--text))!important;
-  box-shadow:inset 0 1px 1px rgba(9,49,54,.02)!important;
-  font-size:.9rem!important;
-  line-height:1.3!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm textarea{
-  min-height:96px!important;
-  resize:vertical!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea):focus{
-  outline:0!important;
-  border-color:color-mix(in srgb,var(--v76-primary,var(--primary)) 66%,var(--v76-border,var(--border)))!important;
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--v76-primary,var(--primary)) 13%,transparent)!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row{
-  grid-column:1/-1!important;
-  order:30!important;
-  display:grid!important;
-  grid-template-columns:auto minmax(190px,230px)!important;
-  justify-content:end!important;
-  gap:9px!important;
-  margin-top:5px!important;
-  padding-top:16px!important;
-  border-top:1px solid var(--v76-border,var(--border))!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn{
-  min-height:50px!important;
-  border-radius:12px!important;
-  padding-inline:18px!important;
-}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn.primary{
-  background:var(--v76-primary,var(--primary))!important;
-  border-color:var(--v76-primary,var(--primary))!important;
-  box-shadow:0 5px 14px color-mix(in srgb,var(--v76-primary,var(--primary)) 18%,transparent)!important;
-}
-
-@media(max-width:620px){
-  html.cdc-v75 #formDialog[data-v75-kind="expense"]{
-    inset:0!important;
-    width:100vw!important;
-    max-width:none!important;
-    height:100dvh!important;
-    max-height:100dvh!important;
-    margin:0!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-shell{
-    width:100vw!important;
-    min-height:100dvh!important;
-    max-height:100dvh!important;
-    border:0!important;
-    border-radius:0!important;
-    box-shadow:none!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head{
-    min-height:calc(env(safe-area-inset-top,0px) + 62px)!important;
-    padding:calc(env(safe-area-inset-top,0px) + 8px) 16px 8px!important;
-    justify-content:center!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head>div{
-    width:100%!important;
-    text-align:center!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #dialogTitle{
-    padding-inline:46px!important;
-    font-size:1.08rem!important;
-    white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close{
-    position:absolute!important;
-    left:10px!important;
-    bottom:8px!important;
-    margin:0!important;
-    font-size:0!important;
-    color:var(--v76-text,var(--text))!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close::before{
-    content:"";
-    width:22px;
-    height:22px;
-    display:block;
-    background:currentColor;
-    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='m15 18-6-6 6-6'/%3E%3C/svg%3E") center/contain no-repeat;
-    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='m15 18-6-6 6-6'/%3E%3C/svg%3E") center/contain no-repeat;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #dialogBody{
-    padding:14px 16px calc(22px + env(safe-area-inset-bottom,0px))!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm{
-    grid-template-columns:minmax(0,1fr)!important;
-    gap:12px!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs{
-    grid-column:1!important;
-    min-height:54px!important;
-    margin-bottom:2px!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs button{
-    min-height:44px!important;
-    gap:6px!important;
-    padding-inline:7px!important;
-    font-size:.76rem!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs button::before{
-    width:17px!important;
-    height:17px!important;
-    flex-basis:17px!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>[data-invoice-capture],
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label,
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(10),
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(9),
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm::after,
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row{
-    grid-column:1!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label{
-    font-size:.8rem!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea){
-    min-height:52px!important;
-    padding:12px 13px!important;
-    border-radius:13px!important;
-    font-size:1rem!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm textarea{min-height:94px!important}
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm::after{
-    margin-top:3px!important;
-    padding-top:15px!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row{
-    grid-template-columns:minmax(0,1fr)!important;
-    margin-top:4px!important;
-    padding-top:14px!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn{
-    width:100%!important;
-    min-height:52px!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn.primary{order:-1!important}
-}
-
-@media(max-width:380px){
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head{padding-inline:12px!important}
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #dialogBody{padding-inline:12px!important}
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs button{
-    gap:4px!important;
-    padding-inline:5px!important;
-    font-size:.7rem!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs button::before{display:none!important}
-}
-
-@media(max-width:620px) and (orientation:landscape) and (max-height:520px){
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-head{
-    min-height:calc(env(safe-area-inset-top,0px) + 54px)!important;
-    padding-top:calc(env(safe-area-inset-top,0px) + 4px)!important;
-    padding-bottom:4px!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close{bottom:4px!important}
-}
-
-@media(prefers-reduced-motion:reduce){
+  .invoice-scan-guide span{animation:none!important}
   html.cdc-v75 #formDialog[data-v75-kind="expense"] :is(.dialog-close,.v75-bill-tabs button,.btn,input,select,textarea){transition:none!important}
 }
-
 @media(forced-colors:active){
   html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-shell,
   html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs,
   html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>[data-invoice-capture],
   html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea),
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn{
-    border:1px solid CanvasText!important;
-  }
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs button.active{
-    background:Highlight!important;
-    color:HighlightText!important;
-  }
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn{border:1px solid CanvasText!important}
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs button.active{background:Highlight!important;color:HighlightText!important}
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close::before{background:ButtonText!important}
 }
