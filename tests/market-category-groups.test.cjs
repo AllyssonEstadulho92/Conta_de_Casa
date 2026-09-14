@@ -40,6 +40,7 @@ assert.match(planningMore,/76-planning-more1/);
 assert.match(planningMore,/\.cdc-category-dot/);
 
 assert.match(sw,/retire-assets1/);
+assert.match(sw,/v76-version-alignment1/);
 assert.ok(sw.includes("'./market-category-groups.css'"));
 assert.ok(sw.includes("'./market-category-groups.js'"));
 assert.ok(sw.includes("'./design-system.css'"));
@@ -53,7 +54,8 @@ assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.ok(sw.includes("'./v64-runtime.js'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
-assert.match(prepare,/const BUILD = 'v75'/);
+assert.match(prepare,/const BUILD = 'v76'/);
+assert.match(prepare,/const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const CATEGORY_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
@@ -76,6 +78,7 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
+  assert.match(index,/name="app-build" content="v76"/);
   assert.match(index,/market-brand\.css\?v=74-ui1/);
   assert.match(index,/market-branding\.js\?v=74-ui1/);
   assert.match(index,/market-category-groups\.css\?v=64-ui1/);
@@ -108,4 +111,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market category grouping preserved with v76 architecture and retired v74/Featured assets excluded from distribution: OK');
+console.log('Market category grouping preserved with official v76 build and retired v74/Featured assets excluded from distribution: OK');
