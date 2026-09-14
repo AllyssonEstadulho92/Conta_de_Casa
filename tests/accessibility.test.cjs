@@ -10,7 +10,9 @@ const base=fs.readFileSync('styles.css','utf8');
 const architecture=fs.readFileSync('v75-architecture.css','utf8');
 const planningMore=fs.readFileSync('v76-planning-more.css','utf8');
 const menu=fs.readFileSync('mobile-menu-toggle.css','utf8');
-const css=`${base}\n${design}\n${architecture}\n${planningMore}\n${menu}`;
+const usability=fs.readFileSync('v75-usability.css','utf8');
+const sw=fs.readFileSync('sw.js','utf8');
+const css=`${base}\n${design}\n${architecture}\n${planningMore}\n${menu}\n${usability}`;
 const render=fs.readFileSync('render.js','utf8');
 const events=fs.readFileSync('events.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
@@ -81,4 +83,17 @@ assert.match(architecture,/\.v75-more-group/);
 assert.match(architecture,/\.v75-budget-summary/);
 assert.doesNotMatch(css,/pointer-events:none!important;[^}]*\.cdc-quick-action/);
 
-console.log('Accessibility contrast, focus, touch targets, semantic state and mobile safe-area tests for v76 with retired sources absent: OK');
+/* Short-height vault: the main auth actions remain reachable in the first useful
+   viewport without breaking the WCAG 44 px touch target floor. */
+assert.match(usability,/76-vault-short-height1/);
+assert.match(usability,/@media\(max-width:820px\) and \(max-height:780px\)/);
+assert.match(usability,/max\(12px,env\(safe-area-inset-top,0px\)\)/,'vault must use a compact real safe-area floor instead of an unconditional 24 px top gap');
+assert.match(usability,/\.vault-keypad\{[\s\S]*grid-template-columns:repeat\(3,54px\)!important;[\s\S]*gap:7px 14px!important/);
+assert.match(usability,/:is\(\.vault-key,\.vault-key-spacer\)\{[\s\S]*width:54px!important;[\s\S]*height:54px!important/);
+assert.match(usability,/\.vault-enter-btn\{[\s\S]*min-height:48px!important;[\s\S]*margin-top:10px!important/);
+assert.match(usability,/\.vault-keyboard-toggle\{[\s\S]*min-height:44px!important/);
+assert.match(usability,/@media\(max-width:820px\) and \(max-height:640px\)[\s\S]*width:48px!important[\s\S]*height:48px!important/,'very short viewports may compact the keypad but must stay above 44 px');
+assert.doesNotMatch(usability,/@media\(max-width:820px\) and \(max-height:[^)]+\)[\s\S]*width:(?:4[0-3]|[0-3]\d)px!important/,'short-height variants must never reduce PIN targets below 44 px');
+assert.match(sw,/vault-short-height1/,'PWA cache must invalidate the old vault geometry');
+
+console.log('Accessibility contrast, focus, touch targets, semantic state, safe areas and short-height vault contracts for v76: OK');
