@@ -9,13 +9,6 @@ const GENERATED=path.join(ROOT,'.generated');
 
 const RUNTIMES=Object.freeze([
   {
-    source:'src/ui/veggie-menu-toggle.ts',
-    manual:'v76-veggie-menu.js',
-    output:'v76-veggie-menu.js',
-    marker:'installVeggieMenuToggle',
-    label:'Veggie Burger'
-  },
-  {
     source:'src/ui/market-branding.ts',
     manual:'market-branding.js',
     output:'market-branding.js',
