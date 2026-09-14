@@ -152,6 +152,20 @@ html.cdc-v75 #cdcMobileGreeting{
     background:var(--v76-danger,#d94f60)!important;
     box-shadow:none!important;
   }
+
+  /* 76-mobile-menu-left1 — o controlo de navegação é sempre o primeiro elemento
+     visual do cabeçalho móvel. Mantém a ordem sem depender de estilos antigos. */
+  html.cdc-v75 .topbar-leading>.mobile-menu-btn,
+  html.cdc-v75[data-v75-page="dashboard"] .topbar-leading>.mobile-menu-btn{
+    order:-1!important;
+    margin-left:0!important;
+    margin-right:4px!important;
+    flex:0 0 44px!important;
+  }
+  html.cdc-v75 .topbar-leading>.page-heading,
+  html.cdc-v75[data-v75-page="dashboard"] .topbar-leading>.page-heading{
+    order:0!important;
+  }
 }
 
 @media(max-width:360px){
