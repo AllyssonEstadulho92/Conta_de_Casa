@@ -6,7 +6,7 @@
  * pelos módulos canónicos; esta camada deixa de instalar observers, listeners ou rede.
  * Mantém apenas a API histórica até à remoção física do ficheiro do bundle.
  *
- * Não lê/escreve appState, preços, quantidades, persistência ou sincronização.
+ * Não lê/escreve estado da aplicação, preços, quantidades, persistência ou sincronização.
  */
 (function installRetiredV75Featured(root){
   function upgrade(){return false;}
