@@ -10,7 +10,7 @@
     ['dashboard','Início','home'],
     ['bills','Despesas','bill'],
     ['market','Mercado','market'],
-    ['planning','Planeamento','plan'],
+    ['planning','Plano','plan'],
     ['settings','Mais','more']
   ];
   const SUPPORTED_STORES=[
@@ -44,7 +44,7 @@
       bill:'<path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4"/><path d="M9 11h6M9 15h6"/>',
       receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
       market:'<path d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.6H18a2 2 0 0 0 2-1.6L21 8H7"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>',
-      plan:'<path d="M4 19V9m6 10V5m6 14v-7m4 7H2"/>',
+      plan:'<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/>',
       more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
       bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
       calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
@@ -52,7 +52,12 @@
       income:'<path d="M12 19V5m-5 5 5-5 5 5"/>',
       security:'<path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6z"/><path d="m9 12 2 2 4-4"/>',
       sync:'<path d="M20 7h-5V2"/><path d="M20 7a8 8 0 0 0-14-2"/><path d="M4 17h5v5"/><path d="M4 17a8 8 0 0 0 14 2"/>',
-      settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1A1.7 1.7 0 0 0 4.6 15 1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.6V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v4H21a1.7 1.7 0 0 0-1.6 1Z"/>'
+      report:'<path d="M5 21v-6M12 21V9M19 21V3"/>',
+      goal:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+      shield:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+      cloudCheck:'<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><path d="m9 12 2 2 4-4"/>',
+      activity:'<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>',
+      settings:'<path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/>'
     };
     return `<svg class="svg-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${fallback[name]||fallback.more}</svg>`;
   }
@@ -149,112 +154,70 @@
   }
 
   function replaceOrInsert(id,html,anchor,position='beforebegin'){
-    const shell=document.createElement('div');
-    shell.innerHTML=html;
-    const next=shell.firstElementChild;
-    if(!next)return null;
-    const current=byId(id);
-    if(current)current.replaceWith(next);
-    else anchor?.insertAdjacentElement?.(position,next);
-    return next;
+    const existing=byId(id);if(existing){existing.outerHTML=html;return byId(id);}
+    anchor?.insertAdjacentHTML(position,html);return byId(id);
   }
 
   function renderDashboardPrototype(){
-    if(!appReady())return;
-    const page=byId('page-dashboard'),kpis=byId('kpiGrid'),metrics=dashboardMetrics();
-    if(!page||!kpis||!metrics)return;
-    replaceOrInsert('cdcMobileGreeting',greetingHtml(),page,'afterbegin');
-    const greeting=byId('cdcMobileGreeting');
-    replaceOrInsert('cdcMobileMonthWrap',monthControlHtml(),greeting,'afterend');
-    const hero=replaceOrInsert('cdcMonthHero',heroHtml(metrics),kpis,'beforebegin');
-    hero?.style.setProperty('--cdc-budget-pct',`${metrics.pct}%`);
-    if(!byId('cdcQuickActions'))hero?.insertAdjacentHTML('afterend',quickActionsHtml());
-    replaceOrInsert('cdcDashboardCategories',dashboardCategoryHtml(),byId('cdcQuickActions'),'afterend');
+    const page=byId('page-dashboard');if(!page||!appReady())return;
+    const metrics=dashboardMetrics();if(!metrics)return;
+    const kpi=byId('kpiGrid');
+    const secondary=byId('dashboardSecondary');
+    if(isMobile()){
+      if(kpi)replaceOrInsert('cdcMobileGreeting',greetingHtml(),kpi,'beforebegin');
+      const greeting=byId('cdcMobileGreeting');
+      if(greeting)replaceOrInsert('cdcMobileMonthWrap',monthControlHtml(),greeting,'afterend');
+    }else{byId('cdcMobileGreeting')?.remove();byId('cdcMobileMonthWrap')?.remove();}
+    if(kpi)replaceOrInsert('cdcMonthHero',heroHtml(metrics),kpi,'beforebegin');
+    if(kpi)replaceOrInsert('cdcQuickActions',quickActionsHtml(),kpi,'beforebegin');
+    if(secondary)replaceOrInsert('cdcDashboardCategories',dashboardCategoryHtml(),secondary,'afterend');
   }
-
-  function dateTime(value){const date=new Date(value||0);return Number.isNaN(date.getTime())?new Date(0):date;}
 
   function movementRows(){
-    if(!appReady())return [];
-    const rows=[];
     try{
-      for(const bill of appState.bills||[]){
-        if(bill.archived||bill.cancelled)continue;
-        if(typeof billInMonth==='function'&&!billInMonth(bill))continue;
-        const payments=(appState.payments||[]).filter(p=>p.billId===bill.id).sort((a,b)=>dateTime(b.paidAt)-dateTime(a.paidAt));
-        const when=payments[0]?.paidAt||bill.createdAt||bill.dueAt||`${bill.dueDate||selectedMonthKey()+'-01'}T12:00:00`;
-        rows.push({type:'out',id:bill.id,title:bill.title||'Despesa',subtitle:bill.provider||bill.category||'Despesa',amount:Number(bill.totalCents||0),when,category:bill.category||'Outros'});
-      }
-      for(const income of appState.incomes||[]){
-        if(typeof inSelectedMonth==='function'&&!inSelectedMonth(income.receivedAt))continue;
-        rows.push({type:'in',id:income.id,title:income.description||'Entrada',subtitle:'Rendimento',amount:Number(income.amountCents||0),when:income.receivedAt,category:'Rendimento'});
-      }
-    }catch(_error){}
-    const search=clean(byId('billSearch')?.value||'').toLocaleLowerCase('pt-PT');
-    return rows.filter(row=>(expenseTab==='all'||expenseTab===row.type)&&(!search||`${row.title} ${row.subtitle} ${row.category}`.toLocaleLowerCase('pt-PT').includes(search))).sort((a,b)=>dateTime(b.when)-dateTime(a.when));
+      const month=selectedMonthKey();
+      const bills=(appState?.bills||[]).filter(b=>String(b?.dueDate||'').slice(0,7)===month);
+      const payments=(appState?.payments||[]).filter(p=>String(p?.date||'').slice(0,7)===month).map(p=>({id:p.id,type:'payment',title:p.description||'Pagamento',date:p.date,cents:Number(p.amountCents||0),category:p.category||'Pagamentos'}));
+      const markets=(appState?.markets||[]).filter(m=>String(m?.date||m?.updatedAt||'').slice(0,7)===month).map(m=>({id:m.id,type:'market',title:m.name||'Mercado',date:m.date||m.updatedAt,cents:Number(m.actualCents??m.estimatedCents??0),category:'Mercado'}));
+      const billRows=bills.map(b=>({id:b.id,type:'bill',title:b.title||b.description||'Despesa',date:b.dueDate,cents:Number(b.amountCents||0),category:b.category||'Outros'}));
+      return [...billRows,...payments,...markets].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+    }catch(_error){return [];}
   }
 
-  function dayKey(value){
-    const date=dateTime(value);if(date.getTime()===0)return 'Sem data';
-    const today=new Date();const key=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    if(key(date)===key(today))return `Hoje, ${new Intl.DateTimeFormat('pt-PT',{day:'numeric',month:'long'}).format(date)}`;
-    const yesterday=new Date(today);yesterday.setDate(today.getDate()-1);
-    if(key(date)===key(yesterday))return `Ontem, ${new Intl.DateTimeFormat('pt-PT',{day:'numeric',month:'long'}).format(date)}`;
-    return new Intl.DateTimeFormat('pt-PT',{day:'numeric',month:'long'}).format(date).replace(/^./,c=>c.toUpperCase());
-  }
-
-  function movementIcon(row,index){
-    if(row.type==='in')return ['income','income'];
-    const text=`${row.title} ${row.category}`.toLocaleLowerCase('pt-PT');
-    if(/aliment|mercado|supermerc|continente|pingo/.test(text))return ['market','food'];
-    if(/casa|renda|energia|eletric|água|gas|gás/.test(text))return ['home','home'];
-    if(/transport|combust|galp|autom/.test(text))return ['plan','transport'];
-    if(/saúde|saude|farm/.test(text))return ['security','health'];
-    return ['bill',categoryTone(index)];
-  }
-
-  function movementFeedHtml(){
-    const groups=new Map();
-    movementRows().forEach(row=>{const key=dayKey(row.when);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);});
-    const body=[...groups.entries()].map(([label,items])=>`<section class="cdc-movement-day"><h3>${esc(label)}</h3><div>${items.map((row,index)=>{const [iconName,tone]=movementIcon(row,index);const date=dateTime(row.when);const time=date.getTime()?new Intl.DateTimeFormat('pt-PT',{hour:'2-digit',minute:'2-digit'}).format(date):'';const action=row.type==='out'?`data-bill-id="${attr(row.id)}"`:'data-v74-go="planning"';return `<button type="button" class="cdc-movement-row" ${action}><span class="cdc-movement-icon ${tone}">${iconMarkup(iconName,19)}</span><span class="cdc-movement-copy"><strong>${esc(row.title)}</strong><small>${esc(row.subtitle)}</small></span><span class="cdc-movement-value ${row.type==='in'?'income':'expense'}"><strong data-money>${row.type==='in'?'+ ':'- '}${moneyText(row.amount)}</strong><small>${esc(time)}</small></span></button>`;}).join('')}</div></section>`).join('');
-    return body||'<p class="cdc-empty-note">Sem movimentos para este filtro.</p>';
+  function expenseFeedHtml(){
+    let rows=movementRows();
+    if(expenseTab==='paid')rows=rows.filter(row=>row.type==='payment'||row.type==='market');
+    if(expenseTab==='pending')rows=rows.filter(row=>row.type==='bill');
+    const body=rows.slice(0,60).map(row=>`<button type="button" class="cdc-expense-row" ${row.type==='bill'?`data-bill-id="${attr(row.id)}"`:'disabled'}><span class="cdc-expense-icon ${row.type}">${iconMarkup(row.type==='market'?'market':row.type==='payment'?'income':'bill',19)}</span><span><strong>${esc(row.title)}</strong><small>${esc(row.category)} · ${esc(row.date||'')}</small></span><strong data-money>${moneyText(row.cents)}</strong><i>${row.type==='bill'?'›':''}</i></button>`).join('');
+    return `<section id="cdcExpenseFeed" class="cdc-expense-feed"><div class="cdc-expense-tabs"><button type="button" class="${expenseTab==='all'?'active':''}" data-expense-tab="all">Todos</button><button type="button" class="${expenseTab==='paid'?'active':''}" data-expense-tab="paid">Pagos</button><button type="button" class="${expenseTab==='pending'?'active':''}" data-expense-tab="pending">Pendentes</button></div><div class="cdc-expense-list">${body||'<p class="cdc-empty-note">Ainda não existem movimentos neste mês.</p>'}</div></section>`;
   }
 
   function renderExpenseFeed(){
-    const page=byId('page-bills'),command=q('.bill-command-bar',byId('page-bills'));
-    if(!page||!command)return;
-    const tabsHtml=`<div id="cdcExpenseTabs" class="cdc-segmented" role="tablist" aria-label="Movimentos"><button type="button" role="tab" data-expense-tab="all" aria-selected="${expenseTab==='all'}" class="${expenseTab==='all'?'active':''}">Todas</button><button type="button" role="tab" data-expense-tab="in" aria-selected="${expenseTab==='in'}" class="${expenseTab==='in'?'active':''}">Entradas</button><button type="button" role="tab" data-expense-tab="out" aria-selected="${expenseTab==='out'}" class="${expenseTab==='out'?'active':''}">Saídas</button></div>`;
-    replaceOrInsert('cdcExpenseTabs',tabsHtml,command,'beforebegin');
-    let feed=byId('cdcExpenseFeed');
-    if(!feed){feed=document.createElement('div');feed.id='cdcExpenseFeed';feed.className='cdc-expense-feed';feed.setAttribute('aria-live','polite');command.insertAdjacentElement('afterend',feed);}
-    feed.innerHTML=movementFeedHtml();
-    if(!byId('cdcExpenseFab'))page.insertAdjacentHTML('beforeend','<button id="cdcExpenseFab" class="cdc-expense-fab" type="button" data-v74-action="expense" aria-label="Adicionar despesa">+</button>');
-  }
-
-  function productImage(item){
-    let src='';try{src=typeof safeProductImageUrl==='function'?safeProductImageUrl(item?.imageUrl):'';}catch(_error){}
-    return src?`<img src="${attr(src)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">`:`<span>${iconMarkup('market',23)}</span>`;
+    const page=byId('page-bills'),list=byId('billsList');if(!page||!list)return;
+    replaceOrInsert('cdcExpenseFeed',expenseFeedHtml(),list,'afterend');
+    if(isMobile()&&!byId('cdcExpenseFab'))page.insertAdjacentHTML('beforeend','<button id="cdcExpenseFab" class="cdc-expense-fab" type="button" data-v74-action="expense" aria-label="Adicionar despesa"><span>+</span></button>');
+    if(!isMobile())byId('cdcExpenseFab')?.remove();
   }
 
   function marketHomeHtml(){
-    let items=[];try{items=(appState.market||[]).filter(item=>!item.purchased).slice(0,3);}catch(_error){}
-    const featured=items.length?items.map(item=>`<button class="cdc-product-card" type="button" data-edit-market="${attr(item.id)}"><span class="cdc-product-image">${productImage(item)}</span><strong>${esc(item.name||'Produto')}</strong><small>${esc(item.category||'Outros')}</small><b data-money>${moneyText(Number(item.estimatedCents||0))}</b></button>`).join(''):'<p class="cdc-empty-note">Pesquise produtos reais para começar a sua lista.</p>';
-    return `<section id="cdcMarketHome" class="cdc-market-home"><button type="button" class="cdc-market-search" data-v74-market-browser>${iconMarkup('search',18)}<span>Pesquisar produtos, marcas...</span><i>${iconMarkup('receipt',18)}</i></button><div class="cdc-market-section-head"><strong>Produtos em destaque</strong><button type="button" data-v74-market-browser>Ver todos</button></div><div class="cdc-product-grid">${featured}</div><div class="cdc-market-section-head"><strong>Lojas</strong><small>Fontes ativas</small></div><div class="cdc-store-grid">${SUPPORTED_STORES.map(([name,mark,id])=>`<button type="button" class="cdc-store-card" data-v74-market-browser data-v74-store="${id}"><span>${esc(mark)}</span><strong>${esc(name)}</strong></button>`).join('')}</div><div class="cdc-list-heading"><strong>A minha lista</strong><small>${items.length?`${items.length} por comprar`:'Sem itens pendentes'}</small></div></section>`;
+    const names=SUPPORTED_STORES.map(([name,abbr,id])=>`<button class="cdc-store-card" type="button" data-v74-market-browser="${id}"><span>${esc(abbr)}</span><strong>${esc(name)}</strong><small>Pesquisar produtos</small></button>`).join('');
+    const lists=(appState?.markets||[]).slice(-4).reverse().map(m=>`<button class="cdc-list-row" type="button" data-market-id="${attr(m.id)}"><span>${iconMarkup('market',18)}</span><span><strong>${esc(m.name||'Lista')}</strong><small>${esc(m.date||'')}</small></span><strong data-money>${moneyText(m.actualCents??m.estimatedCents??0)}</strong><i>›</i></button>`).join('');
+    return `<section id="cdcMarketHome" class="cdc-market-home"><div class="cdc-section-title"><strong>Supermercados</strong><button type="button" data-v74-market-browser="all">Ver todos</button></div><div class="cdc-store-grid">${names}</div><div class="cdc-section-title"><strong>As minhas listas</strong></div><div class="cdc-list-box">${lists||'<p class="cdc-empty-note">Ainda não existem listas.</p>'}</div></section>`;
   }
 
   function renderMarketHome(){
-    const command=q('.market-command-bar',byId('page-market'));if(!command)return;
-    replaceOrInsert('cdcMarketHome',marketHomeHtml(),command,'beforebegin');
+    const page=byId('page-market'),toolbar=q('.market-toolbar',page);if(!page)return;
+    if(toolbar)replaceOrInsert('cdcMarketHome',marketHomeHtml(),toolbar,'afterend');
   }
 
   function planningOverviewHtml(){
-    const metrics=dashboardMetrics();if(!metrics)return '';
-    const entries=categoryEntries().slice(0,4),total=entries.reduce((sum,entry)=>sum+Number(entry[1]||0),0)||1;
-    return `<section id="cdcPlanningOverview" class="cdc-planning-overview"><div class="cdc-planning-month"><button type="button" data-v74-month-step="-1" aria-label="Mês anterior">‹</button><strong>${esc(monthLabel())}</strong><button type="button" data-v74-month-step="1" aria-label="Mês seguinte">›</button></div><div class="cdc-budget-ring" style="--pct:${metrics.pct}"><div><strong>${metrics.pct}%</strong><span data-money>${moneyText(metrics.spent)}</span><small>de ${moneyText(metrics.budget||0)}</small></div></div><div class="cdc-planning-categories">${entries.map(([name,value],index)=>{const pct=Math.round(Number(value||0)/total*100);return `<div><span class="cdc-category-dot ${categoryTone(index)}"></span><strong>${esc(name)}</strong><span class="cdc-plan-track"><i style="width:${Math.max(5,pct)}%"></i></span><b data-money>${moneyText(value)}</b></div>`;}).join('')||'<p class="cdc-empty-note">Sem despesas para distribuir.</p>'}</div></section>`;
+    const metrics=dashboardMetrics()||{spent:0,budget:0,remaining:0,pct:0};
+    return `<section id="cdcPlanningOverview" class="cdc-planning-overview"><div class="cdc-planning-summary"><span>Total gasto este mês</span><strong data-money>${moneyText(metrics.spent)}</strong><small>Orçamento: <b data-money>${metrics.budget?moneyText(metrics.budget):'Por definir'}</b></small></div><div class="cdc-planning-progress"><div><span></span></div><small>${metrics.budget?`${metrics.pct}% utilizado`:'Defina um orçamento mensal'}</small></div></section>`;
   }
 
   function renderPlanningPrototype(){
-    const page=byId('page-planning'),tabs=q('.section-tabs',byId('page-planning'));if(!page)return;
+    const page=byId('page-planning');if(!page)return;
+    const tabs=q('.section-tabs',page);
     if(tabs){const buttons=qa('.section-tab',tabs);if(buttons[0])buttons[0].textContent='Orçamento';if(buttons[1])buttons[1].textContent='Metas';}
     if(tabs)replaceOrInsert('cdcPlanningOverview',planningOverviewHtml(),tabs,'afterend');
   }
@@ -271,7 +234,7 @@
   }
 
   function moreMenuHtml(){
-    const items=[['market','As minhas listas','market'],['planning','Planeamento e orçamento','plan'],['reports','Relatórios','bill'],['goals','Metas de poupança','income'],['security','Segurança e privacidade','security'],['sync','Sincronização','sync'],['diagnostics','Diagnóstico e integridade','settings']];
+    const items=[['market','As minhas listas','market'],['planning','Planeamento e orçamento','plan'],['reports','Relatórios','report'],['goals','Metas de poupança','goal'],['security','Segurança e privacidade','shield'],['sync','Sincronização','cloudCheck'],['diagnostics','Diagnóstico e integridade','activity']];
     return `<section id="cdcMoreMenu" class="cdc-more-menu"><div class="cdc-profile-card"><span class="cdc-avatar">${esc(initials())}</span><div><strong>${esc(profileName())}</strong><small>Conta de Casa · cofre local</small></div></div><div class="cdc-more-list">${items.map(([page,label,iconName])=>`<button type="button" ${page==='sync'?'data-v74-more="sync"':`data-v74-go="${page}"`}><span>${iconMarkup(iconName,19)}</span><strong>${esc(label)}</strong><i>›</i></button>`).join('')}</div></section>`;
   }
 
