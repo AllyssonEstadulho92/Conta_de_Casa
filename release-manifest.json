@@ -1,9 +1,26 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "v75",
-  "publishedAt": "2026-09-09",
+  "latestVersion": "v76",
+  "publishedAt": "2026-09-14",
   "releases": [
+    {
+      "version": "v76",
+      "date": "14 de setembro de 2026",
+      "title": "Arquitetura consolidada, versão estável e interface alinhada",
+      "items": [
+        "A aplicação passa a identificar oficialmente a release pública v76, alinhando package, build, centro de atualizações, manifesto de releases e cache PWA.",
+        "A navegação móvel mantém uma única autoridade de composição, com Início, Despesas, Mercado, Planeamento e Mais como cinco destinos principais e mapeamento consistente das rotas secundárias.",
+        "v76-mobile-shell.css assume a geometria final de telemóvel, incluindo safe areas, reflow, overflow, barra inferior persistente, alvos tácteis e suporte a ecrãs estreitos.",
+        "Planeamento e Mais passam a usar v76-planning-more.css como camada explícita, sem depender das antigas estruturas Featured ou v74.",
+        "v74-experience.css, v74-experience.js e v75-market-featured.css/js foram retirados do bundle, do cache e do próprio repositório depois de toda a bateria funcional comprovar que já não eram necessários.",
+        "A composição do Dashboard, Despesas, Mercado e restantes rotas foi consolidada sem criar uma segunda fonte de verdade para valores, estados ou handlers.",
+        "O Mercado continua limitado a fontes suportadas e fotografias oficiais/validadas, preservando separação entre preço estimado e valor efetivamente pago.",
+        "Os módulos TypeScript de menu v76, branding do Mercado e política de conflitos de sincronização continuam a ser gerados no build e não são mantidos como JavaScript manual duplicado.",
+        "Cálculos em cêntimos, STATE_VERSION, IndexedDB, cofre/PIN, PBKDF2-SHA-256, AES-GCM, faturas, QR, scanner, quantidades e sincronização mantêm os mesmos contratos funcionais e de segurança.",
+        "A CI, TypeScript Foundation e GitHub Pages permanecem como barreiras obrigatórias antes de cada integração em main."
+      ]
+    },
     {
       "version": "v75",
       "date": "9 de setembro de 2026",
