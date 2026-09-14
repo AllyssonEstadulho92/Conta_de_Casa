@@ -12,6 +12,8 @@ const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 const render=read('render.js');
 const finance=read('finance.js');
+const forms=read('forms.js');
+const market=read('market-experience.js');
 
 assert.match(css,/76-product-pages1/);
 assert.match(css,/#page-dashboard>#kpiGrid\{order:1\}/);
@@ -43,6 +45,22 @@ assert.match(css,/\.account-balance-kpi::after\{display:none!important\}/);
 assert.match(css,/\.main>\.topbar\{[\s\S]*box-shadow:none!important/);
 assert.match(css,/data-v75-page=\"dashboard\"[\s\S]*\.page-heading \.eyebrow[\s\S]*display:none!important/);
 
+/* Regressão reportada: Mercado e Faturas mantêm sempre um caminho visível para
+   criar registos e continuam a expor os resultados existentes. O CSS só protege
+   visibilidade; handlers e domínio permanecem nos módulos funcionais. */
+assert.match(css,/76-primary-actions-restore1/);
+assert.match(css,/#page-bills \.bill-command-bar,[\s\S]*#page-market \.market-command-bar[\s\S]*display:grid!important[\s\S]*visibility:visible!important/);
+assert.match(css,/#page-bills #newBillBtn,[\s\S]*#page-market #newMarketBtn[\s\S]*display:inline-flex!important[\s\S]*pointer-events:auto!important/);
+assert.match(css,/#page-bills #billsList,[\s\S]*#page-market #marketList[\s\S]*visibility:visible!important[\s\S]*opacity:1!important/);
+assert.match(css,/#formDialog #billForm \.v75-bill-tabs[\s\S]*display:flex!important/);
+assert.match(css,/#formDialog\[data-mode=\"market-browser\"\] \.market-browser[\s\S]*display:block!important/);
+assert.match(forms,/function openBillForm\(/);
+assert.match(forms,/function openMarketForm\(/);
+assert.match(market,/function openMarketBrowser\(/);
+assert.match(market,/return target\?\.closest\?\.\('#newMarketBtn'\)/,'market browser must still intercept the visible add-item action');
+assert.match(render,/function renderBills\(/);
+assert.match(render,/function renderMarket\(/);
+
 // A nova camada tem propriedade de composição de página, carrega antes do shell e entra no PWA.
 assert.match(prepare,/const PRODUCT_PAGES_REV = '76-dashboard-clean1'/);
 assert.ok(prepare.includes("'v76-product-pages.css'"));
@@ -51,6 +69,7 @@ const product=prepare.indexOf('v76-product-pages.css?v=${PRODUCT_PAGES_REV}');
 const shell=prepare.indexOf('v76-mobile-shell.css?v=${MOBILE_SHELL_REV}');
 assert.ok(modern>=0 && product>modern && shell>product,'product pages must load after visual tokens and before the mobile shell');
 assert.match(sw,/dashboard-clean1/);
+assert.match(sw,/mobile-drawer-actions1/);
 assert.ok(sw.includes("'./v76-product-pages.css'"));
 
 // A camada de composição não pode assumir geometria global do shell.
@@ -59,4 +78,4 @@ assert.doesNotMatch(css,/body \.main\s*\{/);
 assert.doesNotMatch(css,/\.mobile-nav\s*\{/);
 assert.doesNotMatch(css,/safe-area-inset-/);
 
-console.log('v76 product page hierarchy: canonical Dashboard only, responsive order and PWA integration: OK');
+console.log('v76 product page hierarchy: dashboard plus visible Mercado/Faturas actions and PWA integration: OK');
