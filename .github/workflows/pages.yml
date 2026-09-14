@@ -47,7 +47,6 @@ jobs:
           node --check forms.js
           node --check events.js
           node --check mobile-menu-toggle.js
-          node --check .generated/v76-veggie-menu.js
           node --check sync.js
           node --check .generated/sync-conflict-policy.js
           node --check market-experience.js
@@ -129,13 +128,13 @@ jobs:
 
       - name: Confirm generated runtimes in public bundle
         run: |
-          test -f dist/v76-veggie-menu.js
           test -f dist/market-branding.js
           test -f dist/sync-conflict-policy.js
+          test ! -f dist/v76-veggie-menu.js
+          test ! -f dist/v76-veggie-menu.css
           test ! -f v76-veggie-menu.js
           test ! -f market-branding.js
           test ! -f sync-conflict-policy.js
-          node --check dist/v76-veggie-menu.js
           node --check dist/market-branding.js
           node --check dist/sync-conflict-policy.js
 
