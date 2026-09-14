@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 13 de setembro de 2026
+Atualizado: 14 de setembro de 2026
 
 ## P0 — Invariantes
 
@@ -20,36 +20,45 @@ Atualizado: 13 de setembro de 2026
 - [ ] Repetir validação física no mesmo iPhone/Safari.
 - [ ] Repetir validação em PWA instalada.
 
-## P0 — Marca e iconografia `76-brand-icons1`
+## P0 — Marca e iconografia
 
-### Publicado — PR #100
+### `76-brand-icons1` — publicado, PR #100
 
-- [x] Auditar `icon.svg`, `.brand-mark`, subset Lucide e pseudo-ícones históricos.
-- [x] Confirmar duas identidades: `icon.svg` e Lucide `home` na marca interna.
 - [x] Simplificar `icon.svg` para casa + euro, teal sólido e branco.
-- [x] Remover folha e gradientes decorativos da marca.
-- [x] Fazer sidebar/drawer/cofre reutilizarem a mesma marca `icon.svg`.
-- [x] Manter Lucide como única família de ícones funcionais.
-- [x] Neutralizar ícone decorativo do título do Mercado.
-- [x] Neutralizar chevron extra do estado de sync no Mercado.
-- [x] Restaurar `Plus` semântico no botão “Adicionar item”.
-- [x] Neutralizar pseudo-ícones coloridos dos cartões de resumo do Mercado.
-- [x] Proteger a nova autoridade em `tests/ui-icons.test.cjs`.
-- [x] Invalidar cache PWA com `brand-icons1`.
-- [x] TypeScript Foundation do PR verde.
-- [x] CI integral do PR verde.
-- [x] Merge PR #100: `5b9689f04e844b9216626729b3b5aae5bf1acc09`.
-- [x] TypeScript Foundation main `34783537256` verde.
-- [x] CI main `34783537266` verde.
-- [x] Pages `34783564467` publicada com sucesso.
-- [ ] Validar nova marca e ícones em Safari/iPhone, PWA instalada, Android/Chrome e desktop.
+- [x] Remover folha/gradientes da marca.
+- [x] Reutilizar `icon.svg` em sidebar/drawer/cofre.
+- [x] Manter Lucide como família funcional.
+- [x] Remover duplicações/pseudo-ícones do Mercado.
+- [x] Restaurar `Plus` no botão “Adicionar item”.
+- [x] CI/TypeScript/Pages verdes.
+
+### `76-icon-semantics2` — branch atual
+
+- [x] Auditar screenshot físico do iPhone: dock excessivamente cinzento e `Planeame…` truncado.
+- [x] Corrigir `plan` para Lucide `clipboard-list`.
+- [x] Corrigir `settings` para engrenagem Lucide.
+- [x] Adicionar `activity` para Diagnóstico.
+- [x] Corrigir nomes não canónicos do menu Mais: `report`, `goal`, `shield`, `cloudCheck`, `activity`.
+- [x] Encurtar label móvel `Planeamento` → `Plano`, preservando rota/título.
+- [x] Criar tokens de cor semântica para light/dark.
+- [x] Aplicar cor controlada ao dock, header, Mais e ações semânticas.
+- [x] Manter `aria-current`, fundo/texto e forced-colors para não depender apenas da cor.
+- [x] Invalidar cache PWA com `icon-semantics2`.
+- [x] Atualizar regressões de iconografia e consistência.
+- [ ] TypeScript Foundation verde no head final.
+- [ ] CI integral verde no head final.
+- [ ] Merge em `main`.
+- [ ] CI/TypeScript pós-merge verdes.
+- [ ] Pages publicada.
+- [ ] Validar visualmente em Safari/iPhone e PWA instalada.
+- [ ] Validar Android/Chrome e desktop.
 
 ### Limpeza posterior segura
 
-- [ ] Remover glifos Unicode de fallback do HTML apenas depois de prova de que não são necessários.
+- [ ] Remover glifos Unicode de fallback do HTML só depois de prova de que não são necessários.
 - [ ] Deixar de hidratar `.brand-mark` como Lucide `home` no runtime.
-- [ ] Remover regras pseudo-icon antigas do Mercado apenas depois de confirmar não utilização em todos os estados.
-- [ ] Rever contraste não textual dos ícones em light/dark e forced-colors no dispositivo/browser real.
+- [ ] Remover regras pseudo-icon antigas do Mercado após confirmação de não utilização.
+- [ ] Migrar `ui-icons.js` para TypeScript strict num bloco próprio.
 
 ## P0 — Dívida estrutural UI/UX
 
@@ -66,8 +75,9 @@ Atualizado: 13 de setembro de 2026
 - [x] Resumo principal real e indicadores canónicos.
 - [x] Blocos v74 duplicados visualmente suprimidos.
 - [x] Header e dock alinhados com direção v76 pelo PR #99.
+- [x] Primeira correção física da cor/semântica do dock implementada em `76-icon-semantics2`.
 - [ ] Remover criação DOM v74 substituída.
-- [ ] Validar desktop + iPhone/PWA.
+- [ ] Validar desktop + iPhone/PWA após publicação do bloco atual.
 
 ### Faturas
 
@@ -88,6 +98,7 @@ Atualizado: 13 de setembro de 2026
 
 ### Planeamento + Calendário
 
+- [x] Ícone de Planeamento passa a checklist/clipboard no bloco atual.
 - [ ] Consolidar hierarquia com dados reais suportados.
 - [ ] Preservar mesma informação essencial mobile/desktop.
 - [ ] Rever datas, vencimentos e estados.
@@ -99,9 +110,10 @@ Atualizado: 13 de setembro de 2026
 
 ### Segurança + Diagnóstico + Definições
 
+- [x] Ícones semânticos corrigidos no menu Mais (`shield`, `activity`, engrenagem).
 - [ ] Rever forms, estados, feedback e linguagem.
 - [ ] Garantir ações destrutivas claramente distintas.
-- [ ] Rever dark mode e forced-colors.
+- [ ] Rever dark mode e forced-colors em browser/dispositivo real.
 
 ## P0 — Fonte 100% TypeScript
 
@@ -115,6 +127,7 @@ Atualizado: 13 de setembro de 2026
 ### Próximos blocos
 
 - [ ] Migrar módulos UI folha/baixo acoplamento restantes.
+- [ ] Migrar iconografia para TypeScript após estabilização visual.
 - [ ] Criar configuração canónica de navegação em TypeScript antes de remover autoridade v74.
 - [ ] Criar vetores de paridade para dinheiro/datas/quantidades.
 - [ ] Migrar domínio por subdomínios.
@@ -129,7 +142,7 @@ Atualizado: 13 de setembro de 2026
 - [ ] Auditar ZXing remoto e considerar bundle local com licença preservada.
 - [ ] Reduzir `style-src 'unsafe-inline'` quando possível.
 - [ ] Rever origens CSP finais.
-- [ ] Confirmar offline/update em PWA após cada invalidação de cache.
+- [ ] Confirmar offline/update em PWA após `icon-semantics2`.
 - [ ] Ativar required checks/branch protection quando disponível.
 
 ## P0 — QA final
