@@ -54,7 +54,6 @@ const continenteProduct='https://www.continente.pt/produto/compressas-gaze-20-x-
 const continenteImage='https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dwa5dd802e/images/col/816/8167440-frente.jpg?sw=2000&sh=2000';
 const pingoProduct='https://www.pingodoce.pt/home/produtos/mercearia/arroz-massa-e-leguminosas/arroz/arroz-carolino-cigala-739490.html';
 const pingoImage='https://static.pingodoce.pt/dw/image/v2/BLJJ_PRD/on/demandware.static/-/Sites-pingo-doce-master/default/dw8cff88d2/images/large/739490_93c013c8bbf2545978b1e875cb8563de.jpg';
-
 assert.equal(sandbox.CDCOfficialMarketImages.safeProductUrl(continenteProduct,'continente','8167440'),continenteProduct);
 assert.equal(sandbox.CDCOfficialMarketImages.safeProductUrl(pingoProduct,'pingo-doce','739490'),pingoProduct);
 assert.equal(sandbox.CDCOfficialMarketImages.safeProductUrl(pingoProduct,'pingo-doce','111111'),'');
@@ -64,10 +63,7 @@ assert.equal(sandbox.CDCOfficialMarketImages.safeOfficialImageUrl(continenteImag
 assert.equal(sandbox.CDCOfficialMarketImages.safeOfficialImageUrl(pingoImage,'pingo-doce','739490'),pingoImage);
 assert.equal(sandbox.CDCOfficialMarketImages.safeOfficialImageUrl(pingoImage,'pingo-doce','123456'),'');
 
-const catalogue=[
-  '- Pingo Doce · Arroz Carolino Cigala · 1 Kg · 1,49€ · pid 739490',pingoProduct,
-  '- Continente · Compressas Gaze · 20 Un · 2,99€ · pid 8167440',continenteProduct
-].join('\n');
+const catalogue=['- Pingo Doce · Arroz Carolino Cigala · 1 Kg · 1,49€ · pid 739490',pingoProduct,'- Continente · Compressas Gaze · 20 Un · 2,99€ · pid 8167440',continenteProduct].join('\n');
 const parsed=JSON.parse(JSON.stringify(sandbox.CDCOfficialMarketImages.parseCatalogRecords(catalogue)));
 assert.equal(parsed.length,2);
 assert.equal(parsed[0].pid,'739490');
@@ -76,15 +72,18 @@ assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
-for(const asset of ['./market-retailer-image-policy.js','./market-official-images.js','./v64-runtime.js','./market-shopping-focus.js','./mobile-menu-toggle.js','./v74-experience.css','./v75-architecture.css','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`));
-assert.ok(!sw.includes("'./v74-experience.js'"),'retired v74 runtime must not be cached');
+assert.match(sw,/retire-assets1/);
+for(const asset of ['./market-retailer-image-policy.js','./market-official-images.js','./v64-runtime.js','./market-shopping-focus.js','./mobile-menu-toggle.js','./v75-architecture.css','./v76-planning-more.css','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`));
+for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be cached`);
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.match(prepare,/const BUILD = 'v75'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
-assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
+assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-more1'/);
+assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
+assert.doesNotMatch(prepare,/const FEATURED_REV/);
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -96,20 +95,21 @@ try{
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
   assert.match(index,/market-shopping-focus\.js\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.js\?v=73-menu8/);
-  assert.match(index,/v74-experience\.css\?v=74-experience2/);
-  assert.doesNotMatch(index,/v74-experience\.js\?v=74-experience2/);
   assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
+  assert.match(index,/v76-planning-more\.css\?v=76-planning-more1/);
   assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
+  assert.doesNotMatch(index,/v74-experience\.(?:css|js)/);
+  assert.doesNotMatch(index,/v75-market-featured\.(?:css|js)/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.ok(index.indexOf('market-official-images.js')<index.indexOf('v64-runtime.js'));
   assert.ok(index.indexOf('v64-runtime.js')<index.indexOf('market-shopping-focus.js'));
   assert.ok(index.indexOf('market-shopping-focus.js')<index.indexOf('mobile-menu-toggle.js'));
   assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v75-architecture.js'));
-  for(const asset of ['market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','market-shopping-focus.js','mobile-menu-toggle.js','v74-experience.css','v75-architecture.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
-  assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')),'retired v74 runtime must not exist in dist');
+  for(const asset of ['market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','market-shopping-focus.js','mobile-menu-toggle.js','v75-architecture.css','v76-planning-more.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  for(const retired of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(dist,retired)),`${retired} must not exist in dist`);
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official-image bridge remains safe under v76 architecture without published v74 runtime: OK');
+console.log('Market official-image bridge remains safe under v76 with retired assets excluded from distribution: OK');

@@ -17,6 +17,7 @@ const experienceCss=fs.readFileSync('v74-experience.css','utf8');
 const experienceJs=fs.readFileSync('v74-experience.js','utf8');
 const architectureCss=fs.readFileSync('v75-architecture.css','utf8');
 const architectureJs=fs.readFileSync('v75-architecture.js','utf8');
+const planningMore=fs.readFileSync('v76-planning-more.css','utf8');
 const js=fs.readFileSync('market-experience.js','utf8');
 const runtimeJs=fs.readFileSync('v64-runtime.js','utf8');
 const imageAudit=fs.readFileSync('market-image-audit.js','utf8');
@@ -36,18 +37,25 @@ assert.match(index,/market-experience\.js\?v=53/);
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
+assert.match(sw,/retire-assets1/);
 assert.match(sw,/ts-runtime2-market-branding1/,'Service Worker cache must change when the generated Market branding runtime changes');
-for(const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','v74-experience.css','v75-architecture.css','v75-architecture.js']){
+for(const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','v75-architecture.css','v76-planning-more.css','v75-architecture.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be cached by the service worker`);
   assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be included in the Pages bundle`);
 }
-assert.ok(!sw.includes("'./v74-experience.js'"),'retired v74 experience runtime must not be cached');
-assert.ok(!publicFilesBlock.includes("'v74-experience.js'"),'retired v74 experience runtime must not be copied to Pages');
+for(const retired of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js']){
+  assert.ok(!sw.includes(`'./${retired}'`),`${retired} must not be cached`);
+  assert.ok(!publicFilesBlock.includes(`'${retired}'`),`${retired} must not be copied to Pages`);
+}
 assert.match(pages,/forbidden=\[[^\]]*'v74-experience\.js'/s,'retired runtime should remain explicitly forbidden in dist');
+assert.match(pages,/forbidden=\[[^\]]*'v74-experience\.css'/s,'retired CSS should remain explicitly forbidden in dist');
+assert.match(pages,/forbidden=\[[^\]]*'v75-market-featured\.js'/s,'retired Featured runtime should remain explicitly forbidden in dist');
+assert.match(pages,/forbidden=\[[^\]]*'v75-market-featured\.css'/s,'retired Featured CSS should remain explicitly forbidden in dist');
 assert.ok(!sw.includes("'./ui-consistency.css'"),'obsolete visual override must not ship');
 assert.ok(!sw.includes("'./v64-runtime.css'"),'obsolete v64 visual shell must not ship');
 assert.match(pages,/const BUILD = 'v75'/);
 assert.match(pages,/const ARCHITECTURE_REV = '75-architecture2'/);
+assert.match(pages,/const PLANNING_MORE_REV = '76-planning-more1'/);
 assert.match(pages,/['"]market-branding\.js['"]:\s*path\.join\(GENERATED,\s*['"]market-branding\.js['"]\)/);
 
 for(const market of ['Pingo Doce','Continente'])assert.ok(js.includes(market));
@@ -73,11 +81,12 @@ assert.match(brandingJs,/installMarketBranding/);
 assert.match(brandingJs,/marketProductImages\s*=\s*'verified'/);
 assert.doesNotMatch(brandingJs,/appState|estimatedCents|actualCents|saveState|commit\(/,'branding must not mutate financial state');
 
-/* Fontes v74 ficam apenas para auditoria/compatibilidade; Mercado atual usa os módulos canónicos. */
+/* Fontes v74 permanecem apenas para auditoria histórica; não entram na distribuição. */
 assert.match(experienceJs,/SUPPORTED_STORES=\[[\s\S]*Continente[\s\S]*Pingo Doce/);
 assert.doesNotMatch(experienceJs,/Auchan|Lidl|Mercadona/);
 assert.match(experienceCss,/76-retire-v74-css-behavior1/);
 assert.doesNotMatch(experienceCss,/\{[^}]*\}/,'retired v74 CSS must not style Mercado');
+assert.match(planningMore,/76-planning-more1/);
 assert.match(architectureCss,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'Mercado must remain visible in the primary navigation');
 assert.match(architectureCss,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'current market grid must remain compact');
 assert.match(architectureJs,/market:\['Mercado','Compras'\]/);
@@ -103,4 +112,4 @@ assert.ok(css.includes('env(safe-area-inset-top)'));
 assert.ok(css.includes('env(safe-area-inset-bottom)'));
 assert.ok(css.includes('min-width:0'));
 
-console.log('Market live sources, TS-generated branding and v76 architecture remain safe without v74 runtime/CSS authority: OK');
+console.log('Market live sources and TS branding remain safe with retired v74/Featured assets excluded from distribution: OK');

@@ -63,16 +63,20 @@ assert.match(css, /\.drawer-nav \.nav-btn\{[\s\S]*min-height:48px/);
 assert.match(css, /@media\(prefers-reduced-motion:reduce\)[\s\S]*transition:none!important/);
 assert.doesNotMatch(css, /background:\s*(?:green|#0f0|#00ff00)/i);
 
-/* v75 keeps the validated v73 controller and changes only the information architecture above it. */
+/* v76 mantém o controlador v73 validado e altera apenas a arquitetura acima dele. */
 assert.match(prepare, /const BUILD = 'v75'/);
 assert.match(prepare, /const MENU_REV = '73-menu8'/);
-assert.match(prepare, /const EXPERIENCE_REV = '74-experience2'/);
 assert.match(prepare, /const ARCHITECTURE_REV = '75-architecture2'/);
+assert.match(prepare, /const PLANNING_MORE_REV = '76-planning-more1'/);
+assert.doesNotMatch(prepare, /const EXPERIENCE_REV/);
+assert.doesNotMatch(prepare, /const FEATURED_REV/);
 assert.match(sw, /v73-menu8/);
-assert.match(sw, /v74-experience2/);
+assert.match(sw, /planning-more1/);
 assert.match(sw, /v75-architecture2/);
-assert.ok(sw.includes("'./v74-experience.css'"));
+assert.match(sw, /retire-assets1/);
 assert.ok(sw.includes("'./v75-architecture.css'"));
+assert.ok(sw.includes("'./v76-planning-more.css'"));
+for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be cached`);
 assert.match(architecture,/DRAWER_GROUPS/,'v75 must simplify the existing drawer instead of replacing its controller');
 assert.doesNotMatch(architecture,/showModal\(|drawer\.close=|touchmove/,'v75 architecture must not duplicate the v73 drawer controller');
 assert.equal(manifest.latestVersion,'v75');
@@ -82,4 +86,4 @@ assert.ok(v73.items.some(item=>/lado direito|direita/i.test(item)));
 assert.ok(v73.items.some(item=>/swipe|gesto/i.test(item)));
 assert.ok(v73.items.some(item=>/cabeçalho|header/i.test(item)));
 
-console.log('v73 right-side drawer controller remains protected inside the final v75 prototype architecture.');
+console.log('v73 right-side drawer controller remains protected while retired v74/Featured assets stay out of the v76 distribution.');
