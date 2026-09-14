@@ -6,7 +6,7 @@
  * - marcar estados de carregamento/erro das imagens do Mercado;
  * - reavaliar esses estados após re-renderizações.
  *
- * 76-stability2:
+ * 76-stability-authority1:
  * - remove a segunda autoridade de navegação móvel;
  * - remove a limpeza de nós v74, que já não são produzidos pelo bundle público;
  * - deixa a composição e navegação exclusivamente com v75-architecture.js;
@@ -18,7 +18,7 @@
   const MOBILE_QUERY='(max-width: 820px)';
   const IMAGE_SELECTOR='.market-product-photo';
   const IMAGE_BOUND='v75ImageBound';
-  const REVISION='76-stability2';
+  const REVISION='75-stability1';
   let auditFrame=0;
 
   const mobileMedia=root.matchMedia?.(MOBILE_QUERY)||null;
