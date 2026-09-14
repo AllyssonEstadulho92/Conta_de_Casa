@@ -33,11 +33,25 @@ assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/forced-colors:active/);
 assert.doesNotMatch(css,/\bappState\b|amountCents|estimatedCents|actualCents|openDB\(|saveState\(|persistState\(/,'drawer visual layer must not access application or financial state');
 
+/* Regressão reportada no mobile: o controlo fica à esquerda e o estado nativo
+   [open] nunca pode renderizar apenas um painel vazio enquanto a classe .open
+   aguarda um frame do Safari/PWA. */
+assert.match(headerCss,/76-mobile-menu-left1/);
+assert.match(headerCss,/\.topbar-leading>\.mobile-menu-btn[\s\S]*order:-1!important[\s\S]*margin-left:0!important/);
+assert.match(css,/76-drawer-open-guard1/);
+assert.match(css,/\.nav-drawer\[open\]:not\(\[data-closing="true"\]\) \.nav-drawer-shell\{[\s\S]*transform:translate3d\(0,0,0\)!important[\s\S]*opacity:1!important/);
+assert.match(css,/\.nav-drawer\[open\] \.drawer-nav\{[\s\S]*display:flex!important[\s\S]*flex:1 1 auto!important/);
+assert.match(css,/\.nav-drawer\[open\] \.drawer-nav \.nav-btn\{[\s\S]*display:flex!important[\s\S]*visibility:visible!important[\s\S]*opacity:1!important/);
+assert.match(css,/\.drawer-head>\.mobile-menu-btn\{[\s\S]*order:0!important[\s\S]*margin-left:0!important/);
+assert.match(css,/\.nav-drawer\[open\]:not\(\[data-closing="true"\]\) \.mobile-menu-btn \.mobile-menu-glyph::before[\s\S]*rotate\(45deg\)!important/);
+assert.match(css,/\.nav-drawer\[open\]:not\(\[data-closing="true"\]\) \.mobile-menu-btn \.mobile-menu-glyph::after[\s\S]*rotate\(-45deg\)!important/);
+
 assert.match(prepare,/const DRAWER_REV = '75-drawer2'/);
 assert.ok(prepare.includes("'v75-drawer-theme.css'"));
 assert.match(prepare,/v75-drawer-theme\.css\?v=\$\{DRAWER_REV\}/);
 assert.match(sw,/stability1-layout1-drawer2/);
 assert.match(sw,/ui-audit1/);
+assert.match(sw,/mobile-drawer-actions1/,'PWA cache must invalidate the reported mobile drawer/action regression');
 assert.ok(sw.includes("'./v75-drawer-theme.css'"));
 assert.ok(!sw.includes("'./v75-drawer-blue.css'"));
 
@@ -50,10 +64,11 @@ try{
   assert.ok(fs.existsSync(path.join(dist,'v75-drawer-theme.css')));
   const built=fs.readFileSync(path.join(dist,'v75-drawer-theme.css'),'utf8');
   assert.match(built,/76-drawer-neutral1/);
+  assert.match(built,/76-drawer-open-guard1/);
   assert.match(built,/background:var\(--v76-drawer-surface\)!important/);
   assert.ok(!fs.existsSync(path.join(dist,'v75-drawer-blue.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v76 neutral right drawer theme, focus, touch target and distribution tests: OK');
+console.log('v76 neutral right drawer theme, left menu control, native-open guard and distribution tests: OK');
