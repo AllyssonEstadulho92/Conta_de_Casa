@@ -11,6 +11,7 @@ const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const js=read('market-image-audit.js');
 const policy=read('market-retailer-image-policy.js');
 const css=read('market-image-audit.css');
+const planningMore=read('v76-planning-more.css');
 const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
 const publicFilesStart=prepare.indexOf('const PUBLIC_FILES');
@@ -61,6 +62,7 @@ assert.match(css,/safe-area-inset-top/);
 assert.match(css,/safe-area-inset-bottom/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/:focus-visible/);
+assert.match(planningMore,/76-planning-more1/);
 
 const documentStub={readyState:'loading',addEventListener(){},querySelector(){return null;},querySelectorAll(){return [];},body:null};
 const sandbox={console,URL,AbortController,setTimeout,clearTimeout,Promise,document:documentStub,requestAnimationFrame:fn=>fn(),fetch:async()=>{throw new Error('network-disabled-in-test');}};
@@ -88,13 +90,17 @@ assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/pr
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/images/large/739490_test.jpg'),'');
 
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
-for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','design-system.css','v64-runtime.js','v74-experience.css','v75-architecture.css','v75-architecture.js']){
+assert.match(sw,/retire-assets1/);
+for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','design-system.css','v64-runtime.js','v75-architecture.css','v76-planning-more.css','v75-architecture.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
 }
-assert.ok(!sw.includes("'./v74-experience.js'"),'retired v74 runtime must not be in the offline cache allowlist');
-assert.ok(!publicFilesBlock.includes("'v74-experience.js'"),'retired v74 runtime must not be in the Pages bundle allowlist');
-assert.match(prepare,/forbidden=\[[^\]]*'v74-experience\.js'/s,'retired v74 runtime must stay explicitly forbidden from dist');
+for(const retired of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js']){
+  assert.ok(!sw.includes(`'./${retired}'`),`${retired} must not be cached`);
+  assert.ok(!publicFilesBlock.includes(`'${retired}'`),`${retired} must not be copied to Pages`);
+}
+assert.match(prepare,/forbidden=\[[^\]]*'v74-experience\.css'/s);
+assert.match(prepare,/forbidden=\[[^\]]*'v75-market-featured\.js'/s);
 for(const obsolete of ['ui-consistency.css','v64-runtime.css']){
   assert.ok(!sw.includes(`'./${obsolete}'`),`${obsolete} must not ship in v75`);
   assert.ok(!publicFilesBlock.includes(`'${obsolete}'`),`${obsolete} must not be copied to dist`);
@@ -103,8 +109,10 @@ assert.match(prepare,/const BUILD = 'v75'/);
 assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
-assert.match(prepare,/const EXPERIENCE_REV = '74-experience2'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
+assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-more1'/);
+assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
+assert.doesNotMatch(prepare,/const FEATURED_REV/);
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -119,22 +127,23 @@ try{
   assert.doesNotMatch(index,/v64-runtime\.css/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
-  assert.match(index,/v74-experience\.css\?v=74-experience2/);
-  assert.doesNotMatch(index,/v74-experience\.js/,'built application must not load the retired v74 runtime');
   assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
+  assert.match(index,/v76-planning-more\.css\?v=76-planning-more1/);
   assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
+  assert.doesNotMatch(index,/v74-experience\.(?:css|js)/);
+  assert.doesNotMatch(index,/v75-market-featured\.(?:css|js)/);
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.match(index,/https:\/\/www\.continente\.pt/);
   assert.match(index,/https:\/\/static\.pingodoce\.pt/);
   assert.match(index,/https:\/\/r\.jina\.ai/);
   assert.match(index,/https:\/\/\*\.openbeautyfacts\.org/);
   assert.match(index,/https:\/\/world\.openproductsfacts\.org/);
-  for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','design-system.css','v64-runtime.js','v74-experience.css','v75-architecture.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
-  assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')),'retired v74 runtime must not exist in dist');
+  for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','design-system.css','v64-runtime.js','v75-architecture.css','v76-planning-more.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
+  for(const retired of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(dist,retired)),`${retired} must not exist in dist`);
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official retailer image, fallback, zoom and safe-source expectations remain valid without published v74 runtime: OK');
+console.log('Market official retailer image, fallback, zoom and safe-source expectations remain valid with retired assets excluded from distribution: OK');
