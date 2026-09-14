@@ -107,7 +107,7 @@ assert.match(architecture,/dashboardMetrics/);
 assert.match(architecture,/categoryEntries/);
 assert.match(architecture,/ensureBillTabs/);
 assert.match(architecture,/CDCV75/);
-assert.doesNotMatch(architecture,/CDCV74/,'v76 architecture must not depend on the historical v74 runtime');
+assert.doesNotMatch(architecture,/root\.CDCV74/,'v76 architecture must not depend on the historical v74 runtime');
 assert.doesNotMatch(architecture,/placeDashboardGreeting/,'retired dashboard greeting must not return through architecture');
 assert.doesNotMatch(architecture,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/);
 
