@@ -18,6 +18,10 @@
  * - Manual / Ler fatura / QR Code passam a ser modos determinísticos e acessíveis;
  * - mudar de modo deixa de abrir automaticamente ficheiro ou câmara;
  * - ações de captura são explícitas e ficam a cargo de invoice-capture.js.
+ *
+ * 76-mobile-label-fit1:
+ * - a rota continua a chamar-se Planeamento; apenas o label do dock passa a “Plano”
+ *   para evitar truncamento em iPhones estreitos sem reduzir a legibilidade.
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
@@ -43,7 +47,7 @@
     ['dashboard','Início','home'],
     ['bills','Despesas','bill'],
     ['market','Mercado','market'],
-    ['planning','Planeamento','plan'],
+    ['planning','Plano','plan'],
     ['settings','Mais','more']
   ]);
   const MORE_GROUPS=Object.freeze([
