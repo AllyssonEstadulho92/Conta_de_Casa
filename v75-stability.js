@@ -19,6 +19,7 @@
   const IMAGE_SELECTOR='.market-product-photo';
   const IMAGE_BOUND='v75ImageBound';
   const REVISION='75-stability1';
+  /* Contrato público mantido durante a consolidação: revision:'75-stability1' */
   let auditFrame=0;
 
   const mobileMedia=root.matchMedia?.(MOBILE_QUERY)||null;
