@@ -64,7 +64,7 @@ assert.match(css, /@media\(prefers-reduced-motion:reduce\)[\s\S]*transition:none
 assert.doesNotMatch(css, /background:\s*(?:green|#0f0|#00ff00)/i);
 
 /* v76 mantém o controlador v73 validado e altera apenas a arquitetura acima dele. */
-assert.match(prepare, /const BUILD = 'v75'/);
+assert.match(prepare, /const BUILD = 'v76'/);
 assert.match(prepare, /const MENU_REV = '73-menu8'/);
 assert.match(prepare, /const ARCHITECTURE_REV = '75-architecture2'/);
 assert.match(prepare, /const PLANNING_MORE_REV = '76-planning-more1'/);
@@ -79,7 +79,7 @@ assert.ok(sw.includes("'./v76-planning-more.css'"));
 for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be cached`);
 assert.match(architecture,/DRAWER_GROUPS/,'v75 must simplify the existing drawer instead of replacing its controller');
 assert.doesNotMatch(architecture,/showModal\(|drawer\.close=|touchmove/,'v75 architecture must not duplicate the v73 drawer controller');
-assert.equal(manifest.latestVersion,'v75');
+assert.equal(manifest.latestVersion,'v76');
 const v73=manifest.releases.find(release=>release.version==='v73');
 assert.ok(v73,'v73 navigation notes must remain in release history');
 assert.ok(v73.items.some(item=>/lado direito|direita/i.test(item)));

@@ -34,7 +34,7 @@ const releaseManifest = JSON.parse(read('release-manifest.json'));
 const webManifest = JSON.parse(read('manifest.webmanifest'));
 
 assert.match(packageJson.version,/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/);
-assert.equal(packageJson.version,'0.76.0-dev.1');
+assert.equal(packageJson.version,'0.76.0');
 
 assert.match(updateJs, /VERSÃO INSTALADA/);
 assert.match(updateJs, /Conta de Casa \$\{escapeHtml\(appVersion\(\)\)\}/);
@@ -62,9 +62,10 @@ assert.doesNotMatch(updateAction,/if\(!isNewerVersion\(manifest\.latestVersion\)
 
 assert.equal(releaseManifest.schemaVersion,1);
 assert.equal(releaseManifest.channel,'stable');
-assert.equal(releaseManifest.latestVersion,'v75');
-assert.equal(releaseManifest.releases[0].version,'v75');
+assert.equal(releaseManifest.latestVersion,'v76');
+assert.equal(releaseManifest.releases[0].version,'v76');
 assert.ok(releaseManifest.releases[0].items.length>=8);
+assert.ok(releaseManifest.releases.some(release=>release.version==='v75'));
 assert.ok(releaseManifest.releases.some(release=>release.version==='v74'));
 assert.ok(releaseManifest.releases.some(release=>release.version==='v73'));
 assert.ok(releaseManifest.releases.some(release=>release.version==='v64'));
@@ -96,8 +97,8 @@ assert.match(drawerCss,/revisão 76-drawer-neutral1/i);
 assert.match(drawerCss,/background:var\(--v76-drawer-surface\)!important/);
 assert.doesNotMatch(drawerCss,/linear-gradient\(/);
 
-assert.match(sw, /version-audit1/);
-assert.match(sw, /conta-de-casa-public-v75-architecture2/);
+assert.match(sw, /v76-version-alignment1/);
+assert.match(sw, /conta-de-casa-public-v76-version-alignment1-v75-architecture2/);
 assert.match(sw, /stability1-layout1-drawer2/);
 assert.match(sw, /ui-audit1/);
 assert.match(sw, /architecture-consolidation1-retire-v74-runtime1/);
@@ -116,8 +117,8 @@ assert.doesNotMatch(sw, /install[\s\S]{0,260}skipWaiting\(\)/);
 
 assert.match(prepare, /const APP_VERSION = String\(PACKAGE\.version/);
 assert.match(prepare, /git'.*rev-parse.*--short=7.*HEAD/s);
-assert.match(prepare, /const APP_UPDATE_REV = '76-version-audit1'/);
-assert.match(prepare, /const BUILD = 'v75'/);
+assert.match(prepare, /const APP_UPDATE_REV = '76-version-alignment1'/);
+assert.match(prepare, /const BUILD = 'v76'/);
 assert.match(prepare, /name="app-version"/);
 assert.match(prepare, /name="app-build-id"/);
 assert.match(prepare, /name="app-build-date"/);
@@ -153,15 +154,15 @@ try {
   const distWebManifest = JSON.parse(fs.readFileSync(path.join(dist,'manifest.webmanifest'),'utf8'));
   const meta=(name)=>new RegExp(`<meta name="${name}" content="([^"]+)"`).exec(index)?.[1]||'';
 
-  assert.equal(meta('app-build'),'v75');
+  assert.equal(meta('app-build'),'v76');
   assert.equal(meta('app-version'),packageJson.version);
   assert.match(meta('app-build-id'),/^(?:[0-9a-f]{7}|local)$/);
   assert.ok(!Number.isNaN(Date.parse(meta('app-build-date'))));
   assert.match(index, /<meta name="theme-color" content="#f4f8f8"/);
-  assert.match(index, /design-system\.css\?v=75/);
-  assert.match(index, /app-update\.css\?v=76-version-audit1/);
-  assert.match(index, /v76-version-about\.css\?v=76-version-audit1/);
-  assert.match(index, /app-update\.js\?v=76-version-audit1/);
+  assert.match(index, /design-system\.css\?v=76/);
+  assert.match(index, /app-update\.css\?v=76-version-alignment1/);
+  assert.match(index, /v76-version-about\.css\?v=76-version-alignment1/);
+  assert.match(index, /app-update\.js\?v=76-version-alignment1/);
   assert.match(index, /market-brand\.css\?v=74-ui1/);
   assert.match(index, /market-shopping-focus\.css\?v=74-shopping2/);
   assert.match(index, /mobile-menu-toggle\.css\?v=73-menu8/);
@@ -175,12 +176,13 @@ try {
   assert.match(index, /v75-stability\.js\?v=75-stability1/);
   for(const retired of [/v74-experience\.(?:css|js)/,/v75-market-featured\.(?:css|js)/,/v75-drawer-blue\.css/,/ui-consistency\.css/,/v64-runtime\.css/])assert.doesNotMatch(index,retired);
   assert.doesNotMatch(index, /\?v=53/);
-  assert.ok(index.includes(`id="appBuildVersion">${packageJson.version} · v75</strong>`));
-  assert.match(events, /\.\/sw\.js\?v=75/);
-  assert.equal(distManifest.latestVersion,'v75');
+  assert.ok(index.includes(`id="appBuildVersion">${packageJson.version} · v76</strong>`));
+  assert.match(events, /\.\/sw\.js\?v=76/);
+  assert.equal(distManifest.latestVersion,'v76');
+  assert.equal(distManifest.releases[0].version,'v76');
   assert.equal(distWebManifest.background_color,'#f4f8f8');
   assert.equal(distWebManifest.theme_color,'#f4f8f8');
-  assert.ok(index.indexOf('sync.js?v=75') < index.indexOf('sync-conflict-policy.js?v=74-ui1'));
+  assert.ok(index.indexOf('sync.js?v=76') < index.indexOf('sync-conflict-policy.js?v=74-ui1'));
   assert.ok(index.indexOf('market-shopping-focus.js?v=74-shopping2') < index.indexOf('mobile-menu-toggle.js?v=73-menu8'));
   assert.ok(index.indexOf('mobile-menu-toggle.js?v=73-menu8') < index.indexOf('v75-architecture.js?v=75-architecture2'));
   assert.ok(index.indexOf('v75-architecture.js?v=75-architecture2') < index.indexOf('v75-stability.js?v=75-stability1'));
@@ -194,4 +196,4 @@ try {
   fs.rmSync(dist, { recursive:true, force:true });
 }
 
-console.log(`Version metadata ${packageJson.version}, controlled updates and physically retired v74/Featured sources: OK`);
+console.log(`Stable version metadata ${packageJson.version}, v76 controlled updates and physically retired v74/Featured sources: OK`);

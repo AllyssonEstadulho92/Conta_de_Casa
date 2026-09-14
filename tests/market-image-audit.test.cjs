@@ -91,6 +91,7 @@ assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/im
 
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
 assert.match(sw,/retire-assets1/);
+assert.match(sw,/v76-version-alignment1/);
 for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','design-system.css','v64-runtime.js','v75-architecture.css','v76-planning-more.css','v75-architecture.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
@@ -102,10 +103,11 @@ for(const retired of ['v74-experience.css','v74-experience.js','v75-market-featu
 assert.match(prepare,/forbidden=\[[^\]]*'v74-experience\.css'/s);
 assert.match(prepare,/forbidden=\[[^\]]*'v75-market-featured\.js'/s);
 for(const obsolete of ['ui-consistency.css','v64-runtime.css']){
-  assert.ok(!sw.includes(`'./${obsolete}'`),`${obsolete} must not ship in v75`);
+  assert.ok(!sw.includes(`'./${obsolete}'`),`${obsolete} must not ship in v76`);
   assert.ok(!publicFilesBlock.includes(`'${obsolete}'`),`${obsolete} must not be copied to dist`);
 }
-assert.match(prepare,/const BUILD = 'v75'/);
+assert.match(prepare,/const BUILD = 'v76'/);
+assert.match(prepare,/const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
@@ -118,11 +120,12 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/market-image-audit\.css\?v=75/);
-  assert.match(index,/market-retailer-image-policy\.js\?v=75/);
-  assert.match(index,/market-image-audit\.js\?v=75/);
-  assert.match(index,/market-official-images\.js\?v=75/);
-  assert.match(index,/design-system\.css\?v=75/);
+  assert.match(index,/name="app-build" content="v76"/);
+  assert.match(index,/market-image-audit\.css\?v=76/);
+  assert.match(index,/market-retailer-image-policy\.js\?v=76/);
+  assert.match(index,/market-image-audit\.js\?v=76/);
+  assert.match(index,/market-official-images\.js\?v=76/);
+  assert.match(index,/design-system\.css\?v=76/);
   assert.doesNotMatch(index,/ui-consistency\.css/);
   assert.doesNotMatch(index,/v64-runtime\.css/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
@@ -146,4 +149,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Market official retailer image, fallback, zoom and safe-source expectations remain valid with retired assets excluded from distribution: OK');
+console.log('Market official retailer image, fallback, zoom and safe-source expectations remain valid under the official v76 distribution: OK');
