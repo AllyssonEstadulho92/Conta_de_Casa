@@ -200,6 +200,57 @@
   }
   html.cdc-v75 .drawer-footer .footer-icon{color:currentColor!important}
   html.cdc-v75 .drawer-footer .action-label{color:inherit!important}
+
+  /* 76-drawer-open-guard1 — Safari/PWA pode apresentar o <dialog> antes de a
+     classe .open entrar no frame seguinte. O atributo nativo [open] passa a ser
+     a garantia visual de que o conteúdo do drawer nunca fica num painel branco. */
+  html.cdc-v75 .nav-drawer[open]:not([data-closing="true"]) .nav-drawer-shell{
+    transform:translate3d(0,0,0)!important;
+    opacity:1!important;
+  }
+  html.cdc-v75 .nav-drawer[open]:not([data-closing="true"])::backdrop{
+    background:rgba(10,34,40,.16)!important;
+  }
+  html.cdc-v75 .nav-drawer[open] :is(.drawer-head,.drawer-nav,.drawer-footer){
+    visibility:visible!important;
+    opacity:1!important;
+  }
+  html.cdc-v75 .nav-drawer[open] .drawer-nav{
+    display:flex!important;
+    flex:1 1 auto!important;
+    flex-direction:column!important;
+  }
+  html.cdc-v75 .nav-drawer[open] .drawer-nav .nav-group,
+  html.cdc-v75 .nav-drawer[open] .drawer-nav .nav-group-items{
+    display:grid!important;
+  }
+  html.cdc-v75 .nav-drawer[open] .drawer-nav .nav-btn{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+
+  /* O mesmo controlo hambúrguer/X fica no lado esquerdo também quando é movido
+     para o cabeçalho do drawer pelo controlador existente. */
+  html.cdc-v75 .drawer-head>.mobile-menu-btn{
+    order:0!important;
+    margin-left:0!important;
+    margin-right:0!important;
+  }
+  html.cdc-v75 .drawer-head>.brand{
+    order:1!important;
+  }
+
+  /* Se a classe .open atrasar um frame, o glyph acompanha o estado nativo do
+     dialog e continua a transformar as duas linhas num X centrado. */
+  html.cdc-v75 .nav-drawer[open]:not([data-closing="true"]) .mobile-menu-btn .mobile-menu-glyph::before{
+    width:23px!important;
+    transform:translate(-50%,-50%) translateY(0) rotate(45deg)!important;
+  }
+  html.cdc-v75 .nav-drawer[open]:not([data-closing="true"]) .mobile-menu-btn .mobile-menu-glyph::after{
+    width:23px!important;
+    transform:translate(-50%,-50%) translateY(0) rotate(-45deg)!important;
+  }
 }
 
 @media(hover:hover) and (pointer:fine) and (max-width:820px){
