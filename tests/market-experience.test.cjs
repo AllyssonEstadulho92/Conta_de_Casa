@@ -39,6 +39,7 @@ assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
 assert.match(sw,/retire-assets1/);
 assert.match(sw,/v76-version-alignment1/);
 assert.match(sw,/ts-runtime2-market-branding1/,'Service Worker cache must change when the generated Market branding runtime changes');
+assert.match(sw,/prototype-product-browser1/,'PWA cache must refresh the prototype-aligned product browser');
 for(const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','v75-architecture.css','v76-planning-more.css','v75-architecture.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be cached by the service worker`);
   assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be included in the Pages bundle`);
@@ -106,4 +107,16 @@ assert.ok(css.includes('env(safe-area-inset-top)'));
 assert.ok(css.includes('env(safe-area-inset-bottom)'));
 assert.ok(css.includes('min-width:0'));
 
-console.log('Market live sources and TypeScript branding remain safe under the official v76 release with retired sources physically absent: OK');
+/* O browser de produto deve parecer parte da mesma aplicação: pesquisa dominante,
+   refinamento discreto, fontes compactas e resultados com ação clara. */
+assert.match(css,/76-prototype-product-browser1/);
+assert.match(css,/#formDialog\[data-mode="market-browser"\] \.dialog-shell\{[\s\S]*border-radius:22px[\s\S]*background:var\(--v76-bg/);
+assert.match(css,/\.market-browser-search:focus-within\{[\s\S]*box-shadow:0 0 0 3px/);
+assert.match(css,/\.market-browser-tab\.active\{[\s\S]*background:var\(--v76-surface[\s\S]*color:var\(--v76-primary/,'selected refinement tab must be quiet instead of a heavy filled control');
+assert.match(css,/\.market-source-card\.selected\{[\s\S]*background:var\(--v76-surface-accent/,'selected retailer must use the same teal surface language as the rest of v76');
+assert.match(css,/\.market-source-card\{[\s\S]*grid-template-columns:56px minmax\(0,1fr\) 24px/,'retailer selection must be compact and readable');
+assert.match(css,/\.market-add-product\{[\s\S]*width:44px[\s\S]*background:var\(--v76-primary/,'add action must use a standard 44px primary target');
+assert.match(css,/@media\(max-width:820px\)[\s\S]*#formDialog\[data-mode="market-browser"\] \.dialog-shell\{[\s\S]*height:100dvh/,'mobile add-product flow must remain a stable full-screen surface');
+assert.match(css,/@media\(forced-colors:active\)/,'product browser must keep a forced-colors fallback');
+
+console.log('Market live sources and prototype-aligned product browser remain safe under the official v76 release: OK');
