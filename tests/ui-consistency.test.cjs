@@ -93,20 +93,27 @@ assert.match(architecture,/CDCV75/);
 assert.doesNotMatch(architecture,/placeDashboardGreeting/,'retired dashboard greeting must not return through architecture');
 assert.doesNotMatch(architecture,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/);
 
+/* Menu móvel: o trigger global permanece no header e o X visível vive no dialog.
+   A aplicação deixa de mover o mesmo botão entre duas árvores/top-layers. */
 assert.match(menuCss,/Conta de Casa v76/);
 assert.match(menuCss,/v76 menu-morph1/);
-assert.match(menuCss,/\.mobile-menu-glyph>span\{display:none!important\}/);
+assert.match(menuCss,/76-menu-visible-close1/);
 assert.match(menuCss,/\.mobile-menu-glyph::before,[\s\S]*\.mobile-menu-glyph::after/);
-assert.match(menuCss,/\.mobile-menu-btn\[aria-expanded="true"\]/);
-assert.match(menuJs,/line\.animate\(frames/);
+assert.match(menuCss,/\.drawer-close-glyph::before[\s\S]*rotate\(45deg\)/);
+assert.match(menuCss,/\.drawer-close-glyph::after[\s\S]*rotate\(-45deg\)/);
+assert.match(menuCss,/#drawerCloseBtn\.icon-btn\.drawer-close-control\{[\s\S]*display:inline-grid!important[\s\S]*visibility:visible!important[\s\S]*opacity:1!important/);
+assert.match(menuJs,/closeButton\.hidden=false/);
+assert.match(menuJs,/closeButton\.addEventListener\('click',[\s\S]*closeDrawer/);
 assert.match(menuJs,/drawer\.close=animatedDrawerClose/);
 assert.match(menuJs,/touch\.clientX>=root\.innerWidth-swipeEdgeWidth/);
+assert.doesNotMatch(menuJs,/insertBefore\(button,drawerHead\.firstChild\)/,'global menu trigger must stay mounted in the shared header');
 assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 0 0 auto!important/);
 
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
 assert.match(sw,/retire-assets1/);
 assert.match(sw,/v76-version-alignment1/);
 assert.match(sw,/menu-morph1/);
+assert.match(sw,/menu-visible-close1/);
 for(const asset of ['./design-system.css','./v75-architecture.css','./v76-planning-more.css','./v75-architecture.js','./v75-header-refinement.css'])assert.ok(sw.includes(`'${asset}'`));
 for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be cached`);
 assert.ok(!sw.includes("'./ui-consistency.css'"));
@@ -155,4 +162,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Conta de Casa UI consistency: official v76 build owns release identity while current v75/v76 layer contracts remain intact.');
+console.log('Conta de Casa UI consistency: official v76 build keeps a stable shared header and a visible top-layer drawer close control.');
