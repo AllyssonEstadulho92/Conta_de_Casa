@@ -8,6 +8,7 @@ const ROOT=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const js=read('v75-architecture.js');
 const css=read('v75-architecture.css');
+const invoiceCss=read('invoice-capture.css');
 const legacy=read('styles.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
@@ -57,16 +58,33 @@ assert.match(css,/\.v75-sync-hero/);
 assert.match(css,/background:var\(--v75-surface\)!important/,'v75 architecture layer must use coherent surfaces instead of mixed hard-coded cards');
 assert.match(css,/prefers-reduced-motion:reduce/);
 
+/* 76-expense-mode1: Manual / Ler fatura / QR Code tornam-se um único controlo
+   segmentado, mantendo os handlers existentes e melhorando apenas apresentação. */
+assert.match(invoiceCss,/76-expense-mode1/);
+assert.match(invoiceCss,/#formDialog\[data-v75-kind="expense"\] \.v75-bill-tabs\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
+assert.match(invoiceCss,/\.v75-bill-tabs button\{[\s\S]*min-height:52px!important[\s\S]*display:inline-flex!important/,'expense mode controls must preserve generous touch targets');
+assert.match(invoiceCss,/data-v75-bill-mode="manual"\]::before/,'manual mode must expose its own icon');
+assert.match(invoiceCss,/data-v75-bill-mode="image"\]::before/,'invoice image mode must expose its own icon');
+assert.match(invoiceCss,/data-v75-bill-mode="qr"\]::before/,'QR mode must expose its own icon');
+assert.match(invoiceCss,/\.v75-bill-tabs button\.active\{[\s\S]*background:linear-gradient\(135deg[\s\S]*color:#fff!important/,'active expense mode must have a strong teal selected state');
+assert.match(invoiceCss,/\.v75-bill-tabs button:focus-visible\{[\s\S]*box-shadow:0 0 0 3px/,'expense mode control must expose a keyboard focus ring');
+assert.match(invoiceCss,/@media\(max-width:430px\)[\s\S]*\.v75-bill-tabs button/,'expense mode control must adapt to narrow iPhone widths');
+assert.match(invoiceCss,/@media\(prefers-reduced-motion:reduce\)[\s\S]*\.v75-bill-tabs button\{transition:none!important\}/);
+assert.match(invoiceCss,/@media\(forced-colors:active\)[\s\S]*\.v75-bill-tabs button\.active/);
+
 assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
+assert.ok(prepare.includes("'invoice-capture.css'"));
 assert.match(sw,/conta-de-casa-public-v76-version-alignment1-v75-architecture2/);
+assert.match(sw,/expense-mode1/,'PWA cache must refresh the improved expense mode control');
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
+assert.ok(sw.includes("'./invoice-capture.css'"));
 assert.equal(release.latestVersion,'v76');
 assert.equal(release.releases[0].version,'v76');
 assert.ok(release.releases[0].items.some(item=>/Início.*Despesas.*Mercado.*Planeamento.*Mais/i.test(item)));
 assert.ok(release.releases[0].items.some(item=>/cofre\/PIN|PIN|cofre/i.test(item)));
 
-console.log('v76 consolidated presentation architecture without retired v74 navigation markers: OK');
+console.log('v76 consolidated presentation architecture with premium expense mode control: OK');
