@@ -15,6 +15,7 @@ const release=JSON.parse(read('release-manifest.json'));
 
 assert.match(js,/Conta de Casa v76/);
 assert.match(js,/76-architecture-consolidation1/);
+assert.match(js,/76-retire-v74-nav-marker1/);
 assert.match(js,/bills:\['Despesas','Movimentos'\]/);
 assert.match(js,/market:\['Mercado','Compras'\]/);
 assert.match(js,/settings:\['Mais','Conta e aplicação'\]/);
@@ -29,6 +30,7 @@ assert.match(js,/ensurePlanningShell/,'Planning overview shell must be owned by 
 assert.match(js,/dashboardMetrics/);
 assert.match(js,/categoryEntries/);
 assert.doesNotMatch(js,/root\.CDCV74/,'current architecture must not depend on the v74 runtime API');
+assert.doesNotMatch(js,/dataset\.v74Nav\s*=/,'current navigation must not emit the compatibility dataset consumed by the physically retired v74 runtime');
 assert.doesNotMatch(js,/placeDashboardGreeting/,'retired dashboard greeting composition must not be recreated');
 assert.match(js,/ensureBillTabs/,'new expense flow must expose Manual, invoice and QR modes');
 assert.match(js,/data-v75-bill-mode="manual"/);
@@ -67,4 +69,4 @@ assert.equal(release.releases[0].version,'v76');
 assert.ok(release.releases[0].items.some(item=>/Início.*Despesas.*Mercado.*Planeamento.*Mais/i.test(item)));
 assert.ok(release.releases[0].items.some(item=>/cofre\/PIN|PIN|cofre/i.test(item)));
 
-console.log('v76 consolidated presentation architecture, expense flow, sync hierarchy and navigation tests: OK');
+console.log('v76 consolidated presentation architecture without retired v74 navigation markers: OK');

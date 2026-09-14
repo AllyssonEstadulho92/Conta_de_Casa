@@ -10,6 +10,9 @@
  * - passa a criar os seus próprios shells de Planeamento, Mais e Preferências;
  * - torna a navegação desktop/drawer/mobile determinística numa única camada;
  * - preserva os handlers funcionais existentes através de data-page/data-mobile.
+ *
+ * 76-retire-v74-nav-marker1:
+ * - elimina data-v74-nav, que servia apenas um runtime v74 já removido do repositório.
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
@@ -175,9 +178,6 @@
         mobile.innerHTML=mobileNavHtml();
         mobile.dataset.v76Architecture=mobileSignature;
       }
-      /* Transitional marker: while an older cached v74 runtime is still alive it
-         sees the canonical signature and does not rebuild the dock. */
-      mobile.dataset.v74Nav='1';
     }
 
     const active=navParent(currentPageId());
