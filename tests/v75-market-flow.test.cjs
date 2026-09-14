@@ -40,12 +40,15 @@ assert.doesNotMatch(js,/market-barcode|ZXing|BarcodeDetector|data-market-scan/i,
 
 assert.match(css,/Mercado 75-market1/);
 assert.match(css,/76-market-canonical-flow1/,'Mercado must declare the canonical v76 presentation path');
+assert.match(css,/76-market-search-single-surface1/,'Mercado search must declare a single-surface visual contract');
 assert.match(css,/grid-template-columns:64px minmax\(0,1fr\) auto!important/,'live search card must explicitly allocate photo, content and action columns');
 assert.match(css,/\.market-filter-field>span[\s\S]*position:static!important/,'mobile filter labels must be visible');
 assert.match(css,/#page-market>#marketList\{[\s\S]*display:block!important[\s\S]*visibility:visible!important/,'canonical market results must cancel any legacy display:none');
 assert.match(css,/#page-market>#marketSummary\{[\s\S]*display:grid!important/,'canonical market summary must remain mounted');
 assert.match(css,/#page-market>\.market-results-head\{[\s\S]*display:flex!important[\s\S]*justify-content:space-between!important/,'title and result count must be separate, aligned elements');
 assert.match(css,/#marketResultCount\{[\s\S]*white-space:nowrap!important/,'result count must not visually concatenate with Lista do mês');
+assert.match(css,/76-market-search-single-surface1[\s\S]*#page-market>\.market-command-bar\{[\s\S]*padding:0!important;[\s\S]*border:0!important;[\s\S]*border-radius:0!important;[\s\S]*background:transparent!important;[\s\S]*box-shadow:none!important/,'outer search command bar must not draw a second rounded surface');
+assert.match(css,/76-market-search-single-surface1[\s\S]*\.market-search-wrap\{[\s\S]*border:0!important;[\s\S]*background:transparent!important;[\s\S]*box-shadow:none!important/,'search wrapper must remain visually transparent around the actual input');
 assert.match(css,/@media\(max-width:820px\)[\s\S]*#page-market>\.market-filter-grid\{[\s\S]*display:flex!important[\s\S]*overflow-x:auto!important/,'mobile Mercado filters must use one horizontal disclosure strip');
 assert.match(css,/scroll-snap-type:x proximity/);
 assert.match(css,/\.market-filter-field\{[\s\S]*flex:0 0 164px!important/,'mobile filter controls must keep a stable readable width');
@@ -80,6 +83,7 @@ assert.ok(sw.includes("'./v75-market-flow.css'"));
 assert.ok(sw.includes("'./v75-market-flow.js'"));
 assert.match(sw,/assets1-market1/,'market1 must remain in the cache lineage');
 assert.match(sw,/canonical-expense-market1/,'PWA must invalidate for canonical Despesas/Mercado presentation');
+assert.match(sw,/single-search-surface1/,'PWA must invalidate the duplicate-search-surface cache');
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -94,4 +98,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v76 canonical Mercado flow, compact mobile filters and accounting isolation: OK');
+console.log('v76 canonical Mercado flow, single-surface search, compact mobile filters and accounting isolation: OK');
