@@ -24,6 +24,9 @@ const officialBridge=fs.readFileSync('market-official-images.js','utf8');
 const retailerPolicy=fs.readFileSync('market-retailer-image-policy.js','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const pages=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
+const publicFilesStart=pages.indexOf('const PUBLIC_FILES');
+const publicFilesEnd=pages.indexOf(']);',publicFilesStart);
+const publicFilesBlock=pages.slice(publicFilesStart,publicFilesEnd+3);
 const events=fs.readFileSync('events.js','utf8');
 
 assert.ok(!fs.existsSync('market-branding.js'),'Market branding manual JS source must stay removed');
@@ -36,10 +39,11 @@ assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
 assert.match(sw,/ts-runtime2-market-branding1/,'Service Worker cache must change when the generated Market branding runtime changes');
 for(const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','v74-experience.css','v75-architecture.css','v75-architecture.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be cached by the service worker`);
-  assert.ok(pages.includes(`'${asset}'`),`${asset} must be included in the Pages bundle`);
+  assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be included in the Pages bundle`);
 }
 assert.ok(!sw.includes("'./v74-experience.js'"),'retired v74 experience runtime must not be cached');
-assert.ok(!pages.includes("'v74-experience.js'"),'retired v74 experience runtime must not be copied to Pages');
+assert.ok(!publicFilesBlock.includes("'v74-experience.js'"),'retired v74 experience runtime must not be copied to Pages');
+assert.match(pages,/forbidden=\[[^\]]*'v74-experience\.js'/s,'retired runtime should remain explicitly forbidden in dist');
 assert.ok(!sw.includes("'./ui-consistency.css'"),'obsolete visual override must not ship');
 assert.ok(!sw.includes("'./v64-runtime.css'"),'obsolete v64 visual shell must not ship');
 assert.match(pages,/const BUILD = 'v75'/);
