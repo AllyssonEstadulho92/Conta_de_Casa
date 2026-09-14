@@ -18,7 +18,7 @@
     Object.freeze({page:'dashboard',label:'Início',icon:'home'}),
     Object.freeze({page:'bills',label:'Despesas',icon:'bill'}),
     Object.freeze({page:'market',label:'Mercado',icon:'market'}),
-    Object.freeze({page:'planning',label:'Planeamento',icon:'plan'}),
+    Object.freeze({page:'planning',label:'Plano',icon:'plan'}),
     Object.freeze({page:'settings',label:'Mais',icon:'more'})
   ]);
   const LEGACY_DASHBOARD_IDS=Object.freeze([
@@ -146,7 +146,7 @@
       home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-6h6v6"/>',
       bill:'<path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4"/><path d="M9 11h6M9 15h6"/>',
       market:'<path d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.6H18a2 2 0 0 0 2-1.6L21 8H7"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>',
-      plan:'<path d="M4 19V9m6 10V5m6 14v-7m4 7H2"/>',
+      plan:'<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/>',
       more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'
     };
     return `<svg class="svg-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.more}</svg>`;
