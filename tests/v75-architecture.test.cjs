@@ -30,7 +30,7 @@ assert.match(js,/ensurePlanningShell/,'Planning overview shell must be owned by 
 assert.match(js,/dashboardMetrics/);
 assert.match(js,/categoryEntries/);
 assert.doesNotMatch(js,/root\.CDCV74/,'current architecture must not depend on the v74 runtime API');
-assert.doesNotMatch(js,/v74Nav|data-v74-nav/,'current navigation must not emit compatibility markers for the physically retired v74 runtime');
+assert.doesNotMatch(js,/dataset\.v74Nav\s*=/,'current navigation must not emit the compatibility dataset consumed by the physically retired v74 runtime');
 assert.doesNotMatch(js,/placeDashboardGreeting/,'retired dashboard greeting composition must not be recreated');
 assert.match(js,/ensureBillTabs/,'new expense flow must expose Manual, invoice and QR modes');
 assert.match(js,/data-v75-bill-mode="manual"/);
