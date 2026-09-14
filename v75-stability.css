@@ -7,6 +7,18 @@
   --v75-touch:44px;
   --v75-control-radius:12px;
   --v75-page-gap:16px;
+  --v76-icon-default:#49666d;
+  --v76-icon-home:#087b78;
+  --v76-icon-bills:#5268c7;
+  --v76-icon-market:#168f69;
+  --v76-icon-planning:#b56c12;
+  --v76-icon-more:#7559b8;
+  --v76-icon-report:#2b73b7;
+  --v76-icon-goal:#ad4f7b;
+  --v76-icon-security:#168f69;
+  --v76-icon-settings:#7559b8;
+  --v76-icon-diagnostics:#53708a;
+  --v76-icon-alert:#b56c12;
 }
 
 html.cdc-v75{
@@ -15,7 +27,21 @@ html.cdc-v75{
   text-size-adjust:100%;
   -webkit-text-size-adjust:100%;
 }
-html.cdc-v75[data-theme="dark"]{color-scheme:dark}
+html.cdc-v75[data-theme="dark"]{
+  color-scheme:dark;
+  --v76-icon-default:#b2c5c9;
+  --v76-icon-home:#4dd5c2;
+  --v76-icon-bills:#9aaaff;
+  --v76-icon-market:#64d5a2;
+  --v76-icon-planning:#f0b45d;
+  --v76-icon-more:#c3a9ff;
+  --v76-icon-report:#86bbff;
+  --v76-icon-goal:#f09ac0;
+  --v76-icon-security:#64d5a2;
+  --v76-icon-settings:#c3a9ff;
+  --v76-icon-diagnostics:#a8c3db;
+  --v76-icon-alert:#f0b45d;
+}
 html.cdc-v75 body{
   min-width:0;
   overflow-x:clip;
@@ -45,6 +71,45 @@ html.cdc-v75 .ui-icon-svg{
   overflow:visible!important;
 }
 html.cdc-v75 .icon-btn{display:inline-grid;place-items:center}
+
+/* Cor semântica controlada: a cor orienta, mas não substitui label, forma, foco ou aria-current. */
+html.cdc-v75 :is(#desktopNav,#drawerNav) .nav-btn[data-page="dashboard"]>.ui-icon-svg{color:var(--v76-icon-home)!important}
+html.cdc-v75 :is(#desktopNav,#drawerNav) .nav-btn[data-page="bills"]>.ui-icon-svg{color:var(--v76-icon-bills)!important}
+html.cdc-v75 :is(#desktopNav,#drawerNav) .nav-btn[data-page="market"]>.ui-icon-svg{color:var(--v76-icon-market)!important}
+html.cdc-v75 :is(#desktopNav,#drawerNav) .nav-btn[data-page="planning"]>.ui-icon-svg{color:var(--v76-icon-planning)!important}
+html.cdc-v75 :is(#desktopNav,#drawerNav) .nav-btn[data-page="reports"]>.ui-icon-svg{color:var(--v76-icon-report)!important}
+html.cdc-v75 :is(#desktopNav,#drawerNav) .nav-btn[data-page="goals"]>.ui-icon-svg{color:var(--v76-icon-goal)!important}
+html.cdc-v75 :is(#desktopNav,#drawerNav) .nav-btn[data-page="security"]>.ui-icon-svg{color:var(--v76-icon-security)!important}
+html.cdc-v75 :is(#desktopNav,#drawerNav) .nav-btn[data-page="diagnostics"]>.ui-icon-svg{color:var(--v76-icon-diagnostics)!important}
+html.cdc-v75 :is(#desktopNav,#drawerNav) .nav-btn[data-page="settings"]>.ui-icon-svg{color:var(--v76-icon-settings)!important}
+
+html.cdc-v75.app-active body .mobile-nav .nav-btn[data-mobile="dashboard"]{--v76-nav-accent:var(--v76-icon-home)}
+html.cdc-v75.app-active body .mobile-nav .nav-btn[data-mobile="bills"]{--v76-nav-accent:var(--v76-icon-bills)}
+html.cdc-v75.app-active body .mobile-nav .nav-btn[data-mobile="market"]{--v76-nav-accent:var(--v76-icon-market)}
+html.cdc-v75.app-active body .mobile-nav .nav-btn[data-mobile="planning"]{--v76-nav-accent:var(--v76-icon-planning)}
+html.cdc-v75.app-active body .mobile-nav .nav-btn[data-mobile="settings"]{--v76-nav-accent:var(--v76-icon-more)}
+html.cdc-v75.app-active body .mobile-nav .nav-btn>.ui-icon-svg,
+html.cdc-v75.app-active body .mobile-nav .nav-btn>.svg-icon{color:var(--v76-nav-accent,var(--v76-icon-default))!important;opacity:.96!important}
+html.cdc-v75.app-active body .mobile-nav .nav-btn.active,
+html.cdc-v75.app-active body .mobile-nav .nav-btn[aria-current="page"]{
+  background:color-mix(in srgb,var(--v76-nav-accent,var(--v76-icon-home)) 11%,var(--v75-surface,#fff))!important;
+  color:var(--v76-nav-accent,var(--v76-icon-home))!important;
+}
+#mobileMenuBtn>.ui-icon-svg,#sidebarToggle>.ui-icon-svg{color:var(--v76-icon-home)!important}
+#notificationsBtn>.ui-icon-svg{color:var(--v76-icon-alert)!important}
+#themeToggle>.ui-icon-svg{color:var(--v76-icon-more)!important}
+#privacyToggle .ui-icon-svg,#drawerPrivacyToggle .ui-icon-svg{color:var(--v76-icon-report)!important}
+#lockBtn .ui-icon-svg,#drawerLockBtn .ui-icon-svg,#securityLockBtn .ui-icon-svg{color:var(--v76-icon-security)!important}
+.ui-search-icon,.ui-select-arrow{color:var(--v76-icon-default)!important}
+:is([data-edit-bill],[data-edit-payment],[data-edit-market],[data-detail-edit]) .ui-icon-svg{color:var(--v76-icon-report)!important}
+:is([data-delete-bill],[data-delete-payment],[data-delete-market],[data-detail-delete],[data-remove-excess-payment],#resetDataBtn) .ui-icon-svg{color:var(--v76-danger,#d94f60)!important}
+[data-detail-pay] .ui-icon-svg{color:var(--v76-success,#168f69)!important}
+[data-detail-cancel] .ui-icon-svg{color:var(--v76-warning,#d8872d)!important}
+:is(#billClearFilters,#marketClearFilters,[data-clear-bill-filters]) .ui-icon-svg{color:var(--v76-icon-bills)!important}
+:is(#syncConfigureBtn,#syncResolveBtn) .ui-icon-svg{color:var(--v76-icon-security)!important}
+:is(#syncNowBtn,#syncConflictRetryBtn) .ui-icon-svg{color:var(--v76-icon-report)!important}
+#syncDisableBtn .ui-icon-svg{color:var(--v76-danger,#d94f60)!important}
+html.cdc-v75 .btn.primary .ui-icon-svg{color:currentColor!important}
 
 /* Tabelas podem rolar sem alargar a página inteira. */
 html.cdc-v75 :is(.bill-table-shell,.market-table-shell){
@@ -321,6 +386,7 @@ html.cdc-v75 .market-product-photo-button:disabled{
 @media(forced-colors:active){
   html.cdc-v75 :is(button,a,input,select,textarea):focus-visible{outline:2px solid Highlight!important}
   html.cdc-v75 .market-product-photo{border:1px solid CanvasText!important}
+  html.cdc-v75 :is(.nav-btn,.icon-btn,.icon-text-btn,.btn) .ui-icon-svg{color:ButtonText!important;forced-color-adjust:auto!important}
 }
 
 @media(prefers-reduced-motion:reduce){
