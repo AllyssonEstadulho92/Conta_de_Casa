@@ -78,9 +78,8 @@ assert.doesNotMatch(marketBrand,/\.market-product-photo[^\{]*\{[^}]*display:none
 assert.match(shopping,/Conta de Casa v74/);
 assert.match(shopping,/grid-template-columns:38px 54px minmax\(0,1fr\) auto!important/);
 
-/* A navegação v74 ainda é dependência de compatibilidade até ao bloco dedicado
-   de migração; a auditoria regista esta dívida sem a confundir com a autoridade
-   visual final do shell v76. */
+/* O runtime v74 continua temporariamente publicado nesta etapa para permitir uma
+   transição reversível, mas já não é autoridade nem dependência da arquitetura v76. */
 assert.match(experience,/Conta de Casa v74/);
 for(const marker of ["['dashboard','Início','home']","['bills','Despesas','bill']","['market','Mercado','market']","['planning','Planeamento','plan']","['settings','Mais','more']"])assert.ok(experience.includes(marker));
 assert.match(experience,/data-v74-action="expense"/);
@@ -95,14 +94,21 @@ assert.doesNotMatch(experience,/saveState|commit\(|estimatedCents\s*=|actualCent
 assert.match(experience,/observeStableRoots/);
 assert.match(experience,/CDCV74/);
 
-assert.match(architecture,/Conta de Casa v75/);
+assert.match(architecture,/Conta de Casa v76/);
+assert.match(architecture,/76-architecture-consolidation1/);
 assert.match(architecture,/bills:\['Despesas','Movimentos'\]/);
 assert.match(architecture,/settings:\['Mais','Conta e aplicação'\]/);
 assert.match(architecture,/DRAWER_GROUPS/);
+assert.match(architecture,/MOBILE_NAV/);
 assert.match(architecture,/MORE_GROUPS/);
+assert.match(architecture,/ensureMoreShell/);
+assert.match(architecture,/ensurePlanningShell/);
+assert.match(architecture,/dashboardMetrics/);
+assert.match(architecture,/categoryEntries/);
 assert.match(architecture,/ensureBillTabs/);
-assert.match(architecture,/placeDashboardGreeting/);
 assert.match(architecture,/CDCV75/);
+assert.doesNotMatch(architecture,/CDCV74/,'v76 architecture must not depend on the historical v74 runtime');
+assert.doesNotMatch(architecture,/placeDashboardGreeting/,'retired dashboard greeting must not return through architecture');
 assert.doesNotMatch(architecture,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/);
 
 assert.match(menuCss,/Conta de Casa v73/);
@@ -113,6 +119,7 @@ assert.match(menuJs,/touch\.clientX>=root\.innerWidth-swipeEdgeWidth/);
 assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 0 0 auto!important/);
 
 assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2/);
+assert.match(sw,/architecture-consolidation1/);
 for(const asset of ['./design-system.css','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js','./v75-header-refinement.css'])assert.ok(sw.includes(`'${asset}'`));
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
@@ -151,4 +158,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Conta de Casa UI consistency, compatibility layers and neutral mobile header audit: OK');
+console.log('Conta de Casa UI consistency, v76 architecture consolidation and neutral mobile header audit: OK');
