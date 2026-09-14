@@ -32,6 +32,15 @@ assert.match(css,/@media\(max-width:430px\)[\s\S]*\.cdc-product-grid\{grid-templ
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/forced-colors:active/);
 
+/* 76-icon-semantics3: ícones recuperam cor funcional controlada, com equivalentes dark
+   e sem depender exclusivamente da cor para seleção/estado. */
+for(const token of ['--v76-icon-home:#087b78','--v76-icon-bills:#5268c7','--v76-icon-market:#168f69','--v76-icon-planning:#b56c12','--v76-icon-more:#7559b8','--v76-icon-report:#2b73b7','--v76-icon-goal:#ad4f7b'])assert.ok(css.includes(token),`missing semantic icon token ${token}`);
+assert.match(css,/html\.cdc-v75\[data-theme="dark"\][\s\S]*--v76-icon-home:#4dd5c2/,'dark mode must have explicit semantic icon colours');
+assert.match(css,/\.mobile-nav \.nav-btn\[data-mobile="dashboard"\][\s\S]*--v76-nav-accent:var\(--v76-icon-home\)/);
+assert.match(css,/\.mobile-nav \.nav-btn\[data-mobile="planning"\][\s\S]*--v76-nav-accent:var\(--v76-icon-planning\)/);
+assert.match(css,/\.mobile-nav \.nav-btn\[aria-current="page"\][\s\S]*background:color-mix/,'active mobile destination must retain a non-colour selected surface');
+assert.match(css,/forced-colors:active[\s\S]*ButtonText/,'forced colours must override custom semantic colours');
+
 /* Critério anti-zoom acidental: não bloqueia pinch-to-zoom e usa a correção recomendada para iOS. */
 assert.match(usability,/fundação de usabilidade 75-usability1/i);
 assert.match(usability,/touch-action:manipulation/,'interactive controls must suppress accidental double-tap zoom');
@@ -86,7 +95,7 @@ for(const marker of [
   "page:'dashboard',label:'Início',icon:'home'",
   "page:'bills',label:'Despesas',icon:'bill'",
   "page:'market',label:'Mercado',icon:'market'",
-  "page:'planning',label:'Planeamento',icon:'plan'",
+  "page:'planning',label:'Plano',icon:'plan'",
   "page:'settings',label:'Mais',icon:'more'"
 ])assert.ok(js.includes(marker),`canonical mobile nav must contain ${marker}`);
 assert.match(js,/data-v76-primary="1"/);
@@ -147,4 +156,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v75 cross-application stability, v76 runtime consolidation, usability, auth, page audit, image fallback and distribution tests: OK');
+console.log('v75 cross-application stability, v76 semantic icon colour, runtime consolidation, usability, auth, page audit, image fallback and distribution tests: OK');
