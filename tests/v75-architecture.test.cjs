@@ -59,7 +59,7 @@ assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
-assert.match(sw,/conta-de-casa-public-v76-version-alignment1-architecture2/);
+assert.match(sw,/conta-de-casa-public-v76-version-alignment1-v75-architecture2/);
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
 assert.equal(release.latestVersion,'v76');
