@@ -36,7 +36,7 @@ assert.match(designCss,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,
 assert.match(designCss,/\.mobile-nav \.nav-btn\.active::before\{background:var\(--primary\)!important\}/,'there must be one canonical active indicator');
 assert.match(designCss,/prefers-reduced-motion:reduce/);
 
-/* v74 prototype remains the composition base. */
+/* v74 CSS remains temporarily as the composition base while the JS runtime is retired. */
 assert.match(experienceCss,/Conta de Casa v74 — composição visual do protótipo móvel/);
 assert.match(experienceCss,/@media\(max-width:820px\)/);
 assert.match(experienceCss,/--cdc-prototype-header:#003b48/);
@@ -107,8 +107,9 @@ assert.match(index,/manifest\.webmanifest\?v=53/);
 for(const asset of ['core','finance','render','forms','sync','events'])assert.match(index,new RegExp(`${asset}\\.js\\?v=53`));
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2/);
+assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
 for(const asset of ['./design-system.css','./v74-experience.css','./v75-architecture.css','./market-experience.css','./market-experience.js','./v64-runtime.js','./app-update.css','./app-update.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be available offline`);
+assert.ok(!sw.includes("'./v74-experience.js'"),'retired v74 runtime must not be available offline');
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 assert.match(sw,/url\.searchParams\.has\('v'\)/);
@@ -125,7 +126,7 @@ try{
   assert.match(builtIndex,/name="app-build" content="v75"/);
   assert.match(builtIndex,/design-system\.css\?v=75/);
   assert.match(builtIndex,/v74-experience\.css\?v=74-experience2/);
-  assert.match(builtIndex,/v74-experience\.js\?v=74-experience2/);
+  assert.doesNotMatch(builtIndex,/v74-experience\.js\?v=74-experience2/);
   assert.match(builtIndex,/v75-architecture\.css\?v=75-architecture2/);
   assert.match(builtIndex,/v75-architecture\.js\?v=75-architecture2/);
   assert.match(builtIndex,/mobile-menu-toggle\.css\?v=73-menu8/);
@@ -133,11 +134,11 @@ try{
   assert.doesNotMatch(builtIndex,/v64-runtime\.css/);
   assert.ok(fs.existsSync(path.join(dist,'design-system.css')));
   assert.ok(fs.existsSync(path.join(dist,'v74-experience.css')));
-  assert.ok(fs.existsSync(path.join(dist,'v74-experience.js')));
+  assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')),'retired v74 runtime must not exist in dist');
   assert.ok(fs.existsSync(path.join(dist,'v75-architecture.css')));
   assert.ok(fs.existsSync(path.join(dist,'v75-architecture.js')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Responsive v75 architecture, safe areas, visible five-destination navigation and Pages freshness tests: OK');
+console.log('Responsive v76 architecture, safe areas, visible five-destination navigation and retired v74 runtime distribution: OK');
