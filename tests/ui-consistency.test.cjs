@@ -12,6 +12,7 @@ const marketBrand=read('market-brand.css');
 const shopping=read('market-shopping-focus.css');
 const experience=read('v74-experience.js');
 const experienceCss=read('v74-experience.css');
+const migrationCss=read('v75-market-featured.css');
 const architecture=read('v75-architecture.js');
 const architectureCss=read('v75-architecture.css');
 const headerCss=read('v75-header-refinement.css');
@@ -36,13 +37,17 @@ assert.match(design,/position:fixed!important/);
 assert.match(design,/\.ui-icon-svg,\.svg-icon\{[\s\S]*stroke-width:2!important/);
 assert.match(design,/prefers-reduced-motion:reduce/);
 
-assert.match(experienceCss,/Conta de Casa v74/);
-assert.match(experienceCss,/--cdc-prototype-header:#003b48/);
-for(const marker of ['.cdc-mobile-greeting','.cdc-dashboard-categories','.cdc-expense-feed','.cdc-market-home','.cdc-planning-overview','.cdc-report-summary','.cdc-more-menu'])assert.ok(experienceCss.includes(marker));
-assert.match(experienceCss,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/);
-assert.match(experienceCss,/#formDialog\.dialog\{width:100vw!important/);
-assert.match(experienceCss,/\.invoice-scan-overlay/);
-assert.match(experienceCss,/prefers-reduced-motion:reduce/);
+/* v74-experience.css fica apenas como asset transitório sem regras. */
+assert.match(experienceCss,/76-retire-v74-css-behavior1/);
+assert.doesNotMatch(experienceCss,/\{[^}]*\}/,'v74 experience stylesheet must no longer own presentation');
+
+/* Estruturas ainda vivas passam para a ponte v76, não para o stylesheet v74. */
+assert.match(migrationCss,/Conta de Casa v76 — ponte de retirada 75-featured1/i);
+for(const marker of ['.cdc-empty-note','.cdc-avatar','.cdc-category-dot','.cdc-planning-overview','.cdc-budget-ring','.cdc-plan-track','.cdc-more-menu','.cdc-preferences-details'])assert.ok(migrationCss.includes(marker));
+assert.match(migrationCss,/@media\(max-width:820px\)/);
+assert.match(migrationCss,/@media\(min-width:821px\)/);
+assert.match(migrationCss,/\.cdc-preferences-details\{display:contents\}/);
+assert.match(migrationCss,/prefers-reduced-motion:reduce/);
 
 assert.match(architectureCss,/Conta de Casa v75/);
 assert.match(architectureCss,/--v75-header:#004653/);
@@ -106,7 +111,7 @@ assert.match(menuJs,/touch\.clientX>=root\.innerWidth-swipeEdgeWidth/);
 assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 0 0 auto!important/);
 
 assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
-for(const asset of ['./design-system.css','./v74-experience.css','./v75-architecture.css','./v75-architecture.js','./v75-header-refinement.css'])assert.ok(sw.includes(`'${asset}'`));
+for(const asset of ['./design-system.css','./v74-experience.css','./v75-market-featured.css','./v75-architecture.css','./v75-architecture.js','./v75-header-refinement.css'])assert.ok(sw.includes(`'${asset}'`));
 assert.ok(!sw.includes("'./v74-experience.js'"),'retired v74 runtime must not be cached');
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
@@ -120,7 +125,7 @@ assert.match(prepare,/const HEADER_REV = '75-header2'/);
 assert.doesNotMatch(publicFilesBlock,/'ui-consistency\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'v64-runtime\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'v74-experience\.js'/,'retired v74 runtime must not be copied to dist');
-for(const asset of ['v74-experience.css','v75-architecture.css','v75-architecture.js','v75-header-refinement.css'])assert.ok(publicFilesBlock.includes(`'${asset}'`));
+for(const asset of ['v74-experience.css','v75-market-featured.css','v75-architecture.css','v75-architecture.js','v75-header-refinement.css'])assert.ok(publicFilesBlock.includes(`'${asset}'`));
 assert.match(prepare,/forbidden=\[[^\]]*'v74-experience\.js'/s,'dist build must explicitly forbid the retired runtime');
 
 assert.equal(manifest.background_color,'#f4f8f8');
@@ -135,12 +140,14 @@ try{
   assert.match(index,/market-shopping-focus\.css\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/v74-experience\.css\?v=74-experience2/);
+  assert.match(index,/v75-market-featured\.css\?v=75-featured1/);
   assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
   assert.match(index,/v75-header-refinement\.css\?v=75-header2/);
   assert.doesNotMatch(index,/v74-experience\.js/,'built Pages HTML must not load the retired v74 runtime');
   assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
   assert.match(index,/<meta name="theme-color" content="#f4f8f8"/);
-  for(const asset of ['design-system.css','v74-experience.css','v75-architecture.css','v75-architecture.js','v75-header-refinement.css'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  for(const asset of ['design-system.css','v74-experience.css','v75-market-featured.css','v75-architecture.css','v75-architecture.js','v75-header-refinement.css'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  assert.match(fs.readFileSync(path.join(dist,'v74-experience.css'),'utf8'),/76-retire-v74-css-behavior1/);
   assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')),'retired v74 runtime must not exist in dist');
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
@@ -148,4 +155,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Conta de Casa UI consistency: v76 architecture owns runtime composition and v74 JS is retired from Pages.');
+console.log('Conta de Casa UI consistency: v76 owns presentation/runtime composition; v74 experience CSS/JS are retired authorities.');
