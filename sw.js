@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-planning-more1-header2-stability1-layout1-drawer2-image-library1-catalog4-pd-photo1-photo-loader3-startup2-usability1-pages1-assets1-market1-expenses1-veggie-menu2-modern-ui2-version-audit1-mobile-shell2-architecture-baseline1-ui-components1-product-pages1-ts-runtime2-market-branding1-auth1-dashboard-clean1-ts-runtime3-sync-policy1-auth-transition1-auth-hidden1-ui-audit1-brand-icons1-full-page-audit1-page-polish1-runtime-consolidation1-architecture-consolidation1-retire-v74-runtime1-retire-assets1';
+const CACHE = 'conta-de-casa-public-v76-version-alignment1-architecture2-v74-ui1-v74-shopping2-v73-menu8-planning-more1-header2-stability1-layout1-drawer2-image-library1-catalog4-pd-photo1-photo-loader3-startup2-usability1-pages1-assets1-market1-expenses1-veggie-menu2-modern-ui2-version-alignment1-mobile-shell2-architecture-baseline1-ui-components1-product-pages1-ts-runtime2-market-branding1-auth1-dashboard-clean1-ts-runtime3-sync-policy1-auth-transition1-auth-hidden1-ui-audit1-brand-icons1-full-page-audit1-page-polish1-runtime-consolidation1-architecture-consolidation1-retire-v74-runtime1-retire-assets1';
 const NAVIGATION_TIMEOUT_MS = 4000;
 const PUBLIC_ASSETS = [
   './',
