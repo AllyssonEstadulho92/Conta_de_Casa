@@ -40,7 +40,7 @@ assert.match(css,/\.market-item-details>summary/);
 assert.match(css,/min-height:44px/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(brand,/\.market-product-photo[\s\S]*display:grid!important/);
-assert.match(experience,/\.cdc-market-home/,'v74 experience must place the shopping list inside the prototype market screen');
+assert.match(experience,/\.cdc-market-home/,'legacy CSS is still temporarily available while its live selectors are migrated');
 assert.match(architecture,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'v75 must keep Mercado visible in primary navigation');
 assert.match(architecture,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'v75 prototype must keep compact product cards');
 
@@ -54,11 +54,13 @@ assert.ok(v65.items.some(item=>/comprados/i));
 assert.ok(sw.includes("'./market-shopping-focus.css'"));
 assert.ok(sw.includes("'./market-shopping-focus.js'"));
 assert.ok(sw.includes("'./v74-experience.css'"));
+assert.ok(!sw.includes("'./v74-experience.js'"),'shopping focus must not depend on the retired v74 runtime');
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.match(sw,/v74-shopping2/);
 assert.match(sw,/v73-menu8/);
 assert.match(sw,/v74-experience2/);
 assert.match(sw,/v75-architecture2/);
+assert.match(sw,/retire-v74-runtime1/);
 assert.match(prepare,/const BUILD = 'v75'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
@@ -75,7 +77,7 @@ try{
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/mobile-menu-toggle\.js\?v=73-menu8/);
   assert.match(index,/v74-experience\.css\?v=74-experience2/);
-  assert.match(index,/v74-experience\.js\?v=74-experience2/);
+  assert.doesNotMatch(index,/v74-experience\.js/);
   assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
   assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
   assert.ok(index.indexOf('market-shopping-focus.css')<index.indexOf('mobile-menu-toggle.css'));
@@ -83,11 +85,11 @@ try{
   assert.ok(index.indexOf('v74-experience.css')<index.indexOf('v75-architecture.css'));
   assert.ok(index.indexOf('market-category-groups.js')<index.indexOf('market-shopping-focus.js'));
   assert.ok(index.indexOf('market-shopping-focus.js')<index.indexOf('mobile-menu-toggle.js'));
-  assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v74-experience.js'));
-  assert.ok(index.indexOf('v74-experience.js')<index.indexOf('v75-architecture.js'));
-  for(const asset of ['market-shopping-focus.css','market-shopping-focus.js','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  assert.ok(index.indexOf('mobile-menu-toggle.js')<index.indexOf('v75-architecture.js'));
+  for(const asset of ['market-shopping-focus.css','market-shopping-focus.js','v74-experience.css','v75-architecture.css','v75-architecture.js'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Mobile shopping focus preserved under the final v75 prototype architecture: OK');
+console.log('Mobile shopping focus preserved with v76 architecture and no published v74 runtime: OK');

@@ -63,8 +63,10 @@ const BUILD_DATE=new Date().toISOString();
 
 /* Bundle público v75 com programa v76 incremental. Mantém a experiência funcional existente,
    acrescenta metadados de versão/build, runtimes gerados por TypeScript, 76-modern-ui2,
-   76-dashboard-clean1 e 76-mobile-shell2. Nenhuma destas camadas altera domínio financeiro,
-   persistência, cifragem, sincronização, scanner, QR ou regras de Mercado. */
+   76-dashboard-clean1 e 76-mobile-shell2. O runtime histórico v74-experience.js já não
+   é publicado: a arquitetura v76 passou a possuir Planeamento, Mais e navegação.
+   Nenhuma destas camadas altera domínio financeiro, persistência, cifragem,
+   sincronização, scanner, QR ou regras de Mercado. */
 const PUBLIC_FILES = Object.freeze([
   'index.html',
   'styles.css',
@@ -128,7 +130,6 @@ const PUBLIC_FILES = Object.freeze([
   'market-photo-loader.js',
   'v64-runtime.js',
   'market-shopping-focus.js',
-  'v74-experience.js',
   'v75-architecture.js',
   'v75-stability.js',
   'v75-startup-guard.js',
@@ -225,7 +226,6 @@ if(!index.includes('v64-runtime.js'))index=index.replace('</body>',`  <script sr
 if(!index.includes('market-shopping-focus.js'))index=index.replace('</body>',`  <script src="./market-shopping-focus.js?v=${SHOPPING_REV}" defer></script>\n</body>`);
 if(!index.includes('mobile-menu-toggle.js'))index=index.replace('</body>',`  <script src="./mobile-menu-toggle.js?v=${MENU_REV}" defer></script>\n</body>`);
 if(!index.includes('v76-veggie-menu.js'))index=index.replace('</body>',`  <script src="./v76-veggie-menu.js?v=${VEGGIE_MENU_REV}" defer></script>\n</body>`);
-if(!index.includes('v74-experience.js'))index=index.replace('</body>',`  <script src="./v74-experience.js?v=${EXPERIENCE_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-architecture.js'))index=index.replace('</body>',`  <script src="./v75-architecture.js?v=${ARCHITECTURE_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-stability.js'))index=index.replace('</body>',`  <script src="./v75-stability.js?v=${STABILITY_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-startup-guard.js'))index=index.replace('</body>',`  <script src="./v75-startup-guard.js?v=${STARTUP_REV}" defer></script>\n</body>`);
@@ -241,7 +241,7 @@ fs.writeFileSync(distEvents,events);
 const manifest=JSON.parse(fs.readFileSync(path.join(DIST,'release-manifest.json'),'utf8'));
 if(manifest.latestVersion!==BUILD)throw new Error(`Release manifest latestVersion ${manifest.latestVersion} does not match ${BUILD}`);
 
-const forbidden=['README.md','SECURITY.md','PRIVACY.md','SPEC.md','CHANGELOG.md','.git','.github','tests','scripts','downloads','ui-consistency.css','v64-runtime.css','v75-drawer-blue.css'];
+const forbidden=['README.md','SECURITY.md','PRIVACY.md','SPEC.md','CHANGELOG.md','.git','.github','tests','scripts','downloads','ui-consistency.css','v64-runtime.css','v74-experience.js','v75-drawer-blue.css'];
 for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry)))throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
@@ -252,4 +252,4 @@ for(const name of Object.keys(GENERATED_PUBLIC_FILES)){
   }
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; veggie-menu ${VEGGIE_MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; experience ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; veggie-menu ${VEGGIE_MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; experience-css ${EXPERIENCE_REV}; architecture ${ARCHITECTURE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; featured ${FEATURED_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);

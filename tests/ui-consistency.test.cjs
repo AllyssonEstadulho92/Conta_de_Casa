@@ -57,8 +57,6 @@ assert.match(architectureCss,/\.invoice-scan-overlay[\s\S]*inset:0!important/);
 assert.match(architectureCss,/background:var\(--v75-surface\)!important/);
 assert.match(architectureCss,/prefers-reduced-motion:reduce/);
 
-/* v76-ui-audit1: o header móvel final é uma superfície neutra e acessível.
-   Não pode recuperar o antigo gradiente escuro/ícones brancos por cascade. */
 assert.match(headerCss,/cabeçalho móvel compatível com o design system atual/i);
 assert.match(headerCss,/#cdcMobileGreeting[\s\S]*display:none!important/);
 assert.match(headerCss,/#notificationsBtn[\s\S]*order:99!important/);
@@ -78,21 +76,11 @@ assert.doesNotMatch(marketBrand,/\.market-product-photo[^\{]*\{[^}]*display:none
 assert.match(shopping,/Conta de Casa v74/);
 assert.match(shopping,/grid-template-columns:38px 54px minmax\(0,1fr\) auto!important/);
 
-/* O runtime v74 continua temporariamente publicado nesta etapa para permitir uma
-   transição reversível, mas já não é autoridade nem dependência da arquitetura v76. */
+/* O ficheiro v74-experience.js fica apenas como fonte histórica nesta etapa.
+   A aplicação publicada já não o carrega, copia nem guarda em cache. */
 assert.match(experience,/Conta de Casa v74/);
-for(const marker of ["['dashboard','Início','home']","['bills','Despesas','bill']","['market','Mercado','market']","['planning','Planeamento','plan']","['settings','Mais','more']"])assert.ok(experience.includes(marker));
-assert.match(experience,/data-v74-action="expense"/);
-assert.match(experience,/data-v74-action="invoice"/);
-assert.match(experience,/data-v74-action="market"/);
-assert.match(experience,/openBillForm/);
-assert.match(experience,/data-invoice-capture/);
-assert.match(experience,/invoiceImageInput/);
-assert.match(experience,/SUPPORTED_STORES=\[[\s\S]*Continente[\s\S]*Pingo Doce/);
-assert.doesNotMatch(experience,/Auchan|Lidl|Mercadona/);
-assert.doesNotMatch(experience,/saveState|commit\(|estimatedCents\s*=|actualCents\s*=/);
-assert.match(experience,/observeStableRoots/);
 assert.match(experience,/CDCV74/);
+assert.doesNotMatch(architecture,/root\.CDCV74/,'v76 architecture must not depend on the historical v74 runtime');
 
 assert.match(architecture,/Conta de Casa v76/);
 assert.match(architecture,/76-architecture-consolidation1/);
@@ -107,7 +95,6 @@ assert.match(architecture,/dashboardMetrics/);
 assert.match(architecture,/categoryEntries/);
 assert.match(architecture,/ensureBillTabs/);
 assert.match(architecture,/CDCV75/);
-assert.doesNotMatch(architecture,/root\.CDCV74/,'v76 architecture must not depend on the historical v74 runtime');
 assert.doesNotMatch(architecture,/placeDashboardGreeting/,'retired dashboard greeting must not return through architecture');
 assert.doesNotMatch(architecture,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/);
 
@@ -118,9 +105,9 @@ assert.match(menuJs,/drawer\.close=animatedDrawerClose/);
 assert.match(menuJs,/touch\.clientX>=root\.innerWidth-swipeEdgeWidth/);
 assert.match(menuCss,/@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 0 0 auto!important/);
 
-assert.match(sw,/conta-de-casa-public-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-v74-experience2-header2/);
-assert.match(sw,/architecture-consolidation1/);
-for(const asset of ['./design-system.css','./v74-experience.css','./v74-experience.js','./v75-architecture.css','./v75-architecture.js','./v75-header-refinement.css'])assert.ok(sw.includes(`'${asset}'`));
+assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
+for(const asset of ['./design-system.css','./v74-experience.css','./v75-architecture.css','./v75-architecture.js','./v75-header-refinement.css'])assert.ok(sw.includes(`'${asset}'`));
+assert.ok(!sw.includes("'./v74-experience.js'"),'retired v74 runtime must not be cached');
 assert.ok(!sw.includes("'./ui-consistency.css'"));
 assert.ok(!sw.includes("'./v64-runtime.css'"));
 
@@ -132,7 +119,9 @@ assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
 assert.match(prepare,/const HEADER_REV = '75-header2'/);
 assert.doesNotMatch(publicFilesBlock,/'ui-consistency\.css'/);
 assert.doesNotMatch(publicFilesBlock,/'v64-runtime\.css'/);
-for(const asset of ['v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-header-refinement.css'])assert.ok(publicFilesBlock.includes(`'${asset}'`));
+assert.doesNotMatch(publicFilesBlock,/'v74-experience\.js'/,'retired v74 runtime must not be copied to dist');
+for(const asset of ['v74-experience.css','v75-architecture.css','v75-architecture.js','v75-header-refinement.css'])assert.ok(publicFilesBlock.includes(`'${asset}'`));
+assert.match(prepare,/forbidden=\[[^\]]*'v74-experience\.js'/s,'dist build must explicitly forbid the retired runtime');
 
 assert.equal(manifest.background_color,'#f4f8f8');
 assert.equal(manifest.theme_color,'#f4f8f8');
@@ -148,14 +137,15 @@ try{
   assert.match(index,/v74-experience\.css\?v=74-experience2/);
   assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
   assert.match(index,/v75-header-refinement\.css\?v=75-header2/);
-  assert.match(index,/v74-experience\.js\?v=74-experience2/);
+  assert.doesNotMatch(index,/v74-experience\.js/,'built Pages HTML must not load the retired v74 runtime');
   assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
   assert.match(index,/<meta name="theme-color" content="#f4f8f8"/);
-  for(const asset of ['design-system.css','v74-experience.css','v74-experience.js','v75-architecture.css','v75-architecture.js','v75-header-refinement.css'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  for(const asset of ['design-system.css','v74-experience.css','v75-architecture.css','v75-architecture.js','v75-header-refinement.css'])assert.ok(fs.existsSync(path.join(dist,asset)));
+  assert.ok(!fs.existsSync(path.join(dist,'v74-experience.js')),'retired v74 runtime must not exist in dist');
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Conta de Casa UI consistency, v76 architecture consolidation and neutral mobile header audit: OK');
+console.log('Conta de Casa UI consistency: v76 architecture owns runtime composition and v74 JS is retired from Pages.');
