@@ -367,3 +367,45 @@ html.cdc-v75.app-active .topbar #syncHeaderStatus{
     line-height:1.05!important;
   }
 }
+
+/* 76-primary-actions-restore1 — as duas rotas operacionais nunca podem perder
+   os respetivos caminhos de criação nem os resultados existentes por efeito de
+   uma camada visual. A lógica/handlers permanecem em events.js, forms.js,
+   market-experience.js e render.js. */
+html.cdc-v75 #page-bills .bill-command-bar,
+html.cdc-v75 #page-market .market-command-bar{
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+html.cdc-v75 #page-bills #newBillBtn,
+html.cdc-v75 #page-market #newMarketBtn{
+  display:inline-flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+html.cdc-v75 #page-bills #billsList,
+html.cdc-v75 #page-market #marketList{
+  visibility:visible!important;
+  opacity:1!important;
+}
+html.cdc-v75 #formDialog #billForm .v75-bill-tabs,
+html.cdc-v75 #formDialog[data-mode="market-browser"] .market-browser{
+  visibility:visible!important;
+  opacity:1!important;
+}
+html.cdc-v75 #formDialog #billForm .v75-bill-tabs{
+  display:flex!important;
+}
+html.cdc-v75 #formDialog[data-mode="market-browser"] .market-browser{
+  display:block!important;
+}
+
+@media(max-width:560px){
+  html.cdc-v75 #page-bills #newBillBtn,
+  html.cdc-v75 #page-market #newMarketBtn{
+    width:100%!important;
+    min-width:0!important;
+  }
+}
