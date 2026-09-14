@@ -12,7 +12,6 @@ const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 const render=read('render.js');
 const finance=read('finance.js');
-const v74=read('v74-experience.js');
 
 assert.match(css,/76-product-pages1/);
 assert.match(css,/#page-dashboard>#kpiGrid\{order:1\}/);
@@ -31,11 +30,11 @@ assert.match(finance,/pendingCount:/);
 assert.match(finance,/overdueCount:/);
 assert.match(finance,/next7Count:/);
 
-// A camada v74 ainda existe por compatibilidade, mas a composição duplicada do Dashboard
-// deixa de participar no produto v76. Cada conteúdo mantém um equivalente funcional real.
+// O runtime v74 foi removido fisicamente. A camada v76 mantém uma proteção defensiva
+// contra IDs antigos sem depender da existência do runtime que os criava.
+assert.ok(!fs.existsSync(path.join(ROOT,'v74-experience.js')),'v74 runtime source must be physically deleted');
 for(const legacyId of ['cdcMobileGreeting','cdcMobileMonthWrap','cdcMonthHero','cdcQuickActions','cdcDashboardCategories']){
-  assert.match(v74,new RegExp(`id=\\"${legacyId}\\"`),`audit must prove legacy ${legacyId} is still injected by v74 before it is suppressed`);
-  assert.match(css,new RegExp(`#${legacyId}`),`v76 dashboard composition must explicitly suppress duplicate ${legacyId}`);
+  assert.match(css,new RegExp(`#${legacyId}`),`v76 dashboard composition keeps defensive suppression for legacy ${legacyId}`);
 }
 assert.match(css,/v76-dashboard-clean1/);
 assert.match(css,/#cdcMobileGreeting,[\s\S]*#cdcMobileMonthWrap,[\s\S]*#cdcMonthHero,[\s\S]*#cdcQuickActions,[\s\S]*#cdcDashboardCategories[\s\S]*display:none!important/);

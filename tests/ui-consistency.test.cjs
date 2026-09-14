@@ -10,7 +10,6 @@ const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const design=read('design-system.css');
 const marketBrand=read('market-brand.css');
 const shopping=read('market-shopping-focus.css');
-const experience=read('v74-experience.js');
 const planningMore=read('v76-planning-more.css');
 const architecture=read('v75-architecture.js');
 const architectureCss=read('v75-architecture.css');
@@ -36,7 +35,7 @@ assert.match(design,/position:fixed!important/);
 assert.match(design,/\.ui-icon-svg,\.svg-icon\{[\s\S]*stroke-width:2!important/);
 assert.match(design,/prefers-reduced-motion:reduce/);
 
-for(const retiredSource of ['v74-experience.css','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(ROOT,retiredSource)),`${retiredSource} must be physically deleted`);
+for(const retiredSource of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(ROOT,retiredSource)),`${retiredSource} must be physically deleted`);
 
 assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-more1/i);
 for(const marker of ['.cdc-empty-note','.cdc-avatar','.cdc-category-dot','.cdc-planning-overview','.cdc-budget-ring','.cdc-plan-track','.cdc-more-menu','.cdc-preferences-details'])assert.ok(planningMore.includes(marker));
@@ -77,9 +76,7 @@ assert.doesNotMatch(marketBrand,/\.market-product-photo[^\{]*\{[^}]*display:none
 assert.match(shopping,/Conta de Casa v74/);
 assert.match(shopping,/grid-template-columns:38px 54px minmax\(0,1fr\) auto!important/);
 
-assert.match(experience,/Conta de Casa v74/);
-assert.match(experience,/CDCV74/);
-assert.doesNotMatch(architecture,/root\.CDCV74/,'v76 architecture must not depend on the historical v74 runtime');
+assert.doesNotMatch(architecture,/root\.CDCV74/,'v76 architecture must not depend on the retired v74 runtime');
 assert.match(architecture,/Conta de Casa v76/);
 assert.match(architecture,/76-architecture-consolidation1/);
 assert.match(architecture,/bills:\['Despesas','Movimentos'\]/);

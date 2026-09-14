@@ -13,7 +13,6 @@ const css=fs.readFileSync('market-experience.css','utf8');
 const brandingCss=fs.readFileSync('market-brand.css','utf8');
 const brandingTs=fs.readFileSync('src/ui/market-branding.ts','utf8');
 const brandingJs=fs.readFileSync('.generated/market-branding.js','utf8');
-const experienceJs=fs.readFileSync('v74-experience.js','utf8');
 const architectureCss=fs.readFileSync('v75-architecture.css','utf8');
 const architectureJs=fs.readFileSync('v75-architecture.js','utf8');
 const planningMore=fs.readFileSync('v76-planning-more.css','utf8');
@@ -30,7 +29,7 @@ const publicFilesBlock=pages.slice(publicFilesStart,publicFilesEnd+3);
 const events=fs.readFileSync('events.js','utf8');
 
 assert.ok(!fs.existsSync('market-branding.js'),'Market branding manual JS source must stay removed');
-assert.ok(!fs.existsSync('v74-experience.css'),'retired v74 CSS source must stay deleted');
+for(const retiredSource of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(retiredSource),`${retiredSource} must stay physically deleted`);
 assert.match(index,/<meta name="app-build" content="v53"/);
 assert.match(index,/market-experience\.css\?v=53/);
 assert.match(index,/market-experience\.js\?v=53/);
@@ -81,9 +80,6 @@ assert.match(brandingJs,/installMarketBranding/);
 assert.match(brandingJs,/marketProductImages\s*=\s*'verified'/);
 assert.doesNotMatch(brandingJs,/appState|estimatedCents|actualCents|saveState|commit\(/,'branding must not mutate financial state');
 
-/* O runtime v74 permanece apenas como fonte histórica; o CSS antigo já foi removido. */
-assert.match(experienceJs,/SUPPORTED_STORES=\[[\s\S]*Continente[\s\S]*Pingo Doce/);
-assert.doesNotMatch(experienceJs,/Auchan|Lidl|Mercadona/);
 assert.match(planningMore,/76-planning-more1/);
 assert.match(architectureCss,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'Mercado must remain visible in the primary navigation');
 assert.match(architectureCss,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'current market grid must remain compact');
@@ -108,4 +104,4 @@ assert.ok(css.includes('env(safe-area-inset-top)'));
 assert.ok(css.includes('env(safe-area-inset-bottom)'));
 assert.ok(css.includes('min-width:0'));
 
-console.log('Market live sources and TS branding remain safe after deleting retired v74 CSS/Featured sources: OK');
+console.log('Market live sources and TypeScript branding remain safe with v74/Featured sources physically absent: OK');
