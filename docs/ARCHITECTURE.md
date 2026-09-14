@@ -1,6 +1,6 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 13 de setembro de 2026  
+Atualizado: 14 de setembro de 2026  
 Versão: `0.76.0-dev.1`  
 Release pública: `v75`  
 Programa técnico: `v76`  
@@ -27,25 +27,11 @@ Invariantes:
 
 `PIN/palavra-passe → PBKDF2 → check cifrado → AES-GCM → appState normalizado`.
 
-### `76-auth-transition1`
+Contratos visuais publicados:
 
-- PIN local válido abre o Dashboard sem depender de sync remoto;
-- sync real continua em background;
-- falha de transição remove `app-active`, esconde app e restaura cofre.
-
-### `76-auth-hidden1`
-
-Contrato visual final:
-
-- `#vaultScreen[hidden] { display:none!important; }`;
-- `#app[hidden] { display:none!important; }`;
-- `#vaultScreen:not([hidden]) + #app { display:none!important; }`.
-
-Isto evita que Safari/WebKit mantenha o cofre renderizado quando uma regra histórica declara `display:grid!important`.
-
-### `76-ui-audit1`
-
-A camada final neutraliza o onboarding `cdcWelcome` do v74 e mantém o formulário real `#vaultCreate` visível quando a classe histórica `cdc-vault-create-collapsed` é aplicada. É uma mitigação visual segura; a remoção definitiva da criação runtime fica para o bloco de limpeza v74.
+- `76-auth-transition1`: PIN local válido abre o Dashboard sem depender de sync remoto;
+- `76-auth-hidden1`: `#vaultScreen[hidden]` e `#app[hidden]` são explicitamente `display:none!important` e cofre visível exclui shell autenticado;
+- `76-ui-audit1`: onboarding v74 não pode mascarar o formulário real do cofre.
 
 ## 3. Rotas e navegação
 
@@ -62,70 +48,88 @@ Rotas canónicas:
 - diagnostics;
 - settings.
 
-`renderPage()` é o dispatcher funcional. O gate estrutural valida rota ↔ secção HTML ↔ renderer e audita o bundle do Pages.
+`renderPage()` continua o dispatcher funcional. O gate estrutural valida rota ↔ secção HTML ↔ renderer e audita o bundle Pages.
 
-Dívida confirmada: existem duas autoridades de navegação móvel.
+### Autoridade móvel após PR #104
 
-- `core.js/render.js` definem `MOBILE_NAV_ITEMS` e geram `#mobileNav`;
-- `v74-experience.js` executa `ensureMobileNav()` e pode reescrever o mesmo DOM com cinco destinos históricos.
+`v75-stability.js` é a autoridade final transitória para o dock móvel enquanto as camadas históricas coexistem. A assinatura canónica é:
 
-Esta duplicação será eliminada num bloco próprio, preferencialmente com configuração canónica TypeScript, sem remover drawer, `aria-current` ou rotas antes da paridade.
+`Início · Despesas · Mercado · Plano · Mais`
+
+A rota continua `planning`; apenas o label compacto do dock passa a `Plano` para evitar truncagem em ecrãs pequenos. `calendar` herda seleção de `bills`; `goals` de `planning`; `diagnostics/security` de `settings`.
+
+`v74-experience.js` permanece por compatibilidade, mas deixa de vencer a assinatura final quando encontra `data-v74-nav`/`data-v76-nav-authority` instalados por v75 stability.
 
 ## 4. Arquitetura visual
 
 Autoridades pretendidas:
 
-- tokens/componentes: `v76-modern-ui.css`;
+- tokens/componentes v76: `v76-modern-ui.css`;
 - composição de página: `v76-product-pages.css`;
 - geometria mobile/safe areas/dock: `v76-mobile-shell.css`;
+- estabilidade/compatibilidade transversal: `v75-stability.css/js`;
 - identidade da aplicação: `icon.svg`;
 - iconografia funcional: subset Lucide local em `ui-icons.js` + métricas em `ui-icons.css`;
-- compatibilidade histórica: v74/v75, apenas enquanto existirem consumidores.
+- compatibilidade histórica: v74/v75 apenas enquanto existirem consumidores reais.
 
-### Contratos de `76-ui-audit1`
+PR #102 e #103 consolidaram contraste, reflow, dialogs, tabs, densidade, hierarquia e apresentação das 10 rotas. PR #104 reduziu a dupla autoridade do dock e remove em runtime nós v74 do Dashboard já substituídos.
 
-- header móvel é superfície neutra, sem gradiente decorativo, sem texto branco forçado e com controlos 44×44 px;
-- dock móvel usa uma superfície única, selected state discreto, foco visível, labels coerentes e safe areas;
-- `forced-colors` e `prefers-reduced-motion` continuam suportados;
-- visual não altera lógica financeira ou de segurança.
+## 5. Design system e iconografia
 
-### Contratos de `76-brand-icons1`
+`v76-modern-ui.css` mantém tokens de cor, superfície, borda, radius, sombras, alturas de controlos, foco e estados.
 
-- `icon.svg` é a única marca gráfica canónica da Conta de Casa em PWA, sidebar, drawer e cofre;
-- a marca reduz-se a casa + euro, teal sólido e branco, sem gradientes ou símbolos decorativos não relacionados;
-- Lucide é reservado a ações, estados e navegação, não substitui a marca;
-- todos os ícones funcionais usam `viewBox 24×24`, `currentColor`, stroke coerente de 2 px e caixas explícitas;
-- o símbolo deve corresponder semanticamente à ação: por exemplo, “Adicionar item” usa `Plus`, não `Scan`;
-- pseudo-ícones decorativos que duplicam título, resumo ou estado são neutralizados;
-- ícones não podem ser a única fonte de significado quando texto/estado é necessário;
-- glifos Unicode históricos podem permanecer temporariamente no markup como fallback, mas não são a autoridade visual final.
+`76-brand-icons1` definiu:
 
-## 5. Design system
+- `icon.svg` como única marca gráfica;
+- Lucide local como família de ícones funcionais;
+- `viewBox 24×24`, `currentColor`, stroke 2 px e licença local preservada;
+- símbolos funcionais devem corresponder semanticamente à ação.
 
-`v76-modern-ui.css` contém tokens de cor, superfície, borda, radius, sombras, control-height, icon-control, focus ring e estados disabled/hover.
+`76-icon-semantics3` acrescenta uma camada semântica controlada dentro da estabilidade transversal, sem criar uma nova biblioteca de ícones:
 
-Direção de consolidação:
+- Início: teal;
+- Despesas: índigo;
+- Mercado/Segurança: verde;
+- Planeamento: âmbar;
+- Mais/Definições: roxo;
+- Relatórios: azul;
+- Objetivos: rosa;
+- Diagnóstico: azul-cinza;
+- alertas: âmbar;
+- destrutivo: danger existente.
 
-- brand teal usado com parcimónia em ação/seleção;
-- superfícies neutras;
-- sombra mínima;
-- hierarquia por espaço/tipografia antes de cartões;
-- ícones lineares coerentes;
+A paleta possui equivalentes dark mode. Em `forced-colors`, o browser/OS recupera a autoridade de contraste. Cor nunca é o único indicador de seleção: `aria-current`, superfície selecionada, texto e foco continuam ativos.
+
+Geometrias corrigidas:
+
+- `plan`: clipboard/checklist;
+- `settings`: engrenagem;
+- `activity`: Diagnóstico.
+
+O menu `Mais` recebe ícones por função através da camada de estabilidade, reutilizando `CDCIcons.markup` e sem alterar destinos ou handlers.
+
+## 6. Responsividade e acessibilidade
+
+- `v76-mobile-shell.css` continua a autoridade de viewport/safe areas/scroll/dock;
 - alvos essenciais >=44 px;
-- WCAG 2.2 AA como referência mínima quando aplicável;
-- marca e ícones funcionais têm papéis separados.
+- inputs móveis >=16 px para evitar focus zoom do Safari;
+- zoom manual não é bloqueado;
+- foco visível;
+- reduced-motion e forced-colors preservados;
+- tabelas usam scroll controlado no desktop e cartões móveis quando já existe representação equivalente;
+- informação essencial não deve desaparecer apenas por falta de espaço.
 
-## 6. Páginas
+## 7. Páginas
 
 Estado atual:
 
-- Acesso: `76-auth1` + `76-auth-transition1` + `76-auth-hidden1`;
-- Dashboard: `76-dashboard-clean1` usa renderização canónica e suprime visualmente blocos v74 duplicados;
-- Faturas e Planeamento: têm recuperação funcional mobile v75, mas precisam do acabamento final v76;
-- Mercado: funcionalidade espalhada por múltiplas camadas; `76-brand-icons1` remove duplicações visuais, mas catálogo/lista/preço/fotografia ainda precisam auditoria de produto;
-- Calendário, Relatórios, Objetivos, Segurança, Diagnóstico e Definições: ainda sem consolidação visual final equivalente ao Dashboard.
+- Acesso: consolidado por `76-auth1`, transition e hidden contracts;
+- Dashboard: composição canónica v76; nós v74 substituídos são removidos pela estabilidade runtime;
+- Faturas: funcional, com recuperação mobile v75 e polish global; revisão de estados ainda necessária;
+- Mercado: múltiplas camadas funcionais preservadas; iconografia e fotografias têm contratos próprios; persistência `marketId|pid` ainda precisa E2E dedicado;
+- Planeamento/Calendário/Relatórios/Objetivos/Segurança/Diagnóstico/Definições: passaram pelo polish global, mas continuam no ciclo de validação física e limpeza residual.
 
-## 7. Runtime e TypeScript
+## 8. Runtime e TypeScript
 
 Runtimes TS canónicos já publicados:
 
@@ -137,45 +141,36 @@ Pipeline:
 
 `src/**/*.ts → tsc strict/noEmit → build-typescript-runtime.cjs → .generated/*.js → prepare-pages.cjs → dist/*.js → Pages`.
 
-JS manual restante só é removido depois de substituição comprovada.
+JS manual restante só é removido depois de substituição comprovada. `finance.js`, `core.js` e cifra ficam para fases com vetores de paridade próprios.
 
-## 8. Build/PWA
+## 9. Build/PWA
 
 Fluxo:
 
-`PR/push → TypeScript Foundation + CI → merge main → CI main verde → build runtimes → prepare-pages allowlist → artefacto Pages → deploy`.
+`PR/push → TypeScript Foundation + CI → merge main → CI main → prepare-pages allowlist → artefacto Pages → deploy`.
 
 Service Worker:
 
 - navegação network-first com timeout 4 s;
 - assets públicos network-first/no-store com fallback cache;
 - allowlist explícita;
-- revisões de cache para distribuir mudanças de UI/JS.
+- cache versionada para distribuir alterações.
 
-`76-brand-icons1` muda apenas identidade/apresentação e invalida o cache para distribuir `icon.svg` e `ui-icons.css`; a estratégia não muda.
+`76-icon-semantics3` apenas acrescenta a revisão de cache `icon-semantics3`; a estratégia de rede/cache não muda.
 
-## 9. Segurança e acessibilidade
+## 10. Segurança
 
 - nenhum segredo no repositório público;
 - CSP ativa;
 - armazenamento sensível em claro bloqueado;
-- zoom manual não é bloqueado;
-- focus visível e sem ser tapado pelo dock;
-- safe areas cobertas;
-- reduced-motion/forced-colors cobertos;
-- UI não pode introduzir biometria fictícia;
-- alterações visuais não podem alterar KDF/cifra/schema;
-- ícones de controlo devem manter contraste não textual adequado e área clicável fornecida pelo controlo, não pelo desenho do SVG.
+- alterações visuais não alteram KDF/cifra/schema;
+- ícones não introduzem dependências remotas;
+- ações destrutivas mantêm símbolo, texto/label e token danger, sem depender só de cor.
 
-## 10. Próxima consolidação
+## 11. Próxima consolidação
 
-1. validar `76-brand-icons1` em CI e hardware;
-2. uma autoridade de navegação móvel;
-3. impedir que v74 crie componentes já substituídos;
-4. terminar Faturas e Mercado;
-5. Planeamento + Calendário;
-6. Relatórios + Objetivos;
-7. Segurança + Diagnóstico + Definições;
-8. consolidar tipografia/iconografia residual e remover fallbacks históricos comprovadamente dispensáveis;
-9. remover CSS/runtime histórico apenas com prova de não utilização e regressões verdes;
-10. continuar migração TypeScript por risco, deixando `core/finance/cifra` para fases com vetores de paridade próprios.
+1. concluir gates e publicação de `76-icon-semantics3`;
+2. validar iPhone/Safari/PWA, Android/Chrome, tablet e desktop;
+3. continuar Faturas → Mercado → Planeamento/Calendário → Relatórios/Objetivos → Segurança/Diagnóstico/Definições;
+4. remover CSS/runtime histórico apenas com prova de não utilização;
+5. continuar migração TypeScript por risco e paridade.
