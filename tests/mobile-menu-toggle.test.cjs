@@ -51,7 +51,15 @@ assert.match(js, /velocity>=swipeFlingVelocity/);
 assert.match(js, /setDragVisual\(offset,progress\)/);
 assert.match(js, /document\.addEventListener\('touchmove',onTouchMove,\{capture:true,passive:false\}\)/);
 
-assert.match(css, /Conta de Casa v73/);
+assert.match(css, /Conta de Casa v76/);
+assert.match(css, /v76 menu-morph1/);
+assert.match(css, /\.mobile-menu-glyph>span\{display:none!important\}/,'legacy three-span glyph must no longer be visible');
+assert.match(css, /\.mobile-menu-glyph::before,[\s\S]*\.mobile-menu-glyph::after\{/,'two pseudo-elements must own the visible icon');
+assert.match(css, /translate\(-50%,-50%\) translateY\(-4px\) rotate\(0deg\)/,'top stroke must start above center');
+assert.match(css, /translate\(-50%,-50%\) translateY\(4px\) rotate\(0deg\)/,'bottom stroke must start below center');
+assert.match(css, /translateY\(0\) rotate\(45deg\)/,'top stroke must morph into the positive diagonal');
+assert.match(css, /translateY\(0\) rotate\(-45deg\)/,'bottom stroke must morph into the negative diagonal');
+assert.match(css, /cubic-bezier\(\.22,1,\.36,1\)/,'morph must use the v76 smooth deceleration curve');
 assert.match(css, /@media\(min-width:821px\)[\s\S]*\.sidebar\{[\s\S]*inset:0 0 0 auto!important/);
 assert.match(css, /\.main\{[\s\S]*margin-left:0!important;[\s\S]*margin-right:var\(--sidebar-current\)!important/);
 assert.match(css, /\.nav-drawer\{[\s\S]*inset:0 0 0 auto/);
@@ -60,10 +68,10 @@ assert.match(css, /border-left:1px solid/);
 assert.match(css, /box-shadow:-18px 0 40px/);
 assert.match(css, /\.nav-drawer-shell\{[\s\S]*safe-area-inset-top[\s\S]*safe-area-inset-bottom/);
 assert.match(css, /\.drawer-nav \.nav-btn\{[\s\S]*min-height:48px/);
-assert.match(css, /@media\(prefers-reduced-motion:reduce\)[\s\S]*transition:none!important/);
+assert.match(css, /@media\(prefers-reduced-motion:reduce\)[\s\S]*\.mobile-menu-glyph::before[\s\S]*\.mobile-menu-glyph::after[\s\S]*transition:none!important/);
 assert.doesNotMatch(css, /background:\s*(?:green|#0f0|#00ff00)/i);
 
-/* v76 mantém o controlador v73 validado e altera apenas a arquitetura acima dele. */
+/* v76 mantém o controlador v73 validado e melhora apenas a apresentação do glyph. */
 assert.match(prepare, /const BUILD = 'v76'/);
 assert.match(prepare, /const MENU_REV = '73-menu8'/);
 assert.match(prepare, /const ARCHITECTURE_REV = '75-architecture2'/);
@@ -71,6 +79,7 @@ assert.match(prepare, /const PLANNING_MORE_REV = '76-planning-more1'/);
 assert.doesNotMatch(prepare, /const EXPERIENCE_REV/);
 assert.doesNotMatch(prepare, /const FEATURED_REV/);
 assert.match(sw, /v73-menu8/);
+assert.match(sw, /menu-morph1/,'service worker cache must be invalidated for the new visible morph');
 assert.match(sw, /planning-more1/);
 assert.match(sw, /v75-architecture2/);
 assert.match(sw, /retire-assets1/);
@@ -86,4 +95,4 @@ assert.ok(v73.items.some(item=>/lado direito|direita/i.test(item)));
 assert.ok(v73.items.some(item=>/swipe|gesto/i.test(item)));
 assert.ok(v73.items.some(item=>/cabeçalho|header/i.test(item)));
 
-console.log('v73 right-side drawer controller remains protected while retired v74/Featured assets stay out of the v76 distribution.');
+console.log('v76 two-line menu morph, right-side drawer controller and retired-asset boundaries: OK');
