@@ -47,6 +47,33 @@ assert.match(shell,/@media\(max-width:560px\)[\s\S]*\.bill-filter-grid,\.market-
 assert.match(shell,/@media\(max-width:390px\)[\s\S]*\.bill-summary-grid,\.market-summary-grid[\s\S]*grid-template-columns:minmax\(0,1fr\)!important/);
 assert.match(shell,/:is\(\.section-tab,\.nav-btn,\.icon-text-btn,\.sync-header-status\):focus-visible/);
 
+/* 76-page-polish1: as dez rotas recebem contratos explícitos de apresentação. */
+assert.match(shell,/76-page-polish1/);
+for(const page of [
+  'page-dashboard','page-bills','page-calendar','page-market','page-planning',
+  'page-reports','page-goals','page-security','page-diagnostics','page-settings'
+]){
+  assert.ok(shell.includes(`#${page}`),`page polish must cover ${page}`);
+}
+assert.match(shell,/--v76-page-gap:16px/);
+assert.match(shell,/--v76-panel-pad:18px/);
+assert.match(shell,/font-variant-numeric:tabular-nums/);
+assert.match(shell,/\.section-tabs \.section-tab\{[\s\S]*flex:1 1 0!important/);
+assert.match(shell,/:is\(\.bill-table,\.market-table\) thead th\{[\s\S]*position:sticky/);
+assert.match(shell,/#page-dashboard \.account-balance-kpi\{[\s\S]*min-height:166px!important/);
+assert.match(shell,/#page-bills \.bill-summary-item\{[\s\S]*min-height:96px!important/);
+assert.match(shell,/#page-calendar \.calendar-day\{[\s\S]*min-height:82px!important/);
+assert.match(shell,/#page-market \.market-visual-product-media\{[\s\S]*aspect-ratio:4\/3/);
+assert.match(shell,/#page-planning \.v75-budget-summary\{[\s\S]*min-height:146px!important/);
+assert.match(shell,/#page-reports #reportCards\{[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/);
+assert.match(shell,/#page-goals \.goal-grid\{[\s\S]*grid-template-columns:repeat\(auto-fit,minmax\(250px,1fr\)\)!important/);
+assert.match(shell,/:is\(#page-security,#page-diagnostics\) :is\(\.detail-item,\.security-item\)\{[\s\S]*min-height:82px!important/);
+assert.match(shell,/#page-settings #settingsForm\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
+assert.match(shell,/@media\(min-width:821px\)[\s\S]*max-width:1280px!important/);
+assert.match(shell,/@media\(max-width:820px\)[\s\S]*#page-reports #reportCards[\s\S]*repeat\(2,minmax\(0,1fr\)\)!important/);
+assert.match(shell,/@media\(max-width:560px\)[\s\S]*#page-reports #reportCards\{grid-template-columns:minmax\(0,1fr\)!important\}/);
+assert.doesNotMatch(shell,/\bzoom\s*:/i);
+
 assert.match(shell,/76-auth-hidden1/);
 assert.match(shell,/#vaultScreen\[hidden\],[\s\S]*#app\[hidden\]\{[\s\S]*display:none!important/,'hidden must remain authoritative even when auth CSS declares display:grid!important');
 assert.match(shell,/76-auth-transition1/);
@@ -67,7 +94,6 @@ assert.match(shell,/\.mobile-nav \.nav-btn\.active,[\s\S]*background:var\(--v76-
 assert.match(shell,/\.mobile-nav \.nav-btn:focus-visible\{[\s\S]*outline:3px solid/,'mobile nav keyboard focus must remain visible');
 assert.match(shell,/prefers-reduced-motion:reduce/);
 assert.match(shell,/forced-colors:active/);
-assert.doesNotMatch(shell,/\bzoom\s*:/i);
 
 assert.equal(pkg.version,'0.76.0-dev.1');
 assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui2'/);
@@ -77,6 +103,7 @@ assert.match(prepare,/v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile
 assert.match(sw,/modern-ui2/);
 assert.match(sw,/mobile-shell2/);
 assert.match(sw,/full-page-audit1/);
+assert.match(sw,/page-polish1/);
 assert.match(sw,/auth-transition1/);
 assert.match(sw,/auth-hidden1/);
 assert.ok(sw.includes("'./v76-mobile-shell.css'"));
@@ -92,6 +119,7 @@ try{
   assert.ok(fs.existsSync(path.join(dist,'v76-mobile-shell.css')));
   const builtShell=read('dist/v76-mobile-shell.css');
   assert.match(builtShell,/76-full-page-audit1/);
+  assert.match(builtShell,/76-page-polish1/);
   assert.match(builtShell,/#vaultScreen\[hidden\],[\s\S]*#app\[hidden\]/);
   assert.match(builtShell,/#vaultScreen:not\(\[hidden\]\) \+ #app/);
   assert.match(builtShell,/#vaultScreen #cdcWelcome\{[\s\S]*display:none!important/);
@@ -100,4 +128,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v76 full-page audit + mobile shell: AA contrast, overflow protection, responsive grids, safe areas, auth visibility and dock geometry: OK');
+console.log('v76 page polish + full-page audit + mobile shell: ten-route hierarchy, responsive density, AA contrast, overflow, safe areas and auth contracts: OK');
