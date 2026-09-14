@@ -1,11 +1,19 @@
 'use strict';
 
-/* Conta de Casa v75 — arquitetura e composição final alinhadas com o protótipo aprovado.
- * Esta camada reorganiza apenas apresentação, navegação e progressive disclosure.
- * Não altera cálculos, valores financeiros, IndexedDB, cifragem, pagamentos ou sincronização.
+/* Conta de Casa v76 — arquitetura final de apresentação sobre o runtime funcional.
+ * Esta camada é a autoridade para composição/navegação progressiva ainda não migrada
+ * para o núcleo. Não altera cálculos, valores financeiros, IndexedDB, cifragem,
+ * pagamentos, scanner, QR ou sincronização.
+ *
+ * 76-architecture-consolidation1:
+ * - deixa de depender de CDCV74;
+ * - passa a criar os seus próprios shells de Planeamento, Mais e Preferências;
+ * - torna a navegação desktop/drawer/mobile determinística numa única camada;
+ * - preserva os handlers funcionais existentes através de data-page/data-mobile.
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
+  const REVISION='76-architecture-consolidation1';
   const LABELS=Object.freeze({
     dashboard:['Início','Visão geral'],
     bills:['Despesas','Movimentos'],
@@ -22,6 +30,13 @@
     {label:'Principal',items:[['dashboard','Início','home'],['bills','Despesas','bill'],['market','Mercado','market'],['planning','Planeamento','plan']]},
     {label:'Análise',items:[['reports','Relatórios','report'],['goals','Metas de poupança','goal']]},
     {label:'Conta e sistema',items:[['security','Segurança e privacidade','shield'],['diagnostics','Diagnóstico','settings'],['settings','Mais','more']]}
+  ]);
+  const MOBILE_NAV=Object.freeze([
+    ['dashboard','Início','home'],
+    ['bills','Despesas','bill'],
+    ['market','Mercado','market'],
+    ['planning','Planeamento','plan'],
+    ['settings','Mais','more']
   ]);
   const MORE_GROUPS=Object.freeze([
     {label:'Organização',items:[['reports','Relatórios','report','Análise de despesas e evolução'],['goals','Metas de poupança','goal','Objetivos e progresso']]},
@@ -54,6 +69,17 @@
     if(page==='goals')return 'planning';
     if(page==='diagnostics'||page==='security')return 'settings';
     return page;
+  }
+
+  function selectedMonthKey(){
+    try{return String(selectedMonth||'');}catch(_error){return '';}
+  }
+
+  function monthLabel(){
+    const key=selectedMonthKey();
+    if(!/^\d{4}-\d{2}$/.test(key))return 'Mês atual';
+    const [year,month]=key.split('-').map(Number);
+    return new Intl.DateTimeFormat('pt-PT',{month:'long',year:'numeric'}).format(new Date(year,month-1,1)).replace(/^./,char=>char.toUpperCase());
   }
 
   function profileName(){
@@ -89,6 +115,25 @@
     return `<svg class="svg-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.settings}</svg>`;
   }
 
+  function dashboardMetrics(){
+    try{
+      if(typeof dashboardNumbers!=='function')return null;
+      const numbers=dashboardNumbers();
+      const spent=typeof sumCents==='function'
+        ? sumCents([numbers.paymentTotal||0,numbers.marketSpent||0])
+        : Number(numbers.paymentTotal||0)+Number(numbers.marketSpent||0);
+      const budget=Number(numbers.profile?.budgetCents||0);
+      const pct=budget>0?Math.max(0,Math.min(100,Math.round(spent/budget*100))):0;
+      const remaining=budget>0?Math.max(0,budget-spent):0;
+      return {spent,budget,pct,remaining,projected:Number(numbers.projected||0),current:Number(numbers.current||0)};
+    }catch(_error){return null;}
+  }
+
+  function categoryEntries(){
+    try{return typeof categoryTotals==='function'?categoryTotals().filter(entry=>Number(entry?.[1])>0):[];}
+    catch(_error){return [];}
+  }
+
   function syncPageChrome(){
     const page=currentPageId();
     document.documentElement.dataset.v75Page=page;
@@ -106,37 +151,46 @@
     return DRAWER_GROUPS.map(group=>`<div class="nav-group v75-nav-group"><p class="nav-group-label">${esc(group.label)}</p><div class="nav-group-items">${group.items.map(([page,label,iconName])=>`<button class="nav-btn" type="button" data-page="${attr(page)}" aria-label="${attr(label)}" title="${attr(label)}">${iconMarkup(iconName,20)}<span class="nav-label">${esc(label)}</span></button>`).join('')}</div></div>`).join('');
   }
 
+  function mobileNavHtml(){
+    return MOBILE_NAV.map(([page,label,iconName])=>`<button class="nav-btn" type="button" data-mobile="${attr(page)}" data-v76-primary="1" aria-label="${attr(label)}">${iconMarkup(iconName,22)}<span>${esc(label)}</span></button>`).join('');
+  }
+
   function syncNavigationArchitecture(){
-    const html=navGroupsHtml();
+    const groups=navGroupsHtml();
+    const groupSignature=DRAWER_GROUPS.map(group=>group.items.map(item=>item[0]).join(',')).join('|');
     for(const id of ['desktopNav','drawerNav']){
       const nav=byId(id);
       if(!nav)continue;
-      const signature=DRAWER_GROUPS.map(group=>group.items.map(item=>item[0]).join(',')).join('|');
-      if(nav.dataset.v75Architecture!==signature){nav.innerHTML=html;nav.dataset.v75Architecture=signature;}
+      if(nav.dataset.v76Architecture!==groupSignature){
+        nav.innerHTML=groups;
+        nav.dataset.v76Architecture=groupSignature;
+      }
     }
+
+    const mobile=byId('mobileNav');
+    const mobileSignature=MOBILE_NAV.map(item=>item[0]).join(',');
+    if(mobile){
+      const current=qa(':scope > [data-mobile]',mobile).map(button=>button.dataset.mobile).join(',');
+      if(current!==mobileSignature||mobile.dataset.v76Architecture!==mobileSignature){
+        mobile.innerHTML=mobileNavHtml();
+        mobile.dataset.v76Architecture=mobileSignature;
+      }
+      /* Transitional marker: while an older cached v74 runtime is still alive it
+         sees the canonical signature and does not rebuild the dock. */
+      mobile.dataset.v74Nav='1';
+    }
+
     const active=navParent(currentPageId());
     qa('.nav-btn[data-page]').forEach(button=>{
       const on=button.dataset.page===active;
       button.classList.toggle('active',on);
       if(on)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
     });
-    const labels={dashboard:'Início',bills:'Despesas',market:'Mercado',planning:'Planeamento',settings:'Mais'};
-    const mobile=byId('mobileNav');
-    if(mobile){
-      qa('[data-mobile]',mobile).forEach(button=>{
-        const label=labels[button.dataset.mobile];
-        if(!label)return;
-        const span=q('span',button);if(span&&span.textContent!==label)span.textContent=label;
-        button.setAttribute('aria-label',label);
-      });
-    }
-  }
-
-  function placeDashboardGreeting(){
-    if(!isMobile()||currentPageId()!=='dashboard')return;
-    const greeting=byId('cdcMobileGreeting');
-    const topbar=q('.topbar');
-    if(greeting&&topbar&&greeting.parentElement!==topbar)topbar.appendChild(greeting);
+    qa('#mobileNav [data-mobile]').forEach(button=>{
+      const on=button.dataset.mobile===active;
+      button.classList.toggle('active',on);
+      if(on)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
+    });
   }
 
   function moreItemHtml(action,label,iconName,description){
@@ -144,12 +198,35 @@
     return `<button type="button" class="v75-more-row" ${attrs}><span class="v75-more-icon">${iconMarkup(iconName,19)}</span><span><strong>${esc(label)}</strong><small>${esc(description||'')}</small></span><i aria-hidden="true">›</i></button>`;
   }
 
+  function ensureMoreShell(){
+    const page=byId('page-settings');
+    if(!page)return null;
+    let menu=byId('cdcMoreMenu');
+    if(!menu){
+      menu=document.createElement('section');
+      menu.id='cdcMoreMenu';
+      menu.className='cdc-more-menu';
+      page.insertAdjacentElement('afterbegin',menu);
+    }
+    const panel=q(':scope > .panel.narrow',page);
+    if(panel&&!panel.closest('#cdcPreferencesDetails')){
+      const details=document.createElement('details');
+      details.id='cdcPreferencesDetails';
+      details.className='cdc-preferences-details';
+      const summary=document.createElement('summary');
+      summary.textContent='Definições da aplicação';
+      panel.before(details);
+      details.append(summary,panel);
+    }
+    return menu;
+  }
+
   function moreArchitectureHtml(){
     return `<button type="button" class="cdc-profile-card v75-profile-card" data-v75-preferences><span class="cdc-avatar" aria-hidden="true">${esc(initials())}</span><div><strong>${esc(profileName())}</strong><small>Conta de Casa · cofre privado</small></div><i aria-hidden="true">›</i></button>${MORE_GROUPS.map(group=>`<section class="v75-more-group" aria-label="${attr(group.label)}"><h2>${esc(group.label)}</h2><div>${group.items.map(([action,label,iconName,description])=>moreItemHtml(action,label,iconName,description)).join('')}</div></section>`).join('')}`;
   }
 
   function renderMoreArchitecture(){
-    const rootNode=byId('cdcMoreMenu');
+    const rootNode=ensureMoreShell();
     if(!rootNode||!appReady())return;
     const signature=`${profileName()}|${MORE_GROUPS.length}`;
     if(rootNode.dataset.v75Architecture===signature)return;
@@ -157,25 +234,45 @@
     rootNode.dataset.v75Architecture=signature;
   }
 
-  function planningArchitectureHtml(){
-    const metrics=root.CDCV74?.dashboardMetrics?.();
-    const entries=root.CDCV74?.categoryEntries?.().slice(0,5)||[];
+  function ensurePlanningShell(){
+    const page=byId('page-planning');
+    const tabs=q('.section-tabs',page);
+    if(!page||!tabs)return null;
+    let rootNode=byId('cdcPlanningOverview');
+    if(!rootNode){
+      rootNode=document.createElement('section');
+      rootNode.id='cdcPlanningOverview';
+      rootNode.className='cdc-planning-overview v75-planning-overview';
+      tabs.insertAdjacentElement('afterend',rootNode);
+    }
+    return rootNode;
+  }
+
+  function planningMonthHtml(){
+    return `<div class="cdc-planning-month"><button type="button" data-v75-month-step="-1" aria-label="Mês anterior">‹</button><strong>${esc(monthLabel())}</strong><button type="button" data-v75-month-step="1" aria-label="Mês seguinte">›</button></div>`;
+  }
+
+  function planningArchitectureHtml(metrics,entries){
     if(!metrics)return '';
     const total=entries.reduce((sum,entry)=>sum+Number(entry[1]||0),0)||1;
     const budgetLabel=metrics.budget>0?moneyText(metrics.budget):'Por definir';
     const remainingLabel=metrics.budget>0?moneyText(metrics.remaining):'—';
-    const month=q('#cdcPlanningOverview .cdc-planning-month')?.outerHTML||'';
-    return `${month}<section class="v75-budget-summary" aria-label="Resumo do orçamento"><div class="cdc-budget-ring" style="--pct:${metrics.pct}"><div><strong>${metrics.pct}%</strong><span data-money>${moneyText(metrics.spent)}</span><small>de ${budgetLabel}</small></div></div><div class="v75-budget-metrics"><div><small>Gasto este mês</small><strong data-money>${moneyText(metrics.spent)}</strong></div><div><small>Orçamento</small><strong data-money>${budgetLabel}</strong></div><div><small>Disponível</small><strong data-money>${remainingLabel}</strong></div></div></section><div class="v75-section-heading"><strong>Despesas por categoria</strong><small>${entries.length?'Distribuição do mês':'Sem movimentos neste mês'}</small></div><div class="cdc-planning-categories">${entries.map(([name,value],index)=>{const pct=Math.round(Number(value||0)/total*100);return `<div><span class="cdc-category-dot ${['food','home','transport','health','other'][index%5]}" aria-hidden="true"></span><strong>${esc(name)}</strong><span class="cdc-plan-track"><i style="width:${Math.max(5,pct)}%"></i></span><b data-money>${moneyText(value)}</b></div>`;}).join('')||'<p class="cdc-empty-note">Ainda não existem despesas para distribuir.</p>'}</div>`;
+    return `${planningMonthHtml()}<section class="v75-budget-summary" aria-label="Resumo do orçamento"><div class="cdc-budget-ring" style="--pct:${metrics.pct}"><div><strong>${metrics.pct}%</strong><span data-money>${moneyText(metrics.spent)}</span><small>de ${budgetLabel}</small></div></div><div class="v75-budget-metrics"><div><small>Gasto este mês</small><strong data-money>${moneyText(metrics.spent)}</strong></div><div><small>Orçamento</small><strong data-money>${budgetLabel}</strong></div><div><small>Disponível</small><strong data-money>${remainingLabel}</strong></div></div></section><div class="v75-section-heading"><strong>Despesas por categoria</strong><small>${entries.length?'Distribuição do mês':'Sem movimentos neste mês'}</small></div><div class="cdc-planning-categories">${entries.map(([name,value],index)=>{const pct=Math.round(Number(value||0)/total*100);return `<div><span class="cdc-category-dot ${['food','home','transport','health','other'][index%5]}" aria-hidden="true"></span><strong>${esc(name)}</strong><span class="cdc-plan-track"><i style="width:${Math.max(5,pct)}%"></i></span><b data-money>${moneyText(value)}</b></div>`;}).join('')||'<p class="cdc-empty-note">Ainda não existem despesas para distribuir.</p>'}</div>`;
   }
 
   function renderPlanningArchitecture(){
-    const rootNode=byId('cdcPlanningOverview');
+    const rootNode=ensurePlanningShell();
     if(!rootNode||!appReady())return;
-    const metrics=root.CDCV74?.dashboardMetrics?.();
-    const key=`${metrics?.spent||0}|${metrics?.budget||0}|${root.CDCV74?.categoryEntries?.().length||0}`;
+    const metrics=dashboardMetrics();
+    const entries=categoryEntries().slice(0,5);
+    const key=`${selectedMonthKey()}|${metrics?.spent||0}|${metrics?.budget||0}|${entries.map(entry=>`${entry[0]}:${entry[1]}`).join(',')}`;
     if(rootNode.dataset.v75Key===key)return;
-    const html=planningArchitectureHtml();
-    if(html){rootNode.innerHTML=html;rootNode.dataset.v75Key=key;rootNode.classList.add('v75-planning-overview');}
+    const html=planningArchitectureHtml(metrics,entries);
+    if(html){
+      rootNode.innerHTML=html;
+      rootNode.dataset.v75Key=key;
+      rootNode.classList.add('v75-planning-overview');
+    }
   }
 
   function ensureBillTabs(form){
@@ -228,9 +325,25 @@
   }
 
   function handlePreferences(){
-    const details=byId('cdcPreferencesDetails');
-    if(details){details.open=true;setTimeout(()=>details.scrollIntoView({block:'start',behavior:'smooth'}),20);return;}
-    if(typeof showPage==='function')showPage('settings');
+    if(typeof showPage==='function'&&currentPageId()!=='settings')showPage('settings');
+    setTimeout(()=>{
+      const details=byId('cdcPreferencesDetails');
+      if(!details)return;
+      details.open=true;
+      details.scrollIntoView({block:'start',behavior:root.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?'auto':'smooth'});
+    },30);
+  }
+
+  function stepMonth(delta){
+    const key=selectedMonthKey();
+    if(!/^\d{4}-\d{2}$/.test(key))return;
+    const [year,month]=key.split('-').map(Number);
+    const next=new Date(year,month-1+Number(delta||0),1);
+    const value=`${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}`;
+    const picker=byId('monthPicker');
+    if(!picker)return;
+    picker.value=value;
+    picker.dispatchEvent(new Event('change',{bubbles:true}));
   }
 
   function setBillMode(mode){
@@ -248,7 +361,6 @@
     syncNavigationArchitecture();
     syncScannerState();
     if(!appReady())return;
-    placeDashboardGreeting();
     renderMoreArchitecture();
     renderPlanningArchitecture();
     syncBillDialog();
@@ -263,9 +375,12 @@
 
   function start(){
     document.documentElement.classList.add('cdc-v75');
+    document.documentElement.dataset.v76Architecture=REVISION;
     document.addEventListener('click',event=>{
       const mode=event.target.closest?.('[data-v75-bill-mode]');
       if(mode){event.preventDefault();setBillMode(mode.dataset.v75BillMode);schedule();return;}
+      const monthStep=event.target.closest?.('[data-v75-month-step]');
+      if(monthStep){event.preventDefault();stepMonth(monthStep.dataset.v75MonthStep);schedule();return;}
       const go=event.target.closest?.('[data-v75-go]');
       if(go){event.preventDefault();if(typeof showPage==='function')showPage(go.dataset.v75Go);schedule();return;}
       if(event.target.closest?.('[data-v75-sync]')){event.preventDefault();handleSync();schedule();return;}
@@ -283,5 +398,7 @@
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-  root.CDCV75=Object.freeze({VERSION:'v75',LABELS,DRAWER_GROUPS,MORE_GROUPS});
+  root.CDCV75=Object.freeze({VERSION:'v75',REVISION,LABELS,DRAWER_GROUPS,MOBILE_NAV:MobileNavSnapshot(),MORE_GROUPS});
+
+  function MobileNavSnapshot(){return MOBILE_NAV.map(item=>item[0]);}
 })(typeof window!=='undefined'?window:globalThis);
