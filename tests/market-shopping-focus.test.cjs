@@ -45,9 +45,10 @@ assert.match(architecture,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.n
 assert.match(architecture,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'v76 architecture must keep compact product cards where that component is used');
 assert.match(planningMore,/76-planning-more1/);
 
-assert.equal(manifest.latestVersion,'v75');
+assert.equal(manifest.latestVersion,'v76');
+assert.equal(manifest.releases[0]?.version,'v76');
 const v65=manifest.releases.find(release=>release.version==='v65');
-assert.ok(v65,'v65 shopping behavior must remain documented after v75');
+assert.ok(v65,'v65 shopping behavior must remain documented after v76');
 assert.ok(v65.items.some(item=>/Lista de compras/i));
 assert.ok(v65.items.some(item=>/por comprar/i));
 assert.ok(v65.items.some(item=>/comprados/i));
@@ -61,9 +62,11 @@ assert.match(sw,/v74-shopping2/);
 assert.match(sw,/v73-menu8/);
 assert.match(sw,/planning-more1/);
 assert.match(sw,/v75-architecture2/);
+assert.match(sw,/v76-version-alignment1/);
 assert.match(sw,/retire-v74-runtime1/);
 assert.match(sw,/retire-assets1/);
-assert.match(prepare,/const BUILD = 'v75'/);
+assert.match(prepare,/const BUILD = 'v76'/);
+assert.match(prepare,/const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
@@ -75,6 +78,7 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
+  assert.match(index,/name="app-build" content="v76"/);
   assert.doesNotMatch(index,/v64-runtime\.css/);
   assert.match(index,/market-shopping-focus\.css\?v=74-shopping2/);
   assert.match(index,/market-shopping-focus\.js\?v=74-shopping2/);
@@ -97,4 +101,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Mobile shopping focus preserved with v76 architecture and retired v74/Featured sources removed from repository/distribution: OK');
+console.log('Mobile shopping focus preserved with official v76 release and retired v74/Featured sources removed from repository/distribution: OK');
