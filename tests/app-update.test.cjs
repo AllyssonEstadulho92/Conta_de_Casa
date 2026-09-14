@@ -18,7 +18,6 @@ const shoppingCss = read('market-shopping-focus.css');
 const menuJs = read('mobile-menu-toggle.js');
 const menuCss = read('mobile-menu-toggle.css');
 const experienceJs = read('v74-experience.js');
-const experienceCss = read('v74-experience.css');
 const planningMore = read('v76-planning-more.css');
 const architectureJs = read('v75-architecture.js');
 const architectureCss = read('v75-architecture.css');
@@ -85,9 +84,8 @@ assert.match(shoppingJs,/Conta de Casa v65/);
 assert.match(shoppingCss,/Conta de Casa v74/);
 assert.match(menuJs,/Conta de Casa v73/);
 assert.match(menuCss,/Conta de Casa v73/);
-assert.match(experienceJs,/Conta de Casa v74/,'historical source remains in repository only');
-assert.match(experienceCss,/76-retire-v74-css-behavior1/);
-assert.doesNotMatch(experienceCss,/\{[^}]*\}/);
+assert.match(experienceJs,/Conta de Casa v74/,'historical runtime source remains in repository only');
+for(const retiredSource of ['v74-experience.css','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(ROOT,retiredSource)),`${retiredSource} must be physically deleted`);
 assert.match(planningMore,/76-planning-more1/);
 assert.match(architectureJs,/Conta de Casa v76/);
 assert.match(architectureJs,/76-architecture-consolidation1/);
@@ -198,4 +196,4 @@ try {
   fs.rmSync(dist, { recursive:true, force:true });
 }
 
-console.log(`Version metadata ${packageJson.version}, controlled updates and physically retired v74/Featured distribution: OK`);
+console.log(`Version metadata ${packageJson.version}, controlled updates and physically retired v74/Featured sources: OK`);

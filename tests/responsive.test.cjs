@@ -9,7 +9,6 @@ const ROOT=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const legacyCss=read('styles.css');
 const designCss=read('design-system.css');
-const experienceCss=read('v74-experience.css');
 const planningMore=read('v76-planning-more.css');
 const architectureCss=read('v75-architecture.css');
 const menuCss=read('mobile-menu-toggle.css');
@@ -19,6 +18,8 @@ const index=read('index.html');
 const render=read('render.js');
 const sw=read('sw.js');
 const prepare=read('scripts/prepare-pages.cjs');
+
+for(const retiredSource of ['v74-experience.css','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(ROOT,retiredSource)),`${retiredSource} must be physically deleted`);
 
 assert.match(designCss,/Conta de Casa v74 — sistema visual consolidado/);
 assert.match(designCss,/--content-max:1480px/);
@@ -35,9 +36,6 @@ assert.match(designCss,/\.mobile-menu-btn\{width:44px!important;[\s\S]*height:44
 assert.match(designCss,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/);
 assert.match(designCss,/\.mobile-nav \.nav-btn\.active::before\{background:var\(--primary\)!important\}/);
 assert.match(designCss,/prefers-reduced-motion:reduce/);
-
-assert.match(experienceCss,/76-retire-v74-css-behavior1/);
-assert.doesNotMatch(experienceCss,/\{[^}]*\}/,'retired v74 stylesheet source must contain no visual rule blocks');
 
 assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-more1/i);
 assert.match(planningMore,/@media\(max-width:820px\)/);
@@ -134,4 +132,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Responsive v76 architecture, safe areas and five-destination navigation survive physical retirement of v74/Featured assets: OK');
+console.log('Responsive v76 architecture, safe areas and five-destination navigation survive physical retirement of v74/Featured sources: OK');

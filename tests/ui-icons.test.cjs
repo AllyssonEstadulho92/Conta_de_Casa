@@ -1,10 +1,11 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
+const path=require('node:path');
 
+const ROOT=path.resolve(__dirname,'..');
 const js=fs.readFileSync('ui-icons.js','utf8');
 const css=fs.readFileSync('ui-icons.css','utf8');
 const design=fs.readFileSync('design-system.css','utf8');
-const experience=fs.readFileSync('v74-experience.css','utf8');
 const planningMore=fs.readFileSync('v76-planning-more.css','utf8');
 const architecture=fs.readFileSync('v75-architecture.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
@@ -15,6 +16,8 @@ const publicFilesStart=pages.indexOf('const PUBLIC_FILES');
 const publicFilesEnd=pages.indexOf(']);',publicFilesStart);
 const publicFilesBlock=pages.slice(publicFilesStart,publicFilesEnd+3);
 const license=fs.readFileSync('LUCIDE_LICENSE.txt','utf8');
+
+for(const retiredSource of ['v74-experience.css','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(ROOT,retiredSource)),`${retiredSource} must be physically deleted`);
 
 assert.match(js,/LUCIDE_SOURCE_COMMIT='94e4cb9d9db5907053ebf3636a97c45529cf776b'/,'Lucide source snapshot must be pinned and auditable');
 assert.match(js,/Object\.assign\(ICONS,LUCIDE_ICONS\)/,'Lucide registry must extend the existing application registry without changing callers');
@@ -65,8 +68,6 @@ assert.match(design,/safe-area-inset-top/);
 assert.match(design,/position:fixed!important/);
 assert.match(design,/\.mobile-nav \.nav-btn\.active::before[\s\S]*background:var\(--primary\)!important/);
 assert.doesNotMatch(design,/\.mobile-nav \.nav-btn\.active::after[\s\S]*background:/);
-assert.match(experience,/76-retire-v74-css-behavior1/);
-assert.doesNotMatch(experience,/\{[^}]*\}/,'retired v74 stylesheet must not own icon presentation');
 assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-more1/i);
 assert.match(architecture,/Conta de Casa v75/);
 assert.match(architecture,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/);
@@ -107,4 +108,4 @@ assert.doesNotMatch(sw,/['"]\.\/v64-runtime\.css['"]/);
 assert.match(sw,/planning-more1/);
 assert.match(sw,/retire-assets1/);
 
-console.log('Conta de Casa brand mark and Lucide UI icon authority remain valid with retired assets excluded from distribution: OK');
+console.log('Conta de Casa brand mark and Lucide UI icon authority remain valid with retired sources physically absent: OK');

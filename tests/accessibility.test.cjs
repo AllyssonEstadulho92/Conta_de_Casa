@@ -2,10 +2,11 @@
 
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
+const path=require('node:path');
 
+const ROOT=path.resolve(__dirname,'..');
 const design=fs.readFileSync('design-system.css','utf8');
 const base=fs.readFileSync('styles.css','utf8');
-const experience=fs.readFileSync('v74-experience.css','utf8');
 const architecture=fs.readFileSync('v75-architecture.css','utf8');
 const planningMore=fs.readFileSync('v76-planning-more.css','utf8');
 const menu=fs.readFileSync('mobile-menu-toggle.css','utf8');
@@ -13,6 +14,8 @@ const css=`${base}\n${design}\n${architecture}\n${planningMore}\n${menu}`;
 const render=fs.readFileSync('render.js','utf8');
 const events=fs.readFileSync('events.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
+
+for(const retiredSource of ['v74-experience.css','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(ROOT,retiredSource)),`${retiredSource} must be physically deleted`);
 
 function tokens(block){return Object.fromEntries([...block.matchAll(/--([a-z0-9-]+):#([0-9a-f]{6})/gi)].map(match=>[match[1],match[2]]));}
 function luminance(hex){const values=hex.match(/../g).map(part=>parseInt(part,16)/255).map(value=>value<=.03928?value/12.92:((value+.055)/1.055)**2.4);return .2126*values[0]+.7152*values[1]+.0722*values[2];}
@@ -70,8 +73,6 @@ assert.match(index,/id="billsList"[\s\S]*aria-live="polite"/);
 assert.match(index,/id="accountBalanceInfo"[\s\S]*aria-live="polite"/);
 assert.match(index,/id="toast"[\s\S]*role="status" aria-live="polite"/);
 
-assert.match(experience,/76-retire-v74-css-behavior1/);
-assert.doesNotMatch(experience,/\{[^}]*\}/,'retired v74 CSS source must remain rule-free');
 assert.match(planningMore,/76-planning-more1/);
 assert.match(planningMore,/\.cdc-planning-overview/);
 assert.match(planningMore,/\.cdc-more-menu/);
@@ -80,4 +81,4 @@ assert.match(architecture,/\.v75-more-group/);
 assert.match(architecture,/\.v75-budget-summary/);
 assert.doesNotMatch(css,/pointer-events:none!important;[^}]*\.cdc-quick-action/);
 
-console.log('Accessibility contrast, focus, touch targets, semantic state and mobile safe-area tests for v76: OK');
+console.log('Accessibility contrast, focus, touch targets, semantic state and mobile safe-area tests for v76 with retired sources absent: OK');

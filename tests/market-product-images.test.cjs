@@ -7,7 +7,6 @@ const barcode=fs.readFileSync('market-barcode.js','utf8');
 const render=fs.readFileSync('render.js','utf8');
 const css=fs.readFileSync('ui-icons.css','utf8');
 const brandCss=fs.readFileSync('market-brand.css','utf8');
-const experienceCss=fs.readFileSync('v74-experience.css','utf8');
 const architectureCss=fs.readFileSync('v75-architecture.css','utf8');
 const architectureJs=fs.readFileSync('v75-architecture.js','utf8');
 const planningMore=fs.readFileSync('v76-planning-more.css','utf8');
@@ -17,6 +16,10 @@ const runtime=fs.readFileSync('v64-runtime.js','utf8');
 const imageAudit=fs.readFileSync('market-image-audit.js','utf8');
 const officialBridge=fs.readFileSync('market-official-images.js','utf8');
 const retailerPolicy=fs.readFileSync('market-retailer-image-policy.js','utf8');
+
+assert.ok(!fs.existsSync('v74-experience.css'),'retired v74 CSS source must be deleted');
+assert.ok(!fs.existsSync('v75-market-featured.css'),'retired Featured CSS source must be deleted');
+assert.ok(!fs.existsSync('v75-market-featured.js'),'retired Featured runtime source must be deleted');
 
 assert.match(core,/function safeProductImageUrl/);
 assert.match(core,/url\.hostname\.toLowerCase\(\) !== 'images\.openfoodfacts\.org'/);
@@ -65,8 +68,6 @@ assert.match(css,/\.market-product-photo img/);
 assert.match(css,/object-fit:contain/);
 assert.match(brandCss,/fotografias[\s\S]*verificadas/);
 assert.match(brandCss,/\.market-product-photo[\s\S]*display:grid!important/);
-assert.match(experienceCss,/76-retire-v74-css-behavior1/);
-assert.doesNotMatch(experienceCss,/\{[^}]*\}/,'retired v74 CSS source must not control product images');
 assert.match(planningMore,/76-planning-more1/);
 assert.match(architectureCss,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/);
 assert.match(architectureCss,/\.cdc-product-image img[\s\S]*object-fit:contain!important/,'current architecture must preserve uncropped verified product photos');
@@ -88,4 +89,4 @@ assert.match(sw,/\.\/v75-architecture\.js/);
 assert.match(runtime,/productCode=scan\.code/);
 assert.doesNotMatch(runtime,/imageUrl\s*=/);
 
-console.log('Market real/official images remain isolated under v76 with retired v74/Featured assets excluded from distribution: OK');
+console.log('Market real/official images remain isolated after deleting retired v74/Featured sources: OK');
