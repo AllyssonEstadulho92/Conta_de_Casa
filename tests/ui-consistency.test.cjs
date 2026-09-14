@@ -11,7 +11,6 @@ const design=read('design-system.css');
 const marketBrand=read('market-brand.css');
 const shopping=read('market-shopping-focus.css');
 const experience=read('v74-experience.js');
-const experienceCss=read('v74-experience.css');
 const planningMore=read('v76-planning-more.css');
 const architecture=read('v75-architecture.js');
 const architectureCss=read('v75-architecture.css');
@@ -37,11 +36,8 @@ assert.match(design,/position:fixed!important/);
 assert.match(design,/\.ui-icon-svg,\.svg-icon\{[\s\S]*stroke-width:2!important/);
 assert.match(design,/prefers-reduced-motion:reduce/);
 
-/* v74 experience permanece apenas como fonte histórica, sem regras. */
-assert.match(experienceCss,/76-retire-v74-css-behavior1/);
-assert.doesNotMatch(experienceCss,/\{[^}]*\}/,'v74 experience stylesheet must no longer own presentation');
+for(const retiredSource of ['v74-experience.css','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(ROOT,retiredSource)),`${retiredSource} must be physically deleted`);
 
-/* Planeamento/Mais têm autoridade v76 explícita. */
 assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-more1/i);
 for(const marker of ['.cdc-empty-note','.cdc-avatar','.cdc-category-dot','.cdc-planning-overview','.cdc-budget-ring','.cdc-plan-track','.cdc-more-menu','.cdc-preferences-details'])assert.ok(planningMore.includes(marker));
 assert.match(planningMore,/@media\(max-width:820px\)/);
@@ -155,4 +151,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Conta de Casa UI consistency: v76 owns presentation/runtime composition and retired v74/Featured assets do not ship.');
+console.log('Conta de Casa UI consistency: v76 owns presentation/runtime composition and retired v74/Featured sources are physically absent.');
