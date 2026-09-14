@@ -22,6 +22,10 @@
  * 76-mobile-label-fit1:
  * - a rota continua a chamar-se Planeamento; apenas o label do dock passa a “Plano”
  *   para evitar truncamento em iPhones estreitos sem reduzir a legibilidade.
+ *
+ * 76-prototype-planning1:
+ * - orçamento inexistente deixa de ser apresentado como 0%;
+ * - Mais separa Conta e dados, Segurança e Aplicação em responsabilidades claras.
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
@@ -52,7 +56,8 @@
   ]);
   const MORE_GROUPS=Object.freeze([
     {label:'Organização',items:[['reports','Relatórios','report','Análise de despesas e evolução'],['goals','Metas de poupança','goal','Objetivos e progresso']]},
-    {label:'Conta e dados',items:[['sync','Sincronização','sync','Estado entre dispositivos'],['security','Segurança e privacidade','shield','Cofre, backup e proteção'],['diagnostics','Diagnóstico e integridade','settings','Verificações técnicas']]},
+    {label:'Conta e dados',items:[['sync','Sincronização','sync','Estado entre dispositivos']]},
+    {label:'Segurança',items:[['security','Segurança e privacidade','shield','Cofre, backup e proteção'],['diagnostics','Diagnóstico e integridade','settings','Verificações técnicas']]},
     {label:'Aplicação',items:[['theme','Aparência','theme','Claro, escuro ou sistema'],['preferences','Definições da aplicação','settings','Nome, moeda e preferências']]}
   ]);
 
@@ -264,9 +269,14 @@
   function planningArchitectureHtml(metrics,entries){
     if(!metrics)return '';
     const total=entries.reduce((sum,entry)=>sum+Number(entry[1]||0),0)||1;
-    const budgetLabel=metrics.budget>0?moneyText(metrics.budget):'Por definir';
-    const remainingLabel=metrics.budget>0?moneyText(metrics.remaining):'—';
-    return `${planningMonthHtml()}<section class="v75-budget-summary" aria-label="Resumo do orçamento"><div class="cdc-budget-ring" style="--pct:${metrics.pct}"><div><strong>${metrics.pct}%</strong><span data-money>${moneyText(metrics.spent)}</span><small>de ${budgetLabel}</small></div></div><div class="v75-budget-metrics"><div><small>Gasto este mês</small><strong data-money>${moneyText(metrics.spent)}</strong></div><div><small>Orçamento</small><strong data-money>${budgetLabel}</strong></div><div><small>Disponível</small><strong data-money>${remainingLabel}</strong></div></div></section><div class="v75-section-heading"><strong>Despesas por categoria</strong><small>${entries.length?'Distribuição do mês':'Sem movimentos neste mês'}</small></div><div class="cdc-planning-categories">${entries.map(([name,value],index)=>{const pct=Math.round(Number(value||0)/total*100);return `<div><span class="cdc-category-dot ${['food','home','transport','health','other'][index%5]}" aria-hidden="true"></span><strong>${esc(name)}</strong><span class="cdc-plan-track"><i style="width:${Math.max(5,pct)}%"></i></span><b data-money>${moneyText(value)}</b></div>`;}).join('')||'<p class="cdc-empty-note">Ainda não existem despesas para distribuir.</p>'}</div>`;
+    const hasBudget=metrics.budget>0;
+    const budgetLabel=hasBudget?moneyText(metrics.budget):'Por definir';
+    const remainingLabel=hasBudget?moneyText(metrics.remaining):'—';
+    const ringClass=hasBudget?'':' is-unset';
+    const ringValue=hasBudget?`${metrics.pct}%`:'—';
+    const ringDetail=hasBudget?`<span data-money>${moneyText(metrics.spent)}</span><small>de ${budgetLabel}</small>`:'<span>Por definir</span><small>Defina um orçamento mensal</small>';
+    const ringLabel=hasBudget?`Orçamento usado: ${metrics.pct}%`:'Orçamento mensal por definir';
+    return `${planningMonthHtml()}<section class="v75-budget-summary" aria-label="Resumo do orçamento"><div class="cdc-budget-ring${ringClass}" style="--pct:${hasBudget?metrics.pct:0}" aria-label="${attr(ringLabel)}"><div><strong>${ringValue}</strong>${ringDetail}</div></div><div class="v75-budget-metrics"><div><small>Gasto este mês</small><strong data-money>${moneyText(metrics.spent)}</strong></div><div><small>Orçamento</small><strong${hasBudget?' data-money':''}>${budgetLabel}</strong></div><div><small>Disponível</small><strong${hasBudget?' data-money':''}>${remainingLabel}</strong></div></div></section><div class="v75-section-heading"><strong>Despesas por categoria</strong><small>${entries.length?'Distribuição do mês':'Sem movimentos neste mês'}</small></div><div class="cdc-planning-categories">${entries.map(([name,value],index)=>{const pct=Math.round(Number(value||0)/total*100);return `<div><span class="cdc-category-dot ${['food','home','transport','health','other'][index%5]}" aria-hidden="true"></span><strong>${esc(name)}</strong><span class="cdc-plan-track"><i style="width:${Math.max(5,pct)}%"></i></span><b data-money>${moneyText(value)}</b></div>`;}).join('')||'<p class="cdc-empty-note">Ainda não existem despesas para distribuir.</p>'}</div>`;
   }
 
   function renderPlanningArchitecture(){
