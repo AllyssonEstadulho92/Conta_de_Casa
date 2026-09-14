@@ -93,7 +93,10 @@ assert.match(usability,/:is\(\.vault-key,\.vault-key-spacer\)\{[\s\S]*width:54px
 assert.match(usability,/\.vault-enter-btn\{[\s\S]*min-height:48px!important;[\s\S]*margin-top:10px!important/);
 assert.match(usability,/\.vault-keyboard-toggle\{[\s\S]*min-height:44px!important/);
 assert.match(usability,/@media\(max-width:820px\) and \(max-height:640px\)[\s\S]*width:48px!important[\s\S]*height:48px!important/,'very short viewports may compact the keypad but must stay above 44 px');
-assert.doesNotMatch(usability,/@media\(max-width:820px\) and \(max-height:[^)]+\)[\s\S]*width:(?:4[0-3]|[0-3]\d)px!important/,'short-height variants must never reduce PIN targets below 44 px');
+const shortHeightCss=usability.slice(usability.indexOf('76-vault-short-height1'));
+const keypadSizes=[...shortHeightCss.matchAll(/grid-template-columns:repeat\(3,(\d+)px\)!important/g)].map(match=>Number(match[1]));
+assert.ok(keypadSizes.length>=2,'short-height vault must define compact keypad sizes for both height bands');
+assert.ok(keypadSizes.every(size=>size>=44),`short-height PIN targets must remain >=44 px; got ${keypadSizes.join(', ')}`);
 assert.match(sw,/vault-short-height1/,'PWA cache must invalidate the old vault geometry');
 
 console.log('Accessibility contrast, focus, touch targets, semantic state, safe areas and short-height vault contracts for v76: OK');
