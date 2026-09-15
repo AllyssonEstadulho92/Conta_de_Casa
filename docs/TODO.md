@@ -17,16 +17,20 @@ Atualizado: 15 de setembro de 2026
 - [x] PIN local abre aplicação sem depender de sync.
 - [x] `[hidden]` impede cofre e shell simultâneos.
 - [x] Formulário de despesa mobile usa um único scroll owner após PR #132.
-- [x] `76-vault-short-height1`: compactação para alturas curtas mantendo targets >=44 px.
-- [x] PR #150 / `76-auth-ios-spacing2`: usar `100svh`, topo seguro e remover margem vertical automática do cartão no mobile.
-- [x] PR #150: densidade progressiva do keypad 58/54/48 px para alturas <=900/780/640 px.
-- [x] PR #150: regressão de acessibilidade protege `100svh`, safe areas, densidade e piso tátil.
-- [x] PR #150: token técnico `auth-ios-spacing2` invalida a geometria antiga da PWA.
-- [x] PR #150: TypeScript Foundation PR `34961244599` e CI PR `34961244608` verdes.
-- [x] PR #150: merge `a140211813f2194926b2cbd5bde7c53a8798b140`.
-- [x] PR #150: TypeScript Foundation `main` `34961349276`, CI `main` `34961349248` e Pages `34961403315` verdes.
-- [ ] Confirmar PR #150 no mesmo iPhone/Safari web com barras do browser abertas e recolhidas.
-- [ ] Confirmar PR #150 na PWA instalada após atualização do cache.
+- [x] PR #150 introduziu `100svh`, safe areas e topo seguro para Safari/iOS.
+- [x] PR #152 / `76-auth-prototype-final1`: substituir as camadas visuais `76-vault-short-height1` + `76-auth-ios-spacing2` por uma única autoridade do cofre.
+- [x] PR #152: keypad mobile 56 px com gaps 30/16 px conforme protótipo aprovado.
+- [x] PR #152: fallback `<=359px` em 52 px / gaps 24/13 px.
+- [x] PR #152: fallback de altura `<=720px` em 50 px / gaps 22/9 px.
+- [x] PR #152: todos os targets essenciais permanecem >=44 px.
+- [x] PR #152: transferência de cofre passa a superfície própria e CTA Entrar mantém hierarquia principal.
+- [x] PR #152: regressões de acessibilidade/estabilidade atualizadas para a nova autoridade única.
+- [x] PR #152: token técnico `auth-prototype-final1` invalida a apresentação anterior da PWA.
+- [x] PR #152: TypeScript Foundation PR `34977687455` e CI PR `34977687437` verdes.
+- [x] PR #152: merge `ceaa4fc8a79cbb2ad442854ffaacd501dac7313f`.
+- [x] PR #152: TypeScript Foundation `main` `34977780423`, CI `main` `34977780342` e Pages `34977846729` verdes.
+- [ ] Confirmar `76-auth-prototype-final1` no mesmo iPhone/Safari web após atualização do cache.
+- [ ] Confirmar o mesmo layout na PWA instalada.
 - [ ] Validar portrait/landscape e teclado virtual no cofre.
 - [ ] Criar E2E WebKit/Chromium para PIN → Dashboard → drawer → Despesas → Adicionar → Manual/Imagem/QR → fechar/guardar.
 
