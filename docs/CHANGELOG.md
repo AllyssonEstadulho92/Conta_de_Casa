@@ -2,6 +2,50 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-15 — PR #154 / `76-auth-exclusive-state1` — estados exclusivos do cofre — publicado
+
+### Problema confirmado no dispositivo
+
+A captura real do iPhone/Safari após o PR #152 mostrou **Criar cofre local** e **Introduza o seu PIN** renderizados simultaneamente, tornando o ecrã excessivamente comprido e incoerente.
+
+### Causa confirmada
+
+- `events.js` já selecionava corretamente um único estado através de `idbGet('meta','vault')`;
+- quando existia metadata local, `#vaultCreate.hidden=true` e `#vaultUnlock.hidden=false` estavam corretos;
+- porém `v75-usability.css` declarava `#vaultCreate{display:grid!important}`;
+- a especificidade dessa regra conseguia sobrepor visualmente a regra genérica `[hidden]{display:none!important}`.
+
+### Correção
+
+- mantém `76-auth-prototype-final1` como única autoridade visual do cofre;
+- adiciona `76-auth-exclusive-state1` como contrato dentro da mesma folha, sem criar outra camada CSS;
+- `#vaultScreen[hidden]`, `#vaultCreate[hidden]`, `#vaultUnlock[hidden]` e painéis internos relevantes recebem `display:none!important` com especificidade suficiente;
+- criação e desbloqueio deixam de poder aparecer simultaneamente;
+- keypad, espaçamentos, `100svh`, safe areas, dark mode, `forced-colors`, `prefers-reduced-motion` e targets >=44 px permanecem inalterados;
+- `tests/accessibility.test.cjs` passa a proteger tanto a regra visual de exclusividade como a decisão funcional de `events.js`;
+- Service Worker recebe apenas o token técnico `auth-exclusive-state1` para invalidar o CSS antigo da PWA.
+
+### Evidência
+
+- head final PR #154: `eb8c7c3d165685776a863720ebfc2981efa80bef`;
+- TypeScript Foundation PR `35003057035`: sucesso;
+- CI PR `35003057086`: sucesso integral;
+- merge: `2594ba1c1a3f4f2cabbcf5c92e2cdd5a8f28734c`;
+- TypeScript Foundation `main` `35003207253`: sucesso;
+- CI `main` `35003207139`: sucesso integral;
+- Deploy Pages `35003264802`: sucesso.
+
+### Preservado
+
+Sem alteração de PIN, palavra-passe, `createVault()`, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync, `STATE_VERSION`, dados financeiros, QR, scanner, Mercado, release `v76` ou versão `0.76.0`.
+
+### Pendente
+
+- confirmar no mesmo iPhone/Safari e PWA instalada que, com cofre existente, aparece apenas **Introduza o seu PIN**;
+- confirmar num perfil sem cofre que aparece apenas **Criar cofre local**.
+
+---
+
 ## 2026-09-15 — PR #152 / `76-auth-prototype-final1` — protótipo final do PIN — publicado
 
 ### Problema confirmado no dispositivo
@@ -245,6 +289,7 @@ A validação física mostrou que a faixa horizontal herdada de filtros produzia
 ## Decisões de continuidade
 
 - regressão real em dispositivo tem prioridade sobre teste legado;
+- `hidden` é autoridade tanto entre cofre/shell como entre criação/desbloqueio do próprio cofre;
 - `icon.svg` é marca; Lucide é iconografia funcional;
 - protótipos definem hierarquia, não autorizam domínio inventado;
 - auth móvel tem uma única autoridade visual, usa viewport útil/safe areas e mantém targets >=44 px;

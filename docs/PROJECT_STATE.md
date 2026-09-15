@@ -4,7 +4,7 @@ Atualizado: 15 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main`: `ceaa4fc8a79cbb2ad442854ffaacd501dac7313f` — PR #152  
+Baseline funcional em `main`: `2594ba1c1a3f4f2cabbcf5c92e2cdd5a8f28734c` — PR #154  
 Branch funcional: `main`
 
 ## Invariantes obrigatórias
@@ -23,43 +23,45 @@ Branch funcional: `main`
 
 A aplicação permanece em v76/`0.76.0`. Os blocos mais recentes são:
 
-- PR #147 / `76-bills-mobile-alignment2`: Despesas mobile usa grelha de filtros contida, sem depender de faixa horizontal;
+- PR #147 / `76-bills-mobile-alignment2`: Despesas mobile usa grelha de filtros contida, sem depender de uma faixa horizontal;
 - PR #149 / `76-date-calculator1`: Calculadora de datas local em TypeScript strict em **Mais → Ferramentas**;
-- PR #150 / `76-auth-ios-spacing2`: primeira correção de altura útil do iPhone/Safari;
-- PR #152 / `76-auth-prototype-final1`: substitui a composição visual anterior do PIN pelo protótipo final aprovado e consolida uma única autoridade visual do cofre.
+- PR #152 / `76-auth-prototype-final1`: ecrã de PIN consolidado numa única autoridade visual;
+- PR #154 / `76-auth-exclusive-state1`: criação e desbloqueio do cofre tornam-se estados visualmente exclusivos, corrigindo a sobreposição confirmada no iPhone/Safari.
 
-## Auth / iPhone / Safari — PR #152
+## Auth / iPhone / Safari — PR #152 + PR #154
 
-A validação física posterior ao PR #150 mostrou que o ecrã continuava visualmente incoerente: o keypad parecia demasiado estreito, o ritmo entre blocos não correspondia ao protótipo e a transferência de cofre perdia hierarquia junto ao rodapé do Safari.
+A validação física mostrou duas etapas distintas:
 
-Correção publicada em `76-auth-prototype-final1`:
+1. o PR #152 consolidou o ecrã de PIN numa única composição visual, com keypad móvel de 56 px e espaçamento 30/16 px;
+2. uma captura posterior mostrou simultaneamente **Criar cofre local** e **Introduza o seu PIN** no mesmo ecrã.
 
-- `v75-usability.css` passa a concentrar a autoridade visual do cofre num único bloco;
-- os blocos visuais históricos `76-vault-short-height1` e `76-auth-ios-spacing2` deixam de existir como secções CSS concorrentes;
-- mobile mantém `min-height:100svh`, safe areas e scroll compatível com Safari/iOS;
-- `.vault-card` móvel usa `margin:0 auto`, sem recentragem vertical implícita;
-- keypad móvel padrão: teclas de 56 px, `column-gap:30px` e `row-gap:16px`;
-- `<=359px`: teclas 52 px, gap horizontal 24 px e vertical 13 px;
-- altura útil `<=720px`: teclas 50 px, gap horizontal 22 px e vertical 9 px;
-- todos os alvos essenciais permanecem >=44 px;
-- teclas recebem superfície/borda/sombra discretas; apagar continua visualmente leve;
-- botão Entrar, alternância para palavra-passe, recuperação e transferência passam a uma hierarquia única e mais legível;
-- `Usar dados de outro dispositivo` passa a superfície própria, evitando mistura com o rodapé;
-- dark mode, `forced-colors`, `prefers-reduced-motion`, pinch-to-zoom e prevenção de auto-zoom do Safari permanecem cobertos;
-- PIN, unlock, PBKDF2, AES-GCM, IndexedDB, importação e sync não foram alterados;
-- Service Worker usa o token técnico `auth-prototype-final1` para invalidar a apresentação anterior.
+Causa confirmada do segundo problema:
 
-Evidência:
+- `events.js` já selecionava corretamente um único estado através de `idbGet('meta','vault')`;
+- porém `v75-usability.css` aplicava `display:grid!important` a `#vaultCreate`;
+- essa regra tinha especificidade suficiente para neutralizar visualmente o atributo `hidden` usado pelo runtime.
 
-- PR #152 head final: `1124fc2284ab15dfc7b8e384792196a8256f89c6`;
-- TypeScript Foundation PR `34977687455`: sucesso;
-- CI PR `34977687437`: sucesso integral;
-- merge: `ceaa4fc8a79cbb2ad442854ffaacd501dac7313f`;
-- TypeScript Foundation `main` `34977780423`: sucesso;
-- CI `main` `34977780342`: sucesso integral;
-- Deploy Pages `34977846729`: sucesso.
+Correção publicada em `76-auth-exclusive-state1`:
 
-Pendente apenas a validação visual física no mesmo iPhone/Safari e PWA instalada após atualização do cache. O teste automatizado confirma contratos estruturais, não proporções reais do dispositivo.
+- `hidden` volta a ser autoridade explícita para `#vaultScreen`, `#vaultCreate`, `#vaultUnlock` e painéis internos de recuperação/transferência;
+- criação e desbloqueio nunca podem ser apresentados em simultâneo;
+- o fluxo funcional continua a ser decidido exclusivamente pela existência do cofre local;
+- a correção foi incorporada na mesma autoridade `v75-usability.css`, sem criar outra camada visual concorrente;
+- keypad, espaçamentos, `100svh`, safe areas, dark mode, `forced-colors`, `prefers-reduced-motion` e targets >=44 px foram preservados;
+- PIN, palavra-passe, `createVault()`, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação e sync não foram alterados;
+- Service Worker usa o token técnico `auth-exclusive-state1` para retirar da PWA a folha antiga.
+
+Evidência PR #154:
+
+- head funcional: `eb8c7c3d165685776a863720ebfc2981efa80bef`;
+- TypeScript Foundation PR `35003057035`: sucesso;
+- CI PR `35003057086`: sucesso integral;
+- merge: `2594ba1c1a3f4f2cabbcf5c92e2cdd5a8f28734c`;
+- TypeScript Foundation `main` `35003207253`: sucesso;
+- CI `main` `35003207139`: sucesso integral;
+- Deploy Pages `35003264802`: sucesso.
+
+Pendente: confirmação física pós-PR #154 no mesmo iPhone/Safari e na PWA instalada para verificar que apenas **Introduza o seu PIN** aparece quando o cofre já existe.
 
 ## Calculadora de datas — PR #149
 
@@ -85,7 +87,7 @@ Integrada em `main` no commit `8e58777f601d164bd4589f7d0e0e8f96e02686f0`.
 - lupa Lucide local é a única lupa funcional;
 - Estado/Categoria e De/Até usam grelha móvel contida;
 - Ordenar e Limpar filtros ocupam linhas completas;
-- `<=360px` empilha para evitar clipping;
+- `<=360px` empilha antes de cortar conteúdo;
 - sem alteração de cálculos, persistência, QR, scanner ou sync.
 
 Pendente: validação física final no mesmo iPhone/PWA após refresh de cache.
@@ -107,7 +109,7 @@ Pendente: confirmação visual no mesmo iPhone/PWA.
 
 ### ALTO
 
-- validar `76-auth-prototype-final1` fisicamente no iPhone/Safari web e PWA;
+- validar PR #154 fisicamente no iPhone/Safari web e PWA;
 - validar PR #147 e `76-planning-ring-shape1` no mesmo dispositivo;
 - criar E2E WebKit/Chromium para PIN → Dashboard → drawer → Despesas → Adicionar → Manual/Imagem/QR;
 - reduzir gradualmente a cascade CSS e o uso de `!important` por componente;
@@ -122,7 +124,7 @@ Pendente: confirmação visual no mesmo iPhone/PWA.
 
 ## Próximo passo
 
-1. validar fisicamente `76-auth-prototype-final1` no iPhone/Safari web e PWA instalada;
+1. validar fisicamente `76-auth-exclusive-state1` no mesmo iPhone/Safari e PWA instalada;
 2. confirmar Despesas e Planeamento no mesmo dispositivo;
 3. corrigir a descrição factual de rede em Segurança;
 4. empacotar ZXing local + licença e endurecer CSP;
