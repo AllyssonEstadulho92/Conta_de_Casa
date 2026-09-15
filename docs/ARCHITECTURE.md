@@ -58,6 +58,28 @@ A dívida histórica de duas autoridades móveis foi resolvida durante a consoli
 - `mobile-menu-toggle.js` é a autoridade funcional do drawer/hambúrguer móvel;
 - `v76-mobile-shell.css` é a autoridade geométrica final no mobile.
 
+### 3.1 Hierarquia do menu completo — `76-drawer-hierarchy1`
+
+O PR #136 simplificou o drawer sem alterar as rotas reais:
+
+- **Principal:** Início (`dashboard`), Despesas (`bills`), Planeamento (`planning`), Mercado (`market`);
+- **Análise:** Relatórios (`reports`);
+- **Sistema:** Segurança e sincronização (`security`), Definições (`settings`).
+
+Rotas secundárias continuam acessíveis dentro da respetiva página-pai e deixam de competir como destinos de primeiro nível:
+
+- `calendar` → Despesas;
+- `goals` → Planeamento;
+- `diagnostics` → Definições.
+
+`navParent(page, compact)` distingue os dois contextos:
+
+- no menu completo, Segurança mantém seleção própria;
+- no dock compacto de cinco destinos, Segurança continua agrupada em Mais/Definições;
+- Calendário, Metas e Diagnóstico continuam a selecionar a página-pai correspondente.
+
+O drawer permanece do lado direito porque `mobile-menu-toggle.js` e o gesto de abertura/fecho existentes estão orientados para esse lado; mudar o lado apenas por estética criaria risco desnecessário de regressão em swipe/hit-testing.
+
 ## 4. Arquitetura visual
 
 Autoridades atuais:
@@ -67,8 +89,21 @@ Autoridades atuais:
 - geometria mobile/safe areas/dock: `v76-mobile-shell.css`;
 - identidade gráfica: `icon.svg`;
 - iconografia funcional: subset Lucide local em `ui-icons.js` + `ui-icons.css`;
-- drawer/hambúrguer: `mobile-menu-toggle.js/.css` + shell v76;
+- drawer/hambúrguer: `mobile-menu-toggle.js/.css` para interação e `v75-drawer-theme.css` para apresentação;
 - formulários de despesas/QR: `invoice-capture.js/.css` sobre os formulários canónicos.
+
+### 4.1 Drawer móvel
+
+`v75-drawer-theme.css` (`76-drawer-hierarchy1`) define a apresentação final do drawer em `<=820px`:
+
+- largura útil até 360 px, mantendo margem de segurança no viewport;
+- navegação vertical de uma coluna;
+- linha de navegação com target mínimo de 52 px;
+- ícones funcionais sem cartão interior decorativo;
+- estado ativo em superfície teal suave, não apenas por cor do ícone;
+- botão X com target 44×44 px, uma única superfície circular e foco visível;
+- `Ocultar valores` e `Bloquear` em stack vertical;
+- `prefers-reduced-motion`, `forced-colors`, safe areas e scroll do conteúdo preservados.
 
 A cascade ainda contém muitas regras históricas v75 e `!important`. A redução deve ser feita por propriedade/componente, nunca por eliminação em massa.
 
@@ -84,6 +119,8 @@ Direção vigente:
 - targets essenciais >=44 px;
 - WCAG 2.2 AA como referência mínima quando aplicável;
 - light/dark, forced-colors e reduced-motion preservados.
+
+A geometria global dos ícones ainda requer uma passagem isolada: o subset local continua funcional, mas Planeamento e Definições devem ser revistos para aproximar a semântica visual aprovada de calendário/planeamento e engrenagem, sem trocar a família Lucide nem introduzir CDN.
 
 ## 6. Mercado
 
@@ -155,7 +192,7 @@ Service Worker:
 - allowlist explícita;
 - tokens de cache técnicos distribuem correções sem obrigar a alterar a release pública.
 
-Os hotfixes `76-market-identity1`/`76-market-identity-stale1` não alteraram `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
+Os PR #133/#134/#136 não alteraram `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
 
 ## 10. Segurança e dependências externas
 
@@ -173,14 +210,22 @@ A CI cobre sintaxe, finanças, isolamento, datas, QR, Mercado, imagens, scanner,
 
 Limitação conhecida: vários testes “Safari/PWA” são contratos estáticos de código/CSS; ainda falta E2E real em WebKit/Chromium para toque, teclado, scroll e foco.
 
-PR #134 passou TypeScript Foundation main `34914028412`, CI main `34914028440` e Pages `34914061390`.
+PR #136 passou:
+
+- TypeScript Foundation main `34933261324`;
+- CI main `34933261352`;
+- Pages `34933296570`.
+
+A aparência final do drawer ainda precisa de validação física no iPhone/PWA; os gates automatizados não substituem esse teste visual.
 
 ## 12. Próxima consolidação
 
-1. corrigir a descrição de rede da página Segurança sem mudar a release;
-2. preparar ZXing local e CSP mais restritiva num bloco isolado;
-3. E2E WebKit/Chromium para PIN, navegação e formulário de despesas;
-4. reduzir cascade CSS por componente com prova de não utilização;
-5. continuar TypeScript em módulos de baixo acoplamento;
-6. migrar `render/forms/events` apenas depois dos contratos visuais estabilizarem;
-7. deixar finanças/core/cifra para blocos com vetores de paridade próprios.
+1. validar `76-drawer-hierarchy1` no iPhone/PWA;
+2. rever geometria de Planeamento/Definições no subset local Lucide;
+3. corrigir a descrição de rede da página Segurança sem mudar a release;
+4. preparar ZXing local e CSP mais restritiva num bloco isolado;
+5. E2E WebKit/Chromium para PIN, navegação e formulário de despesas;
+6. reduzir cascade CSS por componente com prova de não utilização;
+7. continuar TypeScript em módulos de baixo acoplamento;
+8. migrar `render/forms/events` apenas depois dos contratos visuais estabilizarem;
+9. deixar finanças/core/cifra para blocos com vetores de paridade próprios.
