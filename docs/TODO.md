@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 13 de setembro de 2026
+Atualizado: 15 de setembro de 2026
 
 ## P0 — Invariantes
 
@@ -9,115 +9,95 @@ Atualizado: 13 de setembro de 2026
 - [x] PBKDF2-SHA-256 + AES-GCM, 250000 iterações.
 - [x] IndexedDB financeiro preservado.
 - [x] `estimatedCents` separado de `actualCents`.
-- [x] `marketId|pid` preservado.
+- [x] `marketId|pid` definido como identidade canónica.
 - [x] Redesign/migração sem alteração silenciosa de domínio.
 
 ## P0 — Auth/Safari
 
-- [x] PR #96: entrada local-first, sync não bloqueia Dashboard.
-- [x] PR #98: `[hidden]` explícito evita cofre e shell simultâneos.
-- [x] PR #99: auditoria UI/UX transversal integrada e Pages publicada.
-- [ ] Repetir validação física no mesmo iPhone/Safari.
-- [ ] Repetir validação em PWA instalada.
+- [x] PIN local abre aplicação sem depender de sync.
+- [x] `[hidden]` impede cofre e shell simultâneos.
+- [x] Formulário de despesa mobile usa um único scroll owner após PR #132.
+- [ ] Criar E2E WebKit/Chromium para PIN → Dashboard → drawer → Despesas → Adicionar → Manual/Imagem/QR → fechar/guardar.
+- [ ] Repetir validação física em Safari/iPhone web e PWA instalada.
 
-## P0 — Marca e iconografia `76-brand-icons1`
+## P0 — Mercado / identidade `76-market-identity1`
 
-### Publicado — PR #100
+- [x] Confirmar lacuna: pesquisa/catalogo conhecem `marketId|pid`, item persistido não preservava.
+- [x] Capturar identidade a partir do resultado Cesta ao adicionar produto.
+- [x] Aplicar `marketId/pid` antes do commit do novo item.
+- [x] Preservar os campos durante `normalizeMarketItem()`.
+- [x] Tipar `marketId/pid` em `MarketItem` de forma retrocompatível.
+- [x] Manter `marketId/pid` fora da lista de metadados técnicos descartados pelo sync.
+- [x] Não alterar `estimatedCents`, `actualCents`, quantidade ou estado de compra.
+- [ ] CI completa verde.
+- [ ] TypeScript Foundation verde.
+- [ ] GitHub Pages publicada.
+- [ ] Validar pesquisa → adicionar → reload → editar → sync.
 
-- [x] Auditar `icon.svg`, `.brand-mark`, subset Lucide e pseudo-ícones históricos.
-- [x] Confirmar duas identidades: `icon.svg` e Lucide `home` na marca interna.
-- [x] Simplificar `icon.svg` para casa + euro, teal sólido e branco.
-- [x] Remover folha e gradientes decorativos da marca.
-- [x] Fazer sidebar/drawer/cofre reutilizarem a mesma marca `icon.svg`.
-- [x] Manter Lucide como única família de ícones funcionais.
-- [x] Neutralizar ícone decorativo do título do Mercado.
-- [x] Neutralizar chevron extra do estado de sync no Mercado.
-- [x] Restaurar `Plus` semântico no botão “Adicionar item”.
-- [x] Neutralizar pseudo-ícones coloridos dos cartões de resumo do Mercado.
-- [x] Proteger a nova autoridade em `tests/ui-icons.test.cjs`.
-- [x] Invalidar cache PWA com `brand-icons1`.
-- [x] TypeScript Foundation do PR verde.
-- [x] CI integral do PR verde.
-- [x] Merge PR #100: `5b9689f04e844b9216626729b3b5aae5bf1acc09`.
-- [x] TypeScript Foundation main `34783537256` verde.
-- [x] CI main `34783537266` verde.
-- [x] Pages `34783564467` publicada com sucesso.
-- [ ] Validar nova marca e ícones em Safari/iPhone, PWA instalada, Android/Chrome e desktop.
+## P0 — Navegação e shell
 
-### Limpeza posterior segura
+- [x] Retirar runtime/CSS v74 e Featured do bundle e do repositório.
+- [x] Consolidar uma única autoridade de composição/navegação móvel.
+- [x] Manter `mobile-menu-toggle.js` como autoridade do drawer/hambúrguer.
+- [x] Manter `v76-mobile-shell.css` como autoridade geométrica mobile.
+- [x] Corrigir safe areas, dock e labels em ecrãs estreitos.
+- [ ] E2E real para abertura/fecho do drawer, foco, Escape e swipe.
 
-- [ ] Remover glifos Unicode de fallback do HTML apenas depois de prova de que não são necessários.
-- [ ] Deixar de hidratar `.brand-mark` como Lucide `home` no runtime.
-- [ ] Remover regras pseudo-icon antigas do Mercado apenas depois de confirmar não utilização em todos os estados.
-- [ ] Rever contraste não textual dos ícones em light/dark e forced-colors no dispositivo/browser real.
-
-## P0 — Dívida estrutural UI/UX
-
-- [ ] Consolidar navegação móvel numa única autoridade.
-- [ ] Remover/restringir `ensureMobileNav()` v74 após paridade.
-- [ ] Parar criação runtime de `cdcMobileGreeting`, `cdcMobileMonthWrap`, `cdcMonthHero`, `cdcQuickActions`, `cdcDashboardCategories`.
-- [ ] Parar criação de `cdcWelcome` depois de provar que o fluxo `vaultCreate` cobre primeiro acesso/importação.
-- [ ] Reduzir dependência de `!important` entre v74/v75/v76.
-
-## P0 — Revisão página a página
+## P0 — UI/UX página a página
 
 ### Dashboard
 
-- [x] Resumo principal real e indicadores canónicos.
-- [x] Blocos v74 duplicados visualmente suprimidos.
-- [x] Header e dock alinhados com direção v76 pelo PR #99.
-- [ ] Remover criação DOM v74 substituída.
-- [ ] Validar desktop + iPhone/PWA.
+- [x] Hero de saldo e indicadores canónicos v76.
+- [x] Remover dependência runtime v74.
+- [ ] Validação física final desktop + iPhone/PWA.
 
-### Faturas
+### Despesas/Faturas
 
-- [ ] Rever pesquisa, filtros, resumo e estados.
-- [ ] Rever tabela desktop/lista mobile.
-- [ ] Rever detalhe, editar, pagar, excluir e captura/QR.
-- [ ] Uniformizar empty/loading/error/success.
-- [ ] Confirmar foco/teclado/dialogs.
+- [x] Pesquisa, filtros, resumo e lista canónicos restaurados.
+- [x] Fluxo Adicionar despesa profissionalizado.
+- [x] Modos Manual / Ler fatura / QR estabilizados.
+- [x] Hotfix touch/scroll Safari PR #132.
+- [ ] E2E de criar/editar/pagar/eliminar/cancelar.
+- [ ] Uniformizar states loading/error/success onde ainda existam diferenças.
 
 ### Mercado
 
-- [x] Primeira limpeza transversal de iconografia em PR #100.
-- [ ] Rever pesquisa, filtros, catálogo/lista, quantidade e carrinho.
-- [ ] Rever scanner, imagens e fallback.
-- [ ] Manter estimativa ≠ valor real.
-- [ ] Criar teste ponta a ponta para persistência `marketId|pid`.
-- [ ] Auditar logos/imagens/licenças antes de ampliar catálogo visual.
+- [x] Pesquisa live limitada a Pingo Doce/Continente.
+- [x] Catálogo visual usa identidade `marketId|pid`.
+- [x] Pesquisa/lista/filtros alinhados visualmente.
+- [x] Primeira correção de persistência de identidade na branch atual.
+- [ ] Validar ciclo completo da identidade após merge.
+- [ ] Rever logos/imagens/licenças antes de ampliar catálogo visual.
 
 ### Planeamento + Calendário
 
-- [ ] Consolidar hierarquia com dados reais suportados.
-- [ ] Preservar mesma informação essencial mobile/desktop.
-- [ ] Rever datas, vencimentos e estados.
+- [x] Planeamento v76 e estado “Por definir” para orçamento ausente.
+- [ ] Rever calendário/vencimentos em E2E e densidade final tablet/desktop.
 
 ### Relatórios + Objetivos
 
-- [ ] Rever visualizações, legendas, contraste e leitura sem depender apenas de cor.
-- [ ] Rever empty states e densidade.
+- [ ] Rever visualizações/legendas sem depender só de cor.
+- [ ] Rever empty states e densidade final.
 
 ### Segurança + Diagnóstico + Definições
 
-- [ ] Rever forms, estados, feedback e linguagem.
-- [ ] Garantir ações destrutivas claramente distintas.
-- [ ] Rever dark mode e forced-colors.
+- [ ] Corrigir texto “Sem CDNs” enquanto ZXing usar `unpkg.com`.
+- [ ] Rever feedback/destructive actions/dark mode/forced-colors fisicamente.
 
-## P0 — Fonte 100% TypeScript
+## P0 — TypeScript
 
 ### Concluído
 
-- [x] Fundação strict — PR #72.
-- [x] Veggie menu — PR #88.
-- [x] Market branding — PR #89.
-- [x] Sync conflict policy — PR #95.
+- [x] Fundação strict.
+- [x] Tipos de estado/mercado em `src/types`.
+- [x] Market branding TS.
+- [x] Sync conflict policy TS.
 
 ### Próximos blocos
 
-- [ ] Migrar módulos UI folha/baixo acoplamento restantes.
-- [ ] Criar configuração canónica de navegação em TypeScript antes de remover autoridade v74.
+- [ ] Migrar módulos UI/baixo acoplamento restantes.
 - [ ] Criar vetores de paridade para dinheiro/datas/quantidades.
-- [ ] Migrar domínio por subdomínios.
+- [ ] Migrar domínio Mercado para TS e retirar a ponte transitória de identidade quando houver autoridade única.
 - [ ] Migrar `render/forms/events` depois dos contratos visuais estabilizarem.
 - [ ] Migrar core/persistência/cifra apenas com vetores próprios.
 - [ ] Migrar Service Worker/tooling no bloco final.
@@ -126,16 +106,23 @@ Atualizado: 13 de setembro de 2026
 
 - [x] PIN local não depende de rede.
 - [x] `[hidden]` do auth protegido em Safari/WebKit.
-- [ ] Auditar ZXing remoto e considerar bundle local com licença preservada.
+- [ ] Empacotar ZXing localmente com licença preservada.
+- [ ] Depois, remover `https://unpkg.com` de `script-src`.
 - [ ] Reduzir `style-src 'unsafe-inline'` quando possível.
-- [ ] Rever origens CSP finais.
-- [ ] Confirmar offline/update em PWA após cada invalidação de cache.
-- [ ] Ativar required checks/branch protection quando disponível.
+- [ ] Confirmar offline/update da PWA após cada invalidação de cache.
+- [ ] Ativar required checks/branch protection em `main` quando a permissão administrativa estiver disponível.
+
+## P1 — Higiene do repositório
+
+- [x] Encerrar PR #45/v65 como obsoleto em 15/09/2026.
+- [ ] Rever branches antigas `feat/v76-icon-semantics2` e `feat/v76-icon-semantics3`; apagar apenas se não contiverem trabalho exclusivo necessário.
 
 ## P0 — QA final
 
 - [ ] Safari/iPhone web.
 - [ ] Safari/iPhone PWA.
+- [ ] WebKit E2E.
+- [ ] Chromium E2E.
 - [ ] Android/Chrome.
 - [ ] tablet.
 - [ ] desktop.
@@ -144,8 +131,7 @@ Atualizado: 13 de setembro de 2026
 - [ ] Light/Dark/System.
 - [ ] reduced-motion/forced-colors.
 - [ ] 320/360/375/390/430/768/820 px.
-- [ ] comparação visual antes/depois antes de eliminar CSS histórico.
 
 ## Critério de conclusão
 
-Só concluir quando todas as rotas partilharem sistema visual e comportamento coerentes, mobile/desktop preservarem informação essencial, não houver sobreposição/overflow conhecido, acessibilidade estiver coberta, CI/Pages estiverem verdes, validação física confirmar o produto e JS manual tiver sido substituído por TypeScript conforme o plano.
+Só concluir quando todas as rotas partilharem sistema visual e comportamento coerentes, mobile/desktop preservarem informação essencial, não houver sobreposição/overflow conhecido, acessibilidade estiver coberta, CI/Pages estiverem verdes, validação física/E2E confirmar o produto e a migração TypeScript seguir o plano sem regressão de domínio.
