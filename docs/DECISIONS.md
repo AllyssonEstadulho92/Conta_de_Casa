@@ -173,6 +173,19 @@ A reorganização visual dos filtros de Despesas não cria uma segunda implement
 - `mobile-layout.css` é CSS de feature: não pode assumir `100dvh`, scroll global ou a geometria do viewport, que pertence exclusivamente a `v76-mobile-shell.css`;
 - esta decisão não altera cálculos, `STATE_VERSION`, IndexedDB, PIN/cofre, QR, scanner, sync ou release.
 
+## D-100 — ritmo móvel de Despesas usa espaçamento positivo e tokens locais
+
+O refinamento visual de Despesas deve criar hierarquia através de espaço consistente, sem voltar a depender de offsets negativos ou ajustes ad hoc espalhados pela cascade.
+
+- `76-bills-mobile-spacing1` define os tokens de espaçamento apenas dentro de `#page-bills` em `<=820px`;
+- pesquisa e filtros mantêm 20 px de separação entre secções;
+- padding, gap entre colunas e gap label/controlo são propriedades de feature e não pertencem à shell global;
+- título, subtítulo e primeira linha de filtros usam espaçamento positivo explícito;
+- o fallback `<=360px` empilha os campos com ritmo vertical próprio antes de reduzir legibilidade;
+- regras visualmente duplicadas podem ser consolidadas quando os seletores partilham exatamente o mesmo comportamento;
+- limpeza CSS não autoriza remover IDs, handlers, campos, estados, acessibilidade ou invariantes financeiros;
+- qualquer alteração futura de espaçamento deve manter os testes de responsividade, arquitetura UI e acessibilidade verdes e continuar sujeita a validação física em Safari/PWA.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;
