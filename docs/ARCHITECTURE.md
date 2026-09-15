@@ -117,9 +117,9 @@ Composição:
 - `<=360px` empilha antes de cortar conteúdo;
 - foco, reduced-motion, forced-colors e targets tácteis preservados.
 
-### 4.4 Planeamento mobile — `76-planning-budget-card2`
+### 4.4 Planeamento mobile — `76-planning-budget-card2` + `76-planning-ring-shape1`
 
-O PR #143 altera apenas a composição móvel do resumo de orçamento em `#page-planning`.
+O PR #143 altera apenas a composição móvel do resumo de orçamento em `#page-planning`; o PR #145 corrige exclusivamente a geometria do anel após validação física no iPhone.
 
 **Autoridade de dados e cálculo:**
 
@@ -139,13 +139,23 @@ O PR #143 altera apenas a composição móvel do resumo de orçamento em `#page-
 **Composição visual:**
 
 - `v75-architecture.js` gera o seletor mensal, intervalo real do mês e cartão de orçamento;
-- `v76-planning-more.css` (`76-planning-budget-card2`) estiliza título, estado circular, métricas, orientação e CTA dentro de uma única superfície;
+- `v76-planning-more.css` estiliza título, estado circular, métricas, orientação e CTA dentro de uma única superfície;
 - orçamento ausente permanece factual (`Por definir`), sem percentagem falsa;
 - quando existe orçamento, percentagem, gasto e disponível continuam calculados pela lógica existente;
 - navegação mensal usa ícones Lucide locais em vez dos caracteres `‹/›`;
 - `<=430px` mantém métricas numa coluna, removendo a antiga compressão em três colunas;
 - `<=350px` adapta o cabeçalho sem remover ações;
 - `prefers-reduced-motion` e `forced-colors` têm fallback explícito.
+
+**Geometria do anel — PR #145:**
+
+- `v75-architecture.css` ainda contém uma regra histórica `width:118px!important;height:118px!important` para `.cdc-budget-ring`;
+- o PR #143 aumentou a largura móvel sem neutralizar a altura histórica, por isso `aspect-ratio` não conseguia produzir um quadrado e o círculo aparecia oval;
+- `76-planning-ring-shape1` em `v76-planning-more.css` passa a impor `height:auto!important` e `aspect-ratio:1/1!important`;
+- diâmetros canónicos: 136 px em mobile geral, 128 px em `<=430px` e 116 px em `<=350px`;
+- iconografia e tipografia interna acompanham a redução de escala;
+- testes verificam a neutralização da altura fixa, a proporção 1:1 e os breakpoints;
+- não existe qualquer alteração ao cálculo da percentagem, estado `Por definir`, orçamento ou persistência.
 
 O overview dinâmico continua oculto em `>=821px`; desktop mantém o formulário/painéis canónicos existentes. O protótipo foi aplicado ao contexto móvel solicitado, sem criar uma segunda arquitetura financeira.
 
@@ -209,7 +219,7 @@ Service Worker:
 - allowlist explícita;
 - tokens técnicos invalidam cache sem alterar release pública.
 
-PR #143 acrescenta apenas o token `planning-budget-card2`; `package.json`, `release-manifest.json`, `app-update.js` e `v76/0.76.0` permanecem inalterados.
+PR #143 acrescentou `planning-budget-card2`; PR #145 acrescenta apenas `planning-ring-shape1`. `package.json`, `release-manifest.json`, `app-update.js` e `v76/0.76.0` permanecem inalterados.
 
 ## 10. Segurança e dependências externas
 
@@ -225,25 +235,25 @@ PR #143 acrescenta apenas o token `planning-budget-card2`; `package.json`, `rele
 
 A CI cobre sintaxe, TypeScript, finanças, isolamento, datas, QR, Mercado, imagens, scanner, UI, responsividade, acessibilidade, segurança e sync.
 
-PR #143:
+PR #145:
 
-- TypeScript Foundation PR `34946433827`: sucesso;
-- CI PR `34946433799`: sucesso;
-- merge `386d75b35060eb011c2a2d68ec6b965c87c5080c`;
-- TypeScript Foundation main `34946493929`: sucesso;
-- CI main `34946493911`: sucesso;
-- Pages `34946542013`: sucesso.
+- TypeScript Foundation PR `34948896081`: sucesso;
+- CI PR `34948896074`: sucesso;
+- CI push head `34948870264`: sucesso;
+- merge `471c689c1df47118bd3a345214acfd140bdc6e7d`;
+- Pages `34949105955`: sucesso.
 
-Limitação conhecida: testes estáticos não substituem validação física/E2E WebKit/Chromium para toque, teclado, scroll, foco e proporções reais.
+Limitação conhecida: testes estáticos não substituem validação física/E2E WebKit/Chromium para toque, teclado, scroll, foco e proporções reais. A forma circular do PR #145 deve ser confirmada no mesmo iPhone/PWA que revelou a deformação.
 
 ## 12. Próxima consolidação
 
-1. validar fisicamente Planeamento PR #143 e Despesas PR #142 no iPhone/PWA;
-2. corrigir a descrição factual de rede na página Segurança;
-3. empacotar ZXing localmente com licença preservada;
-4. depois remover `unpkg.com` de `script-src` e endurecer CSP;
-5. criar E2E WebKit/Chromium;
-6. reduzir cascade CSS por componente;
-7. continuar TypeScript em módulos de baixo acoplamento;
-8. migrar `render/forms/events` só depois dos contratos visuais estabilizarem;
-9. deixar finanças/core/cifra para blocos com vetores de paridade próprios.
+1. confirmar fisicamente `76-planning-ring-shape1` no iPhone/PWA;
+2. validar Despesas PR #142 e restantes superfícies móveis no mesmo dispositivo;
+3. corrigir a descrição factual de rede na página Segurança;
+4. empacotar ZXing localmente com licença preservada;
+5. depois remover `unpkg.com` de `script-src` e endurecer CSP;
+6. criar E2E WebKit/Chromium;
+7. reduzir cascade CSS por componente;
+8. continuar TypeScript em módulos de baixo acoplamento;
+9. migrar `render/forms/events` só depois dos contratos visuais estabilizarem;
+10. deixar finanças/core/cifra para blocos com vetores de paridade próprios.
