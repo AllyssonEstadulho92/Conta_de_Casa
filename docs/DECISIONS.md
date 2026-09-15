@@ -146,6 +146,18 @@ O menu móvel completo não deve reproduzir todas as rotas internas nem apresent
 - botão de fecho e ações de sessão usam targets tácteis >=44 px e estados de foco explícitos;
 - esta consolidação é de apresentação/navegação e não altera domínio, persistência, segurança ou release.
 
+## D-098 — ícones semânticos usam geometria Lucide coerente com a responsabilidade
+
+A família de ícones funcional continua a ser o subset Lucide local e auditável, mas a reutilização de uma geometria inadequada não é aceite apenas porque o nome semântico já existe.
+
+- `plan` representa Planeamento com `CalendarCheck2`, não com a mesma geometria de `wallet`;
+- `settings` representa Definições com `Settings`/engrenagem, não com sliders;
+- as geometrias devem vir do snapshot Lucide já fixado no repositório (`94e4cb9d9db5907053ebf3636a97c45529cf776b`) ou de atualização explícita e auditada desse snapshot;
+- `icon.svg` continua reservado à marca, não a ações funcionais;
+- nomes semânticos e callers devem permanecer estáveis quando apenas a representação gráfica muda;
+- mudanças de iconografia não alteram rotas, handlers, dados, persistência, segurança ou release;
+- testes devem impedir regressões para geometrias semanticamente incorretas.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;
