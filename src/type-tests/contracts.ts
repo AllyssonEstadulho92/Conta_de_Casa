@@ -70,6 +70,8 @@ const emptyState: AppStateV5 = {
     estimatedCents: cents,
     actualCents: cents,
     purchased: false,
+    marketId: '',
+    pid: '',
     productCode,
     imageUrl: '',
     imageSource: '',
@@ -101,3 +103,7 @@ void invalidEvidence;
 // @ts-expect-error o browser live atual só aceita os mercados ativos declarados.
 const invalidMarket: ActiveMarketId = 'mercado-inexistente';
 void invalidMarket;
+
+// @ts-expect-error identidade persistida não aceita uma loja arbitrária.
+const invalidPersistedMarket: AppStateV5['market'][number]['marketId'] = 'loja-inexistente';
+void invalidPersistedMarket;
