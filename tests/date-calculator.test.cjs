@@ -1,0 +1,100 @@
+'use strict';
+
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+const {execFileSync}=require('node:child_process');
+const {webcrypto}=require('node:crypto');
+
+const ROOT=path.resolve(__dirname,'..');
+execFileSync(process.execPath,['scripts/build-typescript-runtime.cjs'],{cwd:ROOT,stdio:'pipe'});
+
+const generated=fs.readFileSync(path.join(ROOT,'.generated/date-calculator.js'),'utf8');
+const source=fs.readFileSync(path.join(ROOT,'src/ui/date-calculator.ts'),'utf8');
+const css=fs.readFileSync(path.join(ROOT,'date-calculator.css'),'utf8');
+const prep=fs.readFileSync(path.join(ROOT,'scripts/prepare-pages.cjs'),'utf8');
+const sw=fs.readFileSync(path.join(ROOT,'sw.js'),'utf8');
+
+assert.match(source,/76-date-calculator1/);
+assert.match(source,/civilDayDiff/,'A calculadora deve reutilizar matemática civil existente.');
+assert.match(source,/Feriados não são descontados/,'Dias úteis devem declarar a regra sem presumir feriados.');
+assert.doesNotMatch(source,/\bfetch\s*\(|XMLHttpRequest|localStorage|indexedDB|saveState\s*\(|commit\s*\(/,'A ferramenta não deve aceder à rede nem persistir dados.');
+assert.match(css,/\.cdc-datecalc-dialog/);
+assert.match(css,/@media\(max-width:820px\)/);
+assert.match(css,/@media\(forced-colors:active\)/);
+assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
+assert.doesNotMatch(css,/https?:\/\//,'O CSS da calculadora não deve introduzir dependências remotas.');
+assert.match(prep,/'date-calculator\.css'/);
+assert.match(prep,/'date-calculator\.js': path\.join\(GENERATED, 'date-calculator\.js'\)/);
+assert.match(prep,/date-calculator\.js\?v=\$\{DATE_CALCULATOR_REV\}/);
+assert.match(sw,/date-calculator1/);
+assert.match(sw,/'\.\/date-calculator\.css'/);
+assert.match(sw,/'\.\/date-calculator\.js'/);
+assert.doesNotThrow(()=>new vm.Script(generated),'O runtime gerado deve ser JavaScript clássico válido.');
+
+const probe=`
+const fs=require('node:fs');
+const vm=require('node:vm');
+const {webcrypto}=require('node:crypto');
+const context=vm.createContext({console,crypto:webcrypto,TextEncoder,TextDecoder,Intl,Date,Math,Number,String,Map,Set,Uint8Array,Array,Object,JSON,RegExp,Error,Promise,BigInt,atob,btoa,globalThis:null});
+context.globalThis=context;
+vm.runInContext(fs.readFileSync('core.js','utf8'),context);
+vm.runInContext(fs.readFileSync('.generated/date-calculator.js','utf8'),context);
+const out=vm.runInContext(\`(()=>{
+  const api=CDCDateCalculator;
+  return {
+    forward:api.difference('2026-09-03','2026-09-15'),
+    reverse:api.difference('2026-09-15','2026-09-03'),
+    same:api.difference('2026-09-15','2026-09-15'),
+    explicit:api.difference('2026-09-03','2026-09-15',true,true),
+    monthEnd:api.calendarSpan('2024-01-31','2024-03-01'),
+    fridayPlusBusiness:api.addDays('2026-09-11',1,'business'),
+    mondayMinusBusiness:api.addDays('2026-09-14',-1,'business'),
+    calendarPlus:api.addDays('2024-02-28',1,'calendar'),
+    workWeek:api.businessDays('2026-09-14','2026-09-18',true,true),
+    weekend:api.businessDays('2026-09-12','2026-09-13',true,true),
+    dayOfYear:api.dayOfYear('2026-09-15'),
+    weekday:api.weekdayName('2026-09-15'),
+    invalid:api.difference('2026-02-30','2026-03-01')
+  };
+})()\`,context);
+process.stdout.write(JSON.stringify(out));
+`;
+
+let baseline=null;
+for(const tz of ['UTC','Europe/Lisbon','America/Los_Angeles','Pacific/Kiritimati']){
+  const raw=execFileSync(process.execPath,['-e',probe],{cwd:ROOT,env:{...process.env,TZ:tz},encoding:'utf8'});
+  const result=JSON.parse(raw);
+  if(baseline===null)baseline=result;
+  else assert.deepEqual(result,baseline,`Os resultados civis têm de ser idênticos em ${tz}.`);
+}
+
+const result=baseline;
+assert.ok(result);
+assert.equal(result.forward.elapsedDays,12);
+assert.equal(result.forward.inclusiveDays,13);
+assert.equal(result.forward.selectedDays,12);
+assert.equal(result.forward.weeks,1);
+assert.equal(result.forward.remainingDays,5);
+assert.deepEqual(result.forward.span,{years:0,months:0,days:12});
+assert.equal(result.reverse.direction,-1);
+assert.equal(result.reverse.elapsedDays,12);
+assert.equal(result.reverse.selectedDays,12);
+assert.equal(result.same.elapsedDays,0);
+assert.equal(result.same.inclusiveDays,1);
+assert.equal(result.same.selectedDays,0);
+assert.equal(result.explicit.selectedDays,13);
+assert.deepEqual(result.monthEnd,{years:0,months:1,days:1});
+assert.equal(result.fridayPlusBusiness,'2026-09-14');
+assert.equal(result.mondayMinusBusiness,'2026-09-11');
+assert.equal(result.calendarPlus,'2024-02-29');
+assert.equal(result.workWeek.businessDays,5);
+assert.equal(result.workWeek.weekendDays,0);
+assert.equal(result.weekend.businessDays,0);
+assert.equal(result.weekend.weekendDays,2);
+assert.equal(result.dayOfYear,258);
+assert.equal(result.weekday,'terça-feira');
+assert.equal(result.invalid,null);
+
+console.log('Date calculator: exact civil differences, additions, weekdays and timezone invariants: OK');
