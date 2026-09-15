@@ -75,6 +75,13 @@ Atualizado: 15 de setembro de 2026
 - [x] Fluxo Adicionar despesa profissionalizado.
 - [x] Modos Manual / Ler fatura / QR estabilizados.
 - [x] Hotfix touch/scroll Safari PR #132.
+- [x] PR #140 / `76-bills-mobile-filters1`: reorganizar pesquisa + ação principal para mobile sem alterar IDs/handlers.
+- [x] PR #140: neutralizar a lupa CSS histórica duplicada e manter Lucide como ícone funcional da pesquisa.
+- [x] PR #140: Estado/Categoria em duas colunas, datas e Ordenar organizados, `<=360px` com fallback de uma coluna.
+- [x] PR #140: preservar targets >=44 px, foco, reduced-motion, forced-colors e contrato de viewport da shell.
+- [x] PR #140: TypeScript Foundation PR `34942844618`, CI PR `34942844692` e CI push `34942841985` verdes.
+- [ ] Confirmar conclusão do Pages `34942974208` do merge PR #140.
+- [ ] Validar fisicamente `76-bills-mobile-filters1` no mesmo iPhone/Safari web e PWA instalada.
 - [ ] E2E de criar/editar/pagar/eliminar/cancelar.
 - [ ] Uniformizar estados loading/error/success onde ainda existam diferenças.
 
