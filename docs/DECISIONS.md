@@ -200,6 +200,46 @@ A validação física do PR #143 mostrou que `aspect-ratio` não corrige um comp
 - testes devem proteger a neutralização da altura histórica e os tamanhos 136/128/116 px;
 - esta correção é exclusivamente visual e não altera percentagem, orçamento, cálculos, persistência ou domínio.
 
+## D-102 — filtros móveis de Despesas não usam faixa horizontal como apresentação final
+
+A validação física no iPhone mostrou que a faixa horizontal herdada de `v75-expenses-modern.css` criava pressão lateral e campos parcialmente cortados.
+
+- em `<=820px`, a apresentação final usa grelha contida na largura disponível;
+- Estado/Categoria formam um par e De/Até outro;
+- Ordenar e Limpar filtros ocupam linhas completas;
+- `<=360px` usa uma coluna antes de cortar conteúdo;
+- scroll horizontal não é requisito para descobrir controlos essenciais;
+- `mobile-layout.css` pode neutralizar a apresentação histórica, mas não assume viewport global;
+- `v76-mobile-shell.css` continua a autoridade de safe areas, scroll e dock;
+- a decisão não altera `renderBills()`, listeners, fórmulas, IndexedDB, PIN/cofre, QR, scanner, Mercado, sync ou release.
+
+## D-103 — a calculadora de datas usa aritmética civil e regras explícitas
+
+`76-date-calculator1` não calcula intervalos dividindo milissegundos por 24 horas.
+
+- reutiliza as primitivas civis de `core.js` para validar, ordenar e deslocar datas;
+- diferença de datas deve ser determinística entre fusos e mudanças de horário de verão;
+- inclusão/exclusão da data inicial e final é escolha explícita do utilizador;
+- período em anos/meses/dias é civil e separado do total absoluto de dias;
+- “dias úteis” significa segunda a sexta-feira; feriados não são presumidos sem jurisdição configurada;
+- a ferramenta é local: não usa rede, IndexedDB, `appState`, `commit()` ou `saveState()`;
+- a fonte funcional permanece TypeScript strict e o JavaScript público é artefacto gerado;
+- qualquer futura integração de feriados requer fonte/jurisdição explícita, testes e decisão própria.
+
+## D-104 — o auth móvel segue a altura útil do iOS, não um modelo fixo de iPhone
+
+A captura física no Safari mostrou que um layout correto por largura ainda pode ficar verticalmente desequilibrado por causa das barras do browser e da altura disponível.
+
+- o cofre móvel usa `100svh` como referência estável quando o browser chrome está visível;
+- safe areas continuam a ser respeitadas com `env(safe-area-inset-*)`;
+- o conteúdo começa no topo seguro e `.vault-card` não usa margem vertical automática no mobile;
+- a densidade reduz progressivamente por altura antes de permitir clipping: keypad 58/54/48 px nos breakpoints 900/780/640 px;
+- nenhum alvo essencial pode descer abaixo de 44 px;
+- o input mantém pelo menos 16 px de texto no iOS para evitar auto-zoom indesejado;
+- pinch-to-zoom permanece permitido;
+- esta decisão é exclusivamente de apresentação e não altera PIN, PBKDF2, AES-GCM, unlock, IndexedDB, importação ou sync;
+- testes estáticos protegem o contrato, mas validação física Safari/PWA continua obrigatória.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;

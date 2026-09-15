@@ -7,7 +7,7 @@ Distribuição: GitHub Pages / PWA
 
 ## 1. Modelo geral
 
-PWA estática/local-first. O browser recebe HTML/CSS/JavaScript; a fonte funcional está a migrar incrementalmente para TypeScript strict. Não existe framework UI. A interface é composta por HTML, CSS e runtime próprio.
+PWA estática/local-first. O browser recebe HTML/CSS/JavaScript; a fonte funcional está a migrar incrementalmente para TypeScript strict. Não existe framework UI.
 
 Invariantes:
 
@@ -22,17 +22,34 @@ Invariantes:
 
 ## 2. Segurança, cofre e sessão
 
-`core.js` continua a autoridade de estado, cifra, normalização base e sessão:
+`core.js` continua a autoridade de estado, cifra, normalização e sessão:
 
 `PIN/palavra-passe → PBKDF2 → check cifrado → AES-GCM → AppStateV5 normalizado`.
 
-Contratos publicados:
+Contratos:
 
 - PIN local válido abre a aplicação sem depender do sync remoto;
-- cofre e shell autenticado são visualmente exclusivos;
-- `[hidden]` é autoridade explícita no Safari/WebKit;
-- sync, quando configurado, continua em background;
-- anexos reais continuam bloqueados até existir cifragem dedicada.
+- `#vaultScreen[hidden]` e `#app[hidden]` são exclusivos;
+- sync opcional continua em background;
+- anexos reais permanecem bloqueados até existir cifragem dedicada;
+- UI do cofre não pode modificar lógica de derivação, unlock, IndexedDB ou sync.
+
+### 2.1 Geometria do cofre móvel — `76-vault-short-height1` + `76-auth-ios-spacing2`
+
+Autoridade visual: `v75-usability.css`.
+
+A correção do PR #150 mantém o mesmo HTML e os mesmos handlers, mas adapta o ecrã de PIN à altura útil do browser:
+
+- mobile usa `100svh` para considerar o estado pequeno do viewport com barras do Safari visíveis;
+- alinhamento vertical começa no topo seguro (`align-items:start`) e o cartão usa `margin:0 auto`, evitando recentragem vertical por margem automática;
+- safe areas continuam via `env(safe-area-inset-*)`;
+- densidade do keypad reduz progressivamente para 58 px em `<=900px`, 54 px em `<=780px` e 48 px em `<=640px`;
+- o piso tátil funcional permanece >=44 px;
+- campos mantêm 16 px no mobile para evitar auto-zoom do Safari;
+- zoom manual/pinch-to-zoom continua permitido;
+- `prefers-reduced-motion`, `forced-colors` e dark mode permanecem cobertos.
+
+A correção é exclusivamente de apresentação. Não existe nova autoridade de autenticação.
 
 ## 3. Rotas e navegação
 
@@ -53,24 +70,18 @@ Rotas canónicas:
 
 Autoridades móveis:
 
-- `v75-architecture.js`: composição/navegação progressiva atual;
+- `v75-architecture.js`: composição/navegação progressiva;
 - `mobile-menu-toggle.js`: drawer/hambúrguer;
-- `v76-mobile-shell.css`: geometria do viewport, safe areas, scroll e dock;
-- `mobile-layout.css`: refinamentos de feature sem propriedade de viewport.
+- `v76-mobile-shell.css`: viewport autenticado, safe areas, scroll e dock;
+- `mobile-layout.css`: refinamentos de feature sem propriedade global do viewport.
 
-### 3.1 Hierarquia do menu completo — `76-drawer-hierarchy1`
+Hierarquia do drawer:
 
-- **Principal:** Início, Despesas, Planeamento, Mercado;
-- **Análise:** Relatórios;
-- **Sistema:** Segurança e sincronização, Definições.
+- Principal: Início, Despesas, Planeamento, Mercado;
+- Análise: Relatórios;
+- Sistema: Segurança e sincronização, Definições.
 
-Rotas secundárias permanecem nas páginas-pai:
-
-- `calendar` → Despesas;
-- `goals` → Planeamento;
-- `diagnostics` → Definições.
-
-O drawer permanece do lado direito para preservar controlador e gesto existentes.
+Calendário, Metas e Diagnóstico permanecem nas páginas-pai.
 
 ## 4. Arquitetura visual
 
@@ -78,29 +89,17 @@ Autoridades atuais:
 
 - tokens/componentes: `v76-modern-ui.css` + `design-system.css`;
 - composição de páginas: `v76-product-pages.css`, `v76-planning-more.css` e camadas v75 ainda ativas;
-- geometria mobile: `v76-mobile-shell.css`;
-- refinamentos móveis específicos: `mobile-layout.css`;
+- geometria mobile autenticada: `v76-mobile-shell.css`;
+- auth/cofre: `v75-usability.css`;
+- refinamentos móveis de feature: `mobile-layout.css`;
 - marca: `icon.svg`;
 - iconografia funcional: subset Lucide local em `ui-icons.js` + `ui-icons.css`;
 - drawer: `mobile-menu-toggle.js/.css` + `v75-drawer-theme.css`;
 - formulários de despesas/QR: `invoice-capture.js/.css`.
 
-A cascade ainda contém regras históricas e `!important`; a redução deve ser feita por componente e com regressões, nunca por eliminação em massa.
+A cascade ainda contém regras históricas e `!important`; a redução deve ser por componente com regressões, nunca por eliminação em massa.
 
-### 4.1 Drawer móvel
-
-`v75-drawer-theme.css` (`76-drawer-hierarchy1`) define uma lista vertical legível, targets adequados, seleção clara, safe areas, foco, `prefers-reduced-motion` e `forced-colors`.
-
-### 4.2 Iconografia funcional — `76-icon-semantics1`
-
-- `icon.svg` é reservado à marca;
-- `ui-icons.js` usa subset Lucide local, sem icon font/CDN;
-- snapshot fixado em `94e4cb9d9db5907053ebf3636a97c45529cf776b` com `LUCIDE_LICENSE.txt`;
-- `plan` usa `CalendarCheck2`;
-- `settings` usa `Settings`/engrenagem;
-- nomes semânticos permanecem estáveis.
-
-### 4.3 Despesas mobile — `76-bills-mobile-filters1` + `76-bills-mobile-spacing1`
+## 5. Despesas mobile — `76-bills-mobile-alignment2`
 
 Autoridade funcional preservada:
 
@@ -108,109 +107,85 @@ Autoridade funcional preservada:
 - `events.js` mantém listeners;
 - IDs canónicos não mudaram.
 
-Composição:
+Composição final móvel:
 
-- pesquisa + ação principal em superfície compacta;
-- lupa Lucide local é a única lupa funcional;
-- filtros em cartão com Estado/Categoria, datas, ordenação e limpar;
-- PR #142 acrescenta espaçamento/ritmo vertical e remove offsets visuais desnecessários;
+- pesquisa + ação principal compactas;
+- lupa Lucide local como única lupa funcional;
+- filtros em grelha contida, sem depender de scroll horizontal;
+- Estado/Categoria e De/Até em pares;
+- Ordenar e Limpar filtros em linhas completas;
 - `<=360px` empilha antes de cortar conteúdo;
-- foco, reduced-motion, forced-colors e targets tácteis preservados.
+- `mobile-layout.css` continua sem assumir a geometria global do shell.
 
-### 4.4 Planeamento mobile — `76-planning-budget-card2` + `76-planning-ring-shape1`
+## 6. Planeamento mobile
 
-O PR #143 altera apenas a composição móvel do resumo de orçamento em `#page-planning`; o PR #145 corrige exclusivamente a geometria do anel após validação física no iPhone.
+`76-planning-budget-card2` + `76-planning-ring-shape1`:
 
-**Autoridade de dados e cálculo:**
+- `dashboardNumbers()`/`categoryTotals()` fornecem os valores apresentados;
+- `#monthPicker` continua a autoridade do mês;
+- `#monthPlanForm` e `#monthlyBudget` continuam a única gravação do orçamento;
+- ações Definir/Editar apenas focam o campo canónico;
+- orçamento ausente permanece `Por definir`;
+- navegação mensal usa Lucide local;
+- o anel neutraliza altura legada com `height:auto!important` e `aspect-ratio:1/1!important`;
+- desktop mantém os painéis/formulários canónicos.
 
-- `dashboardNumbers()` continua a fornecer os números agregados usados por `dashboardMetrics()`;
-- `categoryTotals()` continua a fornecer a distribuição de despesas;
-- `monthProfile()` continua a representar o perfil mensal;
-- `#monthPicker` continua a ser o controlo canónico do mês selecionado;
-- `stepMonth()` apenas atualiza `#monthPicker` e dispara o `change` já existente.
+## 7. Calculadora de datas — `76-date-calculator1`
 
-**Autoridade de gravação:**
+PR #149 adicionou um utilitário local sem criar nova rota principal.
 
-- `#monthPlanForm` permanece o único formulário de planeamento mensal;
-- `#monthlyBudget` permanece o único campo canónico de orçamento mensal;
-- `events.js` continua a validar `accountBalance`, `openingBalance` e `monthlyBudget` e a executar `commit('updated','planning')`;
-- os botões visuais `Definir/Editar orçamento` do novo cartão possuem apenas `data-v75-budget-focus`: deslocam a viewport e focam `#monthlyBudget`; não escrevem estado, não fazem `saveState()` nem `commit()`.
+Entrada: **Mais → Ferramentas → Calculadora de datas**.
 
-**Composição visual:**
+Arquitetura:
 
-- `v75-architecture.js` gera o seletor mensal, intervalo real do mês e cartão de orçamento;
-- `v76-planning-more.css` estiliza título, estado circular, métricas, orientação e CTA dentro de uma única superfície;
-- orçamento ausente permanece factual (`Por definir`), sem percentagem falsa;
-- quando existe orçamento, percentagem, gasto e disponível continuam calculados pela lógica existente;
-- navegação mensal usa ícones Lucide locais em vez dos caracteres `‹/›`;
-- `<=430px` mantém métricas numa coluna, removendo a antiga compressão em três colunas;
-- `<=350px` adapta o cabeçalho sem remover ações;
-- `prefers-reduced-motion` e `forced-colors` têm fallback explícito.
+- fonte canónica: `src/ui/date-calculator.ts`;
+- runtime browser: `.generated/date-calculator.js` → `dist/date-calculator.js`;
+- estilos: `date-calculator.css`;
+- build: `scripts/build-typescript-runtime.cjs` + `scripts/prepare-pages.cjs`;
+- Service Worker inclui CSS/runtime na allowlist pública.
 
-**Geometria do anel — PR #145:**
+Contratos de exatidão:
 
-- `v75-architecture.css` ainda contém uma regra histórica `width:118px!important;height:118px!important` para `.cdc-budget-ring`;
-- o PR #143 aumentou a largura móvel sem neutralizar a altura histórica, por isso `aspect-ratio` não conseguia produzir um quadrado e o círculo aparecia oval;
-- `76-planning-ring-shape1` em `v76-planning-more.css` passa a impor `height:auto!important` e `aspect-ratio:1/1!important`;
-- diâmetros canónicos: 136 px em mobile geral, 128 px em `<=430px` e 116 px em `<=350px`;
-- iconografia e tipografia interna acompanham a redução de escala;
-- testes verificam a neutralização da altura fixa, a proporção 1:1 e os breakpoints;
-- não existe qualquer alteração ao cálculo da percentagem, estado `Por definir`, orçamento ou persistência.
+- reutiliza `parseCivilDateKey`, `cleanDateKey`, `civilDayNumber`, `civilDayDiff`, `addCivilDays`, `addCivilMonthsClamped` e `currentLocalDateKey` de `core.js`;
+- diferença é de datas civis, não de milissegundos/horas locais;
+- DST/fuso não alteram a contagem de dias;
+- inclusão/exclusão de data inicial/final é explícita;
+- “dias úteis” = segunda a sexta; feriados só podem ser descontados se existir jurisdição explícita futura;
+- não usa rede, IndexedDB, `appState`, `commit()` ou `saveState()`;
+- fechar o shell autenticado fecha também o dialog da ferramenta.
 
-O overview dinâmico continua oculto em `>=821px`; desktop mantém o formulário/painéis canónicos existentes. O protótipo foi aplicado ao contexto móvel solicitado, sem criar uma segunda arquitetura financeira.
-
-## 5. Design system
-
-Direção vigente:
-
-- superfícies neutras;
-- teal como marca/ação/seleção;
-- sombras mínimas;
-- hierarquia por tipografia, alinhamento e espaço;
-- Lucide para ações/estados e `icon.svg` para marca;
-- targets essenciais >=44 px;
-- WCAG 2.2 AA como referência mínima quando aplicável;
-- light/dark, forced-colors e reduced-motion preservados.
-
-## 6. Mercado
-
-### Fontes e evidência
+## 8. Mercado
 
 - pesquisa live: Pingo Doce e Continente através de cesta.pt;
-- fotografia opcional: Open Food Facts quando existe correspondência forte/validada;
+- fotografia opcional: Open Food Facts quando existe correspondência validada;
 - preço pesquisado entra como `estimatedCents`;
 - valor pago só entra em `actualCents` após confirmação;
+- `marketId|pid` preserva identidade quando existe SKU verificável;
 - imagem/logótipo não prova preço/transação.
 
-### Identidade canónica
+## 9. Faturas e captura
 
-`marketId|pid` identifica SKUs reais quando existe origem verificável. `76-market-identity1` e `76-market-identity-stale1` preservam a identidade em criação/normalização/reload/restauro/sync e impedem herança de estado transitório obsoleto.
-
-## 7. Faturas e captura
-
-O fluxo Adicionar despesa mantém três modos:
+Fluxo Adicionar despesa:
 
 - Manual;
 - Ler fatura por imagem/QR AT;
 - QR Code por câmara.
 
-PR #132 mantém um único proprietário de scroll no mobile Safari. PR #140/#142 atuam apenas na lista/filtros de Despesas e não alteram captura nem domínio financeiro.
+PR #132 mantém um único proprietário de scroll no mobile Safari. Os blocos de alinhamento de Despesas não alteram captura nem domínio financeiro.
 
-## 8. TypeScript
+## 10. TypeScript
 
-Fontes canónicas já existentes incluem `src/types/*`, `src/ui/market-branding.ts` e `src/sync/sync-conflict-policy.ts`.
-
-Pipeline:
+Pipeline vigente:
 
 `src/**/*.ts → tsc strict/noEmit → build-typescript-runtime.cjs → .generated/*.js → prepare-pages.cjs → dist/*.js → Pages`.
 
-JavaScript manual só sai depois de substituição comprovada e regressões verdes. `v75-architecture.js` e `ui-icons.js` continuam JavaScript manual neste bloco.
+Runtimes TypeScript ativos incluem Market branding, Sync conflict policy e Calculadora de datas. JavaScript manual só sai depois de substituição comprovada e regressões verdes.
 
-## 9. Build/PWA
+## 11. Build/PWA
 
 Fluxo:
 
-`branch/PR → TypeScript Foundation + CI → merge main → build Pages → deploy`.
+`branch/PR → TypeScript Foundation + CI → merge main → Deploy Pages`.
 
 Service Worker:
 
@@ -219,41 +194,39 @@ Service Worker:
 - allowlist explícita;
 - tokens técnicos invalidam cache sem alterar release pública.
 
-PR #143 acrescentou `planning-budget-card2`; PR #145 acrescenta apenas `planning-ring-shape1`. `package.json`, `release-manifest.json`, `app-update.js` e `v76/0.76.0` permanecem inalterados.
+PR #149 adicionou `date-calculator1`; PR #150 acrescenta `auth-ios-spacing2`. `package.json`, `release-manifest.json`, `app-update.js` e v76/`0.76.0` permanecem inalterados.
 
-## 10. Segurança e dependências externas
+## 12. Segurança e dependências externas
 
 - nenhum segredo deve existir no repositório público;
 - CSP está ativa;
 - armazenamento sensível em claro está bloqueado;
 - zoom manual não é bloqueado;
 - iconografia Lucide é local/licenciada;
-- ZXing ainda é carregado de `unpkg.com`, logo a afirmação “Sem CDNs” na página Segurança continua incorreta até bundle local;
+- ZXing ainda é carregado de `unpkg.com`, portanto “Sem CDNs” continua factual e tecnicamente incorreto até bundle local;
 - `style-src 'unsafe-inline'` permanece dívida de hardening.
 
-## 11. QA
+## 13. QA
 
 A CI cobre sintaxe, TypeScript, finanças, isolamento, datas, QR, Mercado, imagens, scanner, UI, responsividade, acessibilidade, segurança e sync.
 
-PR #145:
+A regressão de acessibilidade protege especificamente o cofre móvel:
 
-- TypeScript Foundation PR `34948896081`: sucesso;
-- CI PR `34948896074`: sucesso;
-- CI push head `34948870264`: sucesso;
-- merge `471c689c1df47118bd3a345214acfd140bdc6e7d`;
-- Pages `34949105955`: sucesso.
+- `100svh`;
+- `margin:0 auto` no cartão mobile;
+- bandas de keypad 58/54/48 px;
+- piso tátil >=44 px;
+- token de cache `auth-ios-spacing2`.
 
-Limitação conhecida: testes estáticos não substituem validação física/E2E WebKit/Chromium para toque, teclado, scroll, foco e proporções reais. A forma circular do PR #145 deve ser confirmada no mesmo iPhone/PWA que revelou a deformação.
+Limitação: testes estáticos não substituem Safari/WebKit real para browser chrome, teclado virtual, scroll, foco e safe areas.
 
-## 12. Próxima consolidação
+## 14. Próxima consolidação
 
-1. confirmar fisicamente `76-planning-ring-shape1` no iPhone/PWA;
-2. validar Despesas PR #142 e restantes superfícies móveis no mesmo dispositivo;
-3. corrigir a descrição factual de rede na página Segurança;
+1. validar PR #150 no mesmo iPhone/Safari web e PWA;
+2. confirmar Despesas/Planeamento no mesmo dispositivo;
+3. corrigir descrição factual de rede em Segurança;
 4. empacotar ZXing localmente com licença preservada;
-5. depois remover `unpkg.com` de `script-src` e endurecer CSP;
+5. remover `unpkg.com` de `script-src` e endurecer CSP;
 6. criar E2E WebKit/Chromium;
 7. reduzir cascade CSS por componente;
-8. continuar TypeScript em módulos de baixo acoplamento;
-9. migrar `render/forms/events` só depois dos contratos visuais estabilizarem;
-10. deixar finanças/core/cifra para blocos com vetores de paridade próprios.
+8. continuar TypeScript em módulos de baixo acoplamento.
