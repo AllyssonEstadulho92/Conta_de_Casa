@@ -317,6 +317,24 @@ A captura física da Calculadora de datas mostrou que a versão móvel estava fu
 - `date-calculator-mobile-spacing3` é apenas um token técnico de cache e não altera a release pública;
 - CI protege a geometria declarada, mas a confirmação final continua dependente de Safari/WebKit real.
 
+## D-110 — o campo de data preserva o picker nativo e explicita a sua affordance
+
+O protótipo aprovado mostrou que a data precisava de uma leitura mais clara: calendário à esquerda, valor ao centro e ação **Hoje** à direita. A implementação deve obter essa hierarquia sem substituir o controlo nativo por um date picker próprio.
+
+- `input[type="date"]` continua a ser a fonte de interação do calendário;
+- em WebKit, `::-webkit-calendar-picker-indicator` pode ser reposicionado à esquerda para alinhar a affordance ao protótipo;
+- um divisor visual interno separa o indicador do valor, sem criar uma segunda ação;
+- o campo reserva espaço à esquerda para o indicador/divisor e à direita para **Hoje**;
+- **Hoje** permanece um botão real e independente com target >=44 px;
+- no mobile, Trocar pode ocupar o eixo horizontal para reforçar a relação entre as datas, mantendo uma superfície central 44×44 px;
+- a Regra de contagem usa duas colunas quando a largura permite e empilha em `<=430px` antes de comprimir texto;
+- `forced-colors` deve continuar funcional mesmo quando o background decorativo do campo é removido pelo sistema;
+- não é introduzida biblioteca nova de calendário ou ícones para esta alteração;
+- `date-calculator.css` continua a única autoridade visual e `src/ui/date-calculator.ts` continua a autoridade funcional;
+- matemática civil, IDs, handlers, inclusão/exclusão, dias úteis, IndexedDB, auth, sync, QR, scanner e Mercado permanecem inalterados;
+- `date-calculator-prototype-inputs4` é apenas token técnico de cache e não altera `v76`/`0.76.0`;
+- validação em Safari/WebKit real continua obrigatória porque o rendering do indicador nativo varia entre motores.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;
