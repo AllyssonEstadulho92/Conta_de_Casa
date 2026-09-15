@@ -317,23 +317,31 @@ A captura física da Calculadora de datas mostrou que a versão móvel estava fu
 - `date-calculator-mobile-spacing3` é apenas um token técnico de cache e não altera a release pública;
 - CI protege a geometria declarada, mas a confirmação final continua dependente de Safari/WebKit real.
 
-## D-110 — o campo de data preserva o picker nativo e explicita a sua affordance
+## D-110 — primeira aproximação do campo de data ao protótipo, substituída no WebKit por D-111
 
-O protótipo aprovado mostrou que a data precisava de uma leitura mais clara: calendário à esquerda, valor ao centro e ação **Hoje** à direita. A implementação deve obter essa hierarquia sem substituir o controlo nativo por um date picker próprio.
+O PR #163 definiu a hierarquia visual calendário → valor → Hoje e tentou obter essa composição reposicionando `::-webkit-calendar-picker-indicator` à esquerda. A captura física posterior no iPhone mostrou que esse detalhe não é robusto no WebKit e podia provocar overflow/clipping. A hierarquia continua válida, mas a técnica de reposicionamento foi substituída pela D-111.
 
-- `input[type="date"]` continua a ser a fonte de interação do calendário;
-- em WebKit, `::-webkit-calendar-picker-indicator` pode ser reposicionado à esquerda para alinhar a affordance ao protótipo;
-- um divisor visual interno separa o indicador do valor, sem criar uma segunda ação;
-- o campo reserva espaço à esquerda para o indicador/divisor e à direita para **Hoje**;
+- `input[type="date"]` continua a ser a fonte semântica de interação;
 - **Hoje** permanece um botão real e independente com target >=44 px;
-- no mobile, Trocar pode ocupar o eixo horizontal para reforçar a relação entre as datas, mantendo uma superfície central 44×44 px;
-- a Regra de contagem usa duas colunas quando a largura permite e empilha em `<=430px` antes de comprimir texto;
-- `forced-colors` deve continuar funcional mesmo quando o background decorativo do campo é removido pelo sistema;
-- não é introduzida biblioteca nova de calendário ou ícones para esta alteração;
-- `date-calculator.css` continua a única autoridade visual e `src/ui/date-calculator.ts` continua a autoridade funcional;
-- matemática civil, IDs, handlers, inclusão/exclusão, dias úteis, IndexedDB, auth, sync, QR, scanner e Mercado permanecem inalterados;
-- `date-calculator-prototype-inputs4` é apenas token técnico de cache e não altera `v76`/`0.76.0`;
-- validação em Safari/WebKit real continua obrigatória porque o rendering do indicador nativo varia entre motores.
+- Trocar mantém o eixo horizontal e superfície central 44×44 px;
+- `date-calculator.css` continua a única autoridade visual;
+- a regra de não introduzir um segundo date picker permanece;
+- a técnica de `left`/`position:absolute` sobre o indicador WebKit não deve voltar a ser usada como autoridade final.
+
+## D-111 — o campo de data iOS usa uma moldura contida e não desloca o indicador nativo
+
+A captura física após o PR #163 mostrou a secção deslocada e cortada lateralmente no Safari/iOS. O problema confirmado era de apresentação: a combinação de padding reservado e reposicionamento absoluto do indicador nativo podia aumentar a largura intrínseca de `input[type="date"]` no WebKit.
+
+- `.cdc-datecalc-input-action` passa a ser a única moldura visual do campo, com grelha interna `48px minmax(0,1fr) auto`;
+- a affordance visual de calendário e o divisor pertencem à moldura e não introduzem rede, biblioteca ou segundo widget de data;
+- o `input[type="date"]` nativo ocupa a coluna central, usa `min-width:0` e não recebe borda própria duplicada;
+- `::-webkit-calendar-picker-indicator` não é reposicionado por coordenadas; fica visualmente colapsado para não interferir na geometria;
+- **Hoje** ocupa a terceira coluna em fluxo normal, não `position:absolute`;
+- o foco visível é aplicado à moldura por `:focus-within`;
+- em telemóveis comuns a Regra de contagem preserva duas colunas; só empilha em `<=340px`;
+- o hotfix não altera o token do Service Worker: como `date-calculator.css` já é servido network-first/no-store, um reload normal pode obter a correção sem obrigar o utilizador ao ecrã de atualização;
+- a correção é estritamente visual e não altera TypeScript funcional, matemática civil, IDs, handlers, IndexedDB, auth, sync, QR, scanner, Mercado ou release;
+- CI protege a estrutura declarada, mas a confirmação final continua dependente do mesmo iPhone/Safari/PWA real.
 
 ## Invariantes vigentes
 
