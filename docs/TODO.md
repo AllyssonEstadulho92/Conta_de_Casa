@@ -90,7 +90,8 @@ Atualizado: 15 de setembro de 2026
 ### Planeamento + Calendário
 
 - [x] Planeamento v76 e estado “Por definir” para orçamento ausente.
-- [ ] Rever geometria do ícone de Planeamento no subset local Lucide.
+- [x] PR #138: substituir a antiga geometria wallet/tray de `plan` por `CalendarCheck2` do snapshot Lucide fixado.
+- [x] PR #138: regressão impede Planeamento de voltar a usar a geometria de carteira.
 - [ ] Rever calendário/vencimentos em E2E e densidade final tablet/desktop.
 
 ### Relatórios + Objetivos
@@ -100,9 +101,18 @@ Atualizado: 15 de setembro de 2026
 
 ### Segurança + Diagnóstico + Definições
 
-- [ ] Rever geometria do ícone de Definições para engrenagem consistente no subset local Lucide.
+- [x] PR #138: substituir sliders de `settings` pela engrenagem `Settings` do snapshot Lucide fixado.
+- [x] PR #138: regressão impede Definições de voltar à geometria de sliders.
 - [ ] Corrigir texto “Sem CDNs” enquanto ZXing usar `unpkg.com`.
 - [ ] Rever feedback/destructive actions/dark mode/forced-colors fisicamente.
+
+### Iconografia transversal
+
+- [x] Manter `icon.svg` como marca e Lucide como iconografia funcional.
+- [x] Manter snapshot Lucide auditável `94e4cb9d9db5907053ebf3636a97c45529cf776b` e licença local.
+- [x] PR #138: TypeScript Foundation PR `34938701913` e CI PR `34938701834` verdes.
+- [x] PR #138: TypeScript Foundation main `34938763131`, CI main `34938763232` e Pages `34938807431` verdes.
+- [ ] Validar visualmente Planeamento/Definições no iPhone/PWA e desktop.
 
 ## P0 — TypeScript
 
@@ -118,6 +128,7 @@ Atualizado: 15 de setembro de 2026
 - [ ] Migrar módulos UI/baixo acoplamento restantes.
 - [ ] Criar vetores de paridade para dinheiro/datas/quantidades.
 - [ ] Migrar domínio Mercado para TS e retirar a ponte transitória de identidade quando houver autoridade única.
+- [ ] Migrar `ui-icons.js` para TypeScript em bloco próprio, preservando registry/hydrator e paridade visual.
 - [ ] Migrar `render/forms/events` depois dos contratos visuais estabilizarem.
 - [ ] Migrar core/persistência/cifra apenas com vetores próprios.
 - [ ] Migrar Service Worker/tooling no bloco final.
@@ -126,6 +137,7 @@ Atualizado: 15 de setembro de 2026
 
 - [x] PIN local não depende de rede.
 - [x] `[hidden]` do auth protegido em Safari/WebKit.
+- [ ] Corrigir a descrição “Sem CDNs” na página Segurança enquanto ZXing continuar remoto.
 - [ ] Empacotar ZXing localmente com licença preservada.
 - [ ] Depois, remover `https://unpkg.com` de `script-src`.
 - [ ] Reduzir `style-src 'unsafe-inline'` quando possível.
