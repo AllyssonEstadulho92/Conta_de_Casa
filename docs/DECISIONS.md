@@ -233,12 +233,29 @@ A captura física no Safari mostrou que um layout correto por largura ainda pode
 - o cofre móvel usa `100svh` como referência estável quando o browser chrome está visível;
 - safe areas continuam a ser respeitadas com `env(safe-area-inset-*)`;
 - o conteúdo começa no topo seguro e `.vault-card` não usa margem vertical automática no mobile;
-- a densidade reduz progressivamente por altura antes de permitir clipping: keypad 58/54/48 px nos breakpoints 900/780/640 px;
 - nenhum alvo essencial pode descer abaixo de 44 px;
 - o input mantém pelo menos 16 px de texto no iOS para evitar auto-zoom indesejado;
 - pinch-to-zoom permanece permitido;
 - esta decisão é exclusivamente de apresentação e não altera PIN, PBKDF2, AES-GCM, unlock, IndexedDB, importação ou sync;
+- os tamanhos 58/54/48 px do PR #150 foram uma etapa intermédia e são substituídos pela autoridade final definida em D-105;
 - testes estáticos protegem o contrato, mas validação física Safari/PWA continua obrigatória.
+
+## D-105 — o ecrã de PIN tem uma única autoridade visual baseada no protótipo aprovado
+
+A validação física após o PR #150 mostrou que acumular breakpoints corretivos não produzia uma composição coerente. O PR #152 substitui essas secções por `76-auth-prototype-final1`.
+
+- `v75-usability.css` contém uma única secção canónica de apresentação do cofre;
+- `76-vault-short-height1` e `76-auth-ios-spacing2` deixam de existir como blocos CSS concorrentes;
+- o HTML e todos os IDs/handlers do auth permanecem canónicos e inalterados;
+- keypad mobile padrão usa teclas de 56 px, `column-gap:30px` e `row-gap:16px` para corresponder ao protótipo aprovado;
+- em `<=359px`, o keypad usa 52 px com gaps 24/13 px;
+- em alturas `<=720px`, usa 50 px com gaps 22/9 px antes de permitir clipping;
+- `100svh`, safe areas, scroll, pinch-to-zoom e input >=16 px permanecem requisitos iOS;
+- Entrar é a ação visual principal; palavra-passe/recuperação são secundárias; transferência de cofre é superfície própria;
+- targets essenciais nunca descem abaixo de 44 px;
+- dark mode, `forced-colors` e `prefers-reduced-motion` continuam obrigatórios;
+- a alteração não toca PIN, palavra-passe, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync ou domínio financeiro;
+- regressão visual real no dispositivo tem prioridade sobre preservar dimensões históricas apenas porque testes antigos as esperavam.
 
 ## Invariantes vigentes
 
