@@ -4,7 +4,7 @@ Atualizado: 15 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main`: `a1cbdce6661bbde015699fca39d5aa7ac284ec90` — PR #161  
+Baseline funcional em `main`: `1bf42cfc2ed7c2b67413db49c7828416dcae4d4c` — PR #163  
 Branch funcional: `main`
 
 ## Invariantes
@@ -28,51 +28,49 @@ Blocos atuais relevantes:
 - PR #154 / `76-auth-exclusive-state1`: criação e desbloqueio do cofre são estados visualmente exclusivos;
 - PR #156 / `76-date-calculator-layout2`: autoridade visual canónica da Calculadora de datas;
 - PR #158 / `76-auth-spacing3`: ritmo vertical do PIN ajustado para Safari/iOS;
-- PR #161 / `76-date-calculator-mobile-spacing3`: Data inicial, Trocar e Data final formam um grupo móvel compacto.
+- PR #161 / `76-date-calculator-mobile-spacing3`: Data inicial, Trocar e Data final formam um grupo móvel compacto;
+- PR #163 / `76-date-calculator-prototype-inputs4`: campos de data, controlo Trocar e regra de contagem alinhados ao protótipo aprovado.
 
 ## Calculadora de datas — estado atual
 
-Autoridade funcional: `src/ui/date-calculator.ts`.  
-Autoridade visual: `date-calculator.css` / `76-date-calculator-layout2`, com refinamento interno `76-date-calculator-mobile-spacing3`.
+Autoridade funcional: `src/ui/date-calculator.ts` / `76-date-calculator1`.  
+Autoridade visual: `date-calculator.css` / `76-date-calculator-layout2`, com refinamentos internos `76-date-calculator-mobile-spacing3` e `76-date-calculator-prototype-inputs4`.
 
-O PR #156 consolidou o componente sem alterar a matemática civil e o PR #161 corrige especificamente o espaçamento observado no telemóvel:
+O PR #163 adapta a apresentação ao protótipo aprovado sem criar uma segunda implementação:
 
-- escala de espaçamento continua 4/8/12/16/20/24/32 px;
-- desktop: formulário/resultado na área principal e informação rápida na coluna lateral;
-- mobile `<=820px`: **Calculadora → Informação rápida → Resultado → Ações**;
-- `<=560px`: Data inicial → Trocar → Data final usa uma coluna flexível com gap canónico de 8 px;
-- labels do grupo de datas neutralizam altura/margem herdadas que possam criar vazio artificial;
-- botão Trocar mantém 44×44 px, centrado e sem margem vertical adicional;
-- inputs mantêm 52 px, texto de 16 px e ação **Hoje** >=44 px;
-- `<=430px`: grupos secundários passam a uma coluna;
-- `<=360px`: dialog usa `100svh` em ecrã completo;
-- sem scroll horizontal como requisito de navegação;
-- `forced-colors`, `prefers-reduced-motion` e impressão/PDF permanecem suportados;
-- Service Worker usa os tokens técnicos `date-calculator-layout2` e `date-calculator-mobile-spacing3`.
+- os campos `input[type="date"]` preservam o seletor nativo;
+- a affordance nativa do calendário fica à esquerda em WebKit, com divisor visual interno;
+- o valor da data mantém espaço reservado entre calendário e ação **Hoje**;
+- **Hoje** permanece à direita com target >=44 px;
+- em `<=560px`, Data inicial → Trocar → Data final continuam num grupo vertical com gap de 8 px;
+- o controlo **Trocar** passa a funcionar visualmente como eixo horizontal, mantendo uma superfície central de 44×44 px;
+- **Regra de contagem** usa duas colunas quando existe largura suficiente e passa a uma coluna em `<=430px` para evitar compressão;
+- inputs principais mantêm 52 px e texto de 16 px;
+- `100svh`, safe areas, `forced-colors`, `prefers-reduced-motion` e impressão/PDF permanecem suportados;
+- Service Worker usa o token técnico `date-calculator-prototype-inputs4` para invalidar a apresentação anterior.
 
-A lógica continua local, baseada nas primitivas civis de `core.js`; não foi criada uma segunda implementação de cálculos. Dias úteis continuam a significar segunda a sexta-feira e não descontam feriados sem jurisdição configurada.
+A lógica continua local e baseada nas primitivas civis de `core.js`. Não foi alterada a matemática de datas, inclusão/exclusão dos limites, soma/subtração, definição de dias úteis ou persistência.
 
-Evidência PR #161:
+Evidência PR #163:
 
-- head `44322ce724e1ec7795b2f76f73bfd7535dc7427d`;
-- TypeScript Foundation PR `35021139249`: sucesso;
-- CI PR `35021139256`: sucesso integral;
-- merge `a1cbdce6661bbde015699fca39d5aa7ac284ec90`;
-- TypeScript Foundation `main` `35021210449`: sucesso;
-- CI `main` `35021210442`: sucesso integral;
-- Deploy Pages `35021281637`: sucesso.
+- head funcional `c2bbcf7d98bcd7511dbde748e049f3e15258bd3b`;
+- TypeScript Foundation PR `35023063165`: sucesso;
+- CI PR `35023063147`: sucesso integral;
+- merge `1bf42cfc2ed7c2b67413db49c7828416dcae4d4c`;
+- TypeScript Foundation `main` `35023156381`: sucesso;
+- CI `main` `35023156390`: sucesso integral;
+- Deploy Pages `35023224573`: sucesso.
 
-Pendente: confirmação física no mesmo iPhone/Safari/PWA de que o espaço entre as duas datas ficou proporcional e sem novo clipping.
+Pendente: confirmação física no mesmo iPhone/Safari/PWA de que o indicador nativo, o divisor, o botão Hoje, o eixo Trocar e a regra de contagem mantêm a composição prevista sem clipping.
 
 ## Auth / iOS — PR #158
 
-`v75-usability.css` continua a única autoridade visual do cofre. O PR #158 não cria nova folha nem duplica handlers; apenas corrige o ritmo vertical dentro da autoridade existente.
+`v75-usability.css` continua a única autoridade visual do cofre.
 
 - keypad móvel mantém 56 px com `column-gap:30px` e `row-gap:16px`;
 - espaço entre marca e conteúdo: 16 px;
 - campo PIN e keypad usam 18 px de separação dos blocos anteriores;
-- CTA **Entrar** mantém 52 px e passa a 20 px após o keypad;
-- transferência passa a 14 px de margem superior + 12 px de separador interno;
+- CTA **Entrar** mantém 52 px;
 - `#vaultMessage:empty` deixa de reservar altura;
 - `100svh`, safe areas, input >=16 px, pinch-to-zoom, dark mode, `forced-colors` e `prefers-reduced-motion` permanecem ativos;
 - cache PWA usa o token técnico `auth-spacing3`.
@@ -103,7 +101,7 @@ Pendente: validação física no mesmo iPhone/PWA.
 
 ## Próximo passo
 
-1. validar `76-date-calculator-mobile-spacing3` no iPhone/Safari/PWA;
+1. validar `76-date-calculator-prototype-inputs4` no iPhone/Safari/PWA;
 2. validar `76-auth-spacing3` e os restantes blocos móveis pendentes;
 3. corrigir a descrição factual de rede em Segurança;
 4. empacotar ZXing local e endurecer CSP;

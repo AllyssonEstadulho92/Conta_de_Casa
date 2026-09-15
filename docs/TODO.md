@@ -73,13 +73,18 @@ Atualizado: 15 de setembro de 2026
 - [x] PR #156: inputs principais 52 px; targets menores >=44 px.
 - [x] PR #156: breakpoints 820/560/430/360 e ausência de scroll horizontal como requisito.
 - [x] PR #156: forced-colors, reduced-motion e impressão/PDF preservados.
-- [x] PR #156: TypeScript PR `35016302805` e CI PR `35016302738` verdes.
-- [x] PR #156: merge `00ec8351cfedb8eba657fe4f19a4f2614c86347f`.
-- [x] PR #156: TypeScript `main` `35016376375`, CI `main` `35016376360` e Pages `35016440963` verdes.
 - [x] PR #161 / `76-date-calculator-mobile-spacing3`: Data inicial → Trocar → Data final compactados no mobile sem alterar markup ou lógica.
 - [x] PR #161: `<=560px` usa flex vertical, gap de 8 px, labels sem margem/altura herdada e Trocar 44×44 px centrado.
-- [x] PR #161: TypeScript PR `35021139249`, CI PR `35021139256`, TypeScript `main` `35021210449`, CI `main` `35021210442` e Pages `35021281637` verdes.
-- [ ] Confirmar fisicamente `76-date-calculator-mobile-spacing3` no mesmo iPhone/Safari/PWA.
+- [x] PR #163 / `76-date-calculator-prototype-inputs4`: apresentação alinhada ao protótipo aprovado dentro da mesma folha canónica.
+- [x] PR #163: `input[type="date"]` preserva o picker nativo, com indicador WebKit à esquerda, divisor interno e ação Hoje à direita.
+- [x] PR #163: Trocar usa eixo horizontal visual em mobile com superfície central 44×44 px.
+- [x] PR #163: Regra de contagem usa duas colunas e empilha em `<=430px` para evitar clipping.
+- [x] PR #163: regressões atualizadas e cache PWA invalidado com `date-calculator-prototype-inputs4`.
+- [x] PR #163: TypeScript PR `35023063165` e CI PR `35023063147` verdes.
+- [x] PR #163: merge `1bf42cfc2ed7c2b67413db49c7828416dcae4d4c`.
+- [x] PR #163: TypeScript `main` `35023156381`, CI `main` `35023156390` e Pages `35023224573` verdes.
+- [ ] Confirmar fisicamente `76-date-calculator-prototype-inputs4` no mesmo iPhone/Safari/PWA.
+- [ ] Confirmar o indicador nativo do calendário e o eixo Trocar em WebKit real.
 - [ ] Confirmar visualmente o dialog em tablet e desktop.
 - [ ] Validar top-layer/scroll do `<dialog>` em WebKit real.
 - [ ] Validar copiar/partilhar/imprimir-PDF em dispositivo real.

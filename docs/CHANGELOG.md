@@ -2,6 +2,50 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-15 — PR #163 / `76-date-calculator-prototype-inputs4` — campos de datas alinhados ao protótipo — publicado
+
+### Problema confirmado
+
+Depois do ajuste de espaçamento do PR #161, a secção já estava funcional e compacta, mas a hierarquia visual ainda não correspondia ao protótipo aprovado: o campo de data não explicitava suficientemente a affordance do calendário, o controlo **Trocar** não criava um eixo visual entre as datas e a Regra de contagem precisava de uma composição mais organizada.
+
+### Correção
+
+- `date-calculator.css` permanece a única autoridade visual da ferramenta;
+- `input[type="date"]` continua nativo e não foi substituído por widget JavaScript;
+- em WebKit, o indicador nativo do calendário é reposicionado à esquerda;
+- o campo reserva 54 px à esquerda e 76 px à direita para calendário/divisor e ação **Hoje**;
+- um divisor vertical interno separa a affordance do calendário do valor;
+- **Hoje** permanece ação real à direita com target >=44 px;
+- em `<=560px`, Trocar ocupa o eixo horizontal disponível, mantendo uma superfície central 44×44 px;
+- Regra de contagem usa duas colunas onde existe largura e passa a uma coluna em `<=430px`;
+- checkboxes móveis usam 22×22 px sem reduzir a área clicável da label;
+- `forced-colors`, `prefers-reduced-motion`, `100svh`, safe areas e impressão/PDF permanecem suportados;
+- `tests/date-calculator.test.cjs` protege o novo contrato visual e todos os vetores matemáticos civis anteriores;
+- Service Worker recebe `date-calculator-prototype-inputs4` para invalidar a apresentação anterior.
+
+### Preservado
+
+Sem alteração de `src/ui/date-calculator.ts`, matemática civil, regras de inclusão/exclusão, soma/subtração, dias úteis, IDs, handlers, IndexedDB, finanças, auth, sync, QR, scanner, Mercado, `STATE_VERSION`, `v76` ou `0.76.0`.
+
+### Evidência
+
+- head funcional `c2bbcf7d98bcd7511dbde748e049f3e15258bd3b`;
+- TypeScript Foundation PR `35023063165`: sucesso;
+- CI PR `35023063147`: sucesso integral;
+- merge `1bf42cfc2ed7c2b67413db49c7828416dcae4d4c`;
+- TypeScript Foundation `main` `35023156381`: sucesso;
+- CI `main` `35023156390`: sucesso integral;
+- Deploy Pages `35023224573`: sucesso.
+
+### Pendente
+
+- confirmação física no mesmo iPhone/Safari web e PWA instalada;
+- confirmação do rendering do indicador nativo WebKit e do eixo Trocar;
+- validação tablet/desktop e portrait/landscape;
+- E2E WebKit/Chromium para top-layer, scroll, partilha e impressão.
+
+---
+
 ## 2026-09-15 — PR #161 / `76-date-calculator-mobile-spacing3` — grupo móvel de datas — publicado
 
 ### Problema confirmado
