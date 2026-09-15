@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'conta-de-casa-public-v76-version-alignment1-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-planning-more1-header2-stability1-layout1-drawer2-image-library1-catalog4-pd-photo1-photo-loader3-startup2-usability1-pages1-assets1-market1-expenses1-modern-ui2-version-alignment1-mobile-shell2-architecture-baseline1-ui-components1-product-pages1-ts-runtime2-market-branding1-auth1-dashboard-clean1-ts-runtime3-sync-policy1-auth-transition1-auth-hidden1-ui-audit1-brand-icons1-full-page-audit1-page-polish1-runtime-consolidation1-architecture-consolidation1-retire-v74-runtime1-retire-assets1-menu-morph1-mobile-drawer-actions1-expense-mode1-single-menu-authority1-expense-mode-stability1-shell-coherence1-vault-short-height1-canonical-expense-market1-prototype-system1-prototype-dashboard1-prototype-product-browser1-single-search-surface1-menu-visible-close1-drawer-grid1-expense-form-professional1-expense-ios-touch1-market-identity1-market-identity-stale1-planning-budget-card2-planning-ring-shape1-expenses-mobile-alignment2';
+const CACHE = 'conta-de-casa-public-v76-version-alignment1-v75-architecture2-v74-ui1-v74-shopping2-v73-menu8-planning-more1-header2-stability1-layout1-drawer2-image-library1-catalog4-pd-photo1-photo-loader3-startup2-usability1-pages1-assets1-market1-expenses1-modern-ui2-version-alignment1-mobile-shell2-architecture-baseline1-ui-components1-product-pages1-ts-runtime2-market-branding1-auth1-dashboard-clean1-ts-runtime3-sync-policy1-auth-transition1-auth-hidden1-ui-audit1-brand-icons1-full-page-audit1-page-polish1-runtime-consolidation1-architecture-consolidation1-retire-v74-runtime1-retire-assets1-menu-morph1-mobile-drawer-actions1-expense-mode1-single-menu-authority1-expense-mode-stability1-shell-coherence1-vault-short-height1-canonical-expense-market1-prototype-system1-prototype-dashboard1-prototype-product-browser1-single-search-surface1-menu-visible-close1-drawer-grid1-expense-form-professional1-expense-ios-touch1-market-identity1-market-identity-stale1-planning-budget-card2-planning-ring-shape1-expenses-mobile-alignment2-date-calculator1';
 const NAVIGATION_TIMEOUT_MS = 4000;
 const PUBLIC_ASSETS = [
   './',
@@ -36,6 +36,7 @@ const PUBLIC_ASSETS = [
   './v76-modern-ui.css',
   './v76-product-pages.css',
   './v76-mobile-shell.css',
+  './date-calculator.css',
   './core.js',
   './finance.js',
   './render.js',
@@ -64,6 +65,7 @@ const PUBLIC_ASSETS = [
   './v64-runtime.js',
   './market-shopping-focus.js',
   './v75-architecture.js',
+  './date-calculator.js',
   './v75-stability.js',
   './v75-startup-guard.js',
   './v75-market-flow.js',
