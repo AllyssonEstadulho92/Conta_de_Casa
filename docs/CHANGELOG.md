@@ -2,6 +2,46 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-15 — PR #138 / `76-icon-semantics1` — iconografia funcional semântica — publicado
+
+### Problema confirmado
+
+A família Lucide já era a autoridade funcional, mas duas entradas do subset local não correspondiam bem à responsabilidade apresentada:
+
+- `plan` reutilizava exatamente a mesma geometria de `wallet`, fazendo Planeamento parecer uma carteira/tray;
+- `settings` usava sliders, aproximando Definições de filtros/ajustes rápidos em vez de uma configuração global.
+
+### Correção
+
+- `ui-icons.js` passa a declarar `76-icon-semantics1`;
+- Planeamento mantém o nome semântico `plan`, mas usa `CalendarCheck2` do snapshot Lucide fixado no projeto;
+- Definições mantém o nome semântico `settings`, mas usa `Settings`/engrenagem do mesmo snapshot;
+- snapshot de origem permanece `94e4cb9d9db5907053ebf3636a97c45529cf776b`;
+- `LUCIDE_LICENSE.txt` e distribuição local/offline permanecem inalterados;
+- `CDCIcons` expõe a revisão sem alterar a API `markup` já usada pela arquitetura;
+- regressões verificam que Planeamento não volta a wallet/tray e Definições não volta a sliders.
+
+### Evidência
+
+- PR #138 head `fc08456427aad0069774b01caabbafd64c1b6c3b`;
+- TypeScript Foundation PR `34938701913`: sucesso;
+- CI PR `34938701834`: sucesso integral;
+- merge PR #138: `d2348c940ccdee2812805c82a6f2e62cccf24863`;
+- TypeScript Foundation main `34938763131`: sucesso;
+- CI main `34938763232`: sucesso integral;
+- Pages `34938807431`: sucesso.
+
+### Preservado
+
+Sem alteração de CSS, rotas, handlers, `STATE_VERSION`, release `v76`, versão `0.76.0`, `package.json`, `release-manifest.json`, `app-update.js`, cálculos, PIN/cofre, IndexedDB, Mercado, QR, scanner ou sync. Nenhuma CDN foi adicionada.
+
+### Pendente
+
+- validação física dos novos ícones no mesmo iPhone/Safari/PWA e desktop;
+- correção do texto “Sem CDNs” na página Segurança enquanto ZXing continuar carregado de `unpkg.com`.
+
+---
+
 ## 2026-09-15 — PR #136 / `76-drawer-hierarchy1` — drawer móvel harmonizado — publicado
 
 ### Problema confirmado no iPhone
@@ -52,8 +92,7 @@ Sem alteração de `STATE_VERSION`, release `v76`, versão `0.76.0`, `package.js
 
 ### Pendente
 
-- validação física do drawer no mesmo iPhone/Safari/PWA;
-- passagem isolada pela geometria global dos ícones de Planeamento e Definições.
+- validação física do drawer no mesmo iPhone/Safari/PWA.
 
 ---
 
@@ -162,6 +201,7 @@ Sem alteração de `STATE_VERSION`, release pública, `package.json`, `release-m
 
 - regressão real em dispositivo tem prioridade sobre teste legado;
 - `icon.svg` é a marca canónica e Lucide é a iconografia funcional;
+- ícones funcionais devem representar a responsabilidade real e usar geometria do snapshot Lucide auditado;
 - o drawer completo usa uma coluna e expõe apenas destinos de primeiro nível;
 - rotas secundárias permanecem nas páginas-pai em vez de duplicarem a navegação;
 - `marketId|pid` acompanha o SKU pesquisado quando existe origem verificável;
