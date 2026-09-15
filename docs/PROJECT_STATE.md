@@ -4,7 +4,7 @@ Atualizado: 15 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main`: `471c689c1df47118bd3a345214acfd140bdc6e7d` — PR #145  
+Baseline funcional em `main`: `480dc501ff10bf29413b934e623d8641d5e95229` — PR #147  
 Branch funcional: `main`
 
 ## Invariantes obrigatórias
@@ -29,64 +29,61 @@ Consolidações relevantes:
 - PR #117–#130: menu móvel, shell/safe areas, Planeamento/Mais, Dashboard, Mercado, drawer e pesquisa alinhados ao produto v76;
 - PR #131: fluxo profissional de Adicionar despesa;
 - PR #132: hotfix Safari/iPhone para touch/scroll do formulário de despesas;
-- PR #133: persistência retrocompatível de `marketId|pid` no Mercado;
-- PR #134: expiração segura da identidade temporária se um clique live não chegar ao commit;
+- PR #133/#134: identidade `marketId|pid` do Mercado e expiração segura do estado transitório;
 - PR #136: `76-drawer-hierarchy1`, drawer móvel em hierarquia vertical legível;
 - PR #138: `76-icon-semantics1`, Planeamento/Definições com geometrias Lucide coerentes;
 - PR #140: `76-bills-mobile-filters1`, pesquisa/filtros móveis de Despesas reorganizados;
-- PR #142: `76-bills-mobile-spacing1`, ritmo, espaçamento e limpeza visual do mesmo bloco de Despesas;
-- PR #143: `76-planning-budget-card2`, resumo móvel de Planeamento reorganizado segundo o protótipo aprovado sem duplicar o fluxo funcional de orçamento;
-- PR #145: `76-planning-ring-shape1`, normalização do anel de orçamento após validação física no iPhone revelar deformação oval.
+- PR #142: `76-bills-mobile-spacing1`, ritmo e espaçamento do mesmo bloco;
+- PR #143: `76-planning-budget-card2`, resumo móvel de Planeamento reorganizado;
+- PR #145: `76-planning-ring-shape1`, anel de orçamento normalizado após validação física;
+- PR #147: `76-bills-mobile-alignment2`, filtros móveis de Despesas convertidos de faixa horizontal para grelha contida e alinhada.
 
-## Evidência mais recente — PR #145
+## Evidência mais recente — PR #147
 
-- head final do PR: `7b6760955b365076bc3fab08f96113adafa87505`;
-- TypeScript Foundation PR `34948896081`: sucesso;
-- CI PR `34948896074`: sucesso integral;
-- CI push do head `34948870264`: sucesso integral;
-- merge PR #145: `471c689c1df47118bd3a345214acfd140bdc6e7d`;
-- Pages `34949105955`: sucesso, incluindo preparação do bundle, upload e deploy.
+- head final do PR: `c2435e8580982c8c8367b0e7458ead2009201a5d`;
+- TypeScript Foundation PR `34951435419`: sucesso;
+- CI PR `34951435285`: sucesso integral;
+- merge PR #147: `480dc501ff10bf29413b934e623d8641d5e95229`;
+- TypeScript Foundation `main` `34951525321`: sucesso;
+- CI `main` `34951525416`: sucesso integral;
+- Pages `34951589187`: sucesso.
 
-A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados pelos PR #142/#143/#145.
+A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados pelo PR #147.
 
-## Despesas — pesquisa, filtros e espaçamento móvel
+## Despesas — pesquisa, filtros e alinhamento móvel
 
-`76-bills-mobile-filters1` + `76-bills-mobile-spacing1` estão integrados:
+`76-bills-mobile-filters1` + `76-bills-mobile-spacing1` + `76-bills-mobile-alignment2` estão integrados:
 
 - `#billSearch`, `#newBillBtn`, `#billStatusFilter`, `#billCategoryFilter`, `#billDateFrom`, `#billDateTo`, `#billSort` e `#billClearFilters` continuam canónicos;
 - `renderBills()` e `events.js` continuam a autoridade funcional;
-- lupa histórica duplicada foi neutralizada, ficando o Lucide local como representação funcional;
-- pesquisa, ação principal e cartão de filtros usam espaçamento móvel consistente;
-- Estado/Categoria permanecem organizados, datas/ordenação/limpeza continuam funcionais;
-- `<=360px` mantém fallback de uma coluna;
-- foco, `forced-colors`, `prefers-reduced-motion` e targets tácteis permanecem cobertos;
-- cálculos, persistência, PIN/cofre, QR, scanner e sync não foram alterados.
+- lupa histórica duplicada permanece neutralizada; a lupa Lucide local é a única representação funcional;
+- pesquisa e ação principal ocupam uma superfície compacta com espaçamento previsível;
+- a antiga faixa horizontal de filtros deixou de ser a apresentação final no mobile;
+- Estado/Categoria formam o primeiro par, De/Até o segundo, Ordenar ocupa uma linha completa e Limpar filtros permanece ação terciária;
+- o cartão usa contenção de largura (`min-width:0`/`max-width:100%`) e não depende de scroll horizontal para revelar controlos;
+- controlos móveis têm 50 px de altura e o botão Limpar mantém target de pelo menos 44 px;
+- `<=360px` usa uma coluna para evitar clipping;
+- foco, `forced-colors` e `prefers-reduced-motion` permanecem cobertos;
+- `mobile-layout.css` continua CSS de feature e não assume viewport/safe areas/dock, cuja autoridade é `v76-mobile-shell.css`;
+- cálculos, persistência, PIN/cofre, QR, scanner, Mercado e sync não foram alterados.
 
-PR #142 foi publicado com TypeScript/CI/Pages verdes; Pages `34945033256` terminou com sucesso.
+Durante o PR #147, o gate de arquitetura rejeitou `overflow:hidden` genérico em CSS de feature. A implementação final removeu esse ownership indevido e a CI voltou a verde.
 
 ## Planeamento — orçamento móvel
 
-`76-planning-budget-card2` + `76-planning-ring-shape1` estão publicados:
+`76-planning-budget-card2` + `76-planning-ring-shape1` permanecem publicados:
 
-- o seletor de mês mantém `#monthPicker` como autoridade e continua a usar `stepMonth()`/evento `change` existente;
-- o cartão apresenta mês e intervalo real, título Orçamento mensal, gasto do mês, orçamento, disponível e estado definido/por definir;
-- os valores continuam derivados de `dashboardNumbers()`/`categoryTotals()` e da lógica financeira existente;
+- `#monthPicker` continua a autoridade do mês e `stepMonth()` apenas atualiza/dispara o fluxo existente;
+- gasto, orçamento e disponível continuam derivados da lógica financeira existente;
 - orçamento ausente continua factual: `Por definir`, sem percentagem falsa;
-- Definir/Editar orçamento não cria segundo formulário nem grava dados: todas as ações apenas deslocam/focam `#monthlyBudget`;
-- a gravação continua exclusivamente no `#monthPlanForm` através do listener de `events.js`, `monthProfile()` e `commit('updated','planning')`;
-- ícones vêm do subset Lucide local; navegação mensal deixa de depender de caracteres `‹/›`;
-- em iPhones estreitos as três métricas deixam de ser comprimidas em colunas iguais e passam a linhas legíveis;
-- a validação física revelou que uma altura histórica fixa (`118px!important`) em `v75-architecture.css` competia com a largura nova do anel, produzindo uma elipse;
-- `76-planning-ring-shape1` neutraliza essa altura com `height:auto!important`, força `aspect-ratio:1/1!important` e usa 136 px no mobile geral, 128 px em `<=430px` e 116 px em `<=350px`;
-- a iconografia e tipografia internas foram reduzidas proporcionalmente, sem alterar percentagem, estado ou cálculos;
-- `forced-colors`, `prefers-reduced-motion` e targets tácteis são preservados;
-- Service Worker recebeu apenas tokens técnicos de cache para distribuição das correções.
+- Definir/Editar orçamento apenas desloca/foca `#monthlyBudget`;
+- a gravação continua exclusivamente no `#monthPlanForm` através de `events.js`;
+- o anel usa `height:auto!important` + `aspect-ratio:1/1!important`, com 136/128/116 px conforme breakpoint;
+- iconografia Lucide local, `forced-colors`, `prefers-reduced-motion` e targets tácteis permanecem preservados.
 
-A forma circular corrigida precisa ainda de confirmação visual no mesmo iPhone/PWA após atualização do cache; CI/Pages já estão verdes.
+A forma circular corrigida ainda precisa de confirmação visual no mesmo iPhone/PWA após atualização do cache.
 
 ## Iconografia funcional — estado atual
-
-`76-icon-semantics1` permanece publicado:
 
 - `icon.svg` é a marca canónica;
 - `ui-icons.js` + `ui-icons.css` são a autoridade da iconografia funcional Lucide;
@@ -118,8 +115,9 @@ A forma circular corrigida precisa ainda de confirmação visual no mesmo iPhone
 
 ### ALTO
 
-- confirmar fisicamente `76-planning-ring-shape1` no mesmo iPhone/Safari e PWA instalada;
-- validar `76-bills-mobile-spacing1`, drawer e iconografia no mesmo dispositivo;
+- confirmar fisicamente `76-bills-mobile-alignment2` no mesmo iPhone/Safari e PWA instalada;
+- confirmar fisicamente `76-planning-ring-shape1` no mesmo dispositivo;
+- validar drawer e iconografia no mesmo dispositivo;
 - acrescentar E2E real WebKit/Chromium para toque, teclado, scroll e PIN → aplicação;
 - reduzir gradualmente a cascade CSS e dependência de `!important`;
 - `main` continua sem branch protection/required checks obrigatórios.
@@ -137,8 +135,8 @@ A forma circular corrigida precisa ainda de confirmação visual no mesmo iPhone
 
 ## Próximo passo
 
-1. confirmar visualmente `76-planning-ring-shape1` no iPhone/Safari web e PWA instalada;
-2. validar `76-bills-mobile-spacing1` e drawer/iconografia no mesmo dispositivo;
+1. validar fisicamente `76-bills-mobile-alignment2` no iPhone/Safari web e PWA instalada, incluindo 360/390/430 px equivalentes;
+2. confirmar `76-planning-ring-shape1` e drawer/iconografia no mesmo dispositivo;
 3. corrigir a descrição da página Segurança para refletir a dependência ZXing real;
 4. preparar ZXing local + licença e, só depois, remover `unpkg.com` de `script-src`;
 5. criar primeiro fluxo E2E WebKit/Chromium;
