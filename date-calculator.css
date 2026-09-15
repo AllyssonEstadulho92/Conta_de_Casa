@@ -1,4 +1,4 @@
-/* Conta de Casa v76 — 76-date-calculator-layout2.
+/* Conta de Casa v76 — 76-date-calculator-layout2 + 76-date-calculator-mobile-spacing3.
    Autoridade visual canónica da Calculadora de datas.
    Ritmo baseado em 4/8/12/16/20/24/32 px, sem alterar cálculo, domínio,
    persistência, cifra, sync, QR, scanner ou Mercado. */
@@ -649,13 +649,29 @@ html.cdc-v75 .cdc-datecalc-footer span{
     font-size:.74rem;
   }
 
+  /* 76-date-calculator-mobile-spacing3: no telemóvel, as duas datas e o
+     botão de troca formam um único grupo compacto. Flex elimina tracks
+     verticais excessivos e mantém a ordem funcional sem scroll horizontal. */
   html.cdc-v75 .cdc-datecalc-date-grid{
-    grid-template-columns:minmax(0,1fr);
-    gap:var(--datecalc-space-4);
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:var(--datecalc-space-2);
+  }
+
+  html.cdc-v75 .cdc-datecalc-date-grid>label{
+    width:100%;
+    min-height:0!important;
+    margin:0!important;
+  }
+
+  html.cdc-v75 .cdc-datecalc-date-grid .cdc-datecalc-input-action{
+    min-height:52px;
   }
 
   html.cdc-v75 .cdc-datecalc-swap{
-    justify-self:center;
+    align-self:center;
+    justify-self:auto;
     margin:0;
   }
 
