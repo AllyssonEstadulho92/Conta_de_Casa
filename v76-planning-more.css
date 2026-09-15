@@ -11,7 +11,12 @@
    76-planning-budget-card2:
    - aplica uma hierarquia móvel única para mês, orçamento, métricas e ação principal;
    - mantém a autoridade funcional no formulário #monthPlanForm/#monthlyBudget existente;
-   - elimina a composição comprimida de três métricas lado a lado em iPhones estreitos. */
+   - elimina a composição comprimida de três métricas lado a lado em iPhones estreitos.
+
+   76-planning-ring-shape1:
+   - neutraliza a altura histórica fixa do anel e força proporção 1:1 real;
+   - reduz ligeiramente o diâmetro no iPhone para evitar aparência esticada;
+   - mantém progresso, estado Por definir e acessibilidade sem alterar cálculos. */
 
 html.cdc-v75 .cdc-empty-note{
   margin:0;
@@ -182,7 +187,7 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
 
   html.cdc-v75 .v76-planning-budget-card>.v75-budget-summary{
     display:grid!important;
-    grid-template-columns:minmax(150px,.8fr) minmax(0,1.35fr)!important;
+    grid-template-columns:minmax(136px,.78fr) minmax(0,1.35fr)!important;
     align-items:center!important;
     gap:18px!important;
     padding:0!important;
@@ -192,9 +197,10 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
     box-shadow:none!important;
   }
   html.cdc-v75 .cdc-budget-ring{
-    width:150px!important;
+    width:136px!important;
+    height:auto!important;
     max-width:100%;
-    aspect-ratio:1;
+    aspect-ratio:1/1!important;
     display:grid!important;
     place-items:center!important;
     position:relative!important;
@@ -209,7 +215,7 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
   html.cdc-v75 .cdc-budget-ring::after{
     content:"";
     position:absolute;
-    inset:13px;
+    inset:12px;
     border-radius:50%;
     background:var(--v76-surface,var(--v75-surface))!important;
   }
@@ -218,7 +224,7 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
     box-shadow:inset 0 0 0 1px var(--v76-border,var(--v75-border));
   }
   html.cdc-v75 .cdc-budget-ring.is-unset::after{
-    inset:11px;
+    inset:10px;
     border:1px dashed color-mix(in srgb,var(--v76-primary,var(--v75-primary)) 24%,var(--v76-border,var(--v75-border)));
   }
   html.cdc-v75 .cdc-budget-ring>div{
@@ -226,38 +232,38 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
     z-index:1;
     display:grid;
     justify-items:center;
-    gap:4px;
-    padding:12px;
+    gap:3px;
+    padding:10px;
     text-align:center;
     line-height:1.15;
   }
   html.cdc-v75 .cdc-budget-ring strong{
     color:var(--v76-text,var(--v75-text));
-    font-size:1.38rem;
+    font-size:1.28rem;
     line-height:1;
     letter-spacing:-.04em;
   }
   html.cdc-v75 .cdc-budget-ring span{
     color:var(--v76-primary,var(--v75-primary));
-    font-size:.72rem;
+    font-size:.7rem;
     font-weight:720;
   }
   html.cdc-v75 .cdc-budget-ring small{
-    max-width:104px;
+    max-width:96px;
     color:var(--v76-muted,var(--v75-muted));
-    font-size:.61rem;
+    font-size:.59rem;
     line-height:1.3;
   }
   html.cdc-v75 .cdc-budget-ring.is-unset span:not(.v76-budget-ring-icon){color:var(--v76-text,var(--v75-text))}
   html.cdc-v75 .v76-budget-ring-icon{
-    width:42px;
-    height:42px;
+    width:36px;
+    height:36px;
     display:grid;
     place-items:center;
-    margin-bottom:2px;
+    margin-bottom:1px;
     color:var(--v76-primary,var(--v75-primary))!important;
   }
-  html.cdc-v75 .v76-budget-ring-icon .svg-icon{width:30px;height:30px}
+  html.cdc-v75 .v76-budget-ring-icon .svg-icon{width:26px;height:26px}
 
   html.cdc-v75 .v75-budget-metrics{
     display:grid!important;
@@ -538,7 +544,11 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
     justify-items:stretch!important;
     gap:14px!important;
   }
-  html.cdc-v75 .cdc-budget-ring{width:142px!important}
+  html.cdc-v75 .cdc-budget-ring{
+    width:128px!important;
+    height:auto!important;
+    aspect-ratio:1/1!important;
+  }
   html.cdc-v75 .v75-budget-metrics{grid-template-columns:1fr!important;gap:8px!important}
   html.cdc-v75 .v75-budget-metrics>.v76-budget-metric{
     min-height:64px!important;
@@ -562,6 +572,11 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
     grid-column:1/-1;
     justify-self:stretch;
     width:100%;
+  }
+  html.cdc-v75 .cdc-budget-ring{
+    width:116px!important;
+    height:auto!important;
+    aspect-ratio:1/1!important;
   }
   html.cdc-v75 .v75-budget-metrics>.v76-budget-metric{min-height:62px!important}
   html.cdc-v75 #page-goals>.section-toolbar{display:grid!important}

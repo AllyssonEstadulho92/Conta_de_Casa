@@ -86,6 +86,7 @@ assert.doesNotMatch(js,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/
 
 assert.match(planningCss,/76-prototype-planning1/);
 assert.match(planningCss,/76-planning-budget-card2/,'planning CSS revision must remain explicit');
+assert.match(planningCss,/76-planning-ring-shape1/,'planning ring normalization must remain explicit');
 assert.match(planningCss,/\.cdc-budget-ring\.is-unset/,'undefined budget must have a neutral visual ring');
 assert.match(planningCss,/conic-gradient\(/,'defined budget may use a progress ring');
 assert.match(planningCss,/\.v76-planning-budget-card\{[\s\S]*border-radius:22px!important/,'budget context must use one restrained enclosing surface');
@@ -93,9 +94,12 @@ assert.match(planningCss,/\.v76-budget-card-head\{/,'budget card must have a ded
 assert.match(planningCss,/\.v76-budget-metric\{/,'budget values must use a consistent metric row');
 assert.match(planningCss,/\.v76-budget-guidance\{/,'budget guidance must remain visually distinct but inside the same context');
 assert.match(planningCss,/\.v76-budget-cta\{/,'budget action must remain a full-width primary mobile control');
+assert.match(planningCss,/\.cdc-budget-ring\{[\s\S]*width:136px!important;[\s\S]*height:auto!important;[\s\S]*aspect-ratio:1\/1!important/,'budget ring must override the historical fixed height and stay circular');
 const narrowPlanning=/@media\(max-width:430px\)\{([\s\S]*?)\n\}\n\n@media\(max-width:350px\)/.exec(planningCss)?.[1]||'';
 assert.match(narrowPlanning,/\.v75-budget-metrics\{grid-template-columns:1fr!important/,'narrow iPhones must keep budget metrics in one readable column');
 assert.doesNotMatch(narrowPlanning,/repeat\(3/,'narrow iPhones must not compress the three financial metrics into equal columns');
+assert.match(narrowPlanning,/\.cdc-budget-ring\{[\s\S]*width:128px!important;[\s\S]*height:auto!important;[\s\S]*aspect-ratio:1\/1!important/,'phone budget ring must remain compact and circular');
+assert.match(planningCss,/@media\(max-width:350px\)[\s\S]*\.cdc-budget-ring\{[\s\S]*width:116px!important/,'very narrow phones must use the compact ring size');
 assert.match(planningCss,/\.v75-more-row\{[\s\S]*min-height:58px/,'More rows must keep generous mobile touch targets');
 assert.match(planningCss,/\.v75-more-group>div\{[\s\S]*box-shadow:none!important/,'More groups should use restrained surfaces without floating-card clutter');
 assert.match(planningCss,/#page-goals #goalList>\.empty\{[\s\S]*min-height:240px/,'Goals empty state must be intentional and readable');
@@ -142,6 +146,7 @@ assert.match(sw,/expense-mode-stability1/,'PWA cache must refresh deterministic 
 assert.match(sw,/prototype-system1/,'PWA cache must refresh the approved prototype composition');
 assert.match(sw,/expense-ios-touch1/,'PWA cache must refresh the iOS expense-dialog touch fix');
 assert.match(sw,/planning-budget-card2/,'PWA cache must refresh the refined planning budget card');
+assert.match(sw,/planning-ring-shape1/,'PWA cache must refresh the normalized planning ring');
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
 assert.ok(sw.includes("'./invoice-capture.css'"));
