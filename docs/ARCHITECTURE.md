@@ -121,9 +121,9 @@ O PR #138 mantém a separação entre marca e ícones funcionais:
 - `ui-icons.css` continua a controlar tamanho, stroke, alinhamento, foco e comportamento visual partilhado;
 - regressões em `tests/ui-icons.test.cjs` verificam que Planeamento não volta a wallet/tray e Definições não volta a sliders.
 
-### 4.3 Despesas mobile — `76-bills-mobile-filters1`
+### 4.3 Despesas mobile — `76-bills-mobile-filters1` + `76-bills-mobile-spacing1`
 
-O PR #140 reorganiza apenas a apresentação móvel do bloco de pesquisa/filtros de `#page-bills`.
+Os PR #140 e #142 reorganizam e refinam apenas a apresentação móvel do bloco de pesquisa/filtros de `#page-bills`.
 
 Autoridade funcional preservada:
 
@@ -134,12 +134,16 @@ Autoridade funcional preservada:
 
 Composição visual:
 
-- `mobile-layout.css` contém o refinamento `76-bills-mobile-filters1` apenas em `<=820px`;
-- `.bill-command-bar` agrupa pesquisa e ação principal sem alterar o formulário;
+- `mobile-layout.css` contém os refinamentos `76-bills-mobile-filters1` e `76-bills-mobile-spacing1` apenas em `<=820px`;
+- `.bill-command-bar` agrupa pesquisa e ação principal sem alterar o formulário e usa 20 px de separação para o cartão seguinte;
 - a lupa CSS histórica de `v75-expenses-modern.css` é neutralizada quando o sistema Lucide local já fornece `.ui-search-icon`, evitando dupla iconografia;
-- Estado/Categoria usam duas colunas em telefones com largura suficiente;
-- De/Até preservam inputs `date` reais; Ordenar continua disponível e Limpar filtros mantém o mesmo handler;
-- `<=360px` passa para uma coluna para evitar truncamento estrutural;
+- o ritmo de feature é expresso por custom properties locais a `#page-bills`: separação de secção, padding do cartão, gap entre colunas e gap interno dos campos;
+- o cartão de filtros usa padding próprio de 20 px vertical / 18 px horizontal no mobile e evita compensações negativas entre cabeçalho e subtítulo;
+- o subtítulo usa espaçamento positivo, substituindo o antigo `margin-top` negativo;
+- Estado/Categoria usam duas colunas em telefones com largura suficiente, com 22 px de separação do cabeçalho; linhas seguintes usam 16 px de ritmo vertical;
+- De/Até preservam inputs `date` reais; Ordenar continua disponível e Limpar filtros mantém o mesmo handler e target mínimo de 44 px;
+- os dois prefixos visuais “Período ·” partilham uma única regra CSS em vez de declarações duplicadas;
+- `<=360px` passa para uma coluna e recebe ritmo vertical próprio antes de comprimir conteúdo;
 - targets essenciais permanecem >=44 px;
 - `forced-colors` e `prefers-reduced-motion` têm fallback explícito;
 - `mobile-layout.css` não pode definir `100dvh` nem recriar scroll/viewport global: essa propriedade continua exclusiva de `v76-mobile-shell.css`.
@@ -200,7 +204,7 @@ O fluxo Adicionar despesa usa o formulário financeiro existente e três modos d
 
 O PR #132 estabeleceu no mobile um único proprietário de scroll para evitar falhas de hit-testing no Safari/iOS. Scanner e formulário continuam separados da persistência financeira; o commit ocorre apenas após validação do formulário.
 
-O PR #140 não altera captura nem domínio financeiro. A mudança atua somente sobre a apresentação da pesquisa e dos filtros móveis, mantendo os mesmos controlos HTML, IDs e listeners.
+Os PR #140/#142 não alteram captura nem domínio financeiro. As mudanças atuam somente sobre a apresentação da pesquisa e dos filtros móveis, mantendo os mesmos controlos HTML, IDs e listeners.
 
 ## 8. TypeScript
 
@@ -232,7 +236,7 @@ Service Worker:
 - allowlist explícita;
 - tokens de cache técnicos distribuem correções sem obrigar a alterar a release pública.
 
-Os PR #133/#134/#136/#138/#140 não alteraram `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
+Os PR #133/#134/#136/#138/#140/#142 não alteraram `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
 
 ## 10. Segurança e dependências externas
 
@@ -241,7 +245,7 @@ Os PR #133/#134/#136/#138/#140 não alteraram `package.json`, `release-manifest.
 - armazenamento sensível em claro está bloqueado;
 - zoom manual não é bloqueado;
 - foco/safe areas/reduced-motion/forced-colors têm contratos de regressão;
-- a iconografia Lucide continua local e licenciada; os PR #138/#140 não adicionaram qualquer CDN;
+- a iconografia Lucide continua local e licenciada; os PR #138/#140/#142 não adicionaram qualquer CDN;
 - ZXing ainda é carregado de `unpkg.com`, logo a afirmação “Sem CDNs” na página Segurança precisa de correção até a biblioteca ser empacotada localmente;
 - `style-src 'unsafe-inline'` permanece dívida de hardening.
 
@@ -251,20 +255,22 @@ A CI cobre sintaxe, finanças, isolamento, datas, QR, Mercado, imagens, scanner,
 
 Limitação conhecida: vários testes “Safari/PWA” são contratos estáticos de código/CSS; ainda falta E2E real em WebKit/Chromium para toque, teclado, scroll e foco.
 
-PR #140 passou:
+PR #142 passou:
 
-- TypeScript Foundation PR `34942844618`;
-- CI PR `34942844692`;
-- CI push `34942841985`;
-- o primeiro ciclo do PR detetou uma violação do contrato de arquitetura por `overflow:hidden` em CSS de feature; o código foi corrigido antes do merge e o gate voltou a verde;
-- merge: `387a953e427331a5aa48d872cd7c54e1552d2c1c`;
-- Pages `34942974208` iniciou após o merge e deve ser confirmado antes de encerrar a validação pública.
+- TypeScript Foundation PR `34944913748`: sucesso;
+- CI PR `34944913749`: sucesso integral;
+- merge: `cd45ec537989c51f125747958e198c8e0431a352`;
+- TypeScript Foundation main `34944980784`: sucesso;
+- CI main `34944980812`: sucesso integral;
+- Pages `34945033256`: sucesso.
+
+`tests/mobile-bills-filters.test.cjs` passou a proteger também os tokens de espaçamento, ausência do offset negativo histórico, distância da primeira linha de filtros, target/separação de Limpar filtros e ritmo no fallback `<=360px`.
 
 A aparência final dos filtros de Despesas, drawer e ícones corrigidos ainda deve ser validada fisicamente no iPhone/PWA; os gates automatizados não substituem esse teste visual.
 
 ## 12. Próxima consolidação
 
-1. confirmar Pages do PR #140 e validar `76-bills-mobile-filters1` no iPhone/PWA;
+1. validar `76-bills-mobile-filters1` + `76-bills-mobile-spacing1` no iPhone/Safari web e PWA;
 2. validar `76-drawer-hierarchy1` + `76-icon-semantics1` no mesmo dispositivo;
 3. corrigir a descrição de rede da página Segurança sem mudar a release;
 4. preparar ZXing local e CSP mais restritiva num bloco isolado;
