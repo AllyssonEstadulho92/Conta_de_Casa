@@ -34,14 +34,13 @@ assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/forced-colors:active/);
 
 /* Usabilidade: pinch-to-zoom permanece disponível e controlos evitam zoom acidental. */
-assert.match(usability,/fundação de usabilidade 75-usability1/i);
+assert.match(usability,/76-auth-prototype-final1/i);
 assert.match(usability,/touch-action:manipulation/);
 assert.match(usability,/font-size:16px!important/);
 assert.match(usability,/100dvh/);
 assert.match(usability,/safe-area-inset-top/);
 assert.match(usability,/--v75-usability-tap-target:44px/);
 assert.doesNotMatch(index,/maximum-scale\s*=|user-scalable\s*=\s*no/i);
-assert.match(usability,/v76-auth1/);
 assert.match(usability,/#vaultScreen\.vault-screen/);
 assert.match(usability,/\.vault-key\{[\s\S]*border-radius:50%!important/);
 assert.match(usability,/\.vault-enter-btn\{[\s\S]*background:var\(--v76-primary/);
@@ -129,4 +128,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v76 stability: theme/image safety preserved and navigation has one architecture authority: OK');
+console.log('v76 stability: theme/image safety preserved, PIN visual authority consolidated and navigation has one architecture authority: OK');
