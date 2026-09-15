@@ -23,6 +23,7 @@ assert.doesNotMatch(source,/\bfetch\s*\(|XMLHttpRequest|localStorage|indexedDB|s
 
 assert.match(css,/76-date-calculator-layout2/,'O CSS deve declarar a autoridade visual canónica atual.');
 assert.match(css,/76-date-calculator-mobile-spacing3/,'O ajuste móvel deve permanecer dentro da autoridade canónica da calculadora.');
+assert.match(css,/76-date-calculator-prototype-inputs4/,'A composição aprovada do protótipo deve estar declarada na autoridade visual existente.');
 assert.match(css,/--datecalc-space-1:4px/);
 assert.match(css,/--datecalc-space-2:8px/);
 assert.match(css,/--datecalc-space-3:12px/);
@@ -37,9 +38,14 @@ assert.match(css,/height:calc\(100svh - 16px\)/,'Safari/iOS deve usar altura est
 assert.doesNotMatch(css,/100dvh/,'A autoridade móvel final não deve voltar a depender de 100dvh.');
 assert.match(css,/\.cdc-datecalc-input-action \.cdc-datecalc-inline-action[\s\S]*min-height:44px/,'A ação Hoje deve manter target tátil adequado.');
 assert.match(css,/\.cdc-datecalc-options label[\s\S]*min-height:44px/,'Opções de contagem devem manter target tátil adequado.');
+assert.match(css,/\.cdc-datecalc-input-action input\[type="date"\][\s\S]*padding-left:54px!important;[\s\S]*padding-right:76px!important/,'Os campos de data devem reservar espaço para calendário e ação Hoje.');
+assert.match(css,/input\[type="date"\]::-webkit-calendar-picker-indicator[\s\S]*left:14px;[\s\S]*width:20px;[\s\S]*height:20px/,'O picker nativo deve ficar visível à esquerda sem criar uma segunda biblioteca de ícones.');
 assert.match(css,/@media\(max-width:560px\)[\s\S]*\.cdc-datecalc-date-grid\{[\s\S]*display:flex;[\s\S]*flex-direction:column;[\s\S]*align-items:stretch;[\s\S]*gap:var\(--datecalc-space-2\)/,'Datas móveis devem formar um único grupo vertical compacto com gap de 8 px.');
 assert.match(css,/@media\(max-width:560px\)[\s\S]*\.cdc-datecalc-date-grid>label\{[\s\S]*min-height:0!important;[\s\S]*margin:0!important/,'Labels móveis não devem herdar altura ou margens que criem vazio artificial.');
-assert.match(css,/@media\(max-width:560px\)[\s\S]*\.cdc-datecalc-swap\{[\s\S]*align-self:center;[\s\S]*margin:0/,'Trocar datas deve ficar centrado sem margem vertical adicional.');
+assert.match(css,/@media\(max-width:560px\)[\s\S]*\.cdc-datecalc-swap\{[\s\S]*align-self:stretch;[\s\S]*width:100%;[\s\S]*background:linear-gradient\(var\(--v76-border\),var\(--v76-border\)\) center\/100% 1px no-repeat/,'Trocar datas deve formar um eixo visual horizontal com controlo centrado.');
+assert.match(css,/@media\(max-width:560px\)[\s\S]*\.cdc-datecalc-swap :is\(\.svg-icon,\.ui-icon-svg\)[\s\S]*width:44px!important;[\s\S]*height:44px!important/,'O controlo de troca deve preservar um target visual 44x44.');
+assert.match(css,/@media\(max-width:560px\)[\s\S]*\.cdc-datecalc-options\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,'A regra de contagem deve manter duas opções organizadas quando há largura suficiente.');
+assert.match(css,/@media\(max-width:430px\)[\s\S]*\.cdc-datecalc-options\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/,'Em ecrãs estreitos a regra de contagem deve empilhar antes de comprimir texto.');
 assert.match(css,/@media\(max-width:430px\)/);
 assert.match(css,/@media\(max-width:360px\)/);
 assert.match(css,/@media\(forced-colors:active\)/);
@@ -50,7 +56,8 @@ assert.match(prep,/'date-calculator\.css'/);
 assert.match(prep,/'date-calculator\.js': path\.join\(GENERATED, 'date-calculator\.js'\)/);
 assert.match(prep,/date-calculator\.js\?v=\$\{DATE_CALCULATOR_REV\}/);
 assert.match(sw,/date-calculator-layout2/,'O cache PWA deve preservar o token da autoridade visual base.');
-assert.match(sw,/date-calculator-mobile-spacing3/,'O cache PWA deve invalidar o espaçamento móvel anterior.');
+assert.match(sw,/date-calculator-mobile-spacing3/,'O cache PWA deve preservar o token do agrupamento móvel compacto.');
+assert.match(sw,/date-calculator-prototype-inputs4/,'O cache PWA deve invalidar a apresentação anterior dos campos de data.');
 assert.match(sw,/'\.\/date-calculator\.css'/);
 assert.match(sw,/'\.\/date-calculator\.js'/);
 assert.doesNotThrow(()=>new vm.Script(generated),'O runtime gerado deve ser JavaScript clássico válido.');
@@ -119,4 +126,4 @@ assert.equal(result.dayOfYear,258);
 assert.equal(result.weekday,'terça-feira');
 assert.equal(result.invalid,null);
 
-console.log('Date calculator: exact civil calculations + canonical compact mobile date layout contract: OK');
+console.log('Date calculator: exact civil calculations + prototype-aligned mobile date input layout contract: OK');
