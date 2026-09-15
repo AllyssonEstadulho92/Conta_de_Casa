@@ -26,13 +26,18 @@ Atualizado: 15 de setembro de 2026
 - [x] PR #152: transferência de cofre passa a superfície própria e CTA Entrar mantém hierarquia principal.
 - [x] PR #152: regressões de acessibilidade/estabilidade atualizadas para a nova autoridade única.
 - [x] PR #152: token técnico `auth-prototype-final1` invalida a apresentação anterior da PWA.
-- [x] PR #152: TypeScript Foundation PR `34977687455` e CI PR `34977687437` verdes.
-- [x] PR #152: merge `ceaa4fc8a79cbb2ad442854ffaacd501dac7313f`.
-- [x] PR #152: TypeScript Foundation `main` `34977780423`, CI `main` `34977780342` e Pages `34977846729` verdes.
-- [ ] Confirmar `76-auth-prototype-final1` no mesmo iPhone/Safari web após atualização do cache.
-- [ ] Confirmar o mesmo layout na PWA instalada.
+- [x] Captura física pós-PR #152 identificou sobreposição entre **Criar cofre local** e **Introduza o seu PIN**.
+- [x] PR #154 / `76-auth-exclusive-state1`: `hidden` torna-se autoridade explícita também para `#vaultCreate` e `#vaultUnlock`.
+- [x] PR #154: teste protege a seleção exclusiva do runtime via `idbGet('meta','vault')` e impede CSS de reexibir estado oculto.
+- [x] PR #154: Service Worker recebe token técnico `auth-exclusive-state1`.
+- [x] PR #154: TypeScript Foundation PR `35003057035` e CI PR `35003057086` verdes.
+- [x] PR #154: merge `2594ba1c1a3f4f2cabbcf5c92e2cdd5a8f28734c`.
+- [x] PR #154: TypeScript Foundation `main` `35003207253`, CI `main` `35003207139` e Pages `35003264802` verdes.
+- [ ] Confirmar `76-auth-exclusive-state1` no mesmo iPhone/Safari web após atualização do cache: com cofre existente deve aparecer apenas **Introduza o seu PIN**.
+- [ ] Confirmar o mesmo estado exclusivo na PWA instalada.
+- [ ] Validar estado sem cofre num browser/perfil limpo: deve aparecer apenas **Criar cofre local**.
 - [ ] Validar portrait/landscape e teclado virtual no cofre.
-- [ ] Criar E2E WebKit/Chromium para PIN → Dashboard → drawer → Despesas → Adicionar → Manual/Imagem/QR → fechar/guardar.
+- [ ] Criar E2E WebKit/Chromium para criação/desbloqueio exclusivo → Dashboard → drawer → Despesas → Adicionar → Manual/Imagem/QR → fechar/guardar.
 
 ## P0 — Despesas/Faturas
 
