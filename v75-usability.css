@@ -1,12 +1,12 @@
-/* Conta de Casa v75 — fundação de usabilidade 75-usability1.
-   Camada exclusivamente visual/interacional. Não altera dados, cálculos,
-   IndexedDB, cofre, PIN, sincronização, scanner ou regras financeiras. */
+/* Conta de Casa v76 — usabilidade transversal + auth canónico 76-auth-prototype-final1.
+   Esta folha é exclusivamente visual/interacional. Não altera dados, cálculos,
+   IndexedDB, PIN/palavra-passe, cifragem, sincronização, scanner ou regras financeiras. */
 
 :root{
   --v75-usability-tap-target:44px;
 }
 
-/* Evita zoom acidental por duplo toque sem desativar pinch-to-zoom do navegador. */
+/* Toque previsível sem impedir pinch-to-zoom. */
 html.cdc-v75 :is(
   button,
   a[href],
@@ -21,7 +21,6 @@ html.cdc-v75 :is(
   touch-action:manipulation;
 }
 
-/* Alvos tácteis previsíveis em controlos de navegação e ações compactas. */
 html.cdc-v75 :is(
   .icon-btn,
   .nav-btn,
@@ -40,14 +39,12 @@ html.cdc-v75 :is(.icon-btn,.dialog-close,.sidebar-toggle,.mobile-menu-btn){
   min-width:var(--v75-usability-tap-target);
 }
 
-/* O foco continua visível para teclado; o toque não deixa um halo persistente no iOS. */
 @media (hover:none) and (pointer:coarse){
   html.cdc-v75 :is(button,a[href],[role="button"]){-webkit-tap-highlight-color:transparent}
 }
 
 @media(max-width:820px){
-  /* Safari/iOS amplia automaticamente campos com texto inferior a 16 px.
-     Esta regra impede esse auto-zoom mantendo a ampliação manual disponível. */
+  /* Evita o auto-zoom do Safari em campos com texto inferior a 16 px. */
   html.cdc-v75 :is(
     input:not([type="checkbox"]):not([type="radio"]),
     select,
@@ -56,185 +53,169 @@ html.cdc-v75 :is(.icon-btn,.dialog-close,.sidebar-toggle,.mobile-menu-btn){
     font-size:16px!important;
   }
 
-  /* Cofre: ocupa o viewport dinâmico, respeita safe areas e continua rolável
-     quando o teclado ou um ecrã de menor altura reduz o espaço disponível. */
-  html.cdc-v75 .vault-screen{
-    min-height:100dvh!important;
-    padding:
-      max(16px,env(safe-area-inset-top,0px))
-      max(14px,env(safe-area-inset-right,0px))
-      max(16px,env(safe-area-inset-bottom,0px))
-      max(14px,env(safe-area-inset-left,0px))!important;
-    overflow-y:auto;
-    overscroll-behavior-y:contain;
-    -webkit-overflow-scrolling:touch;
-  }
-
-  html.cdc-v75 .vault-card{
-    width:min(100%,430px)!important;
-    margin:auto!important;
-    padding:clamp(18px,5vw,28px)!important;
-    border-radius:22px!important;
-  }
-
-  html.cdc-v75 .vault-card h1{
-    margin-top:22px!important;
-    font-size:clamp(1.42rem,6vw,1.72rem)!important;
-    line-height:1.15!important;
-  }
-
-  html.cdc-v75 .vault-unlock-intro{
-    text-align:center;
-  }
-
-  html.cdc-v75 .vault-unlock-input-label{
-    margin-top:18px!important;
-  }
-
-  html.cdc-v75 .vault-key{
-    min-width:52px;
-    min-height:52px;
-  }
-
-  html.cdc-v75 .vault-enter-btn,
-  html.cdc-v75 .vault-keyboard-toggle,
-  html.cdc-v75 .vault-disclosure{
-    width:100%;
-  }
-
-  /* A navegação inferior mantém cinco destinos igualmente clicáveis. */
   html.cdc-v75 .mobile-nav .nav-btn{
     touch-action:manipulation;
     min-height:52px!important;
   }
 
-  /* Evita que barras de ações muito densas criem alvos demasiado pequenos. */
   html.cdc-v75 :is(.bill-command-bar,.market-command-bar) :is(button,input),
   html.cdc-v75 :is(.bill-filter-grid,.market-filter-grid) :is(button,input,select){
     min-height:48px!important;
   }
 }
 
-@media(prefers-reduced-motion:reduce){
-  html.cdc-v75 :is(.vault-screen,.dialog-shell,.nav-drawer-shell){scroll-behavior:auto!important}
-}
-
-/* ===== v76-auth1 — acesso ao cofre: produto, não landing page =====
-   Preserva todos os IDs, handlers, PIN/palavra-passe, recuperação, importação e
-   cifragem existentes. Esta revisão altera exclusivamente hierarquia e apresentação. */
+/* ===== 76-auth-prototype-final1 ===========================================
+   Autoridade visual única do cofre. Substitui as camadas móveis históricas
+   76-vault-short-height1 e 76-auth-ios-spacing2. O protótipo aprovado define:
+   marca limpa, hierarquia central, teclado respirado, CTA único e transferência
+   em cartão discreto. IDs, handlers e fluxo de autenticação permanecem intactos. */
 html.cdc-v75 #vaultScreen.vault-screen{
-  --vault-auth-bg:#f5f7f7;
-  --vault-auth-key:#edf2f2;
-  --vault-auth-key-active:#e2ebea;
-  --vault-auth-border:#dfe7e7;
-  --vault-auth-muted:#718186;
+  --vault-auth-bg:#f5f8f8;
+  --vault-auth-surface:#ffffff;
+  --vault-auth-key:#f8fbfb;
+  --vault-auth-key-active:#edf4f3;
+  --vault-auth-border:#dce6e6;
+  --vault-auth-muted:#728287;
+  --vault-auth-shadow:0 8px 24px rgba(18,52,61,.055);
   min-height:100dvh!important;
   display:grid!important;
   place-items:center!important;
+  padding:24px!important;
+  overflow-y:auto!important;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
   background:var(--vault-auth-bg)!important;
   color:var(--v76-text,var(--v75-text))!important;
 }
 
 html.cdc-v75[data-theme="dark"] #vaultScreen.vault-screen{
   --vault-auth-bg:#071b20;
-  --vault-auth-key:#112d33;
-  --vault-auth-key-active:#18383e;
-  --vault-auth-border:#29454b;
-  --vault-auth-muted:#9eb2b6;
+  --vault-auth-surface:#0c252b;
+  --vault-auth-key:#112e34;
+  --vault-auth-key-active:#173940;
+  --vault-auth-border:#29464c;
+  --vault-auth-muted:#9db1b5;
+  --vault-auth-shadow:none;
 }
 
 html.cdc-v75 #vaultScreen .vault-card{
   width:min(420px,100%)!important;
   margin:auto!important;
-  padding:36px 34px 30px!important;
+  padding:34px 32px 28px!important;
   border:1px solid var(--vault-auth-border)!important;
   border-radius:24px!important;
-  background:var(--v76-surface,var(--v75-surface))!important;
+  background:var(--vault-auth-surface)!important;
   box-shadow:0 16px 44px rgba(18,52,61,.065)!important;
 }
 
+html.cdc-v75[data-theme="dark"] #vaultScreen .vault-card{
+  box-shadow:none!important;
+}
+
 html.cdc-v75 #vaultScreen .vault-brand{
+  display:flex!important;
+  align-items:center!important;
   justify-content:center!important;
-  gap:10px!important;
-  margin:0 0 28px!important;
+  gap:11px!important;
+  margin:0 0 26px!important;
   text-align:left!important;
 }
+
 html.cdc-v75 #vaultScreen .vault-brand .brand-mark{
-  width:40px!important;
-  min-width:40px!important;
-  height:40px!important;
-  border-radius:12px!important;
+  width:44px!important;
+  min-width:44px!important;
+  height:44px!important;
+  border-radius:13px!important;
   background:url('./icon.svg') center/cover no-repeat!important;
   color:transparent!important;
   box-shadow:none!important;
   overflow:hidden!important;
 }
-html.cdc-v75 #vaultScreen .vault-brand strong{
-  color:var(--v76-text,var(--v75-text))!important;
-  font-size:1rem!important;
-  font-weight:720!important;
-  letter-spacing:-.02em!important;
+
+html.cdc-v75 #vaultScreen .vault-brand>div{
+  min-width:0!important;
 }
+
+html.cdc-v75 #vaultScreen .vault-brand strong{
+  display:block!important;
+  color:var(--v76-text,var(--v75-text))!important;
+  font-size:1.02rem!important;
+  font-weight:730!important;
+  letter-spacing:-.025em!important;
+}
+
 html.cdc-v75 #vaultScreen .vault-brand small{
+  display:block!important;
   margin-top:1px!important;
   color:var(--vault-auth-muted)!important;
-  font-size:.72rem!important;
+  font-size:.74rem!important;
   line-height:1.35!important;
 }
 
 html.cdc-v75 #vaultScreen .vault-unlock-intro{
   display:grid!important;
   justify-items:center!important;
-  gap:8px!important;
+  gap:9px!important;
   text-align:center!important;
 }
+
 html.cdc-v75 #vaultScreen .vault-lock-badge{
-  width:42px!important;
-  height:42px!important;
+  width:48px!important;
+  height:48px!important;
   display:grid!important;
   place-items:center!important;
-  margin:0 0 6px!important;
+  margin:0 0 5px!important;
   border:0!important;
   border-radius:50%!important;
-  background:color-mix(in srgb,var(--v76-primary,var(--v75-primary)) 10%,var(--v76-surface,var(--v75-surface)))!important;
+  background:color-mix(in srgb,var(--v76-primary,var(--v75-primary)) 9%,var(--vault-auth-surface))!important;
   color:var(--v76-primary,var(--v75-primary))!important;
   box-shadow:none!important;
 }
-html.cdc-v75 #vaultScreen .vault-lock-badge svg{width:19px!important;height:19px!important}
+
+html.cdc-v75 #vaultScreen .vault-lock-badge svg{
+  width:21px!important;
+  height:21px!important;
+}
+
 html.cdc-v75 #vaultScreen .vault-eyebrow{display:none!important}
+
 html.cdc-v75 #vaultScreen #vaultUnlock h1,
 html.cdc-v75 #vaultScreen #vaultCreate h1{
   margin:0!important;
   color:var(--v76-text,var(--v75-text))!important;
   font-size:clamp(1.72rem,6.7vw,2rem)!important;
   line-height:1.08!important;
-  font-weight:760!important;
-  letter-spacing:-.04em!important;
+  font-weight:770!important;
+  letter-spacing:-.045em!important;
 }
+
 html.cdc-v75 #vaultScreen #vaultUnlockHint,
 html.cdc-v75 #vaultScreen #vaultCreate>p{
-  max-width:340px!important;
+  max-width:350px!important;
   margin:0 auto!important;
   color:var(--vault-auth-muted)!important;
-  font-size:.85rem!important;
-  line-height:1.5!important;
+  font-size:.86rem!important;
+  line-height:1.48!important;
   text-align:center!important;
 }
 
 html.cdc-v75 #vaultScreen .vault-unlock-input-label{
-  width:min(100%,320px)!important;
-  margin:22px auto 0!important;
+  width:min(100%,332px)!important;
+  margin:24px auto 0!important;
+  display:grid!important;
   gap:8px!important;
   color:var(--vault-auth-muted)!important;
-  font-size:.74rem!important;
-  font-weight:620!important;
+  font-size:.76rem!important;
+  font-weight:650!important;
 }
+
 html.cdc-v75 #vaultScreen #unlockPassphrase{
+  width:100%!important;
   min-height:56px!important;
   padding:12px 16px!important;
   border:1px solid var(--vault-auth-border)!important;
-  border-radius:14px!important;
-  background:var(--v76-surface,var(--v75-surface))!important;
+  border-radius:16px!important;
+  background:var(--vault-auth-surface)!important;
   color:var(--v76-text,var(--v75-text))!important;
   box-shadow:none!important;
   text-align:center!important;
@@ -242,170 +223,216 @@ html.cdc-v75 #vaultScreen #unlockPassphrase{
   font-variant-numeric:tabular-nums!important;
   letter-spacing:.18em!important;
 }
+
 html.cdc-v75 #vaultScreen #unlockPassphrase::placeholder{
   color:color-mix(in srgb,var(--vault-auth-muted) 62%,transparent)!important;
   opacity:1!important;
 }
+
 html.cdc-v75 #vaultScreen #unlockPassphrase:focus{
   border-color:var(--v76-primary,var(--v75-primary))!important;
   box-shadow:0 0 0 3px color-mix(in srgb,var(--v76-primary,var(--v75-primary)) 13%,transparent)!important;
 }
+
 html.cdc-v75 #vaultScreen #vaultUnlock.text-entry-mode #unlockPassphrase{
   text-align:left!important;
   letter-spacing:normal!important;
 }
+
 html.cdc-v75 #vaultScreen #vaultUnlock.text-entry-mode .vault-pin-pad{display:none!important}
 
 html.cdc-v75 #vaultScreen .vault-pin-pad{
   width:100%!important;
-  margin:20px auto 0!important;
+  margin:24px auto 0!important;
 }
+
 html.cdc-v75 #vaultScreen .vault-keypad{
   width:100%!important;
   max-width:300px!important;
   margin:0 auto!important;
   display:grid!important;
-  grid-template-columns:repeat(3,68px)!important;
+  grid-template-columns:repeat(3,64px)!important;
   justify-content:center!important;
-  gap:12px 18px!important;
+  column-gap:26px!important;
+  row-gap:16px!important;
 }
+
 html.cdc-v75 #vaultScreen :is(.vault-key,.vault-key-spacer){
-  width:68px!important;
-  min-width:68px!important;
-  height:68px!important;
-  min-height:68px!important;
+  width:64px!important;
+  min-width:64px!important;
+  height:64px!important;
+  min-height:64px!important;
   justify-self:center!important;
 }
+
 html.cdc-v75 #vaultScreen .vault-key{
   display:grid!important;
   place-items:center!important;
   padding:0!important;
-  border:0!important;
+  border:1px solid color-mix(in srgb,var(--vault-auth-border) 72%,transparent)!important;
   border-radius:50%!important;
   background:var(--vault-auth-key)!important;
   color:var(--v76-text,var(--v75-text))!important;
-  box-shadow:none!important;
-  transition:transform .12s ease,background-color .12s ease!important;
+  box-shadow:var(--vault-auth-shadow)!important;
+  transition:transform .12s ease,background-color .12s ease,border-color .12s ease!important;
 }
+
 html.cdc-v75 #vaultScreen .vault-key strong{
   color:inherit!important;
-  font-size:1.3rem!important;
+  font-size:1.28rem!important;
   line-height:1!important;
-  font-weight:560!important;
+  font-weight:590!important;
   letter-spacing:-.02em!important;
 }
+
 html.cdc-v75 #vaultScreen .vault-key small{display:none!important}
+
 html.cdc-v75 #vaultScreen .vault-key:active{
-  transform:scale(.94)!important;
+  transform:scale(.95)!important;
   background:var(--vault-auth-key-active)!important;
 }
+
 html.cdc-v75 #vaultScreen .vault-key-delete{
+  border-color:transparent!important;
   background:transparent!important;
   color:var(--vault-auth-muted)!important;
+  box-shadow:none!important;
 }
-html.cdc-v75 #vaultScreen .vault-key-delete svg{width:22px!important;height:22px!important}
+
+html.cdc-v75 #vaultScreen .vault-key-delete svg{
+  width:22px!important;
+  height:22px!important;
+}
 
 html.cdc-v75 #vaultScreen .vault-enter-btn{
-  width:min(100%,320px)!important;
+  width:min(100%,340px)!important;
   min-height:52px!important;
-  margin:20px auto 0!important;
+  margin:26px auto 0!important;
   display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
   border:1px solid transparent!important;
-  border-radius:14px!important;
+  border-radius:16px!important;
   background:var(--v76-primary,var(--v75-primary))!important;
   color:#fff!important;
   box-shadow:none!important;
-  font-size:.92rem!important;
-  font-weight:720!important;
+  font-size:.94rem!important;
+  font-weight:730!important;
 }
+
 html.cdc-v75 #vaultScreen .vault-enter-btn:hover{
   background:var(--v76-primary-strong,var(--v75-primary-strong))!important;
   transform:none!important;
   box-shadow:none!important;
 }
+
 html.cdc-v75 #vaultScreen .vault-keyboard-toggle{
-  width:min(100%,320px)!important;
+  width:auto!important;
+  min-width:0!important;
   min-height:44px!important;
-  margin:6px auto 0!important;
-  padding:8px 10px!important;
+  margin:11px auto 0!important;
+  padding:8px 14px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
   border:0!important;
   border-radius:10px!important;
   background:transparent!important;
   color:var(--v76-primary,var(--v75-primary))!important;
   box-shadow:none!important;
-  font-size:.82rem!important;
-  font-weight:650!important;
+  font-size:.84rem!important;
+  font-weight:680!important;
 }
 
 html.cdc-v75 #vaultScreen .pin-recovery-actions{
   width:min(100%,350px)!important;
-  margin:4px auto 0!important;
+  margin:7px auto 0!important;
   display:grid!important;
   justify-items:center!important;
-  gap:2px!important;
+  gap:4px!important;
 }
+
 html.cdc-v75 #vaultScreen .vault-action-row{
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
   flex-wrap:wrap!important;
-  gap:2px 12px!important;
+  gap:0 10px!important;
 }
+
 html.cdc-v75 #vaultScreen .pin-help-link{
-  min-height:40px!important;
+  min-height:44px!important;
   padding:7px 5px!important;
   border:0!important;
   background:transparent!important;
   color:var(--vault-auth-muted)!important;
   box-shadow:none!important;
   font-size:.76rem!important;
-  font-weight:580!important;
+  font-weight:590!important;
 }
+
 html.cdc-v75 #vaultScreen .pin-help-link:hover{
   background:transparent!important;
   color:var(--v76-primary,var(--v75-primary))!important;
 }
 
 html.cdc-v75 #vaultScreen .vault-transfer{
-  width:min(100%,360px)!important;
-  margin:22px auto 0!important;
-  padding-top:10px!important;
+  width:min(100%,350px)!important;
+  margin:20px auto 0!important;
+  padding-top:17px!important;
   border-top:1px solid var(--vault-auth-border)!important;
 }
+
 html.cdc-v75 #vaultScreen .vault-disclosure{
   width:100%!important;
-  min-height:50px!important;
-  padding:8px 4px!important;
+  min-height:70px!important;
+  padding:11px 14px!important;
   display:flex!important;
   align-items:center!important;
   justify-content:space-between!important;
   gap:12px!important;
-  border:0!important;
-  border-radius:10px!important;
-  background:transparent!important;
+  border:1px solid var(--vault-auth-border)!important;
+  border-radius:17px!important;
+  background:color-mix(in srgb,var(--vault-auth-key) 74%,var(--vault-auth-surface))!important;
   color:var(--v76-text,var(--v75-text))!important;
   box-shadow:none!important;
   text-align:left!important;
 }
-html.cdc-v75 #vaultScreen .vault-disclosure strong{
-  font-size:.8rem!important;
-  font-weight:650!important;
+
+html.cdc-v75 #vaultScreen .vault-disclosure>span:first-child{
+  min-width:0!important;
 }
+
+html.cdc-v75 #vaultScreen .vault-disclosure strong{
+  display:block!important;
+  font-size:.82rem!important;
+  font-weight:680!important;
+}
+
 html.cdc-v75 #vaultScreen .vault-disclosure small{
+  display:block!important;
   margin-top:2px!important;
   color:var(--vault-auth-muted)!important;
-  font-size:.7rem!important;
+  font-size:.71rem!important;
+  line-height:1.35!important;
 }
-html.cdc-v75 #vaultScreen .vault-disclosure-icon{color:var(--vault-auth-muted)!important}
+
+html.cdc-v75 #vaultScreen .vault-disclosure-icon{
+  flex:0 0 auto!important;
+  color:var(--vault-auth-muted)!important;
+  font-size:1.2rem!important;
+}
+
 html.cdc-v75 #vaultScreen :is(.device-transfer-box,.pin-recovery-box){
   margin-top:8px!important;
   padding:14px!important;
   border:1px solid var(--vault-auth-border)!important;
   border-radius:14px!important;
-  background:color-mix(in srgb,var(--vault-auth-key) 72%,var(--v76-surface,var(--v75-surface)))!important;
+  background:color-mix(in srgb,var(--vault-auth-key) 72%,var(--vault-auth-surface))!important;
   color:var(--v76-text,var(--v75-text))!important;
   box-shadow:none!important;
 }
+
 html.cdc-v75 #vaultScreen :is(.device-transfer-box,.pin-recovery-box) p{
   color:var(--vault-auth-muted)!important;
   font-size:.78rem!important;
@@ -413,21 +440,24 @@ html.cdc-v75 #vaultScreen :is(.device-transfer-box,.pin-recovery-box) p{
 }
 
 html.cdc-v75 #vaultScreen #vaultCreate{
-  display:grid;
-  gap:12px;
+  display:grid!important;
+  gap:12px!important;
 }
+
 html.cdc-v75 #vaultScreen #vaultCreate label{
   width:100%!important;
   margin:0!important;
   color:var(--vault-auth-muted)!important;
   font-size:.76rem!important;
 }
+
 html.cdc-v75 #vaultScreen #vaultCreate input{
   min-height:52px!important;
   border-color:var(--vault-auth-border)!important;
   border-radius:14px!important;
   box-shadow:none!important;
 }
+
 html.cdc-v75 #vaultScreen #vaultCreate .btn.primary{
   min-height:52px!important;
   margin-top:4px!important;
@@ -438,329 +468,245 @@ html.cdc-v75 #vaultScreen #vaultCreate .btn.primary{
 
 html.cdc-v75 #vaultScreen #vaultMessage{
   min-height:18px!important;
-  margin:8px auto 0!important;
+  margin:7px auto 0!important;
   text-align:center!important;
   font-size:.78rem!important;
 }
+
 html.cdc-v75 #vaultScreen .privacy-note{
-  max-width:340px!important;
-  margin:14px auto 0!important;
+  max-width:350px!important;
+  margin:12px auto 0!important;
   color:var(--vault-auth-muted)!important;
-  font-size:.68rem!important;
-  line-height:1.45!important;
+  font-size:.69rem!important;
+  line-height:1.4!important;
   text-align:center!important;
 }
 
+/* Mobile: reproduz a composição aprovada, com mais espaço lateral entre as teclas
+   sem aumentar artificialmente a altura total da página. */
 @media(max-width:820px){
   html.cdc-v75 #vaultScreen.vault-screen{
-    align-items:start!important;
+    min-height:100svh!important;
+    place-items:start center!important;
     padding:
-      max(24px,env(safe-area-inset-top,0px))
-      max(18px,env(safe-area-inset-right,0px))
+      max(18px,env(safe-area-inset-top,0px))
+      max(16px,env(safe-area-inset-right,0px))
       max(24px,env(safe-area-inset-bottom,0px))
-      max(18px,env(safe-area-inset-left,0px))!important;
+      max(16px,env(safe-area-inset-left,0px))!important;
   }
+
   html.cdc-v75 #vaultScreen .vault-card{
     width:min(100%,390px)!important;
-    padding:18px 2px 26px!important;
+    margin:0 auto!important;
+    padding:14px 4px 24px!important;
     border:0!important;
     border-radius:0!important;
     background:transparent!important;
     box-shadow:none!important;
   }
-  html.cdc-v75 #vaultScreen .vault-brand{margin-bottom:30px!important}
+
+  html.cdc-v75 #vaultScreen .vault-brand{
+    margin-bottom:24px!important;
+  }
+
+  html.cdc-v75 #vaultScreen .vault-brand .brand-mark{
+    width:44px!important;
+    min-width:44px!important;
+    height:44px!important;
+  }
+
+  html.cdc-v75 #vaultScreen .vault-lock-badge{
+    width:48px!important;
+    height:48px!important;
+    margin-bottom:5px!important;
+  }
+
   html.cdc-v75 #vaultScreen #vaultUnlock h1,
   html.cdc-v75 #vaultScreen #vaultCreate h1{
-    font-size:clamp(1.72rem,7.2vw,1.95rem)!important;
+    font-size:clamp(1.7rem,7.2vw,1.95rem)!important;
   }
+
+  html.cdc-v75 #vaultScreen #vaultUnlockHint{
+    max-width:350px!important;
+    font-size:.86rem!important;
+    line-height:1.45!important;
+  }
+
+  html.cdc-v75 #vaultScreen .vault-unlock-input-label{
+    width:min(100%,330px)!important;
+    margin-top:23px!important;
+  }
+
+  html.cdc-v75 #vaultScreen #unlockPassphrase{
+    min-height:54px!important;
+  }
+
+  html.cdc-v75 #vaultScreen .vault-pin-pad{
+    margin-top:24px!important;
+  }
+
   html.cdc-v75 #vaultScreen .vault-keypad{
-    grid-template-columns:repeat(3,64px)!important;
-    gap:12px 18px!important;
+    max-width:280px!important;
+    grid-template-columns:repeat(3,56px)!important;
+    column-gap:30px!important;
+    row-gap:16px!important;
   }
+
   html.cdc-v75 #vaultScreen :is(.vault-key,.vault-key-spacer){
-    width:64px!important;
-    min-width:64px!important;
-    height:64px!important;
-    min-height:64px!important;
+    width:56px!important;
+    min-width:56px!important;
+    height:56px!important;
+    min-height:56px!important;
   }
-}
 
-@media(max-width:359px), (max-height:700px) and (max-width:820px){
-  html.cdc-v75 #vaultScreen .vault-brand{margin-bottom:20px!important}
-  html.cdc-v75 #vaultScreen .vault-lock-badge{margin-bottom:2px!important}
-  html.cdc-v75 #vaultScreen .vault-unlock-input-label{margin-top:16px!important}
-  html.cdc-v75 #vaultScreen .vault-pin-pad{margin-top:14px!important}
-  html.cdc-v75 #vaultScreen .vault-keypad{
-    grid-template-columns:repeat(3,58px)!important;
-    gap:9px 16px!important;
+  html.cdc-v75 #vaultScreen .vault-key strong{
+    font-size:1.26rem!important;
   }
-  html.cdc-v75 #vaultScreen :is(.vault-key,.vault-key-spacer){
-    width:58px!important;
-    min-width:58px!important;
-    height:58px!important;
-    min-height:58px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-enter-btn{margin-top:15px!important}
-  html.cdc-v75 #vaultScreen .vault-transfer{margin-top:15px!important}
-}
 
-@media(prefers-reduced-motion:reduce){
-  html.cdc-v75 #vaultScreen :is(.vault-key,.vault-enter-btn,.vault-keyboard-toggle,.pin-help-link){
-    transition:none!important;
-  }
-}
-
-@media(forced-colors:active){
-  html.cdc-v75 #vaultScreen :is(.vault-card,#unlockPassphrase,.vault-key,.vault-transfer,.device-transfer-box,.pin-recovery-box){
-    border-color:CanvasText!important;
-  }
   html.cdc-v75 #vaultScreen .vault-enter-btn{
-    border:1px solid ButtonText!important;
+    width:min(100%,340px)!important;
+    min-height:52px!important;
+    margin-top:27px!important;
+  }
+
+  html.cdc-v75 #vaultScreen .vault-keyboard-toggle{
+    margin-top:11px!important;
+  }
+
+  html.cdc-v75 #vaultScreen .pin-recovery-actions{
+    margin-top:7px!important;
+  }
+
+  html.cdc-v75 #vaultScreen .vault-transfer{
+    width:min(100%,350px)!important;
+    margin-top:20px!important;
+    padding-top:17px!important;
+  }
+
+  html.cdc-v75 #vaultScreen .privacy-note{
+    margin-top:12px!important;
   }
 }
 
-/* 76-vault-short-height1 — o cofre adapta-se à altura útil do browser, não a um
-   modelo específico de iPhone. Mantém todos os controlos e alvos >=44 px, mas
-   garante que PIN, Entrar e alternância para palavra-passe ficam no primeiro
-   viewport sempre que exista altura funcional suficiente. */
-@media(max-width:820px){
-  html.cdc-v75 #vaultScreen.vault-screen{
-    padding:
-      max(12px,env(safe-area-inset-top,0px))
-      max(16px,env(safe-area-inset-right,0px))
-      max(12px,env(safe-area-inset-bottom,0px))
-      max(16px,env(safe-area-inset-left,0px))!important;
-  }
-}
-
-@media(max-width:820px) and (max-height:780px){
+/* Ecrãs estreitos: preserva o espaçamento sem provocar corte lateral. */
+@media(max-width:359px){
   html.cdc-v75 #vaultScreen .vault-card{
-    padding:8px 2px 16px!important;
+    padding-inline:0!important;
   }
+
+  html.cdc-v75 #vaultScreen .vault-keypad{
+    grid-template-columns:repeat(3,52px)!important;
+    column-gap:24px!important;
+    row-gap:13px!important;
+  }
+
+  html.cdc-v75 #vaultScreen :is(.vault-key,.vault-key-spacer){
+    width:52px!important;
+    min-width:52px!important;
+    height:52px!important;
+    min-height:52px!important;
+  }
+}
+
+/* Alturas realmente curtas: compacta apenas o necessário para manter todas as
+   ações alcançáveis, sem regressar à densidade excessiva das camadas antigas. */
+@media(max-width:820px) and (max-height:720px){
+  html.cdc-v75 #vaultScreen.vault-screen{
+    padding-top:max(10px,env(safe-area-inset-top,0px))!important;
+  }
+
+  html.cdc-v75 #vaultScreen .vault-card{
+    padding-top:6px!important;
+  }
+
   html.cdc-v75 #vaultScreen .vault-brand{
-    margin-bottom:12px!important;
+    margin-bottom:13px!important;
   }
-  html.cdc-v75 #vaultScreen .vault-brand .brand-mark{
-    width:36px!important;
-    min-width:36px!important;
-    height:36px!important;
-  }
+
   html.cdc-v75 #vaultScreen .vault-lock-badge{
-    width:36px!important;
-    height:36px!important;
-    margin-bottom:0!important;
+    width:40px!important;
+    height:40px!important;
+    margin-bottom:1px!important;
   }
+
   html.cdc-v75 #vaultScreen .vault-unlock-intro{
     gap:5px!important;
   }
+
   html.cdc-v75 #vaultScreen #vaultUnlock h1{
-    font-size:1.5rem!important;
+    font-size:1.55rem!important;
   }
+
   html.cdc-v75 #vaultScreen #vaultUnlockHint{
-    max-width:320px!important;
     font-size:.78rem!important;
-    line-height:1.35!important;
+    line-height:1.32!important;
   }
+
   html.cdc-v75 #vaultScreen .vault-unlock-input-label{
-    margin-top:10px!important;
+    margin-top:12px!important;
     gap:5px!important;
   }
+
   html.cdc-v75 #vaultScreen #unlockPassphrase{
     min-height:48px!important;
-    padding-block:9px!important;
   }
+
   html.cdc-v75 #vaultScreen .vault-pin-pad{
-    margin-top:9px!important;
+    margin-top:12px!important;
   }
+
   html.cdc-v75 #vaultScreen .vault-keypad{
-    grid-template-columns:repeat(3,54px)!important;
-    gap:7px 14px!important;
+    grid-template-columns:repeat(3,50px)!important;
+    column-gap:22px!important;
+    row-gap:9px!important;
   }
+
   html.cdc-v75 #vaultScreen :is(.vault-key,.vault-key-spacer){
-    width:54px!important;
-    min-width:54px!important;
-    height:54px!important;
-    min-height:54px!important;
+    width:50px!important;
+    min-width:50px!important;
+    height:50px!important;
+    min-height:50px!important;
   }
+
   html.cdc-v75 #vaultScreen .vault-enter-btn{
     min-height:48px!important;
-    margin-top:10px!important;
+    margin-top:14px!important;
   }
+
   html.cdc-v75 #vaultScreen .vault-keyboard-toggle{
-    min-height:44px!important;
     margin-top:2px!important;
-    padding-block:6px!important;
   }
+
   html.cdc-v75 #vaultScreen .pin-recovery-actions{
     margin-top:0!important;
     gap:0!important;
   }
-  html.cdc-v75 #vaultScreen .pin-help-link{
-    min-height:44px!important;
-    padding-block:5px!important;
-  }
+
   html.cdc-v75 #vaultScreen .vault-transfer{
-    margin-top:8px!important;
-    padding-top:6px!important;
+    margin-top:10px!important;
+    padding-top:8px!important;
   }
+
   html.cdc-v75 #vaultScreen .vault-disclosure{
-    min-height:44px!important;
-    padding-block:5px!important;
+    min-height:56px!important;
+    padding-block:7px!important;
   }
-  html.cdc-v75 #vaultScreen #vaultMessage{
-    min-height:16px!important;
-    margin-top:4px!important;
-  }
+
   html.cdc-v75 #vaultScreen .privacy-note{
     margin-top:6px!important;
   }
 }
 
-@media(max-width:820px) and (max-height:640px){
-  html.cdc-v75 #vaultScreen .vault-brand{
-    margin-bottom:8px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-brand small,
-  html.cdc-v75 #vaultScreen #vaultUnlockHint{
-    font-size:.72rem!important;
-    line-height:1.28!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-keypad{
-    grid-template-columns:repeat(3,48px)!important;
-    gap:5px 12px!important;
-  }
-  html.cdc-v75 #vaultScreen :is(.vault-key,.vault-key-spacer){
-    width:48px!important;
-    min-width:48px!important;
-    height:48px!important;
-    min-height:48px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-key strong{
-    font-size:1.15rem!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-enter-btn{
-    min-height:46px!important;
-    margin-top:8px!important;
-  }
+@media(prefers-reduced-motion:reduce){
+  html.cdc-v75 :is(.vault-screen,.dialog-shell,.nav-drawer-shell){scroll-behavior:auto!important}
+  html.cdc-v75 #vaultScreen :is(.vault-key,.vault-enter-btn,.vault-keyboard-toggle,.pin-help-link){transition:none!important}
 }
 
-/* 76-auth-ios-spacing2 — o acesso móvel segue a altura útil do browser iOS.
-   A composição começa no topo seguro, usa o small viewport para não depender da
-   expansão/retração das barras do Safari e reduz progressivamente o ritmo vertical.
-   Nenhum alvo tátil fica abaixo dos 44 px e o fluxo funcional do cofre não muda. */
-@media(max-width:820px){
-  html.cdc-v75 #vaultScreen.vault-screen{
-    min-height:100svh!important;
-    align-items:start!important;
-    justify-items:center!important;
-    padding:
-      max(12px,env(safe-area-inset-top,0px))
-      max(16px,env(safe-area-inset-right,0px))
-      max(22px,env(safe-area-inset-bottom,0px))
-      max(16px,env(safe-area-inset-left,0px))!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-card{
-    margin:0 auto!important;
-    padding:clamp(8px,1.6svh,16px) 2px 18px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-brand{
-    margin-bottom:clamp(14px,2.2svh,22px)!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-unlock-intro{
-    gap:clamp(5px,.8svh,8px)!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-unlock-input-label{
-    margin-top:clamp(12px,1.7svh,18px)!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-pin-pad{
-    margin-top:clamp(10px,1.4svh,16px)!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-keypad{
-    gap:clamp(8px,1svh,11px) 18px!important;
+@media(forced-colors:active){
+  html.cdc-v75 #vaultScreen :is(.vault-card,#unlockPassphrase,.vault-key,.vault-transfer,.vault-disclosure,.device-transfer-box,.pin-recovery-box){
+    border-color:CanvasText!important;
   }
   html.cdc-v75 #vaultScreen .vault-enter-btn{
-    margin-top:clamp(12px,1.6svh,18px)!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-keyboard-toggle{
-    margin-top:2px!important;
-  }
-  html.cdc-v75 #vaultScreen .pin-recovery-actions{
-    margin-top:0!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-transfer{
-    margin-top:clamp(10px,1.4svh,16px)!important;
-    padding-top:8px!important;
-  }
-  html.cdc-v75 #vaultScreen .privacy-note{
-    margin-top:8px!important;
-  }
-}
-
-@media(max-width:820px) and (max-height:900px){
-  html.cdc-v75 #vaultScreen .vault-card{
-    padding:6px 2px 18px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-brand{
-    margin-bottom:14px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-lock-badge{
-    width:38px!important;
-    height:38px!important;
-    margin-bottom:2px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-unlock-intro{
-    gap:5px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-unlock-input-label{
-    margin-top:12px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-pin-pad{
-    margin-top:10px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-keypad{
-    grid-template-columns:repeat(3,58px)!important;
-    gap:8px 16px!important;
-  }
-  html.cdc-v75 #vaultScreen :is(.vault-key,.vault-key-spacer){
-    width:58px!important;
-    min-width:58px!important;
-    height:58px!important;
-    min-height:58px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-enter-btn{
-    min-height:48px!important;
-    margin-top:12px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-transfer{
-    margin-top:10px!important;
-  }
-}
-
-@media(max-width:820px) and (max-height:780px){
-  html.cdc-v75 #vaultScreen .vault-keypad{
-    grid-template-columns:repeat(3,54px)!important;
-    gap:7px 14px!important;
-  }
-  html.cdc-v75 #vaultScreen :is(.vault-key,.vault-key-spacer){
-    width:54px!important;
-    min-width:54px!important;
-    height:54px!important;
-    min-height:54px!important;
-  }
-  html.cdc-v75 #vaultScreen .vault-enter-btn{
-    margin-top:10px!important;
-  }
-}
-
-@media(max-width:820px) and (max-height:640px){
-  html.cdc-v75 #vaultScreen .vault-keypad{
-    grid-template-columns:repeat(3,48px)!important;
-    gap:5px 12px!important;
-  }
-  html.cdc-v75 #vaultScreen :is(.vault-key,.vault-key-spacer){
-    width:48px!important;
-    min-width:48px!important;
-    height:48px!important;
-    min-height:48px!important;
+    border:1px solid ButtonText!important;
   }
 }
