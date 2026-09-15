@@ -2,6 +2,49 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-15 — PR #158 / `76-auth-spacing3` — ritmo vertical do PIN em Safari/iOS — publicado
+
+### Problema confirmado
+
+A validação física no iPhone/Safari mostrou que a geometria do keypad estava correta, mas o somatório dos espaços entre marca, introdução, campo PIN, keypad, CTA, ações secundárias, transferência e nota inferior empurrava conteúdo para a zona do chrome inferior do browser.
+
+### Correção
+
+- `v75-usability.css` permanece a única autoridade visual do auth;
+- keypad móvel mantém 56 px, `column-gap:30px` e `row-gap:16px`;
+- separação da marca reduzida para 16 px;
+- campo PIN e keypad usam 18 px de separação dos blocos anteriores;
+- CTA **Entrar** mantém 52 px e usa 20 px após o keypad;
+- ações secundárias são aproximadas sem reduzir targets >=44 px;
+- transferência usa 14 px de margem superior e 12 px de separador interno;
+- `#vaultMessage:empty` deixa de reservar altura quando não existe mensagem;
+- `100svh`, safe areas, input >=16 px, pinch-to-zoom, dark mode, `forced-colors` e `prefers-reduced-motion` permanecem ativos;
+- Service Worker recebe o token técnico `auth-spacing3`.
+
+### Preservado
+
+Sem alteração de PIN, palavra-passe, `createVault()`, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync, dados financeiros, QR, scanner, Mercado, `STATE_VERSION`, `v76` ou `0.76.0`.
+
+### Evidência
+
+- head funcional `4632fa25a608524a5e0ce2e313378a21f1458e9f`;
+- TypeScript Foundation PR `35019148671`: sucesso;
+- CI PR `35019148364`: sucesso integral;
+- merge funcional original PR #158: `79cd9e52feb0ac87678c253e0392ba402ae6f718`;
+- TypeScript Foundation `main` `35019232012`: sucesso;
+- CI `main` `35019231922`: sucesso integral;
+- Deploy Pages `35019295696`: sucesso;
+- PR #159 reaplicou o mesmo conteúdo funcional sem novo contrato visual; `main` passou a `36f04023a967539e2827c357c58c835ef9a721e9`;
+- em `main` após PR #159: TypeScript `35019873098`, CI `35019873034` e Deploy Pages `35019940717`: sucesso.
+
+### Pendente
+
+- confirmação física no mesmo iPhone/Safari web e PWA instalada;
+- validação portrait/landscape e teclado virtual;
+- E2E WebKit/Chromium para o fluxo de autenticação.
+
+---
+
 ## 2026-09-15 — PR #156 / `76-date-calculator-layout2` — autoridade visual da Calculadora de datas — publicado
 
 ### Objetivo
@@ -176,7 +219,7 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 ## 2026-09-13 — auth/UI e início TypeScript
 
 - abertura local deixou de depender de sync remoto;
-- Safari/WebKit passou a respeitar `hidden` entre cofre e shell;
+- Safari/WebKit passou a respeitar `hidden` entre cofre/shell;
 - marca `icon.svg` e Lucide consolidados;
 - Sync conflict policy migrou para TypeScript.
 
