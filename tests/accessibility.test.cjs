@@ -83,11 +83,12 @@ assert.match(architecture,/\.v75-more-group/);
 assert.match(architecture,/\.v75-budget-summary/);
 assert.doesNotMatch(css,/pointer-events:none!important;[^}]*\.cdc-quick-action/);
 
-/* 76-auth-prototype-final1 + 76-auth-exclusive-state1: uma única autoridade
-   visual substitui as camadas históricas, e `hidden` continua a ser a
-   autoridade de estado para impedir criação/desbloqueio simultâneos. */
+/* 76-auth-prototype-final1 + 76-auth-exclusive-state1 + 76-auth-spacing3:
+   uma única autoridade visual substitui as camadas históricas; `hidden` continua
+   a ser autoridade de estado e o ritmo móvel preserva ações acima do chrome do Safari. */
 assert.match(usability,/76-auth-prototype-final1/);
 assert.match(usability,/76-auth-exclusive-state1/);
+assert.match(usability,/76-auth-spacing3/);
 assert.doesNotMatch(usability,/\/\* 76-vault-short-height1/,'legacy short-height auth section must be removed');
 assert.doesNotMatch(usability,/\/\* 76-auth-ios-spacing2/,'legacy iOS spacing section must be removed');
 assert.match(usability,/#vaultScreen\.vault-screen\[hidden\],[\s\S]*#vaultCreate\[hidden\],[\s\S]*#vaultUnlock\[hidden\][\s\S]*display:none!important/,'hidden auth states must override author display rules');
@@ -97,7 +98,12 @@ assert.match(usability,/max\(18px,env\(safe-area-inset-top,0px\)\)/,'mobile auth
 assert.match(usability,/\.vault-card\{[\s\S]*margin:0 auto!important/,'mobile auth must not vertically recenter the whole card');
 assert.match(usability,/\.vault-keypad\{[\s\S]*grid-template-columns:repeat\(3,56px\)!important;[\s\S]*column-gap:30px!important;[\s\S]*row-gap:16px!important/,'approved PIN keypad must keep the wider horizontal rhythm');
 assert.match(usability,/:is\(\.vault-key,\.vault-key-spacer\)\{[\s\S]*width:56px!important;[\s\S]*height:56px!important/);
-assert.match(usability,/\.vault-enter-btn\{[\s\S]*min-height:52px!important;[\s\S]*margin-top:27px!important/);
+assert.match(usability,/#vaultMessage:empty\{[\s\S]*min-height:0!important;[\s\S]*margin-top:0!important/,'empty auth status must not reserve vertical space');
+assert.match(usability,/@media\(max-width:820px\)[\s\S]*\.vault-brand\{[\s\S]*margin-bottom:16px!important/,'mobile brand rhythm must remain compact');
+assert.match(usability,/@media\(max-width:820px\)[\s\S]*\.vault-unlock-input-label\{[\s\S]*margin-top:18px!important/,'PIN field must have deliberate spacing from the intro');
+assert.match(usability,/@media\(max-width:820px\)[\s\S]*\.vault-pin-pad\{[\s\S]*margin-top:18px!important/,'keypad must follow the field without an oversized gap');
+assert.match(usability,/@media\(max-width:820px\)[\s\S]*\.vault-enter-btn\{[\s\S]*min-height:52px!important;[\s\S]*margin-top:20px!important/,'primary CTA must remain separated but not pushed below the viewport');
+assert.match(usability,/@media\(max-width:820px\)[\s\S]*\.vault-transfer\{[\s\S]*margin-top:14px!important;[\s\S]*padding-top:12px!important/,'device transfer must stay reachable above Safari chrome');
 assert.match(usability,/\.vault-keyboard-toggle\{[\s\S]*min-height:44px!important/);
 assert.match(usability,/\.vault-disclosure\{[\s\S]*min-height:70px!important/,'device-transfer action must remain a clear full-width card');
 assert.match(usability,/@media\(max-width:820px\) and \(max-height:720px\)[\s\S]*grid-template-columns:repeat\(3,50px\)!important/,'short viewports may compact but must keep touch targets above 44 px');
@@ -105,6 +111,7 @@ const authCss=usability.slice(usability.indexOf('76-auth-prototype-final1'));
 const keypadSizes=[...authCss.matchAll(/grid-template-columns:repeat\(3,(\d+)px\)!important/g)].map(match=>Number(match[1]));
 assert.deepEqual(keypadSizes,[64,56,52,50],'auth keypad sizes must remain ordered from desktop/base to mobile/compact contracts');
 assert.ok(keypadSizes.every(size=>size>=44),`PIN targets must remain >=44 px; got ${keypadSizes.join(', ')}`);
-assert.match(sw,/auth-prototype-final1/,'PWA cache must invalidate the previous auth layout');
+assert.match(sw,/auth-prototype-final1/,'PWA cache must retain the canonical auth layout token');
+assert.match(sw,/auth-spacing3/,'PWA cache must invalidate the previous auth spacing');
 
-console.log('Accessibility contrast, focus, touch targets, semantic state, safe areas and exclusive PIN layout contracts for v76: OK');
+console.log('Accessibility contrast, focus, touch targets, semantic state, safe areas and compact exclusive PIN layout contracts for v76: OK');
