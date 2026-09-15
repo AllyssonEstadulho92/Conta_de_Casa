@@ -167,7 +167,6 @@ A reorganização visual dos filtros de Despesas não cria uma segunda implement
 - os IDs canónicos dos controlos não mudam;
 - `mobile-layout.css` pode reorganizar pesquisa, ação e filtros em `<=820px`, mas não pode calcular, persistir nem alterar critérios;
 - o sistema Lucide local é a única lupa visível da pesquisa; pseudo-elementos históricos que duplicavam o símbolo devem ser neutralizados;
-- Estado/Categoria podem usar duas colunas e De/Até/Ordenar podem ser reorganizados desde que os inputs reais permaneçam acessíveis e funcionais;
 - em ecrãs muito estreitos a composição deve empilhar antes de cortar conteúdo;
 - targets essenciais mantêm pelo menos 44 px e foco/forced-colors/reduced-motion permanecem explícitos;
 - `mobile-layout.css` é CSS de feature: não pode assumir `100dvh`, scroll global ou a geometria do viewport, que pertence exclusivamente a `v76-mobile-shell.css`;
@@ -199,6 +198,20 @@ A validação física do PR #143 mostrou que `aspect-ratio` não corrige um comp
 - tamanhos móveis podem variar por breakpoint, mas largura e altura efetivas devem permanecer 1:1;
 - testes devem proteger a neutralização da altura histórica e os tamanhos 136/128/116 px;
 - esta correção é exclusivamente visual e não altera percentagem, orçamento, cálculos, persistência ou domínio.
+
+## D-102 — filtros móveis de Despesas não usam faixa horizontal como apresentação final
+
+A validação física no iPhone mostrou que a faixa horizontal herdada de `v75-expenses-modern.css` introduzia pressão lateral, campos cortados e a sensação de que o terceiro controlo invadia o cartão.
+
+- em `<=820px`, a apresentação final dos filtros é uma grelha contida na largura disponível;
+- Estado/Categoria formam um par; De/Até formam outro; Ordenar e Limpar filtros ocupam linhas completas;
+- `<=360px` usa uma coluna para evitar clipping;
+- scroll horizontal não é requisito para descobrir controlos essenciais;
+- `mobile-layout.css` pode neutralizar a regra visual histórica com especificidade maior, mas não se torna autoridade de viewport;
+- `v76-mobile-shell.css` continua a única autoridade de safe areas, scroll da aplicação e dock persistente;
+- `overflow:hidden` genérico permanece proibido em CSS de feature pelo contrato de arquitetura; contenção deve ser feita por `min-width:0`, `max-width:100%` e regras locais justificadas;
+- alterações visuais instaladas na PWA devem invalidar o cache técnico do Service Worker;
+- a decisão não altera `renderBills()`, listeners, fórmulas, cêntimos, IndexedDB, PIN/cofre, QR, scanner, Mercado, sync ou release.
 
 ## Invariantes vigentes
 
