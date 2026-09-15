@@ -2,7 +2,7 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
-## 2026-09-15 — PR #150 / `76-auth-ios-spacing2` — espaçamento do cofre no iPhone/Safari — em validação
+## 2026-09-15 — PR #150 / `76-auth-ios-spacing2` — espaçamento do cofre no iPhone/Safari — publicado
 
 ### Problema confirmado no dispositivo
 
@@ -25,19 +25,28 @@ A captura física do ecrã de PIN mostrou uma composição funcional mas vertica
 - regressão em `tests/accessibility.test.cjs` protege `100svh`, margens, breakpoints e tamanho mínimo;
 - Service Worker recebe apenas o token técnico `auth-ios-spacing2` para invalidar o layout anterior na PWA.
 
+### Evidência
+
+- head final do PR #150: `5713cb7514344298aeda578e061281667c6aca48`;
+- TypeScript Foundation PR `34961244599`: sucesso;
+- CI PR `34961244608`: sucesso integral;
+- merge: `a140211813f2194926b2cbd5bde7c53a8798b140`;
+- TypeScript Foundation `main` `34961349276`: sucesso;
+- CI `main` `34961349248`: sucesso integral;
+- Deploy Pages `34961403315`: sucesso, incluindo build, allowlist, upload e deploy.
+
 ### Preservado
 
 Sem alteração de PIN, palavra-passe, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync, `STATE_VERSION`, dados financeiros, QR, scanner, Mercado, release `v76` ou versão `0.76.0`.
 
 ### Pendente
 
-- concluir gates do PR #150;
-- publicar;
-- confirmar no mesmo iPhone/Safari web e PWA instalada com barras do browser abertas/recolhidas, portrait/landscape e teclado virtual.
+- confirmar no mesmo iPhone/Safari web e PWA instalada que o novo ritmo vertical fica correto com barras do browser abertas/recolhidas;
+- validar portrait/landscape e teclado virtual.
 
 ---
 
-## 2026-09-15 — PR #149 / `76-date-calculator1` — calculadora exata de datas — integrada em `main`
+## 2026-09-15 — PR #149 / `76-date-calculator1` — calculadora exata de datas — publicada
 
 ### Funcionalidade
 
@@ -64,15 +73,13 @@ Sem alteração de PIN, palavra-passe, `unlockVault()`, PBKDF2, AES-GCM, Indexed
 ### Evidência
 
 - merge em `main`: `8e58777f601d164bd4589f7d0e0e8f96e02686f0`;
-- TypeScript Foundation do PR: sucesso;
-- CI do PR: sucesso integral;
-- TypeScript Foundation em `main`: sucesso;
-- CI em `main`: sucesso integral.
+- TypeScript Foundation e CI do PR: sucesso;
+- TypeScript Foundation e CI em `main`: sucesso;
+- a publicação atual de Pages no head `a140211813f2194926b2cbd5bde7c53a8798b140` (`34961403315`) contém também os assets da calculadora e terminou com sucesso.
 
 ### Pendente
 
-- validação física do dialog e ações de partilha/impressão em iPhone/PWA e desktop;
-- publicação Pages deve ser tratada como confirmada apenas quando existir run de deploy concluído com sucesso para o head correspondente.
+- validação física do dialog e ações de partilha/impressão em iPhone/PWA e desktop.
 
 ---
 
