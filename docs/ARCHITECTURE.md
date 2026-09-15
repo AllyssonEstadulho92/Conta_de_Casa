@@ -30,15 +30,23 @@ Contratos:
 
 - PIN local válido abre a aplicação sem depender do sync remoto;
 - `#vaultScreen[hidden]` e `#app[hidden]` são exclusivos;
+- `#vaultCreate[hidden]` e `#vaultUnlock[hidden]` também são autoridades explícitas e não podem ser anulados por regras de apresentação;
 - sync opcional continua em background;
 - anexos reais permanecem bloqueados até existir cifragem dedicada;
 - UI do cofre não pode modificar lógica de derivação, unlock, IndexedDB ou sync.
 
-### 2.1 Autoridade visual do cofre — `76-auth-prototype-final1`
+### 2.1 Autoridade visual do cofre — `76-auth-prototype-final1` + `76-auth-exclusive-state1`
 
 Autoridade visual: `v75-usability.css`.
 
-O PR #152 substitui as duas camadas móveis anteriores (`76-vault-short-height1` e `76-auth-ios-spacing2`) por uma composição única baseada no protótipo aprovado em dispositivo real.
+O PR #152 substitui as duas camadas móveis anteriores (`76-vault-short-height1` e `76-auth-ios-spacing2`) por uma composição única baseada no protótipo aprovado em dispositivo real. O PR #154 corrige a última colisão de cascade observada fisicamente: `#vaultCreate{display:grid!important}` podia sobrepor o estado `hidden` definido pelo runtime e mostrar criação e desbloqueio ao mesmo tempo.
+
+Contrato de estado:
+
+- `events.js` consulta `idbGet('meta','vault')` e escolhe exatamente um estado: criação quando não existe cofre local, desbloqueio quando existe;
+- `hidden` é autoridade superior à decoração CSS para `#vaultScreen`, `#vaultCreate`, `#vaultUnlock`, transferência e painéis de recuperação;
+- uma regra visual com `display:* !important` nunca pode tornar visível um estado que o runtime marcou como `hidden`;
+- não é criado um segundo controlador de autenticação nem uma alternância artificial entre “Criar” e “Entrar” quando já existe cofre.
 
 Contrato móvel:
 
@@ -54,7 +62,7 @@ Contrato móvel:
 - `Usar dados de outro dispositivo` é uma superfície própria abaixo de um divisor, evitando competição visual com o CTA principal;
 - pinch-to-zoom, `prefers-reduced-motion`, `forced-colors` e dark mode permanecem suportados.
 
-A mudança é exclusivamente de apresentação. HTML canónico, IDs, handlers, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação e sync não mudam.
+A mudança é exclusivamente de apresentação/estado visual. HTML canónico, IDs, handlers, `createVault()`, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação e sync não mudam.
 
 ## 3. Rotas e navegação
 
@@ -95,14 +103,14 @@ Autoridades atuais:
 - tokens/componentes: `v76-modern-ui.css` + `design-system.css`;
 - composição de páginas: `v76-product-pages.css`, `v76-planning-more.css` e camadas v75 ainda ativas;
 - geometria mobile autenticada: `v76-mobile-shell.css`;
-- auth/cofre: `v75-usability.css` / `76-auth-prototype-final1`;
+- auth/cofre: `v75-usability.css` / `76-auth-prototype-final1` com contrato de estado `76-auth-exclusive-state1`;
 - refinamentos móveis de feature: `mobile-layout.css`;
 - marca: `icon.svg`;
 - iconografia funcional: subset Lucide local em `ui-icons.js` + `ui-icons.css`;
 - drawer: `mobile-menu-toggle.js/.css` + `v75-drawer-theme.css`;
 - formulários de despesas/QR: `invoice-capture.js/.css`.
 
-A cascade ainda contém regras históricas e `!important`; a redução deve ser por componente com regressões, nunca por eliminação em massa. No cofre, o PR #152 já retirou duas secções móveis redundantes e deixou uma única autoridade visual.
+A cascade ainda contém regras históricas e `!important`; a redução deve ser por componente com regressões, nunca por eliminação em massa. No cofre, a regra explícita de `hidden` impede que especificidade visual altere o estado funcional.
 
 ## 5. Despesas mobile — `76-bills-mobile-alignment2`
 
@@ -199,7 +207,7 @@ Service Worker:
 - allowlist explícita;
 - tokens técnicos invalidam cache sem alterar release pública.
 
-PR #149 adicionou `date-calculator1`; PR #150 adicionou `auth-ios-spacing2`; PR #152 acrescenta `auth-prototype-final1` e substitui a autoridade visual móvel anterior. `package.json`, `release-manifest.json`, `app-update.js` e v76/`0.76.0` permanecem inalterados.
+PR #154 acrescenta `auth-exclusive-state1` ao token técnico de cache para distribuir a correção do estado `hidden`. `package.json`, `release-manifest.json`, `app-update.js` e v76/`0.76.0` permanecem inalterados.
 
 ## 12. Segurança e dependências externas
 
@@ -215,24 +223,25 @@ PR #149 adicionou `date-calculator1`; PR #150 adicionou `auth-ios-spacing2`; PR 
 
 A CI cobre sintaxe, TypeScript, finanças, isolamento, datas, QR, Mercado, imagens, scanner, UI, responsividade, acessibilidade, segurança e sync.
 
-Regressões do cofre após PR #152 protegem:
+Regressões do cofre após PR #154 protegem:
 
-- marcador `76-auth-prototype-final1` e ausência das secções históricas como autoridades CSS;
+- `76-auth-prototype-final1` como autoridade visual única e `76-auth-exclusive-state1` como contrato de estado;
+- `#vaultCreate[hidden]` e `#vaultUnlock[hidden]` com `display:none!important` de especificidade suficiente;
+- decisão funcional de `events.js` baseada em `idbGet('meta','vault')`;
 - `100svh` e safe areas;
-- `margin:0 auto` no cartão mobile;
 - keypad 56 px com gaps 30/16 px no mobile padrão;
 - fallbacks 52 px (`<=359px`) e 50 px (`<=720px` de altura);
 - piso tátil >=44 px;
 - transferência em superfície com min-height 70 px;
-- token de cache `auth-prototype-final1`.
+- token de cache `auth-exclusive-state1`.
 
-Evidência PR #152: TypeScript Foundation `34977687455` e CI `34977687437` verdes; após merge, TypeScript `34977780423`, CI `34977780342` e Pages `34977846729` verdes.
+Evidência PR #154: TypeScript Foundation `35003057035` e CI `35003057086` verdes; após merge, TypeScript `35003207253`, CI `35003207139` e Pages `35003264802` verdes.
 
 Limitação: testes estáticos não substituem Safari/WebKit real para browser chrome, teclado virtual, scroll, foco, proporções e safe areas.
 
 ## 14. Próxima consolidação
 
-1. validar `76-auth-prototype-final1` no mesmo iPhone/Safari web e PWA;
+1. validar `76-auth-exclusive-state1` no mesmo iPhone/Safari web e PWA;
 2. confirmar Despesas/Planeamento no mesmo dispositivo;
 3. corrigir descrição factual de rede em Segurança;
 4. empacotar ZXing localmente com licença preservada;
