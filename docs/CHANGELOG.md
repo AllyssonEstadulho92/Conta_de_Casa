@@ -2,6 +2,55 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-15 — PR #140 / `76-bills-mobile-filters1` — pesquisa e filtros móveis de Despesas — integrado
+
+### Problema confirmado
+
+A página Despesas mantinha os controlos funcionais corretos, mas a apresentação móvel estava desalinhada com o protótipo aprovado:
+
+- a pesquisa podia mostrar duas lupas sobrepostas porque `v75-expenses-modern.css` desenhava uma lupa por pseudo-elementos ao mesmo tempo que `ui-icons.js` injetava a lupa Lucide local;
+- a faixa horizontal de filtros criava labels cortados e leitura pouco previsível no iPhone;
+- pesquisa, ação principal e filtros tinham dimensões/ritmo visual inconsistentes;
+- a solução tinha de preservar os IDs e listeners canónicos para não arriscar regressão funcional.
+
+### Correção
+
+- `mobile-layout.css` passa a declarar `76-bills-mobile-filters1` apenas como refinamento de feature móvel;
+- `.bill-command-bar` organiza pesquisa + Nova fatura numa composição compacta;
+- a lupa CSS histórica é neutralizada e a lupa Lucide local passa a ser a única representação visível da pesquisa;
+- `#newBillBtn` mantém o mesmo controlo/handler e passa a uma superfície móvel quadrada com ícone e label acessível preservada;
+- o bloco de filtros passa a cartão com hierarquia clara “Filtros” + texto auxiliar;
+- Estado/Categoria ficam lado a lado em telefones com largura suficiente;
+- De/Até continuam a ser inputs `date` reais; Ordenar e Limpar filtros permanecem funcionais;
+- `<=360px` empilha a composição para evitar clipping;
+- targets essenciais >=44 px, foco, reduced-motion e forced-colors foram preservados;
+- `mobile-layout.css` não assume viewport/scroll global, mantendo `v76-mobile-shell.css` como autoridade geométrica.
+
+### Regressão encontrada e resolvida durante o PR
+
+O primeiro ciclo de CI bloqueou a alteração porque o CSS de feature continha `overflow:hidden`, violando o contrato que impede `mobile-layout.css` de recriar um viewport recortado. A regra foi removida/substituída por clipping acessível sem propriedade global de overflow e o gate `UI architecture contract tests` voltou a verde antes do merge.
+
+### Evidência
+
+- PR #140 head final `f7744d48e1b9ce28942e9765b199dc8f209ab4df`;
+- TypeScript Foundation PR `34942844618`: sucesso;
+- CI PR `34942844692`: sucesso integral;
+- CI push `34942841985`: sucesso integral;
+- merge PR #140: `387a953e427331a5aa48d872cd7c54e1552d2c1c`;
+- Pages `34942974208`: iniciado após o merge; confirmação final pendente no momento deste registo.
+
+### Preservado
+
+Sem alteração de `renderBills()`, listeners, IDs canónicos, cálculos, `STATE_VERSION`, release `v76`, versão `0.76.0`, `package.json`, `release-manifest.json`, `app-update.js`, PIN/cofre, IndexedDB, Mercado, QR, scanner ou sync.
+
+### Pendente
+
+- confirmar o Pages do merge #140;
+- validar a composição no mesmo iPhone/Safari web e PWA instalada, incluindo 360/375/390/430 px;
+- prosseguir com a correção factual da página Segurança e, depois, ZXing local/CSP em bloco separado.
+
+---
+
 ## 2026-09-15 — PR #138 / `76-icon-semantics1` — iconografia funcional semântica — publicado
 
 ### Problema confirmado
@@ -202,6 +251,8 @@ Sem alteração de `STATE_VERSION`, release pública, `package.json`, `release-m
 - regressão real em dispositivo tem prioridade sobre teste legado;
 - `icon.svg` é a marca canónica e Lucide é a iconografia funcional;
 - ícones funcionais devem representar a responsabilidade real e usar geometria do snapshot Lucide auditado;
+- filtros móveis de Despesas podem ser reorganizados visualmente, mas mantêm `renderBills()`, IDs e listeners como única autoridade funcional;
+- CSS de feature não assume viewport/scroll global; `v76-mobile-shell.css` continua autoridade geométrica;
 - o drawer completo usa uma coluna e expõe apenas destinos de primeiro nível;
 - rotas secundárias permanecem nas páginas-pai em vez de duplicarem a navegação;
 - `marketId|pid` acompanha o SKU pesquisado quando existe origem verificável;
