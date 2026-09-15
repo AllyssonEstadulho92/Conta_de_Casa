@@ -6,7 +6,12 @@
    76-prototype-planning1:
    - aproxima Planeamento, Metas e Mais do protótipo aprovado;
    - orçamento por definir usa estado neutro em vez de percentagem enganadora;
-   - reduz sombras, gradientes decorativos e densidade irregular. */
+   - reduz sombras, gradientes decorativos e densidade irregular.
+
+   76-planning-budget-card2:
+   - aplica uma hierarquia móvel única para mês, orçamento, métricas e ação principal;
+   - mantém a autoridade funcional no formulário #monthPlanForm/#monthlyBudget existente;
+   - elimina a composição comprimida de três métricas lado a lado em iPhones estreitos. */
 
 html.cdc-v75 .cdc-empty-note{
   margin:0;
@@ -50,56 +55,144 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
 @media(max-width:820px){
   html.cdc-v75 .cdc-planning-overview{
     display:grid!important;
-    gap:12px!important;
-    margin-bottom:14px!important;
+    gap:16px!important;
+    margin-bottom:16px!important;
   }
 
+  /* Navegação mensal: controlos tácteis separados da informação temporal. */
   html.cdc-v75 .cdc-planning-month{
-    min-height:48px;
+    min-height:64px;
     display:grid!important;
-    grid-template-columns:44px minmax(0,1fr) 44px!important;
+    grid-template-columns:48px minmax(0,1fr) 48px!important;
     align-items:center!important;
+    gap:4px!important;
     margin:0!important;
+    padding:4px 6px!important;
     border:1px solid var(--v76-border,var(--v75-border))!important;
-    border-radius:14px!important;
+    border-radius:18px!important;
     background:var(--v76-surface,var(--v75-surface))!important;
-    box-shadow:none!important;
+    box-shadow:0 5px 18px rgba(7,47,52,.035)!important;
   }
-  html.cdc-v75 .cdc-planning-month>strong{
+  html.cdc-v75 .cdc-planning-month-copy{
+    display:grid;
+    min-width:0;
+    justify-items:center;
+    gap:2px;
     text-align:center;
+  }
+  html.cdc-v75 .cdc-planning-month-copy>strong{
     color:var(--v76-text,var(--v75-text));
-    font-size:.84rem;
-    font-weight:720;
+    font-size:1rem;
+    line-height:1.2;
+    font-weight:760;
+    letter-spacing:-.025em;
+  }
+  html.cdc-v75 .cdc-planning-month-copy>small{
+    color:var(--v76-muted,var(--v75-muted));
+    font-size:.66rem;
+    line-height:1.25;
+    font-weight:520;
   }
   html.cdc-v75 .cdc-planning-month button{
     width:44px;
     height:44px;
     display:grid;
     place-items:center;
+    justify-self:center;
     border:0;
-    border-radius:12px;
-    background:transparent;
+    border-radius:13px;
+    background:color-mix(in srgb,var(--v76-primary,var(--v75-primary)) 7%,transparent);
     color:var(--v76-primary,var(--v75-primary));
-    font-size:22px;
   }
+  html.cdc-v75 .cdc-planning-month button.is-prev .svg-icon{transform:rotate(180deg)}
   html.cdc-v75 .cdc-planning-month button:focus-visible{
     outline:0;
     box-shadow:var(--v76-focus,0 0 0 3px color-mix(in srgb,var(--v75-primary) 16%,transparent));
   }
 
-  html.cdc-v75 .v75-budget-summary{
+  /* Cartão principal — um único contexto visual para o orçamento do mês. */
+  html.cdc-v75 .v76-planning-budget-card{
     display:grid!important;
-    grid-template-columns:minmax(132px,.78fr) minmax(0,1.4fr)!important;
-    align-items:center!important;
     gap:16px!important;
-    padding:18px!important;
+    padding:16px!important;
     border:1px solid var(--v76-border,var(--v75-border))!important;
-    border-radius:18px!important;
+    border-radius:22px!important;
     background:var(--v76-surface,var(--v75-surface))!important;
+    box-shadow:0 10px 32px rgba(7,47,52,.045)!important;
+  }
+  html.cdc-v75 .v76-budget-card-head{
+    display:grid;
+    grid-template-columns:44px minmax(0,1fr) auto;
+    align-items:center;
+    gap:12px;
+  }
+  html.cdc-v75 .v76-budget-card-icon,
+  html.cdc-v75 .v76-budget-metric-icon,
+  html.cdc-v75 .v76-budget-guidance-icon{
+    display:grid;
+    place-items:center;
+    flex:0 0 auto;
+    background:var(--v76-surface-accent,color-mix(in srgb,var(--v76-primary,var(--v75-primary)) 10%,var(--v76-surface,var(--v75-surface))));
+    color:var(--v76-primary,var(--v75-primary));
+  }
+  html.cdc-v75 .v76-budget-card-icon{
+    width:44px;
+    height:44px;
+    border-radius:14px;
+  }
+  html.cdc-v75 .v76-budget-card-copy{
+    display:grid;
+    min-width:0;
+    gap:3px;
+  }
+  html.cdc-v75 .v76-budget-card-copy>strong{
+    color:var(--v76-text,var(--v75-text));
+    font-size:1rem;
+    line-height:1.2;
+    font-weight:780;
+    letter-spacing:-.025em;
+  }
+  html.cdc-v75 .v76-budget-card-copy>small{
+    color:var(--v76-muted,var(--v75-muted));
+    font-size:.68rem;
+    line-height:1.35;
+  }
+  html.cdc-v75 .v76-budget-head-action{
+    min-height:44px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    padding:0 12px;
+    border:1px solid color-mix(in srgb,var(--v76-primary,var(--v75-primary)) 12%,var(--v76-border,var(--v75-border)));
+    border-radius:14px;
+    background:var(--v76-surface-accent,color-mix(in srgb,var(--v76-primary,var(--v75-primary)) 9%,var(--v76-surface,var(--v75-surface))));
+    color:var(--v76-primary,var(--v75-primary));
+    font-size:.7rem;
+    font-weight:760;
+    white-space:nowrap;
+  }
+  html.cdc-v75 .v76-budget-head-action:focus-visible,
+  html.cdc-v75 .v76-budget-metric-action:focus-visible,
+  html.cdc-v75 .v76-budget-guidance>button:focus-visible,
+  html.cdc-v75 .v76-budget-cta:focus-visible{
+    outline:0;
+    box-shadow:var(--v76-focus,0 0 0 3px color-mix(in srgb,var(--v75-primary) 16%,transparent));
+  }
+
+  html.cdc-v75 .v76-planning-budget-card>.v75-budget-summary{
+    display:grid!important;
+    grid-template-columns:minmax(150px,.8fr) minmax(0,1.35fr)!important;
+    align-items:center!important;
+    gap:18px!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
     box-shadow:none!important;
   }
   html.cdc-v75 .cdc-budget-ring{
-    width:132px!important;
+    width:150px!important;
     max-width:100%;
     aspect-ratio:1;
     display:grid!important;
@@ -116,7 +209,7 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
   html.cdc-v75 .cdc-budget-ring::after{
     content:"";
     position:absolute;
-    inset:12px;
+    inset:13px;
     border-radius:50%;
     background:var(--v76-surface,var(--v75-surface))!important;
   }
@@ -125,64 +218,146 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
     box-shadow:inset 0 0 0 1px var(--v76-border,var(--v75-border));
   }
   html.cdc-v75 .cdc-budget-ring.is-unset::after{
-    inset:10px;
-    border:1px dashed color-mix(in srgb,var(--v76-primary,var(--v75-primary)) 18%,var(--v76-border,var(--v75-border)));
+    inset:11px;
+    border:1px dashed color-mix(in srgb,var(--v76-primary,var(--v75-primary)) 24%,var(--v76-border,var(--v75-border)));
   }
   html.cdc-v75 .cdc-budget-ring>div{
     position:relative;
     z-index:1;
     display:grid;
     justify-items:center;
-    gap:3px;
-    padding:10px;
+    gap:4px;
+    padding:12px;
     text-align:center;
     line-height:1.15;
   }
   html.cdc-v75 .cdc-budget-ring strong{
-    font-size:1.34rem;
     color:var(--v76-text,var(--v75-text));
-    letter-spacing:-.035em;
+    font-size:1.38rem;
+    line-height:1;
+    letter-spacing:-.04em;
   }
   html.cdc-v75 .cdc-budget-ring span{
-    font-size:.7rem;
     color:var(--v76-primary,var(--v75-primary));
-    font-weight:680;
+    font-size:.72rem;
+    font-weight:720;
   }
   html.cdc-v75 .cdc-budget-ring small{
-    max-width:90px;
-    font-size:.59rem;
-    line-height:1.3;
+    max-width:104px;
     color:var(--v76-muted,var(--v75-muted));
+    font-size:.61rem;
+    line-height:1.3;
   }
-  html.cdc-v75 .cdc-budget-ring.is-unset span{color:var(--v76-text,var(--v75-text))}
+  html.cdc-v75 .cdc-budget-ring.is-unset span:not(.v76-budget-ring-icon){color:var(--v76-text,var(--v75-text))}
+  html.cdc-v75 .v76-budget-ring-icon{
+    width:42px;
+    height:42px;
+    display:grid;
+    place-items:center;
+    margin-bottom:2px;
+    color:var(--v76-primary,var(--v75-primary))!important;
+  }
+  html.cdc-v75 .v76-budget-ring-icon .svg-icon{width:30px;height:30px}
 
   html.cdc-v75 .v75-budget-metrics{
     display:grid!important;
     grid-template-columns:1fr!important;
-    gap:7px!important;
+    gap:8px!important;
   }
-  html.cdc-v75 .v75-budget-metrics>div{
-    min-height:54px!important;
-    display:flex!important;
+  html.cdc-v75 .v75-budget-metrics>.v76-budget-metric{
+    min-height:66px!important;
+    display:grid!important;
+    grid-template-columns:40px minmax(0,1fr) auto!important;
     align-items:center!important;
-    justify-content:space-between!important;
-    gap:10px!important;
+    gap:11px!important;
     padding:10px 12px!important;
     border:1px solid var(--v76-border,var(--v75-border))!important;
-    border-radius:12px!important;
+    border-radius:14px!important;
     background:var(--v76-surface-soft,var(--v75-surface-soft))!important;
     box-shadow:none!important;
   }
-  html.cdc-v75 .v75-budget-metrics small{
-    font-size:.66rem!important;
-    line-height:1.25;
+  html.cdc-v75 .v76-budget-metric-icon{
+    width:40px;
+    height:40px;
+    border-radius:12px;
   }
-  html.cdc-v75 .v75-budget-metrics strong{
+  html.cdc-v75 .v76-budget-metric-copy{
+    display:grid;
+    min-width:0;
+    gap:3px;
+  }
+  html.cdc-v75 .v76-budget-metric-copy>small{
+    color:var(--v76-muted,var(--v75-muted));
+    font-size:.66rem!important;
+    line-height:1.2;
+    font-weight:520;
+  }
+  html.cdc-v75 .v76-budget-metric-copy>strong{
     color:var(--v76-text,var(--v75-text));
-    font-size:.82rem;
-    font-weight:760;
+    font-size:.9rem!important;
+    line-height:1.15;
+    font-weight:780;
     white-space:nowrap;
   }
+  html.cdc-v75 .v76-budget-metric-action,
+  html.cdc-v75 .v76-budget-guidance>button{
+    width:36px;
+    height:36px;
+    display:grid;
+    place-items:center;
+    padding:0;
+    border:0;
+    border-radius:11px;
+    background:transparent;
+    color:var(--v76-muted,var(--v75-muted));
+  }
+
+  html.cdc-v75 .v76-budget-guidance{
+    min-height:72px;
+    display:grid;
+    grid-template-columns:40px minmax(0,1fr) 36px;
+    align-items:center;
+    gap:11px;
+    padding:11px 12px;
+    border:1px solid color-mix(in srgb,var(--v76-primary,var(--v75-primary)) 10%,var(--v76-border,var(--v75-border)));
+    border-radius:15px;
+    background:var(--v76-surface-accent,color-mix(in srgb,var(--v76-primary,var(--v75-primary)) 7%,var(--v76-surface,var(--v75-surface))));
+  }
+  html.cdc-v75 .v76-budget-guidance-icon{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+  }
+  html.cdc-v75 .v76-budget-guidance>span:nth-child(2){
+    display:grid;
+    min-width:0;
+    gap:3px;
+  }
+  html.cdc-v75 .v76-budget-guidance strong{
+    color:var(--v76-primary,var(--v75-primary));
+    font-size:.76rem;
+    line-height:1.25;
+    font-weight:760;
+  }
+  html.cdc-v75 .v76-budget-guidance small{
+    color:var(--v76-muted,var(--v75-muted));
+    font-size:.65rem;
+    line-height:1.4;
+  }
+
+  html.cdc-v75 .v76-budget-cta{
+    width:100%!important;
+    min-height:54px!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:9px!important;
+    margin:0!important;
+    border-radius:16px!important;
+    font-size:.8rem!important;
+    font-weight:780!important;
+  }
+  html.cdc-v75 .v76-budget-cta .svg-icon{width:20px;height:20px}
 
   html.cdc-v75 .v75-section-heading{
     display:flex!important;
@@ -351,21 +526,29 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
 }
 
 @media(max-width:430px){
-  html.cdc-v75 .v75-budget-summary{
+  html.cdc-v75 .cdc-planning-overview{gap:14px!important}
+  html.cdc-v75 .cdc-planning-month{min-height:62px}
+  html.cdc-v75 .cdc-planning-month-copy>strong{font-size:.92rem}
+  html.cdc-v75 .v76-planning-budget-card{padding:14px!important;gap:14px!important}
+  html.cdc-v75 .v76-budget-card-head{grid-template-columns:42px minmax(0,1fr) auto;gap:10px}
+  html.cdc-v75 .v76-budget-card-icon{width:42px;height:42px}
+  html.cdc-v75 .v76-budget-head-action{padding-inline:10px;font-size:.67rem}
+  html.cdc-v75 .v76-planning-budget-card>.v75-budget-summary{
     grid-template-columns:1fr!important;
     justify-items:stretch!important;
+    gap:14px!important;
   }
-  html.cdc-v75 .cdc-budget-ring{width:124px!important}
-  html.cdc-v75 .v75-budget-metrics{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
-  html.cdc-v75 .v75-budget-metrics>div{
-    min-height:70px!important;
-    display:grid!important;
-    align-content:center!important;
-    justify-items:start!important;
-    gap:4px!important;
-    padding:9px!important;
+  html.cdc-v75 .cdc-budget-ring{width:142px!important}
+  html.cdc-v75 .v75-budget-metrics{grid-template-columns:1fr!important;gap:8px!important}
+  html.cdc-v75 .v75-budget-metrics>.v76-budget-metric{
+    min-height:64px!important;
+    grid-template-columns:38px minmax(0,1fr) auto!important;
+    gap:10px!important;
+    padding:9px 11px!important;
   }
-  html.cdc-v75 .v75-budget-metrics strong{font-size:.72rem;white-space:normal}
+  html.cdc-v75 .v76-budget-metric-icon{width:38px;height:38px}
+  html.cdc-v75 .v76-budget-guidance{grid-template-columns:38px minmax(0,1fr) 34px;gap:10px;padding:10px 11px}
+  html.cdc-v75 .v76-budget-guidance-icon{width:38px;height:38px}
   html.cdc-v75 .cdc-planning-categories>div{
     grid-template-columns:28px minmax(72px,1fr) auto!important;
   }
@@ -373,8 +556,14 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
 }
 
 @media(max-width:350px){
-  html.cdc-v75 .v75-budget-metrics{grid-template-columns:1fr!important}
-  html.cdc-v75 .v75-budget-metrics>div{min-height:50px!important;display:flex!important;justify-content:space-between!important;align-items:center!important}
+  html.cdc-v75 .v76-budget-card-head{grid-template-columns:40px minmax(0,1fr)}
+  html.cdc-v75 .v76-budget-card-icon{width:40px;height:40px}
+  html.cdc-v75 .v76-budget-head-action{
+    grid-column:1/-1;
+    justify-self:stretch;
+    width:100%;
+  }
+  html.cdc-v75 .v75-budget-metrics>.v76-budget-metric{min-height:62px!important}
   html.cdc-v75 #page-goals>.section-toolbar{display:grid!important}
   html.cdc-v75 #page-goals #newGoalBtn{width:100%!important}
 }
@@ -391,14 +580,34 @@ html.cdc-v75 .cdc-category-dot.income{background:#def7e7}
 @media(prefers-reduced-motion:reduce){
   html.cdc-v75 .cdc-budget-ring,
   html.cdc-v75 .v75-more-row,
-  html.cdc-v75 .cdc-planning-month button{transition:none!important;scroll-behavior:auto!important}
+  html.cdc-v75 .cdc-planning-month button,
+  html.cdc-v75 .v76-budget-head-action,
+  html.cdc-v75 .v76-budget-metric-action,
+  html.cdc-v75 .v76-budget-guidance>button,
+  html.cdc-v75 .v76-budget-cta{
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
 }
 
 @media(forced-colors:active){
   html.cdc-v75 .cdc-budget-ring,
   html.cdc-v75 .v75-budget-summary,
+  html.cdc-v75 .v76-planning-budget-card,
+  html.cdc-v75 .v76-budget-metric,
+  html.cdc-v75 .v76-budget-guidance,
+  html.cdc-v75 .v76-budget-head-action,
+  html.cdc-v75 .v76-budget-metric-action,
+  html.cdc-v75 .v76-budget-guidance>button,
   html.cdc-v75 .cdc-profile-card,
   html.cdc-v75 .v75-more-group>div,
-  html.cdc-v75 #page-goals #goalList>.empty{border:1px solid CanvasText!important;background:Canvas!important;color:CanvasText!important}
+  html.cdc-v75 #page-goals #goalList>.empty{
+    border:1px solid CanvasText!important;
+    background:Canvas!important;
+    color:CanvasText!important;
+  }
   html.cdc-v75 .cdc-budget-ring::after{background:Canvas!important}
+  html.cdc-v75 .v76-budget-card-icon,
+  html.cdc-v75 .v76-budget-metric-icon,
+  html.cdc-v75 .v76-budget-guidance-icon{background:Canvas!important;color:CanvasText!important}
 }
