@@ -20,18 +20,34 @@ Atualizado: 15 de setembro de 2026
 - [ ] Criar E2E WebKit/Chromium para PIN → Dashboard → drawer → Despesas → Adicionar → Manual/Imagem/QR → fechar/guardar.
 - [ ] Repetir validação física em Safari/iPhone web e PWA instalada.
 
-## P0 — Mercado / identidade `76-market-identity1`
+## P0 — Mercado / identidade canónica
 
-- [x] Confirmar lacuna: pesquisa/catalogo conhecem `marketId|pid`, item persistido não preservava.
+### `76-market-identity1` — publicado no PR #133
+
+- [x] Confirmar lacuna: pesquisa/catálogo conheciam `marketId|pid`, item persistido não preservava.
 - [x] Capturar identidade a partir do resultado Cesta ao adicionar produto.
 - [x] Aplicar `marketId/pid` antes do commit do novo item.
 - [x] Preservar os campos durante `normalizeMarketItem()`.
 - [x] Tipar `marketId/pid` em `MarketItem` de forma retrocompatível.
 - [x] Manter `marketId/pid` fora da lista de metadados técnicos descartados pelo sync.
 - [x] Não alterar `estimatedCents`, `actualCents`, quantidade ou estado de compra.
+- [x] TypeScript Foundation PR `34913445635` verde.
+- [x] CI PR `34913445733` verde.
+- [x] Merge PR #133: `62359b4997075c4bd476f43f69ab18e41327f1bd`.
+- [x] TypeScript Foundation main `34913506775` verde.
+- [x] CI main `34913506766` verde.
+- [x] Pages `34913539151` publicada.
+
+### `76-market-identity-stale1` — hardening em curso
+
+- [x] Identificar risco raro de identidade pendente após clique live sem commit.
+- [x] Expirar identidade no microtask seguinte quando não consumida.
+- [x] Preservar aplicação normal antes do primeiro `await` do commit.
+- [x] Adicionar regressão específica.
+- [x] Invalidar apenas cache técnico PWA, sem mudar release/centro de atualizações.
 - [ ] CI completa verde.
 - [ ] TypeScript Foundation verde.
-- [ ] GitHub Pages publicada.
+- [ ] Merge e Pages verdes.
 - [ ] Validar pesquisa → adicionar → reload → editar → sync.
 
 ## P0 — Navegação e shell
@@ -58,15 +74,16 @@ Atualizado: 15 de setembro de 2026
 - [x] Modos Manual / Ler fatura / QR estabilizados.
 - [x] Hotfix touch/scroll Safari PR #132.
 - [ ] E2E de criar/editar/pagar/eliminar/cancelar.
-- [ ] Uniformizar states loading/error/success onde ainda existam diferenças.
+- [ ] Uniformizar estados loading/error/success onde ainda existam diferenças.
 
 ### Mercado
 
 - [x] Pesquisa live limitada a Pingo Doce/Continente.
 - [x] Catálogo visual usa identidade `marketId|pid`.
 - [x] Pesquisa/lista/filtros alinhados visualmente.
-- [x] Primeira correção de persistência de identidade na branch atual.
-- [ ] Validar ciclo completo da identidade após merge.
+- [x] Persistência inicial de identidade publicada no PR #133.
+- [ ] Fechar guard contra identidade pendente obsoleta.
+- [ ] Validar ciclo completo da identidade após publicação do guard.
 - [ ] Rever logos/imagens/licenças antes de ampliar catálogo visual.
 
 ### Planeamento + Calendário

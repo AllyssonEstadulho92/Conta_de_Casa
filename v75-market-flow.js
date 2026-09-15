@@ -36,6 +36,13 @@
     return match?{marketId:match[1],pid:match[2]}:null;
   }
 
+  function clearPendingIdentitySoon(identity){
+    if(!identity)return;
+    const clear=()=>{if(pendingSearchIdentity===identity)pendingSearchIdentity=null;};
+    if(typeof root.queueMicrotask==='function')root.queueMicrotask(clear);
+    else Promise.resolve().then(clear);
+  }
+
   function installCanonicalIdentityBridge(){
     const originalNormalize=typeof normalizeMarketItem==='function'?normalizeMarketItem:null;
     if(originalNormalize&&!originalNormalize.__cdcMarketIdentity){
@@ -72,7 +79,10 @@
 
     document.addEventListener('click',event=>{
       const add=event.target?.closest?.('[data-market-add-product]');
-      if(add)pendingSearchIdentity=identityFromSearchResultId(add.dataset.marketAddProduct);
+      if(!add)return;
+      const identity=identityFromSearchResultId(add.dataset.marketAddProduct);
+      pendingSearchIdentity=identity;
+      clearPendingIdentitySoon(identity);
     },true);
   }
 

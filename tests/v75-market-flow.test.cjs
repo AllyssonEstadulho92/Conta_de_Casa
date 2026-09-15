@@ -50,6 +50,15 @@ assert.match(js,/candidate\.marketId=pendingSearchIdentity\.marketId/);
 assert.match(js,/candidate\.pid=pendingSearchIdentity\.pid/);
 assert.match(js,/return await originalCommit\(action,entity,\.\.\.args\)/);
 assert.match(js,/identityRevision:IDENTITY_REVISION/);
+
+/* 76-market-identity-stale1: uma identidade capturada num clique que não chega
+   a criar o artigo expira no microtask seguinte e não pode contaminar um item manual. */
+assert.match(js,/function clearPendingIdentitySoon\(identity\)/);
+assert.match(js,/root\.queueMicrotask\(clear\)/);
+assert.match(js,/Promise\.resolve\(\)\.then\(clear\)/);
+assert.match(js,/pendingSearchIdentity=identity;[\s\S]*clearPendingIdentitySoon\(identity\)/);
+assert.match(js,/if\(pendingSearchIdentity===identity\)pendingSearchIdentity=null/);
+
 assert.doesNotMatch(js,/estimatedCents\s*=|actualCents\s*=|quantity\s*=|priceCents\s*=/,'identity bridge must not alter money or quantity');
 assert.doesNotMatch(js,/market-barcode|ZXing|BarcodeDetector|data-market-scan/i,'market flow must not alter scanner behavior');
 
@@ -107,6 +116,7 @@ assert.match(sw,/assets1-market1/,'market1 must remain in the cache lineage');
 assert.match(sw,/canonical-expense-market1/,'PWA must invalidate for canonical Despesas/Mercado presentation');
 assert.match(sw,/single-search-surface1/,'PWA must invalidate the duplicate-search-surface cache');
 assert.match(sw,/market-identity1/,'PWA must invalidate when canonical Mercado identity persistence changes');
+assert.match(sw,/market-identity-stale1/,'PWA must invalidate when stale pending identities are hardened');
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -121,4 +131,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v76 canonical Mercado flow, marketId|pid persistence, single-surface search, compact mobile filters and accounting isolation: OK');
+console.log('v76 canonical Mercado flow, marketId|pid persistence/stale guard, single-surface search, compact mobile filters and accounting isolation: OK');
