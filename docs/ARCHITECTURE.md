@@ -107,6 +107,19 @@ Autoridades atuais:
 
 A cascade ainda contém muitas regras históricas v75 e `!important`. A redução deve ser feita por propriedade/componente, nunca por eliminação em massa.
 
+### 4.2 Iconografia funcional — `76-icon-semantics1`
+
+O PR #138 mantém a separação entre marca e ícones funcionais:
+
+- `icon.svg` continua reservado à identidade gráfica da aplicação;
+- `ui-icons.js` mantém um subset Lucide local, sem icon font nem CDN de iconografia;
+- o snapshot de origem continua fixado em `94e4cb9d9db5907053ebf3636a97c45529cf776b` e `LUCIDE_LICENSE.txt` continua distribuído;
+- `plan` passa a usar a geometria `CalendarCheck2` desse snapshot, substituindo a antiga geometria igual a `wallet`;
+- `settings` passa a usar a geometria `Settings`/engrenagem desse snapshot, substituindo sliders;
+- os nomes semânticos `plan` e `settings` não mudaram, logo `PAGE_META`, `DRAWER_GROUPS`, `MOBILE_NAV` e restantes callers não precisaram de novas rotas ou handlers;
+- `ui-icons.css` continua a controlar tamanho, stroke, alinhamento, foco e comportamento visual partilhado;
+- regressões em `tests/ui-icons.test.cjs` verificam que Planeamento não volta a wallet/tray e Definições não volta a sliders.
+
 ## 5. Design system
 
 Direção vigente:
@@ -116,11 +129,10 @@ Direção vigente:
 - sombras mínimas;
 - hierarquia por tipografia, alinhamento e espaço antes de decoração;
 - Lucide para ações/estados; `icon.svg` para a marca;
+- ícones devem representar a responsabilidade real, sem reutilização visual por conveniência;
 - targets essenciais >=44 px;
 - WCAG 2.2 AA como referência mínima quando aplicável;
 - light/dark, forced-colors e reduced-motion preservados.
-
-A geometria global dos ícones ainda requer uma passagem isolada: o subset local continua funcional, mas Planeamento e Definições devem ser revistos para aproximar a semântica visual aprovada de calendário/planeamento e engrenagem, sem trocar a família Lucide nem introduzir CDN.
 
 ## 6. Mercado
 
@@ -179,6 +191,8 @@ Pipeline:
 
 JavaScript manual só deve ser removido depois de substituição comprovada e regressões verdes.
 
+`ui-icons.js` continua JavaScript manual neste bloco: o PR #138 corrigiu apenas semântica visual e testes. A futura migração para TypeScript deve ser feita separadamente, com paridade do registry e do hydrator.
+
 ## 9. Build/PWA
 
 Fluxo:
@@ -192,7 +206,7 @@ Service Worker:
 - allowlist explícita;
 - tokens de cache técnicos distribuem correções sem obrigar a alterar a release pública.
 
-Os PR #133/#134/#136 não alteraram `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
+Os PR #133/#134/#136/#138 não alteraram `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
 
 ## 10. Segurança e dependências externas
 
@@ -201,6 +215,7 @@ Os PR #133/#134/#136 não alteraram `package.json`, `release-manifest.json`, `ap
 - armazenamento sensível em claro está bloqueado;
 - zoom manual não é bloqueado;
 - foco/safe areas/reduced-motion/forced-colors têm contratos de regressão;
+- a iconografia Lucide continua local e licenciada; o PR #138 não adicionou qualquer CDN;
 - ZXing ainda é carregado de `unpkg.com`, logo a afirmação “Sem CDNs” na página Segurança precisa de correção até a biblioteca ser empacotada localmente;
 - `style-src 'unsafe-inline'` permanece dívida de hardening.
 
@@ -210,22 +225,23 @@ A CI cobre sintaxe, finanças, isolamento, datas, QR, Mercado, imagens, scanner,
 
 Limitação conhecida: vários testes “Safari/PWA” são contratos estáticos de código/CSS; ainda falta E2E real em WebKit/Chromium para toque, teclado, scroll e foco.
 
-PR #136 passou:
+PR #138 passou:
 
-- TypeScript Foundation main `34933261324`;
-- CI main `34933261352`;
-- Pages `34933296570`.
+- TypeScript Foundation PR `34938701913`;
+- CI PR `34938701834`;
+- TypeScript Foundation main `34938763131`;
+- CI main `34938763232`;
+- Pages `34938807431`.
 
-A aparência final do drawer ainda precisa de validação física no iPhone/PWA; os gates automatizados não substituem esse teste visual.
+A aparência final do drawer e dos dois ícones corrigidos ainda deve ser validada fisicamente no iPhone/PWA; os gates automatizados não substituem esse teste visual.
 
 ## 12. Próxima consolidação
 
-1. validar `76-drawer-hierarchy1` no iPhone/PWA;
-2. rever geometria de Planeamento/Definições no subset local Lucide;
-3. corrigir a descrição de rede da página Segurança sem mudar a release;
-4. preparar ZXing local e CSP mais restritiva num bloco isolado;
-5. E2E WebKit/Chromium para PIN, navegação e formulário de despesas;
-6. reduzir cascade CSS por componente com prova de não utilização;
-7. continuar TypeScript em módulos de baixo acoplamento;
-8. migrar `render/forms/events` apenas depois dos contratos visuais estabilizarem;
-9. deixar finanças/core/cifra para blocos com vetores de paridade próprios.
+1. validar `76-drawer-hierarchy1` + `76-icon-semantics1` no iPhone/PWA;
+2. corrigir a descrição de rede da página Segurança sem mudar a release;
+3. preparar ZXing local e CSP mais restritiva num bloco isolado;
+4. E2E WebKit/Chromium para PIN, navegação e formulário de despesas;
+5. reduzir cascade CSS por componente com prova de não utilização;
+6. continuar TypeScript em módulos de baixo acoplamento;
+7. migrar `render/forms/events` apenas depois dos contratos visuais estabilizarem;
+8. deixar finanças/core/cifra para blocos com vetores de paridade próprios.
