@@ -2,6 +2,56 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-15 — PR #165 / `76-date-calculator-prototype-inputs5` — correção WebKit/iOS dos campos de data — publicado
+
+### Problema confirmado
+
+A captura física após o PR #163 mostrou a secção **Datas de entrada** deslocada e cortada lateralmente no Safari/iOS. O valor da data, o botão **Hoje**, o eixo Trocar e a Regra de contagem ultrapassavam a área visual esperada. A matemática estava correta; a regressão era de composição do `input[type="date"]` no WebKit.
+
+A técnica anterior reposicionava `::-webkit-calendar-picker-indicator` com coordenadas e combinava esse deslocamento com padding reservado. No WebKit móvel, isso podia aumentar a largura intrínseca do controlo e empurrar o conteúdo para fora do cartão.
+
+### Correção
+
+- `date-calculator.css` continua a única autoridade visual;
+- `.cdc-datecalc-input-action` passa a ser a moldura contida do campo, em grelha `48px minmax(0,1fr) auto`;
+- calendário visual/divisor ficam na primeira coluna sem criar rede, biblioteca ou segundo date picker;
+- o `input[type="date"]` nativo ocupa a coluna central com `min-width:0`, sem borda e sem padding lateral artificial;
+- o indicador WebKit deixa de usar `left`/posicionamento absoluto e fica visualmente colapsado;
+- **Hoje** passa para a terceira coluna em fluxo normal e mantém target >=44 px;
+- foco visível é aplicado ao conjunto por `:focus-within`;
+- Data inicial → Trocar → Data final continuam com gap móvel de 8 px;
+- Trocar mantém o eixo horizontal e a superfície central 44×44 px;
+- Regra de contagem mantém duas colunas em telemóveis comuns e só empilha em `<=340px`;
+- `forced-colors`, `prefers-reduced-motion`, `100svh`, safe areas e impressão/PDF permanecem suportados;
+- `tests/date-calculator.test.cjs` impede o retorno do reposicionamento horizontal do indicador e protege a contenção do campo.
+
+### Atualização sem ecrã intermédio
+
+O Service Worker não recebeu um novo token neste hotfix. `date-calculator.css` já pertence à allowlist pública e é servido com estratégia network-first/no-store, com cache apenas como fallback. Assim, após o deploy, um reload/reabertura normal pode obter o CSS novo sem obrigar o utilizador a entrar na página de atualização da aplicação.
+
+### Preservado
+
+Sem alteração de `src/ui/date-calculator.ts`, matemática civil, regras de inclusão/exclusão, soma/subtração, dias úteis, IDs, handlers, IndexedDB, finanças, auth, sync, QR, scanner, Mercado, `STATE_VERSION`, `v76` ou `0.76.0`.
+
+### Evidência
+
+- head PR #165: `045d72e5af30b8a4f22ee6d3630ecb898e1f8a3e`;
+- TypeScript Foundation PR `35025919784`: sucesso;
+- CI PR `35025919606`: sucesso integral;
+- merge `a80c0f9bfdbd9135dea69368ca2bde56196fab5d`;
+- TypeScript Foundation `main` `35025991379`: sucesso;
+- CI `main` `35025991388`: sucesso integral;
+- Deploy Pages `35026044123`: sucesso.
+
+### Pendente
+
+- confirmação física no mesmo iPhone/Safari web e PWA instalada;
+- confirmar que os dois campos permanecem totalmente contidos e sem scroll/clipping horizontal;
+- validação tablet/desktop e portrait/landscape;
+- E2E WebKit/Chromium para top-layer, scroll, partilha e impressão.
+
+---
+
 ## 2026-09-15 — PR #163 / `76-date-calculator-prototype-inputs4` — campos de datas alinhados ao protótipo — publicado
 
 ### Problema confirmado
@@ -12,16 +62,16 @@ Depois do ajuste de espaçamento do PR #161, a secção já estava funcional e c
 
 - `date-calculator.css` permanece a única autoridade visual da ferramenta;
 - `input[type="date"]` continua nativo e não foi substituído por widget JavaScript;
-- em WebKit, o indicador nativo do calendário é reposicionado à esquerda;
-- o campo reserva 54 px à esquerda e 76 px à direita para calendário/divisor e ação **Hoje**;
-- um divisor vertical interno separa a affordance do calendário do valor;
-- **Hoje** permanece ação real à direita com target >=44 px;
+- em WebKit, o indicador nativo do calendário foi reposicionado à esquerda nesta versão; essa técnica foi posteriormente substituída pelo PR #165 após regressão física no iPhone;
+- o campo reservava 54 px à esquerda e 76 px à direita para calendário/divisor e ação **Hoje**;
+- um divisor vertical interno separava a affordance do calendário do valor;
+- **Hoje** permanecia ação real à direita com target >=44 px;
 - em `<=560px`, Trocar ocupa o eixo horizontal disponível, mantendo uma superfície central 44×44 px;
-- Regra de contagem usa duas colunas onde existe largura e passa a uma coluna em `<=430px`;
+- Regra de contagem usava duas colunas onde existia largura e passava a uma coluna em `<=430px`;
 - checkboxes móveis usam 22×22 px sem reduzir a área clicável da label;
 - `forced-colors`, `prefers-reduced-motion`, `100svh`, safe areas e impressão/PDF permanecem suportados;
-- `tests/date-calculator.test.cjs` protege o novo contrato visual e todos os vetores matemáticos civis anteriores;
-- Service Worker recebe `date-calculator-prototype-inputs4` para invalidar a apresentação anterior.
+- `tests/date-calculator.test.cjs` protegia o contrato visual e todos os vetores matemáticos civis anteriores;
+- Service Worker recebeu `date-calculator-prototype-inputs4` para invalidar a apresentação anterior.
 
 ### Preservado
 
@@ -37,12 +87,9 @@ Sem alteração de `src/ui/date-calculator.ts`, matemática civil, regras de inc
 - CI `main` `35023156390`: sucesso integral;
 - Deploy Pages `35023224573`: sucesso.
 
-### Pendente
+### Estado posterior
 
-- confirmação física no mesmo iPhone/Safari web e PWA instalada;
-- confirmação do rendering do indicador nativo WebKit e do eixo Trocar;
-- validação tablet/desktop e portrait/landscape;
-- E2E WebKit/Chromium para top-layer, scroll, partilha e impressão.
+A captura física no Safari/iOS mostrou overflow/clipping; a técnica do indicador nativo reposicionado foi substituída no PR #165 / `76-date-calculator-prototype-inputs5`.
 
 ---
 
