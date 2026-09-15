@@ -4,7 +4,7 @@ Atualizado: 15 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main`: `79cd9e52feb0ac87678c253e0392ba402ae6f718` — PR #158  
+Baseline funcional em `main`: `a1cbdce6661bbde015699fca39d5aa7ac284ec90` — PR #161  
 Branch funcional: `main`
 
 ## Invariantes
@@ -27,67 +27,59 @@ Blocos atuais relevantes:
 - PR #152 / `76-auth-prototype-final1`: composição móvel consolidada do cofre;
 - PR #154 / `76-auth-exclusive-state1`: criação e desbloqueio do cofre são estados visualmente exclusivos;
 - PR #156 / `76-date-calculator-layout2`: autoridade visual canónica da Calculadora de datas;
-- PR #158 / `76-auth-spacing3`: ritmo vertical do PIN ajustado para Safari/iOS sem alterar o fluxo de autenticação.
+- PR #158 / `76-auth-spacing3`: ritmo vertical do PIN ajustado para Safari/iOS;
+- PR #161 / `76-date-calculator-mobile-spacing3`: Data inicial, Trocar e Data final formam um grupo móvel compacto.
 
 ## Calculadora de datas — estado atual
 
 Autoridade funcional: `src/ui/date-calculator.ts`.  
-Autoridade visual: `date-calculator.css` / `76-date-calculator-layout2`.
+Autoridade visual: `date-calculator.css` / `76-date-calculator-layout2`, com refinamento interno `76-date-calculator-mobile-spacing3`.
 
-O PR #156 reconfigurou o componente sem alterar a matemática civil:
+O PR #156 consolidou o componente sem alterar a matemática civil e o PR #161 corrige especificamente o espaçamento observado no telemóvel:
 
-- escala de espaçamento 4/8/12/16/20/24/32 px;
+- escala de espaçamento continua 4/8/12/16/20/24/32 px;
 - desktop: formulário/resultado na área principal e informação rápida na coluna lateral;
 - mobile `<=820px`: **Calculadora → Informação rápida → Resultado → Ações**;
-- `<=560px`: campos de data, resultado e ações empilham antes de comprimir;
+- `<=560px`: Data inicial → Trocar → Data final usa uma coluna flexível com gap canónico de 8 px;
+- labels do grupo de datas neutralizam altura/margem herdadas que possam criar vazio artificial;
+- botão Trocar mantém 44×44 px, centrado e sem margem vertical adicional;
+- inputs mantêm 52 px, texto de 16 px e ação **Hoje** >=44 px;
 - `<=430px`: grupos secundários passam a uma coluna;
 - `<=360px`: dialog usa `100svh` em ecrã completo;
-- inputs principais usam 52 px e texto de 16 px;
-- targets essenciais permanecem >=44 px;
 - sem scroll horizontal como requisito de navegação;
 - `forced-colors`, `prefers-reduced-motion` e impressão/PDF permanecem suportados;
-- Service Worker usa o token técnico `date-calculator-layout2` para invalidar o CSS anterior.
+- Service Worker usa os tokens técnicos `date-calculator-layout2` e `date-calculator-mobile-spacing3`.
 
 A lógica continua local, baseada nas primitivas civis de `core.js`; não foi criada uma segunda implementação de cálculos. Dias úteis continuam a significar segunda a sexta-feira e não descontam feriados sem jurisdição configurada.
 
-Evidência PR #156:
+Evidência PR #161:
 
-- merge `00ec8351cfedb8eba657fe4f19a4f2614c86347f`;
-- TypeScript Foundation `main` `35016376375`: sucesso;
-- CI `main` `35016376360`: sucesso integral;
-- Deploy Pages `35016440963`: sucesso.
+- head `44322ce724e1ec7795b2f76f73bfd7535dc7427d`;
+- TypeScript Foundation PR `35021139249`: sucesso;
+- CI PR `35021139256`: sucesso integral;
+- merge `a1cbdce6661bbde015699fca39d5aa7ac284ec90`;
+- TypeScript Foundation `main` `35021210449`: sucesso;
+- CI `main` `35021210442`: sucesso integral;
+- Deploy Pages `35021281637`: sucesso.
 
-Pendente: validação física em iPhone/Safari/PWA, tablet e desktop, incluindo scroll, top-layer, partilha e impressão/PDF.
+Pendente: confirmação física no mesmo iPhone/Safari/PWA de que o espaço entre as duas datas ficou proporcional e sem novo clipping.
 
 ## Auth / iOS — PR #158
 
 `v75-usability.css` continua a única autoridade visual do cofre. O PR #158 não cria nova folha nem duplica handlers; apenas corrige o ritmo vertical dentro da autoridade existente.
 
-Alterações de apresentação:
-
 - keypad móvel mantém 56 px com `column-gap:30px` e `row-gap:16px`;
 - espaço entre marca e conteúdo: 16 px;
 - campo PIN e keypad usam 18 px de separação dos blocos anteriores;
 - CTA **Entrar** mantém 52 px e passa a 20 px após o keypad;
-- ações secundárias ficam mais próximas do CTA sem perder targets >=44 px;
 - transferência passa a 14 px de margem superior + 12 px de separador interno;
-- `#vaultMessage:empty` deixa de reservar altura quando não existe mensagem;
+- `#vaultMessage:empty` deixa de reservar altura;
 - `100svh`, safe areas, input >=16 px, pinch-to-zoom, dark mode, `forced-colors` e `prefers-reduced-motion` permanecem ativos;
-- cache PWA recebe o token técnico `auth-spacing3`.
+- cache PWA usa o token técnico `auth-spacing3`.
 
 Preservado: PIN, palavra-passe, `createVault()`, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync e dados financeiros.
 
-Evidência PR #158:
-
-- head `4632fa25a608524a5e0ce2e313378a21f1458e9f`;
-- TypeScript Foundation PR `35019148671`: sucesso;
-- CI PR `35019148364`: sucesso integral;
-- merge `79cd9e52feb0ac87678c253e0392ba402ae6f718`;
-- TypeScript Foundation `main` `35019232012`: sucesso;
-- CI `main` `35019231922`: sucesso integral;
-- Deploy Pages `35019295696`: sucesso.
-
-Pendente: confirmação física no mesmo iPhone/Safari e PWA instalada para validar que transferência e nota inferior permanecem acima do browser chrome.
+Pendente: confirmação física no mesmo iPhone/Safari e PWA instalada.
 
 ## Despesas
 
@@ -111,8 +103,8 @@ Pendente: validação física no mesmo iPhone/PWA.
 
 ## Próximo passo
 
-1. validar `76-auth-spacing3` no iPhone/Safari/PWA;
-2. validar `76-date-calculator-layout2` e os restantes blocos móveis pendentes;
+1. validar `76-date-calculator-mobile-spacing3` no iPhone/Safari/PWA;
+2. validar `76-auth-spacing3` e os restantes blocos móveis pendentes;
 3. corrigir a descrição factual de rede em Segurança;
 4. empacotar ZXing local e endurecer CSP;
 5. continuar a consolidação por componente e a migração TypeScript sem alterar invariantes.
