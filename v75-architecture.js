@@ -26,6 +26,13 @@
  * 76-prototype-planning1:
  * - orçamento inexistente deixa de ser apresentado como 0%;
  * - Mais separa Conta e dados, Segurança e Aplicação em responsabilidades claras.
+ *
+ * 76-drawer-hierarchy1:
+ * - o menu completo expõe apenas destinos de primeiro nível;
+ * - Calendário permanece dentro de Despesas, Metas dentro de Planeamento e
+ *   Diagnóstico dentro de Definições, evitando duplicação de rotas secundárias;
+ * - Segurança mantém seleção própria no menu completo, embora continue agrupada
+ *   em “Mais” no dock móvel compacto.
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
@@ -38,14 +45,14 @@
     planning:['Planeamento','Orçamento'],
     goals:['Metas','Poupança'],
     reports:['Relatórios','Análise'],
-    security:['Segurança e privacidade','Conta'],
+    security:['Segurança e sincronização','Conta e dados'],
     diagnostics:['Diagnóstico e integridade','Sistema'],
-    settings:['Mais','Conta e aplicação']
+    settings:['Definições','Aplicação']
   });
   const DRAWER_GROUPS=Object.freeze([
-    {label:'Principal',items:[['dashboard','Início','home'],['bills','Despesas','bill'],['market','Mercado','market'],['planning','Planeamento','plan']]},
-    {label:'Análise',items:[['reports','Relatórios','report'],['goals','Metas de poupança','goal']]},
-    {label:'Conta e sistema',items:[['security','Segurança e privacidade','shield'],['diagnostics','Diagnóstico','settings'],['settings','Mais','more']]}
+    {label:'Principal',items:[['dashboard','Início','home'],['bills','Despesas','bill'],['planning','Planeamento','plan'],['market','Mercado','market']]},
+    {label:'Análise',items:[['reports','Relatórios','report']]},
+    {label:'Sistema',items:[['security','Segurança e sincronização','shield'],['settings','Definições','settings']]}
   ]);
   const MOBILE_NAV=Object.freeze([
     ['dashboard','Início','home'],
@@ -81,10 +88,11 @@
     catch(_error){return 'dashboard';}
   }
 
-  function navParent(page){
+  function navParent(page,compact=false){
     if(page==='calendar')return 'bills';
     if(page==='goals')return 'planning';
-    if(page==='diagnostics'||page==='security')return 'settings';
+    if(page==='diagnostics')return 'settings';
+    if(compact&&page==='security')return 'settings';
     return page;
   }
 
@@ -120,7 +128,7 @@
       home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-6h6v6"/>',
       bill:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
       market:'<path d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.6H18a2 2 0 0 0 2-1.6L21 8H7"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>',
-      plan:'<path d="M4 19V9m6 10V5m6 14v-7m4 7H2"/>',
+      plan:'<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/>',
       report:'<path d="M4 20V10m5 10V4m6 16v-7m5 7V7"/>',
       goal:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
       shield:'<path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-5"/>',
@@ -194,14 +202,16 @@
       }
     }
 
-    const active=navParent(currentPageId());
+    const page=currentPageId();
+    const fullActive=navParent(page,false);
     qa('.nav-btn[data-page]').forEach(button=>{
-      const on=button.dataset.page===active;
+      const on=button.dataset.page===fullActive;
       button.classList.toggle('active',on);
       if(on)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
     });
+    const mobileActive=navParent(page,true);
     qa('#mobileNav [data-mobile]').forEach(button=>{
-      const on=button.dataset.mobile===active;
+      const on=button.dataset.mobile===mobileActive;
       button.classList.toggle('active',on);
       if(on)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
     });
