@@ -301,6 +301,22 @@ A validação física posterior mostrou que o problema remanescente não estava 
 - a mudança é estritamente visual e não altera PIN, palavra-passe, criação/desbloqueio, PBKDF2, AES-GCM, IndexedDB, importação, sync ou domínio financeiro;
 - a validação física no mesmo iPhone/Safari/PWA continua necessária, pois CI estática não mede a geometria real do browser chrome.
 
+## D-109 — campos de data móveis formam um único grupo compacto
+
+A captura física da Calculadora de datas mostrou que a versão móvel estava funcionalmente correta, mas o empilhamento com tracks de grid e espaçamento acumulado fazia **Data inicial**, **Trocar** e **Data final** parecerem três blocos demasiado afastados.
+
+- `date-calculator.css` continua a única autoridade visual; não se cria outra folha corretiva;
+- em `<=560px`, `.cdc-datecalc-date-grid` usa flex vertical em vez de tracks de grid;
+- a ordem funcional permanece Data inicial → Trocar → Data final;
+- o gap canónico do grupo é 8 px;
+- labels anulam `margin` e `min-height` herdados que possam criar vazio artificial;
+- `.cdc-datecalc-input-action` mantém pelo menos 52 px;
+- o botão Trocar permanece 44×44 px, centrado e sem margem vertical adicional;
+- desktop mantém a grelha de três colunas e não é alterado por esta decisão;
+- IDs, handlers, labels, matemática civil, regras de dias úteis e TypeScript funcional permanecem inalterados;
+- `date-calculator-mobile-spacing3` é apenas um token técnico de cache e não altera a release pública;
+- CI protege a geometria declarada, mas a confirmação final continua dependente de Safari/WebKit real.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;

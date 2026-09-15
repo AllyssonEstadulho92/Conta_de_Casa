@@ -76,7 +76,11 @@ Atualizado: 15 de setembro de 2026
 - [x] PR #156: TypeScript PR `35016302805` e CI PR `35016302738` verdes.
 - [x] PR #156: merge `00ec8351cfedb8eba657fe4f19a4f2614c86347f`.
 - [x] PR #156: TypeScript `main` `35016376375`, CI `main` `35016376360` e Pages `35016440963` verdes.
-- [ ] Confirmar visualmente o dialog em iPhone/Safari/PWA, tablet e desktop.
+- [x] PR #161 / `76-date-calculator-mobile-spacing3`: Data inicial → Trocar → Data final compactados no mobile sem alterar markup ou lógica.
+- [x] PR #161: `<=560px` usa flex vertical, gap de 8 px, labels sem margem/altura herdada e Trocar 44×44 px centrado.
+- [x] PR #161: TypeScript PR `35021139249`, CI PR `35021139256`, TypeScript `main` `35021210449`, CI `main` `35021210442` e Pages `35021281637` verdes.
+- [ ] Confirmar fisicamente `76-date-calculator-mobile-spacing3` no mesmo iPhone/Safari/PWA.
+- [ ] Confirmar visualmente o dialog em tablet e desktop.
 - [ ] Validar top-layer/scroll do `<dialog>` em WebKit real.
 - [ ] Validar copiar/partilhar/imprimir-PDF em dispositivo real.
 - [ ] Avaliar futura integração de feriados portugueses apenas com jurisdição/fonte oficial explícita.

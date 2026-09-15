@@ -2,6 +2,48 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-15 — PR #161 / `76-date-calculator-mobile-spacing3` — grupo móvel de datas — publicado
+
+### Problema confirmado
+
+A captura física da Calculadora de datas em mobile mostrou espaço vertical excessivo entre **Data inicial**, o botão **Trocar** e **Data final**. A matemática e os controlos estavam corretos; o problema era exclusivamente de composição móvel.
+
+### Correção
+
+- `date-calculator.css` permanece a única autoridade visual da ferramenta;
+- em `<=560px`, `.cdc-datecalc-date-grid` passa a flex vertical;
+- ordem funcional permanece Data inicial → Trocar → Data final;
+- gap do grupo passa a 8 px;
+- labels anulam margem e altura herdadas que poderiam reservar vazio artificial;
+- a área do input mantém pelo menos 52 px;
+- botão Trocar mantém 44×44 px, centrado e sem margem vertical adicional;
+- desktop preserva a grelha original com as duas datas lado a lado;
+- `forced-colors`, `prefers-reduced-motion`, `100svh`, safe areas e impressão/PDF permanecem suportados;
+- `tests/date-calculator.test.cjs` protege o novo contrato e todos os vetores matemáticos civis anteriores;
+- Service Worker recebe `date-calculator-mobile-spacing3` para invalidar a apresentação móvel anterior.
+
+### Preservado
+
+Sem alteração de `src/ui/date-calculator.ts`, matemática civil, regras de inclusão/exclusão, dias úteis, IDs, handlers, IndexedDB, finanças, auth, sync, QR, scanner, Mercado, `STATE_VERSION`, `v76` ou `0.76.0`.
+
+### Evidência
+
+- head funcional `44322ce724e1ec7795b2f76f73bfd7535dc7427d`;
+- TypeScript Foundation PR `35021139249`: sucesso;
+- CI PR `35021139256`: sucesso integral;
+- merge `a1cbdce6661bbde015699fca39d5aa7ac284ec90`;
+- TypeScript Foundation `main` `35021210449`: sucesso;
+- CI `main` `35021210442`: sucesso integral;
+- Deploy Pages `35021281637`: sucesso.
+
+### Pendente
+
+- confirmação física no mesmo iPhone/Safari web e PWA instalada;
+- validação tablet/desktop e portrait/landscape;
+- E2E WebKit/Chromium para top-layer, scroll, partilha e impressão.
+
+---
+
 ## 2026-09-15 — PR #158 / `76-auth-spacing3` — ritmo vertical do PIN em Safari/iOS — publicado
 
 ### Problema confirmado
