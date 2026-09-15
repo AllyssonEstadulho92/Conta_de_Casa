@@ -1,4 +1,4 @@
-/* Conta de Casa v76 — 76-date-calculator-layout2 + 76-date-calculator-mobile-spacing3.
+/* Conta de Casa v76 — 76-date-calculator-layout2 + 76-date-calculator-mobile-spacing3 + 76-date-calculator-prototype-inputs4.
    Autoridade visual canónica da Calculadora de datas.
    Ritmo baseado em 4/8/12/16/20/24/32 px, sem alterar cálculo, domínio,
    persistência, cifra, sync, QR, scanner ou Mercado. */
@@ -159,8 +159,6 @@ html.cdc-v75 .cdc-datecalc-result-actions .btn:focus-visible{
   box-shadow:var(--v76-focus);
 }
 
-/* O main funcional mantém a semântica/handlers existentes; visualmente os seus filhos
-   participam na única grelha da ferramenta para permitir a mesma hierarquia em todos os breakpoints. */
 html.cdc-v75 .cdc-datecalc-workspace{
   display:contents;
 }
@@ -262,10 +260,6 @@ html.cdc-v75 .cdc-datecalc-input-action{
   min-width:0;
 }
 
-html.cdc-v75 .cdc-datecalc-input-action input{
-  padding-right:72px!important;
-}
-
 html.cdc-v75 .cdc-datecalc-input-action .cdc-datecalc-inline-action{
   position:absolute;
   top:4px;
@@ -298,6 +292,30 @@ html.cdc-v75 .cdc-datecalc-input-card :is(input[type="date"],input[type="number"
   font-size:16px!important;
   line-height:1.25!important;
   box-shadow:none!important;
+}
+
+/* 76-date-calculator-prototype-inputs4: o seletor de data ganha uma affordance
+   de calendário à esquerda, com divisor visual, preservando o picker nativo. */
+html.cdc-v75 .cdc-datecalc-input-action input[type="date"]{
+  position:relative;
+  padding-left:54px!important;
+  padding-right:76px!important;
+  background:
+    linear-gradient(var(--v76-border),var(--v76-border)) 46px center/1px 28px no-repeat,
+    var(--v76-surface)!important;
+}
+
+html.cdc-v75 .cdc-datecalc-input-action input[type="date"]::-webkit-calendar-picker-indicator{
+  position:absolute;
+  left:14px;
+  top:50%;
+  width:20px;
+  height:20px;
+  margin:0;
+  padding:0;
+  transform:translateY(-50%);
+  opacity:.7;
+  cursor:pointer;
 }
 
 html.cdc-v75 .cdc-datecalc-input-card :is(input,select):focus{
@@ -649,9 +667,6 @@ html.cdc-v75 .cdc-datecalc-footer span{
     font-size:.74rem;
   }
 
-  /* 76-date-calculator-mobile-spacing3: no telemóvel, as duas datas e o
-     botão de troca formam um único grupo compacto. Flex elimina tracks
-     verticais excessivos e mantém a ordem funcional sem scroll horizontal. */
   html.cdc-v75 .cdc-datecalc-date-grid{
     display:flex;
     flex-direction:column;
@@ -669,10 +684,55 @@ html.cdc-v75 .cdc-datecalc-footer span{
     min-height:52px;
   }
 
+  /* O controlo de troca usa a largura disponível apenas para desenhar o eixo
+     visual; o SVG continua uma superfície 44x44 centrada e acessível. */
   html.cdc-v75 .cdc-datecalc-swap{
-    align-self:center;
+    align-self:stretch;
     justify-self:auto;
+    width:100%;
+    height:44px;
     margin:0;
+    border:0;
+    border-radius:0;
+    background:linear-gradient(var(--v76-border),var(--v76-border)) center/100% 1px no-repeat;
+  }
+
+  html.cdc-v75 .cdc-datecalc-swap :is(.svg-icon,.ui-icon-svg){
+    box-sizing:border-box;
+    width:44px!important;
+    height:44px!important;
+    padding:11px;
+    border:1px solid var(--v76-border);
+    border-radius:12px;
+    background:var(--v76-surface-soft);
+    color:var(--v76-primary);
+  }
+
+  html.cdc-v75 .cdc-datecalc-options{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:var(--datecalc-space-2) var(--datecalc-space-4);
+    margin-top:var(--datecalc-space-4);
+    padding:var(--datecalc-space-3) var(--datecalc-space-4);
+  }
+
+  html.cdc-v75 .cdc-datecalc-options legend{
+    margin-left:var(--datecalc-space-2);
+  }
+
+  html.cdc-v75 .cdc-datecalc-options label{
+    min-width:0;
+    min-height:44px;
+  }
+
+  html.cdc-v75 .cdc-datecalc-options input{
+    flex-basis:22px;
+    width:22px!important;
+    height:22px!important;
+  }
+
+  html.cdc-v75 .cdc-datecalc-submit{
+    margin-top:var(--datecalc-space-5)!important;
   }
 
   html.cdc-v75 .cdc-datecalc-result-grid,
@@ -706,6 +766,15 @@ html.cdc-v75 .cdc-datecalc-footer span{
 
   html.cdc-v75 .cdc-datecalc-card-head{
     margin-bottom:var(--datecalc-space-4);
+  }
+
+  html.cdc-v75 .cdc-datecalc-input-action .cdc-datecalc-inline-action{
+    min-width:60px;
+  }
+
+  html.cdc-v75 .cdc-datecalc-options{
+    grid-template-columns:minmax(0,1fr);
+    gap:var(--datecalc-space-1);
   }
 
   html.cdc-v75 .cdc-datecalc-result-hero{
@@ -768,6 +837,10 @@ html.cdc-v75 .cdc-datecalc-footer span{
   html.cdc-v75 .cdc-datecalc-tabs button[aria-selected="true"],
   html.cdc-v75 .cdc-datecalc-inline-action{
     border:2px solid Highlight;
+  }
+
+  html.cdc-v75 .cdc-datecalc-input-action input[type="date"]{
+    background:Canvas!important;
   }
 }
 
