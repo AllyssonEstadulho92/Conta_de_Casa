@@ -97,9 +97,9 @@ Direção vigente:
 
 ### Identidade canónica
 
-O catálogo visual já usa `marketId|pid` para identificar SKUs reais.
+O catálogo visual usa `marketId|pid` para identificar SKUs reais.
 
-`76-market-identity1` estende este contrato à lista persistida sem alterar `STATE_VERSION`:
+`76-market-identity1`, publicado pelo PR #133, estende este contrato à lista persistida sem alterar `STATE_VERSION`:
 
 - a ação de adicionar produto transporta a identidade a partir de `data-market-add-product="cesta-<marketId>-<pid>"`;
 - `v75-market-flow.js` aplica `marketId` e `pid` ao novo item imediatamente antes do commit;
@@ -108,7 +108,14 @@ O catálogo visual já usa `marketId|pid` para identificar SKUs reais.
 - `src/types/persisted-state.ts` tipa os dois campos;
 - `src/sync/sync-conflict-policy.ts` não os remove da business view, porque identidade de SKU não é mero metadado de apresentação.
 
-Esta ponte é transitória até o domínio Mercado ser migrado para uma fonte TypeScript canónica própria.
+`76-market-identity-stale1` acrescenta uma garantia temporal à ponte:
+
+- a identidade capturada num clique live só permanece pendente durante o mesmo ciclo síncrono de evento;
+- se o fluxo live chegar ao commit, `marketId/pid` são copiados para o item antes do primeiro `await`;
+- se o fluxo não criar o item, a identidade pendente expira no microtask seguinte;
+- isto impede que um clique live abortado contamine uma criação manual posterior.
+
+A ponte continua transitória até o domínio Mercado ser migrado para uma fonte TypeScript canónica própria.
 
 ## 7. Faturas e captura
 
@@ -148,7 +155,7 @@ Service Worker:
 - allowlist explícita;
 - tokens de cache técnicos distribuem correções sem obrigar a alterar a release pública.
 
-`76-market-identity1` não altera `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
+Os hotfixes `76-market-identity1`/`76-market-identity-stale1` não alteram `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
 
 ## 10. Segurança e dependências externas
 
@@ -166,9 +173,11 @@ A CI cobre sintaxe, finanças, isolamento, datas, QR, Mercado, imagens, scanner,
 
 Limitação conhecida: vários testes “Safari/PWA” são contratos estáticos de código/CSS; ainda falta E2E real em WebKit/Chromium para toque, teclado, scroll e foco.
 
+PR #133 passou TypeScript Foundation, CI integral e Pages. O guard temporal de identidade tem regressão própria antes de integração.
+
 ## 12. Próxima consolidação
 
-1. integrar `76-market-identity1` com gates verdes;
+1. integrar/publicar `76-market-identity-stale1` com gates verdes;
 2. E2E WebKit/Chromium para PIN, navegação e formulário de despesas;
 3. corrigir copy de Segurança + preparar ZXing local;
 4. reduzir cascade CSS por componente com prova de não utilização;
