@@ -2,127 +2,88 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-15 — PR #156 / `76-date-calculator-layout2` — autoridade visual da Calculadora de datas — publicado
+
+### Objetivo
+
+Eliminar a necessidade de novos ajustes sucessivos de alinhamento/espaçamento e transformar `date-calculator.css` numa única autoridade visual coerente com o Design System da aplicação.
+
+### Reconfiguração
+
+- `date-calculator.css` foi consolidado em vez de receber outro bloco corretivo no fim da cascade;
+- introduzida escala local 4/8/12/16/20/24/32 px;
+- desktop usa grelha com área principal flexível e coluna lateral de 280 px;
+- mobile `<=820px` usa a ordem **Calculadora → Informação rápida → Resultado → Ações**;
+- `cdc-datecalc-workspace` usa `display:contents` apenas para composição visual, preservando markup funcional, IDs e handlers;
+- `<=560px` empilha datas, resultado e ações antes de ocorrer compressão;
+- `<=430px` empilha campos secundários e reduz padding de forma controlada;
+- `<=360px` usa dialog em ecrã completo com `100svh`;
+- `100dvh` deixou de fazer parte da autoridade móvel final;
+- inputs/selects principais usam 52 px e texto de 16 px;
+- ação **Hoje**, opções de contagem e botão de troca mantêm targets >=44 px;
+- tabs mantêm três destinos numa única grelha, sem scroll horizontal;
+- `forced-colors`, `prefers-reduced-motion` e impressão/PDF permanecem suportados;
+- `tests/date-calculator.test.cjs` protege a nova arquitetura visual e mantém todos os vetores matemáticos multitimezone;
+- Service Worker recebeu o token técnico `date-calculator-layout2` para invalidar o CSS anterior.
+
+### Preservado
+
+Sem alteração de:
+
+- `src/ui/date-calculator.ts` e `76-date-calculator1` como autoridade funcional;
+- matemática civil;
+- regras de inclusão/exclusão;
+- soma/subtração de dias;
+- definição atual de dias úteis;
+- estado financeiro, persistência, auth, sync, QR, scanner ou Mercado;
+- release `v76` / versão `0.76.0`.
+
+### Evidência
+
+- head final PR #156: `e82bcf394be18fb3f102164242704040289ccab8`;
+- TypeScript Foundation PR `35016302805`: sucesso;
+- CI PR `35016302738`: sucesso integral;
+- merge: `00ec8351cfedb8eba657fe4f19a4f2614c86347f`;
+- TypeScript Foundation `main` `35016376375`: sucesso;
+- CI `main` `35016376360`: sucesso integral;
+- Deploy Pages `35016440963`: sucesso.
+
+### Pendente
+
+- validação física do `<dialog>` em iPhone/Safari web e PWA instalada;
+- validação em tablet/desktop;
+- copiar/partilhar/imprimir-PDF em dispositivo real;
+- E2E WebKit/Chromium para top-layer, scroll e responsividade real.
+
+---
+
 ## 2026-09-15 — PR #154 / `76-auth-exclusive-state1` — estados exclusivos do cofre — publicado
 
-### Problema confirmado no dispositivo
-
-A captura real do iPhone/Safari após o PR #152 mostrou **Criar cofre local** e **Introduza o seu PIN** renderizados simultaneamente, tornando o ecrã excessivamente comprido e incoerente.
-
-### Causa confirmada
-
-- `events.js` já selecionava corretamente um único estado através de `idbGet('meta','vault')`;
-- quando existia metadata local, `#vaultCreate.hidden=true` e `#vaultUnlock.hidden=false` estavam corretos;
-- porém `v75-usability.css` declarava `#vaultCreate{display:grid!important}`;
-- a especificidade dessa regra conseguia sobrepor visualmente a regra genérica `[hidden]{display:none!important}`.
-
-### Correção
-
-- mantém `76-auth-prototype-final1` como única autoridade visual do cofre;
-- adiciona `76-auth-exclusive-state1` como contrato dentro da mesma folha, sem criar outra camada CSS;
-- `#vaultScreen[hidden]`, `#vaultCreate[hidden]`, `#vaultUnlock[hidden]` e painéis internos relevantes recebem `display:none!important` com especificidade suficiente;
-- criação e desbloqueio deixam de poder aparecer simultaneamente;
-- keypad, espaçamentos, `100svh`, safe areas, dark mode, `forced-colors`, `prefers-reduced-motion` e targets >=44 px permanecem inalterados;
-- `tests/accessibility.test.cjs` passa a proteger tanto a regra visual de exclusividade como a decisão funcional de `events.js`;
-- Service Worker recebe apenas o token técnico `auth-exclusive-state1` para invalidar o CSS antigo da PWA.
-
-### Evidência
-
-- head final PR #154: `eb8c7c3d165685776a863720ebfc2981efa80bef`;
-- TypeScript Foundation PR `35003057035`: sucesso;
-- CI PR `35003057086`: sucesso integral;
-- merge: `2594ba1c1a3f4f2cabbcf5c92e2cdd5a8f28734c`;
-- TypeScript Foundation `main` `35003207253`: sucesso;
-- CI `main` `35003207139`: sucesso integral;
-- Deploy Pages `35003264802`: sucesso.
-
-### Preservado
-
-Sem alteração de PIN, palavra-passe, `createVault()`, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync, `STATE_VERSION`, dados financeiros, QR, scanner, Mercado, release `v76` ou versão `0.76.0`.
-
-### Pendente
-
-- confirmar no mesmo iPhone/Safari e PWA instalada que, com cofre existente, aparece apenas **Introduza o seu PIN**;
-- confirmar num perfil sem cofre que aparece apenas **Criar cofre local**.
+- captura real mostrou criação e desbloqueio renderizados simultaneamente;
+- a causa foi uma regra `display:grid!important` que conseguia contrariar o estado `hidden`;
+- `hidden` passou a autoridade explícita também entre estados internos do cofre;
+- criação e desbloqueio deixam de poder aparecer ao mesmo tempo;
+- auth funcional, armazenamento, cifra e sync foram preservados;
+- merge `2594ba1c1a3f4f2cabbcf5c92e2cdd5a8f28734c`;
+- TypeScript, CI e Pages em `main` concluíram com sucesso.
 
 ---
 
-## 2026-09-15 — PR #152 / `76-auth-prototype-final1` — protótipo final do PIN — publicado
+## 2026-09-15 — PR #152 / `76-auth-prototype-final1` — composição final do PIN — publicado
 
-### Problema confirmado no dispositivo
-
-Depois do PR #150, a validação física mostrou que a correção de altura era tecnicamente estável, mas a composição ainda não correspondia ao resultado visual pretendido:
-
-- o keypad permanecia demasiado estreito na horizontal;
-- vários breakpoints históricos produziam uma sensação de layout corrigido por camadas, em vez de uma composição única;
-- ações secundárias e transferência de cofre tinham pouca separação visual;
-- a zona inferior continuava a parecer misturada com o chrome do Safari.
-
-### Correção
-
-- `v75-usability.css` passa a declarar `76-auth-prototype-final1` como autoridade visual única do cofre;
-- as secções históricas `76-vault-short-height1` e `76-auth-ios-spacing2` são removidas como blocos CSS concorrentes;
-- `100svh`, safe areas, scroll do cofre, input >=16 px e pinch-to-zoom continuam preservados;
-- keypad mobile padrão usa teclas 56 px, `column-gap:30px` e `row-gap:16px`;
-- `<=359px` usa 52 px e gaps 24/13 px;
-- altura `<=720px` usa 50 px e gaps 22/9 px;
-- teclas ganham superfície, borda e sombra subtis; apagar mantém tratamento leve;
-- Entrar permanece CTA principal, palavra-passe/recuperação ficam secundárias;
-- `Usar dados de outro dispositivo` passa a cartão próprio, separado do rodapé;
-- dark mode, `forced-colors`, `prefers-reduced-motion` e targets >=44 px são preservados;
-- `tests/accessibility.test.cjs` e `tests/v75-stability.test.cjs` foram alinhados com a nova autoridade final;
-- Service Worker recebe apenas o token técnico `auth-prototype-final1` para invalidar a composição anterior.
-
-### Evidência
-
-- head final PR #152: `1124fc2284ab15dfc7b8e384792196a8256f89c6`;
-- TypeScript Foundation PR `34977687455`: sucesso;
-- CI PR `34977687437`: sucesso integral;
-- merge: `ceaa4fc8a79cbb2ad442854ffaacd501dac7313f`;
-- TypeScript Foundation `main` `34977780423`: sucesso;
-- CI `main` `34977780342`: sucesso integral;
-- Deploy Pages `34977846729`: sucesso.
-
-### Preservado
-
-Sem alteração de PIN, palavra-passe, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync, `STATE_VERSION`, dados financeiros, QR, scanner, Mercado, release `v76` ou versão `0.76.0`.
-
-### Pendente
-
-- confirmar no mesmo iPhone/Safari web e PWA instalada que o resultado publicado corresponde ao protótipo aprovado;
-- validar portrait/landscape, barras do Safari abertas/recolhidas e teclado virtual.
+- consolidou a apresentação móvel do cofre numa única autoridade visual;
+- retirou blocos corretivos concorrentes anteriores;
+- keypad móvel padrão 56 px, `column-gap:30px`, `row-gap:16px`;
+- `100svh`, safe areas, input >=16 px e targets >=44 px preservados;
+- merge `ceaa4fc8a79cbb2ad442854ffaacd501dac7313f`;
+- Pages `34977846729`: sucesso.
 
 ---
 
-## 2026-09-15 — PR #150 / `76-auth-ios-spacing2` — espaçamento do cofre no iPhone/Safari — publicado e substituído visualmente pelo PR #152
-
-### Problema confirmado no dispositivo
-
-A captura física do ecrã de PIN mostrou uma composição funcional mas verticalmente demasiado espaçada:
-
-- a marca, título, input, teclado, ações e transferência consumiam mais altura do que o necessário;
-- em alturas comuns de Safari/iPhone, o breakpoint `<=780px` não era ativado, portanto o keypad permanecia maior;
-- `.vault-card` ainda herdava margem automática, podendo contribuir para recentragem vertical;
-- a zona `Usar dados de outro dispositivo` aproximava-se da barra inferior do Safari e perdia conforto visual.
-
-### Correção histórica
+## 2026-09-15 — PR #150 / `76-auth-ios-spacing2` — base de viewport iOS — substituído visualmente pelo PR #152
 
 - introduziu `100svh`, safe areas e topo seguro no auth móvel;
-- `.vault-card` passou a `margin:0 auto`;
-- densidade foi reduzida por altura para 58/54/48 px;
-- preservou targets >=44 px e auth funcional;
-- token técnico `auth-ios-spacing2` invalidou o layout anterior.
-
-### Evidência
-
-- head final PR #150: `5713cb7514344298aeda578e061281667c6aca48`;
-- TypeScript Foundation PR `34961244599`: sucesso;
-- CI PR `34961244608`: sucesso integral;
-- merge: `a140211813f2194926b2cbd5bde7c53a8798b140`;
-- TypeScript Foundation `main` `34961349276`: sucesso;
-- CI `main` `34961349248`: sucesso integral;
-- Deploy Pages `34961403315`: sucesso.
-
-A base de viewport/safe areas permanece válida; os tamanhos e a composição visual foram substituídos por `76-auth-prototype-final1` no PR #152.
+- a base de viewport permaneceu válida, mas a composição visual foi consolidada posteriormente.
 
 ---
 
@@ -132,140 +93,75 @@ A base de viewport/safe areas permanece válida; os tamanhos e a composição vi
 
 - entrada em **Mais → Ferramentas → Calculadora de datas**;
 - diferença civil entre duas datas;
-- escolha explícita para incluir/excluir data inicial e final;
+- inclusão/exclusão explícita das datas-limite;
 - total decorrido, total inclusivo, semanas e período civil anos/meses/dias;
-- adicionar/subtrair dias corridos;
-- adicionar/subtrair dias úteis;
+- adicionar/subtrair dias corridos e úteis;
 - contagem de dias úteis;
 - dia do ano, dia da semana e estado bissexto/comum;
 - copiar, partilhar e imprimir/PDF.
 
-### Exatidão e arquitetura
+### Exatidão
 
 - fonte funcional TypeScript strict em `src/ui/date-calculator.ts`;
-- runtime JavaScript é gerado no build;
-- reutiliza primitivas de data civil de `core.js` em vez de dividir milissegundos por 24 horas;
+- reutiliza primitivas de data civil de `core.js`;
 - regressões multitimezone cobrem UTC, Europe/Lisbon, America/Los_Angeles e Pacific/Kiritimati;
 - “dias úteis” significa segunda a sexta; feriados não são presumidos sem jurisdição configurada;
-- sem rede, IndexedDB, `appState`, `commit()` ou `saveState()`;
-- CSS próprio, responsivo e compatível com dark mode, forced-colors e reduced-motion.
+- sem rede nem persistência no estado financeiro;
+- merge `8e58777f601d164bd4589f7d0e0e8f96e02686f0`.
 
-### Evidência
-
-- merge em `main`: `8e58777f601d164bd4589f7d0e0e8f96e02686f0`;
-- TypeScript Foundation e CI do PR: sucesso;
-- TypeScript Foundation e CI em `main`: sucesso;
-- a publicação atual de Pages contém também os assets da calculadora.
-
-### Pendente
-
-- validação física do dialog e ações de partilha/impressão em iPhone/PWA e desktop.
+A apresentação inicial deste PR foi substituída visualmente por `76-date-calculator-layout2` no PR #156; a lógica funcional permanece a mesma.
 
 ---
 
-## 2026-09-15 — PR #147 / `76-bills-mobile-alignment2` — alinhamento móvel de Despesas — integrado
+## 2026-09-15 — PR #147 / `76-bills-mobile-alignment2` — Despesas mobile — integrado
 
-### Problema
-
-A validação física mostrou que a faixa horizontal herdada de filtros produzia pressão lateral e campos parcialmente cortados.
-
-### Correção
-
-- `mobile-layout.css` passa a ser a apresentação final do bloco Pesquisa + Filtros em mobile;
-- filtros usam grelha contida em duas colunas;
+- filtros passam a grelha contida;
 - Estado/Categoria e De/Até formam pares;
-- Ordenar e Limpar filtros ocupam linhas completas;
+- Ordenar/Limpar ocupam linhas completas;
 - `<=360px` empilha numa coluna;
-- scroll horizontal deixa de ser requisito para descobrir filtros essenciais;
-- `v76-mobile-shell.css` continua a autoridade do viewport/safe areas/dock;
-- cálculos, IDs, listeners e persistência financeira permanecem intactos.
-
-### Evidência
-
-- merge em `main`: `480dc501ff10bf29413b934e623d8641d5e95229`.
-
-### Pendente
-
-- confirmação física final em 360/390/430 px equivalentes, Safari web/PWA e portrait/landscape.
+- scroll horizontal deixa de ser necessário para descobrir controlos essenciais;
+- merge `480dc501ff10bf29413b934e623d8641d5e95229`.
 
 ---
 
-## 2026-09-15 — PR #145 / `76-planning-ring-shape1` — normalização do anel de orçamento — publicado
+## 2026-09-15 — PR #145 / `76-planning-ring-shape1` — anel de orçamento — publicado
 
-- validação física revelou anel oval por conflito entre `width` nova e `height:118px!important` histórica;
-- camada canónica usa `height:auto!important` + `aspect-ratio:1/1!important`;
-- diâmetros móveis 136/128/116 px;
-- cálculo, orçamento, `dashboardNumbers()`, `monthProfile()`, IndexedDB e auth preservados;
-- merge `471c689c1df47118bd3a345214acfd140bdc6e7d`;
-- Pages `34949105955`: sucesso;
-- falta confirmação física do formato final no mesmo iPhone/PWA.
+- corrige geometria oval causada por altura legada fixa;
+- usa `height:auto!important` + `aspect-ratio:1/1!important`;
+- merge `471c689c1df47118bd3a345214acfd140bdc6e7d`.
 
----
+## 2026-09-15 — PR #143 / `76-planning-budget-card2` — Planeamento móvel — publicado
 
-## 2026-09-15 — PR #143 / `76-planning-budget-card2` — orçamento móvel de Planeamento — publicado
+- seletor mensal, resumo de orçamento e CTA reorganizados;
+- gravação continua no formulário canónico;
+- merge `386d75b35060eb011c2a2d68ec6b965c87c5080c`.
 
-- seletor mensal passou a usar Lucide local e intervalo real do mês;
-- cartão único de orçamento apresenta gasto, orçamento, disponível, orientação e CTA;
-- orçamento ausente continua `Por definir`;
-- Definir/Editar apenas foca `#monthlyBudget`; `#monthPlanForm` + `events.js` continuam a única gravação;
-- métricas deixam de ser comprimidas em três colunas em iPhones estreitos;
-- merge `386d75b35060eb011c2a2d68ec6b965c87c5080c`;
-- Pages `34946542013`: sucesso.
+## 2026-09-15 — PR #142 / `76-bills-mobile-spacing1`
 
----
+- normaliza o ritmo do cartão de filtros de Despesas;
+- merge `cd45ec537989c51f125747958e198c8e0431a352`.
 
-## 2026-09-15 — PR #142 / `76-bills-mobile-spacing1` — espaçamento de Despesas — publicado
+## 2026-09-15 — PR #140 / `76-bills-mobile-filters1`
 
-- refinado espaço entre pesquisa e filtros;
-- aumentado respiro interno do cartão;
-- removidos offsets visuais desnecessários;
-- IDs, handlers, cálculos e arquitetura de viewport preservados;
-- merge `cd45ec537989c51f125747958e198c8e0431a352`;
-- Pages `34945033256`: sucesso.
-
----
-
-## 2026-09-15 — PR #140 / `76-bills-mobile-filters1` — pesquisa e filtros móveis — integrado
-
-- pesquisa + Nova fatura passam a composição compacta;
-- lupa CSS duplicada é neutralizada em favor do Lucide local;
-- filtros ganham hierarquia móvel e fallback de uma coluna;
-- `mobile-layout.css` permanece CSS de feature e não assume o viewport global;
+- pesquisa + ação + filtros ganham composição móvel;
+- lupa duplicada é neutralizada em favor do Lucide local;
 - merge `387a953e427331a5aa48d872cd7c54e1552d2c1c`.
 
----
-
-## 2026-09-15 — PR #138 / `76-icon-semantics1` — iconografia funcional — publicado
+## 2026-09-15 — PR #138 / `76-icon-semantics1`
 
 - Planeamento usa `CalendarCheck2`;
-- Definições usa `Settings`/engrenagem;
-- snapshot Lucide permanece `94e4cb9d9db5907053ebf3636a97c45529cf776b` com licença local;
-- merge `d2348c940ccdee2812805c82a6f2e62cccf24863`.
+- Definições usa `Settings`;
+- iconografia funcional permanece no snapshot Lucide local/licenciado.
 
----
+## 2026-09-15 — PR #136 / `76-drawer-hierarchy1`
 
-## 2026-09-15 — PR #136 / `76-drawer-hierarchy1` — drawer móvel — publicado
+- drawer móvel numa coluna, com hierarquia simples e targets adequados.
 
-- drawer à direita em uma coluna;
-- grupos Principal, Análise e Sistema;
-- rotas secundárias permanecem nas páginas-pai;
-- targets, foco, reduced-motion, forced-colors e safe areas preservados;
-- merge `6cc4707197a50c022179d0af66895079ef1583bc`.
+## 2026-09-15 — PR #133/#134 — identidade de Mercado
 
----
-
-## 2026-09-15 — PR #134 / `76-market-identity-stale1`
-
-- identidade `marketId|pid` temporária expira quando não é consumida;
-- fluxo live normal preserva identidade antes do primeiro `await`;
-- merge `69318d104cd8aa1a68be919ba6a9c805b20f9cf5`.
-
-## 2026-09-15 — PR #133 / `76-market-identity1`
-
-- resultados live preservam `marketId|pid` ao entrar na lista;
-- normalização/reload/restauro/sync retêm identidade;
-- preços, quantidades e contabilidade não mudam;
-- merge `62359b4997075c4bd476f43f69ab18e41327f1bd`.
+- resultados live preservam `marketId|pid`;
+- identidade transitória não contamina criações posteriores;
+- preços e contabilidade não mudam.
 
 ---
 
@@ -279,8 +175,8 @@ A validação física mostrou que a faixa horizontal herdada de filtros produzia
 
 ## 2026-09-13 — auth/UI e início TypeScript
 
-- PIN local passou a abrir sem depender de sync remoto;
-- Safari/WebKit passou a respeitar `[hidden]` entre cofre e shell;
+- abertura local deixou de depender de sync remoto;
+- Safari/WebKit passou a respeitar `hidden` entre cofre e shell;
 - marca `icon.svg` e Lucide consolidados;
 - Sync conflict policy migrou para TypeScript.
 
@@ -289,15 +185,15 @@ A validação física mostrou que a faixa horizontal herdada de filtros produzia
 ## Decisões de continuidade
 
 - regressão real em dispositivo tem prioridade sobre teste legado;
-- `hidden` é autoridade tanto entre cofre/shell como entre criação/desbloqueio do próprio cofre;
+- cada componente deve convergir para uma única autoridade visual, não para sucessivos blocos `fix`;
+- `hidden` é autoridade de estado e não pode ser revertido por decoração CSS;
 - `icon.svg` é marca; Lucide é iconografia funcional;
 - protótipos definem hierarquia, não autorizam domínio inventado;
-- auth móvel tem uma única autoridade visual, usa viewport útil/safe areas e mantém targets >=44 px;
+- auth e Calculadora de datas usam `100svh` quando controlam altura móvel própria;
 - filtros de Despesas não dependem de faixa horizontal;
-- resumo de Planeamento delega no formulário/orçamento canónico;
+- resumo de Planeamento delega no formulário canónico;
 - calculadora usa aritmética civil e regras explícitas;
-- `marketId|pid` acompanha SKU verificável;
 - correção técnica não exige mudança de release;
 - testes estáticos não substituem E2E/validação WebKit real;
-- ZXing deve migrar de CDN para bundle local antes de endurecer `script-src`;
+- ZXing deve migrar de origem remota para bundle local antes de endurecer `script-src`;
 - migração TypeScript continua por blocos com paridade e regressões.

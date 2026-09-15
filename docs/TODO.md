@@ -18,26 +18,15 @@ Atualizado: 15 de setembro de 2026
 - [x] `[hidden]` impede cofre e shell simultâneos.
 - [x] Formulário de despesa mobile usa um único scroll owner após PR #132.
 - [x] PR #150 introduziu `100svh`, safe areas e topo seguro para Safari/iOS.
-- [x] PR #152 / `76-auth-prototype-final1`: substituir as camadas visuais `76-vault-short-height1` + `76-auth-ios-spacing2` por uma única autoridade do cofre.
-- [x] PR #152: keypad mobile 56 px com gaps 30/16 px conforme protótipo aprovado.
-- [x] PR #152: fallback `<=359px` em 52 px / gaps 24/13 px.
-- [x] PR #152: fallback de altura `<=720px` em 50 px / gaps 22/9 px.
-- [x] PR #152: todos os targets essenciais permanecem >=44 px.
-- [x] PR #152: transferência de cofre passa a superfície própria e CTA Entrar mantém hierarquia principal.
-- [x] PR #152: regressões de acessibilidade/estabilidade atualizadas para a nova autoridade única.
-- [x] PR #152: token técnico `auth-prototype-final1` invalida a apresentação anterior da PWA.
-- [x] Captura física pós-PR #152 identificou sobreposição entre **Criar cofre local** e **Introduza o seu PIN**.
-- [x] PR #154 / `76-auth-exclusive-state1`: `hidden` torna-se autoridade explícita também para `#vaultCreate` e `#vaultUnlock`.
-- [x] PR #154: teste protege a seleção exclusiva do runtime via `idbGet('meta','vault')` e impede CSS de reexibir estado oculto.
-- [x] PR #154: Service Worker recebe token técnico `auth-exclusive-state1`.
-- [x] PR #154: TypeScript Foundation PR `35003057035` e CI PR `35003057086` verdes.
-- [x] PR #154: merge `2594ba1c1a3f4f2cabbcf5c92e2cdd5a8f28734c`.
-- [x] PR #154: TypeScript Foundation `main` `35003207253`, CI `main` `35003207139` e Pages `35003264802` verdes.
-- [ ] Confirmar `76-auth-exclusive-state1` no mesmo iPhone/Safari web após atualização do cache: com cofre existente deve aparecer apenas **Introduza o seu PIN**.
-- [ ] Confirmar o mesmo estado exclusivo na PWA instalada.
-- [ ] Validar estado sem cofre num browser/perfil limpo: deve aparecer apenas **Criar cofre local**.
-- [ ] Validar portrait/landscape e teclado virtual no cofre.
-- [ ] Criar E2E WebKit/Chromium para criação/desbloqueio exclusivo → Dashboard → drawer → Despesas → Adicionar → Manual/Imagem/QR → fechar/guardar.
+- [x] PR #152 / `76-auth-prototype-final1`: autoridade visual única do cofre.
+- [x] PR #152: keypad mobile 56 px com gaps 30/16 px; fallbacks estreitos/baixos preservados.
+- [x] PR #154 / `76-auth-exclusive-state1`: `hidden` é autoridade também entre criação e desbloqueio.
+- [x] PR #154: testes protegem exclusividade do estado e decisão do runtime.
+- [x] PR #154: TypeScript, CI e Pages verdes.
+- [ ] Confirmar `76-auth-exclusive-state1` no mesmo iPhone/Safari web e PWA instalada.
+- [ ] Validar estado sem cofre num browser/perfil limpo.
+- [ ] Validar portrait/landscape e teclado virtual.
+- [ ] Criar E2E WebKit/Chromium para criação/desbloqueio → Dashboard → drawer → Despesas → Adicionar.
 
 ## P0 — Despesas/Faturas
 
@@ -72,10 +61,23 @@ Atualizado: 15 de setembro de 2026
 - [x] Diferença civil determinística com regra explícita de inclusão dos extremos.
 - [x] Soma/subtração de dias corridos e dias úteis.
 - [x] Dias úteis definidos como segunda a sexta; feriados não presumidos sem jurisdição.
-- [x] Testes multitimezone adicionados e gates do PR/main verdes.
+- [x] Testes multitimezone adicionados.
 - [x] Sem rede, IndexedDB, `appState`, `commit()` ou `saveState()`.
-- [ ] Confirmar visualmente o dialog em iPhone/Safari/PWA e desktop.
+- [x] PR #156 / `76-date-calculator-layout2`: `date-calculator.css` passa a única autoridade visual da ferramenta.
+- [x] PR #156: escala de espaçamento 4/8/12/16/20/24/32 px.
+- [x] PR #156: desktop usa área principal + coluna lateral de informação rápida.
+- [x] PR #156: mobile usa `Calculadora → Informação rápida → Resultado → Ações`.
+- [x] PR #156: `100svh` substitui `100dvh` na autoridade móvel final.
+- [x] PR #156: inputs principais 52 px; targets menores >=44 px.
+- [x] PR #156: breakpoints 820/560/430/360 e ausência de scroll horizontal como requisito.
+- [x] PR #156: forced-colors, reduced-motion e impressão/PDF preservados.
+- [x] PR #156: TypeScript PR `35016302805` e CI PR `35016302738` verdes.
+- [x] PR #156: merge `00ec8351cfedb8eba657fe4f19a4f2614c86347f`.
+- [x] PR #156: TypeScript `main` `35016376375`, CI `main` `35016376360` e Pages `35016440963` verdes.
+- [ ] Confirmar visualmente o dialog em iPhone/Safari/PWA, tablet e desktop.
+- [ ] Validar top-layer/scroll do `<dialog>` em WebKit real.
 - [ ] Validar copiar/partilhar/imprimir-PDF em dispositivo real.
+- [ ] Avaliar futura integração de feriados portugueses apenas com jurisdição/fonte oficial explícita.
 
 ## P0 — Mercado
 
@@ -88,9 +90,9 @@ Atualizado: 15 de setembro de 2026
 ## P0 — Segurança + Diagnóstico + Definições
 
 - [x] `settings` usa engrenagem Lucide.
-- [ ] Corrigir texto `Sem CDNs` enquanto ZXing usar `unpkg.com`.
+- [ ] Corrigir texto `Sem CDNs` enquanto ZXing usar origem remota.
 - [ ] Empacotar ZXing localmente com licença preservada.
-- [ ] Depois remover `https://unpkg.com` de `script-src`.
+- [ ] Depois remover a origem remota de `script-src`.
 - [ ] Reduzir `style-src 'unsafe-inline'` quando a arquitetura permitir.
 - [ ] Rever feedback/destructive actions/dark mode/forced-colors fisicamente.
 - [ ] Confirmar offline/update da PWA após cada invalidação relevante de cache.

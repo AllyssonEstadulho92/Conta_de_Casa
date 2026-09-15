@@ -13,56 +13,23 @@ Invariantes:
 
 - `STATE_VERSION=5`;
 - dinheiro em cêntimos inteiros;
-- IndexedDB cifrado;
-- PBKDF2-SHA-256 + AES-GCM, 250000 iterações;
+- estado financeiro local cifrado;
 - sync GitHub opcional/cifrado;
 - `estimatedCents` separado de `actualCents`;
 - `marketId|pid` canónico quando existe identidade de loja/SKU;
 - fotografia não prova preço/transação.
 
-## 2. Segurança, cofre e sessão
+## 2. Cofre e sessão
 
-`core.js` continua a autoridade de estado, cifra, normalização e sessão:
+`core.js` continua a autoridade de estado, cifra, normalização e sessão. A UI do cofre não pode modificar lógica de derivação, desbloqueio, armazenamento ou sync.
 
-`PIN/palavra-passe → PBKDF2 → check cifrado → AES-GCM → AppStateV5 normalizado`.
+Autoridade visual: `v75-usability.css` / `76-auth-prototype-final1`.  
+Contrato de exclusividade: `76-auth-exclusive-state1`.
 
-Contratos:
-
-- PIN local válido abre a aplicação sem depender do sync remoto;
-- `#vaultScreen[hidden]` e `#app[hidden]` são exclusivos;
-- `#vaultCreate[hidden]` e `#vaultUnlock[hidden]` também são autoridades explícitas e não podem ser anulados por regras de apresentação;
-- sync opcional continua em background;
-- anexos reais permanecem bloqueados até existir cifragem dedicada;
-- UI do cofre não pode modificar lógica de derivação, unlock, IndexedDB ou sync.
-
-### 2.1 Autoridade visual do cofre — `76-auth-prototype-final1` + `76-auth-exclusive-state1`
-
-Autoridade visual: `v75-usability.css`.
-
-O PR #152 substitui as duas camadas móveis anteriores (`76-vault-short-height1` e `76-auth-ios-spacing2`) por uma composição única baseada no protótipo aprovado em dispositivo real. O PR #154 corrige a última colisão de cascade observada fisicamente: `#vaultCreate{display:grid!important}` podia sobrepor o estado `hidden` definido pelo runtime e mostrar criação e desbloqueio ao mesmo tempo.
-
-Contrato de estado:
-
-- `events.js` consulta `idbGet('meta','vault')` e escolhe exatamente um estado: criação quando não existe cofre local, desbloqueio quando existe;
-- `hidden` é autoridade superior à decoração CSS para `#vaultScreen`, `#vaultCreate`, `#vaultUnlock`, transferência e painéis de recuperação;
-- uma regra visual com `display:* !important` nunca pode tornar visível um estado que o runtime marcou como `hidden`;
-- não é criado um segundo controlador de autenticação nem uma alternância artificial entre “Criar” e “Entrar” quando já existe cofre.
-
-Contrato móvel:
-
-- `#vaultScreen` usa `100svh`, safe areas e scroll próprio do cofre;
-- conteúdo começa no topo seguro e `.vault-card` usa `margin:0 auto`;
-- input móvel mantém texto >=16 px para evitar auto-zoom do Safari;
-- keypad padrão: teclas 56 px, `column-gap:30px`, `row-gap:16px`;
-- `<=359px`: teclas 52 px, gaps 24/13 px;
-- altura `<=720px`: teclas 50 px, gaps 22/9 px;
-- todos os alvos essenciais permanecem >=44 px;
-- o botão apagar é visualmente leve, mas mantém área funcional suficiente;
-- Entrar é a ação principal; Usar palavra-passe e recuperação permanecem ações secundárias;
-- `Usar dados de outro dispositivo` é uma superfície própria abaixo de um divisor, evitando competição visual com o CTA principal;
-- pinch-to-zoom, `prefers-reduced-motion`, `forced-colors` e dark mode permanecem suportados.
-
-A mudança é exclusivamente de apresentação/estado visual. HTML canónico, IDs, handlers, `createVault()`, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação e sync não mudam.
+- criação e desbloqueio são estados mutuamente exclusivos;
+- atributos `hidden` não podem ser anulados por regras decorativas;
+- `100svh`, safe areas e targets adequados permanecem requisitos móveis;
+- o PR #156 não altera esta arquitetura.
 
 ## 3. Rotas e navegação
 
@@ -88,14 +55,6 @@ Autoridades móveis:
 - `v76-mobile-shell.css`: viewport autenticado, safe areas, scroll e dock;
 - `mobile-layout.css`: refinamentos de feature sem propriedade global do viewport.
 
-Hierarquia do drawer:
-
-- Principal: Início, Despesas, Planeamento, Mercado;
-- Análise: Relatórios;
-- Sistema: Segurança e sincronização, Definições.
-
-Calendário, Metas e Diagnóstico permanecem nas páginas-pai.
-
 ## 4. Arquitetura visual
 
 Autoridades atuais:
@@ -103,49 +62,39 @@ Autoridades atuais:
 - tokens/componentes: `v76-modern-ui.css` + `design-system.css`;
 - composição de páginas: `v76-product-pages.css`, `v76-planning-more.css` e camadas v75 ainda ativas;
 - geometria mobile autenticada: `v76-mobile-shell.css`;
-- auth/cofre: `v75-usability.css` / `76-auth-prototype-final1` com contrato de estado `76-auth-exclusive-state1`;
+- auth/cofre: `v75-usability.css`;
 - refinamentos móveis de feature: `mobile-layout.css`;
+- Calculadora de datas: `date-calculator.css` / `76-date-calculator-layout2`;
 - marca: `icon.svg`;
 - iconografia funcional: subset Lucide local em `ui-icons.js` + `ui-icons.css`;
 - drawer: `mobile-menu-toggle.js/.css` + `v75-drawer-theme.css`;
 - formulários de despesas/QR: `invoice-capture.js/.css`.
 
-A cascade ainda contém regras históricas e `!important`; a redução deve ser por componente com regressões, nunca por eliminação em massa. No cofre, a regra explícita de `hidden` impede que especificidade visual altere o estado funcional.
+A redução da cascade deve ser feita por componente e protegida por regressões, nunca por eliminação global de estilos.
 
-## 5. Despesas mobile — `76-bills-mobile-alignment2`
+## 5. Despesas mobile
 
-Autoridade funcional preservada:
+Autoridade funcional:
 
 - `renderBills()` filtra/renderiza;
 - `events.js` mantém listeners;
-- IDs canónicos não mudaram.
+- IDs canónicos não mudam.
 
-Composição final móvel:
-
-- pesquisa + ação principal compactas;
-- lupa Lucide local como única lupa funcional;
-- filtros em grelha contida, sem depender de scroll horizontal;
-- Estado/Categoria e De/Até em pares;
-- Ordenar e Limpar filtros em linhas completas;
-- `<=360px` empilha antes de cortar conteúdo;
-- `mobile-layout.css` continua sem assumir a geometria global do shell.
+Apresentação móvel final: `76-bills-mobile-alignment2`, com grelha contida e fallback para uma coluna antes de cortar conteúdo.
 
 ## 6. Planeamento mobile
 
 `76-planning-budget-card2` + `76-planning-ring-shape1`:
 
-- `dashboardNumbers()`/`categoryTotals()` fornecem os valores apresentados;
 - `#monthPicker` continua a autoridade do mês;
 - `#monthPlanForm` e `#monthlyBudget` continuam a única gravação do orçamento;
-- ações Definir/Editar apenas focam o campo canónico;
 - orçamento ausente permanece `Por definir`;
-- navegação mensal usa Lucide local;
-- o anel neutraliza altura legada com `height:auto!important` e `aspect-ratio:1/1!important`;
-- desktop mantém os painéis/formulários canónicos.
+- o anel neutraliza altura legada e mantém proporção 1:1;
+- a apresentação não altera cálculos ou persistência.
 
-## 7. Calculadora de datas — `76-date-calculator1`
+## 7. Calculadora de datas
 
-PR #149 adicionou um utilitário local sem criar nova rota principal.
+### 7.1 Autoridade funcional — `76-date-calculator1`
 
 Entrada: **Mais → Ferramentas → Calculadora de datas**.
 
@@ -153,26 +102,77 @@ Arquitetura:
 
 - fonte canónica: `src/ui/date-calculator.ts`;
 - runtime browser: `.generated/date-calculator.js` → `dist/date-calculator.js`;
-- estilos: `date-calculator.css`;
 - build: `scripts/build-typescript-runtime.cjs` + `scripts/prepare-pages.cjs`;
 - Service Worker inclui CSS/runtime na allowlist pública.
 
 Contratos de exatidão:
 
-- reutiliza `parseCivilDateKey`, `cleanDateKey`, `civilDayNumber`, `civilDayDiff`, `addCivilDays`, `addCivilMonthsClamped` e `currentLocalDateKey` de `core.js`;
+- reutiliza primitivas de data civil de `core.js`;
 - diferença é de datas civis, não de milissegundos/horas locais;
 - DST/fuso não alteram a contagem de dias;
-- inclusão/exclusão de data inicial/final é explícita;
-- “dias úteis” = segunda a sexta; feriados só podem ser descontados se existir jurisdição explícita futura;
-- não usa rede, IndexedDB, `appState`, `commit()` ou `saveState()`;
-- fechar o shell autenticado fecha também o dialog da ferramenta.
+- inclusão/exclusão das datas-limite é explícita;
+- “dias úteis” = segunda a sexta-feira;
+- feriados só podem ser descontados quando existir jurisdição e fonte explícitas;
+- não usa rede nem persiste resultados no estado financeiro.
+
+### 7.2 Autoridade visual — `76-date-calculator-layout2`
+
+PR #156 consolida toda a apresentação em `date-calculator.css` sem criar nova folha de correção.
+
+Sistema de espaçamento local:
+
+- 4 px: microajustes;
+- 8 px: elementos diretamente relacionados;
+- 12 px: ícone/texto e grupos compactos;
+- 16 px: espaçamento padrão;
+- 20 px: padding intermédio;
+- 24 px: separação principal;
+- 32 px: reservado para separação de grande escala.
+
+Desktop:
+
+- grelha com área principal flexível + coluna lateral de 280 px;
+- `input` e `result` ocupam a coluna principal;
+- `facts` ocupa a coluna lateral;
+- `actions` permanece diretamente associado ao resultado;
+- cards usam a mesma família de borda, raio e sombra.
+
+Mobile `<=820px`:
+
+- ordem canónica: `input → facts → result → actions`;
+- dialog usa `100svh`, não `100dvh`;
+- safe areas são aplicadas ao cabeçalho/layout/rodapé;
+- sem scroll horizontal para descobrir controlos.
+
+Breakpoints de feature:
+
+- `<=820px`: uma coluna e viewport móvel estável;
+- `<=560px`: datas, resultado e ações empilham;
+- `<=430px`: campos secundários passam a uma coluna e paddings reduzem;
+- `<=360px`: dialog ocupa integralmente o viewport estável.
+
+Controlos:
+
+- inputs/selects principais: 52 px e texto de 16 px;
+- tabs: mínimo 48 px;
+- ação **Hoje**: mínimo 44 px;
+- opções de contagem: mínimo 44 px por label;
+- botão de troca: 44×44 px;
+- CTA principal: mínimo 52 px.
+
+Acessibilidade e modos:
+
+- foco visível preservado;
+- `forced-colors` e `prefers-reduced-motion` explícitos;
+- impressão/PDF mantém apenas o conteúdo de resultado relevante;
+- JavaScript/TypeScript funcional e IDs/handlers não foram duplicados.
+
+`cdc-datecalc-workspace` usa `display:contents` apenas como composição visual para permitir que os filhos existentes participem na única grelha da ferramenta; não existe um segundo componente de estado ou cálculo.
 
 ## 8. Mercado
 
-- pesquisa live: Pingo Doce e Continente através de cesta.pt;
-- fotografia opcional: Open Food Facts quando existe correspondência validada;
-- preço pesquisado entra como `estimatedCents`;
-- valor pago só entra em `actualCents` após confirmação;
+- pesquisa live limitada às fontes já suportadas;
+- preço pesquisado permanece separado do valor confirmado;
 - `marketId|pid` preserva identidade quando existe SKU verificável;
 - imagem/logótipo não prova preço/transação.
 
@@ -184,7 +184,7 @@ Fluxo Adicionar despesa:
 - Ler fatura por imagem/QR AT;
 - QR Code por câmara.
 
-PR #132 mantém um único proprietário de scroll no mobile Safari. Os blocos de alinhamento de Despesas não alteram captura nem domínio financeiro.
+A reconfiguração da Calculadora de datas não altera captura, finanças ou scanner.
 
 ## 10. TypeScript
 
@@ -192,7 +192,7 @@ Pipeline vigente:
 
 `src/**/*.ts → tsc strict/noEmit → build-typescript-runtime.cjs → .generated/*.js → prepare-pages.cjs → dist/*.js → Pages`.
 
-Runtimes TypeScript ativos incluem Market branding, Sync conflict policy e Calculadora de datas. JavaScript manual só sai depois de substituição comprovada e regressões verdes.
+A Calculadora de datas continua com fonte funcional TypeScript strict; o PR #156 altera apenas CSS, teste de contrato visual e token de cache.
 
 ## 11. Build/PWA
 
@@ -202,50 +202,47 @@ Fluxo:
 
 Service Worker:
 
-- navegação network-first com timeout de 4 s;
+- navegação network-first com timeout;
 - assets públicos network-first/no-store com fallback de cache;
 - allowlist explícita;
 - tokens técnicos invalidam cache sem alterar release pública.
 
-PR #154 acrescenta `auth-exclusive-state1` ao token técnico de cache para distribuir a correção do estado `hidden`. `package.json`, `release-manifest.json`, `app-update.js` e v76/`0.76.0` permanecem inalterados.
+PR #156 acrescenta `date-calculator-layout2` ao token técnico de cache. `package.json`, manifesto de release e versão pública permanecem inalterados.
 
 ## 12. Segurança e dependências externas
 
 - nenhum segredo deve existir no repositório público;
 - CSP está ativa;
-- armazenamento sensível em claro está bloqueado;
-- zoom manual não é bloqueado;
 - iconografia Lucide é local/licenciada;
-- ZXing ainda é carregado de `unpkg.com`, portanto “Sem CDNs” continua factual e tecnicamente incorreto até bundle local;
+- ZXing ainda é carregado remotamente, portanto a página Segurança não pode afirmar ausência total de CDN;
+- a localização do ZXing deve ocorrer antes de remover a origem remota da CSP;
 - `style-src 'unsafe-inline'` permanece dívida de hardening.
 
 ## 13. QA
 
-A CI cobre sintaxe, TypeScript, finanças, isolamento, datas, QR, Mercado, imagens, scanner, UI, responsividade, acessibilidade, segurança e sync.
+A CI cobre sintaxe, TypeScript, finanças, isolamento, datas, QR, Mercado, scanner, UI, responsividade, acessibilidade, segurança e sync.
 
-Regressões do cofre após PR #154 protegem:
+Regressões específicas do PR #156 protegem:
 
-- `76-auth-prototype-final1` como autoridade visual única e `76-auth-exclusive-state1` como contrato de estado;
-- `#vaultCreate[hidden]` e `#vaultUnlock[hidden]` com `display:none!important` de especificidade suficiente;
-- decisão funcional de `events.js` baseada em `idbGet('meta','vault')`;
-- `100svh` e safe areas;
-- keypad 56 px com gaps 30/16 px no mobile padrão;
-- fallbacks 52 px (`<=359px`) e 50 px (`<=720px` de altura);
-- piso tátil >=44 px;
-- transferência em superfície com min-height 70 px;
-- token de cache `auth-exclusive-state1`.
+- marcador `76-date-calculator-layout2`;
+- escala 4/8/12/16/20/24/32;
+- grelha desktop `input/facts/result/actions`;
+- ordem móvel `input → facts → result → actions`;
+- `100svh` e ausência de `100dvh` na autoridade final;
+- targets de 44 px nas ações menores;
+- breakpoints 820/430/360;
+- matemática civil multitimezone já existente.
 
-Evidência PR #154: TypeScript Foundation `35003057035` e CI `35003057086` verdes; após merge, TypeScript `35003207253`, CI `35003207139` e Pages `35003264802` verdes.
+Evidência: PR TypeScript `35016302805`, PR CI `35016302738`; após merge, TypeScript `35016376375`, CI `35016376360` e Pages `35016440963`, todos com sucesso.
 
-Limitação: testes estáticos não substituem Safari/WebKit real para browser chrome, teclado virtual, scroll, foco, proporções e safe areas.
+Limitação: testes estáticos não substituem Safari/WebKit real para top-layer de `<dialog>`, scroll, safe areas, partilha e impressão.
 
 ## 14. Próxima consolidação
 
-1. validar `76-auth-exclusive-state1` no mesmo iPhone/Safari web e PWA;
-2. confirmar Despesas/Planeamento no mesmo dispositivo;
+1. validar `76-date-calculator-layout2` em iPhone/Safari/PWA e desktop;
+2. validar os restantes blocos móveis pendentes;
 3. corrigir descrição factual de rede em Segurança;
 4. empacotar ZXing localmente com licença preservada;
-5. remover `unpkg.com` de `script-src` e endurecer CSP;
+5. endurecer CSP depois da remoção da dependência remota;
 6. criar E2E WebKit/Chromium;
-7. reduzir cascade CSS por componente;
-8. continuar TypeScript em módulos de baixo acoplamento.
+7. continuar redução de cascade por componente e migração TypeScript de baixo acoplamento.
