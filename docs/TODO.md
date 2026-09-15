@@ -75,16 +75,19 @@ Atualizado: 15 de setembro de 2026
 - [x] PR #156: forced-colors, reduced-motion e impressão/PDF preservados.
 - [x] PR #161 / `76-date-calculator-mobile-spacing3`: Data inicial → Trocar → Data final compactados no mobile sem alterar markup ou lógica.
 - [x] PR #161: `<=560px` usa flex vertical, gap de 8 px, labels sem margem/altura herdada e Trocar 44×44 px centrado.
-- [x] PR #163 / `76-date-calculator-prototype-inputs4`: apresentação alinhada ao protótipo aprovado dentro da mesma folha canónica.
-- [x] PR #163: `input[type="date"]` preserva o picker nativo, com indicador WebKit à esquerda, divisor interno e ação Hoje à direita.
-- [x] PR #163: Trocar usa eixo horizontal visual em mobile com superfície central 44×44 px.
-- [x] PR #163: Regra de contagem usa duas colunas e empilha em `<=430px` para evitar clipping.
-- [x] PR #163: regressões atualizadas e cache PWA invalidado com `date-calculator-prototype-inputs4`.
-- [x] PR #163: TypeScript PR `35023063165` e CI PR `35023063147` verdes.
-- [x] PR #163: merge `1bf42cfc2ed7c2b67413db49c7828416dcae4d4c`.
-- [x] PR #163: TypeScript `main` `35023156381`, CI `main` `35023156390` e Pages `35023224573` verdes.
-- [ ] Confirmar fisicamente `76-date-calculator-prototype-inputs4` no mesmo iPhone/Safari/PWA.
-- [ ] Confirmar o indicador nativo do calendário e o eixo Trocar em WebKit real.
+- [x] PR #163 / `76-date-calculator-prototype-inputs4`: primeira aproximação da apresentação ao protótipo.
+- [x] Captura física posterior ao PR #163 confirmou overflow/clipping lateral no Safari/iOS causado pela técnica de reposicionamento do indicador nativo.
+- [x] PR #165 / `76-date-calculator-prototype-inputs5`: remove o reposicionamento absoluto do indicador WebKit e contém o campo numa grelha interna própria.
+- [x] PR #165: calendário visual/divisor à esquerda, input nativo na coluna central e Hoje à direita em fluxo normal.
+- [x] PR #165: `min-width:0`, `max-width:100%` e moldura contida impedem a largura intrínseca do `input[type="date"]` de deslocar o cartão.
+- [x] PR #165: foco visível por `:focus-within`; targets e `forced-colors` preservados.
+- [x] PR #165: Regra de contagem mantém duas colunas em telemóveis comuns e só empilha em `<=340px`.
+- [x] PR #165: não altera token do Service Worker; o CSS público network-first/no-store pode atualizar num reload normal, sem ecrã de atualização.
+- [x] PR #165: TypeScript PR `35025919784` e CI PR `35025919606` verdes.
+- [x] PR #165: merge `a80c0f9bfdbd9135dea69368ca2bde56196fab5d`.
+- [x] PR #165: TypeScript `main` `35025991379`, CI `main` `35025991388` e Pages `35026044123` verdes.
+- [ ] Confirmar fisicamente `76-date-calculator-prototype-inputs5` no mesmo iPhone/Safari/PWA.
+- [ ] Confirmar que Data inicial/Data final permanecem totalmente dentro do cartão sem clipping ou deslocamento lateral.
 - [ ] Confirmar visualmente o dialog em tablet e desktop.
 - [ ] Validar top-layer/scroll do `<dialog>` em WebKit real.
 - [ ] Validar copiar/partilhar/imprimir-PDF em dispositivo real.
