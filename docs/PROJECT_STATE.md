@@ -4,7 +4,7 @@ Atualizado: 15 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main`: `387a953e427331a5aa48d872cd7c54e1552d2c1c` — PR #140  
+Baseline funcional em `main`: `386d75b35060eb011c2a2d68ec6b965c87c5080c` — PR #143  
 Branch funcional: `main`
 
 ## Invariantes obrigatórias
@@ -31,84 +31,92 @@ Consolidações relevantes:
 - PR #132: hotfix Safari/iPhone para touch/scroll do formulário de despesas;
 - PR #133: persistência retrocompatível de `marketId|pid` no Mercado;
 - PR #134: expiração segura da identidade temporária se um clique live não chegar ao commit;
-- PR #136: `76-drawer-hierarchy1`, substituição do drawer móvel denso por uma hierarquia vertical legível;
-- PR #138: `76-icon-semantics1`, correção semântica dos ícones de Planeamento e Definições com geometrias do snapshot Lucide já fixado no projeto;
-- PR #140: `76-bills-mobile-filters1`, reorganização móvel da pesquisa e filtros de Despesas, com remoção visual da lupa CSS duplicada e preservação integral dos IDs/handlers canónicos.
+- PR #136: `76-drawer-hierarchy1`, drawer móvel em hierarquia vertical legível;
+- PR #138: `76-icon-semantics1`, Planeamento/Definições com geometrias Lucide coerentes;
+- PR #140: `76-bills-mobile-filters1`, pesquisa/filtros móveis de Despesas reorganizados;
+- PR #142: `76-bills-mobile-spacing1`, ritmo, espaçamento e limpeza visual do mesmo bloco de Despesas;
+- PR #143: `76-planning-budget-card2`, resumo móvel de Planeamento reorganizado segundo o protótipo aprovado sem duplicar o fluxo funcional de orçamento.
 
-Evidência mais recente do bloco PR #140:
+## Evidência mais recente — PR #143
 
-- merge PR #140: `387a953e427331a5aa48d872cd7c54e1552d2c1c`;
-- TypeScript Foundation PR `34942844618`: sucesso;
-- CI PR `34942844692`: sucesso integral;
-- CI push `34942841985`: sucesso integral;
-- Pages `34942974208`: execução iniciada após o merge; confirmar conclusão antes de tratar a validação pública como encerrada.
+- head final do PR: `b7a315e154f88cad09d73b9caed6744b0a48bb52`;
+- TypeScript Foundation PR `34946433827`: sucesso;
+- CI PR `34946433799`: sucesso integral;
+- merge PR #143: `386d75b35060eb011c2a2d68ec6b965c87c5080c`;
+- TypeScript Foundation `main` `34946493929`: sucesso;
+- CI `main` `34946493911`: sucesso integral;
+- Pages `34946542013`: sucesso, incluindo preparação do bundle, upload e deploy.
 
-A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados pelo PR #140.
+A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados pelos PR #142/#143.
 
-## Despesas — pesquisa e filtros móveis
+## Despesas — pesquisa, filtros e espaçamento móvel
 
-`76-bills-mobile-filters1` está integrado em `main`:
+`76-bills-mobile-filters1` + `76-bills-mobile-spacing1` estão integrados:
 
-- `#billSearch`, `#newBillBtn`, `#billStatusFilter`, `#billCategoryFilter`, `#billDateFrom`, `#billDateTo`, `#billSort` e `#billClearFilters` continuam a ser os controlos canónicos;
-- `renderBills()` e os listeners existentes em `events.js` continuam a autoridade funcional;
-- a pesquisa móvel e o botão de nova despesa usam composição compacta e targets tácteis adequados;
-- a lupa manual histórica de `v75-expenses-modern.css` é neutralizada no mobile quando o sistema Lucide local fornece `.ui-search-icon`, eliminando a duplicação visual observada;
-- o bloco de filtros passa a uma hierarquia de cartão legível, com Estado/Categoria em duas colunas, datas organizadas, Ordenar e Limpar filtros preservados;
-- em `<=360px`, os filtros passam para uma coluna para evitar clipping;
-- `forced-colors` e `prefers-reduced-motion` permanecem cobertos;
-- `mobile-layout.css` continua limitado a refinamentos de feature e não assume a geometria global do viewport, que pertence a `v76-mobile-shell.css`;
+- `#billSearch`, `#newBillBtn`, `#billStatusFilter`, `#billCategoryFilter`, `#billDateFrom`, `#billDateTo`, `#billSort` e `#billClearFilters` continuam canónicos;
+- `renderBills()` e `events.js` continuam a autoridade funcional;
+- lupa histórica duplicada foi neutralizada, ficando o Lucide local como representação funcional;
+- pesquisa, ação principal e cartão de filtros usam espaçamento móvel consistente;
+- Estado/Categoria permanecem organizados, datas/ordenação/limpeza continuam funcionais;
+- `<=360px` mantém fallback de uma coluna;
+- foco, `forced-colors`, `prefers-reduced-motion` e targets tácteis permanecem cobertos;
 - cálculos, persistência, PIN/cofre, QR, scanner e sync não foram alterados.
 
-Validação física deste bloco no mesmo iPhone/Safari/PWA ainda está pendente; CI verde não substitui observação real do layout.
+PR #142 foi publicado com TypeScript/CI/Pages verdes; Pages `34945033256` terminou com sucesso.
+
+## Planeamento — orçamento móvel
+
+`76-planning-budget-card2` está publicado:
+
+- o seletor de mês mantém `#monthPicker` como autoridade e continua a usar `stepMonth()`/evento `change` existente;
+- o cartão apresenta mês e intervalo real, título Orçamento mensal, gasto do mês, orçamento, disponível e estado definido/por definir;
+- os valores continuam derivados de `dashboardNumbers()`/`categoryTotals()` e da lógica financeira existente;
+- orçamento ausente continua factual: `Por definir`, sem percentagem falsa;
+- Definir/Editar orçamento não cria segundo formulário nem grava dados: todas as ações apenas deslocam/focam `#monthlyBudget`;
+- a gravação continua exclusivamente no `#monthPlanForm` através do listener de `events.js`, `monthProfile()` e `commit('updated','planning')`;
+- ícones vêm do subset Lucide local; navegação mensal deixa de depender de caracteres `‹/›`;
+- em iPhones estreitos as três métricas deixam de ser comprimidas em colunas iguais e passam a linhas legíveis;
+- `forced-colors`, `prefers-reduced-motion` e targets tácteis são preservados;
+- Service Worker recebeu apenas o token técnico `planning-budget-card2` para distribuição da correção.
+
+Validação física no iPhone/Safari/PWA ainda é necessária; CI verde não substitui inspeção real do layout.
 
 ## Iconografia funcional — estado atual
 
-`76-icon-semantics1` está publicado:
+`76-icon-semantics1` permanece publicado:
 
-- `icon.svg` continua a ser a marca canónica da aplicação;
-- `ui-icons.js` + `ui-icons.css` continuam a ser a autoridade da iconografia funcional Lucide;
-- o snapshot Lucide permanece fixado em `94e4cb9d9db5907053ebf3636a97c45529cf776b` e a licença local continua preservada;
-- Planeamento mantém o nome semântico `plan`, mas passa a usar a geometria `CalendarCheck2`, com calendário + confirmação;
-- Definições mantém o nome semântico `settings`, mas passa a usar a geometria `Settings`/engrenagem;
-- a antiga geometria de carteira/tray deixa de representar Planeamento;
-- a antiga geometria de sliders deixa de representar Definições;
-- testes impedem regressão para essas geometrias inadequadas;
-- nenhuma CDN, rota, handler, cálculo ou persistência foi introduzida ou alterada neste bloco.
+- `icon.svg` é a marca canónica;
+- `ui-icons.js` + `ui-icons.css` são a autoridade da iconografia funcional Lucide;
+- snapshot Lucide fixado em `94e4cb9d9db5907053ebf3636a97c45529cf776b`, com `LUCIDE_LICENSE.txt` preservada;
+- Planeamento usa `CalendarCheck2`; Definições usa `Settings`/engrenagem;
+- nenhuma CDN de iconografia foi introduzida.
 
 ## Navegação móvel — estado atual
 
-`76-drawer-hierarchy1` está publicado:
+`76-drawer-hierarchy1` permanece publicado:
 
-- drawer continua a abrir pela direita para preservar o controlador/gesto móvel existente;
-- largura útil foi aumentada para evitar labels comprimidos;
-- navegação passou de cartões em duas colunas para uma lista vertical de uma coluna;
+- drawer à direita, uma coluna e destinos de primeiro nível;
 - Principal: Início, Despesas, Planeamento e Mercado;
 - Análise: Relatórios;
 - Sistema: Segurança e sincronização, Definições;
-- Calendário permanece dentro de Despesas, Metas dentro de Planeamento e Diagnóstico dentro de Definições, evitando duplicação de rotas secundárias;
-- Segurança tem seleção própria no menu completo, mas continua agrupada em Mais no dock compacto;
-- botão de fecho é uma única superfície circular de 44 px;
-- Ocultar valores e Bloquear são ações verticais de largura completa;
-- foco, reduced-motion, forced-colors e safe areas foram preservados.
-
-Validação física no mesmo iPhone/Safari/PWA ainda está pendente; CI verde não substitui observação real do layout.
+- Calendário/Metas/Diagnóstico continuam nas respetivas páginas-pai;
+- botão fechar e ações de sessão preservam targets e foco.
 
 ## Mercado — estado de identidade
 
-`76-market-identity1` + `76-market-identity-stale1` estão publicados:
+`76-market-identity1` + `76-market-identity-stale1` permanecem publicados:
 
-- a pesquisa Cesta preserva `marketId` e `pid` ao adicionar um produto;
+- pesquisa Cesta preserva `marketId` e `pid` ao adicionar produto;
 - normalização/reload/restauro/sync retêm a identidade;
-- itens manuais/legados continuam compatíveis com campos vazios;
-- a identidade temporária usada entre clique e commit expira no microtask seguinte quando não é consumida;
+- identidade temporária expira quando não é consumida;
 - preço, quantidade, `estimatedCents`, `actualCents`, scanner e persistência financeira permanecem inalterados.
 
 ## Auditoria atual — problemas abertos
 
 ### ALTO
 
-- validar fisicamente `76-bills-mobile-filters1`, drawer e iconografia no mesmo iPhone/Safari e PWA instalada;
-- acrescentar E2E real com WebKit/Chromium para toque, teclado, scroll e transição PIN → aplicação;
+- validar fisicamente `76-planning-budget-card2`, `76-bills-mobile-spacing1`, drawer e iconografia no mesmo iPhone/Safari e PWA instalada;
+- acrescentar E2E real WebKit/Chromium para toque, teclado, scroll e PIN → aplicação;
 - reduzir gradualmente a cascade CSS e dependência de `!important`;
 - `main` continua sem branch protection/required checks obrigatórios.
 
@@ -125,10 +133,10 @@ Validação física no mesmo iPhone/Safari/PWA ainda está pendente; CI verde n�
 
 ## Próximo passo
 
-1. confirmar conclusão do Pages do PR #140 e validar `76-bills-mobile-filters1` no iPhone/PWA com nova captura;
-2. validar visualmente `76-drawer-hierarchy1` + `76-icon-semantics1` no mesmo dispositivo;
-3. corrigir a descrição da página Segurança para refletir a dependência ZXing real, sem mudança de release;
-4. preparar ZXing local e endurecimento CSP num bloco isolado;
+1. validar `76-planning-budget-card2` no iPhone/Safari web e PWA instalada, incluindo orçamento por definir e orçamento definido;
+2. validar `76-bills-mobile-spacing1` e drawer/iconografia no mesmo dispositivo;
+3. corrigir a descrição da página Segurança para refletir a dependência ZXing real;
+4. preparar ZXing local + licença e, só depois, remover `unpkg.com` de `script-src`;
 5. criar primeiro fluxo E2E WebKit/Chromium;
-6. consolidar CSS por propriedade, sem apagar regras sem prova de não utilização;
+6. consolidar CSS por propriedade/componente com prova de não utilização;
 7. continuar TypeScript em módulos de baixo acoplamento.
