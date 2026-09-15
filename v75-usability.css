@@ -88,6 +88,17 @@ html.cdc-v75 #vaultScreen.vault-screen{
   color:var(--v76-text,var(--v75-text))!important;
 }
 
+/* 76-auth-exclusive-state1: `hidden` é autoridade de estado. O ecrã de
+   criação e o de desbloqueio nunca podem ser renderizados em simultâneo. */
+html.cdc-v75 #vaultScreen.vault-screen[hidden],
+html.cdc-v75 #vaultScreen #vaultCreate[hidden],
+html.cdc-v75 #vaultScreen #vaultUnlock[hidden],
+html.cdc-v75 #vaultScreen #vaultTransferPanel[hidden],
+html.cdc-v75 #vaultScreen #pinRecoveryBox[hidden],
+html.cdc-v75 #vaultScreen #changePinLockedBox[hidden]{
+  display:none!important;
+}
+
 html.cdc-v75[data-theme="dark"] #vaultScreen.vault-screen{
   --vault-auth-bg:#071b20;
   --vault-auth-surface:#0c252b;
