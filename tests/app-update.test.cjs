@@ -95,13 +95,16 @@ for(const retiredSource of ['v74-experience.css','v74-experience.js','v75-market
 assert.match(planningMore,/76-planning-more1/);
 assert.match(architectureJs,/Conta de Casa v76/);
 assert.match(architectureJs,/76-architecture-consolidation1/);
+assert.match(architectureJs,/76-drawer-hierarchy1/);
 assert.doesNotMatch(architectureJs,/root\.CDCV74/);
 assert.match(architectureCss,/Conta de Casa v75/);
 assert.match(stabilityJs,/revision:'75-stability1'/);
 assert.match(stabilityCss,/revisão transversal de estabilidade visual/i);
 assert.match(layoutCss,/revisão 75-layout1/i);
-assert.match(drawerCss,/revisão 76-drawer-neutral1/i);
+assert.match(drawerCss,/76-drawer-hierarchy1/i);
 assert.match(drawerCss,/background:var\(--v76-drawer-surface\)!important/);
+assert.match(drawerCss,/flex-direction:column!important/,'current drawer must keep the readable vertical hierarchy');
+assert.doesNotMatch(drawerCss,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/,'current drawer must not regress to the dense two-column card wall');
 assert.doesNotMatch(drawerCss,/linear-gradient\(/);
 
 assert.match(sw, /v76-version-alignment1/);
@@ -197,7 +200,9 @@ try {
   assert.ok(index.indexOf('v75-architecture.js?v=75-architecture2') < index.indexOf('v75-stability.js?v=75-stability1'));
   for(const asset of ['app-update.css','v76-version-about.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v75-architecture.css','v76-planning-more.css','v75-architecture.js','v75-stability.css','v75-stability.js','v75-layout-polish.css','v75-drawer-theme.css','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
   for(const retired of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(dist,retired)),`${retired} must not exist in dist`);
-  assert.match(fs.readFileSync(path.join(dist,'v75-drawer-theme.css'),'utf8'),/76-drawer-neutral1/);
+  const builtDrawer=fs.readFileSync(path.join(dist,'v75-drawer-theme.css'),'utf8');
+  assert.match(builtDrawer,/76-drawer-hierarchy1/);
+  assert.match(builtDrawer,/flex-direction:column!important/);
   assert.ok(!fs.existsSync(path.join(dist,'v75-drawer-blue.css')));
   assert.ok(!fs.existsSync(path.join(dist,'ui-consistency.css')));
   assert.ok(!fs.existsSync(path.join(dist,'v64-runtime.css')));
@@ -205,4 +210,4 @@ try {
   fs.rmSync(dist, { recursive:true, force:true });
 }
 
-console.log(`Stable version metadata ${packageJson.version}, v76 controlled updates and physically retired v74/Featured sources: OK`);
+console.log(`Stable version metadata ${packageJson.version}, v76 controlled updates and current hierarchical drawer presentation: OK`);
