@@ -99,4 +99,18 @@ assert.ok(keypadSizes.length>=2,'short-height vault must define compact keypad s
 assert.ok(keypadSizes.every(size=>size>=44),`short-height PIN targets must remain >=44 px; got ${keypadSizes.join(', ')}`);
 assert.match(sw,/vault-short-height1/,'PWA cache must invalidate the old vault geometry');
 
-console.log('Accessibility contrast, focus, touch targets, semantic state, safe areas and short-height vault contracts for v76: OK');
+/* 76-auth-ios-spacing2: Safari browser chrome must not determine the vertical rhythm.
+   The auth surface starts at the safe top edge, uses 100svh and scales before it clips. */
+assert.match(usability,/76-auth-ios-spacing2/);
+assert.match(usability,/min-height:100svh!important/,'mobile auth must use the small viewport height so Safari bars are included in the available space');
+assert.match(usability,/\.vault-card\{[\s\S]*margin:0 auto!important/,'mobile auth card must stop using vertical auto margins that re-center the whole form');
+assert.match(usability,/@media\(max-width:820px\) and \(max-height:900px\)[\s\S]*grid-template-columns:repeat\(3,58px\)!important/,'common iPhone browser heights must compact the keypad before content reaches Safari chrome');
+assert.match(usability,/@media\(max-width:820px\) and \(max-height:780px\)[\s\S]*grid-template-columns:repeat\(3,54px\)!important/);
+assert.match(usability,/@media\(max-width:820px\) and \(max-height:640px\)[\s\S]*grid-template-columns:repeat\(3,48px\)!important/);
+const iosSpacingCss=usability.slice(usability.indexOf('76-auth-ios-spacing2'));
+const iosKeySizes=[...iosSpacingCss.matchAll(/grid-template-columns:repeat\(3,(\d+)px\)!important/g)].map(match=>Number(match[1]));
+assert.deepEqual(iosKeySizes,[58,54,48],'iOS auth density bands must remain ordered and deterministic');
+assert.ok(iosKeySizes.every(size=>size>=44),`iOS PIN targets must remain >=44 px; got ${iosKeySizes.join(', ')}`);
+assert.match(sw,/auth-ios-spacing2/,'PWA cache must invalidate the pre-fix auth spacing');
+
+console.log('Accessibility contrast, focus, touch targets, semantic state, safe areas and responsive iOS vault contracts for v76: OK');
