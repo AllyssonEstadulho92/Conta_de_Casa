@@ -31,7 +31,6 @@ Ritmo vertical móvel: `76-auth-spacing3` dentro da mesma folha canónica.
 - atributos `hidden` não podem ser anulados por regras decorativas;
 - `100svh`, safe areas e targets adequados permanecem requisitos móveis;
 - keypad padrão em mobile mantém 56 px com gaps 30/16 px;
-- o espaçamento entre blocos é compacto o suficiente para manter CTA, transferência e nota de privacidade acessíveis acima do chrome inferior do Safari;
 - `#vaultMessage:empty` não reserva altura;
 - esta arquitetura é exclusivamente visual e não altera PIN, PBKDF2, AES-GCM, IndexedDB, importação ou sync.
 
@@ -68,7 +67,7 @@ Autoridades atuais:
 - geometria mobile autenticada: `v76-mobile-shell.css`;
 - auth/cofre: `v75-usability.css`;
 - refinamentos móveis de feature: `mobile-layout.css`;
-- Calculadora de datas: `date-calculator.css` / `76-date-calculator-layout2`;
+- Calculadora de datas: `date-calculator.css` / `76-date-calculator-layout2`, incluindo `76-date-calculator-mobile-spacing3` na mesma autoridade;
 - marca: `icon.svg`;
 - iconografia funcional: subset Lucide local em `ui-icons.js` + `ui-icons.css`;
 - drawer: `mobile-menu-toggle.js/.css` + `v75-drawer-theme.css`;
@@ -121,7 +120,7 @@ Contratos de exatidão:
 
 ### 7.2 Autoridade visual — `76-date-calculator-layout2`
 
-PR #156 consolida toda a apresentação em `date-calculator.css` sem criar nova folha de correção.
+Toda a apresentação continua em `date-calculator.css`; o PR #161 não cria nova folha nem segunda hierarquia, apenas consolida o grupo móvel de datas dentro da autoridade existente.
 
 Sistema de espaçamento local:
 
@@ -139,7 +138,7 @@ Desktop:
 - `input` e `result` ocupam a coluna principal;
 - `facts` ocupa a coluna lateral;
 - `actions` permanece diretamente associado ao resultado;
-- cards usam a mesma família de borda, raio e sombra.
+- campos Data inicial e Data final continuam lado a lado com o botão Trocar entre ambos.
 
 Mobile `<=820px`:
 
@@ -148,10 +147,18 @@ Mobile `<=820px`:
 - safe areas são aplicadas ao cabeçalho/layout/rodapé;
 - sem scroll horizontal para descobrir controlos.
 
-Breakpoints de feature:
+Mobile `<=560px` — `76-date-calculator-mobile-spacing3`:
 
-- `<=820px`: uma coluna e viewport móvel estável;
-- `<=560px`: datas, resultado e ações empilham;
+- `.cdc-datecalc-date-grid` muda para flex vertical;
+- ordem continua Data inicial → Trocar → Data final;
+- gap entre os três elementos: 8 px;
+- labels anulam margem e altura herdadas que possam criar espaço vazio;
+- `.cdc-datecalc-input-action` mantém pelo menos 52 px;
+- botão Trocar permanece 44×44 px, centrado, sem margem vertical adicional;
+- IDs, labels, handlers e semântica funcional não mudam.
+
+Breakpoints restantes:
+
 - `<=430px`: campos secundários passam a uma coluna e paddings reduzem;
 - `<=360px`: dialog ocupa integralmente o viewport estável.
 
@@ -196,7 +203,7 @@ Pipeline vigente:
 
 `src/**/*.ts → tsc strict/noEmit → build-typescript-runtime.cjs → .generated/*.js → prepare-pages.cjs → dist/*.js → Pages`.
 
-A Calculadora de datas continua com fonte funcional TypeScript strict; os PR #156 e #158 não alteram a lógica TypeScript de domínio.
+A Calculadora de datas continua com fonte funcional TypeScript strict; PR #161 altera apenas apresentação CSS, regressão do contrato visual e token técnico de cache.
 
 ## 11. Build/PWA
 
@@ -213,8 +220,9 @@ Service Worker:
 
 Tokens recentes:
 
-- `date-calculator-layout2`: invalida a apresentação anterior da Calculadora de datas;
-- `auth-spacing3`: invalida o espaçamento anterior do cofre móvel.
+- `date-calculator-layout2`: autoridade visual base da Calculadora de datas;
+- `auth-spacing3`: ritmo móvel do cofre;
+- `date-calculator-mobile-spacing3`: compactação do grupo Data inicial/Trocar/Data final.
 
 `package.json`, manifesto de release e versão pública permanecem inalterados.
 
@@ -231,28 +239,25 @@ Tokens recentes:
 
 A CI cobre sintaxe, TypeScript, finanças, isolamento, datas, QR, Mercado, scanner, UI, responsividade, acessibilidade, segurança e sync.
 
-PR #158 adiciona regressões para:
+PR #161 adiciona regressões para:
 
-- marcador `76-auth-spacing3`;
-- keypad móvel 56 px com gaps 30/16 px;
-- margem compacta da marca 16 px;
-- separação de 18 px no campo e keypad;
-- CTA com 20 px de margem superior;
-- transferência com 14 px/12 px;
-- `#vaultMessage:empty` sem altura reservada;
-- cache PWA `auth-spacing3`.
+- marcador `76-date-calculator-mobile-spacing3` dentro da autoridade canónica;
+- grupo móvel em flex/coluna com gap de 8 px;
+- labels sem margem/altura artificial;
+- botão Trocar centrado e sem margem adicional;
+- cache PWA `date-calculator-mobile-spacing3`;
+- manutenção de todos os vetores matemáticos civis multitimezone.
 
-Evidência PR #158: TypeScript `35019148671` e CI `35019148364`, ambos com sucesso. Após merge: TypeScript `35019232012`, CI `35019231922` e Pages `35019295696`, todos com sucesso.
+Evidência PR #161: TypeScript `35021139249` e CI `35021139256`, ambos com sucesso. Após merge: TypeScript `35021210449`, CI `35021210442` e Pages `35021281637`, todos com sucesso.
 
-Limitação: testes estáticos não substituem Safari/WebKit real para altura útil, browser chrome, teclado virtual, scroll e safe areas.
+Limitação: testes estáticos não substituem Safari/WebKit real para geometria visual, top-layer, scroll, safe areas, browser chrome, partilha e impressão.
 
 ## 14. Próxima consolidação
 
-1. validar `76-auth-spacing3` no mesmo iPhone/Safari/PWA;
-2. validar `76-date-calculator-layout2` em iPhone/Safari/PWA e desktop;
-3. validar os restantes blocos móveis pendentes;
-4. corrigir descrição factual de rede em Segurança;
-5. empacotar ZXing localmente com licença preservada;
-6. endurecer CSP depois da remoção da dependência remota;
-7. criar E2E WebKit/Chromium;
-8. continuar redução de cascade por componente e migração TypeScript de baixo acoplamento.
+1. validar `76-date-calculator-mobile-spacing3` no mesmo iPhone/Safari/PWA;
+2. validar `76-auth-spacing3` e os restantes blocos móveis pendentes;
+3. corrigir descrição factual de rede em Segurança;
+4. empacotar ZXing localmente com licença preservada;
+5. endurecer CSP depois da remoção da dependência remota;
+6. criar E2E WebKit/Chromium;
+7. continuar redução de cascade por componente e migração TypeScript de baixo acoplamento.
