@@ -158,6 +158,21 @@ A família de ícones funcional continua a ser o subset Lucide local e auditáve
 - mudanças de iconografia não alteram rotas, handlers, dados, persistência, segurança ou release;
 - testes devem impedir regressões para geometrias semanticamente incorretas.
 
+## D-099 — filtros móveis de Despesas preservam a autoridade funcional existente
+
+A reorganização visual dos filtros de Despesas não cria uma segunda implementação de pesquisa, filtragem ou estado.
+
+- `renderBills()` permanece a autoridade da renderização/filtragem;
+- `events.js` permanece a autoridade dos listeners;
+- os IDs canónicos dos controlos não mudam;
+- `mobile-layout.css` pode reorganizar pesquisa, ação e filtros em `<=820px`, mas não pode calcular, persistir nem alterar critérios;
+- o sistema Lucide local é a única lupa visível da pesquisa; pseudo-elementos históricos que duplicavam o símbolo devem ser neutralizados;
+- Estado/Categoria podem usar duas colunas e De/Até/Ordenar podem ser reorganizados desde que os inputs reais permaneçam acessíveis e funcionais;
+- em ecrãs muito estreitos a composição deve empilhar antes de cortar conteúdo;
+- targets essenciais mantêm pelo menos 44 px e foco/forced-colors/reduced-motion permanecem explícitos;
+- `mobile-layout.css` é CSS de feature: não pode assumir `100dvh`, scroll global ou a geometria do viewport, que pertence exclusivamente a `v76-mobile-shell.css`;
+- esta decisão não altera cálculos, `STATE_VERSION`, IndexedDB, PIN/cofre, QR, scanner, sync ou release.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;
