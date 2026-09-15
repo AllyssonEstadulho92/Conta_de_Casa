@@ -1,12 +1,16 @@
 'use strict';
 
-/* Conta de Casa v75 — Mercado 75-market1.
- * Camada exclusivamente de apresentação/UX sobre a lógica existente.
- * Não altera preços, quantidades, persistência, PID, scanner, sincronização ou cálculos.
+/* Conta de Casa v76 — Mercado 75-market1 + 76-market-identity1.
+ * Mantém a apresentação/UX existente e acrescenta uma ponte mínima de identidade
+ * canónica para produtos pesquisados: marketId|pid é preservado antes do commit e
+ * durante a normalização. Não altera preços, quantidades, scanner ou cálculos.
  */
 (function installV75MarketFlow(root){
   const REVISION='75-market1';
+  const IDENTITY_REVISION='76-market-identity1';
   const MOBILE_QUERY='(max-width: 820px)';
+  const LIVE_MARKETS=new Set(['pingo-doce','continente']);
+  let pendingSearchIdentity=null;
   const mobile=root.matchMedia?.(MOBILE_QUERY)||{matches:false,addEventListener:null};
   let observer=null;
   let scheduled=false;
@@ -16,6 +20,60 @@
       if(typeof appState==='undefined'||!Array.isArray(appState?.market))return null;
       return appState.market.find(item=>String(item?.id)===String(id))||null;
     }catch(_error){return null;}
+  }
+
+  function cleanIdentityMarket(value){
+    const marketId=String(value||'').trim().toLowerCase();
+    return LIVE_MARKETS.has(marketId)?marketId:'';
+  }
+
+  function cleanIdentityPid(value){
+    return String(value||'').replace(/\D/g,'').slice(0,32);
+  }
+
+  function identityFromSearchResultId(value){
+    const match=/^cesta-(pingo-doce|continente)-(\d{4,32})$/.exec(String(value||''));
+    return match?{marketId:match[1],pid:match[2]}:null;
+  }
+
+  function installCanonicalIdentityBridge(){
+    const originalNormalize=typeof normalizeMarketItem==='function'?normalizeMarketItem:null;
+    if(originalNormalize&&!originalNormalize.__cdcMarketIdentity){
+      const wrappedNormalize=function marketIdentityNormalize(item={}){
+        const normalized=originalNormalize(item);
+        normalized.marketId=cleanIdentityMarket(item?.marketId);
+        normalized.pid=cleanIdentityPid(item?.pid);
+        return normalized;
+      };
+      Object.defineProperty(wrappedNormalize,'__cdcMarketIdentity',{value:true});
+      normalizeMarketItem=wrappedNormalize;
+    }
+
+    const originalCommit=typeof commit==='function'?commit:null;
+    if(originalCommit&&!originalCommit.__cdcMarketIdentity){
+      const wrappedCommit=async function marketIdentityCommit(action,entity,...args){
+        const shouldApply=action==='created'&&entity==='market'&&pendingSearchIdentity;
+        if(shouldApply){
+          try{
+            const items=typeof appState!=='undefined'&&Array.isArray(appState?.market)?appState.market:null;
+            const candidate=items?.[items.length-1];
+            if(candidate&&!candidate.marketId&&!candidate.pid){
+              candidate.marketId=pendingSearchIdentity.marketId;
+              candidate.pid=pendingSearchIdentity.pid;
+            }
+          }catch(_error){}
+        }
+        try{return await originalCommit(action,entity,...args);}
+        finally{if(shouldApply)pendingSearchIdentity=null;}
+      };
+      Object.defineProperty(wrappedCommit,'__cdcMarketIdentity',{value:true});
+      commit=wrappedCommit;
+    }
+
+    document.addEventListener('click',event=>{
+      const add=event.target?.closest?.('[data-market-add-product]');
+      if(add)pendingSearchIdentity=identityFromSearchResultId(add.dataset.marketAddProduct);
+    },true);
   }
 
   function schedule(){
@@ -156,6 +214,7 @@
   }
 
   function start(){
+    installCanonicalIdentityBridge();
     apply();
     if(document.body&&!observer){
       observer=new MutationObserver(records=>{
@@ -170,5 +229,5 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
   else start();
 
-  root.CDCV75MarketFlow=Object.freeze({revision:REVISION,apply});
+  root.CDCV75MarketFlow=Object.freeze({revision:REVISION,identityRevision:IDENTITY_REVISION,apply});
 })(typeof window!=='undefined'?window:globalThis);

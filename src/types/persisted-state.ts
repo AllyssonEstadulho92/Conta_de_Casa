@@ -7,6 +7,7 @@ import type {
   NullableIsoDateTime,
   ProductCode
 } from './primitives.js';
+import type { ActiveMarketId } from './market.js';
 
 export type Recurrence = 'none' | 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'annual';
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -67,7 +68,7 @@ export interface Income {
   syncResolvedAt: NullableIsoDateTime;
 }
 
-/** Forma persistida atual do artigo de Mercado na v75. */
+/** Forma persistida atual do artigo de Mercado na v76. */
 export interface MarketItem {
   id: EntityId;
   name: string;
@@ -77,6 +78,10 @@ export interface MarketItem {
   estimatedCents: Cents;
   actualCents: Cents;
   purchased: boolean;
+  /** Loja de origem quando o artigo vem da pesquisa live; vazio em itens manuais/legados. */
+  marketId: ActiveMarketId | '';
+  /** PID canónico da loja; vazio quando não existe identidade verificável. */
+  pid: string;
   productCode: ProductCode | '';
   imageUrl: string;
   imageSource: string;

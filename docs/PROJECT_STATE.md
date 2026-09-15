@@ -1,13 +1,11 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 13 de setembro de 2026  
-Versão: `0.76.0-dev.1`  
-Release pública: `v75`  
-Programa técnico: `v76` — consolidação UI/UX + migração incremental TypeScript  
-Baseline pública: `5b9689f04e844b9216626729b3b5aae5bf1acc09` — PR #100  
-Branch de trabalho: `main` após `76-brand-icons1`  
+Atualizado: 15 de setembro de 2026  
+Versão técnica: `0.76.0`  
+Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Fallback técnico: `backup/js-runtime-baseline-20260912`
+Baseline `main` antes deste bloco: `863942d018887b35d3277cd2b36062f1509ad29a` — PR #132  
+Branch ativa: `fix/v76-market-canonical-identity1`
 
 ## Invariantes obrigatórias
 
@@ -16,76 +14,65 @@ Fallback técnico: `backup/js-runtime-baseline-20260912`
 - estado financeiro cifrado em IndexedDB;
 - PBKDF2-SHA-256 + AES-GCM, 250000 iterações;
 - sync GitHub opcional/cifrado;
-- `estimatedCents` distinto de `actualCents`;
-- `marketId|pid` como identidade canónica;
+- `estimatedCents` separado de `actualCents`;
+- `marketId|pid` é a identidade canónica de produto quando existe origem live verificável;
 - QR, scanner, backup/restauro, PWA e offline não podem regredir;
 - UI/UX e migração de linguagem não alteram silenciosamente domínio, persistência ou segurança.
 
-## Estado funcional publicado
+## Estado real publicado antes deste bloco
 
-- PR #96 (`76-auth-transition1`): PIN local válido abre a aplicação sem depender do sync remoto;
-- PR #98 (`76-auth-hidden1`): Safari/WebKit respeita explicitamente o estado `hidden` entre cofre e shell;
-- PR #99 (`76-ui-audit1`): header, drawer, dock e auth visual consolidados;
-- PR #100 (`76-brand-icons1`): marca e iconografia consolidadas.
+A `main` está na release v76 e já ultrapassou a antiga baseline do PR #100.
 
-Evidência PR #100:
+Principais consolidações publicadas:
 
-- merge `5b9689f04e844b9216626729b3b5aae5bf1acc09`;
-- TypeScript Foundation main `34783537256`: sucesso;
-- CI main `34783537266`: sucesso integral;
-- Pages `34783564467`: sucesso.
+- PR #105–#116: retirada progressiva da dependência/runtime v74, uma única autoridade de composição/navegação e oficialização da v76;
+- PR #117–#130: menu móvel, shell/safe areas, Planeamento/Mais, Dashboard, Mercado, drawer e pesquisa alinhados ao produto v76;
+- PR #131: fluxo profissional de Adicionar despesa;
+- PR #132: hotfix Safari/iPhone para touch/scroll do formulário de despesas.
 
-## `76-brand-icons1` — publicado
+Para o commit `863942d...`, TypeScript, CI `quality` e Deploy Pages terminaram com sucesso.
 
-Problemas confirmados no código:
+## Bloco atual — `76-market-identity1`
 
-1. `icon.svg` usava casa + euro + folha + dois gradientes, demasiado complexo para tamanhos pequenos;
-2. a PWA usava `icon.svg`, mas `.brand-mark` era hidratado como Lucide `home`, criando duas identidades visuais;
-3. HTML ainda contém glifos Unicode de fallback (`⌂`, `◉`, `⌁`, `☼`, `⌄`) antes da hidratação;
-4. Mercado acumulava pseudo-ícones decorativos além do sistema Lucide;
-5. “Adicionar item” recebia `Plus` semântico, mas CSS escondia-o e mostrava scanner, contradizendo a ação.
+Problema confirmado na auditoria:
 
-Correções publicadas:
+- o catálogo e a pesquisa live conhecem `marketId` e `pid`, mas o item adicionado à lista não preservava essa identidade de forma persistente;
+- o tipo `MarketItem` também não declarava esses campos, apesar de `MarketCatalogIdentity` já existir no modelo TypeScript.
 
-- `icon.svg` simplificado para casa + euro, teal sólido `#087B78`, branco, sem folha ou gradientes;
-- `.brand-mark` reutiliza `icon.svg`; o Lucide `home` redundante é visualmente neutralizado;
-- Lucide permanece a única família de ícones funcionais;
-- pseudo-ícones decorativos/duplicados do Mercado neutralizados;
-- “Adicionar item” volta a mostrar `Plus`;
-- stroke funcional normalizado em 2 px;
-- cache PWA invalidada com `brand-icons1`;
-- teste de iconografia protege marca, semântica e ausência de duplicação.
+Correção em implementação nesta branch:
 
-Nenhuma alteração foi feita a `finance.js`, estado financeiro, IndexedDB, PIN, PBKDF2/AES-GCM, sync, QR, scanner, quantidades ou preços.
+- `v75-market-flow.js` captura a identidade `cesta-<marketId>-<pid>` da ação de adicionar produto;
+- antes do commit do novo item, preserva `marketId` e `pid` sem tocar em preço/quantidade;
+- a normalização do item é envolvida para manter os dois campos depois de reload/restore/sync;
+- `MarketItem` passa a tipar `marketId` e `pid` de forma retrocompatível (`''` para itens manuais/legados);
+- diferenças de `marketId/pid` não são tratadas como metadados descartáveis pelo sync;
+- Service Worker recebe apenas invalidação técnica `market-identity1`; não há alteração de versão/release nem do Centro de atualizações.
 
-## Migração TypeScript
+## Auditoria atual — problemas abertos
 
-Fontes manuais JS já substituídas:
+### ALTO
 
-1. `v76-veggie-menu.js` → `src/ui/veggie-menu-toggle.ts` — PR #88;
-2. `market-branding.js` → `src/ui/market-branding.ts` — PR #89;
-3. `sync-conflict-policy.js` → `src/sync/sync-conflict-policy.ts` — PR #95.
+- executar CI/TypeScript/Pages do bloco `76-market-identity1` antes de integrar;
+- acrescentar E2E real com WebKit/Chromium para toque, teclado, scroll e transição PIN → aplicação;
+- reduzir gradualmente a cascade CSS e dependência de `!important`;
+- `main` continua sem branch protection/required checks obrigatórios.
 
-Fluxo: `TypeScript strict → .generated/*.js → dist/*.js → browser`.
+### MÉDIO
 
-Ainda permanecem JS manuais críticos (`core.js`, `finance.js`, `render.js`, `forms.js`, `events.js`, `sync.js`, Mercado e Service Worker). Nenhum será apagado antes de existir substituto TypeScript com paridade e regressões verdes.
+- ZXing do scanner continua dependente de `unpkg.com`; a página Segurança não deve afirmar literalmente “Sem CDNs” enquanto isso existir;
+- migrar ZXing para bundle local, preservando licença, antes de restringir `script-src` para `'self'`;
+- reduzir `style-src 'unsafe-inline'` quando a arquitetura permitir;
+- continuar migração TypeScript por risco, sem começar por `finance.js`/cifra.
 
-## Riscos/lacunas abertas
+## Limpeza de repositório
 
-- validar fisicamente a nova marca e iconografia no mesmo iPhone/Safari/PWA e Android/Chrome;
-- o ícone do ecrã principal de uma PWA já instalada pode depender do refresh/reinstalação do sistema operativo;
-- remover futuramente glifos Unicode do HTML apenas depois de provar que o fallback não é necessário;
-- deixar de hidratar `.brand-mark` como Lucide `home` numa limpeza posterior;
-- consolidar navegação móvel para uma única fonte;
-- parar criação runtime dos blocos v74 já escondidos;
-- rever páginas reais: Faturas → Mercado → Planeamento → Calendário → Relatórios/Objetivos → Segurança/Diagnóstico/Definições;
-- criar teste ponta a ponta da persistência `marketId|pid`;
-- reduzir CSS legado apenas depois de prova de não utilização;
-- `main` continua sem required checks/branch protection obrigatório.
+- PR #45 (v65) foi encerrado como obsoleto em 15/09/2026; não deve ser reaberto ou integrado na v76.
 
 ## Próximo passo
 
-1. validar visualmente marca, navegação, ações, Mercado e PWA no dispositivo real;
-2. corrigir qualquer problema físico observado antes de remover fallback histórico;
-3. consolidar navegação móvel numa única autoridade;
-4. continuar a revisão página a página e a limpeza controlada do CSS/runtime v74/v75.
+1. fechar `76-market-identity1` com CI + TypeScript + Pages verdes;
+2. validar pesquisa → adicionar → reload → edição → sync sem perder `marketId|pid`;
+3. criar primeiro fluxo E2E WebKit/Chromium;
+4. corrigir a descrição da página Segurança e preparar ZXing local;
+5. consolidar CSS por propriedade, sem apagar regras sem prova de não utilização;
+6. continuar TypeScript em módulos de baixo acoplamento.

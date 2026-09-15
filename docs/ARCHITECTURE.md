@@ -1,14 +1,13 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 13 de setembro de 2026  
-Versão: `0.76.0-dev.1`  
-Release pública: `v75`  
-Programa técnico: `v76`  
+Atualizado: 15 de setembro de 2026  
+Versão: `0.76.0`  
+Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
 
 ## 1. Modelo geral
 
-PWA estática/local-first. O browser recebe HTML/CSS/JavaScript; a fonte funcional está a migrar incrementalmente para TypeScript strict. Não existe framework UI no `package.json`; a interface é composta por HTML, CSS e runtime próprio.
+PWA estática/local-first. O browser recebe HTML/CSS/JavaScript; a fonte funcional está a migrar incrementalmente para TypeScript strict. Não existe framework UI. A interface é composta por HTML, CSS e runtime próprio.
 
 Invariantes:
 
@@ -18,34 +17,22 @@ Invariantes:
 - PBKDF2-SHA-256 + AES-GCM, 250000 iterações;
 - sync GitHub opcional/cifrado;
 - `estimatedCents` separado de `actualCents`;
-- `marketId|pid` canónico;
+- `marketId|pid` canónico quando existe identidade de loja/SKU;
 - fotografia não prova preço/transação.
 
-## 2. Autenticação e sessão
+## 2. Segurança, cofre e sessão
 
-`core.js` mantém a autoridade criptográfica:
+`core.js` continua a autoridade de estado, cifra, normalização base e sessão:
 
-`PIN/palavra-passe → PBKDF2 → check cifrado → AES-GCM → appState normalizado`.
+`PIN/palavra-passe → PBKDF2 → check cifrado → AES-GCM → AppStateV5 normalizado`.
 
-### `76-auth-transition1`
+Contratos publicados:
 
-- PIN local válido abre o Dashboard sem depender de sync remoto;
-- sync real continua em background;
-- falha de transição remove `app-active`, esconde app e restaura cofre.
-
-### `76-auth-hidden1`
-
-Contrato visual final:
-
-- `#vaultScreen[hidden] { display:none!important; }`;
-- `#app[hidden] { display:none!important; }`;
-- `#vaultScreen:not([hidden]) + #app { display:none!important; }`.
-
-Isto evita que Safari/WebKit mantenha o cofre renderizado quando uma regra histórica declara `display:grid!important`.
-
-### `76-ui-audit1`
-
-A camada final neutraliza o onboarding `cdcWelcome` do v74 e mantém o formulário real `#vaultCreate` visível quando a classe histórica `cdc-vault-create-collapsed` é aplicada. É uma mitigação visual segura; a remoção definitiva da criação runtime fica para o bloco de limpeza v74.
+- PIN local válido abre a aplicação sem depender do sync remoto;
+- cofre e shell autenticado são visualmente exclusivos;
+- `[hidden]` é autoridade explícita no Safari/WebKit;
+- sync, quando configurado, continua em background;
+- anexos reais continuam bloqueados até existir cifragem dedicada.
 
 ## 3. Rotas e navegação
 
@@ -62,120 +49,129 @@ Rotas canónicas:
 - diagnostics;
 - settings.
 
-`renderPage()` é o dispatcher funcional. O gate estrutural valida rota ↔ secção HTML ↔ renderer e audita o bundle do Pages.
+`renderPage()` continua a ser o dispatcher funcional.
 
-Dívida confirmada: existem duas autoridades de navegação móvel.
+A dívida histórica de duas autoridades móveis foi resolvida durante a consolidação v76:
 
-- `core.js/render.js` definem `MOBILE_NAV_ITEMS` e geram `#mobileNav`;
-- `v74-experience.js` executa `ensureMobileNav()` e pode reescrever o mesmo DOM com cinco destinos históricos.
-
-Esta duplicação será eliminada num bloco próprio, preferencialmente com configuração canónica TypeScript, sem remover drawer, `aria-current` ou rotas antes da paridade.
+- `v74-experience.js/.css` e Featured foram retirados do bundle e do repositório;
+- `v75-architecture.js` é a autoridade de composição/navegação compatível com a shell atual;
+- `mobile-menu-toggle.js` é a autoridade funcional do drawer/hambúrguer móvel;
+- `v76-mobile-shell.css` é a autoridade geométrica final no mobile.
 
 ## 4. Arquitetura visual
 
-Autoridades pretendidas:
+Autoridades atuais:
 
-- tokens/componentes: `v76-modern-ui.css`;
-- composição de página: `v76-product-pages.css`;
+- tokens/componentes: `v76-modern-ui.css` + `design-system.css`;
+- composição de páginas: `v76-product-pages.css`, `v76-planning-more.css` e camadas v75 ainda ativas;
 - geometria mobile/safe areas/dock: `v76-mobile-shell.css`;
-- identidade da aplicação: `icon.svg`;
-- iconografia funcional: subset Lucide local em `ui-icons.js` + métricas em `ui-icons.css`;
-- compatibilidade histórica: v74/v75, apenas enquanto existirem consumidores.
+- identidade gráfica: `icon.svg`;
+- iconografia funcional: subset Lucide local em `ui-icons.js` + `ui-icons.css`;
+- drawer/hambúrguer: `mobile-menu-toggle.js/.css` + shell v76;
+- formulários de despesas/QR: `invoice-capture.js/.css` sobre os formulários canónicos.
 
-### Contratos de `76-ui-audit1`
-
-- header móvel é superfície neutra, sem gradiente decorativo, sem texto branco forçado e com controlos 44×44 px;
-- dock móvel usa uma superfície única, selected state discreto, foco visível, labels coerentes e safe areas;
-- `forced-colors` e `prefers-reduced-motion` continuam suportados;
-- visual não altera lógica financeira ou de segurança.
-
-### Contratos de `76-brand-icons1`
-
-- `icon.svg` é a única marca gráfica canónica da Conta de Casa em PWA, sidebar, drawer e cofre;
-- a marca reduz-se a casa + euro, teal sólido e branco, sem gradientes ou símbolos decorativos não relacionados;
-- Lucide é reservado a ações, estados e navegação, não substitui a marca;
-- todos os ícones funcionais usam `viewBox 24×24`, `currentColor`, stroke coerente de 2 px e caixas explícitas;
-- o símbolo deve corresponder semanticamente à ação: por exemplo, “Adicionar item” usa `Plus`, não `Scan`;
-- pseudo-ícones decorativos que duplicam título, resumo ou estado são neutralizados;
-- ícones não podem ser a única fonte de significado quando texto/estado é necessário;
-- glifos Unicode históricos podem permanecer temporariamente no markup como fallback, mas não são a autoridade visual final.
+A cascade ainda contém muitas regras históricas v75 e `!important`. A redução deve ser feita por propriedade/componente, nunca por eliminação em massa.
 
 ## 5. Design system
 
-`v76-modern-ui.css` contém tokens de cor, superfície, borda, radius, sombras, control-height, icon-control, focus ring e estados disabled/hover.
+Direção vigente:
 
-Direção de consolidação:
-
-- brand teal usado com parcimónia em ação/seleção;
 - superfícies neutras;
-- sombra mínima;
-- hierarquia por espaço/tipografia antes de cartões;
-- ícones lineares coerentes;
-- alvos essenciais >=44 px;
+- teal como marca/ação/seleção, não como fundo dominante universal;
+- sombras mínimas;
+- hierarquia por tipografia, alinhamento e espaço antes de decoração;
+- Lucide para ações/estados; `icon.svg` para a marca;
+- targets essenciais >=44 px;
 - WCAG 2.2 AA como referência mínima quando aplicável;
-- marca e ícones funcionais têm papéis separados.
+- light/dark, forced-colors e reduced-motion preservados.
 
-## 6. Páginas
+## 6. Mercado
 
-Estado atual:
+### Fontes e evidência
 
-- Acesso: `76-auth1` + `76-auth-transition1` + `76-auth-hidden1`;
-- Dashboard: `76-dashboard-clean1` usa renderização canónica e suprime visualmente blocos v74 duplicados;
-- Faturas e Planeamento: têm recuperação funcional mobile v75, mas precisam do acabamento final v76;
-- Mercado: funcionalidade espalhada por múltiplas camadas; `76-brand-icons1` remove duplicações visuais, mas catálogo/lista/preço/fotografia ainda precisam auditoria de produto;
-- Calendário, Relatórios, Objetivos, Segurança, Diagnóstico e Definições: ainda sem consolidação visual final equivalente ao Dashboard.
+- pesquisa live atual: Pingo Doce e Continente através de cesta.pt;
+- fotografia opcional: Open Food Facts apenas quando existe correspondência forte/validada;
+- preço pesquisado entra como `estimatedCents`;
+- valor pago só entra em `actualCents` após confirmação do utilizador;
+- imagem/logótipo não constitui evidência de preço.
 
-## 7. Runtime e TypeScript
+### Identidade canónica
 
-Runtimes TS canónicos já publicados:
+O catálogo visual já usa `marketId|pid` para identificar SKUs reais.
 
-- `src/ui/veggie-menu-toggle.ts`;
+`76-market-identity1` estende este contrato à lista persistida sem alterar `STATE_VERSION`:
+
+- a ação de adicionar produto transporta a identidade a partir de `data-market-add-product="cesta-<marketId>-<pid>"`;
+- `v75-market-flow.js` aplica `marketId` e `pid` ao novo item imediatamente antes do commit;
+- a mesma camada envolve `normalizeMarketItem()` para reter os campos em reload/restore/sync;
+- itens manuais/legados usam `marketId:''` e `pid:''`;
+- `src/types/persisted-state.ts` tipa os dois campos;
+- `src/sync/sync-conflict-policy.ts` não os remove da business view, porque identidade de SKU não é mero metadado de apresentação.
+
+Esta ponte é transitória até o domínio Mercado ser migrado para uma fonte TypeScript canónica própria.
+
+## 7. Faturas e captura
+
+O fluxo Adicionar despesa usa o formulário financeiro existente e três modos de entrada:
+
+- Manual;
+- Ler fatura por imagem (procura QR da AT; não promete OCR integral);
+- QR Code por câmara.
+
+O PR #132 estabeleceu no mobile um único proprietário de scroll para evitar falhas de hit-testing no Safari/iOS. Scanner e formulário continuam separados da persistência financeira; o commit ocorre apenas após validação do formulário.
+
+## 8. TypeScript
+
+Fontes canónicas já existentes incluem:
+
+- tipos em `src/types/*`;
 - `src/ui/market-branding.ts`;
-- `src/sync/sync-conflict-policy.ts`.
+- `src/sync/sync-conflict-policy.ts`;
+- fonte TS histórica do menu v76, embora o runtime público atual use a autoridade consolidada definida pela arquitetura móvel.
 
 Pipeline:
 
 `src/**/*.ts → tsc strict/noEmit → build-typescript-runtime.cjs → .generated/*.js → prepare-pages.cjs → dist/*.js → Pages`.
 
-JS manual restante só é removido depois de substituição comprovada.
+JavaScript manual só deve ser removido depois de substituição comprovada e regressões verdes.
 
-## 8. Build/PWA
+## 9. Build/PWA
 
 Fluxo:
 
-`PR/push → TypeScript Foundation + CI → merge main → CI main verde → build runtimes → prepare-pages allowlist → artefacto Pages → deploy`.
+`branch/PR → TypeScript Foundation + CI → merge main → build Pages → deploy`.
 
 Service Worker:
 
-- navegação network-first com timeout 4 s;
-- assets públicos network-first/no-store com fallback cache;
+- navegação network-first com timeout de 4 s;
+- assets públicos network-first/no-store com fallback de cache;
 - allowlist explícita;
-- revisões de cache para distribuir mudanças de UI/JS.
+- tokens de cache técnicos distribuem correções sem obrigar a alterar a release pública.
 
-`76-brand-icons1` muda apenas identidade/apresentação e invalida o cache para distribuir `icon.svg` e `ui-icons.css`; a estratégia não muda.
+`76-market-identity1` não altera `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
 
-## 9. Segurança e acessibilidade
+## 10. Segurança e dependências externas
 
-- nenhum segredo no repositório público;
-- CSP ativa;
-- armazenamento sensível em claro bloqueado;
+- nenhum segredo deve existir no repositório público;
+- CSP está ativa;
+- armazenamento sensível em claro está bloqueado;
 - zoom manual não é bloqueado;
-- focus visível e sem ser tapado pelo dock;
-- safe areas cobertas;
-- reduced-motion/forced-colors cobertos;
-- UI não pode introduzir biometria fictícia;
-- alterações visuais não podem alterar KDF/cifra/schema;
-- ícones de controlo devem manter contraste não textual adequado e área clicável fornecida pelo controlo, não pelo desenho do SVG.
+- foco/safe areas/reduced-motion/forced-colors têm contratos de regressão;
+- ZXing ainda é carregado de `unpkg.com`, logo a afirmação “Sem CDNs” na página Segurança precisa de correção até a biblioteca ser empacotada localmente;
+- `style-src 'unsafe-inline'` permanece dívida de hardening.
 
-## 10. Próxima consolidação
+## 11. QA
 
-1. validar `76-brand-icons1` em CI e hardware;
-2. uma autoridade de navegação móvel;
-3. impedir que v74 crie componentes já substituídos;
-4. terminar Faturas e Mercado;
-5. Planeamento + Calendário;
-6. Relatórios + Objetivos;
-7. Segurança + Diagnóstico + Definições;
-8. consolidar tipografia/iconografia residual e remover fallbacks históricos comprovadamente dispensáveis;
-9. remover CSS/runtime histórico apenas com prova de não utilização e regressões verdes;
-10. continuar migração TypeScript por risco, deixando `core/finance/cifra` para fases com vetores de paridade próprios.
+A CI cobre sintaxe, finanças, isolamento, datas, QR, Mercado, imagens, scanner, UI, responsividade, acessibilidade, segurança e sync.
+
+Limitação conhecida: vários testes “Safari/PWA” são contratos estáticos de código/CSS; ainda falta E2E real em WebKit/Chromium para toque, teclado, scroll e foco.
+
+## 12. Próxima consolidação
+
+1. integrar `76-market-identity1` com gates verdes;
+2. E2E WebKit/Chromium para PIN, navegação e formulário de despesas;
+3. corrigir copy de Segurança + preparar ZXing local;
+4. reduzir cascade CSS por componente com prova de não utilização;
+5. continuar TypeScript em módulos de baixo acoplamento;
+6. migrar `render/forms/events` apenas depois dos contratos visuais estabilizarem;
+7. deixar finanças/core/cifra para blocos com vetores de paridade próprios.

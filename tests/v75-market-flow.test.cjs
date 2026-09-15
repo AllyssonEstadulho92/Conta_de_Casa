@@ -15,12 +15,16 @@ const render=read('render.js');
 const shopping=read('market-shopping-focus.js');
 const catalog=read('market-visual-catalog.js');
 const photoLoader=read('market-photo-loader.css');
+const persistedTypes=read('src/types/persisted-state.ts');
+const typeContracts=read('src/type-tests/contracts.ts');
+const syncPolicy=read('src/sync/sync-conflict-policy.ts');
 const indexSource=read('index.html');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 
 new Function(js);
 assert.match(js,/REVISION='75-market1'/);
+assert.match(js,/IDENTITY_REVISION='76-market-identity1'/);
 assert.match(js,/Pesquisar na minha lista…/);
 assert.match(js,/Pesquisar na minha lista de compras/);
 assert.match(js,/Preço por confirmar/);
@@ -35,8 +39,25 @@ assert.match(js,/market-flow-add-label/);
 assert.match(js,/CDCAssetLoader\?\.prepareImage/,'generic asset loader may be reused only for live-browser images');
 assert.match(js,/market-visual-product-card/);
 assert.match(js,/aria-busy/);
-assert.doesNotMatch(js,/\bcommit\s*\(|\bsaveState\s*\(|estimatedCents\s*=|actualCents\s*=|quantity\s*=|appState\.market\.push/,'75-market1 must stay presentation-only');
-assert.doesNotMatch(js,/market-barcode|ZXing|BarcodeDetector|data-market-scan/i,'75-market1 must not alter scanner behavior');
+
+/* 76-market-identity1: a identidade real do produto tem de sobreviver ao ciclo
+   pesquisa -> adicionar -> commit -> normalização, sem tocar em montantes. */
+assert.match(js,/function identityFromSearchResultId\(value\)/);
+assert.match(js,/^.*cesta-\(pingo-doce\|continente\).*\\d\{4,32\}.*$/m);
+assert.match(js,/normalized\.marketId=cleanIdentityMarket\(item\?\.marketId\)/);
+assert.match(js,/normalized\.pid=cleanIdentityPid\(item\?\.pid\)/);
+assert.match(js,/candidate\.marketId=pendingSearchIdentity\.marketId/);
+assert.match(js,/candidate\.pid=pendingSearchIdentity\.pid/);
+assert.match(js,/return await originalCommit\(action,entity,\.\.\.args\)/);
+assert.match(js,/identityRevision:IDENTITY_REVISION/);
+assert.doesNotMatch(js,/estimatedCents\s*=|actualCents\s*=|quantity\s*=|priceCents\s*=/,'identity bridge must not alter money or quantity');
+assert.doesNotMatch(js,/market-barcode|ZXing|BarcodeDetector|data-market-scan/i,'market flow must not alter scanner behavior');
+
+assert.match(persistedTypes,/marketId: ActiveMarketId \| ''/,'persisted market items must type the supported retailer identity');
+assert.match(persistedTypes,/pid: string/,'persisted market items must retain the retailer PID');
+assert.match(typeContracts,/marketId: ''/);
+assert.match(typeContracts,/pid: ''/);
+assert.doesNotMatch(syncPolicy,/['"]marketId['"]|['"]pid['"]/,'marketId/pid are canonical identity and must not be erased as technical-only sync fields');
 
 assert.match(css,/Mercado 75-market1/);
 assert.match(css,/76-market-canonical-flow1/,'Mercado must declare the canonical v76 presentation path');
@@ -64,6 +85,7 @@ for(const canonical of ['marketSearch','newMarketBtn','marketStatusFilter','mark
 }
 
 assert.match(market,/estimatedCents:product\.priceCents,actualCents:0,purchased:false/,'searched price must remain an estimate until a real price is confirmed');
+assert.match(market,/id:`cesta-\$\{marketId\}-\$\{pid\|\|results\.length\}`/,'live result id must keep retailer and PID available to the identity bridge');
 assert.match(render,/if\(!item\.purchased\) return '<span class="status-chip pending">Por comprar<\/span>'/);
 assert.match(render,/Falta preço real/);
 assert.match(render,/Preço real \/ unidade/);
@@ -84,6 +106,7 @@ assert.ok(sw.includes("'./v75-market-flow.js'"));
 assert.match(sw,/assets1-market1/,'market1 must remain in the cache lineage');
 assert.match(sw,/canonical-expense-market1/,'PWA must invalidate for canonical Despesas/Mercado presentation');
 assert.match(sw,/single-search-surface1/,'PWA must invalidate the duplicate-search-surface cache');
+assert.match(sw,/market-identity1/,'PWA must invalidate when canonical Mercado identity persistence changes');
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -98,4 +121,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('v76 canonical Mercado flow, single-surface search, compact mobile filters and accounting isolation: OK');
+console.log('v76 canonical Mercado flow, marketId|pid persistence, single-surface search, compact mobile filters and accounting isolation: OK');
