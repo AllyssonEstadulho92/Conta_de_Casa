@@ -108,7 +108,7 @@ O catálogo visual usa `marketId|pid` para identificar SKUs reais.
 - `src/types/persisted-state.ts` tipa os dois campos;
 - `src/sync/sync-conflict-policy.ts` não os remove da business view, porque identidade de SKU não é mero metadado de apresentação.
 
-`76-market-identity-stale1` acrescenta uma garantia temporal à ponte:
+`76-market-identity-stale1`, publicado pelo PR #134, acrescenta uma garantia temporal à ponte:
 
 - a identidade capturada num clique live só permanece pendente durante o mesmo ciclo síncrono de evento;
 - se o fluxo live chegar ao commit, `marketId/pid` são copiados para o item antes do primeiro `await`;
@@ -155,7 +155,7 @@ Service Worker:
 - allowlist explícita;
 - tokens de cache técnicos distribuem correções sem obrigar a alterar a release pública.
 
-Os hotfixes `76-market-identity1`/`76-market-identity-stale1` não alteram `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
+Os hotfixes `76-market-identity1`/`76-market-identity-stale1` não alteraram `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
 
 ## 10. Segurança e dependências externas
 
@@ -173,13 +173,13 @@ A CI cobre sintaxe, finanças, isolamento, datas, QR, Mercado, imagens, scanner,
 
 Limitação conhecida: vários testes “Safari/PWA” são contratos estáticos de código/CSS; ainda falta E2E real em WebKit/Chromium para toque, teclado, scroll e foco.
 
-PR #133 passou TypeScript Foundation, CI integral e Pages. O guard temporal de identidade tem regressão própria antes de integração.
+PR #134 passou TypeScript Foundation main `34914028412`, CI main `34914028440` e Pages `34914061390`.
 
 ## 12. Próxima consolidação
 
-1. integrar/publicar `76-market-identity-stale1` com gates verdes;
-2. E2E WebKit/Chromium para PIN, navegação e formulário de despesas;
-3. corrigir copy de Segurança + preparar ZXing local;
+1. corrigir a descrição de rede da página Segurança sem mudar a release;
+2. preparar ZXing local e CSP mais restritiva num bloco isolado;
+3. E2E WebKit/Chromium para PIN, navegação e formulário de despesas;
 4. reduzir cascade CSS por componente com prova de não utilização;
 5. continuar TypeScript em módulos de baixo acoplamento;
 6. migrar `render/forms/events` apenas depois dos contratos visuais estabilizarem;
