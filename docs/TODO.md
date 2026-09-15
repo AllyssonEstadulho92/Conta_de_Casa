@@ -22,6 +22,9 @@ Atualizado: 15 de setembro de 2026
 - [x] PR #150: densidade progressiva do keypad 58/54/48 px para alturas <=900/780/640 px.
 - [x] PR #150: regressão de acessibilidade protege `100svh`, safe areas, densidade e piso tátil.
 - [x] PR #150: token técnico `auth-ios-spacing2` invalida a geometria antiga da PWA.
+- [x] PR #150: TypeScript Foundation PR `34961244599` e CI PR `34961244608` verdes.
+- [x] PR #150: merge `a140211813f2194926b2cbd5bde7c53a8798b140`.
+- [x] PR #150: TypeScript Foundation `main` `34961349276`, CI `main` `34961349248` e Pages `34961403315` verdes.
 - [ ] Confirmar PR #150 no mesmo iPhone/Safari web com barras do browser abertas e recolhidas.
 - [ ] Confirmar PR #150 na PWA instalada após atualização do cache.
 - [ ] Validar portrait/landscape e teclado virtual no cofre.
