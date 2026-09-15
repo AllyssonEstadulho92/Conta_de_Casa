@@ -4,7 +4,7 @@ Atualizado: 15 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main`: `471c689c1df47118bd3a345214acfd140bdc6e7d` — PR #145  
+Baseline funcional em `main`: `8e58777f601d164bd4589f7d0e0e8f96e02686f0` — PR #149  
 Branch funcional: `main`
 
 ## Invariantes obrigatórias
@@ -19,128 +19,146 @@ Branch funcional: `main`
 - QR, scanner, backup/restauro, PWA e offline não podem regredir;
 - UI/UX e migração de linguagem não alteram silenciosamente domínio, persistência ou segurança.
 
-## Estado publicado
+## Estado publicado em `main`
 
-A `main` está oficialmente em v76/`0.76.0`.
+A `main` continua em v76/`0.76.0`. As alterações abaixo são incrementais e não mudam a release pública.
 
-Consolidações relevantes:
+Consolidações relevantes mais recentes:
 
-- PR #105–#116: retirada progressiva do runtime v74, autoridade única de navegação/composição e oficialização da v76;
-- PR #117–#130: menu móvel, shell/safe areas, Planeamento/Mais, Dashboard, Mercado, drawer e pesquisa alinhados ao produto v76;
 - PR #131: fluxo profissional de Adicionar despesa;
 - PR #132: hotfix Safari/iPhone para touch/scroll do formulário de despesas;
-- PR #133: persistência retrocompatível de `marketId|pid` no Mercado;
-- PR #134: expiração segura da identidade temporária se um clique live não chegar ao commit;
-- PR #136: `76-drawer-hierarchy1`, drawer móvel em hierarquia vertical legível;
-- PR #138: `76-icon-semantics1`, Planeamento/Definições com geometrias Lucide coerentes;
-- PR #140: `76-bills-mobile-filters1`, pesquisa/filtros móveis de Despesas reorganizados;
-- PR #142: `76-bills-mobile-spacing1`, ritmo, espaçamento e limpeza visual do mesmo bloco de Despesas;
-- PR #143: `76-planning-budget-card2`, resumo móvel de Planeamento reorganizado segundo o protótipo aprovado sem duplicar o fluxo funcional de orçamento;
-- PR #145: `76-planning-ring-shape1`, normalização do anel de orçamento após validação física no iPhone revelar deformação oval.
+- PR #133/#134: identidade `marketId|pid` do Mercado e expiração segura do estado transitório;
+- PR #136: `76-drawer-hierarchy1`;
+- PR #138: `76-icon-semantics1`;
+- PR #140: `76-bills-mobile-filters1`;
+- PR #142: `76-bills-mobile-spacing1`;
+- PR #143: `76-planning-budget-card2`;
+- PR #145: `76-planning-ring-shape1`;
+- PR #147: `76-bills-mobile-alignment2`, grelha móvel de filtros de Despesas sem faixa horizontal;
+- PR #149: `76-date-calculator1`, calculadora local de datas em TypeScript strict.
 
-## Evidência mais recente — PR #145
+## Evidência mais recente — PR #149
 
-- head final do PR: `7b6760955b365076bc3fab08f96113adafa87505`;
-- TypeScript Foundation PR `34948896081`: sucesso;
-- CI PR `34948896074`: sucesso integral;
-- CI push do head `34948870264`: sucesso integral;
-- merge PR #145: `471c689c1df47118bd3a345214acfd140bdc6e7d`;
-- Pages `34949105955`: sucesso, incluindo preparação do bundle, upload e deploy.
+- head final do PR: `fd6a628f1d88ca605d6765cca16f2b70881145ca`;
+- TypeScript Foundation PR `34954233639`: sucesso;
+- CI PR `34954233763`: sucesso integral, incluindo o novo teste `Exact date calculator tests`;
+- merge PR #149: `8e58777f601d164bd4589f7d0e0e8f96e02686f0`;
+- TypeScript Foundation `main` `34954321242`: sucesso;
+- CI `main` `34954321191`: sucesso integral;
+- a primeira execução de Pages observada para este head (`34954431084`) terminou `skipped`; por isso a publicação física da nova ferramenta deve ser confirmada numa execução de Pages bem-sucedida antes de considerar o rollout encerrado.
 
-A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados pelos PR #142/#143/#145.
+A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados pelo PR #149.
 
-## Despesas — pesquisa, filtros e espaçamento móvel
+## Calculadora de datas — `76-date-calculator1`
 
-`76-bills-mobile-filters1` + `76-bills-mobile-spacing1` estão integrados:
+A nova ferramenta está integrada como utilitário em **Mais → Ferramentas → Calculadora de datas**. Não foi criada uma nova rota principal.
+
+### Modos
+
+- **Diferença:** calcula a diferença matemática entre duas datas civis, total contando ambas as datas, contagem selecionada conforme inclusão/exclusão das extremidades, semanas completas + dias restantes e decomposição civil em anos/meses/dias;
+- **Adicionar dias:** adiciona ou subtrai dias corridos ou dias úteis;
+- **Dias úteis:** conta segunda a sexta-feira entre duas datas, respeitando as opções de inclusão das extremidades.
+
+### Exatidão e regras
+
+- reutiliza `parseCivilDateKey()`, `cleanDateKey()`, `civilDayNumber()`, `civilDayDiff()`, `addCivilDays()` e `addCivilMonthsClamped()` já existentes em `core.js`;
+- a aritmética é feita sobre datas civis, não milissegundos de hora local;
+- fuso horário e horário de verão não alteram o total;
+- intervalo suportado: `1900-01-01` a `9999-12-31`;
+- “dias úteis” significa explicitamente segunda a sexta-feira;
+- feriados nacionais, regionais ou municipais **não** são presumidos nem descontados sem uma jurisdição configurada;
+- a interface mostra regras de inclusão para evitar um único número ambíguo.
+
+### Arquitetura
+
+- fonte funcional: `src/ui/date-calculator.ts`;
+- runtime público: `.generated/date-calculator.js` → `dist/date-calculator.js`, gerado pelo pipeline TypeScript;
+- apresentação: `date-calculator.css`;
+- não existe `date-calculator.js` manual no repositório;
+- `scripts/build-typescript-runtime.cjs` e `scripts/prepare-pages.cjs` tratam a ferramenta como runtime TypeScript gerado;
+- `sw.js` inclui CSS/JS na allowlist offline e usa token técnico `date-calculator1`.
+
+### Segurança/privacidade
+
+- nenhuma data é enviada para a Internet;
+- a ferramenta não usa `fetch`, XHR, `localStorage`, IndexedDB, `appState`, `commit()` ou `saveState()`;
+- valores apresentados dinamicamente são escapados antes de entrar em HTML;
+- o diálogo fecha quando `#app` é ocultado/bloqueado, evitando manter top-layer sobre o cofre;
+- copiar, partilhar e imprimir/PDF atuam apenas sobre o texto do resultado e não persistem dados.
+
+### QA específico
+
+Os resultados foram testados de forma determinística em `UTC`, `Europe/Lisbon`, `America/Los_Angeles` e `Pacific/Kiritimati` com paridade obrigatória. Casos cobertos incluem:
+
+- `03/09/2026 → 15/09/2026`: 12 dias decorridos e 13 contando ambas as datas;
+- datas invertidas;
+- mesma data;
+- inclusão explícita das duas extremidades;
+- fim de mês e ano bissexto;
+- sexta-feira + 1 dia útil → segunda-feira;
+- segunda-feira − 1 dia útil → sexta-feira;
+- intervalo só de fim de semana;
+- data inválida.
+
+## Despesas — pesquisa, filtros e alinhamento móvel
+
+`76-bills-mobile-filters1` + `76-bills-mobile-spacing1` + `76-bills-mobile-alignment2` estão integrados:
 
 - `#billSearch`, `#newBillBtn`, `#billStatusFilter`, `#billCategoryFilter`, `#billDateFrom`, `#billDateTo`, `#billSort` e `#billClearFilters` continuam canónicos;
 - `renderBills()` e `events.js` continuam a autoridade funcional;
-- lupa histórica duplicada foi neutralizada, ficando o Lucide local como representação funcional;
-- pesquisa, ação principal e cartão de filtros usam espaçamento móvel consistente;
-- Estado/Categoria permanecem organizados, datas/ordenação/limpeza continuam funcionais;
-- `<=360px` mantém fallback de uma coluna;
-- foco, `forced-colors`, `prefers-reduced-motion` e targets tácteis permanecem cobertos;
-- cálculos, persistência, PIN/cofre, QR, scanner e sync não foram alterados.
+- a antiga faixa horizontal deixou de ser a apresentação final no mobile;
+- Estado/Categoria formam o primeiro par, De/Até o segundo, Ordenar ocupa uma linha completa e Limpar filtros permanece ação terciária;
+- o cartão usa contenção de largura e não depende de scroll horizontal para revelar controlos;
+- `<=360px` usa uma coluna;
+- cálculos, persistência, PIN/cofre, QR, scanner, Mercado e sync não foram alterados.
 
-PR #142 foi publicado com TypeScript/CI/Pages verdes; Pages `34945033256` terminou com sucesso.
+Evidência do PR #147: merge `480dc501ff10bf29413b934e623d8641d5e95229`; TypeScript Foundation/CI em PR e `main` verdes; Pages `34951589187` com sucesso.
 
 ## Planeamento — orçamento móvel
 
-`76-planning-budget-card2` + `76-planning-ring-shape1` estão publicados:
+`76-planning-budget-card2` + `76-planning-ring-shape1` permanecem publicados:
 
-- o seletor de mês mantém `#monthPicker` como autoridade e continua a usar `stepMonth()`/evento `change` existente;
-- o cartão apresenta mês e intervalo real, título Orçamento mensal, gasto do mês, orçamento, disponível e estado definido/por definir;
-- os valores continuam derivados de `dashboardNumbers()`/`categoryTotals()` e da lógica financeira existente;
-- orçamento ausente continua factual: `Por definir`, sem percentagem falsa;
-- Definir/Editar orçamento não cria segundo formulário nem grava dados: todas as ações apenas deslocam/focam `#monthlyBudget`;
-- a gravação continua exclusivamente no `#monthPlanForm` através do listener de `events.js`, `monthProfile()` e `commit('updated','planning')`;
-- ícones vêm do subset Lucide local; navegação mensal deixa de depender de caracteres `‹/›`;
-- em iPhones estreitos as três métricas deixam de ser comprimidas em colunas iguais e passam a linhas legíveis;
-- a validação física revelou que uma altura histórica fixa (`118px!important`) em `v75-architecture.css` competia com a largura nova do anel, produzindo uma elipse;
-- `76-planning-ring-shape1` neutraliza essa altura com `height:auto!important`, força `aspect-ratio:1/1!important` e usa 136 px no mobile geral, 128 px em `<=430px` e 116 px em `<=350px`;
-- a iconografia e tipografia internas foram reduzidas proporcionalmente, sem alterar percentagem, estado ou cálculos;
-- `forced-colors`, `prefers-reduced-motion` e targets tácteis são preservados;
-- Service Worker recebeu apenas tokens técnicos de cache para distribuição das correções.
+- `#monthPicker` continua a autoridade do mês;
+- gasto, orçamento e disponível continuam derivados da lógica financeira existente;
+- orçamento ausente permanece `Por definir`;
+- Definir/Editar orçamento apenas desloca/foca `#monthlyBudget`;
+- `#monthPlanForm` + `events.js` continuam a única gravação;
+- o anel usa `height:auto!important` + `aspect-ratio:1/1!important`, com 136/128/116 px conforme breakpoint;
+- a forma circular ainda precisa de confirmação física no mesmo iPhone/PWA.
 
-A forma circular corrigida precisa ainda de confirmação visual no mesmo iPhone/PWA após atualização do cache; CI/Pages já estão verdes.
+## Segurança — problema ainda aberto
 
-## Iconografia funcional — estado atual
-
-`76-icon-semantics1` permanece publicado:
-
-- `icon.svg` é a marca canónica;
-- `ui-icons.js` + `ui-icons.css` são a autoridade da iconografia funcional Lucide;
-- snapshot Lucide fixado em `94e4cb9d9db5907053ebf3636a97c45529cf776b`, com `LUCIDE_LICENSE.txt` preservada;
-- Planeamento usa `CalendarCheck2`; Definições usa `Settings`/engrenagem;
-- nenhuma CDN de iconografia foi introduzida.
-
-## Navegação móvel — estado atual
-
-`76-drawer-hierarchy1` permanece publicado:
-
-- drawer à direita, uma coluna e destinos de primeiro nível;
-- Principal: Início, Despesas, Planeamento e Mercado;
-- Análise: Relatórios;
-- Sistema: Segurança e sincronização, Definições;
-- Calendário/Metas/Diagnóstico continuam nas respetivas páginas-pai;
-- botão fechar e ações de sessão preservam targets e foco.
-
-## Mercado — estado de identidade
-
-`76-market-identity1` + `76-market-identity-stale1` permanecem publicados:
-
-- pesquisa Cesta preserva `marketId` e `pid` ao adicionar produto;
-- normalização/reload/restauro/sync retêm a identidade;
-- identidade temporária expira quando não é consumida;
-- preço, quantidade, `estimatedCents`, `actualCents`, scanner e persistência financeira permanecem inalterados.
+- ZXing do scanner continua dependente de `unpkg.com`;
+- a página Segurança não pode afirmar literalmente “Sem CDNs” enquanto essa dependência existir;
+- o próximo bloco de segurança continua: corrigir primeiro a descrição factual, depois empacotar ZXing localmente com licença, depois remover `unpkg.com` de `script-src` e endurecer CSP;
+- `style-src 'unsafe-inline'` permanece dívida posterior.
 
 ## Auditoria atual — problemas abertos
 
 ### ALTO
 
-- confirmar fisicamente `76-planning-ring-shape1` no mesmo iPhone/Safari e PWA instalada;
-- validar `76-bills-mobile-spacing1`, drawer e iconografia no mesmo dispositivo;
-- acrescentar E2E real WebKit/Chromium para toque, teclado, scroll e PIN → aplicação;
-- reduzir gradualmente a cascade CSS e dependência de `!important`;
-- `main` continua sem branch protection/required checks obrigatórios.
+- confirmar a calculadora em desktop, iPhone/Safari web e PWA instalada, incluindo foco, teclado, scroll, partilha e impressão/PDF;
+- confirmar `76-bills-mobile-alignment2` e `76-planning-ring-shape1` no mesmo dispositivo;
+- criar E2E WebKit/Chromium para fluxos móveis críticos;
+- reduzir gradualmente cascade CSS/`!important` por componente;
+- `main` continua sem required checks obrigatórios por branch protection.
 
 ### MÉDIO
 
-- ZXing do scanner continua dependente de `unpkg.com`; a página Segurança não deve afirmar literalmente “Sem CDNs” enquanto isso existir;
-- migrar ZXing para bundle local, preservando licença, antes de restringir `script-src` para `'self'`;
-- reduzir `style-src 'unsafe-inline'` quando a arquitetura permitir;
-- continuar migração TypeScript por risco, sem começar por `finance.js`/cifra.
+- corrigir texto factual de Segurança;
+- migrar ZXing para bundle local antes de CSP `'self'`;
+- continuar TypeScript por risco, sem começar por `finance.js`/cifra.
 
 ## Higiene de repositório
 
-- PR #45/v65 encerrado como obsoleto em 15/09/2026; não deve ser reaberto ou integrado na v76.
+- PR #45/v65 permanece encerrado como obsoleto;
+- PR #148 contém documentação do PR #147, mas ficou ultrapassado pela evolução de `main`; a documentação combinada #147 + #149 deve substituí-lo.
 
 ## Próximo passo
 
-1. confirmar visualmente `76-planning-ring-shape1` no iPhone/Safari web e PWA instalada;
-2. validar `76-bills-mobile-spacing1` e drawer/iconografia no mesmo dispositivo;
-3. corrigir a descrição da página Segurança para refletir a dependência ZXing real;
+1. confirmar um deploy Pages bem-sucedido contendo `76-date-calculator1`;
+2. validar fisicamente Calculadora de datas, Despesas e Planeamento no iPhone/Safari web e PWA;
+3. corrigir a descrição factual da página Segurança;
 4. preparar ZXing local + licença e, só depois, remover `unpkg.com` de `script-src`;
-5. criar primeiro fluxo E2E WebKit/Chromium;
-6. consolidar CSS por propriedade/componente com prova de não utilização;
-7. continuar TypeScript em módulos de baixo acoplamento.
+5. criar o primeiro fluxo E2E WebKit/Chromium;
+6. continuar consolidação CSS e TypeScript em módulos de baixo acoplamento.
