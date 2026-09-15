@@ -4,7 +4,7 @@ Atualizado: 15 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main`: `00ec8351cfedb8eba657fe4f19a4f2614c86347f` — PR #156  
+Baseline funcional em `main`: `79cd9e52feb0ac87678c253e0392ba402ae6f718` — PR #158  
 Branch funcional: `main`
 
 ## Invariantes
@@ -26,7 +26,8 @@ Blocos atuais relevantes:
 - PR #149 / `76-date-calculator1`: Calculadora de datas local em TypeScript strict;
 - PR #152 / `76-auth-prototype-final1`: composição móvel consolidada do cofre;
 - PR #154 / `76-auth-exclusive-state1`: criação e desbloqueio do cofre são estados visualmente exclusivos;
-- PR #156 / `76-date-calculator-layout2`: autoridade visual canónica da Calculadora de datas.
+- PR #156 / `76-date-calculator-layout2`: autoridade visual canónica da Calculadora de datas;
+- PR #158 / `76-auth-spacing3`: ritmo vertical do PIN ajustado para Safari/iOS sem alterar o fluxo de autenticação.
 
 ## Calculadora de datas — estado atual
 
@@ -49,11 +50,8 @@ O PR #156 reconfigurou o componente sem alterar a matemática civil:
 
 A lógica continua local, baseada nas primitivas civis de `core.js`; não foi criada uma segunda implementação de cálculos. Dias úteis continuam a significar segunda a sexta-feira e não descontam feriados sem jurisdição configurada.
 
-Evidência:
+Evidência PR #156:
 
-- PR #156 head: `e82bcf394be18fb3f102164242704040289ccab8`;
-- TypeScript Foundation PR `35016302805`: sucesso;
-- CI PR `35016302738`: sucesso integral;
 - merge `00ec8351cfedb8eba657fe4f19a4f2614c86347f`;
 - TypeScript Foundation `main` `35016376375`: sucesso;
 - CI `main` `35016376360`: sucesso integral;
@@ -61,11 +59,35 @@ Evidência:
 
 Pendente: validação física em iPhone/Safari/PWA, tablet e desktop, incluindo scroll, top-layer, partilha e impressão/PDF.
 
-## Auth / iOS
+## Auth / iOS — PR #158
 
-`76-auth-prototype-final1` + `76-auth-exclusive-state1` permanecem integrados. O estado visual do cofre continua exclusivo e a composição móvel usa `100svh`, safe areas e targets adequados. A lógica de criação/desbloqueio e o armazenamento local não foram alterados pelo PR #156.
+`v75-usability.css` continua a única autoridade visual do cofre. O PR #158 não cria nova folha nem duplica handlers; apenas corrige o ritmo vertical dentro da autoridade existente.
 
-Pendente: validação física pós-PR #154 no mesmo iPhone/Safari e PWA instalada.
+Alterações de apresentação:
+
+- keypad móvel mantém 56 px com `column-gap:30px` e `row-gap:16px`;
+- espaço entre marca e conteúdo: 16 px;
+- campo PIN e keypad usam 18 px de separação dos blocos anteriores;
+- CTA **Entrar** mantém 52 px e passa a 20 px após o keypad;
+- ações secundárias ficam mais próximas do CTA sem perder targets >=44 px;
+- transferência passa a 14 px de margem superior + 12 px de separador interno;
+- `#vaultMessage:empty` deixa de reservar altura quando não existe mensagem;
+- `100svh`, safe areas, input >=16 px, pinch-to-zoom, dark mode, `forced-colors` e `prefers-reduced-motion` permanecem ativos;
+- cache PWA recebe o token técnico `auth-spacing3`.
+
+Preservado: PIN, palavra-passe, `createVault()`, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync e dados financeiros.
+
+Evidência PR #158:
+
+- head `4632fa25a608524a5e0ce2e313378a21f1458e9f`;
+- TypeScript Foundation PR `35019148671`: sucesso;
+- CI PR `35019148364`: sucesso integral;
+- merge `79cd9e52feb0ac87678c253e0392ba402ae6f718`;
+- TypeScript Foundation `main` `35019232012`: sucesso;
+- CI `main` `35019231922`: sucesso integral;
+- Deploy Pages `35019295696`: sucesso.
+
+Pendente: confirmação física no mesmo iPhone/Safari e PWA instalada para validar que transferência e nota inferior permanecem acima do browser chrome.
 
 ## Despesas
 
@@ -89,8 +111,8 @@ Pendente: validação física no mesmo iPhone/PWA.
 
 ## Próximo passo
 
-1. validar `76-date-calculator-layout2` no iPhone/Safari/PWA e desktop;
-2. confirmar Auth, Despesas e Planeamento em dispositivo real;
+1. validar `76-auth-spacing3` no iPhone/Safari/PWA;
+2. validar `76-date-calculator-layout2` e os restantes blocos móveis pendentes;
 3. corrigir a descrição factual de rede em Segurança;
 4. empacotar ZXing local e endurecer CSP;
 5. continuar a consolidação por componente e a migração TypeScript sem alterar invariantes.
