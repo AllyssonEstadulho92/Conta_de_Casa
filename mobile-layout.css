@@ -47,17 +47,26 @@
 }
 
 /* 76-bills-mobile-filters1 — refinamento visual do bloco Pesquisa + Filtros.
+   76-bills-mobile-spacing1 — ritmo vertical e limpeza de espaçamento.
    Apenas composição/apresentação: preserva os IDs, listeners, valores e critérios
    funcionais de renderBills(). A especificidade elevada neutraliza os overrides
    históricos de v75-expenses-modern.css sem redefinir a shell móvel. */
 @media(max-width:820px){
+  html.cdc-v75 body #app #page-bills{
+    --bills-mobile-section-gap:20px;
+    --bills-mobile-card-pad-x:18px;
+    --bills-mobile-card-pad-y:20px;
+    --bills-mobile-column-gap:12px;
+    --bills-mobile-field-gap:8px;
+  }
+
   html.cdc-v75 body #app #page-bills>.bill-command-bar{
     display:grid!important;
     grid-template-columns:minmax(0,1fr) 52px!important;
     align-items:center!important;
-    gap:10px!important;
-    margin:0 0 14px!important;
-    padding:10px!important;
+    gap:12px!important;
+    margin:0 0 var(--bills-mobile-section-gap)!important;
+    padding:12px!important;
     border:1px solid color-mix(in srgb,var(--v75-border,var(--border)) 92%,transparent)!important;
     border-radius:18px!important;
     background:var(--v75-surface,var(--surface))!important;
@@ -146,17 +155,19 @@
     border:0!important;
   }
 
-  /* Cartão de filtros com hierarquia equivalente ao protótipo aprovado. */
+  /* Cartão de filtros: espaçamento deliberado por secção, sem depender de margens
+     negativas entre o título, subtítulo e os controlos. */
   html.cdc-v75 body #app #page-bills>.bill-filter-grid{
     position:relative!important;
     display:grid!important;
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
     grid-template-rows:auto auto auto auto auto auto!important;
-    gap:12px 10px!important;
+    column-gap:var(--bills-mobile-column-gap)!important;
+    row-gap:0!important;
     align-items:end!important;
     width:100%!important;
-    margin:0 0 14px!important;
-    padding:18px 16px 16px!important;
+    margin:0 0 var(--bills-mobile-section-gap)!important;
+    padding:var(--bills-mobile-card-pad-y) var(--bills-mobile-card-pad-x) 18px!important;
     overflow:visible!important;
     border:1px solid color-mix(in srgb,var(--v75-border,var(--border)) 92%,transparent)!important;
     border-radius:20px!important;
@@ -192,7 +203,7 @@
     content:"Refine a sua pesquisa de despesas"!important;
     grid-column:1/-1!important;
     grid-row:2!important;
-    margin:-8px 0 2px!important;
+    margin:4px 0 0!important;
     padding-left:52px!important;
     color:var(--v75-muted,var(--muted))!important;
     font-size:.74rem!important;
@@ -202,7 +213,7 @@
 
   html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field{
     display:grid!important;
-    gap:6px!important;
+    gap:var(--bills-mobile-field-gap)!important;
     flex:none!important;
     min-width:0!important;
     max-width:none!important;
@@ -211,11 +222,11 @@
     scroll-snap-align:none!important;
   }
 
-  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(1){grid-column:1!important;grid-row:3!important}
-  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(2){grid-column:2!important;grid-row:3!important}
-  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(3){grid-column:1!important;grid-row:4!important}
-  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(4){grid-column:2!important;grid-row:4!important}
-  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(5){grid-column:1/-1!important;grid-row:5!important}
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(1){grid-column:1!important;grid-row:3!important;margin-top:22px!important}
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(2){grid-column:2!important;grid-row:3!important;margin-top:22px!important}
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(3){grid-column:1!important;grid-row:4!important;margin-top:16px!important}
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(4){grid-column:2!important;grid-row:4!important;margin-top:16px!important}
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(5){grid-column:1/-1!important;grid-row:5!important;margin-top:16px!important}
 
   html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field>span{
     display:block!important;
@@ -228,12 +239,7 @@
     text-transform:none!important;
   }
 
-  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(3)>span::before{
-    content:"Período · "!important;
-    color:var(--v75-muted,var(--muted))!important;
-    font-weight:620!important;
-  }
-
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(3)>span::before,
   html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(4)>span::before{
     content:"Período · "!important;
     color:var(--v75-muted,var(--muted))!important;
@@ -288,7 +294,7 @@
     width:auto!important;
     min-width:0!important;
     min-height:44px!important;
-    margin:0!important;
+    margin:12px 0 0!important;
     padding:0 4px!important;
     border:0!important;
     background:transparent!important;
@@ -322,8 +328,21 @@
     grid-row:auto!important;
   }
 
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field{
+    margin-top:14px!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(1){
+    margin-top:18px!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>#billClearFilters{
+    margin-top:10px!important;
+  }
+
   html.cdc-v75 body #app #page-bills>.bill-command-bar{
     grid-template-columns:minmax(0,1fr) 48px!important;
+    gap:10px!important;
   }
 
   html.cdc-v75 body #app #page-bills #newBillBtn{
