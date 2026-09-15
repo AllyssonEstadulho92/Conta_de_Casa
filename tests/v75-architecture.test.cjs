@@ -21,6 +21,7 @@ assert.match(js,/76-retire-v74-nav-marker1/);
 assert.match(js,/76-expense-mode-stability1/);
 assert.match(js,/76-prototype-planning1/);
 assert.match(js,/76-drawer-hierarchy1/);
+assert.match(js,/76-planning-budget-card2/,'planning prototype refinement must remain explicit');
 assert.match(js,/bills:\['Despesas','Movimentos'\]/);
 assert.match(js,/market:\['Mercado','Compras'\]/);
 assert.match(js,/security:\['Segurança e sincronização','Conta e dados'\]/);
@@ -47,10 +48,23 @@ assert.match(js,/ensurePlanningShell/,'Planning overview shell must be owned by 
 assert.match(js,/dashboardMetrics/);
 assert.match(js,/categoryEntries/);
 assert.match(js,/const hasBudget=metrics\.budget>0/,'planning must explicitly distinguish an undefined budget from a true zero-percent usage');
-assert.match(js,/ringValue=hasBudget\?`\$\{metrics\.pct\}%`:'—'/,'percentage must only render when a budget exists');
 assert.match(js,/Orçamento mensal por definir/,'undefined budget must expose truthful accessible copy');
 assert.match(js,/Defina um orçamento mensal/);
 assert.doesNotMatch(js,/<strong>\$\{metrics\.pct\}%<\/strong><span data-money>/,'planning must not unconditionally print 0% beside Por definir');
+
+/* 76-planning-budget-card2: approved mobile hierarchy reuses canonical domain/actions. */
+assert.match(js,/function monthRangeLabel\(\)/,'month card must expose the real selected-month interval');
+assert.match(js,/const lastDay=new Date\(year,month,0\)\.getDate\(\)/,'month interval must derive its last day instead of hard-coding it');
+assert.match(js,/iconMarkup\('chevron',20\)/,'month navigation must use the local icon system');
+assert.match(js,/class="v76-planning-budget-card"/,'planning must expose one coherent budget card');
+assert.match(js,/class="v76-budget-guidance"/,'planning budget card must explain the undefined/defined state');
+assert.match(js,/class="btn primary v76-budget-cta"/,'planning budget card must expose a clear primary action');
+assert.match(js,/data-v75-budget-focus/,'budget visual actions must delegate instead of creating a second save flow');
+assert.match(js,/function focusPlanningBudget\(\)/,'budget visual actions must have one shared focus adapter');
+assert.match(js,/const input=byId\('monthlyBudget'\)/,'budget actions must target the canonical monthlyBudget field');
+assert.match(js,/input\.scrollIntoView\(\{block:'center'/,'budget action must reveal the existing form before focusing it');
+assert.match(js,/input\.focus\(\{preventScroll:true\}\)/,'canonical budget input must receive focus after navigation');
+
 assert.doesNotMatch(js,/root\.CDCV74/,'current architecture must not depend on the v74 runtime API');
 assert.doesNotMatch(js,/dataset\.v74Nav\s*=/,'current navigation must not emit the compatibility dataset consumed by the physically retired v74 runtime');
 assert.doesNotMatch(js,/placeDashboardGreeting/,'retired dashboard greeting composition must not be recreated');
@@ -71,8 +85,17 @@ assert.doesNotMatch(js,/MORE_GROUPS[\s\S]{0,1200}Planeamento e orçamento/,'More
 assert.doesNotMatch(js,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/,'presentation architecture must not mutate financial state');
 
 assert.match(planningCss,/76-prototype-planning1/);
+assert.match(planningCss,/76-planning-budget-card2/,'planning CSS revision must remain explicit');
 assert.match(planningCss,/\.cdc-budget-ring\.is-unset/,'undefined budget must have a neutral visual ring');
 assert.match(planningCss,/conic-gradient\(/,'defined budget may use a progress ring');
+assert.match(planningCss,/\.v76-planning-budget-card\{[\s\S]*border-radius:22px!important/,'budget context must use one restrained enclosing surface');
+assert.match(planningCss,/\.v76-budget-card-head\{/,'budget card must have a dedicated hierarchy header');
+assert.match(planningCss,/\.v76-budget-metric\{/,'budget values must use a consistent metric row');
+assert.match(planningCss,/\.v76-budget-guidance\{/,'budget guidance must remain visually distinct but inside the same context');
+assert.match(planningCss,/\.v76-budget-cta\{/,'budget action must remain a full-width primary mobile control');
+const narrowPlanning=/@media\(max-width:430px\)\{([\s\S]*?)\n\}\n\n@media\(max-width:350px\)/.exec(planningCss)?.[1]||'';
+assert.match(narrowPlanning,/\.v75-budget-metrics\{grid-template-columns:1fr!important/,'narrow iPhones must keep budget metrics in one readable column');
+assert.doesNotMatch(narrowPlanning,/repeat\(3/,'narrow iPhones must not compress the three financial metrics into equal columns');
 assert.match(planningCss,/\.v75-more-row\{[\s\S]*min-height:58px/,'More rows must keep generous mobile touch targets');
 assert.match(planningCss,/\.v75-more-group>div\{[\s\S]*box-shadow:none!important/,'More groups should use restrained surfaces without floating-card clutter');
 assert.match(planningCss,/#page-goals #goalList>\.empty\{[\s\S]*min-height:240px/,'Goals empty state must be intentional and readable');
@@ -118,6 +141,7 @@ assert.match(sw,/expense-mode1/,'PWA cache must retain the improved expense mode
 assert.match(sw,/expense-mode-stability1/,'PWA cache must refresh deterministic expense mode behavior');
 assert.match(sw,/prototype-system1/,'PWA cache must refresh the approved prototype composition');
 assert.match(sw,/expense-ios-touch1/,'PWA cache must refresh the iOS expense-dialog touch fix');
+assert.match(sw,/planning-budget-card2/,'PWA cache must refresh the refined planning budget card');
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
 assert.ok(sw.includes("'./invoice-capture.css'"));
