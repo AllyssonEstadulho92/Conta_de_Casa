@@ -10,7 +10,8 @@ const GENERATED = path.join(ROOT, '.generated');
 const BUILD_TYPESCRIPT_RUNTIME = path.join(ROOT, 'scripts', 'build-typescript-runtime.cjs');
 const GENERATED_PUBLIC_FILES = Object.freeze({
   'market-branding.js': path.join(GENERATED, 'market-branding.js'),
-  'sync-conflict-policy.js': path.join(GENERATED, 'sync-conflict-policy.js')
+  'sync-conflict-policy.js': path.join(GENERATED, 'sync-conflict-policy.js'),
+  'date-calculator.js': path.join(GENERATED, 'date-calculator.js')
 });
 const PACKAGE = JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
 const APP_VERSION = String(PACKAGE.version||'').trim();
@@ -40,6 +41,7 @@ const IMAGE_LIBRARY_REV = '75-image-library1';
 const CATALOG_REV = '75-catalog4';
 const PD_PHOTO_REV = '75-pd-photo1';
 const PHOTO_LOADER_REV = '75-photo-loader3';
+const DATE_CALCULATOR_REV = '76-date-calculator1';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
   throw new Error(`Invalid package application version: ${APP_VERSION||'(empty)'}`);
@@ -95,6 +97,7 @@ const PUBLIC_FILES = Object.freeze([
   'v76-modern-ui.css',
   'v76-product-pages.css',
   'v76-mobile-shell.css',
+  'date-calculator.css',
   'core.js',
   'finance.js',
   'render.js',
@@ -123,6 +126,7 @@ const PUBLIC_FILES = Object.freeze([
   'v64-runtime.js',
   'market-shopping-focus.js',
   'v75-architecture.js',
+  'date-calculator.js',
   'v75-stability.js',
   'v75-startup-guard.js',
   'v75-market-flow.js',
@@ -135,7 +139,8 @@ const PUBLIC_FILES = Object.freeze([
 
 const MANUAL_TYPESCRIPT_RUNTIMES = Object.freeze({
   'market-branding.js': 'src/ui/market-branding.ts',
-  'sync-conflict-policy.js': 'src/sync/sync-conflict-policy.ts'
+  'sync-conflict-policy.js': 'src/sync/sync-conflict-policy.ts',
+  'date-calculator.js': 'src/ui/date-calculator.ts'
 });
 for(const [manual,source] of Object.entries(MANUAL_TYPESCRIPT_RUNTIMES)){
   if(fs.existsSync(path.join(ROOT,manual))){
@@ -200,6 +205,7 @@ if(!index.includes('v75-usability.css'))index=index.replace('</head>',`  <link r
 if(!index.includes('v76-modern-ui.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-modern-ui.css?v=${MODERN_UI_REV}" />\n</head>`);
 if(!index.includes('v76-product-pages.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-product-pages.css?v=${PRODUCT_PAGES_REV}" />\n</head>`);
 if(!index.includes('v76-mobile-shell.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-mobile-shell.css?v=${MOBILE_SHELL_REV}" />\n</head>`);
+if(!index.includes('date-calculator.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./date-calculator.css?v=${DATE_CALCULATOR_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;
 if(!index.includes('sync-conflict-policy.js'))index=index.replace(syncScript,`${syncScript}<script src="./sync-conflict-policy.js?v=${UI_REV}" defer></script>`);
@@ -221,6 +227,7 @@ if(!index.includes('v64-runtime.js'))index=index.replace('</body>',`  <script sr
 if(!index.includes('market-shopping-focus.js'))index=index.replace('</body>',`  <script src="./market-shopping-focus.js?v=${SHOPPING_REV}" defer></script>\n</body>`);
 if(!index.includes('mobile-menu-toggle.js'))index=index.replace('</body>',`  <script src="./mobile-menu-toggle.js?v=${MENU_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-architecture.js'))index=index.replace('</body>',`  <script src="./v75-architecture.js?v=${ARCHITECTURE_REV}" defer></script>\n</body>`);
+if(!index.includes('date-calculator.js'))index=index.replace('</body>',`  <script src="./date-calculator.js?v=${DATE_CALCULATOR_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-stability.js'))index=index.replace('</body>',`  <script src="./v75-stability.js?v=${STABILITY_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-startup-guard.js'))index=index.replace('</body>',`  <script src="./v75-startup-guard.js?v=${STARTUP_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-market-flow.js'))index=index.replace('</body>',`  <script src="./v75-market-flow.js?v=${MARKET_FLOW_REV}" defer></script>\n</body>`);
@@ -245,4 +252,4 @@ for(const name of Object.keys(GENERATED_PUBLIC_FILES)){
   }
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; architecture ${ARCHITECTURE_REV}; planning-more ${PLANNING_MORE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; architecture ${ARCHITECTURE_REV}; planning-more ${PLANNING_MORE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}; date-calculator ${DATE_CALCULATOR_REV}).`);

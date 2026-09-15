@@ -24,6 +24,13 @@ const runtimes=Object.freeze([
     manual:'sync-conflict-policy.js',
     output:'sync-conflict-policy.js',
     marker:/installSyncConflictPolicy/
+  },
+  {
+    label:'Date calculator',
+    source:'src/ui/date-calculator.ts',
+    manual:'date-calculator.js',
+    output:'date-calculator.js',
+    marker:/installDateCalculator/
   }
 ]);
 
@@ -69,6 +76,13 @@ assert.match(syncPolicy,/imageMatchedAt/);
 assert.match(syncPolicy,/root\.syncBusinessView = businessView/);
 assert.doesNotMatch(syncPolicy,/estimatedCents|actualCents|purchasedAt|quantity/);
 
+const dateCalculator=generatedByName.get('date-calculator.js');
+assert.match(dateCalculator,/76-date-calculator1/);
+assert.match(dateCalculator,/civilDayDiff/);
+assert.match(dateCalculator,/businessDays/);
+assert.match(dateCalculator,/Feriados não são descontados/);
+assert.doesNotMatch(dateCalculator,/\bfetch\s*\(|XMLHttpRequest|localStorage|indexedDB|saveState\s*\(|commit\s*\(/);
+
 execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
 for(const runtime of runtimes){
   const publicPath=path.join(DIST,runtime.output);
@@ -77,8 +91,12 @@ for(const runtime of runtimes){
   const published=fs.readFileSync(publicPath,'utf8');
   assert.equal(published,generatedByName.get(runtime.output),`${runtime.output} must be exactly the TypeScript-generated runtime`);
 }
+assert.ok(fs.existsSync(path.join(DIST,'date-calculator.css')),'Pages bundle must contain date-calculator.css');
+const distIndex=fs.readFileSync(path.join(DIST,'index.html'),'utf8');
+assert.match(distIndex,/date-calculator\.css\?v=76-date-calculator1/);
+assert.match(distIndex,/date-calculator\.js\?v=76-date-calculator1/);
 assert.ok(!fs.existsSync(path.join(DIST,'v76-veggie-menu.js')),'Pages bundle must not contain retired duplicate menu runtime');
 assert.ok(!fs.existsSync(path.join(DIST,'v76-veggie-menu.css')),'Pages bundle must not contain retired duplicate menu CSS');
 
 fs.rmSync(DIST,{recursive:true,force:true});
-console.log('TypeScript runtime build: only active TS modules are generated; duplicate Veggie menu runtime stays retired from Pages.');
+console.log('TypeScript runtime build: active TS modules are generated; date calculator is published; duplicate Veggie menu stays retired.');
