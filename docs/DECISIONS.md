@@ -257,6 +257,18 @@ A validação física após o PR #150 mostrou que acumular breakpoints corretivo
 - a alteração não toca PIN, palavra-passe, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync ou domínio financeiro;
 - regressão visual real no dispositivo tem prioridade sobre preservar dimensões históricas apenas porque testes antigos as esperavam.
 
+## D-106 — `hidden` também é autoridade entre estados internos do cofre
+
+A captura real após o PR #152 revelou que a exclusividade entre o shell e o cofre não era suficiente: `#vaultCreate` podia reaparecer ao lado de `#vaultUnlock` porque uma regra de apresentação usava `display:grid!important`.
+
+- a presença de metadata local em `events.js` continua a decidir o estado: sem cofre → criação; com cofre → desbloqueio;
+- `#vaultCreate[hidden]` e `#vaultUnlock[hidden]` têm de permanecer efetivamente invisíveis independentemente da especificidade de estilos decorativos;
+- o mesmo princípio aplica-se a painéis internos que usam `hidden`, como transferência, ajuda e alteração de PIN bloqueado;
+- CSS não pode converter um estado funcionalmente oculto num segundo modo simultâneo;
+- não se introduz uma aba “Criar cofre” quando já existe um cofre local, porque isso criaria ambiguidade e risco de ação destrutiva;
+- testes devem verificar tanto a regra CSS de exclusividade como a seleção do runtime baseada em `idbGet('meta','vault')`;
+- a correção é visual/semântica e não altera `createVault()`, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync ou domínio financeiro.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;
