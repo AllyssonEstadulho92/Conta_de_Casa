@@ -45,3 +45,309 @@
     gap:7px;
   }
 }
+
+/* 76-bills-mobile-filters1 — refinamento visual do bloco Pesquisa + Filtros.
+   Apenas composição/apresentação: preserva os IDs, listeners, valores e critérios
+   funcionais de renderBills(). A especificidade elevada neutraliza os overrides
+   históricos de v75-expenses-modern.css sem redefinir a shell móvel. */
+@media(max-width:820px){
+  html.cdc-v75 body #app #page-bills>.bill-command-bar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 52px!important;
+    align-items:center!important;
+    gap:10px!important;
+    margin:0 0 14px!important;
+    padding:10px!important;
+    border:1px solid color-mix(in srgb,var(--v75-border,var(--border)) 92%,transparent)!important;
+    border-radius:18px!important;
+    background:var(--v75-surface,var(--surface))!important;
+    box-shadow:0 6px 20px rgba(7,47,52,.05)!important;
+  }
+
+  /* O sistema Lucide já injeta .ui-search-icon. Desliga a lupa manual antiga para
+     impedir o efeito de duas lupas sobrepostas visto no iPhone. */
+  html.cdc-v75 body #app #page-bills .bill-search-wrap::before,
+  html.cdc-v75 body #app #page-bills .bill-search-wrap::after{
+    content:none!important;
+    display:none!important;
+  }
+
+  html.cdc-v75 body #app #page-bills .bill-search-wrap{
+    min-width:0!important;
+  }
+
+  html.cdc-v75 body #app #page-bills .bill-search-wrap.ui-search-control>.ui-search-icon{
+    left:14px!important;
+    width:24px!important;
+    height:24px!important;
+    color:var(--v75-muted,var(--muted))!important;
+  }
+
+  html.cdc-v75 body #app #page-bills #billSearch{
+    width:100%!important;
+    min-width:0!important;
+    min-height:52px!important;
+    margin:0!important;
+    padding:0 14px 0 48px!important;
+    border:1px solid color-mix(in srgb,var(--v75-border,var(--border)) 94%,transparent)!important;
+    border-radius:14px!important;
+    background:var(--v75-surface,var(--surface))!important;
+    color:var(--v75-text,var(--text))!important;
+    font-size:16px!important;
+    line-height:1.25!important;
+    box-shadow:none!important;
+    text-overflow:ellipsis;
+  }
+
+  html.cdc-v75 body #app #page-bills #billSearch::placeholder{
+    color:color-mix(in srgb,var(--v75-muted,var(--muted)) 82%,transparent)!important;
+    opacity:1!important;
+  }
+
+  html.cdc-v75 body #app #page-bills #billSearch:focus{
+    border-color:color-mix(in srgb,var(--expenses-accent,var(--v75-primary)) 55%,var(--v75-border,var(--border)))!important;
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--expenses-accent,var(--v75-primary)) 12%,transparent)!important;
+  }
+
+  html.cdc-v75 body #app #page-bills #newBillBtn{
+    width:52px!important;
+    min-width:52px!important;
+    max-width:52px!important;
+    height:52px!important;
+    min-height:52px!important;
+    padding:0!important;
+    border:1px solid color-mix(in srgb,var(--expenses-accent,var(--v75-primary)) 85%,#006a68)!important;
+    border-radius:15px!important;
+    background:linear-gradient(145deg,var(--expenses-accent,var(--v75-primary)),color-mix(in srgb,var(--expenses-accent,var(--v75-primary)) 76%,var(--v75-accent,var(--accent))))!important;
+    color:#fff!important;
+    box-shadow:none!important;
+    white-space:nowrap!important;
+  }
+
+  html.cdc-v75 body #app #page-bills #newBillBtn[data-ui-iconized="true"]{
+    gap:0!important;
+  }
+
+  html.cdc-v75 body #app #page-bills #newBillBtn[data-ui-iconized="true"]>.ui-icon-svg{
+    width:24px!important;
+    height:24px!important;
+    margin:0!important;
+  }
+
+  html.cdc-v75 body #app #page-bills #newBillBtn[data-ui-iconized="true"]>.ui-icon-label{
+    position:absolute!important;
+    width:1px!important;
+    height:1px!important;
+    padding:0!important;
+    margin:-1px!important;
+    clip-path:inset(50%)!important;
+    clip:rect(0,0,0,0)!important;
+    white-space:nowrap!important;
+    border:0!important;
+  }
+
+  /* Cartão de filtros com hierarquia equivalente ao protótipo aprovado. */
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid{
+    position:relative!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:auto auto auto auto auto auto!important;
+    gap:12px 10px!important;
+    align-items:end!important;
+    width:100%!important;
+    margin:0 0 14px!important;
+    padding:18px 16px 16px!important;
+    overflow:visible!important;
+    border:1px solid color-mix(in srgb,var(--v75-border,var(--border)) 92%,transparent)!important;
+    border-radius:20px!important;
+    background:var(--v75-surface,var(--surface))!important;
+    box-shadow:0 6px 22px rgba(7,47,52,.045)!important;
+    scroll-snap-type:none!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid::before{
+    content:"Filtros"!important;
+    grid-column:1/-1!important;
+    grid-row:1!important;
+    min-height:42px!important;
+    display:flex!important;
+    align-items:center!important;
+    margin:0!important;
+    padding:0 0 0 52px!important;
+    background-image:
+      linear-gradient(color-mix(in srgb,var(--expenses-accent,var(--v75-primary)) 9%,transparent),color-mix(in srgb,var(--expenses-accent,var(--v75-primary)) 9%,transparent)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23087b78' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='21' x2='14' y1='4' y2='4'/%3E%3Cline x1='10' x2='3' y1='4' y2='4'/%3E%3Cline x1='21' x2='12' y1='12' y2='12'/%3E%3Cline x1='8' x2='3' y1='12' y2='12'/%3E%3Cline x1='21' x2='16' y1='20' y2='20'/%3E%3Cline x1='12' x2='3' y1='20' y2='20'/%3E%3Cline x1='14' x2='14' y1='2' y2='6'/%3E%3Cline x1='8' x2='8' y1='10' y2='14'/%3E%3Cline x1='16' x2='16' y1='18' y2='22'/%3E%3C/svg%3E")!important;
+    background-repeat:no-repeat,no-repeat!important;
+    background-position:0 50%,10px 50%!important;
+    background-size:42px 42px,22px 22px!important;
+    border-radius:12px!important;
+    color:var(--v75-text,var(--text))!important;
+    font-size:1.02rem!important;
+    line-height:1.2!important;
+    font-weight:760!important;
+    letter-spacing:-.02em!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid::after{
+    content:"Refine a sua pesquisa de despesas"!important;
+    grid-column:1/-1!important;
+    grid-row:2!important;
+    margin:-8px 0 2px!important;
+    padding-left:52px!important;
+    color:var(--v75-muted,var(--muted))!important;
+    font-size:.74rem!important;
+    line-height:1.35!important;
+    font-weight:450!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field{
+    display:grid!important;
+    gap:6px!important;
+    flex:none!important;
+    min-width:0!important;
+    max-width:none!important;
+    width:100%!important;
+    margin:0!important;
+    scroll-snap-align:none!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(1){grid-column:1!important;grid-row:3!important}
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(2){grid-column:2!important;grid-row:3!important}
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(3){grid-column:1!important;grid-row:4!important}
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(4){grid-column:2!important;grid-row:4!important}
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(5){grid-column:1/-1!important;grid-row:5!important}
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field>span{
+    display:block!important;
+    margin:0!important;
+    color:var(--v75-text,var(--text))!important;
+    font-size:.7rem!important;
+    line-height:1.2!important;
+    font-weight:720!important;
+    letter-spacing:.015em!important;
+    text-transform:none!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(3)>span::before{
+    content:"Período · "!important;
+    color:var(--v75-muted,var(--muted))!important;
+    font-weight:620!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field:nth-child(4)>span::before{
+    content:"Período · "!important;
+    color:var(--v75-muted,var(--muted))!important;
+    font-weight:620!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid :is(.ui-select-control,input,select){
+    min-width:0!important;
+    max-width:100%!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid :is(input,select){
+    width:100%!important;
+    min-height:48px!important;
+    margin:0!important;
+    border:1px solid color-mix(in srgb,var(--v75-border,var(--border)) 94%,transparent)!important;
+    border-radius:13px!important;
+    background-color:var(--v75-surface,var(--surface))!important;
+    color:var(--v75-text,var(--text))!important;
+    font-size:15px!important;
+    font-weight:610!important;
+    line-height:1.2!important;
+    box-shadow:none!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid .ui-select-control>select{
+    padding-left:12px!important;
+    padding-right:40px!important;
+    text-overflow:ellipsis!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid input[type="date"]{
+    padding-inline:12px!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid .ui-select-arrow{
+    right:11px!important;
+    width:20px!important;
+    height:20px!important;
+    color:var(--v75-muted,var(--muted))!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid :is(input,select):focus{
+    border-color:color-mix(in srgb,var(--expenses-accent,var(--v75-primary)) 48%,var(--v75-border,var(--border)))!important;
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--expenses-accent,var(--v75-primary)) 11%,transparent)!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>#billClearFilters{
+    grid-column:1/-1!important;
+    grid-row:6!important;
+    justify-self:start!important;
+    width:auto!important;
+    min-width:0!important;
+    min-height:44px!important;
+    margin:0!important;
+    padding:0 4px!important;
+    border:0!important;
+    background:transparent!important;
+    color:var(--expenses-accent,var(--v75-primary))!important;
+    box-shadow:none!important;
+    font-size:.74rem!important;
+    font-weight:680!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>#billClearFilters:focus-visible{
+    outline:0!important;
+    border-radius:8px!important;
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--expenses-accent,var(--v75-primary)) 13%,transparent)!important;
+  }
+}
+
+/* Em ecrãs realmente estreitos, Estado/Categoria e intervalo de datas passam a uma
+   coluna para evitar labels cortados. A partir de 361 px mantém-se a composição de
+   duas colunas mostrada no protótipo. */
+@media(max-width:360px){
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid{
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:auto!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid::before,
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid::after,
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>.bill-filter-field,
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid>#billClearFilters{
+    grid-column:1!important;
+    grid-row:auto!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-command-bar{
+    grid-template-columns:minmax(0,1fr) 48px!important;
+  }
+
+  html.cdc-v75 body #app #page-bills #newBillBtn{
+    width:48px!important;
+    min-width:48px!important;
+    max-width:48px!important;
+    height:48px!important;
+    min-height:48px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  html.cdc-v75 body #app #page-bills :is(#newBillBtn,#billClearFilters,#billSearch,.bill-filter-grid input,.bill-filter-grid select){
+    transition:none!important;
+  }
+}
+
+@media(forced-colors:active){
+  html.cdc-v75 body #app #page-bills :is(.bill-command-bar,.bill-filter-grid,#billSearch,.bill-filter-grid input,.bill-filter-grid select){
+    border-color:CanvasText!important;
+  }
+
+  html.cdc-v75 body #app #page-bills>.bill-filter-grid::before{
+    background-image:none!important;
+    padding-left:0!important;
+  }
+}
