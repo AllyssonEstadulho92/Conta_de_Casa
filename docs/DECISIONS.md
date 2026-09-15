@@ -286,6 +286,21 @@ O PR #156 substitui o CSS visual anterior da ferramenta por `76-date-calculator-
 - a decisão é estritamente de apresentação: `76-date-calculator1`, matemática civil, regras de dias úteis, TypeScript, domínio financeiro, armazenamento, auth, sync, QR, scanner e Mercado não mudam;
 - validação estática/CI não substitui a verificação física do `<dialog>` em Safari/WebKit real.
 
+## D-108 — o auth móvel compacta o espaço entre blocos sem reduzir o keypad aprovado
+
+A validação física posterior mostrou que o problema remanescente não estava no tamanho das teclas, mas no somatório de margens entre secções, que empurrava transferência e nota inferior para a zona do chrome do Safari.
+
+- `v75-usability.css` continua a única autoridade visual do cofre; não se cria uma nova folha corretiva;
+- keypad padrão permanece 56 px com `column-gap:30px` e `row-gap:16px`;
+- em mobile, marca usa 16 px de separação; campo PIN e keypad usam 18 px; CTA usa 20 px após o keypad;
+- ações secundárias são aproximadas sem reduzir os respetivos targets abaixo de 44 px;
+- transferência usa 14 px de margem superior e 12 px de separador interno;
+- `#vaultMessage:empty` não pode reservar altura quando não existe estado a anunciar;
+- `100svh`, safe areas, input >=16 px, pinch-to-zoom, dark mode, `forced-colors` e `prefers-reduced-motion` permanecem requisitos;
+- o token técnico `auth-spacing3` invalida apenas o cache PWA necessário para distribuir a composição atual;
+- a mudança é estritamente visual e não altera PIN, palavra-passe, criação/desbloqueio, PBKDF2, AES-GCM, IndexedDB, importação, sync ou domínio financeiro;
+- a validação física no mesmo iPhone/Safari/PWA continua necessária, pois CI estática não mede a geometria real do browser chrome.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;

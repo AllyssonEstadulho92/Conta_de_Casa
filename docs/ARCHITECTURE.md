@@ -24,12 +24,16 @@ Invariantes:
 `core.js` continua a autoridade de estado, cifra, normalização e sessão. A UI do cofre não pode modificar lógica de derivação, desbloqueio, armazenamento ou sync.
 
 Autoridade visual: `v75-usability.css` / `76-auth-prototype-final1`.  
-Contrato de exclusividade: `76-auth-exclusive-state1`.
+Contrato de exclusividade: `76-auth-exclusive-state1`.  
+Ritmo vertical móvel: `76-auth-spacing3` dentro da mesma folha canónica.
 
 - criação e desbloqueio são estados mutuamente exclusivos;
 - atributos `hidden` não podem ser anulados por regras decorativas;
 - `100svh`, safe areas e targets adequados permanecem requisitos móveis;
-- o PR #156 não altera esta arquitetura.
+- keypad padrão em mobile mantém 56 px com gaps 30/16 px;
+- o espaçamento entre blocos é compacto o suficiente para manter CTA, transferência e nota de privacidade acessíveis acima do chrome inferior do Safari;
+- `#vaultMessage:empty` não reserva altura;
+- esta arquitetura é exclusivamente visual e não altera PIN, PBKDF2, AES-GCM, IndexedDB, importação ou sync.
 
 ## 3. Rotas e navegação
 
@@ -184,7 +188,7 @@ Fluxo Adicionar despesa:
 - Ler fatura por imagem/QR AT;
 - QR Code por câmara.
 
-A reconfiguração da Calculadora de datas não altera captura, finanças ou scanner.
+As alterações de auth e Calculadora de datas não alteram captura, finanças ou scanner.
 
 ## 10. TypeScript
 
@@ -192,7 +196,7 @@ Pipeline vigente:
 
 `src/**/*.ts → tsc strict/noEmit → build-typescript-runtime.cjs → .generated/*.js → prepare-pages.cjs → dist/*.js → Pages`.
 
-A Calculadora de datas continua com fonte funcional TypeScript strict; o PR #156 altera apenas CSS, teste de contrato visual e token de cache.
+A Calculadora de datas continua com fonte funcional TypeScript strict; os PR #156 e #158 não alteram a lógica TypeScript de domínio.
 
 ## 11. Build/PWA
 
@@ -207,7 +211,12 @@ Service Worker:
 - allowlist explícita;
 - tokens técnicos invalidam cache sem alterar release pública.
 
-PR #156 acrescenta `date-calculator-layout2` ao token técnico de cache. `package.json`, manifesto de release e versão pública permanecem inalterados.
+Tokens recentes:
+
+- `date-calculator-layout2`: invalida a apresentação anterior da Calculadora de datas;
+- `auth-spacing3`: invalida o espaçamento anterior do cofre móvel.
+
+`package.json`, manifesto de release e versão pública permanecem inalterados.
 
 ## 12. Segurança e dependências externas
 
@@ -222,27 +231,28 @@ PR #156 acrescenta `date-calculator-layout2` ao token técnico de cache. `packag
 
 A CI cobre sintaxe, TypeScript, finanças, isolamento, datas, QR, Mercado, scanner, UI, responsividade, acessibilidade, segurança e sync.
 
-Regressões específicas do PR #156 protegem:
+PR #158 adiciona regressões para:
 
-- marcador `76-date-calculator-layout2`;
-- escala 4/8/12/16/20/24/32;
-- grelha desktop `input/facts/result/actions`;
-- ordem móvel `input → facts → result → actions`;
-- `100svh` e ausência de `100dvh` na autoridade final;
-- targets de 44 px nas ações menores;
-- breakpoints 820/430/360;
-- matemática civil multitimezone já existente.
+- marcador `76-auth-spacing3`;
+- keypad móvel 56 px com gaps 30/16 px;
+- margem compacta da marca 16 px;
+- separação de 18 px no campo e keypad;
+- CTA com 20 px de margem superior;
+- transferência com 14 px/12 px;
+- `#vaultMessage:empty` sem altura reservada;
+- cache PWA `auth-spacing3`.
 
-Evidência: PR TypeScript `35016302805`, PR CI `35016302738`; após merge, TypeScript `35016376375`, CI `35016376360` e Pages `35016440963`, todos com sucesso.
+Evidência PR #158: TypeScript `35019148671` e CI `35019148364`, ambos com sucesso. Após merge: TypeScript `35019232012`, CI `35019231922` e Pages `35019295696`, todos com sucesso.
 
-Limitação: testes estáticos não substituem Safari/WebKit real para top-layer de `<dialog>`, scroll, safe areas, partilha e impressão.
+Limitação: testes estáticos não substituem Safari/WebKit real para altura útil, browser chrome, teclado virtual, scroll e safe areas.
 
 ## 14. Próxima consolidação
 
-1. validar `76-date-calculator-layout2` em iPhone/Safari/PWA e desktop;
-2. validar os restantes blocos móveis pendentes;
-3. corrigir descrição factual de rede em Segurança;
-4. empacotar ZXing localmente com licença preservada;
-5. endurecer CSP depois da remoção da dependência remota;
-6. criar E2E WebKit/Chromium;
-7. continuar redução de cascade por componente e migração TypeScript de baixo acoplamento.
+1. validar `76-auth-spacing3` no mesmo iPhone/Safari/PWA;
+2. validar `76-date-calculator-layout2` em iPhone/Safari/PWA e desktop;
+3. validar os restantes blocos móveis pendentes;
+4. corrigir descrição factual de rede em Segurança;
+5. empacotar ZXing localmente com licença preservada;
+6. endurecer CSP depois da remoção da dependência remota;
+7. criar E2E WebKit/Chromium;
+8. continuar redução de cascade por componente e migração TypeScript de baixo acoplamento.
