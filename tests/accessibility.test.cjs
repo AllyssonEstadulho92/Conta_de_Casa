@@ -83,12 +83,15 @@ assert.match(architecture,/\.v75-more-group/);
 assert.match(architecture,/\.v75-budget-summary/);
 assert.doesNotMatch(css,/pointer-events:none!important;[^}]*\.cdc-quick-action/);
 
-/* 76-auth-prototype-final1: uma única autoridade visual substitui as duas
-   camadas históricas de compactação do PIN. O layout móvel mantém safe areas,
-   100svh, espaçamento horizontal explícito e targets >=44 px. */
+/* 76-auth-prototype-final1 + 76-auth-exclusive-state1: uma única autoridade
+   visual substitui as camadas históricas, e `hidden` continua a ser a
+   autoridade de estado para impedir criação/desbloqueio simultâneos. */
 assert.match(usability,/76-auth-prototype-final1/);
+assert.match(usability,/76-auth-exclusive-state1/);
 assert.doesNotMatch(usability,/\/\* 76-vault-short-height1/,'legacy short-height auth section must be removed');
 assert.doesNotMatch(usability,/\/\* 76-auth-ios-spacing2/,'legacy iOS spacing section must be removed');
+assert.match(usability,/#vaultScreen\.vault-screen\[hidden\],[\s\S]*#vaultCreate\[hidden\],[\s\S]*#vaultUnlock\[hidden\][\s\S]*display:none!important/,'hidden auth states must override author display rules');
+assert.match(events,/const meta=await idbGet\('meta','vault'\); \$\('#vaultCreate'\)\.hidden=!!meta; \$\('#vaultUnlock'\)\.hidden=!meta;/,'runtime must choose exactly one auth state from local vault metadata');
 assert.match(usability,/min-height:100svh!important/,'mobile auth must use the small viewport height so Safari chrome is part of the layout contract');
 assert.match(usability,/max\(18px,env\(safe-area-inset-top,0px\)\)/,'mobile auth must preserve a real safe-area top floor');
 assert.match(usability,/\.vault-card\{[\s\S]*margin:0 auto!important/,'mobile auth must not vertically recenter the whole card');
@@ -104,4 +107,4 @@ assert.deepEqual(keypadSizes,[64,56,52,50],'auth keypad sizes must remain ordere
 assert.ok(keypadSizes.every(size=>size>=44),`PIN targets must remain >=44 px; got ${keypadSizes.join(', ')}`);
 assert.match(sw,/auth-prototype-final1/,'PWA cache must invalidate the previous auth layout');
 
-console.log('Accessibility contrast, focus, touch targets, semantic state, safe areas and final PIN layout contracts for v76: OK');
+console.log('Accessibility contrast, focus, touch targets, semantic state, safe areas and exclusive PIN layout contracts for v76: OK');
