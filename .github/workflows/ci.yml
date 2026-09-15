@@ -40,6 +40,7 @@ jobs:
           node --check mobile-menu-toggle.js
           node --check sync.js
           node --check .generated/sync-conflict-policy.js
+          node --check .generated/date-calculator.js
           node --check market-experience.js
           node --check .generated/market-branding.js
           node --check market-category-groups.js
@@ -84,6 +85,9 @@ jobs:
 
       - name: Civil date timezone tests
         run: node tests/date-timezone.test.cjs
+
+      - name: Exact date calculator tests
+        run: node tests/date-calculator.test.cjs
 
       - name: Invoice form regression tests
         run: node tests/form-regression.test.cjs
