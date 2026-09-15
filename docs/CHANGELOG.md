@@ -2,7 +2,7 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
-## 2026-09-15 — `76-market-identity-stale1` — hardening da identidade temporária
+## 2026-09-15 — PR #134 / `76-market-identity-stale1` — hardening da identidade temporária — publicado
 
 ### Risco identificado após PR #133
 
@@ -11,7 +11,7 @@ A ponte de identidade guarda temporariamente `marketId|pid` entre o clique num r
 ### Correção
 
 - a identidade pendente expira no microtask seguinte se não for consumida;
-- no fluxo normal live, `marketId|pid` continuam a ser copiados para o item antes do primeiro `await` do commit;
+- no fluxo live normal, `marketId|pid` continuam a ser copiados para o item antes do primeiro `await` do commit;
 - regressão específica protege a expiração e impede reintrodução do estado obsoleto;
 - Service Worker recebe apenas o token técnico `market-identity-stale1`.
 
@@ -19,7 +19,12 @@ A ponte de identidade guarda temporariamente `marketId|pid` entre o clique num r
 
 Sem alteração de release/centro de atualizações, `STATE_VERSION`, preços, cêntimos, quantidade, `finance.js`, PIN/cofre, IndexedDB, QR ou scanner.
 
-Estado: branch `fix/v76-market-identity-stale-guard1`; depende de CI + TypeScript + Pages verdes.
+### Evidência
+
+- merge PR #134: `69318d104cd8aa1a68be919ba6a9c805b20f9cf5`;
+- TypeScript Foundation main `34914028412`: sucesso;
+- CI main `34914028440`: sucesso integral;
+- Pages `34914061390`: sucesso.
 
 ---
 
