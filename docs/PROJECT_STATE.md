@@ -4,8 +4,8 @@ Atualizado: 15 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline publicada: `62359b4997075c4bd476f43f69ab18e41327f1bd` — PR #133  
-Branch ativa: `fix/v76-market-identity-stale-guard1`
+Baseline publicada: `69318d104cd8aa1a68be919ba6a9c805b20f9cf5` — PR #134  
+Branch funcional: `main`
 
 ## Invariantes obrigatórias
 
@@ -23,41 +23,38 @@ Branch ativa: `fix/v76-market-identity-stale-guard1`
 
 A `main` está oficialmente em v76/`0.76.0`.
 
-Consolidações relevantes já publicadas:
+Consolidações relevantes:
 
 - PR #105–#116: retirada progressiva do runtime v74, autoridade única de navegação/composição e oficialização da v76;
 - PR #117–#130: menu móvel, shell/safe areas, Planeamento/Mais, Dashboard, Mercado, drawer e pesquisa alinhados ao produto v76;
 - PR #131: fluxo profissional de Adicionar despesa;
 - PR #132: hotfix Safari/iPhone para touch/scroll do formulário de despesas;
-- PR #133: persistência retrocompatível de `marketId|pid` no Mercado.
+- PR #133: persistência retrocompatível de `marketId|pid` no Mercado;
+- PR #134: expiração segura da identidade temporária se um clique live não chegar ao commit.
 
-Evidência PR #133:
+Evidência mais recente:
 
-- merge `62359b4997075c4bd476f43f69ab18e41327f1bd`;
-- TypeScript Foundation PR `34913445635`: sucesso;
-- CI PR `34913445733`: sucesso integral;
-- TypeScript Foundation main `34913506775`: sucesso;
-- CI main `34913506766`: sucesso integral;
-- Pages `34913539151`: sucesso.
+- merge PR #134: `69318d104cd8aa1a68be919ba6a9c805b20f9cf5`;
+- TypeScript Foundation main `34914028412`: sucesso;
+- CI main `34914028440`: sucesso integral;
+- Pages `34914061390`: sucesso.
 
-A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados para este hotfix. Só a chave técnica de cache PWA mudou.
+A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados. Apenas a chave técnica de cache PWA foi renovada para distribuir o hotfix.
 
-## Bloco atual — `76-market-identity-stale1`
+## Mercado — estado de identidade
 
-Revisão pós-publicação do PR #133 identificou um edge case raro: se o utilizador tocar em “Adicionar” num resultado live mas o handler não chegar ao commit, a identidade pendente podia permanecer em memória e teoricamente ser aplicada a uma criação manual posterior.
+`76-market-identity1` + `76-market-identity-stale1` estão publicados:
 
-Hardening em curso:
-
-- a identidade pendente expira no microtask seguinte se não for consumida pelo commit live;
-- a aplicação normal do resultado mantém o comportamento: a identidade é copiada para o item antes do primeiro `await` do commit;
-- preço, quantidade, `estimatedCents`, `actualCents`, scanner e persistência financeira não são alterados;
-- regressão específica e novo token técnico de cache `market-identity-stale1` foram adicionados.
+- a pesquisa Cesta preserva `marketId` e `pid` ao adicionar um produto;
+- normalização/reload/restauro/sync retêm a identidade;
+- itens manuais/legados continuam compatíveis com campos vazios;
+- a identidade temporária usada entre clique e commit expira no microtask seguinte quando não é consumida;
+- preço, quantidade, `estimatedCents`, `actualCents`, scanner e persistência financeira permanecem inalterados.
 
 ## Auditoria atual — problemas abertos
 
 ### ALTO
 
-- fechar o guard de identidade pendente com CI/TypeScript/Pages verdes;
 - acrescentar E2E real com WebKit/Chromium para toque, teclado, scroll e transição PIN → aplicação;
 - reduzir gradualmente a cascade CSS e dependência de `!important`;
 - `main` continua sem branch protection/required checks obrigatórios.
@@ -75,9 +72,8 @@ Hardening em curso:
 
 ## Próximo passo
 
-1. publicar `76-market-identity-stale1` se todos os gates permanecerem verdes;
-2. validar pesquisa → adicionar → reload → edição → sync sem perder `marketId|pid`;
+1. corrigir a descrição da página Segurança para refletir a dependência ZXing real, sem mudança de release;
+2. preparar ZXing local e endurecimento CSP num bloco isolado;
 3. criar primeiro fluxo E2E WebKit/Chromium;
-4. corrigir a descrição da página Segurança e preparar ZXing local;
-5. consolidar CSS por propriedade, sem apagar regras sem prova de não utilização;
-6. continuar TypeScript em módulos de baixo acoplamento.
+4. consolidar CSS por propriedade, sem apagar regras sem prova de não utilização;
+5. continuar TypeScript em módulos de baixo acoplamento.
