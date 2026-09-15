@@ -173,6 +173,23 @@ A reorganização visual dos filtros de Despesas não cria uma segunda implement
 - `mobile-layout.css` é CSS de feature: não pode assumir `100dvh`, scroll global ou a geometria do viewport, que pertence exclusivamente a `v76-mobile-shell.css`;
 - esta decisão não altera cálculos, `STATE_VERSION`, IndexedDB, PIN/cofre, QR, scanner, sync ou release.
 
+## D-100 — resumo móvel de Planeamento é uma fachada sobre o formulário canónico
+
+O protótipo de orçamento móvel melhora a hierarquia e a eficiência, mas não cria um segundo fluxo de domínio.
+
+- `dashboardNumbers()`/`dashboardMetrics()` continuam a origem dos valores apresentados no resumo;
+- `categoryTotals()` continua a origem da distribuição por categoria;
+- `#monthPicker` continua a autoridade do mês e os botões anterior/seguinte apenas disparam o fluxo existente;
+- `#monthPlanForm` e `events.js` continuam a única autoridade de validação e gravação do planeamento mensal;
+- `#monthlyBudget` continua a ser o campo canónico de orçamento;
+- `Definir orçamento`, `Editar orçamento`, a linha Orçamento e a orientação contextual apenas fazem scroll/foco para `#monthlyBudget`;
+- a camada de apresentação não chama `commit()`, `saveState()` nem altera `budgetCents`;
+- orçamento ausente deve continuar explícito como `Por definir`, nunca convertido visualmente em `0%`;
+- o intervalo do mês é calculado a partir de `selectedMonth`, não codificado no HTML;
+- a navegação mensal e ações usam iconografia Lucide local/licenciada;
+- em telemóveis estreitos, legibilidade das métricas tem prioridade sobre apresentar três cartões na mesma linha;
+- a melhoria pode invalidar apenas o cache técnico PWA, sem alterar `v76`/`0.76.0`.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;
