@@ -53,6 +53,12 @@ Atualizado: 15 de setembro de 2026
 - [x] Manter `mobile-menu-toggle.js` como autoridade do drawer/hambúrguer.
 - [x] Manter `v76-mobile-shell.css` como autoridade geométrica mobile.
 - [x] Corrigir safe areas, dock e labels em ecrãs estreitos.
+- [x] PR #136: substituir grelha densa do drawer por hierarquia vertical de uma coluna.
+- [x] PR #136: reduzir destinos do menu completo aos níveis principais e manter rotas secundárias dentro das páginas-pai.
+- [x] PR #136: corrigir seleção própria de Segurança no drawer completo, preservando Mais no dock compacto.
+- [x] PR #136: simplificar X e empilhar Ocultar valores/Bloquear com targets tácteis adequados.
+- [x] PR #136: TypeScript Foundation main `34933261324`, CI main `34933261352` e Pages `34933296570` verdes.
+- [ ] Validar fisicamente o drawer no mesmo iPhone/Safari e PWA instalada.
 - [ ] E2E real para abertura/fecho do drawer, foco, Escape e swipe.
 
 ## P0 — UI/UX página a página
@@ -84,6 +90,7 @@ Atualizado: 15 de setembro de 2026
 ### Planeamento + Calendário
 
 - [x] Planeamento v76 e estado “Por definir” para orçamento ausente.
+- [ ] Rever geometria do ícone de Planeamento no subset local Lucide.
 - [ ] Rever calendário/vencimentos em E2E e densidade final tablet/desktop.
 
 ### Relatórios + Objetivos
@@ -93,6 +100,7 @@ Atualizado: 15 de setembro de 2026
 
 ### Segurança + Diagnóstico + Definições
 
+- [ ] Rever geometria do ícone de Definições para engrenagem consistente no subset local Lucide.
 - [ ] Corrigir texto “Sem CDNs” enquanto ZXing usar `unpkg.com`.
 - [ ] Rever feedback/destructive actions/dark mode/forced-colors fisicamente.
 

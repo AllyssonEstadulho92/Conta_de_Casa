@@ -134,6 +134,18 @@ A ponte `76-market-identity1` usa estado temporário apenas para transportar `ma
 - um item criado manualmente depois não pode herdar a identidade de um clique live abortado;
 - o guard não altera preço, quantidade, contabilidade, scanner ou persistência financeira.
 
+## D-097 — drawer completo usa hierarquia vertical e destinos de primeiro nível
+
+O menu móvel completo não deve reproduzir todas as rotas internas nem apresentar uma grelha de cartões com igual peso visual.
+
+- `76-drawer-hierarchy1` usa uma coluna e leitura sequencial;
+- destinos de primeiro nível: Início, Despesas, Planeamento, Mercado, Relatórios, Segurança e sincronização, Definições;
+- Calendário permanece em Despesas, Metas em Planeamento e Diagnóstico em Definições;
+- Segurança tem estado ativo próprio no drawer completo, mas continua agrupada em Mais no dock compacto;
+- o drawer permanece à direita para preservar o controlador/gesto existente e evitar uma mudança puramente estética com risco funcional;
+- botão de fecho e ações de sessão usam targets tácteis >=44 px e estados de foco explícitos;
+- esta consolidação é de apresentação/navegação e não altera domínio, persistência, segurança ou release.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;

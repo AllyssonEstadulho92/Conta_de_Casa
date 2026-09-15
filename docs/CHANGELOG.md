@@ -2,6 +2,61 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-15 — PR #136 / `76-drawer-hierarchy1` — drawer móvel harmonizado — publicado
+
+### Problema confirmado no iPhone
+
+O drawer móvel estava funcional, mas a composição dificultava a leitura:
+
+- destinos apresentados em cartões de duas colunas com peso visual semelhante;
+- labels longos quebravam de forma pouco natural;
+- rotas principais e secundárias competiam no mesmo nível;
+- ícones tinham superfícies internas excessivas;
+- botão X apresentava uma moldura visual demasiado pesada;
+- `Ocultar valores` e `Bloquear` competiam lado a lado na zona inferior.
+
+### Correção
+
+- `v75-drawer-theme.css` passa a declarar `76-drawer-hierarchy1`;
+- drawer continua à direita para preservar controlador e gesto existentes;
+- largura útil aumenta até 360 px, mantendo margem no viewport;
+- navegação passa para uma coluna com leitura vertical;
+- grupos finais: Principal, Análise e Sistema;
+- destinos de primeiro nível: Início, Despesas, Planeamento, Mercado, Relatórios, Segurança e sincronização, Definições;
+- Calendário permanece em Despesas, Metas em Planeamento e Diagnóstico em Definições;
+- Segurança recebe estado ativo próprio no drawer completo e continua agrupada em Mais apenas no dock compacto;
+- ícones deixam de usar cartões internos decorativos;
+- botão de fecho fica numa única superfície circular de 44 px;
+- `Ocultar valores` e `Bloquear` passam a ações verticais de largura completa;
+- foco, reduced-motion, forced-colors e safe areas mantêm contratos próprios.
+
+### QA e regressões
+
+Durante o PR, dois contratos antigos foram encontrados e atualizados para a arquitetura final:
+
+- `ui-consistency.test.cjs` ainda exigia a nomenclatura/hierarquia anterior de Mais;
+- `app-update.test.cjs` ainda exigia o marcador visual `76-drawer-neutral1`.
+
+Os testes foram atualizados para proteger o comportamento novo, sem recuar a interface.
+
+### Evidência
+
+- merge PR #136: `6cc4707197a50c022179d0af66895079ef1583bc`;
+- TypeScript Foundation main `34933261324`: sucesso;
+- CI main `34933261352`: sucesso integral;
+- Pages `34933296570`: sucesso.
+
+### Preservado
+
+Sem alteração de `STATE_VERSION`, release `v76`, versão `0.76.0`, `package.json`, `release-manifest.json`, `app-update.js`, cálculos, `finance.js`, PIN/cofre, IndexedDB, Mercado, QR, scanner ou sync.
+
+### Pendente
+
+- validação física do drawer no mesmo iPhone/Safari/PWA;
+- passagem isolada pela geometria global dos ícones de Planeamento e Definições.
+
+---
+
 ## 2026-09-15 — PR #134 / `76-market-identity-stale1` — hardening da identidade temporária — publicado
 
 ### Risco identificado após PR #133
@@ -82,7 +137,6 @@ Sem alteração de `STATE_VERSION`, release pública, `package.json`, `release-m
 - Despesas e Mercado recuperaram os fluxos funcionais canónicos com pesquisa/filtros/listas;
 - Planeamento, Metas e Mais foram alinhados ao protótipo sem inventar domínio;
 - browser Adicionar produto foi refinado;
-- drawer móvel passou a grelha coerente;
 - pesquisa do Mercado deixou de desenhar moldura duplicada.
 
 ### Despesas/Safari
@@ -108,6 +162,8 @@ Sem alteração de `STATE_VERSION`, release pública, `package.json`, `release-m
 
 - regressão real em dispositivo tem prioridade sobre teste legado;
 - `icon.svg` é a marca canónica e Lucide é a iconografia funcional;
+- o drawer completo usa uma coluna e expõe apenas destinos de primeiro nível;
+- rotas secundárias permanecem nas páginas-pai em vez de duplicarem a navegação;
 - `marketId|pid` acompanha o SKU pesquisado quando existe origem verificável;
 - estado temporário de identidade expira se não for consumido pelo fluxo live;
 - correção técnica não exige mudar a release pública;
