@@ -100,64 +100,58 @@ A cascade ainda contém regras históricas e `!important`; a redução deve ser 
 - `settings` usa `Settings`/engrenagem;
 - nomes semânticos permanecem estáveis.
 
-### 4.3 Despesas mobile — `76-bills-mobile-filters1` + `76-bills-mobile-spacing1`
+### 4.3 Despesas mobile — `76-bills-mobile-filters1` + `76-bills-mobile-spacing1` + `76-bills-mobile-alignment2`
 
 Autoridade funcional preservada:
 
 - `renderBills()` filtra/renderiza;
 - `events.js` mantém listeners;
-- IDs canónicos não mudaram.
+- IDs canónicos não mudaram: `billSearch`, `newBillBtn`, `billStatusFilter`, `billCategoryFilter`, `billDateFrom`, `billDateTo`, `billSort`, `billClearFilters`, `billSummary`, `billsList`.
 
-Composição:
+Composição final móvel:
 
-- pesquisa + ação principal em superfície compacta;
-- lupa Lucide local é a única lupa funcional;
-- filtros em cartão com Estado/Categoria, datas, ordenação e limpar;
-- PR #142 acrescenta espaçamento/ritmo vertical e remove offsets visuais desnecessários;
-- `<=360px` empilha antes de cortar conteúdo;
-- foco, reduced-motion, forced-colors e targets tácteis preservados.
+- pesquisa + ação principal em superfície compacta, com lupa Lucide local como única lupa funcional;
+- o PR #147 neutraliza a antiga apresentação horizontal herdada de `v75-expenses-modern.css`;
+- `mobile-layout.css` é a autoridade final apenas para a apresentação móvel do bloco Pesquisa + Filtros;
+- filtros usam grelha contida na largura disponível, sem depender de scroll horizontal;
+- Estado/Categoria ocupam a primeira linha de controlos;
+- De/Até ocupam a segunda linha;
+- Ordenar ocupa uma linha completa;
+- Limpar filtros permanece ação terciária numa linha própria;
+- espaçamento entre secções é 20 px; controlos móveis usam 50 px de altura e o target mínimo funcional continua >=44 px;
+- `min-width:0` e `max-width:100%` impedem pressão horizontal e texto/inputs cortados;
+- `<=360px` empilha a composição numa coluna;
+- `prefers-reduced-motion` e `forced-colors` têm fallback explícito.
+
+Limite arquitetural: `mobile-layout.css` não pode declarar geometria global de `.app-shell`, `.main`, `.topbar` ou `.mobile-nav`, nem assumir `100dvh`. O PR #147 foi corrigido durante a CI para remover `overflow:hidden` genérico que violava esse contrato; `v76-mobile-shell.css` continua a única autoridade do viewport móvel.
 
 ### 4.4 Planeamento mobile — `76-planning-budget-card2` + `76-planning-ring-shape1`
 
-O PR #143 altera apenas a composição móvel do resumo de orçamento em `#page-planning`; o PR #145 corrige exclusivamente a geometria do anel após validação física no iPhone.
-
 **Autoridade de dados e cálculo:**
 
-- `dashboardNumbers()` continua a fornecer os números agregados usados por `dashboardMetrics()`;
-- `categoryTotals()` continua a fornecer a distribuição de despesas;
-- `monthProfile()` continua a representar o perfil mensal;
-- `#monthPicker` continua a ser o controlo canónico do mês selecionado;
-- `stepMonth()` apenas atualiza `#monthPicker` e dispara o `change` já existente.
+- `dashboardNumbers()` fornece números agregados;
+- `categoryTotals()` fornece distribuição de despesas;
+- `monthProfile()` representa o perfil mensal;
+- `#monthPicker` continua a autoridade do mês selecionado;
+- `stepMonth()` apenas atualiza `#monthPicker` e dispara o `change` existente.
 
 **Autoridade de gravação:**
 
 - `#monthPlanForm` permanece o único formulário de planeamento mensal;
 - `#monthlyBudget` permanece o único campo canónico de orçamento mensal;
-- `events.js` continua a validar `accountBalance`, `openingBalance` e `monthlyBudget` e a executar `commit('updated','planning')`;
-- os botões visuais `Definir/Editar orçamento` do novo cartão possuem apenas `data-v75-budget-focus`: deslocam a viewport e focam `#monthlyBudget`; não escrevem estado, não fazem `saveState()` nem `commit()`.
+- `events.js` continua a validar e executar `commit('updated','planning')`;
+- botões visuais Definir/Editar apenas fazem scroll/foco para `#monthlyBudget`.
 
 **Composição visual:**
 
-- `v75-architecture.js` gera o seletor mensal, intervalo real do mês e cartão de orçamento;
-- `v76-planning-more.css` estiliza título, estado circular, métricas, orientação e CTA dentro de uma única superfície;
-- orçamento ausente permanece factual (`Por definir`), sem percentagem falsa;
-- quando existe orçamento, percentagem, gasto e disponível continuam calculados pela lógica existente;
-- navegação mensal usa ícones Lucide locais em vez dos caracteres `‹/›`;
-- `<=430px` mantém métricas numa coluna, removendo a antiga compressão em três colunas;
-- `<=350px` adapta o cabeçalho sem remover ações;
-- `prefers-reduced-motion` e `forced-colors` têm fallback explícito.
+- `v75-architecture.js` gera seletor mensal, intervalo e resumo;
+- `v76-planning-more.css` estiliza o cartão;
+- orçamento ausente permanece `Por definir`, sem percentagem falsa;
+- navegação mensal usa Lucide local;
+- em telemóveis estreitos, métricas ficam numa coluna;
+- o anel usa `height:auto!important` + `aspect-ratio:1/1!important`, com 136 px, 128 px em `<=430px` e 116 px em `<=350px`.
 
-**Geometria do anel — PR #145:**
-
-- `v75-architecture.css` ainda contém uma regra histórica `width:118px!important;height:118px!important` para `.cdc-budget-ring`;
-- o PR #143 aumentou a largura móvel sem neutralizar a altura histórica, por isso `aspect-ratio` não conseguia produzir um quadrado e o círculo aparecia oval;
-- `76-planning-ring-shape1` em `v76-planning-more.css` passa a impor `height:auto!important` e `aspect-ratio:1/1!important`;
-- diâmetros canónicos: 136 px em mobile geral, 128 px em `<=430px` e 116 px em `<=350px`;
-- iconografia e tipografia interna acompanham a redução de escala;
-- testes verificam a neutralização da altura fixa, a proporção 1:1 e os breakpoints;
-- não existe qualquer alteração ao cálculo da percentagem, estado `Por definir`, orçamento ou persistência.
-
-O overview dinâmico continua oculto em `>=821px`; desktop mantém o formulário/painéis canónicos existentes. O protótipo foi aplicado ao contexto móvel solicitado, sem criar uma segunda arquitetura financeira.
+O overview dinâmico continua oculto em `>=821px`; desktop mantém os painéis/formulários canónicos.
 
 ## 5. Design system
 
@@ -194,7 +188,7 @@ O fluxo Adicionar despesa mantém três modos:
 - Ler fatura por imagem/QR AT;
 - QR Code por câmara.
 
-PR #132 mantém um único proprietário de scroll no mobile Safari. PR #140/#142 atuam apenas na lista/filtros de Despesas e não alteram captura nem domínio financeiro.
+PR #132 mantém um único proprietário de scroll no mobile Safari. PR #140/#142/#147 atuam apenas na lista/pesquisa/filtros de Despesas e não alteram captura nem domínio financeiro.
 
 ## 8. TypeScript
 
@@ -204,7 +198,7 @@ Pipeline:
 
 `src/**/*.ts → tsc strict/noEmit → build-typescript-runtime.cjs → .generated/*.js → prepare-pages.cjs → dist/*.js → Pages`.
 
-JavaScript manual só sai depois de substituição comprovada e regressões verdes. `v75-architecture.js` e `ui-icons.js` continuam JavaScript manual neste bloco.
+JavaScript manual só sai depois de substituição comprovada e regressões verdes.
 
 ## 9. Build/PWA
 
@@ -219,7 +213,7 @@ Service Worker:
 - allowlist explícita;
 - tokens técnicos invalidam cache sem alterar release pública.
 
-PR #143 acrescentou `planning-budget-card2`; PR #145 acrescenta apenas `planning-ring-shape1`. `package.json`, `release-manifest.json`, `app-update.js` e `v76/0.76.0` permanecem inalterados.
+PR #147 acrescentou o token técnico `expenses-mobile-alignment2`. `package.json`, `release-manifest.json`, `app-update.js` e v76/`0.76.0` permanecem inalterados.
 
 ## 10. Segurança e dependências externas
 
@@ -235,25 +229,24 @@ PR #143 acrescentou `planning-budget-card2`; PR #145 acrescenta apenas `planning
 
 A CI cobre sintaxe, TypeScript, finanças, isolamento, datas, QR, Mercado, imagens, scanner, UI, responsividade, acessibilidade, segurança e sync.
 
-PR #145:
+PR #147:
 
-- TypeScript Foundation PR `34948896081`: sucesso;
-- CI PR `34948896074`: sucesso;
-- CI push head `34948870264`: sucesso;
-- merge `471c689c1df47118bd3a345214acfd140bdc6e7d`;
-- Pages `34949105955`: sucesso.
+- TypeScript Foundation PR `34951435419`: sucesso;
+- CI PR `34951435285`: sucesso integral;
+- merge `480dc501ff10bf29413b934e623d8641d5e95229`;
+- TypeScript Foundation `main` `34951525321`: sucesso;
+- CI `main` `34951525416`: sucesso integral;
+- Pages `34951589187`: sucesso.
 
-Limitação conhecida: testes estáticos não substituem validação física/E2E WebKit/Chromium para toque, teclado, scroll, foco e proporções reais. A forma circular do PR #145 deve ser confirmada no mesmo iPhone/PWA que revelou a deformação.
+Limitação conhecida: testes estáticos não substituem validação física/E2E WebKit/Chromium para toque, teclado, scroll, foco e proporções reais. A nova grelha de Despesas deve ser confirmada no mesmo iPhone/PWA que revelou o desalinhamento.
 
 ## 12. Próxima consolidação
 
-1. confirmar fisicamente `76-planning-ring-shape1` no iPhone/PWA;
-2. validar Despesas PR #142 e restantes superfícies móveis no mesmo dispositivo;
+1. validar fisicamente `76-bills-mobile-alignment2` no iPhone/PWA;
+2. confirmar `76-planning-ring-shape1` e drawer/iconografia;
 3. corrigir a descrição factual de rede na página Segurança;
 4. empacotar ZXing localmente com licença preservada;
 5. depois remover `unpkg.com` de `script-src` e endurecer CSP;
 6. criar E2E WebKit/Chromium;
 7. reduzir cascade CSS por componente;
-8. continuar TypeScript em módulos de baixo acoplamento;
-9. migrar `render/forms/events` só depois dos contratos visuais estabilizarem;
-10. deixar finanças/core/cifra para blocos com vetores de paridade próprios.
+8. continuar TypeScript em módulos de baixo acoplamento.
