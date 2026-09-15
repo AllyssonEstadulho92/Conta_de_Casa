@@ -269,6 +269,23 @@ A captura real após o PR #152 revelou que a exclusividade entre o shell e o cof
 - testes devem verificar tanto a regra CSS de exclusividade como a seleção do runtime baseada em `idbGet('meta','vault')`;
 - a correção é visual/semântica e não altera `createVault()`, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync ou domínio financeiro.
 
+## D-107 — a Calculadora de datas tem uma única autoridade de espaçamento e responsividade
+
+O PR #156 substitui o CSS visual anterior da ferramenta por `76-date-calculator-layout2`, sem criar uma folha adicional de correção.
+
+- `date-calculator.css` é a única autoridade visual da ferramenta;
+- a escala de espaçamento local é 4/8/12/16/20/24/32 px;
+- desktop usa uma grelha com área principal + coluna lateral de informação;
+- mobile usa a ordem `input → facts → result → actions`;
+- `cdc-datecalc-workspace` usa `display:contents` apenas para composição, preservando os elementos/IDs/handlers existentes;
+- `<=820px` usa `100svh` e safe areas; `100dvh` não faz parte da autoridade final;
+- `<=560px`, `<=430px` e `<=360px` reduzem composição antes de permitir clipping ou scroll horizontal;
+- inputs principais usam 52 px e texto de 16 px; targets menores permanecem >=44 px;
+- `forced-colors`, `prefers-reduced-motion` e impressão/PDF continuam protegidos;
+- o Service Worker recebe apenas o token técnico `date-calculator-layout2` para invalidar CSS antigo;
+- a decisão é estritamente de apresentação: `76-date-calculator1`, matemática civil, regras de dias úteis, TypeScript, domínio financeiro, armazenamento, auth, sync, QR, scanner e Mercado não mudam;
+- validação estática/CI não substitui a verificação física do `<dialog>` em Safari/WebKit real.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;
