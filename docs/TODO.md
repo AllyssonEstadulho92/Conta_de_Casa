@@ -66,8 +66,14 @@ Atualizado: 15 de setembro de 2026
 - [x] PR #140 / `76-bills-mobile-filters1`: pesquisa + ação + filtros mobile sem alterar IDs/handlers.
 - [x] PR #140: lupa CSS duplicada neutralizada; Lucide local mantém iconografia funcional.
 - [x] PR #142 / `76-bills-mobile-spacing1`: espaçamento, ritmo vertical e limpeza do cartão de filtros.
-- [x] PR #142: TypeScript/CI/Pages verdes; Pages `34945033256` concluída.
-- [ ] Validar fisicamente pesquisa/filtros/espaçamento no mesmo iPhone/Safari web e PWA instalada.
+- [x] PR #147 / `76-bills-mobile-alignment2`: remover a faixa horizontal como apresentação final e usar grelha móvel contida.
+- [x] PR #147: Estado/Categoria e De/Até organizados em pares; Ordenar/Limpar em linhas completas; `<=360px` numa coluna.
+- [x] PR #147: controlos a 50 px, target mínimo >=44 px, foco/reduced-motion/forced-colors preservados.
+- [x] PR #147: regressões atualizadas para impedir retorno do scroll horizontal e proteger o contrato de shell único.
+- [x] PR #147: TypeScript Foundation `34951435419`, CI PR `34951435285`, TypeScript main `34951525321`, CI main `34951525416` e Pages `34951589187` verdes.
+- [x] PR #147: merge `480dc501ff10bf29413b934e623d8641d5e95229`.
+- [ ] Validar fisicamente pesquisa/filtros/espaçamento no mesmo iPhone/Safari web e PWA instalada após refresh do cache.
+- [ ] Validar 360/390/430 px equivalentes e orientação portrait/landscape.
 - [ ] E2E de criar/editar/pagar/eliminar/cancelar.
 - [ ] Uniformizar estados loading/error/success onde ainda existam diferenças.
 
@@ -87,12 +93,8 @@ Atualizado: 15 de setembro de 2026
 - [x] PR #143 / `76-planning-budget-card2`: seletor mensal com intervalo real e ícones locais.
 - [x] PR #143: cartão único de Orçamento mensal com gasto, orçamento, disponível, orientação e CTA.
 - [x] PR #143: Definir/Editar apenas foca `#monthlyBudget`; `#monthPlanForm`/`events.js` continuam a única gravação.
-- [x] PR #143: eliminar compressão das três métricas em colunas no iPhone estreito.
-- [x] PR #143: TypeScript Foundation PR `34946433827` e CI PR `34946433799` verdes.
-- [x] PR #143: merge `386d75b35060eb011c2a2d68ec6b965c87c5080c`; main TypeScript `34946493929`, CI `34946493911` e Pages `34946542013` verdes.
-- [x] PR #145 / `76-planning-ring-shape1`: corrigir anel oval causado por `height:118px!important` legado + nova largura móvel.
+- [x] PR #145 / `76-planning-ring-shape1`: corrigir anel oval causado por altura legada fixa.
 - [x] PR #145: neutralizar altura legada, forçar `aspect-ratio:1/1` e reduzir para 136/128/116 px conforme breakpoint.
-- [x] PR #145: CI PR `34948896074`, TypeScript PR `34948896081`, CI push `34948870264` e Pages `34949105955` verdes.
 - [ ] Confirmar fisicamente o anel circular corrigido no mesmo iPhone/Safari/PWA após refresh do cache.
 - [ ] Validar estado sem orçamento e com orçamento definido no iPhone/Safari/PWA.
 - [ ] Rever calendário/vencimentos em E2E e densidade final tablet/desktop.
