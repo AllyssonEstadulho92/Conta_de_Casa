@@ -67,7 +67,7 @@ Autoridades atuais:
 - geometria mobile autenticada: `v76-mobile-shell.css`;
 - auth/cofre: `v75-usability.css`;
 - refinamentos móveis de feature: `mobile-layout.css`;
-- Calculadora de datas: `date-calculator.css` / `76-date-calculator-layout2`, incluindo `76-date-calculator-mobile-spacing3` na mesma autoridade;
+- Calculadora de datas: `date-calculator.css` / `76-date-calculator-layout2`, com `76-date-calculator-mobile-spacing3` e `76-date-calculator-prototype-inputs4` dentro da mesma autoridade;
 - marca: `icon.svg`;
 - iconografia funcional: subset Lucide local em `ui-icons.js` + `ui-icons.css`;
 - drawer: `mobile-menu-toggle.js/.css` + `v75-drawer-theme.css`;
@@ -120,7 +120,7 @@ Contratos de exatidão:
 
 ### 7.2 Autoridade visual — `76-date-calculator-layout2`
 
-Toda a apresentação continua em `date-calculator.css`; o PR #161 não cria nova folha nem segunda hierarquia, apenas consolida o grupo móvel de datas dentro da autoridade existente.
+Toda a apresentação continua em `date-calculator.css`. Os refinamentos #161 e #163 alteram a composição dentro desta mesma autoridade; não existem folhas paralelas nem duplicação de handlers.
 
 Sistema de espaçamento local:
 
@@ -138,7 +138,7 @@ Desktop:
 - `input` e `result` ocupam a coluna principal;
 - `facts` ocupa a coluna lateral;
 - `actions` permanece diretamente associado ao resultado;
-- campos Data inicial e Data final continuam lado a lado com o botão Trocar entre ambos.
+- Data inicial e Data final permanecem lado a lado, com Trocar entre ambas.
 
 Mobile `<=820px`:
 
@@ -147,20 +147,29 @@ Mobile `<=820px`:
 - safe areas são aplicadas ao cabeçalho/layout/rodapé;
 - sem scroll horizontal para descobrir controlos.
 
-Mobile `<=560px` — `76-date-calculator-mobile-spacing3`:
+Mobile `<=560px`:
 
-- `.cdc-datecalc-date-grid` muda para flex vertical;
-- ordem continua Data inicial → Trocar → Data final;
-- gap entre os três elementos: 8 px;
-- labels anulam margem e altura herdadas que possam criar espaço vazio;
-- `.cdc-datecalc-input-action` mantém pelo menos 52 px;
-- botão Trocar permanece 44×44 px, centrado, sem margem vertical adicional;
-- IDs, labels, handlers e semântica funcional não mudam.
+- `.cdc-datecalc-date-grid` usa flex vertical;
+- ordem permanece Data inicial → Trocar → Data final;
+- gap canónico do grupo: 8 px;
+- labels anulam margem/altura herdadas;
+- o seletor de data continua a ser `input[type="date"]` nativo;
+- em WebKit, `::-webkit-calendar-picker-indicator` é reposicionado à esquerda em vez de ser substituído por um controlo inventado;
+- o campo reserva 54 px à esquerda e 76 px à direita, acomodando indicador/divisor e ação **Hoje**;
+- divisor vertical interno separa a affordance do calendário do valor;
+- **Hoje** permanece uma ação independente à direita com target >=44 px;
+- **Trocar** ocupa visualmente o eixo horizontal disponível, mas a superfície central continua 44×44 px;
+- **Regra de contagem** usa duas colunas quando existe largura suficiente.
 
-Breakpoints restantes:
+Mobile `<=430px`:
 
-- `<=430px`: campos secundários passam a uma coluna e paddings reduzem;
-- `<=360px`: dialog ocupa integralmente o viewport estável.
+- campos secundários passam a uma coluna;
+- **Regra de contagem** empilha para impedir compressão ou corte do texto;
+- padding é reduzido de forma controlada.
+
+Mobile `<=360px`:
+
+- dialog ocupa integralmente o viewport estável.
 
 Controlos:
 
@@ -168,17 +177,18 @@ Controlos:
 - tabs: mínimo 48 px;
 - ação **Hoje**: mínimo 44 px;
 - opções de contagem: mínimo 44 px por label;
-- botão de troca: 44×44 px;
+- superfície central de Trocar: 44×44 px;
 - CTA principal: mínimo 52 px.
 
 Acessibilidade e modos:
 
 - foco visível preservado;
+- seletor nativo de data não é substituído por widget JavaScript;
 - `forced-colors` e `prefers-reduced-motion` explícitos;
 - impressão/PDF mantém apenas o conteúdo de resultado relevante;
 - JavaScript/TypeScript funcional e IDs/handlers não foram duplicados.
 
-`cdc-datecalc-workspace` usa `display:contents` apenas como composição visual para permitir que os filhos existentes participem na única grelha da ferramenta; não existe um segundo componente de estado ou cálculo.
+`cdc-datecalc-workspace` usa `display:contents` apenas como composição visual; não existe um segundo componente de estado ou cálculo.
 
 ## 8. Mercado
 
@@ -203,7 +213,7 @@ Pipeline vigente:
 
 `src/**/*.ts → tsc strict/noEmit → build-typescript-runtime.cjs → .generated/*.js → prepare-pages.cjs → dist/*.js → Pages`.
 
-A Calculadora de datas continua com fonte funcional TypeScript strict; PR #161 altera apenas apresentação CSS, regressão do contrato visual e token técnico de cache.
+A Calculadora de datas continua com fonte funcional TypeScript strict. O PR #163 altera apenas CSS, regressão do contrato visual e token técnico de cache; `src/ui/date-calculator.ts` não foi modificado.
 
 ## 11. Build/PWA
 
@@ -220,9 +230,10 @@ Service Worker:
 
 Tokens recentes:
 
-- `date-calculator-layout2`: autoridade visual base da Calculadora de datas;
+- `date-calculator-layout2`: autoridade visual base;
 - `auth-spacing3`: ritmo móvel do cofre;
-- `date-calculator-mobile-spacing3`: compactação do grupo Data inicial/Trocar/Data final.
+- `date-calculator-mobile-spacing3`: compactação do grupo Data inicial/Trocar/Data final;
+- `date-calculator-prototype-inputs4`: apresentação dos campos de data e regra de contagem alinhada ao protótipo.
 
 `package.json`, manifesto de release e versão pública permanecem inalterados.
 
@@ -239,22 +250,24 @@ Tokens recentes:
 
 A CI cobre sintaxe, TypeScript, finanças, isolamento, datas, QR, Mercado, scanner, UI, responsividade, acessibilidade, segurança e sync.
 
-PR #161 adiciona regressões para:
+PR #163 adiciona regressões para:
 
-- marcador `76-date-calculator-mobile-spacing3` dentro da autoridade canónica;
-- grupo móvel em flex/coluna com gap de 8 px;
-- labels sem margem/altura artificial;
-- botão Trocar centrado e sem margem adicional;
-- cache PWA `date-calculator-mobile-spacing3`;
+- marcador `76-date-calculator-prototype-inputs4` dentro da autoridade canónica;
+- padding reservado para calendário + ação Hoje;
+- indicador nativo WebKit posicionado à esquerda;
+- grupo móvel flex/coluna com gap de 8 px;
+- eixo visual de Trocar e superfície central 44×44 px;
+- Regra de contagem em duas colunas, com fallback de uma coluna em `<=430px`;
+- token de cache `date-calculator-prototype-inputs4`;
 - manutenção de todos os vetores matemáticos civis multitimezone.
 
-Evidência PR #161: TypeScript `35021139249` e CI `35021139256`, ambos com sucesso. Após merge: TypeScript `35021210449`, CI `35021210442` e Pages `35021281637`, todos com sucesso.
+Evidência PR #163: TypeScript `35023063165` e CI `35023063147`, ambos com sucesso. Após merge: TypeScript `35023156381`, CI `35023156390` e Pages `35023224573`, todos com sucesso.
 
-Limitação: testes estáticos não substituem Safari/WebKit real para geometria visual, top-layer, scroll, safe areas, browser chrome, partilha e impressão.
+Limitação: testes estáticos não substituem Safari/WebKit real para rendering do indicador nativo, top-layer, scroll, safe areas, browser chrome, partilha e impressão.
 
 ## 14. Próxima consolidação
 
-1. validar `76-date-calculator-mobile-spacing3` no mesmo iPhone/Safari/PWA;
+1. validar `76-date-calculator-prototype-inputs4` no mesmo iPhone/Safari/PWA;
 2. validar `76-auth-spacing3` e os restantes blocos móveis pendentes;
 3. corrigir descrição factual de rede em Segurança;
 4. empacotar ZXing localmente com licença preservada;
