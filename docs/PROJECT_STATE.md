@@ -4,8 +4,8 @@ Atualizado: 15 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline `main` antes deste bloco: `863942d018887b35d3277cd2b36062f1509ad29a` — PR #132  
-Branch ativa: `fix/v76-market-canonical-identity1`
+Baseline publicada: `62359b4997075c4bd476f43f69ab18e41327f1bd` — PR #133  
+Branch ativa: `fix/v76-market-identity-stale-guard1`
 
 ## Invariantes obrigatórias
 
@@ -19,40 +19,45 @@ Branch ativa: `fix/v76-market-canonical-identity1`
 - QR, scanner, backup/restauro, PWA e offline não podem regredir;
 - UI/UX e migração de linguagem não alteram silenciosamente domínio, persistência ou segurança.
 
-## Estado real publicado antes deste bloco
+## Estado publicado
 
-A `main` está na release v76 e já ultrapassou a antiga baseline do PR #100.
+A `main` está oficialmente em v76/`0.76.0`.
 
-Principais consolidações publicadas:
+Consolidações relevantes já publicadas:
 
-- PR #105–#116: retirada progressiva da dependência/runtime v74, uma única autoridade de composição/navegação e oficialização da v76;
+- PR #105–#116: retirada progressiva do runtime v74, autoridade única de navegação/composição e oficialização da v76;
 - PR #117–#130: menu móvel, shell/safe areas, Planeamento/Mais, Dashboard, Mercado, drawer e pesquisa alinhados ao produto v76;
 - PR #131: fluxo profissional de Adicionar despesa;
-- PR #132: hotfix Safari/iPhone para touch/scroll do formulário de despesas.
+- PR #132: hotfix Safari/iPhone para touch/scroll do formulário de despesas;
+- PR #133: persistência retrocompatível de `marketId|pid` no Mercado.
 
-Para o commit `863942d...`, TypeScript, CI `quality` e Deploy Pages terminaram com sucesso.
+Evidência PR #133:
 
-## Bloco atual — `76-market-identity1`
+- merge `62359b4997075c4bd476f43f69ab18e41327f1bd`;
+- TypeScript Foundation PR `34913445635`: sucesso;
+- CI PR `34913445733`: sucesso integral;
+- TypeScript Foundation main `34913506775`: sucesso;
+- CI main `34913506766`: sucesso integral;
+- Pages `34913539151`: sucesso.
 
-Problema confirmado na auditoria:
+A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados para este hotfix. Só a chave técnica de cache PWA mudou.
 
-- o catálogo e a pesquisa live conhecem `marketId` e `pid`, mas o item adicionado à lista não preservava essa identidade de forma persistente;
-- o tipo `MarketItem` também não declarava esses campos, apesar de `MarketCatalogIdentity` já existir no modelo TypeScript.
+## Bloco atual — `76-market-identity-stale1`
 
-Correção em implementação nesta branch:
+Revisão pós-publicação do PR #133 identificou um edge case raro: se o utilizador tocar em “Adicionar” num resultado live mas o handler não chegar ao commit, a identidade pendente podia permanecer em memória e teoricamente ser aplicada a uma criação manual posterior.
 
-- `v75-market-flow.js` captura a identidade `cesta-<marketId>-<pid>` da ação de adicionar produto;
-- antes do commit do novo item, preserva `marketId` e `pid` sem tocar em preço/quantidade;
-- a normalização do item é envolvida para manter os dois campos depois de reload/restore/sync;
-- `MarketItem` passa a tipar `marketId` e `pid` de forma retrocompatível (`''` para itens manuais/legados);
-- diferenças de `marketId/pid` não são tratadas como metadados descartáveis pelo sync;
-- Service Worker recebe apenas invalidação técnica `market-identity1`; não há alteração de versão/release nem do Centro de atualizações.
+Hardening em curso:
+
+- a identidade pendente expira no microtask seguinte se não for consumida pelo commit live;
+- a aplicação normal do resultado mantém o comportamento: a identidade é copiada para o item antes do primeiro `await` do commit;
+- preço, quantidade, `estimatedCents`, `actualCents`, scanner e persistência financeira não são alterados;
+- regressão específica e novo token técnico de cache `market-identity-stale1` foram adicionados.
 
 ## Auditoria atual — problemas abertos
 
 ### ALTO
 
-- executar CI/TypeScript/Pages do bloco `76-market-identity1` antes de integrar;
+- fechar o guard de identidade pendente com CI/TypeScript/Pages verdes;
 - acrescentar E2E real com WebKit/Chromium para toque, teclado, scroll e transição PIN → aplicação;
 - reduzir gradualmente a cascade CSS e dependência de `!important`;
 - `main` continua sem branch protection/required checks obrigatórios.
@@ -64,13 +69,13 @@ Correção em implementação nesta branch:
 - reduzir `style-src 'unsafe-inline'` quando a arquitetura permitir;
 - continuar migração TypeScript por risco, sem começar por `finance.js`/cifra.
 
-## Limpeza de repositório
+## Higiene de repositório
 
-- PR #45 (v65) foi encerrado como obsoleto em 15/09/2026; não deve ser reaberto ou integrado na v76.
+- PR #45/v65 encerrado como obsoleto em 15/09/2026; não deve ser reaberto ou integrado na v76.
 
 ## Próximo passo
 
-1. fechar `76-market-identity1` com CI + TypeScript + Pages verdes;
+1. publicar `76-market-identity-stale1` se todos os gates permanecerem verdes;
 2. validar pesquisa → adicionar → reload → edição → sync sem perder `marketId|pid`;
 3. criar primeiro fluxo E2E WebKit/Chromium;
 4. corrigir a descrição da página Segurança e preparar ZXing local;
