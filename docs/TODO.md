@@ -22,8 +22,10 @@ Atualizado: 15 de setembro de 2026
 - [x] PR #152: keypad mobile 56 px com gaps 30/16 px; fallbacks estreitos/baixos preservados.
 - [x] PR #154 / `76-auth-exclusive-state1`: `hidden` é autoridade também entre criação e desbloqueio.
 - [x] PR #154: testes protegem exclusividade do estado e decisão do runtime.
-- [x] PR #154: TypeScript, CI e Pages verdes.
-- [ ] Confirmar `76-auth-exclusive-state1` no mesmo iPhone/Safari web e PWA instalada.
+- [x] PR #158 / `76-auth-spacing3`: ritmo vertical compactado sem alterar a geometria aprovada do keypad.
+- [x] PR #158: `#vaultMessage:empty` deixa de reservar altura; cache PWA invalidado com `auth-spacing3`.
+- [x] PR #158: TypeScript, CI e Pages verdes.
+- [ ] Confirmar `76-auth-spacing3` no mesmo iPhone/Safari web e PWA instalada.
 - [ ] Validar estado sem cofre num browser/perfil limpo.
 - [ ] Validar portrait/landscape e teclado virtual.
 - [ ] Criar E2E WebKit/Chromium para criação/desbloqueio → Dashboard → drawer → Despesas → Adicionar.
