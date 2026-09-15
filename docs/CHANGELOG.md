@@ -2,156 +2,88 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
-## 2026-09-13 — PR #100 / `76-brand-icons1` — identidade e iconografia — publicado
+## 2026-09-15 — `76-market-identity1` — identidade canónica do Mercado
 
-### Problemas confirmados
+### Problema confirmado
 
-- `icon.svg` combinava casa, euro, folha e dois gradientes, criando demasiada informação em tamanhos pequenos;
-- a PWA usava `icon.svg`, enquanto `.brand-mark` era hidratado com Lucide `home`, produzindo duas identidades visuais;
-- o Mercado acumulava pseudo-ícones próprios além do sistema Lucide;
-- “Adicionar item” recebia `Plus`, mas CSS escondia esse ícone e mostrava `Scan`, contradizendo a ação;
-- existiam ícones decorativos adicionais no título, sync e cartões de resumo.
+- a pesquisa Cesta e o catálogo visual conheciam a identidade `marketId|pid`;
+- ao adicionar um resultado live à lista, essa identidade deixava de estar garantida no ciclo de commit/normalização;
+- `MarketItem` não declarava `marketId` nem `pid`, apesar de `MarketCatalogIdentity` já existir nos tipos.
 
-### Correções publicadas
+### Correção
 
-- `icon.svg` simplificado para casa + euro, teal sólido `#087B78` e branco;
-- removidos folha e gradientes da marca;
-- `.brand-mark` passa a reutilizar `icon.svg` em vez de exibir genericamente Lucide `home`;
-- Lucide mantém-se como autoridade para navegação, ações e estados;
-- pseudo-ícones decorativos/duplicados do Mercado são neutralizados pela autoridade CSS final;
-- “Adicionar item” volta a apresentar `Plus` semântico;
-- stroke funcional normalizado em 2 px;
-- `tests/ui-icons.test.cjs` protege identidade, semântica e ausência de duplicação;
-- cache Service Worker recebe `brand-icons1` para distribuir a alteração.
+- `v75-market-flow.js` adiciona uma ponte transitória `76-market-identity1`;
+- a ação `data-market-add-product="cesta-<marketId>-<pid>"` é usada para transportar a identidade até ao novo item;
+- `marketId/pid` são aplicados imediatamente antes do commit `created/market`;
+- `normalizeMarketItem()` é envolvido para preservar os dois campos depois de reload, restauro e sincronização;
+- retalhistas aceites: `pingo-doce`, `continente`; itens manuais/legados permanecem válidos com campos vazios;
+- `src/types/persisted-state.ts` e os contratos TypeScript passam a incluir a identidade;
+- `src/sync/sync-conflict-policy.ts` continua sem remover `marketId/pid`, porque identidade de SKU não é metadado visual descartável;
+- regressões em `tests/v75-market-flow.test.cjs` protegem o contrato;
+- Service Worker recebe o token técnico `market-identity1` para distribuição imediata.
 
 ### Preservado
 
-Sem alterações a `STATE_VERSION`, cálculos, `finance.js`, IndexedDB, PBKDF2/AES-GCM, PIN, sync, QR, scanner, preços, quantidades ou regras de Mercado.
+Sem alteração de `STATE_VERSION`, release pública, `package.json`, `release-manifest.json`, `app-update.js`, cálculos, `estimatedCents`, `actualCents`, quantidade, PIN/cofre, IndexedDB, QR ou scanner.
 
-### Evidência
+### Higiene
 
-- merge PR #100: `5b9689f04e844b9216626729b3b5aae5bf1acc09`;
-- TypeScript Foundation PR: sucesso;
-- CI PR `34783486604`: sucesso integral;
-- TypeScript Foundation main `34783537256`: sucesso;
-- CI main `34783537266`: sucesso integral;
-- Pages `34783564467`: sucesso.
+- PR #45/v65 encerrado como obsoleto; não deve ser integrado na baseline v76.
 
-### Validação física pendente
+### Estado
 
-Safari/iPhone/PWA, Android/Chrome e desktop. O ícone do ecrã principal de uma PWA já instalada pode continuar em cache pelo sistema operativo e exigir refresh/reinstalação; não é tratado como regressão confirmada sem teste físico.
+Branch: `fix/v76-market-canonical-identity1`. Integração depende de CI + TypeScript + Pages verdes.
 
 ---
 
-## 2026-09-13 — PR #99 / `76-ui-audit1` — auditoria transversal UI/UX — publicado
+## 2026-09-14 — release v76 e estabilização estrutural
 
-### Âmbito
+### Consolidação arquitetural
 
-Auditoria de header, auth, dock móvel, design system, cascade v74/v75/v76, responsividade, acessibilidade e autoridade de navegação. Referências usadas: Apple HIG, Material/Android accessibility, WCAG 2.2/W3C e web.dev, adaptadas à PWA real.
+- arquitetura atual foi desacoplada do runtime v74;
+- `v74-experience.js/.css` e Featured foram retirados do bundle e posteriormente do repositório;
+- navegação/composição móvel passou a uma única autoridade;
+- release pública foi oficializada como v76/`0.76.0`;
+- shell, safe areas, drawer, menu e páginas foram alinhados ao sistema v76.
 
-### Problemas confirmados
+### UI/UX
 
-- header móvel v75 ainda impunha gradiente escuro e texto/ícones brancos, enquanto v76 já usava superfície clara;
-- onboarding `cdcWelcome` do v74 continuava a poder mascarar o fluxo visual `76-auth1` no primeiro acesso;
-- navegação móvel continua com duas autoridades (`core/render` e `v74-experience`);
-- v74 ainda cria blocos de Dashboard que `76-dashboard-clean1` apenas esconde;
-- cascade histórica continua dependente de múltiplos `!important`.
+- Dashboard passou a usar hero de saldo e indicadores canónicos;
+- Despesas e Mercado recuperaram os fluxos funcionais canónicos com pesquisa/filtros/listas;
+- Planeamento, Metas e Mais foram alinhados ao protótipo sem inventar domínio;
+- browser Adicionar produto foi refinado;
+- drawer móvel passou a grelha coerente;
+- pesquisa do Mercado deixou de desenhar moldura duplicada.
 
-### Correções publicadas
+### Despesas/Safari
 
-- `v75-header-refinement.css` refeito como camada de compatibilidade neutra: superfície do design system, sem gradiente, sem branco forçado, sem sombra pesada;
-- controlos de menu/notificação 44×44 px, foco claro, hover/active discretos e forced-colors;
-- `v76-mobile-shell.css` mantém contratos de `76-auth-hidden1`, neutraliza `cdcWelcome` e mantém `vaultCreate` real visível;
-- dock móvel passa a superfície única, selected state subtil, ícones/labels coerentes e foco visível;
-- cache Service Worker recebe `ui-audit1`;
-- auditoria detalhada em `docs/UI_UX_AUDIT.md`.
+- modos Manual / Ler fatura / QR ficaram determinísticos e acessíveis;
+- PR #131 profissionalizou o formulário Adicionar despesa;
+- PR #132 corrigiu hit-testing/touch no Safari/iPhone removendo scrolls aninhados e preservando campos/tabs interativos.
 
-### Evidência
+### Evidência mais recente antes de 15/09
 
-- merge `add93b922fd8c91d6ec8ad7fffcc8bf5984d673c`;
-- CI pós-merge `34782068003`: sucesso integral;
-- Pages `34782098996`: sucesso.
-
----
-
-## 2026-09-13 — PR #98 / `76-auth-hidden1` — Safari respeita `hidden` no cofre — publicado
-
-Segunda validação física mostrou que, apesar do PR #96, o cofre podia continuar visualmente no fluxo enquanto a página `Mais` aparecia por baixo. A causa foi a regra `display:grid!important` do auth competir com o comportamento nativo de `[hidden]` em Safari/WebKit.
-
-Correção:
-
-- `#vaultScreen[hidden]` e `#app[hidden]` explícitos como `display:none!important`;
-- proteção anterior de cofre visível → shell oculto preservada;
-- cache `auth-hidden1`;
-- regressão adicionada ao mobile shell.
-
-Evidência:
-
-- merge `56f909846c5f02c466f047792c99a61f7fbac1c7`;
-- TypeScript Foundation `34781128824`: sucesso;
-- CI `34781128879`: sucesso;
-- Pages `34781156741`: sucesso.
+Commit `863942d018887b35d3277cd2b36062f1509ad29a` com TypeScript, CI `quality` e GitHub Pages concluídos com sucesso.
 
 ---
 
-## 2026-09-13 — PR #96 / `76-auth-transition1` — PIN abre Dashboard e dock deixa de sobrepor cofre — publicado
+## 2026-09-13 — estabilização auth/UI e início da migração TypeScript
 
-- entrada local-first depois de PIN válido;
-- sync remoto continua em background;
-- rollback seguro em falha de transição;
-- shell não pode aparecer enquanto cofre está visível;
-- Safari/PWA startup e mobile shell protegidos por testes.
-
-Merge `d18d274141b1032ab0e909729739b3f86cabfb9e`; CI/TypeScript/Pages verdes.
-
----
-
-## 2026-09-13 — PR #95 — política de conflitos de sync em TypeScript — publicado
-
-- `src/sync/sync-conflict-policy.ts` canónico;
-- JS manual removido;
-- runtime público gerado pelo build;
-- diferenças técnicas não criam falsos conflitos; diferenças financeiras continuam a exigir revisão.
-
----
-
-## 2026-09-13 — PR #94 / `76-dashboard-clean1`
-
-- suprime visualmente cinco blocos v74 duplicados no Dashboard;
-- mantém `renderDashboard()`/`dashboardNumbers()` canónicos;
-- criação runtime desses nós ainda é dívida aberta.
-
----
-
-## 2026-09-13 — PR #93 — gate de integridade de páginas
-
-Valida rota ↔ secção ↔ renderer, IDs duplicados, assets do `dist`, allowlist Service Worker e evita publicação de conteúdo interno.
-
----
-
-## 2026-09-13 — PR #91 / `76-auth1`
-
-- acesso mais limpo;
-- keypad circular;
-- `Entrar` dominante;
-- recuperação/importação preservadas;
-- sem biometria fictícia.
-
----
-
-## 2026-09-12 — migração TypeScript inicial
-
-- PR #88: Veggie menu TS;
-- PR #89: Market branding TS;
-- baseline rollback `backup/js-runtime-baseline-20260912`.
+- PIN local passou a abrir a aplicação sem depender do sync remoto;
+- Safari/WebKit passou a respeitar explicitamente `[hidden]` entre cofre e shell;
+- header/dock/drawer receberam auditoria transversal;
+- marca `icon.svg` e Lucide foram consolidados;
+- gate de integridade de páginas passou a verificar rota ↔ secção ↔ renderer, IDs e bundle Pages;
+- Sync conflict policy migrou para TypeScript.
 
 ---
 
 ## Decisões de continuidade
 
 - regressão real em dispositivo tem prioridade sobre teste legado;
-- UI final usa conteúdo/hierarquia antes de decoração;
 - `icon.svg` é a marca canónica e Lucide é a iconografia funcional;
-- navegação móvel precisa de uma única autoridade;
-- blocos v74 substituídos devem deixar de ser criados;
+- `marketId|pid` acompanha o SKU pesquisado quando existe origem verificável;
+- correção técnica não exige mudar a release pública;
+- testes estáticos não substituem E2E/validação WebKit real;
+- ZXing deve migrar de CDN para bundle local antes de endurecer `script-src`;
 - migração TypeScript continua por blocos com paridade e regressões.
