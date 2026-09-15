@@ -2,7 +2,54 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
-## 2026-09-15 — PR #150 / `76-auth-ios-spacing2` — espaçamento do cofre no iPhone/Safari — publicado
+## 2026-09-15 — PR #152 / `76-auth-prototype-final1` — protótipo final do PIN — publicado
+
+### Problema confirmado no dispositivo
+
+Depois do PR #150, a validação física mostrou que a correção de altura era tecnicamente estável, mas a composição ainda não correspondia ao resultado visual pretendido:
+
+- o keypad permanecia demasiado estreito na horizontal;
+- vários breakpoints históricos produziam uma sensação de layout corrigido por camadas, em vez de uma composição única;
+- ações secundárias e transferência de cofre tinham pouca separação visual;
+- a zona inferior continuava a parecer misturada com o chrome do Safari.
+
+### Correção
+
+- `v75-usability.css` passa a declarar `76-auth-prototype-final1` como autoridade visual única do cofre;
+- as secções históricas `76-vault-short-height1` e `76-auth-ios-spacing2` são removidas como blocos CSS concorrentes;
+- `100svh`, safe areas, scroll do cofre, input >=16 px e pinch-to-zoom continuam preservados;
+- keypad mobile padrão usa teclas 56 px, `column-gap:30px` e `row-gap:16px`;
+- `<=359px` usa 52 px e gaps 24/13 px;
+- altura `<=720px` usa 50 px e gaps 22/9 px;
+- teclas ganham superfície, borda e sombra subtis; apagar mantém tratamento leve;
+- Entrar permanece CTA principal, palavra-passe/recuperação ficam secundárias;
+- `Usar dados de outro dispositivo` passa a cartão próprio, separado do rodapé;
+- dark mode, `forced-colors`, `prefers-reduced-motion` e targets >=44 px são preservados;
+- `tests/accessibility.test.cjs` e `tests/v75-stability.test.cjs` foram alinhados com a nova autoridade final;
+- Service Worker recebe apenas o token técnico `auth-prototype-final1` para invalidar a composição anterior.
+
+### Evidência
+
+- head final PR #152: `1124fc2284ab15dfc7b8e384792196a8256f89c6`;
+- TypeScript Foundation PR `34977687455`: sucesso;
+- CI PR `34977687437`: sucesso integral;
+- merge: `ceaa4fc8a79cbb2ad442854ffaacd501dac7313f`;
+- TypeScript Foundation `main` `34977780423`: sucesso;
+- CI `main` `34977780342`: sucesso integral;
+- Deploy Pages `34977846729`: sucesso.
+
+### Preservado
+
+Sem alteração de PIN, palavra-passe, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync, `STATE_VERSION`, dados financeiros, QR, scanner, Mercado, release `v76` ou versão `0.76.0`.
+
+### Pendente
+
+- confirmar no mesmo iPhone/Safari web e PWA instalada que o resultado publicado corresponde ao protótipo aprovado;
+- validar portrait/landscape, barras do Safari abertas/recolhidas e teclado virtual.
+
+---
+
+## 2026-09-15 — PR #150 / `76-auth-ios-spacing2` — espaçamento do cofre no iPhone/Safari — publicado e substituído visualmente pelo PR #152
 
 ### Problema confirmado no dispositivo
 
@@ -13,36 +60,25 @@ A captura física do ecrã de PIN mostrou uma composição funcional mas vertica
 - `.vault-card` ainda herdava margem automática, podendo contribuir para recentragem vertical;
 - a zona `Usar dados de outro dispositivo` aproximava-se da barra inferior do Safari e perdia conforto visual.
 
-### Correção
+### Correção histórica
 
-- `v75-usability.css` adiciona `76-auth-ios-spacing2` como camada canónica do auth móvel;
-- `#vaultScreen` usa `min-height:100svh` em mobile para trabalhar com o small viewport do browser;
-- o conteúdo começa no topo seguro e `.vault-card` passa a `margin:0 auto`;
-- safe areas continuam com `env(safe-area-inset-*)`;
-- ritmo vertical de marca, introdução, input, keypad, botão Entrar, recuperação e transferência é reduzido progressivamente;
-- `<=900px` usa keypad de 58 px, `<=780px` usa 54 px e `<=640px` usa 48 px;
-- todos os targets essenciais continuam >=44 px;
-- regressão em `tests/accessibility.test.cjs` protege `100svh`, margens, breakpoints e tamanho mínimo;
-- Service Worker recebe apenas o token técnico `auth-ios-spacing2` para invalidar o layout anterior na PWA.
+- introduziu `100svh`, safe areas e topo seguro no auth móvel;
+- `.vault-card` passou a `margin:0 auto`;
+- densidade foi reduzida por altura para 58/54/48 px;
+- preservou targets >=44 px e auth funcional;
+- token técnico `auth-ios-spacing2` invalidou o layout anterior.
 
 ### Evidência
 
-- head final do PR #150: `5713cb7514344298aeda578e061281667c6aca48`;
+- head final PR #150: `5713cb7514344298aeda578e061281667c6aca48`;
 - TypeScript Foundation PR `34961244599`: sucesso;
 - CI PR `34961244608`: sucesso integral;
 - merge: `a140211813f2194926b2cbd5bde7c53a8798b140`;
 - TypeScript Foundation `main` `34961349276`: sucesso;
 - CI `main` `34961349248`: sucesso integral;
-- Deploy Pages `34961403315`: sucesso, incluindo build, allowlist, upload e deploy.
+- Deploy Pages `34961403315`: sucesso.
 
-### Preservado
-
-Sem alteração de PIN, palavra-passe, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação, sync, `STATE_VERSION`, dados financeiros, QR, scanner, Mercado, release `v76` ou versão `0.76.0`.
-
-### Pendente
-
-- confirmar no mesmo iPhone/Safari web e PWA instalada que o novo ritmo vertical fica correto com barras do browser abertas/recolhidas;
-- validar portrait/landscape e teclado virtual.
+A base de viewport/safe areas permanece válida; os tamanhos e a composição visual foram substituídos por `76-auth-prototype-final1` no PR #152.
 
 ---
 
@@ -75,7 +111,7 @@ Sem alteração de PIN, palavra-passe, `unlockVault()`, PBKDF2, AES-GCM, Indexed
 - merge em `main`: `8e58777f601d164bd4589f7d0e0e8f96e02686f0`;
 - TypeScript Foundation e CI do PR: sucesso;
 - TypeScript Foundation e CI em `main`: sucesso;
-- a publicação atual de Pages no head `a140211813f2194926b2cbd5bde7c53a8798b140` (`34961403315`) contém também os assets da calculadora e terminou com sucesso.
+- a publicação atual de Pages contém também os assets da calculadora.
 
 ### Pendente
 
@@ -211,7 +247,7 @@ A validação física mostrou que a faixa horizontal herdada de filtros produzia
 - regressão real em dispositivo tem prioridade sobre teste legado;
 - `icon.svg` é marca; Lucide é iconografia funcional;
 - protótipos definem hierarquia, não autorizam domínio inventado;
-- auth móvel segue viewport útil/safe areas e mantém targets >=44 px;
+- auth móvel tem uma única autoridade visual, usa viewport útil/safe areas e mantém targets >=44 px;
 - filtros de Despesas não dependem de faixa horizontal;
 - resumo de Planeamento delega no formulário/orçamento canónico;
 - calculadora usa aritmética civil e regras explícitas;
