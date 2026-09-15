@@ -1,7 +1,7 @@
-/* Conta de Casa v75/v76 — revisão 76-drawer-neutral1 + 76-drawer-grid1.
-   Drawer móvel neutro e organizado por grelhas de duas colunas. Mantém a
-   navegação funcional, o lado direito, os alvos tácteis, safe areas e o fecho
-   dedicado do dialog. Camada exclusivamente visual. */
+/* Conta de Casa v76 — 76-drawer-hierarchy1.
+   Drawer móvel com hierarquia vertical, leitura sequencial e densidade reduzida.
+   Mantém navegação, lado direito, targets tácteis, safe areas, fecho dedicado e
+   comportamento funcional existentes. Camada exclusivamente visual. */
 
 @media(max-width:820px){
   :root{
@@ -13,13 +13,13 @@
     --v76-drawer-primary:var(--v76-primary,#087b78);
     --v76-drawer-active:var(--v76-surface-accent,#ecf8f5);
     --v76-drawer-touch:48px;
-    --v76-drawer-card-radius:14px;
+    --v76-drawer-radius:24px;
   }
 
   html.cdc-v75 .nav-drawer{
     inset:0 0 0 auto!important;
-    width:min(320px,calc(100vw - 72px))!important;
-    max-width:calc(100vw - 56px)!important;
+    width:min(360px,calc(100vw - 24px))!important;
+    max-width:calc(100vw - 16px)!important;
     height:100dvh!important;
     max-height:100dvh!important;
     margin:0!important;
@@ -36,7 +36,7 @@
   }
   html.cdc-v75 .nav-drawer.open::backdrop,
   html.cdc-v75 .nav-drawer[open]:not([data-closing="true"])::backdrop{
-    background:rgba(9,31,36,.18)!important;
+    background:rgba(9,31,36,.24)!important;
   }
 
   html.cdc-v75 .nav-drawer-shell{
@@ -46,25 +46,25 @@
     min-height:100dvh!important;
     display:flex!important;
     flex-direction:column!important;
-    padding:max(18px,env(safe-area-inset-top,0px)) 14px max(16px,env(safe-area-inset-bottom,0px))!important;
+    padding:max(18px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px))!important;
     overflow:hidden!important;
     color:var(--v76-drawer-text)!important;
     background:var(--v76-drawer-surface)!important;
     border:0!important;
     border-left:1px solid var(--v76-drawer-border)!important;
-    border-radius:24px 0 0 24px!important;
-    box-shadow:-12px 0 32px rgba(10,49,55,.10)!important;
+    border-radius:var(--v76-drawer-radius) 0 0 var(--v76-drawer-radius)!important;
+    box-shadow:-10px 0 30px rgba(10,49,55,.09)!important;
     isolation:isolate!important;
   }
   html.cdc-v75 .nav-drawer-shell::before{display:none!important}
 
-  /* Cabeçalho limpo e compacto. */
+  /* Cabeçalho: marca, contexto e um único controlo de fecho simples. */
   html.cdc-v75 .drawer-head{
-    min-height:68px!important;
+    min-height:72px!important;
     display:flex!important;
     align-items:center!important;
-    gap:10px!important;
-    padding:2px 2px 14px!important;
+    gap:12px!important;
+    padding:2px 2px 16px!important;
     overflow:visible!important;
     border-bottom:1px solid var(--v76-drawer-border)!important;
     color:var(--v76-drawer-text)!important;
@@ -75,33 +75,50 @@
     min-width:0!important;
     display:flex!important;
     align-items:center!important;
-    gap:10px!important;
+    gap:12px!important;
     color:var(--v76-drawer-text)!important;
   }
   html.cdc-v75 .drawer-head .brand-mark{
-    width:42px!important;
-    height:42px!important;
-    flex:0 0 42px!important;
-    border-radius:12px!important;
+    width:46px!important;
+    height:46px!important;
+    flex:0 0 46px!important;
+    border-radius:14px!important;
     background:url('./icon.svg') center/cover no-repeat!important;
     color:transparent!important;
-    border:1px solid var(--v76-drawer-border)!important;
+    border:1px solid color-mix(in srgb,var(--v76-drawer-primary) 14%,var(--v76-drawer-border))!important;
     box-shadow:none!important;
   }
+  html.cdc-v75 .drawer-head .brand>div{min-width:0!important}
   html.cdc-v75 .drawer-head .brand strong{
+    display:block!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
     color:var(--v76-drawer-text)!important;
-    font-size:.94rem!important;
-    line-height:1.18!important;
+    font-size:1rem!important;
+    line-height:1.2!important;
     font-weight:720!important;
     letter-spacing:-.015em!important;
   }
   html.cdc-v75 .drawer-head .brand small{
+    display:block!important;
+    margin-top:2px!important;
     color:var(--v76-drawer-muted)!important;
-    font-size:.7rem!important;
+    font-size:.74rem!important;
     line-height:1.3!important;
   }
+
+  html.cdc-v75.app-active .nav-drawer[open] .drawer-head>#drawerCloseBtn.icon-btn.drawer-close-control,
   html.cdc-v75 .drawer-head>:is(.mobile-menu-btn,#drawerCloseBtn,.icon-btn){
     order:2!important;
+    position:relative!important;
+    z-index:8!important;
+    display:inline-grid!important;
+    place-items:center!important;
+    visibility:visible!important;
+    opacity:1!important;
+    pointer-events:auto!important;
     flex:0 0 44px!important;
     width:44px!important;
     min-width:44px!important;
@@ -109,26 +126,27 @@
     min-height:44px!important;
     margin-left:auto!important;
     padding:0!important;
-    border:1px solid transparent!important;
-    border-radius:12px!important;
-    background:transparent!important;
+    border:0!important;
+    border-radius:50%!important;
+    background:var(--v76-drawer-soft)!important;
     color:var(--v76-drawer-text)!important;
     box-shadow:none!important;
   }
   html.cdc-v75 .drawer-head>:is(.mobile-menu-btn,#drawerCloseBtn,.icon-btn):active{
-    background:var(--v76-drawer-soft)!important;
-    border-color:var(--v76-drawer-border)!important;
+    background:var(--v76-drawer-active)!important;
+    color:var(--v76-drawer-primary)!important;
+    transform:scale(.96)!important;
   }
   html.cdc-v75 .drawer-head>:is(.mobile-menu-btn,#drawerCloseBtn,.icon-btn):focus-visible{
     outline:3px solid color-mix(in srgb,var(--v76-drawer-primary) 34%,transparent)!important;
     outline-offset:2px!important;
   }
 
-  /* 76-drawer-grid1 — grupos em grelha, duas colunas e cartões com hierarquia clara. */
+  /* Hierarquia vertical: uma ação por linha, sem cartões concorrentes em duas colunas. */
   html.cdc-v75 .drawer-nav{
     min-height:0!important;
-    margin:14px 0 0!important;
-    padding:0 2px 12px!important;
+    margin:16px 0 0!important;
+    padding:0 2px 14px!important;
     overflow-y:auto!important;
     overflow-x:hidden!important;
     overscroll-behavior:contain!important;
@@ -140,7 +158,7 @@
     display:flex!important;
     flex:1 1 auto!important;
     flex-direction:column!important;
-    gap:17px!important;
+    gap:18px!important;
   }
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-group{
     display:grid!important;
@@ -149,56 +167,62 @@
     min-width:0!important;
   }
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-group-items{
-    display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:8px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:2px!important;
     min-width:0!important;
   }
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-group-label{
     display:flex!important;
     align-items:center!important;
     min-height:18px!important;
-    margin:0 4px 1px!important;
+    margin:0 10px 2px!important;
     color:var(--v76-drawer-muted)!important;
-    font-size:.64rem!important;
+    font-size:.66rem!important;
     line-height:1.25!important;
     font-weight:760!important;
-    letter-spacing:.085em!important;
+    letter-spacing:.095em!important;
     text-transform:uppercase!important;
   }
+
+  /* A ordem visual do grupo principal acompanha a sequência de uso. */
+  html.cdc-v75 .drawer-nav [data-page="dashboard"]{order:1!important}
+  html.cdc-v75 .drawer-nav [data-page="bills"]{order:2!important}
+  html.cdc-v75 .drawer-nav [data-page="planning"]{order:3!important}
+  html.cdc-v75 .drawer-nav [data-page="market"]{order:4!important}
 
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-btn{
     position:relative!important;
     min-width:0!important;
-    min-height:70px!important;
+    min-height:52px!important;
     display:grid!important;
-    grid-template-columns:32px minmax(0,1fr)!important;
+    grid-template-columns:26px minmax(0,1fr)!important;
     align-items:center!important;
     justify-items:start!important;
-    gap:9px!important;
-    padding:10px!important;
-    border:1px solid color-mix(in srgb,var(--v76-drawer-border) 88%,transparent)!important;
-    border-radius:var(--v76-drawer-card-radius)!important;
-    background:color-mix(in srgb,var(--v76-drawer-soft) 64%,var(--v76-drawer-surface))!important;
+    gap:13px!important;
+    padding:10px 12px!important;
+    border:1px solid transparent!important;
+    border-radius:14px!important;
+    background:transparent!important;
     color:var(--v76-drawer-text)!important;
-    box-shadow:0 1px 2px rgba(10,49,55,.035)!important;
-    font-size:.79rem!important;
-    line-height:1.18!important;
-    font-weight:650!important;
+    box-shadow:none!important;
+    font-size:.9rem!important;
+    line-height:1.24!important;
+    font-weight:600!important;
     text-align:left!important;
-    transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease!important;
+    transition:background-color .16s ease,color .16s ease,transform .16s ease!important;
   }
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-btn::before{display:none!important}
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-btn :is(.svg-icon,.ui-icon-svg){
     box-sizing:border-box!important;
-    width:32px!important;
-    min-width:32px!important;
-    height:32px!important;
-    padding:6px!important;
-    border-radius:10px!important;
-    background:var(--v76-drawer-surface)!important;
-    color:var(--v76-drawer-primary)!important;
-    border:1px solid color-mix(in srgb,var(--v76-drawer-primary) 12%,var(--v76-drawer-border))!important;
+    width:24px!important;
+    min-width:24px!important;
+    height:24px!important;
+    padding:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    color:var(--v76-drawer-muted)!important;
+    border:0!important;
     stroke-width:1.9!important;
     box-shadow:none!important;
   }
@@ -208,7 +232,8 @@
     overflow:visible!important;
     text-overflow:clip!important;
     white-space:normal!important;
-    overflow-wrap:anywhere!important;
+    overflow-wrap:normal!important;
+    word-break:normal!important;
     color:inherit!important;
     font-weight:inherit!important;
   }
@@ -217,15 +242,30 @@
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-btn[aria-current="page"]{
     color:var(--v76-drawer-primary)!important;
     background:var(--v76-drawer-active)!important;
-    border-color:color-mix(in srgb,var(--v76-drawer-primary) 24%,var(--v76-drawer-border))!important;
-    box-shadow:0 6px 16px rgba(8,91,99,.07)!important;
+    border-color:transparent!important;
+    box-shadow:none!important;
   }
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-btn.active :is(.svg-icon,.ui-icon-svg),
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-btn[aria-current="page"] :is(.svg-icon,.ui-icon-svg){
-    color:#fff!important;
-    background:var(--v76-drawer-primary)!important;
-    border-color:var(--v76-drawer-primary)!important;
+    color:var(--v76-drawer-primary)!important;
+    background:transparent!important;
+    border-color:transparent!important;
   }
+
+  /* Segurança tem rota própria no drawer; o dock pode continuar a agrupar em Mais. */
+  html.cdc-v75[data-v75-page="security"] .nav-drawer[open] .drawer-nav [data-page="settings"].active,
+  html.cdc-v75[data-v75-page="security"] .nav-drawer[open] .drawer-nav [data-page="settings"][aria-current="page"]{
+    color:var(--v76-drawer-text)!important;
+    background:transparent!important;
+  }
+  html.cdc-v75[data-v75-page="security"] .nav-drawer[open] .drawer-nav [data-page="security"]{
+    color:var(--v76-drawer-primary)!important;
+    background:var(--v76-drawer-active)!important;
+  }
+  html.cdc-v75[data-v75-page="security"] .nav-drawer[open] .drawer-nav [data-page="security"] :is(.svg-icon,.ui-icon-svg){
+    color:var(--v76-drawer-primary)!important;
+  }
+
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-btn:active{
     transform:scale(.985)!important;
   }
@@ -234,11 +274,11 @@
     outline-offset:2px!important;
   }
 
-  /* Rodapé também usa grelha. Com três ações, a última ocupa a linha completa. */
+  /* Rodapé: ações de sessão em duas linhas claras, nunca em grelha apertada. */
   html.cdc-v75.app-active .nav-drawer[open] .drawer-footer{
     flex:0 0 auto!important;
-    display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    display:flex!important;
+    flex-direction:column!important;
     gap:8px!important;
     margin-top:auto!important;
     padding:12px 2px 2px!important;
@@ -246,28 +286,25 @@
   }
   html.cdc-v75.app-active .nav-drawer[open] .drawer-footer .icon-text-btn{
     min-width:0!important;
-    min-height:52px!important;
+    min-height:50px!important;
     display:grid!important;
-    grid-template-columns:20px minmax(0,1fr)!important;
+    grid-template-columns:22px minmax(0,1fr)!important;
     align-items:center!important;
-    gap:7px!important;
-    padding:9px 10px!important;
-    border:1px solid color-mix(in srgb,var(--v76-drawer-border) 88%,transparent)!important;
-    border-radius:12px!important;
+    gap:11px!important;
+    padding:10px 12px!important;
+    border:1px solid color-mix(in srgb,var(--v76-drawer-border) 82%,transparent)!important;
+    border-radius:14px!important;
     background:var(--v76-drawer-soft)!important;
     color:var(--v76-drawer-text)!important;
     box-shadow:none!important;
-    font-size:.74rem!important;
-    line-height:1.15!important;
-    font-weight:620!important;
+    font-size:.84rem!important;
+    line-height:1.2!important;
+    font-weight:600!important;
     text-align:left!important;
   }
-  html.cdc-v75.app-active .nav-drawer[open] .drawer-footer .icon-text-btn:last-child:nth-child(odd){
-    grid-column:1 / -1!important;
-  }
   html.cdc-v75.app-active .nav-drawer[open] .drawer-footer .footer-icon{
-    width:20px!important;
-    height:20px!important;
+    width:22px!important;
+    height:22px!important;
     display:grid!important;
     place-items:center!important;
     color:var(--v76-drawer-primary)!important;
@@ -284,7 +321,7 @@
     outline-offset:2px!important;
   }
 
-  /* 76-drawer-open-guard1 — o estado nativo [open] impede painel vazio no Safari/PWA. */
+  /* O estado nativo [open] continua a impedir drawer vazio no Safari/PWA. */
   html.cdc-v75 .nav-drawer[open]:not([data-closing="true"]) .nav-drawer-shell{
     transform:translate3d(0,0,0)!important;
     opacity:1!important;
@@ -301,10 +338,11 @@
 
 @media(hover:hover) and (pointer:fine) and (max-width:820px){
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-btn:hover{
-    transform:translateY(-1px)!important;
-    background:var(--v76-drawer-surface)!important;
-    border-color:color-mix(in srgb,var(--v76-drawer-primary) 20%,var(--v76-drawer-border))!important;
-    box-shadow:0 8px 18px rgba(10,49,55,.07)!important;
+    transform:none!important;
+    background:var(--v76-drawer-soft)!important;
+    color:var(--v76-drawer-primary)!important;
+    border-color:transparent!important;
+    box-shadow:none!important;
   }
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-btn.active:hover,
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-btn[aria-current="page"]:hover{
@@ -312,34 +350,27 @@
   }
   html.cdc-v75.app-active .nav-drawer[open] .drawer-footer .icon-text-btn:hover,
   html.cdc-v75 .drawer-head>:is(.mobile-menu-btn,#drawerCloseBtn,.icon-btn):hover{
-    background:var(--v76-drawer-soft)!important;
+    background:var(--v76-drawer-active)!important;
     color:var(--v76-drawer-primary)!important;
   }
 }
 
 @media(max-width:359px){
   html.cdc-v75 .nav-drawer{
-    width:min(292px,calc(100vw - 56px))!important;
-    max-width:calc(100vw - 48px)!important;
+    width:calc(100vw - 12px)!important;
+    max-width:calc(100vw - 12px)!important;
   }
   html.cdc-v75 .nav-drawer-shell{
-    padding-inline:11px!important;
+    padding-inline:12px!important;
     border-radius:20px 0 0 20px!important;
   }
-  html.cdc-v75 .drawer-head .brand-mark{width:40px!important;height:40px!important;flex-basis:40px!important}
-  html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-group-items{gap:6px!important}
+  html.cdc-v75 .drawer-head .brand-mark{width:42px!important;height:42px!important;flex-basis:42px!important}
   html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-btn{
-    min-height:66px!important;
-    grid-template-columns:28px minmax(0,1fr)!important;
-    gap:7px!important;
-    padding:8px!important;
-    font-size:.73rem!important;
-  }
-  html.cdc-v75.app-active .nav-drawer[open] .drawer-nav .nav-btn :is(.svg-icon,.ui-icon-svg){
-    width:28px!important;
-    min-width:28px!important;
-    height:28px!important;
-    padding:5px!important;
+    min-height:50px!important;
+    grid-template-columns:24px minmax(0,1fr)!important;
+    gap:11px!important;
+    padding:9px 10px!important;
+    font-size:.86rem!important;
   }
 }
 
