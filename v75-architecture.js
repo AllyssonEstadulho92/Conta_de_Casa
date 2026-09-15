@@ -33,6 +33,12 @@
  *   Diagnóstico dentro de Definições, evitando duplicação de rotas secundárias;
  * - Segurança mantém seleção própria no menu completo, embora continue agrupada
  *   em “Mais” no dock móvel compacto.
+ *
+ * 76-planning-budget-card2:
+ * - o resumo móvel de Planeamento passa a uma hierarquia única inspirada no protótipo;
+ * - mês, intervalo, orçamento, gasto e disponível continuam derivados do domínio real;
+ * - ações “Definir/Editar orçamento” apenas deslocam e focam o campo mensal existente;
+ * - não cria segundo formulário nem altera persistência, fórmulas ou listeners canónicos.
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
@@ -107,6 +113,15 @@
     return new Intl.DateTimeFormat('pt-PT',{month:'long',year:'numeric'}).format(new Date(year,month-1,1)).replace(/^./,char=>char.toUpperCase());
   }
 
+  function monthRangeLabel(){
+    const key=selectedMonthKey();
+    if(!/^\d{4}-\d{2}$/.test(key))return '';
+    const [year,month]=key.split('-').map(Number);
+    const lastDay=new Date(year,month,0).getDate();
+    const monthName=new Intl.DateTimeFormat('pt-PT',{month:'long'}).format(new Date(year,month-1,1));
+    return `1 a ${lastDay} de ${monthName}`;
+  }
+
   function profileName(){
     try{return clean(appState?.settings?.profileName||'Utilizador').split(/\s+/)[0]||'Utilizador';}
     catch(_error){return 'Utilizador';}
@@ -135,7 +150,12 @@
       settings:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M4.9 4.9 7 7m10 10 2.1 2.1M2 12h3m14 0h3M4.9 19.1 7 17m10-10 2.1-2.1"/>',
       sync:'<path d="M20 7h-5V2"/><path d="M20 7a8 8 0 0 0-14-2"/><path d="M4 17h5v5"/><path d="M4 17a8 8 0 0 0 14 2"/>',
       theme:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
-      more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'
+      more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+      chevron:'<path d="m9 18 6-6-6-6"/>',
+      plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+      wallet:'<path d="M3 11h3.75a2 2 0 0 1 1.6.8l.45.6a4 4 0 0 0 6.4 0l.45-.6a2 2 0 0 1 1.6-.8H21"/><path d="M3 7h18"/><rect x="3" y="3" width="18" height="18" rx="2"/>',
+      banknote:'<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+      info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>'
     };
     return `<svg class="svg-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.settings}</svg>`;
   }
@@ -273,7 +293,8 @@
   }
 
   function planningMonthHtml(){
-    return `<div class="cdc-planning-month"><button type="button" data-v75-month-step="-1" aria-label="Mês anterior">‹</button><strong>${esc(monthLabel())}</strong><button type="button" data-v75-month-step="1" aria-label="Mês seguinte">›</button></div>`;
+    const range=monthRangeLabel();
+    return `<div class="cdc-planning-month"><button type="button" class="is-prev" data-v75-month-step="-1" aria-label="Mês anterior">${iconMarkup('chevron',20)}</button><span class="cdc-planning-month-copy"><strong>${esc(monthLabel())}</strong>${range?`<small>${esc(range)}</small>`:''}</span><button type="button" class="is-next" data-v75-month-step="1" aria-label="Mês seguinte">${iconMarkup('chevron',20)}</button></div>`;
   }
 
   function planningArchitectureHtml(metrics,entries){
@@ -283,10 +304,15 @@
     const budgetLabel=hasBudget?moneyText(metrics.budget):'Por definir';
     const remainingLabel=hasBudget?moneyText(metrics.remaining):'—';
     const ringClass=hasBudget?'':' is-unset';
-    const ringValue=hasBudget?`${metrics.pct}%`:'—';
+    const ringLead=hasBudget?`<strong>${metrics.pct}%</strong>`:`<span class="v76-budget-ring-icon">${iconMarkup('wallet',30)}</span>`;
     const ringDetail=hasBudget?`<span data-money>${moneyText(metrics.spent)}</span><small>de ${budgetLabel}</small>`:'<span>Por definir</span><small>Defina um orçamento mensal</small>';
     const ringLabel=hasBudget?`Orçamento usado: ${metrics.pct}%`:'Orçamento mensal por definir';
-    return `${planningMonthHtml()}<section class="v75-budget-summary" aria-label="Resumo do orçamento"><div class="cdc-budget-ring${ringClass}" style="--pct:${hasBudget?metrics.pct:0}" aria-label="${attr(ringLabel)}"><div><strong>${ringValue}</strong>${ringDetail}</div></div><div class="v75-budget-metrics"><div><small>Gasto este mês</small><strong data-money>${moneyText(metrics.spent)}</strong></div><div><small>Orçamento</small><strong${hasBudget?' data-money':''}>${budgetLabel}</strong></div><div><small>Disponível</small><strong${hasBudget?' data-money':''}>${remainingLabel}</strong></div></div></section><div class="v75-section-heading"><strong>Despesas por categoria</strong><small>${entries.length?'Distribuição do mês':'Sem movimentos neste mês'}</small></div><div class="cdc-planning-categories">${entries.map(([name,value],index)=>{const pct=Math.round(Number(value||0)/total*100);return `<div><span class="cdc-category-dot ${['food','home','transport','health','other'][index%5]}" aria-hidden="true"></span><strong>${esc(name)}</strong><span class="cdc-plan-track"><i style="width:${Math.max(5,pct)}%"></i></span><b data-money>${moneyText(value)}</b></div>`;}).join('')||'<p class="cdc-empty-note">Ainda não existem despesas para distribuir.</p>'}</div>`;
+    const actionLabel=hasBudget?'Editar':'Definir';
+    const ctaLabel=hasBudget?'Editar orçamento':'Definir orçamento';
+    const ctaIcon=hasBudget?'settings':'plus';
+    const guidanceTitle=hasBudget?'Orçamento mensal definido':'Defina um orçamento mensal';
+    const guidanceText=hasBudget?'Pode ajustar o limite de gastos sempre que precisar.':'Estabeleça o seu limite de gastos para acompanhar o progresso ao longo do mês.';
+    return `${planningMonthHtml()}<section class="v76-planning-budget-card" aria-labelledby="v76BudgetTitle"><header class="v76-budget-card-head"><span class="v76-budget-card-icon" aria-hidden="true">${iconMarkup('plan',22)}</span><span class="v76-budget-card-copy"><strong id="v76BudgetTitle">Orçamento mensal</strong><small>Acompanhe os seus gastos e mantenha o controlo.</small></span><button type="button" class="v76-budget-head-action" data-v75-budget-focus>${iconMarkup('settings',18)}<span>${actionLabel}</span></button></header><section class="v75-budget-summary" aria-label="Resumo do orçamento"><div class="cdc-budget-ring${ringClass}" style="--pct:${hasBudget?metrics.pct:0}" aria-label="${attr(ringLabel)}"><div>${ringLead}${ringDetail}</div></div><div class="v75-budget-metrics"><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('banknote',20)}</span><span class="v76-budget-metric-copy"><small>Gasto este mês</small><strong data-money>${moneyText(metrics.spent)}</strong></span></div><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('goal',20)}</span><span class="v76-budget-metric-copy"><small>Orçamento</small><strong${hasBudget?' data-money':''}>${budgetLabel}</strong></span><button type="button" class="v76-budget-metric-action" data-v75-budget-focus aria-label="${actionLabel} orçamento">${iconMarkup('chevron',18)}</button></div><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('wallet',20)}</span><span class="v76-budget-metric-copy"><small>Disponível</small><strong${hasBudget?' data-money':''}>${remainingLabel}</strong></span></div></div></section><div class="v76-budget-guidance"><span class="v76-budget-guidance-icon" aria-hidden="true">${iconMarkup('info',20)}</span><span><strong>${guidanceTitle}</strong><small>${guidanceText}</small></span><button type="button" data-v75-budget-focus aria-label="${actionLabel} orçamento">${iconMarkup('chevron',18)}</button></div><button type="button" class="btn primary v76-budget-cta" data-v75-budget-focus>${iconMarkup(ctaIcon,20)}<span>${ctaLabel}</span></button></section><div class="v75-section-heading"><strong>Despesas por categoria</strong><small>${entries.length?'Distribuição do mês':'Sem movimentos neste mês'}</small></div><div class="cdc-planning-categories">${entries.map(([name,value],index)=>{const pct=Math.round(Number(value||0)/total*100);return `<div><span class="cdc-category-dot ${['food','home','transport','health','other'][index%5]}" aria-hidden="true"></span><strong>${esc(name)}</strong><span class="cdc-plan-track"><i style="width:${Math.max(5,pct)}%"></i></span><b data-money>${moneyText(value)}</b></div>`;}).join('')||'<p class="cdc-empty-note">Ainda não existem despesas para distribuir.</p>'}</div>`;
   }
 
   function renderPlanningArchitecture(){
@@ -371,6 +397,21 @@
     },30);
   }
 
+  function focusPlanningBudget(){
+    if(typeof showPage==='function'&&currentPageId()!=='planning')showPage('planning');
+    const reduce=Boolean(root.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
+    requestAnimationFrame(()=>{
+      const input=byId('monthlyBudget');
+      if(!input)return;
+      input.scrollIntoView({block:'center',behavior:reduce?'auto':'smooth'});
+      const focusInput=()=>{
+        input.focus({preventScroll:true});
+        if(typeof input.select==='function')input.select();
+      };
+      if(reduce)focusInput();else setTimeout(focusInput,180);
+    });
+  }
+
   function stepMonth(delta){
     const key=selectedMonthKey();
     if(!/^\d{4}-\d{2}$/.test(key))return;
@@ -435,6 +476,8 @@
       if(mode){event.preventDefault();setBillMode(mode.dataset.v75BillMode);schedule();return;}
       const monthStep=event.target.closest?.('[data-v75-month-step]');
       if(monthStep){event.preventDefault();stepMonth(monthStep.dataset.v75MonthStep);schedule();return;}
+      const budgetFocus=event.target.closest?.('[data-v75-budget-focus]');
+      if(budgetFocus){event.preventDefault();focusPlanningBudget();schedule();return;}
       const go=event.target.closest?.('[data-v75-go]');
       if(go){event.preventDefault();if(typeof showPage==='function')showPage(go.dataset.v75Go);schedule();return;}
       if(event.target.closest?.('[data-v75-sync]')){event.preventDefault();handleSync();schedule();return;}
