@@ -87,6 +87,7 @@ Autoridades atuais:
 - tokens/componentes: `v76-modern-ui.css` + `design-system.css`;
 - composição de páginas: `v76-product-pages.css`, `v76-planning-more.css` e camadas v75 ainda ativas;
 - geometria mobile/safe areas/dock: `v76-mobile-shell.css`;
+- refinamentos móveis específicos de feature sem propriedade de viewport: `mobile-layout.css`;
 - identidade gráfica: `icon.svg`;
 - iconografia funcional: subset Lucide local em `ui-icons.js` + `ui-icons.css`;
 - drawer/hambúrguer: `mobile-menu-toggle.js/.css` para interação e `v75-drawer-theme.css` para apresentação;
@@ -119,6 +120,29 @@ O PR #138 mantém a separação entre marca e ícones funcionais:
 - os nomes semânticos `plan` e `settings` não mudaram, logo `PAGE_META`, `DRAWER_GROUPS`, `MOBILE_NAV` e restantes callers não precisaram de novas rotas ou handlers;
 - `ui-icons.css` continua a controlar tamanho, stroke, alinhamento, foco e comportamento visual partilhado;
 - regressões em `tests/ui-icons.test.cjs` verificam que Planeamento não volta a wallet/tray e Definições não volta a sliders.
+
+### 4.3 Despesas mobile — `76-bills-mobile-filters1`
+
+O PR #140 reorganiza apenas a apresentação móvel do bloco de pesquisa/filtros de `#page-bills`.
+
+Autoridade funcional preservada:
+
+- `renderBills()` continua responsável pela filtragem/renderização;
+- `events.js` continua responsável pelos listeners;
+- os IDs `billSearch`, `newBillBtn`, `billStatusFilter`, `billCategoryFilter`, `billDateFrom`, `billDateTo`, `billSort` e `billClearFilters` não mudaram;
+- não existe segunda fonte de estado nem transformação de valores em CSS.
+
+Composição visual:
+
+- `mobile-layout.css` contém o refinamento `76-bills-mobile-filters1` apenas em `<=820px`;
+- `.bill-command-bar` agrupa pesquisa e ação principal sem alterar o formulário;
+- a lupa CSS histórica de `v75-expenses-modern.css` é neutralizada quando o sistema Lucide local já fornece `.ui-search-icon`, evitando dupla iconografia;
+- Estado/Categoria usam duas colunas em telefones com largura suficiente;
+- De/Até preservam inputs `date` reais; Ordenar continua disponível e Limpar filtros mantém o mesmo handler;
+- `<=360px` passa para uma coluna para evitar truncamento estrutural;
+- targets essenciais permanecem >=44 px;
+- `forced-colors` e `prefers-reduced-motion` têm fallback explícito;
+- `mobile-layout.css` não pode definir `100dvh` nem recriar scroll/viewport global: essa propriedade continua exclusiva de `v76-mobile-shell.css`.
 
 ## 5. Design system
 
@@ -176,6 +200,8 @@ O fluxo Adicionar despesa usa o formulário financeiro existente e três modos d
 
 O PR #132 estabeleceu no mobile um único proprietário de scroll para evitar falhas de hit-testing no Safari/iOS. Scanner e formulário continuam separados da persistência financeira; o commit ocorre apenas após validação do formulário.
 
+O PR #140 não altera captura nem domínio financeiro. A mudança atua somente sobre a apresentação da pesquisa e dos filtros móveis, mantendo os mesmos controlos HTML, IDs e listeners.
+
 ## 8. TypeScript
 
 Fontes canónicas já existentes incluem:
@@ -206,7 +232,7 @@ Service Worker:
 - allowlist explícita;
 - tokens de cache técnicos distribuem correções sem obrigar a alterar a release pública.
 
-Os PR #133/#134/#136/#138 não alteraram `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
+Os PR #133/#134/#136/#138/#140 não alteraram `package.json`, `release-manifest.json`, `app-update.js` nem a versão mostrada ao utilizador.
 
 ## 10. Segurança e dependências externas
 
@@ -215,7 +241,7 @@ Os PR #133/#134/#136/#138 não alteraram `package.json`, `release-manifest.json`
 - armazenamento sensível em claro está bloqueado;
 - zoom manual não é bloqueado;
 - foco/safe areas/reduced-motion/forced-colors têm contratos de regressão;
-- a iconografia Lucide continua local e licenciada; o PR #138 não adicionou qualquer CDN;
+- a iconografia Lucide continua local e licenciada; os PR #138/#140 não adicionaram qualquer CDN;
 - ZXing ainda é carregado de `unpkg.com`, logo a afirmação “Sem CDNs” na página Segurança precisa de correção até a biblioteca ser empacotada localmente;
 - `style-src 'unsafe-inline'` permanece dívida de hardening.
 
@@ -225,23 +251,25 @@ A CI cobre sintaxe, finanças, isolamento, datas, QR, Mercado, imagens, scanner,
 
 Limitação conhecida: vários testes “Safari/PWA” são contratos estáticos de código/CSS; ainda falta E2E real em WebKit/Chromium para toque, teclado, scroll e foco.
 
-PR #138 passou:
+PR #140 passou:
 
-- TypeScript Foundation PR `34938701913`;
-- CI PR `34938701834`;
-- TypeScript Foundation main `34938763131`;
-- CI main `34938763232`;
-- Pages `34938807431`.
+- TypeScript Foundation PR `34942844618`;
+- CI PR `34942844692`;
+- CI push `34942841985`;
+- o primeiro ciclo do PR detetou uma violação do contrato de arquitetura por `overflow:hidden` em CSS de feature; o código foi corrigido antes do merge e o gate voltou a verde;
+- merge: `387a953e427331a5aa48d872cd7c54e1552d2c1c`;
+- Pages `34942974208` iniciou após o merge e deve ser confirmado antes de encerrar a validação pública.
 
-A aparência final do drawer e dos dois ícones corrigidos ainda deve ser validada fisicamente no iPhone/PWA; os gates automatizados não substituem esse teste visual.
+A aparência final dos filtros de Despesas, drawer e ícones corrigidos ainda deve ser validada fisicamente no iPhone/PWA; os gates automatizados não substituem esse teste visual.
 
 ## 12. Próxima consolidação
 
-1. validar `76-drawer-hierarchy1` + `76-icon-semantics1` no iPhone/PWA;
-2. corrigir a descrição de rede da página Segurança sem mudar a release;
-3. preparar ZXing local e CSP mais restritiva num bloco isolado;
-4. E2E WebKit/Chromium para PIN, navegação e formulário de despesas;
-5. reduzir cascade CSS por componente com prova de não utilização;
-6. continuar TypeScript em módulos de baixo acoplamento;
-7. migrar `render/forms/events` apenas depois dos contratos visuais estabilizarem;
-8. deixar finanças/core/cifra para blocos com vetores de paridade próprios.
+1. confirmar Pages do PR #140 e validar `76-bills-mobile-filters1` no iPhone/PWA;
+2. validar `76-drawer-hierarchy1` + `76-icon-semantics1` no mesmo dispositivo;
+3. corrigir a descrição de rede da página Segurança sem mudar a release;
+4. preparar ZXing local e CSP mais restritiva num bloco isolado;
+5. E2E WebKit/Chromium para PIN, navegação e formulário de despesas;
+6. reduzir cascade CSS por componente com prova de não utilização;
+7. continuar TypeScript em módulos de baixo acoplamento;
+8. migrar `render/forms/events` apenas depois dos contratos visuais estabilizarem;
+9. deixar finanças/core/cifra para blocos com vetores de paridade próprios.
