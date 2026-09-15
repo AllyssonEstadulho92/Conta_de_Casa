@@ -31,24 +31,20 @@ Atualizado: 15 de setembro de 2026
 - [x] Tipar `marketId/pid` em `MarketItem` de forma retrocompatível.
 - [x] Manter `marketId/pid` fora da lista de metadados técnicos descartados pelo sync.
 - [x] Não alterar `estimatedCents`, `actualCents`, quantidade ou estado de compra.
-- [x] TypeScript Foundation PR `34913445635` verde.
-- [x] CI PR `34913445733` verde.
-- [x] Merge PR #133: `62359b4997075c4bd476f43f69ab18e41327f1bd`.
-- [x] TypeScript Foundation main `34913506775` verde.
-- [x] CI main `34913506766` verde.
-- [x] Pages `34913539151` publicada.
+- [x] TypeScript Foundation/CI/Pages verdes.
 
-### `76-market-identity-stale1` — hardening em curso
+### `76-market-identity-stale1` — publicado no PR #134
 
 - [x] Identificar risco raro de identidade pendente após clique live sem commit.
 - [x] Expirar identidade no microtask seguinte quando não consumida.
 - [x] Preservar aplicação normal antes do primeiro `await` do commit.
 - [x] Adicionar regressão específica.
 - [x] Invalidar apenas cache técnico PWA, sem mudar release/centro de atualizações.
-- [ ] CI completa verde.
-- [ ] TypeScript Foundation verde.
-- [ ] Merge e Pages verdes.
-- [ ] Validar pesquisa → adicionar → reload → editar → sync.
+- [x] Merge PR #134: `69318d104cd8aa1a68be919ba6a9c805b20f9cf5`.
+- [x] TypeScript Foundation main `34914028412` verde.
+- [x] CI main `34914028440` verde.
+- [x] Pages `34914061390` publicada.
+- [ ] Validar fisicamente pesquisa → adicionar → reload → editar → sync.
 
 ## P0 — Navegação e shell
 
@@ -81,9 +77,8 @@ Atualizado: 15 de setembro de 2026
 - [x] Pesquisa live limitada a Pingo Doce/Continente.
 - [x] Catálogo visual usa identidade `marketId|pid`.
 - [x] Pesquisa/lista/filtros alinhados visualmente.
-- [x] Persistência inicial de identidade publicada no PR #133.
-- [ ] Fechar guard contra identidade pendente obsoleta.
-- [ ] Validar ciclo completo da identidade após publicação do guard.
+- [x] Persistência e guard de identidade publicados nos PR #133/#134.
+- [ ] Validar ciclo completo da identidade em dispositivo real.
 - [ ] Rever logos/imagens/licenças antes de ampliar catálogo visual.
 
 ### Planeamento + Calendário
