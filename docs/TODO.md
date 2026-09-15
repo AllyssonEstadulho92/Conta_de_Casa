@@ -90,7 +90,11 @@ Atualizado: 15 de setembro de 2026
 - [x] PR #143: eliminar compressão das três métricas em colunas no iPhone estreito.
 - [x] PR #143: TypeScript Foundation PR `34946433827` e CI PR `34946433799` verdes.
 - [x] PR #143: merge `386d75b35060eb011c2a2d68ec6b965c87c5080c`; main TypeScript `34946493929`, CI `34946493911` e Pages `34946542013` verdes.
-- [ ] Validar fisicamente estado sem orçamento e com orçamento definido no iPhone/Safari/PWA.
+- [x] PR #145 / `76-planning-ring-shape1`: corrigir anel oval causado por `height:118px!important` legado + nova largura móvel.
+- [x] PR #145: neutralizar altura legada, forçar `aspect-ratio:1/1` e reduzir para 136/128/116 px conforme breakpoint.
+- [x] PR #145: CI PR `34948896074`, TypeScript PR `34948896081`, CI push `34948870264` e Pages `34949105955` verdes.
+- [ ] Confirmar fisicamente o anel circular corrigido no mesmo iPhone/Safari/PWA após refresh do cache.
+- [ ] Validar estado sem orçamento e com orçamento definido no iPhone/Safari/PWA.
 - [ ] Rever calendário/vencimentos em E2E e densidade final tablet/desktop.
 
 ### Relatórios + Objetivos

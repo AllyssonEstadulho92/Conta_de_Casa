@@ -4,7 +4,7 @@ Atualizado: 15 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main`: `386d75b35060eb011c2a2d68ec6b965c87c5080c` — PR #143  
+Baseline funcional em `main`: `471c689c1df47118bd3a345214acfd140bdc6e7d` — PR #145  
 Branch funcional: `main`
 
 ## Invariantes obrigatórias
@@ -35,19 +35,19 @@ Consolidações relevantes:
 - PR #138: `76-icon-semantics1`, Planeamento/Definições com geometrias Lucide coerentes;
 - PR #140: `76-bills-mobile-filters1`, pesquisa/filtros móveis de Despesas reorganizados;
 - PR #142: `76-bills-mobile-spacing1`, ritmo, espaçamento e limpeza visual do mesmo bloco de Despesas;
-- PR #143: `76-planning-budget-card2`, resumo móvel de Planeamento reorganizado segundo o protótipo aprovado sem duplicar o fluxo funcional de orçamento.
+- PR #143: `76-planning-budget-card2`, resumo móvel de Planeamento reorganizado segundo o protótipo aprovado sem duplicar o fluxo funcional de orçamento;
+- PR #145: `76-planning-ring-shape1`, normalização do anel de orçamento após validação física no iPhone revelar deformação oval.
 
-## Evidência mais recente — PR #143
+## Evidência mais recente — PR #145
 
-- head final do PR: `b7a315e154f88cad09d73b9caed6744b0a48bb52`;
-- TypeScript Foundation PR `34946433827`: sucesso;
-- CI PR `34946433799`: sucesso integral;
-- merge PR #143: `386d75b35060eb011c2a2d68ec6b965c87c5080c`;
-- TypeScript Foundation `main` `34946493929`: sucesso;
-- CI `main` `34946493911`: sucesso integral;
-- Pages `34946542013`: sucesso, incluindo preparação do bundle, upload e deploy.
+- head final do PR: `7b6760955b365076bc3fab08f96113adafa87505`;
+- TypeScript Foundation PR `34948896081`: sucesso;
+- CI PR `34948896074`: sucesso integral;
+- CI push do head `34948870264`: sucesso integral;
+- merge PR #145: `471c689c1df47118bd3a345214acfd140bdc6e7d`;
+- Pages `34949105955`: sucesso, incluindo preparação do bundle, upload e deploy.
 
-A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados pelos PR #142/#143.
+A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados pelos PR #142/#143/#145.
 
 ## Despesas — pesquisa, filtros e espaçamento móvel
 
@@ -66,7 +66,7 @@ PR #142 foi publicado com TypeScript/CI/Pages verdes; Pages `34945033256` termin
 
 ## Planeamento — orçamento móvel
 
-`76-planning-budget-card2` está publicado:
+`76-planning-budget-card2` + `76-planning-ring-shape1` estão publicados:
 
 - o seletor de mês mantém `#monthPicker` como autoridade e continua a usar `stepMonth()`/evento `change` existente;
 - o cartão apresenta mês e intervalo real, título Orçamento mensal, gasto do mês, orçamento, disponível e estado definido/por definir;
@@ -76,10 +76,13 @@ PR #142 foi publicado com TypeScript/CI/Pages verdes; Pages `34945033256` termin
 - a gravação continua exclusivamente no `#monthPlanForm` através do listener de `events.js`, `monthProfile()` e `commit('updated','planning')`;
 - ícones vêm do subset Lucide local; navegação mensal deixa de depender de caracteres `‹/›`;
 - em iPhones estreitos as três métricas deixam de ser comprimidas em colunas iguais e passam a linhas legíveis;
+- a validação física revelou que uma altura histórica fixa (`118px!important`) em `v75-architecture.css` competia com a largura nova do anel, produzindo uma elipse;
+- `76-planning-ring-shape1` neutraliza essa altura com `height:auto!important`, força `aspect-ratio:1/1!important` e usa 136 px no mobile geral, 128 px em `<=430px` e 116 px em `<=350px`;
+- a iconografia e tipografia internas foram reduzidas proporcionalmente, sem alterar percentagem, estado ou cálculos;
 - `forced-colors`, `prefers-reduced-motion` e targets tácteis são preservados;
-- Service Worker recebeu apenas o token técnico `planning-budget-card2` para distribuição da correção.
+- Service Worker recebeu apenas tokens técnicos de cache para distribuição das correções.
 
-Validação física no iPhone/Safari/PWA ainda é necessária; CI verde não substitui inspeção real do layout.
+A forma circular corrigida precisa ainda de confirmação visual no mesmo iPhone/PWA após atualização do cache; CI/Pages já estão verdes.
 
 ## Iconografia funcional — estado atual
 
@@ -115,7 +118,8 @@ Validação física no iPhone/Safari/PWA ainda é necessária; CI verde não sub
 
 ### ALTO
 
-- validar fisicamente `76-planning-budget-card2`, `76-bills-mobile-spacing1`, drawer e iconografia no mesmo iPhone/Safari e PWA instalada;
+- confirmar fisicamente `76-planning-ring-shape1` no mesmo iPhone/Safari e PWA instalada;
+- validar `76-bills-mobile-spacing1`, drawer e iconografia no mesmo dispositivo;
 - acrescentar E2E real WebKit/Chromium para toque, teclado, scroll e PIN → aplicação;
 - reduzir gradualmente a cascade CSS e dependência de `!important`;
 - `main` continua sem branch protection/required checks obrigatórios.
@@ -133,7 +137,7 @@ Validação física no iPhone/Safari/PWA ainda é necessária; CI verde não sub
 
 ## Próximo passo
 
-1. validar `76-planning-budget-card2` no iPhone/Safari web e PWA instalada, incluindo orçamento por definir e orçamento definido;
+1. confirmar visualmente `76-planning-ring-shape1` no iPhone/Safari web e PWA instalada;
 2. validar `76-bills-mobile-spacing1` e drawer/iconografia no mesmo dispositivo;
 3. corrigir a descrição da página Segurança para refletir a dependência ZXing real;
 4. preparar ZXing local + licença e, só depois, remover `unpkg.com` de `script-src`;

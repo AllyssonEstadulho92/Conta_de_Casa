@@ -2,6 +2,48 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-15 — PR #145 / `76-planning-ring-shape1` — normalização do anel de orçamento — publicado
+
+### Problema confirmado no iPhone
+
+Após a publicação do novo cartão de orçamento do PR #143, a validação física mostrou que o estado `Por definir` aparecia visualmente esticado na horizontal.
+
+A causa foi localizada na cascade real:
+
+- `v75-architecture.css` ainda impunha `width:118px!important;height:118px!important` em `.cdc-budget-ring`;
+- `76-planning-budget-card2` aumentava a largura para 150/142 px e adicionava `aspect-ratio`, mas não neutralizava a altura histórica;
+- com largura e altura explícitas em camadas diferentes, o browser mantinha uma elipse em vez de um círculo.
+
+### Correção
+
+- `v76-planning-more.css` declara `76-planning-ring-shape1`;
+- `.cdc-budget-ring` passa a usar `height:auto!important` + `aspect-ratio:1/1!important` na camada canónica;
+- diâmetro reduzido para 136 px no mobile geral, 128 px em `<=430px` e 116 px em `<=350px`;
+- iconografia, padding e tipografia internos foram reduzidos proporcionalmente;
+- estado `Por definir`, percentagem real, conic-gradient e acessibilidade foram preservados;
+- regressões verificam a proporção 1:1 e impedem o retorno da altura fixa conflitante;
+- Service Worker recebe apenas o token técnico `planning-ring-shape1`.
+
+### Evidência
+
+- PR #145 head `7b6760955b365076bc3fab08f96113adafa87505`;
+- TypeScript Foundation PR `34948896081`: sucesso;
+- CI PR `34948896074`: sucesso integral;
+- CI push head `34948870264`: sucesso integral;
+- merge PR #145: `471c689c1df47118bd3a345214acfd140bdc6e7d`;
+- Pages `34949105955`: sucesso.
+
+### Preservado
+
+Sem alteração de `STATE_VERSION`, cálculos financeiros, percentagem de orçamento, `dashboardNumbers()`, `monthProfile()`, `#monthPlanForm`, IndexedDB, PIN/cofre, QR, scanner, Mercado, sync, release `v76` ou versão `0.76.0`.
+
+### Pendente
+
+- confirmar no mesmo iPhone/Safari/PWA que o anel atualizado está efetivamente circular após refresh do cache;
+- validar também o estado com orçamento definido.
+
+---
+
 ## 2026-09-15 — PR #143 / `76-planning-budget-card2` — orçamento móvel de Planeamento — publicado
 
 ### Problema confirmado
@@ -201,6 +243,7 @@ Sem alteração de `renderBills()`, listeners, IDs canónicos, cálculos, `STATE
 - `icon.svg` é marca; Lucide é iconografia funcional;
 - protótipos definem hierarquia, não autorizam domínio inventado;
 - resumo visual de Planeamento delega no `#monthPlanForm/#monthlyBudget` canónico;
+- componentes circulares devem neutralizar dimensões legadas incompatíveis antes de depender de `aspect-ratio`;
 - filtros de Despesas mantêm `renderBills()`/IDs/listeners como autoridade;
 - CSS de feature não assume viewport global;
 - rotas secundárias permanecem nas páginas-pai;

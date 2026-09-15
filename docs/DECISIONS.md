@@ -190,6 +190,16 @@ O protótipo de orçamento móvel melhora a hierarquia e a eficiência, mas não
 - em telemóveis estreitos, legibilidade das métricas tem prioridade sobre apresentar três cartões na mesma linha;
 - a melhoria pode invalidar apenas o cache técnico PWA, sem alterar `v76`/`0.76.0`.
 
+## D-101 — componentes circulares não podem depender de altura legada fixa
+
+A validação física do PR #143 mostrou que `aspect-ratio` não corrige um componente quando uma camada anterior ainda impõe simultaneamente largura/altura com `!important`.
+
+- a camada canónica mais recente deve neutralizar explicitamente dimensões legadas incompatíveis antes de depender de `aspect-ratio`;
+- o anel de orçamento usa `height:auto!important` + `aspect-ratio:1/1!important`, garantindo geometria circular;
+- tamanhos móveis podem variar por breakpoint, mas largura e altura efetivas devem permanecer 1:1;
+- testes devem proteger a neutralização da altura histórica e os tamanhos 136/128/116 px;
+- esta correção é exclusivamente visual e não altera percentagem, orçamento, cálculos, persistência ou domínio.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;
