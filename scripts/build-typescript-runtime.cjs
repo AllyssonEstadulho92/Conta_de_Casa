@@ -21,6 +21,13 @@ const RUNTIMES=Object.freeze([
     output:'sync-conflict-policy.js',
     marker:'installSyncConflictPolicy',
     label:'Sync conflict policy'
+  },
+  {
+    source:'src/ui/date-calculator.ts',
+    manual:'date-calculator.js',
+    output:'date-calculator.js',
+    marker:'installDateCalculator',
+    label:'Date calculator'
   }
 ]);
 
