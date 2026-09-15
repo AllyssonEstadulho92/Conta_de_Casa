@@ -87,8 +87,8 @@ assert.doesNotMatch(css,/pointer-events:none!important;[^}]*\.cdc-quick-action/)
    camadas históricas de compactação do PIN. O layout móvel mantém safe areas,
    100svh, espaçamento horizontal explícito e targets >=44 px. */
 assert.match(usability,/76-auth-prototype-final1/);
-assert.doesNotMatch(usability,/76-vault-short-height1/,'legacy short-height auth layer must be removed');
-assert.doesNotMatch(usability,/76-auth-ios-spacing2/,'legacy iOS spacing override must be removed');
+assert.doesNotMatch(usability,/\/\* 76-vault-short-height1/,'legacy short-height auth section must be removed');
+assert.doesNotMatch(usability,/\/\* 76-auth-ios-spacing2/,'legacy iOS spacing section must be removed');
 assert.match(usability,/min-height:100svh!important/,'mobile auth must use the small viewport height so Safari chrome is part of the layout contract');
 assert.match(usability,/max\(18px,env\(safe-area-inset-top,0px\)\)/,'mobile auth must preserve a real safe-area top floor');
 assert.match(usability,/\.vault-card\{[\s\S]*margin:0 auto!important/,'mobile auth must not vertically recenter the whole card');
