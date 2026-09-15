@@ -34,22 +34,27 @@ Contratos:
 - anexos reais permanecem bloqueados até existir cifragem dedicada;
 - UI do cofre não pode modificar lógica de derivação, unlock, IndexedDB ou sync.
 
-### 2.1 Geometria do cofre móvel — `76-vault-short-height1` + `76-auth-ios-spacing2`
+### 2.1 Autoridade visual do cofre — `76-auth-prototype-final1`
 
 Autoridade visual: `v75-usability.css`.
 
-A correção do PR #150 mantém o mesmo HTML e os mesmos handlers, mas adapta o ecrã de PIN à altura útil do browser:
+O PR #152 substitui as duas camadas móveis anteriores (`76-vault-short-height1` e `76-auth-ios-spacing2`) por uma composição única baseada no protótipo aprovado em dispositivo real.
 
-- mobile usa `100svh` para considerar o estado pequeno do viewport com barras do Safari visíveis;
-- alinhamento vertical começa no topo seguro (`align-items:start`) e o cartão usa `margin:0 auto`, evitando recentragem vertical por margem automática;
-- safe areas continuam via `env(safe-area-inset-*)`;
-- densidade do keypad reduz progressivamente para 58 px em `<=900px`, 54 px em `<=780px` e 48 px em `<=640px`;
-- o piso tátil funcional permanece >=44 px;
-- campos mantêm 16 px no mobile para evitar auto-zoom do Safari;
-- zoom manual/pinch-to-zoom continua permitido;
-- `prefers-reduced-motion`, `forced-colors` e dark mode permanecem cobertos.
+Contrato móvel:
 
-A correção é exclusivamente de apresentação. Não existe nova autoridade de autenticação.
+- `#vaultScreen` usa `100svh`, safe areas e scroll próprio do cofre;
+- conteúdo começa no topo seguro e `.vault-card` usa `margin:0 auto`;
+- input móvel mantém texto >=16 px para evitar auto-zoom do Safari;
+- keypad padrão: teclas 56 px, `column-gap:30px`, `row-gap:16px`;
+- `<=359px`: teclas 52 px, gaps 24/13 px;
+- altura `<=720px`: teclas 50 px, gaps 22/9 px;
+- todos os alvos essenciais permanecem >=44 px;
+- o botão apagar é visualmente leve, mas mantém área funcional suficiente;
+- Entrar é a ação principal; Usar palavra-passe e recuperação permanecem ações secundárias;
+- `Usar dados de outro dispositivo` é uma superfície própria abaixo de um divisor, evitando competição visual com o CTA principal;
+- pinch-to-zoom, `prefers-reduced-motion`, `forced-colors` e dark mode permanecem suportados.
+
+A mudança é exclusivamente de apresentação. HTML canónico, IDs, handlers, `unlockVault()`, PBKDF2, AES-GCM, IndexedDB, importação e sync não mudam.
 
 ## 3. Rotas e navegação
 
@@ -90,14 +95,14 @@ Autoridades atuais:
 - tokens/componentes: `v76-modern-ui.css` + `design-system.css`;
 - composição de páginas: `v76-product-pages.css`, `v76-planning-more.css` e camadas v75 ainda ativas;
 - geometria mobile autenticada: `v76-mobile-shell.css`;
-- auth/cofre: `v75-usability.css`;
+- auth/cofre: `v75-usability.css` / `76-auth-prototype-final1`;
 - refinamentos móveis de feature: `mobile-layout.css`;
 - marca: `icon.svg`;
 - iconografia funcional: subset Lucide local em `ui-icons.js` + `ui-icons.css`;
 - drawer: `mobile-menu-toggle.js/.css` + `v75-drawer-theme.css`;
 - formulários de despesas/QR: `invoice-capture.js/.css`.
 
-A cascade ainda contém regras históricas e `!important`; a redução deve ser por componente com regressões, nunca por eliminação em massa.
+A cascade ainda contém regras históricas e `!important`; a redução deve ser por componente com regressões, nunca por eliminação em massa. No cofre, o PR #152 já retirou duas secções móveis redundantes e deixou uma única autoridade visual.
 
 ## 5. Despesas mobile — `76-bills-mobile-alignment2`
 
@@ -194,7 +199,7 @@ Service Worker:
 - allowlist explícita;
 - tokens técnicos invalidam cache sem alterar release pública.
 
-PR #149 adicionou `date-calculator1`; PR #150 acrescenta `auth-ios-spacing2`. `package.json`, `release-manifest.json`, `app-update.js` e v76/`0.76.0` permanecem inalterados.
+PR #149 adicionou `date-calculator1`; PR #150 adicionou `auth-ios-spacing2`; PR #152 acrescenta `auth-prototype-final1` e substitui a autoridade visual móvel anterior. `package.json`, `release-manifest.json`, `app-update.js` e v76/`0.76.0` permanecem inalterados.
 
 ## 12. Segurança e dependências externas
 
@@ -210,19 +215,24 @@ PR #149 adicionou `date-calculator1`; PR #150 acrescenta `auth-ios-spacing2`. `p
 
 A CI cobre sintaxe, TypeScript, finanças, isolamento, datas, QR, Mercado, imagens, scanner, UI, responsividade, acessibilidade, segurança e sync.
 
-A regressão de acessibilidade protege especificamente o cofre móvel:
+Regressões do cofre após PR #152 protegem:
 
-- `100svh`;
+- marcador `76-auth-prototype-final1` e ausência das secções históricas como autoridades CSS;
+- `100svh` e safe areas;
 - `margin:0 auto` no cartão mobile;
-- bandas de keypad 58/54/48 px;
+- keypad 56 px com gaps 30/16 px no mobile padrão;
+- fallbacks 52 px (`<=359px`) e 50 px (`<=720px` de altura);
 - piso tátil >=44 px;
-- token de cache `auth-ios-spacing2`.
+- transferência em superfície com min-height 70 px;
+- token de cache `auth-prototype-final1`.
 
-Limitação: testes estáticos não substituem Safari/WebKit real para browser chrome, teclado virtual, scroll, foco e safe areas.
+Evidência PR #152: TypeScript Foundation `34977687455` e CI `34977687437` verdes; após merge, TypeScript `34977780423`, CI `34977780342` e Pages `34977846729` verdes.
+
+Limitação: testes estáticos não substituem Safari/WebKit real para browser chrome, teclado virtual, scroll, foco, proporções e safe areas.
 
 ## 14. Próxima consolidação
 
-1. validar PR #150 no mesmo iPhone/Safari web e PWA;
+1. validar `76-auth-prototype-final1` no mesmo iPhone/Safari web e PWA;
 2. confirmar Despesas/Planeamento no mesmo dispositivo;
 3. corrigir descrição factual de rede em Segurança;
 4. empacotar ZXing localmente com licença preservada;
