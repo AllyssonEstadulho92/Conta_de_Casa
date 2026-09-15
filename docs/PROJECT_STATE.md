@@ -4,7 +4,7 @@ Atualizado: 15 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline publicada: `6cc4707197a50c022179d0af66895079ef1583bc` — PR #136  
+Baseline publicada: `d2348c940ccdee2812805c82a6f2e62cccf24863` — PR #138  
 Branch funcional: `main`
 
 ## Invariantes obrigatórias
@@ -31,16 +31,31 @@ Consolidações relevantes:
 - PR #132: hotfix Safari/iPhone para touch/scroll do formulário de despesas;
 - PR #133: persistência retrocompatível de `marketId|pid` no Mercado;
 - PR #134: expiração segura da identidade temporária se um clique live não chegar ao commit;
-- PR #136: `76-drawer-hierarchy1`, substituição do drawer móvel denso por uma hierarquia vertical legível.
+- PR #136: `76-drawer-hierarchy1`, substituição do drawer móvel denso por uma hierarquia vertical legível;
+- PR #138: `76-icon-semantics1`, correção semântica dos ícones de Planeamento e Definições com geometrias do snapshot Lucide já fixado no projeto.
 
 Evidência mais recente:
 
-- merge PR #136: `6cc4707197a50c022179d0af66895079ef1583bc`;
-- TypeScript Foundation main `34933261324`: sucesso;
-- CI main `34933261352`: sucesso integral;
-- Pages `34933296570`: sucesso.
+- merge PR #138: `d2348c940ccdee2812805c82a6f2e62cccf24863`;
+- TypeScript Foundation main `34938763131`: sucesso;
+- CI main `34938763232`: sucesso integral;
+- Pages `34938807431`: sucesso.
 
-A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados pelo PR #136.
+A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados pelo PR #138.
+
+## Iconografia funcional — estado atual
+
+`76-icon-semantics1` está publicado:
+
+- `icon.svg` continua a ser a marca canónica da aplicação;
+- `ui-icons.js` + `ui-icons.css` continuam a ser a autoridade da iconografia funcional Lucide;
+- o snapshot Lucide permanece fixado em `94e4cb9d9db5907053ebf3636a97c45529cf776b` e a licença local continua preservada;
+- Planeamento mantém o nome semântico `plan`, mas passa a usar a geometria `CalendarCheck2`, com calendário + confirmação;
+- Definições mantém o nome semântico `settings`, mas passa a usar a geometria `Settings`/engrenagem;
+- a antiga geometria de carteira/tray deixa de representar Planeamento;
+- a antiga geometria de sliders deixa de representar Definições;
+- testes impedem regressão para essas geometrias inadequadas;
+- nenhuma CDN, rota, handler, cálculo ou persistência foi introduzida ou alterada neste bloco.
 
 ## Navegação móvel — estado atual
 
@@ -74,14 +89,13 @@ Validação física no mesmo iPhone/Safari/PWA ainda está pendente; CI verde n�
 
 ### ALTO
 
-- validar fisicamente o novo drawer no mesmo iPhone/Safari e PWA instalada;
+- validar fisicamente o drawer e a nova iconografia no mesmo iPhone/Safari e PWA instalada;
 - acrescentar E2E real com WebKit/Chromium para toque, teclado, scroll e transição PIN → aplicação;
 - reduzir gradualmente a cascade CSS e dependência de `!important`;
 - `main` continua sem branch protection/required checks obrigatórios.
 
 ### MÉDIO
 
-- rever geometria global dos ícones em `ui-icons.js`: Planeamento e Definições ainda merecem uma passagem isolada para alinhar calendário/planeamento e engrenagem com a hierarquia aprovada;
 - ZXing do scanner continua dependente de `unpkg.com`; a página Segurança não deve afirmar literalmente “Sem CDNs” enquanto isso existir;
 - migrar ZXing para bundle local, preservando licença, antes de restringir `script-src` para `'self'`;
 - reduzir `style-src 'unsafe-inline'` quando a arquitetura permitir;
@@ -93,10 +107,9 @@ Validação física no mesmo iPhone/Safari/PWA ainda está pendente; CI verde n�
 
 ## Próximo passo
 
-1. validar visualmente `76-drawer-hierarchy1` no iPhone/PWA com nova captura;
-2. rever `ui-icons.js`/`ui-icons.css` num bloco isolado para Planeamento, Definições e consistência do subset Lucide;
-3. corrigir a descrição da página Segurança para refletir a dependência ZXing real, sem mudança de release;
-4. preparar ZXing local e endurecimento CSP num bloco isolado;
-5. criar primeiro fluxo E2E WebKit/Chromium;
-6. consolidar CSS por propriedade, sem apagar regras sem prova de não utilização;
-7. continuar TypeScript em módulos de baixo acoplamento.
+1. validar visualmente `76-drawer-hierarchy1` + `76-icon-semantics1` no iPhone/PWA com nova captura;
+2. corrigir a descrição da página Segurança para refletir a dependência ZXing real, sem mudança de release;
+3. preparar ZXing local e endurecimento CSP num bloco isolado;
+4. criar primeiro fluxo E2E WebKit/Chromium;
+5. consolidar CSS por propriedade, sem apagar regras sem prova de não utilização;
+6. continuar TypeScript em módulos de baixo acoplamento.
