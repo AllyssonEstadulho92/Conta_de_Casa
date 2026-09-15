@@ -4,7 +4,7 @@ Atualizado: 15 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main`: `387a953e427331a5aa48d872cd7c54e1552d2c1c` — PR #140  
+Baseline funcional em `main`: `cd45ec537989c51f125747958e198c8e0431a352` — PR #142  
 Branch funcional: `main`
 
 ## Invariantes obrigatórias
@@ -33,33 +33,40 @@ Consolidações relevantes:
 - PR #134: expiração segura da identidade temporária se um clique live não chegar ao commit;
 - PR #136: `76-drawer-hierarchy1`, substituição do drawer móvel denso por uma hierarquia vertical legível;
 - PR #138: `76-icon-semantics1`, correção semântica dos ícones de Planeamento e Definições com geometrias do snapshot Lucide já fixado no projeto;
-- PR #140: `76-bills-mobile-filters1`, reorganização móvel da pesquisa e filtros de Despesas, com remoção visual da lupa CSS duplicada e preservação integral dos IDs/handlers canónicos.
+- PR #140: `76-bills-mobile-filters1`, reorganização móvel da pesquisa e filtros de Despesas, com remoção visual da lupa CSS duplicada e preservação integral dos IDs/handlers canónicos;
+- PR #142: `76-bills-mobile-spacing1`, consolidação do ritmo vertical e limpeza de espaçamento do mesmo bloco móvel de Despesas.
 
-Evidência mais recente do bloco PR #140:
+Evidência mais recente do bloco PR #142:
 
-- merge PR #140: `387a953e427331a5aa48d872cd7c54e1552d2c1c`;
-- TypeScript Foundation PR `34942844618`: sucesso;
-- CI PR `34942844692`: sucesso integral;
-- CI push `34942841985`: sucesso integral;
-- Pages `34942974208`: execução iniciada após o merge; confirmar conclusão antes de tratar a validação pública como encerrada.
+- merge PR #142: `cd45ec537989c51f125747958e198c8e0431a352`;
+- TypeScript Foundation PR `34944913748`: sucesso;
+- CI PR `34944913749`: sucesso integral;
+- TypeScript Foundation main `34944980784`: sucesso;
+- CI main `34944980812`: sucesso integral;
+- Pages `34945033256`: sucesso.
 
-A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados pelo PR #140.
+A release pública, `package.json`, `release-manifest.json` e Centro de atualizações não foram alterados pelo PR #142.
 
-## Despesas — pesquisa e filtros móveis
+## Despesas — pesquisa, filtros e espaçamento móveis
 
-`76-bills-mobile-filters1` está integrado em `main`:
+`76-bills-mobile-filters1` + `76-bills-mobile-spacing1` estão integrados em `main`:
 
 - `#billSearch`, `#newBillBtn`, `#billStatusFilter`, `#billCategoryFilter`, `#billDateFrom`, `#billDateTo`, `#billSort` e `#billClearFilters` continuam a ser os controlos canónicos;
 - `renderBills()` e os listeners existentes em `events.js` continuam a autoridade funcional;
 - a pesquisa móvel e o botão de nova despesa usam composição compacta e targets tácteis adequados;
-- a lupa manual histórica de `v75-expenses-modern.css` é neutralizada no mobile quando o sistema Lucide local fornece `.ui-search-icon`, eliminando a duplicação visual observada;
-- o bloco de filtros passa a uma hierarquia de cartão legível, com Estado/Categoria em duas colunas, datas organizadas, Ordenar e Limpar filtros preservados;
-- em `<=360px`, os filtros passam para uma coluna para evitar clipping;
+- a lupa manual histórica de `v75-expenses-modern.css` permanece neutralizada quando o sistema Lucide local fornece `.ui-search-icon`;
+- pesquisa e filtros passam a ter separação vertical explícita de 20 px;
+- o cartão de filtros usa padding próprio de feature e gaps consistentes, sem depender de compensações negativas;
+- o subtítulo “Refine a sua pesquisa de despesas” deixou de usar `margin-top` negativo;
+- Estado/Categoria mantêm duas colunas em telefones com largura suficiente e os restantes campos têm ritmo vertical explícito;
+- `#billClearFilters` mantém target de 44 px e recebe separação visual própria;
+- em `<=360px`, os filtros passam para uma coluna com espaçamento vertical regular para evitar clipping e compressão;
+- foi removida duplicação CSS dos prefixos “Período ·” sem alterar os inputs reais;
 - `forced-colors` e `prefers-reduced-motion` permanecem cobertos;
 - `mobile-layout.css` continua limitado a refinamentos de feature e não assume a geometria global do viewport, que pertence a `v76-mobile-shell.css`;
 - cálculos, persistência, PIN/cofre, QR, scanner e sync não foram alterados.
 
-Validação física deste bloco no mesmo iPhone/Safari/PWA ainda está pendente; CI verde não substitui observação real do layout.
+Validação física deste bloco no mesmo iPhone/Safari/PWA ainda está pendente; CI verde e Pages publicados não substituem observação real do layout.
 
 ## Iconografia funcional — estado atual
 
@@ -107,7 +114,7 @@ Validação física no mesmo iPhone/Safari/PWA ainda está pendente; CI verde n�
 
 ### ALTO
 
-- validar fisicamente `76-bills-mobile-filters1`, drawer e iconografia no mesmo iPhone/Safari e PWA instalada;
+- validar fisicamente `76-bills-mobile-filters1` + `76-bills-mobile-spacing1`, drawer e iconografia no mesmo iPhone/Safari e PWA instalada;
 - acrescentar E2E real com WebKit/Chromium para toque, teclado, scroll e transição PIN → aplicação;
 - reduzir gradualmente a cascade CSS e dependência de `!important`;
 - `main` continua sem branch protection/required checks obrigatórios.
@@ -125,7 +132,7 @@ Validação física no mesmo iPhone/Safari/PWA ainda está pendente; CI verde n�
 
 ## Próximo passo
 
-1. confirmar conclusão do Pages do PR #140 e validar `76-bills-mobile-filters1` no iPhone/PWA com nova captura;
+1. validar fisicamente `76-bills-mobile-filters1` + `76-bills-mobile-spacing1` no iPhone/Safari web e PWA instalada com nova captura;
 2. validar visualmente `76-drawer-hierarchy1` + `76-icon-semantics1` no mesmo dispositivo;
 3. corrigir a descrição da página Segurança para refletir a dependência ZXing real, sem mudança de release;
 4. preparar ZXing local e endurecimento CSP num bloco isolado;
