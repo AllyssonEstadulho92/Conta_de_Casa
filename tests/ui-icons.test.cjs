@@ -19,12 +19,29 @@ const license=fs.readFileSync('LUCIDE_LICENSE.txt','utf8');
 
 for(const retiredSource of ['v74-experience.css','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(ROOT,retiredSource)),`${retiredSource} must be physically deleted`);
 
+assert.match(js,/Conta de Casa — sistema de ícones Lucide local \(v76\)/);
 assert.match(js,/LUCIDE_SOURCE_COMMIT='94e4cb9d9db5907053ebf3636a97c45529cf776b'/,'Lucide source snapshot must be pinned and auditable');
+assert.match(js,/ICON_SEMANTICS_REVISION='76-icon-semantics1'/,'semantic icon revision must remain explicit and auditable');
 assert.match(js,/Object\.assign\(ICONS,LUCIDE_ICONS\)/,'Lucide registry must extend the existing application registry without changing callers');
 assert.match(js,/globalThis\.CDCIcons/,'shared icon renderer must remain available to contextual modules');
 assert.match(js,/source:'Lucide'/);
+assert.match(js,/revision:ICON_SEMANTICS_REVISION/);
 assert.match(js,/stroke-width="2"/,'Lucide stroke weight must remain consistent');
 for(const name of ['home','bill','calendar','plan','market','report','goal','shield','settings','search','eye','eyeOff','sun','moon','camera','qr','receipt','close','plus','edit','trash','filter','scan','cloudCheck','cloudOff'])assert.match(js,new RegExp(`\\b${name}:`),`missing Lucide semantic icon ${name}`);
+
+const semanticIconBody=name=>new RegExp(`\\n    ${name}:'([^']+)'`).exec(js)?.[1]||'';
+const planningIcon=semanticIconBody('plan');
+const settingsIcon=semanticIconBody('settings');
+const walletIcon=semanticIconBody('wallet');
+assert.ok(planningIcon,'planning icon must exist');
+assert.ok(settingsIcon,'settings icon must exist');
+assert.match(planningIcon,/m16 19 2 2 4-4/,'Planeamento must use the pinned Lucide CalendarCheck2 check mark');
+assert.match(planningIcon,/M3 9h18/,'Planeamento must visibly retain the calendar header');
+assert.notEqual(planningIcon,walletIcon,'Planeamento must never regress to the wallet/tray geometry');
+assert.doesNotMatch(planningIcon,/M3 11h3\.75/,'Planeamento must not use the historical wallet/tray glyph');
+assert.match(settingsIcon,/M9\.671 4\.136/,'Definições must use the pinned Lucide Settings gear geometry');
+assert.match(settingsIcon,/<circle cx="12" cy="12" r="3"\/>/,'Definições gear must keep its central hub');
+assert.doesNotMatch(settingsIcon,/M14 17H5|M19 7h-9/,'Definições must not regress to the sliders glyph');
 
 assert.match(js,/input\[type="search"\]/);
 assert.match(js,/function decorateSelect/);
@@ -108,4 +125,4 @@ assert.doesNotMatch(sw,/['"]\.\/v64-runtime\.css['"]/);
 assert.match(sw,/planning-more1/);
 assert.match(sw,/retire-assets1/);
 
-console.log('Conta de Casa brand mark and Lucide UI icon authority remain valid with retired sources physically absent: OK');
+console.log('Conta de Casa brand mark and Lucide UI icon authority keep semantic Planeamento/Definições geometry with retired sources absent: OK');
