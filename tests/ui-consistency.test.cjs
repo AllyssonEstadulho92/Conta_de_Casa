@@ -13,6 +13,7 @@ const shopping=read('market-shopping-focus.css');
 const planningMore=read('v76-planning-more.css');
 const architecture=read('v75-architecture.js');
 const architectureCss=read('v75-architecture.css');
+const drawerCss=read('v75-drawer-theme.css');
 const headerCss=read('v75-header-refinement.css');
 const menuCss=read('mobile-menu-toggle.css');
 const menuJs=read('mobile-menu-toggle.js');
@@ -79,9 +80,12 @@ assert.match(shopping,/grid-template-columns:38px 54px minmax\(0,1fr\) auto!impo
 assert.doesNotMatch(architecture,/root\.CDCV74/,'v76 architecture must not depend on the retired v74 runtime');
 assert.match(architecture,/Conta de Casa v76/);
 assert.match(architecture,/76-architecture-consolidation1/);
+assert.match(architecture,/76-drawer-hierarchy1/);
 assert.match(architecture,/bills:\['Despesas','Movimentos'\]/);
-assert.match(architecture,/settings:\['Mais','Conta e aplicação'\]/);
+assert.match(architecture,/settings:\['Definições','Aplicação'\]/);
 assert.match(architecture,/DRAWER_GROUPS/);
+assert.match(architecture,/label:'Principal'[\s\S]*Início[\s\S]*Despesas[\s\S]*Planeamento[\s\S]*Mercado/);
+assert.match(architecture,/label:'Sistema'[\s\S]*Segurança e sincronização[\s\S]*Definições/);
 assert.match(architecture,/MOBILE_NAV/);
 assert.match(architecture,/MORE_GROUPS/);
 assert.match(architecture,/ensureMoreShell/);
@@ -92,6 +96,13 @@ assert.match(architecture,/ensureBillTabs/);
 assert.match(architecture,/CDCV75/);
 assert.doesNotMatch(architecture,/placeDashboardGreeting/,'retired dashboard greeting must not return through architecture');
 assert.doesNotMatch(architecture,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/);
+
+/* Drawer: one-column hierarchy replaces the dense two-column card wall. */
+assert.match(drawerCss,/76-drawer-hierarchy1/);
+assert.match(drawerCss,/\.nav-drawer\[open\] \.drawer-nav \.nav-group-items\{[\s\S]*display:flex!important[\s\S]*flex-direction:column!important/);
+assert.doesNotMatch(drawerCss,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
+assert.match(drawerCss,/word-break:normal!important/);
+assert.match(drawerCss,/\.nav-drawer\[open\] \.drawer-footer\{[\s\S]*display:flex!important[\s\S]*flex-direction:column!important/);
 
 /* Menu móvel: o trigger global permanece no header e o X visível vive no dialog.
    A aplicação deixa de mover o mesmo botão entre duas árvores/top-layers. */
@@ -162,4 +173,4 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-console.log('Conta de Casa UI consistency: official v76 build keeps a stable shared header and a visible top-layer drawer close control.');
+console.log('Conta de Casa UI consistency: official v76 build keeps a stable shared header, readable drawer hierarchy and visible top-layer close control.');
