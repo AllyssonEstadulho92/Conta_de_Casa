@@ -125,6 +125,15 @@ Contratos por regex/sintaxe continuam úteis, mas não contam como validação f
 
 Enquanto ZXing for carregado de `unpkg.com`, a página Segurança não pode afirmar literalmente “Sem CDNs”. A direção preferida é bundle local + licença preservada + CSP mais restritiva.
 
+## D-096 — identidade transitória do Mercado tem validade de um ciclo de evento
+
+A ponte `76-market-identity1` usa estado temporário apenas para transportar `marketId|pid` entre o clique de um resultado live e o `commit('created','market')` executado nesse mesmo fluxo.
+
+- a identidade é copiada para o item antes do primeiro `await` do commit;
+- se o clique não chegar a criar o artigo, o estado temporário é limpo no microtask seguinte;
+- um item criado manualmente depois não pode herdar a identidade de um clique live abortado;
+- o guard não altera preço, quantidade, contabilidade, scanner ou persistência financeira.
+
 ## Invariantes vigentes
 
 - `STATE_VERSION=5`;
