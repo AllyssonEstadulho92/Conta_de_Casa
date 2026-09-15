@@ -160,7 +160,7 @@ self.addEventListener('fetch', event => {
     fetch(event.request,{cache:'no-store'}).then(response => {
       if (response && response.ok) {
         const copy = response.clone();
-        caches.open(CACHE).then(cache=>cache.put(key, copy)).catch(()=>undefined);
+        caches.open(CACHE).then(cache=>cache.put(key, copy));
       }
       return response;
     }).catch(() => caches.match(key))
