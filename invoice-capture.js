@@ -6,6 +6,7 @@
  * 76-expense-mode-stability1 mantém imagem e câmara separadas, sem OCR fictício.
  * 76-expense-mode-action1 torna Manual / Ler fatura / QR Code ações diretas: foco, ficheiro e câmara.
  * 76-invoice-capture-warmup1 prepara o leitor QR em background quando o formulário abre, reduzindo a espera no primeiro uso.
+ * 76-expense-native-input4 usa controlos file/capture nativos no iOS para evitar bloqueios de input.click()/getUserMedia.
  */
 (function installInvoiceCapture(root){
   const MAX_IMAGE_BYTES=15*1024*1024;
@@ -335,23 +336,59 @@
     }
   }
 
-  async function scanImage(file){
+  async function decodeQrFromImage(file,objectUrl){
+    if(typeof root.BarcodeDetector==='function'&&typeof root.createImageBitmap==='function'){
+      let bitmap=null;
+      try{
+        const detector=new root.BarcodeDetector({formats:['qr_code']});
+        bitmap=await root.createImageBitmap(file);
+        const detected=await detector.detect(bitmap);
+        const raw=detected?.find?.(item=>String(item?.rawValue||'').trim())?.rawValue||detected?.[0]?.rawValue||'';
+        if(raw)return String(raw);
+      }catch(_error){
+        /* Fallback ZXing abaixo. */
+      }finally{
+        try{bitmap?.close?.();}catch(_error){}
+      }
+    }
+
+    const zxing=await loadZxing();
+    const reader=new zxing.BrowserQRCodeReader();
+    const result=await reader.decodeFromImageUrl(objectUrl);
+    return result?.getText?.()||result?.text||'';
+  }
+
+  async function scanImage(file,requestedMode=currentCaptureMode()){
     if(!file)return;
-    if(currentCaptureMode()!=='image')return;
-    if(!String(file.type||'').startsWith('image/')){status('Selecione uma imagem da fatura. PDFs não são processados nesta versão.','warning');return;}
-    if(file.size<=0||file.size>MAX_IMAGE_BYTES){status('A imagem deve ter no máximo 15 MB.','warning');return;}
-    status('A procurar o QR da AT na imagem local…');
+    const mode=requestedMode==='qr'?'qr':'image';
+    if(!String(file.type||'').startsWith('image/')){
+      status(mode==='qr'?'Capture uma fotografia do QR da fatura.':'Selecione uma imagem da fatura. PDFs não são processados nesta versão.','warning');
+      return;
+    }
+    if(file.size<=0||file.size>MAX_IMAGE_BYTES){
+      status('A imagem deve ter no máximo 15 MB.','warning');
+      return;
+    }
+
+    ensureCaptureUi();
+    syncCaptureMode(mode);
+    status(mode==='qr'?'A ler o QR captado pela câmara…':'A procurar o QR da AT na imagem local…');
+
     const objectUrl=URL.createObjectURL(file);
     try{
-      const zxing=await loadZxing();
-      const reader=new zxing.BrowserQRCodeReader();
-      const result=await reader.decodeFromImageUrl(objectUrl);
-      const text=result?.getText?.()||result?.text||'';
+      const text=await decodeQrFromImage(file,objectUrl);
       const data=parseAtInvoiceQr(text);
-      if(!data){status('Foi encontrado um código, mas não corresponde ao formato QR de faturação da AT.','warning');return;}
+      if(!data){
+        status(mode==='qr'
+          ?'A fotografia não contém um QR de faturação AT legível. Aproxime a câmara do código e tente novamente.'
+          :'Foi encontrado um código, mas não corresponde ao formato QR de faturação da AT.','warning');
+        return;
+      }
       showPreview(data);
     }catch(_error){
-      status('Não foi possível encontrar um QR de faturação legível nesta imagem. Tente uma fotografia mais nítida.','warning');
+      status(mode==='qr'
+        ?'Não foi possível ler o QR nesta fotografia. Tente novamente com o código mais próximo e bem iluminado.'
+        :'Não foi possível encontrar um QR de faturação legível nesta imagem. Tente uma fotografia mais nítida.','warning');
     }finally{
       URL.revokeObjectURL(objectUrl);
     }
@@ -376,10 +413,19 @@
   }
 
   function handleChange(event){
-    if(event.target?.id!=='invoiceImageInput')return;
-    const file=event.target.files?.[0]||null;
-    if(currentCaptureMode()!=='image'){event.target.value='';return;}
-    scanImage(file).finally(()=>{event.target.value='';});
+    const input=event.target;
+    if(!(input instanceof HTMLInputElement)||input.type!=='file')return;
+
+    let mode='';
+    if(input.id==='invoiceImageInput')mode='image';
+    else if(input.matches('[data-v75-native-invoice]'))mode=input.dataset.v75NativeInvoice||'';
+    else return;
+
+    if(!['image','qr'].includes(mode)){input.value='';return;}
+    const file=input.files?.[0]||null;
+    if(!file){input.value='';return;}
+
+    scanImage(file,mode).finally(()=>{input.value='';});
   }
 
   function focusManualField(){
@@ -407,7 +453,15 @@
 
   function handleModeChange(event){
     const mode=event.detail?.mode||currentCaptureMode();
-    activateMode(mode==='image'||mode==='qr'?mode:'manual');
+    const normalized=mode==='image'||mode==='qr'?mode:'manual';
+    if(event.detail?.native){
+      ensureCaptureUi();
+      closeScanner(false);
+      syncCaptureMode(normalized);
+      if(document.querySelector('#invoiceCapturePreview')?.hidden!==false)status('');
+      return;
+    }
+    activateMode(normalized);
   }
 
   function installDom(){
@@ -422,7 +476,7 @@
     root.addEventListener('pagehide',()=>closeScanner(false));
   }
 
-  root.CDCInvoiceCapture=Object.freeze({parseAtInvoiceQr,parseMoneyCents,parseAtDate,syncCaptureMode,currentCaptureMode});
+  root.CDCInvoiceCapture=Object.freeze({parseAtInvoiceQr,parseMoneyCents,parseAtDate,syncCaptureMode,currentCaptureMode,scanImage});
   if(typeof document!=='undefined'){
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installDom,{once:true});
     else installDom();
