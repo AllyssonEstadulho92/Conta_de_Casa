@@ -97,7 +97,7 @@ assert.match(source,/76-expense-native-input4/,'native invoice capture revision 
 assert.match(source,/function decodeQrFromImage\(file,objectUrl\)/,'image decoding must have a single resilient path');
 assert.match(source,/BarcodeDetector/,'native QR decoding must be attempted when the browser provides it');
 assert.match(source,/event\.detail\?\.native/,'native file/camera selection must not recursively invoke programmatic pickers');
-assert.match(css,/#billForm :is\(input,select,textarea\)\{[\s\S]*pointer-events:auto!important[\s\S]*touch-action:manipulation!important/,'expense fields must remain interactive');
+assert.match(css,/#billForm :is\(input,select,textarea\):not\(\[data-v75-native-invoice\]\)\{[\s\S]*pointer-events:auto!important[\s\S]*touch-action:manipulation!important/,'expense fields must remain interactive without resizing the native capture overlay');
 assert.match(mobileTouchBlock,/\.dialog-close\{[\s\S]*text-indent:-9999px!important[\s\S]*color:transparent!important/,'original multiplication glyph must be visually removed on mobile');
 assert.match(mobileTouchBlock,/\.dialog-close::before\{[\s\S]*mask:url\([^\n]*m15 18-6-6 6-6/,'mobile close control must render only the back chevron');
 assert.doesNotMatch(mobileTouchBlock,/\.dialog-shell\{[\s\S]{0,260}overflow:auto!important/,'dialog shell must never become the mobile scroll owner again');
