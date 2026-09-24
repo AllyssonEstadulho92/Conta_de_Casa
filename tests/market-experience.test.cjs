@@ -56,7 +56,7 @@ assert.ok(!sw.includes("'./ui-consistency.css'"),'obsolete visual override must 
 assert.ok(!sw.includes("'./v64-runtime.css'"),'obsolete v64 visual shell must not ship');
 assert.match(pages,/const BUILD = 'v76'/);
 assert.match(pages,/const APP_UPDATE_REV = '76-version-alignment1'/);
-assert.match(pages,/const ARCHITECTURE_REV = '76-architecture-actions5'/);
+assert.match(pages,/const ARCHITECTURE_REV = '76-architecture-unblock6'/);
 assert.match(pages,/const PLANNING_MORE_REV = '76-planning-more1'/);
 assert.match(pages,/['"]market-branding\.js['"]:\s*path\.join\(GENERATED,\s*['"]market-branding\.js['"]\)/);
 
