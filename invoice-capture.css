@@ -264,7 +264,7 @@ html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm::after{
 html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(6){order:20!important}
 html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(8){order:21!important}
 html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label:nth-of-type(9){grid-column:1/-1!important;order:22!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea){
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea):not([data-v75-native-invoice]){
   width:100%!important;min-width:0!important;min-height:50px!important;margin:0!important;padding:11px 13px!important;
   border:1px solid var(--v76-border,var(--border))!important;border-radius:12px!important;
   background:var(--v76-surface,var(--surface))!important;color:var(--v76-text,var(--text))!important;
@@ -272,7 +272,7 @@ html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,tex
   pointer-events:auto!important;touch-action:manipulation!important
 }
 html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm textarea{min-height:96px!important;resize:vertical!important}
-html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea):focus{
+html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea):not([data-v75-native-invoice]):focus{
   outline:0!important;border-color:color-mix(in srgb,var(--v76-primary,var(--primary)) 66%,var(--v76-border,var(--border)))!important;
   box-shadow:0 0 0 3px color-mix(in srgb,var(--v76-primary,var(--primary)) 13%,transparent)!important
 }
@@ -356,7 +356,7 @@ html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn.pri
   html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm::after,
   html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row{grid-column:1!important}
   html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>label{font-size:.8rem!important}
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea){
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea):not([data-v75-native-invoice]){
     min-height:52px!important;padding:12px 13px!important;border-radius:13px!important;font-size:1rem!important
   }
   html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm textarea{min-height:94px!important}
