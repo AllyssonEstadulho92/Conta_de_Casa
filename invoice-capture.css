@@ -401,13 +401,13 @@ html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn.pri
 }
 @media(prefers-reduced-motion:reduce){
   .invoice-scan-guide span{animation:none!important}
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] :is(.dialog-close,.v75-bill-tabs button,.btn,input,select,textarea){transition:none!important}
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] :is(.dialog-close,.v75-bill-tabs [data-v75-bill-mode],.btn,input,select,textarea){transition:none!important}
 }
 @media(forced-colors:active){
   html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-shell,
   html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs,
   html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>[data-invoice-capture],
-  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea),
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm :is(input,select,textarea):not([data-v75-native-invoice]),
   html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn{border:1px solid CanvasText!important}
   html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs [data-v75-bill-mode].active{background:Highlight!important;color:HighlightText!important}
   html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close::before{background:ButtonText!important}
