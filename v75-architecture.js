@@ -19,6 +19,11 @@
  * - a arquitetura apenas seleciona o modo e emite cdc:bill-mode-change;
  * - invoice-capture.js é a autoridade que executa a ação direta: foco, ficheiro ou câmara.
  *
+ * 76-expense-ios-tab-touch2:
+ * - Safari/iOS recebe um caminho touchend explícito para os três modos;
+ * - o click sintetizado após touchend é deduplicado para evitar dupla abertura;
+ * - desktop/teclado continuam no caminho click/keydown existente.
+ *
  * 76-mobile-label-fit1:
  * - a rota continua a chamar-se Planeamento; apenas o label do dock passa a “Plano”
  *   para evitar truncamento em iPhones estreitos sem reduzir a legibilidade.
@@ -76,6 +81,8 @@
 
   let scheduled=false;
   let observer=null;
+  let lastBillModeTouchAt=0;
+  let lastBillModeTouchValue='';
   const byId=id=>document.getElementById(id);
   const q=(selector,node=document)=>node.querySelector(selector);
   const qa=(selector,node=document)=>[...node.querySelectorAll(selector)];
@@ -433,6 +440,36 @@
     dialog.dispatchEvent(new CustomEvent('cdc:bill-mode-change',{bubbles:true,detail:{mode}}));
   }
 
+  function billModeButtonFromEvent(event){
+    const target=event.target;
+    if(!(target instanceof Element))return null;
+    return target.closest('.v75-bill-tabs [data-v75-bill-mode]');
+  }
+
+  function activateBillModeFromPointerEvent(event){
+    const button=billModeButtonFromEvent(event);
+    if(!button)return false;
+    const mode=button.dataset.v75BillMode||'';
+    if(!['manual','image','qr'].includes(mode))return false;
+
+    if(event.type==='click'&&lastBillModeTouchValue===mode&&Date.now()-lastBillModeTouchAt<900){
+      event.preventDefault();
+      return true;
+    }
+
+    if(event.type==='touchend'){
+      lastBillModeTouchAt=Date.now();
+      lastBillModeTouchValue=mode;
+      if(event.cancelable)event.preventDefault();
+    }else{
+      event.preventDefault();
+    }
+
+    setBillMode(mode);
+    schedule();
+    return true;
+  }
+
   function handleBillModeKeydown(event){
     const current=event.target.closest?.('.v75-bill-tabs [data-v75-bill-mode]');
     if(!current)return;
@@ -471,18 +508,21 @@
   function start(){
     document.documentElement.classList.add('cdc-v75');
     document.documentElement.dataset.v76Architecture=REVISION;
+    document.addEventListener('touchend',event=>{
+      activateBillModeFromPointerEvent(event);
+    },{capture:true,passive:false});
     document.addEventListener('click',event=>{
-      const mode=event.target.closest?.('[data-v75-bill-mode]');
-      if(mode){event.preventDefault();setBillMode(mode.dataset.v75BillMode);schedule();return;}
-      const monthStep=event.target.closest?.('[data-v75-month-step]');
+      if(activateBillModeFromPointerEvent(event))return;
+      const target=event.target instanceof Element?event.target:null;
+      const monthStep=target?.closest('[data-v75-month-step]');
       if(monthStep){event.preventDefault();stepMonth(monthStep.dataset.v75MonthStep);schedule();return;}
-      const budgetFocus=event.target.closest?.('[data-v75-budget-focus]');
+      const budgetFocus=target?.closest('[data-v75-budget-focus]');
       if(budgetFocus){event.preventDefault();focusPlanningBudget();schedule();return;}
-      const go=event.target.closest?.('[data-v75-go]');
+      const go=target?.closest('[data-v75-go]');
       if(go){event.preventDefault();if(typeof showPage==='function')showPage(go.dataset.v75Go);schedule();return;}
-      if(event.target.closest?.('[data-v75-sync]')){event.preventDefault();handleSync();schedule();return;}
-      if(event.target.closest?.('[data-v75-theme]')){event.preventDefault();byId('themeToggle')?.click();setTimeout(schedule,0);return;}
-      if(event.target.closest?.('[data-v75-preferences]')){event.preventDefault();handlePreferences();schedule();return;}
+      if(target?.closest('[data-v75-sync]')){event.preventDefault();handleSync();schedule();return;}
+      if(target?.closest('[data-v75-theme]')){event.preventDefault();byId('themeToggle')?.click();setTimeout(schedule,0);return;}
+      if(target?.closest('[data-v75-preferences]')){event.preventDefault();handlePreferences();schedule();return;}
       setTimeout(schedule,0);
     },true);
     document.addEventListener('keydown',handleBillModeKeydown,true);

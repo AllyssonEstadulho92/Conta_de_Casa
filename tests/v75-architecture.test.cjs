@@ -77,6 +77,10 @@ assert.match(js,/data-v75-bill-mode="qr"/);
 assert.match(js,/syncBillModeButtons/);
 assert.match(js,/handleBillModeKeydown/,'expense mode tabs must support arrow-key navigation');
 assert.match(js,/cdc:bill-mode-change/,'mode selection must delegate the action to the canonical invoice-capture controller');
+assert.match(js,/76-expense-ios-tab-touch2/,'physical Safari regression must have an explicit revision marker');
+assert.match(js,/function activateBillModeFromPointerEvent\(event\)/,'invoice modes must share one pointer\/touch activation path');
+assert.match(js,/addEventListener\('touchend'[\s\S]{0,180}capture:true,passive:false/,'iOS must receive an explicit non-passive touchend path');
+assert.match(js,/Date\.now\(\)-lastBillModeTouchAt<900/,'synthetic click after touchend must be deduplicated');
 assert.doesNotMatch(js,/if\(mode==='image'\)setTimeout\(\(\)=>byId\('invoiceImageInput'\)\?\.click/,'architecture layer must not bypass invoice-capture when opening the file picker');
 assert.doesNotMatch(js,/if\(mode==='qr'\)setTimeout\(\(\)=>q\('\[data-invoice-camera\]'/,'architecture layer must not bypass invoice-capture when opening the camera');
 assert.match(js,/v75-sync-hero/,'synchronization must expose a concise state-first composition');
@@ -136,11 +140,14 @@ assert.match(invoiceCss,/@media\(prefers-reduced-motion:reduce\)[\s\S]*\.v75-bil
 assert.match(invoiceCss,/@media\(forced-colors:active\)[\s\S]*\.v75-bill-tabs button\.active/);
 
 assert.match(prepare,/const BUILD = 'v76'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '76-architecture-touch2'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
 assert.ok(prepare.includes("'invoice-capture.css'"));
-assert.match(sw,/conta-de-casa-public-v76-version-alignment1-v75-architecture2/);
+assert.match(prepare,/const INVOICE_CAPTURE_REV = '76-invoice-touch2'/,'invoice runtime must use an independent cache-busting revision');
+assert.match(prepare,/const SERVICE_WORKER_REV = '76-invoice-touch2'/,'service worker URL must change for this physical iOS fix');
+assert.ok(prepare.includes("invoice-capture\\.js\\?v=[^\"']+"),'Pages build must rewrite the invoice runtime query token');
+assert.match(sw,/conta-de-casa-public-v76-version-alignment1-76-architecture-touch2/);
 assert.match(sw,/expense-mode1/,'PWA cache must retain the improved expense mode control');
 assert.match(sw,/expense-mode-stability1/,'PWA cache must refresh deterministic expense mode behavior');
 assert.match(sw,/prototype-system1/,'PWA cache must refresh the approved prototype composition');

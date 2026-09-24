@@ -194,3 +194,13 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [x] `76-invoice-capture-warmup1`: preparar o leitor QR em background quando o formulário de nova fatura abre.
 - [ ] medir no iPhone/Safari/PWA a diferença entre primeiro uso e usos seguintes.
 - [ ] empacotar ZXing localmente para eliminar a latência e dependência da origem remota.
+
+
+## Regressão física dos modos de fatura
+
+- [x] `76-expense-ios-tab-touch2`: adicionar caminho `touchend` explícito aos tabs de registo.
+- [x] deduplicar o click sintetizado após toque.
+- [x] alterar revisões de cache dos runtimes envolvidos e do Service Worker.
+- [x] proteger o contrato com testes estáticos/Pages.
+- [ ] validar no mesmo iPhone que **Ler fatura** abre o seletor no primeiro toque.
+- [ ] validar no mesmo iPhone que **QR Code** solicita/abre a câmara no primeiro toque.

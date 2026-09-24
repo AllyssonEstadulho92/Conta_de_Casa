@@ -25,7 +25,7 @@ const MENU_REV = '73-menu8';
 const MODERN_UI_REV = '76-modern-ui2';
 const PRODUCT_PAGES_REV = '76-dashboard-clean1';
 const MOBILE_SHELL_REV = '76-mobile-shell2';
-const ARCHITECTURE_REV = '75-architecture2';
+const ARCHITECTURE_REV = '76-architecture-touch2';
 const PLANNING_MORE_REV = '76-planning-more1';
 const HEADER_REV = '75-header2';
 const STABILITY_REV = '75-stability1';
@@ -42,6 +42,8 @@ const CATALOG_REV = '75-catalog4';
 const PD_PHOTO_REV = '75-pd-photo1';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
+const INVOICE_CAPTURE_REV = '76-invoice-touch2';
+const SERVICE_WORKER_REV = '76-invoice-touch2';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
   throw new Error(`Invalid package application version: ${APP_VERSION||'(empty)'}`);
@@ -167,6 +169,7 @@ if(!index.includes('name="app-version"')){
 }
 index=index.replace(/<meta name="theme-color" content="[^"]+"\s*\/>/,'<meta name="theme-color" content="#f4f8f8" />');
 index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
+index=index.replace(/invoice-capture\.js\?v=[^"']+/,`invoice-capture.js?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${APP_VERSION} · ${BUILD}</strong>`);
 
 /* Remove referências históricas/retiradas caso um source HTML antigo volte a introduzi-las. */
@@ -235,7 +238,7 @@ fs.writeFileSync(distIndex,index);
 
 const distEvents=path.join(DIST,'events.js');
 let events=fs.readFileSync(distEvents,'utf8');
-events=events.replace(/\.\/sw\.js\?v=\d+/,`./sw.js?v=${BUILD.slice(1)}`);
+events=events.replace(/\.\/sw\.js\?v=[^'\"]+/,`./sw.js?v=${SERVICE_WORKER_REV}`);
 fs.writeFileSync(distEvents,events);
 
 const manifest=JSON.parse(fs.readFileSync(path.join(DIST,'release-manifest.json'),'utf8'));

@@ -377,3 +377,14 @@ A dependência ZXing continua temporariamente remota. Para reduzir a espera no p
 - erros de pré-aquecimento são silenciosos e recuperáveis pela ação explícita posterior;
 - `zxingPromise` continua a deduplicar carregamentos;
 - esta otimização não substitui a decisão já pendente de empacotar ZXing localmente.
+
+
+## D-114 — regressão física de toque prevalece sobre click sintético verde em CI
+
+A captura real em Safari/iOS mostrou os três modos de registo renderizados, mas sem reação observável ao toque. Como o deploy correspondente já estava concluído, a hipótese de publicação pendente foi descartada para este caso.
+
+- os tabs móveis passam a ter caminho `touchend` explícito além de `click`;
+- ambos convergem em `setBillMode()` e no evento `cdc:bill-mode-change`;
+- o `click` posterior ao toque é deduplicado;
+- revisões de URL dos scripts e do Service Worker mudam juntamente com a correção para evitar runtime antigo em Safari/PWA;
+- testes estáticos continuam obrigatórios, mas não substituem validação física WebKit.
