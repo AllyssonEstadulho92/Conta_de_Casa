@@ -7,6 +7,7 @@
  * 76-expense-mode-action1 torna Manual / Ler fatura / QR Code ações diretas: foco, ficheiro e câmara.
  * 76-invoice-capture-warmup1 prepara o leitor QR em background quando o formulário abre, reduzindo a espera no primeiro uso.
  * 76-expense-native-input4 usa controlos file/capture nativos no iOS para evitar bloqueios de input.click()/getUserMedia.
+ * 76-expense-picker-unblock6 não pré-carrega ZXing em touch/iOS antes da escolha nativa.
  */
 (function installInvoiceCapture(root){
   const MAX_IMAGE_BYTES=15*1024*1024;
@@ -142,7 +143,14 @@
     }catch(_error){return '';}
   }
 
+  function isTouchInvoiceDevice(){
+    const coarse=Boolean(root.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches);
+    const ios=/iPad|iPhone|iPod/.test(String(root.navigator?.userAgent||''))||root.navigator?.platform==='MacIntel'&&Number(root.navigator?.maxTouchPoints||0)>1;
+    return coarse||ios;
+  }
+
   function prewarmZxing(){
+    if(isTouchInvoiceDevice())return;
     if(readerWarmupScheduled||root.ZXingBrowser?.BrowserQRCodeReader)return;
     readerWarmupScheduled=true;
     setTimeout(()=>{
