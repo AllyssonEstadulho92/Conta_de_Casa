@@ -1,6 +1,6 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 15 de setembro de 2026  
+Atualizado: 24 de setembro de 2026  
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
@@ -108,3 +108,19 @@ Pendente: validação física no mesmo iPhone/PWA.
 3. corrigir a descrição factual de rede em Segurança;
 4. empacotar ZXing local e endurecer CSP;
 5. continuar a consolidação por componente e a migração TypeScript sem alterar invariantes.
+
+
+## Registo de faturas — correção de interação 24/09/2026
+
+Revisão técnica: `76-expense-mode-action1`.
+
+- **Manual** volta diretamente ao fluxo de introdução e coloca o foco no primeiro campo do registo;
+- **Ler fatura** abre imediatamente o seletor local de imagem a partir do toque no modo;
+- **QR Code** inicia imediatamente o fluxo da câmara a partir do toque no modo;
+- `v75-architecture.js` continua apenas a selecionar o modo e a emitir `cdc:bill-mode-change`;
+- `invoice-capture.js` mantém a autoridade funcional sobre ficheiro, câmara, scanner e preenchimento assistido;
+- leitura por imagem continua limitada ao QR AT existente na fotografia, sem OCR integral da fatura;
+- imagens e fotogramas não são persistidos nem enviados pelo módulo de captura;
+- o cache do Service Worker foi invalidado com `invoice-mode-action1` para impedir reutilização do runtime anterior.
+
+Pendente: validação física em iPhone/Safari/PWA das permissões da câmara, cancelamento do seletor de imagem e retorno ao modo Manual.
