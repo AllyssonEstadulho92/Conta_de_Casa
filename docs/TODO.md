@@ -204,3 +204,15 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [x] proteger o contrato com testes estáticos/Pages.
 - [ ] validar no mesmo iPhone que **Ler fatura** abre o seletor no primeiro toque.
 - [ ] validar no mesmo iPhone que **QR Code** solicita/abre a câmara no primeiro toque.
+
+
+## Entrega automática e registo de faturas
+
+- [x] `76-expense-ios-tab-direct3`: ligar os três modos diretamente aos respetivos botões.
+- [x] preservar o gesto `touchend` sem `preventDefault()` no iOS.
+- [x] deduplicar o click sintetizado depois do toque.
+- [x] `auto-refresh2`: ativar automaticamente o novo Service Worker depois de concluir o cache.
+- [x] recarregar automaticamente a página em `controllerchange`.
+- [x] verificar novas compilações a cada 30 segundos quando a aplicação está visível e online.
+- [ ] validar fisicamente **Ler fatura** no mesmo iPhone após o novo deploy.
+- [ ] validar fisicamente **QR Code** e pedido de câmara no mesmo iPhone.
