@@ -337,6 +337,19 @@ function wireEvents(){
   $('#newBillBtn').addEventListener('click',()=>openBillForm()); $('#newIncomeBtn').addEventListener('click',openIncomeForm); $('#newMarketBtn').addEventListener('click',()=>openMarketForm()); $('#newGoalBtn').addEventListener('click',openGoalForm);
   $('#kpiGrid').addEventListener('click',e=>{if(e.target.closest('[data-update-balance]'))openAccountBalanceForm();});
   $('#billSearch').addEventListener('input',renderBills);
+  const setBillFiltersOpen=open=>{
+    const page=$('#page-bills');
+    const toggle=$('#billFiltersToggle');
+    if(!page||!toggle)return;
+    const expanded=Boolean(open);
+    page.classList.toggle('bill-filters-open',expanded);
+    toggle.setAttribute('aria-expanded',String(expanded));
+    toggle.classList.toggle('is-open',expanded);
+  };
+  $('#billFiltersToggle')?.addEventListener('click',()=>{
+    const page=$('#page-bills');
+    setBillFiltersOpen(!page?.classList.contains('bill-filters-open'));
+  });
   ['#billStatusFilter','#billCategoryFilter','#billDateFrom','#billDateTo','#billSort'].forEach(sel=>$(sel)?.addEventListener('change',renderBills));
   const clearBillFilters=()=>{
     $('#billSearch').value='';
@@ -346,6 +359,7 @@ function wireEvents(){
     $('#billDateTo').value='';
     $('#billSort').value='due-asc';
     renderBills();
+    if(window.matchMedia?.('(max-width: 820px)')?.matches)setBillFiltersOpen(false);
   };
   $('#billClearFilters')?.addEventListener('click',clearBillFilters);
   $('#billsList').addEventListener('click',async e=>{
