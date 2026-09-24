@@ -405,3 +405,14 @@ A política anterior exigia confirmação manual para promover um worker em espe
 - `controllerchange` recarrega a página automaticamente;
 - a aplicação verifica novas compilações periodicamente enquanto está aberta e online;
 - dados persistentes do utilizador ficam fora deste ciclo.
+
+
+## D-117 — ações móveis críticas usam controlos nativos quando o WebKit bloqueia a cadeia programática
+
+Depois de duas correções baseadas em eventos continuarem a falhar em dispositivo real, **Ler fatura** e **QR Code** deixam de depender de `input.click()` ou de uma cadeia de `CustomEvent` para abrir UI nativa no iOS. O próprio `input[type=file]` passa a ocupar a área clicável do tab.
+
+O QR móvel usa `capture="environment"`, reduzindo dependência de `getUserMedia` e do scanner ao vivo no primeiro gesto. O scanner ao vivo permanece disponível como alternativa em ambientes compatíveis.
+
+## D-118 — atualização automática não interrompe um registo em edição
+
+A aplicação continua a promover novas compilações automaticamente, mas `controllerchange` não pode recarregar uma página com formulário/modal ativo. O reload fica pendente até a interface voltar a um estado seguro. Isto preserva o pedido de atualização automática sem criar perda de contexto ou sensação de bloqueio durante a edição.
