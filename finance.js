@@ -250,8 +250,11 @@ function monthlySpendHistory(month = selectedMonth, count = 6) {
   for(let offset=safeCount-1;offset>=0;offset--){
     const date=new Date(year,monthNumber-1-offset,1);
     const key=`${date.getFullYear()}-${pad2(date.getMonth()+1)}`;
-    const numbers=monthNumbers(key);
-    rows.push({month:key,paymentTotal:numbers.paymentTotal,marketSpent:numbers.marketSpent,total:numbers.budgetUsed});
+    const paymentTotal=sumCents((appState?.payments||[]).filter(p=>inSelectedMonth(p.paidAt,key)).map(p=>p.amountCents));
+    const marketSpent=sumCents((appState?.market||[])
+      .filter(item=>item.purchased&&inSelectedMonth(item.purchasedAt||item.updatedAt,key))
+      .map(item=>marketLineCents(item.actualCents||item.estimatedCents||0,item.quantity)));
+    rows.push({month:key,paymentTotal,marketSpent,total:sumCents([paymentTotal,marketSpent])});
   }
   return rows;
 }
