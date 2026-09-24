@@ -32,6 +32,7 @@ assert.equal(context.CDCInvoiceCapture.parseMoneyCents('123.45'),12345);
 assert.equal(context.CDCInvoiceCapture.parseMoneyCents('123,45'),null,'AT QR decimal separator is dot');
 
 assert.match(source,/76-expense-mode-stability1/);
+assert.match(source,/76-expense-mode-action1/,'invoice registration modes must remain directly actionable');
 assert.match(source,/MODE_COPY=Object\.freeze/);
 assert.match(source,/Ler fatura por imagem/);
 assert.match(source,/Fotografia com QR da Autoridade Tributária/);
@@ -40,6 +41,10 @@ assert.match(source,/Ler QR da fatura/);
 assert.match(source,/Abrir câmara/);
 assert.match(source,/Selecionar imagem/);
 assert.match(source,/cdc:bill-mode-change/,'capture surface must react to the selected registration mode');
+assert.match(source,/function activateMode\(mode\)/,'mode selection must have one canonical activation path');
+assert.match(source,/mode==='image'[\s\S]{0,500}input\.click\(\)/,'Ler fatura must open the local image picker from the mode tap');
+assert.match(source,/mode==='qr'[\s\S]{0,260}openCamera\(\)/,'QR Code must start the camera flow from the mode tap');
+assert.match(source,/mode==='manual'[\s\S]{0,120}focusManualField\(\)/,'Manual must return focus to the manual entry flow');
 assert.match(source,/currentCaptureMode\(\)!=='qr'/,'camera must only start from explicit QR mode');
 assert.match(source,/currentCaptureMode\(\)!=='image'/,'image decoding must stay scoped to image mode');
 assert.match(source,/BrowserQRCodeReader/);
@@ -92,5 +97,6 @@ assert.doesNotMatch(mobileTouchBlock,/\.dialog-shell\{[\s\S]{0,260}overflow:auto
 
 const sw=fs.readFileSync('sw.js','utf8');
 assert.match(sw,/expense-form-professional1-expense-ios-touch1/,'PWA cache must invalidate the frozen iOS expense dialog revision');
+assert.match(sw,/invoice-mode-action1/,'PWA cache must invalidate the previous inert invoice-mode runtime');
 
 console.log('Invoice capture tests: exact AT QR parser plus deterministic modes, professional expense UI and iOS touch stability: OK');
