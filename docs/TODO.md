@@ -229,3 +229,13 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [ ] validar fisicamente **Ler fatura** no mesmo iPhone.
 - [ ] validar fisicamente **QR Code** e retorno da câmara no mesmo iPhone.
 - [ ] confirmar que um deploy novo recarrega automaticamente depois de fechar o formulário, sem interromper edição.
+
+
+## Modos de registo de despesa
+
+- [x] `76-expense-action-map5`: atribuir ID estável a Manual, Ler fatura e QR Code.
+- [x] adicionar `data-v75-bill-action` explícito a cada controlo.
+- [x] centralizar a resolução em `BILL_MODE_ACTIONS`.
+- [x] expor no diálogo a ação atualmente selecionada.
+- [x] proteger o contrato com testes.
+- [ ] validar fisicamente no iPhone os três caminhos após publicação.
