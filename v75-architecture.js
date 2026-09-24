@@ -36,6 +36,12 @@
  * - o fluxo deixa de depender de input.click() programático para abrir UI do iOS;
  * - desktop mantém o leitor QR ao vivo quando existe apontador fino.
  *
+ * 76-expense-action-map5:
+ * - Manual / Ler fatura / QR Code têm IDs e data-actions estáveis;
+ * - um mapa explícito liga cada controlo à respetiva função;
+ * - o diálogo regista a última ação selecionada para diagnóstico e testes;
+ * - o caminho nativo continua a abrir Fotos/Câmara sem uma segunda ação programática.
+ *
  * 76-mobile-label-fit1:
  * - a rota continua a chamar-se Planeamento; apenas o label do dock passa a “Plano”
  *   para evitar truncamento em iPhones estreitos sem reduzir a legibilidade.
@@ -353,45 +359,50 @@
     return coarse||ios;
   }
 
+  const BILL_MODE_ACTIONS=Object.freeze({
+    'expense-manual':Object.freeze({mode:'manual',native:false}),
+    'expense-image':Object.freeze({mode:'image',native:true}),
+    'expense-qr':Object.freeze({mode:'qr',native:'auto'})
+  });
+
   function billTabsHtml(){
     return `<div class="v75-bill-tabs full-row" role="tablist" aria-label="Modo de registo">
-      <button type="button" class="active" role="tab" aria-selected="true" tabindex="0" data-v75-bill-mode="manual">Manual</button>
-      <label class="v75-bill-native-tab" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="image">
+      <button id="expenseModeManual" type="button" class="active" role="tab" aria-selected="true" tabindex="0" data-v75-bill-mode="manual" data-v75-bill-action="expense-manual">Manual</button>
+      <label id="expenseModeImage" class="v75-bill-native-tab" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="image" data-v75-bill-action="expense-image" for="expenseModeImageInput">
         <span>Ler fatura</span>
-        <input type="file" accept="image/*" data-v75-native-invoice="image" tabindex="-1" aria-label="Selecionar fotografia da fatura">
+        <input id="expenseModeImageInput" type="file" accept="image/*" data-v75-native-invoice="image" tabindex="-1" aria-label="Selecionar fotografia da fatura">
       </label>
-      <label class="v75-bill-native-tab" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="qr">
+      <label id="expenseModeQr" class="v75-bill-native-tab" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="qr" data-v75-bill-action="expense-qr" for="expenseModeQrInput">
         <span>QR Code</span>
-        <input type="file" accept="image/*" capture="environment" data-v75-native-invoice="qr" tabindex="-1" aria-label="Abrir câmara para fotografar o QR da fatura">
+        <input id="expenseModeQrInput" type="file" accept="image/*" capture="environment" data-v75-native-invoice="qr" tabindex="-1" aria-label="Abrir câmara para fotografar o QR da fatura">
       </label>
     </div>`;
   }
 
-  function bindBillTabs(form){
-    const manual=q('.v75-bill-tabs [data-v75-bill-mode="manual"]',form);
-    if(manual&&manual.dataset.v75DirectBound!=='true'){
-      manual.dataset.v75DirectBound='true';
-      manual.addEventListener('click',event=>{
-        event.preventDefault();
-        setBillMode('manual');
-        schedule();
-      });
-    }
+  function resolveBillModeAction(control){
+    const actionName=control?.dataset?.v75BillAction||'';
+    const config=BILL_MODE_ACTIONS[actionName];
+    if(!config)return null;
+    const native=config.native==='auto'?prefersNativeQrCapture():Boolean(config.native);
+    return Object.freeze({action:actionName,mode:config.mode,native});
+  }
 
-    qa('.v75-bill-tabs [data-v75-native-invoice]',form).forEach(input=>{
-      if(input.dataset.v75DirectBound==='true')return;
-      input.dataset.v75DirectBound='true';
-      input.addEventListener('click',event=>{
-        const mode=input.dataset.v75NativeInvoice;
-        if(!['image','qr'].includes(mode))return;
-        if(mode==='qr'&&!prefersNativeQrCapture()){
-          event.preventDefault();
-          setBillMode('qr');
-        }else{
-          setBillMode(mode,{native:true});
-        }
-        schedule();
-      });
+  function activateBillModeAction(control,event){
+    const resolved=resolveBillModeAction(control);
+    if(!resolved)return;
+
+    const inputTarget=event?.target instanceof HTMLInputElement&&event.target.matches('[data-v75-native-invoice]');
+    if(resolved.mode==='manual'||resolved.mode==='qr'&&!resolved.native&&inputTarget)event.preventDefault();
+
+    setBillMode(resolved.mode,{native:resolved.native,action:resolved.action});
+    schedule();
+  }
+
+  function bindBillTabs(form){
+    qa('.v75-bill-tabs [data-v75-bill-action]',form).forEach(control=>{
+      if(control.dataset.v75ActionBound==='true')return;
+      control.dataset.v75ActionBound='true';
+      control.addEventListener('click',event=>activateBillModeAction(control,event));
     });
   }
 
@@ -409,6 +420,7 @@
       const on=button.dataset.v75BillMode===effective;
       button.classList.toggle('active',on);
       button.setAttribute('aria-selected',String(on));
+      button.dataset.v75ActionState=on?'active':'idle';
       button.tabIndex=on?0:-1;
     });
   }
@@ -417,13 +429,14 @@
     const dialog=byId('formDialog');
     if(!dialog)return;
     const form=byId('billForm');
-    if(!dialog.open||!form){delete dialog.dataset.v75Kind;delete dialog.dataset.v75BillMode;return;}
+    if(!dialog.open||!form){delete dialog.dataset.v75Kind;delete dialog.dataset.v75BillMode;delete dialog.dataset.v75BillAction;return;}
     dialog.dataset.v75Kind='expense';
     ensureBillTabs(form);
     const isNew=!String(form.elements.id?.value||'');
     const title=byId('dialogTitle');
     if(title)title.textContent=isNew?'Adicionar despesa':'Editar despesa';
     if(!['manual','image','qr'].includes(dialog.dataset.v75BillMode||''))dialog.dataset.v75BillMode='manual';
+    if(!dialog.dataset.v75BillAction)dialog.dataset.v75BillAction='expense-manual';
     syncBillModeButtons(form,dialog.dataset.v75BillMode);
   }
 
@@ -494,9 +507,11 @@
     const dialog=byId('formDialog');
     const form=byId('billForm');
     if(!dialog||!form||!['manual','image','qr'].includes(mode))return;
+    const action=clean(options.action||`expense-${mode==='image'?'image':mode==='qr'?'qr':'manual'}`);
     dialog.dataset.v75BillMode=mode;
+    dialog.dataset.v75BillAction=action;
     syncBillModeButtons(form,mode);
-    dialog.dispatchEvent(new CustomEvent('cdc:bill-mode-change',{bubbles:true,detail:{mode,native:Boolean(options.native)}}));
+    dialog.dispatchEvent(new CustomEvent('cdc:bill-mode-change',{bubbles:true,detail:{mode,native:Boolean(options.native),action}}));
   }
 
   function handleBillModeKeydown(event){
