@@ -336,3 +336,19 @@ A atualização automática substitui código e assets públicos. IndexedDB, cof
 ## Tabs de registo de fatura no iOS
 
 `ensureBillTabs()` cria os três controlos e chama `bindBillTabs()`. Cada botão recebe listeners próprios de `touchend` e `click`. A seleção continua a passar por `setBillMode()`, que atualiza o estado visual e emite `cdc:bill-mode-change`; `invoice-capture.js` permanece a autoridade para ficheiro, câmara e leitura QR.
+
+
+## Captura nativa de faturas no iOS
+
+Os tabs **Ler fatura** e **QR Code** deixam de depender de uma chamada programática a `input.click()` no caminho móvel.
+
+- **Ler fatura** contém um `input[type=file][accept="image/*"]` nativo sobre a própria superfície visual;
+- **QR Code** contém `input[type=file][accept="image/*"][capture="environment"]` para dispositivos de toque;
+- o `click` nativo apenas sincroniza o modo com `setBillMode(mode,{native:true})`; `invoice-capture.js` não abre um segundo picker nesse caminho;
+- o evento `change` entrega o ficheiro diretamente a `scanImage(file,mode)`;
+- `BarcodeDetector` é usado por feature detection quando disponível; ZXing permanece fallback;
+- em desktop/fine pointer, QR Code pode continuar a iniciar o leitor ao vivo.
+
+## Refresh automático seguro
+
+O Service Worker pode assumir automaticamente uma nova compilação, mas `events.js` só executa `location.reload()` quando não existem diálogos críticos abertos, scanner ativo ou campos editáveis com foco. Se existir edição em curso, o reload é adiado e repetido até a página ficar segura.
