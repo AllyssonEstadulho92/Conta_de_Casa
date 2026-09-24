@@ -108,7 +108,7 @@ assert.doesNotMatch(drawerCss,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)
 assert.doesNotMatch(drawerCss,/linear-gradient\(/);
 
 assert.match(sw, /v76-version-alignment1/);
-assert.match(sw, /conta-de-casa-public-v76-version-alignment1-v75-architecture2/);
+assert.match(sw, /conta-de-casa-public-v76-version-alignment1-76-architecture-touch2/);
 assert.match(sw, /stability1-layout1-drawer2/);
 assert.match(sw, /ui-audit1/);
 assert.match(sw, /architecture-consolidation1-retire-v74-runtime1/);
