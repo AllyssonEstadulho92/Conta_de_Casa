@@ -88,9 +88,9 @@ try{
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
   assert.match(index,/market-shopping-focus\.css\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
-  assert.match(index,/v75-architecture\.css\?v=75-architecture2/);
+  assert.match(index,/v75-architecture\.css\?v=76-architecture-touch2/);
   assert.match(index,/v76-planning-more\.css\?v=76-planning-more1/);
-  assert.match(index,/v75-architecture\.js\?v=75-architecture2/);
+  assert.match(index,/v75-architecture\.js\?v=76-architecture-touch2/);
   assert.match(index,/v75-header-refinement\.css\?v=75-header2/);
   assert.doesNotMatch(index,/v74-experience\.(?:css|js)/);
   assert.doesNotMatch(index,/v75-market-featured\.(?:css|js)/);
