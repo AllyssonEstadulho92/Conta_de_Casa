@@ -82,7 +82,7 @@ try {
   assert.match(builtIndex, /<meta name="app-build-id" content="(?:[0-9a-f]{7}|local)"\s*\/>/);
   assert.match(builtIndex, /v76-modern-ui\.css\?v=76-modern-ui2/);
   assert.match(builtIndex, /v76-product-pages\.css\?v=76-dashboard-clean1/);
-  assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-mobile-shell2/);
+  assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-mobile-shell3/);
   assert.match(builtIndex, /v75-usability\.css\?v=76-auth1/);
 
   const builtIds = [...builtIndex.matchAll(/\sid="([^"]+)"/g)].map(match=>match[1]);
