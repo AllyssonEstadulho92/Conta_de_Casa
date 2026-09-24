@@ -45,11 +45,11 @@ assert.match(source,/cdc:bill-mode-change/,'capture surface must react to the se
 assert.match(source,/function activateMode\(mode\)/,'mode selection must have one canonical activation path');
 assert.match(source,/function prewarmZxing\(\)/,'invoice form must prewarm the QR reader');
 assert.match(source,/loadZxing\(\)\.catch\(\(\)=>undefined\)/,'reader warmup must stay non-blocking and silent');
-assert.match(source,/mode==='image'[\s\S]{0,500}input\.click\(\)/,'Ler fatura must open the local image picker from the mode tap');
+assert.match(source,/mode==='image'[\s\S]{0,500}input\.click\(\)/,'the secondary image action may still open its local picker programmatically outside the native top-tab path');
 assert.match(source,/mode==='qr'[\s\S]{0,260}openCamera\(\)/,'QR Code must start the camera flow from the mode tap');
 assert.match(source,/mode==='manual'[\s\S]{0,120}focusManualField\(\)/,'Manual must return focus to the manual entry flow');
 assert.match(source,/currentCaptureMode\(\)!=='qr'/,'camera must only start from explicit QR mode');
-assert.match(source,/currentCaptureMode\(\)!=='image'/,'image decoding must stay scoped to image mode');
+assert.match(source,/requestedMode==='qr'\?'qr':'image'/,'image decoding must explicitly support both invoice-photo and native QR-camera sources');
 assert.match(source,/BrowserQRCodeReader/);
 assert.match(source,/decodeFromImageUrl/);
 assert.match(source,/facingMode:\{ideal:'environment'\}/);
