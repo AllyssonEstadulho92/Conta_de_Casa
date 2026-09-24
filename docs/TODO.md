@@ -275,3 +275,13 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [x] manter meses anteriores intactos e consultáveis.
 - [x] apresentar Saldo inicial e Orçamento vazios num mês novo quando ainda estão a zero.
 - [ ] validar visualmente o calendário mensal no mesmo iPhone/Safari/PWA.
+
+
+## Limpeza visual dos filtros de Despesas
+
+- [x] `76-bills-filter-collapse1`: recolher filtros avançados por defeito no mobile.
+- [x] adicionar botão compacto acessível com `aria-expanded` / `aria-controls`.
+- [x] mostrar contador quando existirem filtros/ordenação fora do padrão.
+- [x] manter IDs, listeners e `renderBills()` como autoridades existentes.
+- [x] manter filtros sempre visíveis em desktop.
+- [ ] validar fisicamente em iPhone que a lista/resumo aparecem imediatamente sem o cartão alto de filtros.
