@@ -460,3 +460,15 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - eventos de input/change são emitidos para manter a UI e validação sincronizadas;
 - runtime de captura revisto para `76-invoice-autofill7`;
 - preservadas regras financeiras, IndexedDB, cofre/PIN, Mercado e sincronização.
+
+
+### 24 de setembro de 2026 — calendário mensal de gastos
+
+- calendário passa a mostrar gastos efetivos por dia, além dos vencimentos;
+- adicionado resumo do mês: gasto total, faturas pagas, Mercado e por pagar;
+- adicionado histórico navegável dos últimos seis meses;
+- meses anteriores continuam derivados dos movimentos guardados e não são apagados na mudança de mês;
+- aplicação acompanha automaticamente o novo mês quando estava no mês corrente;
+- Saldo inicial e Orçamento do mês aparecem vazios num novo período enquanto não forem definidos;
+- cache PWA invalidada com `monthly-spend-calendar1`;
+- preservadas regras de pagamentos, cofre, IndexedDB, sincronização e auditoria financeira.
