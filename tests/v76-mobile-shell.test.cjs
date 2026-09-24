@@ -22,7 +22,7 @@ function contrast(a,b){
   return (Math.max(one,two)+.05)/(Math.min(one,two)+.05);
 }
 
-assert.match(shell,/Conta de Casa v76 — 76-mobile-shell2/);
+assert.match(shell,/Conta de Casa v76 — 76-mobile-shell3/);
 assert.match(shell,/76-full-page-audit1/);
 assert.match(shell,/76-page-polish1/);
 assert.match(shell,/76-shell-coherence1/,'final mobile shell must contain the screenshot-driven shell consolidation');
@@ -68,6 +68,10 @@ assert.match(shell,/#vaultScreen\[hidden\],[\s\S]*#app\[hidden\]\{[\s\S]*display
 assert.match(shell,/76-auth-transition1/);
 assert.match(shell,/#vaultScreen:not\(\[hidden\]\) \+ #app\{[\s\S]*display:none!important/);
 assert.match(shell,/76-ui-audit1/);
+assert.match(shell,/76-bills-filter-collapse1/,'mobile shell must own the compact filter disclosure');
+assert.match(shell,/#page-bills:not\(\.bill-filters-open\)>\.bill-filter-grid\{[\s\S]*display:none!important/,'advanced bill filters must be collapsed by default on mobile');
+assert.match(shell,/#page-bills\.bill-filters-open>\.bill-filter-grid\{[\s\S]*display:grid!important/,'filter toggle must restore the canonical controls');
+assert.match(shell,/#billFiltersToggle\{[\s\S]*display:inline-flex!important/,'mobile filter disclosure must remain a visible touch target');
 
 /* Final safe-area policy: use the browser-provided inset. A normal Safari viewport
    may legitimately report 0; adding an unconditional 24 px created the oversized
@@ -102,10 +106,11 @@ assert.match(shell,/forced-colors:active/);
 assert.equal(pkg.version,'0.76.0');
 assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui2'/);
-assert.match(prepare,/const MOBILE_SHELL_REV = '76-mobile-shell2'/);
+assert.match(prepare,/const MOBILE_SHELL_REV = '76-mobile-shell3'/);
 assert.match(prepare,/v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/);
-assert.match(sw,/mobile-shell2/);
+assert.match(sw,/mobile-shell3/);
 assert.match(sw,/shell-coherence1/,'PWA cache must invalidate the previous shell CSS');
+assert.match(sw,/bills-filters-collapse1/,'PWA cache must invalidate the previous always-open mobile filters');
 assert.ok(sw.includes("'./v76-mobile-shell.css'"));
 
 const dist=path.join(ROOT,'dist');
@@ -115,7 +120,7 @@ try{
   assert.match(builtIndex,/name="app-version" content="0\.76\.0"/);
   assert.match(builtIndex,/name="app-build" content="v76"/);
   assert.match(builtIndex,/v76-modern-ui\.css\?v=76-modern-ui2/);
-  assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-mobile-shell2/);
+  assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-mobile-shell3/);
   assert.ok(builtIndex.indexOf('v76-modern-ui.css')<builtIndex.indexOf('v76-mobile-shell.css'),'mobile shell must remain the final mobile shell authority');
   const builtShell=read('dist/v76-mobile-shell.css');
   assert.match(builtShell,/76-shell-coherence1/);
