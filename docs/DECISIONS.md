@@ -438,3 +438,16 @@ Decisão:
 - ZXing não é pré-carregado em mobile/touch antes da escolha nativa.
 
 O objetivo é reduzir o primeiro gesto ao comportamento nativo mínimo do browser e deixar processamento, mudança de modo e leitura QR para depois da seleção.
+
+
+## D-121 — um QR AT válido preenche automaticamente apenas dados autoritativos
+
+Exigir “Preencher campos” depois de o utilizador já selecionar ou fotografar a fatura acrescentava uma ação desnecessária e podia deixar os campos obrigatórios aparentar vazios.
+
+Decisão:
+
+- dados fiáveis do QR são aplicados automaticamente após reconhecimento;
+- valores já introduzidos pelo utilizador nunca são substituídos por esta automação;
+- categoria, vencimento, método e nome comercial do fornecedor não são inventados;
+- a data do documento não é tratada como data de vencimento;
+- a gravação final continua dependente da validação canónica de `handleBillSubmit()`.

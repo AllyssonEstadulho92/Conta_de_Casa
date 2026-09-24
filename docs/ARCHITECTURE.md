@@ -380,3 +380,17 @@ O fluxo é:
 7. `scanImage()` tenta `BarcodeDetector` e usa ZXing como fallback.
 
 Os inputs nativos são excluídos de `keepFocusedDialogFieldVisible()` e do listener global de `focusin`, evitando cálculos de viewport enquanto o picker do sistema está a abrir. Em dispositivos touch/iOS, `prewarmZxing()` retorna sem carregar a biblioteca remota antes da seleção.
+
+
+## Preenchimento automático a partir do QR AT
+
+Depois de `scanImage()` reconhecer um QR válido, `showPreview()` chama imediatamente `applyInvoiceToForm({announce:false,focus:false})`. O utilizador não precisa de carregar num segundo botão para transferir os dados para o formulário.
+
+`setBlankField()` escreve apenas em campos vazios e emite `input` + `change`. O mapeamento seguro é:
+
+- `documentId` → **Descrição** (`Fatura <documento>`);
+- `issuerNif` → **Fornecedor/entidade** como NIF quando o campo está vazio;
+- `totalCents` → **Valor total**;
+- `documentId` + ATCUD → **Referência**.
+
+Os campos **Categoria**, **Vencimento** e **Método** não são derivados do QR. O formulário mantém os seus valores atuais e `data-invoice-review-fields` assinala os campos que exigem confirmação humana. `forms.js` continua a ser a única autoridade que valida e grava a fatura.

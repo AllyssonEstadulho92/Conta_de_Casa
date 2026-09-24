@@ -449,3 +449,14 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - desktop mantém scanner QR ao vivo;
 - novas revisões públicas: `76-architecture-unblock6`, `76-invoice-unblock6`, `76-safe-refresh4`;
 - preservados cálculos, cofre/PIN, IndexedDB, Mercado e sincronização.
+
+
+### 24 de setembro de 2026 — preenchimento automático da fatura
+
+- QR AT válido passa a preencher automaticamente os campos compatíveis, sem segundo toque;
+- Descrição, Valor total, NIF do emitente e Referência são preenchidos apenas quando vazios;
+- Categoria e Vencimento continuam obrigatórios, mas não são inferidos do QR além dos valores já existentes no formulário;
+- Método e nome comercial do fornecedor permanecem para confirmação;
+- eventos de input/change são emitidos para manter a UI e validação sincronizadas;
+- runtime de captura revisto para `76-invoice-autofill7`;
+- preservadas regras financeiras, IndexedDB, cofre/PIN, Mercado e sincronização.

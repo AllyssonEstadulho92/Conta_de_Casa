@@ -252,3 +252,14 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [ ] validar **Ler fatura** no mesmo iPhone.
 - [ ] validar **QR Code** no mesmo iPhone.
 - [ ] confirmar que regressar de Fotos/Câmara não deixa o formulário bloqueado.
+
+
+## Preenchimento automático de faturas
+
+- [x] `76-invoice-autofill7`: preencher automaticamente dados seguros depois de QR AT válido.
+- [x] preencher Descrição, Valor total, NIF do fornecedor e Referência apenas se estiverem vazios.
+- [x] verificar os quatro campos obrigatórios após o autofill.
+- [x] manter Categoria, Vencimento, Método e fornecedor comercial como campos de revisão.
+- [x] não usar data do documento como vencimento.
+- [x] manter submit/persistência exclusivamente em `forms.js`.
+- [ ] validar fisicamente no iPhone que os campos aparecem preenchidos logo após a leitura.
