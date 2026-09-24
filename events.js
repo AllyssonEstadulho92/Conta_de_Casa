@@ -118,7 +118,7 @@ let sidebarPreference = null;
 function keepFocusedDialogFieldVisible(delay=80) {
   clearTimeout(focusedFieldTimer);
   const active=document.activeElement;
-  if(!active?.matches?.('#formDialog input, #formDialog select, #formDialog textarea')) return;
+  if(!active?.matches?.('#formDialog input:not([data-v75-native-invoice]), #formDialog select, #formDialog textarea')) return;
   focusedFieldTimer=setTimeout(()=>{
     if(!active.isConnected || document.activeElement!==active) return;
     const shell=active.closest('.dialog-shell');
@@ -167,7 +167,7 @@ function installViewportMetrics() {
   window.addEventListener('resize',()=>{updateViewportMetrics();updateAdaptiveNavigation();},{passive:true});
   window.addEventListener('orientationchange',()=>{updateViewportMetrics();updateAdaptiveNavigation();},{passive:true});
   document.addEventListener('focusin',e=>{
-    if(!e.target?.matches?.('#formDialog input, #formDialog select, #formDialog textarea')) return;
+    if(!e.target?.matches?.('#formDialog input:not([data-v75-native-invoice]), #formDialog select, #formDialog textarea')) return;
     updateViewportMetrics();
     keepFocusedDialogFieldVisible(280);
   });
