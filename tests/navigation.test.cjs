@@ -36,6 +36,9 @@ assert.match(render,/monthlySpendHistory\(selectedMonth,6\)/,'calendar must expo
 assert.match(events,/function syncMonthRollover\(\)/,'runtime must detect local month rollover');
 assert.match(events,/selectedMonth=nowMonth[\s\S]*monthProfile\(nowMonth\)/,'month rollover must start a fresh month profile without deleting prior records');
 assert.match(events,/data-calendar-month/,'calendar history must allow switching back to saved months');
+assert.match(render,/openingBalanceCents===0\?'':/,'a fresh month must show an empty opening-balance field');
+assert.match(render,/budgetCents===0\?'':/,'a fresh month must show an empty monthly-budget field');
+assert.match(sw,/monthly-spend-calendar1/,'PWA cache must invalidate the previous calendar runtime');
 assert.match(index, /aria-label="Vistas de planeamento"/);
 assert.match(index, /aria-label="Vistas de definições"/);
 assert.match(index, /aria-label="Navegação completa"/);
