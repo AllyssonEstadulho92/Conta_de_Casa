@@ -201,8 +201,8 @@ try {
   for(const retired of [/v74-experience\.(?:css|js)/,/v75-market-featured\.(?:css|js)/,/v75-drawer-blue\.css/,/ui-consistency\.css/,/v64-runtime\.css/])assert.doesNotMatch(index,retired);
   assert.doesNotMatch(index, /\?v=53/);
   assert.ok(index.includes(`id="appBuildVersion">${packageJson.version} · v76</strong>`));
-  assert.match(index, /invoice-capture\.css\?v=76-invoice-unblock6/);
-  assert.match(index, /invoice-capture\.js\?v=76-invoice-unblock6/);
+  assert.match(index, /invoice-capture\.css\?v=76-invoice-autofill7/);
+  assert.match(index, /invoice-capture\.js\?v=76-invoice-autofill7/);
   assert.match(events, /\.\/sw\.js\?v=76-safe-refresh4/);
   assert.equal(distManifest.latestVersion,'v76');
   assert.equal(distManifest.releases[0].version,'v76');
