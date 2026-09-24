@@ -135,6 +135,7 @@ assert.match(events,/controllerchange[\s\S]{0,220}reloadForNewBuildWhenSafe/,'ta
 assert.match(events,/canReloadForNewBuild/,'automatic reload must defer while an expense form or editable field is active');
 assert.match(events,/#formDialog\[open\]/,'active expense dialogs must block mid-edit reloads');
 assert.match(events,/__swDeferredReloadTimer/,'deferred updates must retry until the page is safe to reload');
+assert.match(events,/#formDialog input:not\(\[data-v75-native-invoice\]\)/,'viewport focus management must ignore invisible native invoice pickers');
 assert.match(updateJs,/auto-refresh2/,'update center must describe the automatic refresh contract');
 assert.match(updateJs,/novas compilações são ativadas automaticamente/i);
 
