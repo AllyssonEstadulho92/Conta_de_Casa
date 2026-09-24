@@ -394,3 +394,21 @@ Depois de `scanImage()` reconhecer um QR válido, `showPreview()` chama imediata
 - `documentId` + ATCUD → **Referência**.
 
 Os campos **Categoria**, **Vencimento** e **Método** não são derivados do QR. O formulário mantém os seus valores atuais e `data-invoice-review-fields` assinala os campos que exigem confirmação humana. `forms.js` continua a ser a única autoridade que valida e grava a fatura.
+
+
+## Calendário mensal de gastos efetivos
+
+O calendário financeiro usa duas dimensões distintas:
+
+- **vencimentos**, obtidos de `billDueDateKey()` e apresentados pela data limite da fatura;
+- **gastos efetivos**, obtidos de pagamentos em `paidAt` e compras de Mercado em `purchasedAt || updatedAt`.
+
+`spendingForDate(dateKey)` devolve `paymentTotal`, `marketSpent` e `total` para um dia civil. `monthlySpendHistory(month,count)` lê diretamente pagamentos e compras datados para produzir o histórico mensal, sem criar perfis vazios nem materializar snapshots.
+
+`renderCalendar()` apresenta resumo mensal, histórico recente, gasto diário e agenda de vencimentos. O histórico permanece derivado dos movimentos persistidos, portanto mudar para um novo mês não altera meses anteriores.
+
+### Transição automática de mês
+
+`syncMonthRollover()` mantém `observedLocalMonth`. Quando o mês civil muda, a aplicação só avança automaticamente se o utilizador ainda estiver a acompanhar o mês que acabou. Se estiver a consultar um mês histórico, a seleção é respeitada.
+
+Um novo perfil mensal mantém valores financeiros neutros, mas a interface apresenta **Saldo inicial** e **Orçamento** vazios enquanto forem zero, evitando transportar visualmente valores do mês anterior.

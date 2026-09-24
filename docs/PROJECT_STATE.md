@@ -242,3 +242,21 @@ Alteração aplicada:
 - nova revisão pública do runtime de captura: `76-invoice-autofill7`.
 
 Não foi inventada uma data de vencimento nem uma categoria a partir da data do documento. Dados financeiros e persistência continuam a ser gravados apenas pelo submit canónico de `forms.js`.
+
+
+## Calendário financeiro mensal — gastos efetivos e transição de mês (24/09/2026)
+
+Revisão técnica: `76-monthly-spend-calendar1`.
+
+O calendário passa a mostrar não apenas vencimentos, mas também o que foi efetivamente gasto em cada dia e em cada mês.
+
+- **Gasto no mês** = pagamentos de faturas + compras de Mercado concluídas no mês selecionado;
+- cada dia do calendário pode mostrar o total efetivamente gasto nesse dia, separado dos vencimentos;
+- o topo do calendário apresenta **Gasto no mês**, **Faturas pagas**, **Mercado** e **Por pagar**;
+- os últimos seis meses ficam disponíveis no histórico com o total gasto em cada mês;
+- os valores históricos não são copiados nem apagados: continuam derivados dos movimentos datados já guardados no cofre;
+- ao mudar de mês no histórico, o seletor mensal passa a consultar diretamente os dados desse período;
+- quando o mês civil muda e o utilizador estava a acompanhar o mês corrente, a aplicação muda automaticamente para o novo mês e preserva o anterior;
+- num mês novo sem planeamento, **Saldo inicial** e **Orçamento do mês** aparecem vazios em vez de `0,00`, ficando prontos para o próximo registo.
+
+Nenhuma despesa histórica é eliminada no rollover. A mudança mensal apenas altera o período em análise e cria o perfil mensal vazio se ainda não existir.

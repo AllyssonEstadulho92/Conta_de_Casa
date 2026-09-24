@@ -28,6 +28,17 @@ assert.match(render, /setAttribute\('aria-current','page'\)/);
 assert.match(render, /document\.title=`\$\{meta\.label\} · Conta de Casa`/);
 
 assert.match(index, /aria-label="Vistas de faturas"/);
+assert.match(index,/id="calendarMonthSummary"/,'calendar must expose a monthly spending summary');
+assert.match(index,/id="calendarHistory"/,'calendar must expose persisted month history navigation');
+assert.match(render,/function renderCalendar\(\)[\s\S]*monthNumbers\(selectedMonth\)/,'calendar must derive the selected month financial totals');
+assert.match(render,/spendingForDate\(dayKey\)/,'calendar day cells must show actual spend by payment date');
+assert.match(render,/monthlySpendHistory\(selectedMonth,6\)/,'calendar must expose recent monthly spend history');
+assert.match(events,/function syncMonthRollover\(\)/,'runtime must detect local month rollover');
+assert.match(events,/selectedMonth=nowMonth[\s\S]*monthProfile\(nowMonth\)/,'month rollover must start a fresh month profile without deleting prior records');
+assert.match(events,/data-calendar-month/,'calendar history must allow switching back to saved months');
+assert.match(render,/openingBalanceCents===0\?'':/,'a fresh month must show an empty opening-balance field');
+assert.match(render,/budgetCents===0\?'':/,'a fresh month must show an empty monthly-budget field');
+assert.match(sw,/monthly-spend-calendar1/,'PWA cache must invalidate the previous calendar runtime');
 assert.match(index, /aria-label="Vistas de planeamento"/);
 assert.match(index, /aria-label="Vistas de definições"/);
 assert.match(index, /aria-label="Navegação completa"/);

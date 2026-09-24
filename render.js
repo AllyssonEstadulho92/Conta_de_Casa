@@ -228,17 +228,41 @@ function renderCalendar() {
   const first = new Date(year,month-1,1); const days=new Date(year,month,0).getDate();
   const offset=(first.getDay()+6)%7;
   const headers=['S','T','Q','Q','S','S','D'].map(d=>`<div class="calendar-head">${d}</div>`).join('');
+  const numbers=monthNumbers(selectedMonth);
+  const history=monthlySpendHistory(selectedMonth,6);
+
+  setHTML('#calendarMonthSummary',[
+    ['Gasto no mês',numbers.budgetUsed,'Pagamentos + compras','primary'],
+    ['Faturas pagas',numbers.paymentTotal,'Pagamentos registados','success'],
+    ['Mercado',numbers.marketSpent,'Compras concluídas','normal'],
+    ['Por pagar',numbers.outstanding,'Faturas ainda pendentes',numbers.outstanding>0?'warning':'normal']
+  ].map(([label,value,sub,kind])=>`<article class="calendar-summary-item ${kind}"><span>${esc(label)}</span><strong data-money>${money(value)}</strong><small>${esc(sub)}</small></article>`).join(''));
+
+  setHTML('#calendarHistory',history.map(item=>{
+    const [hy,hm]=item.month.split('-').map(Number);
+    const label=new Intl.DateTimeFormat('pt-PT',{month:'short',year:'2-digit'}).format(new Date(hy,hm-1,1));
+    return `<button type="button" class="calendar-history-item${item.month===selectedMonth?' active':''}" data-calendar-month="${attr(item.month)}"><span>${esc(label)}</span><strong data-money>${money(item.total)}</strong></button>`;
+  }).join(''));
+
   const cells=[]; for(let i=0;i<offset;i++) cells.push('<div class="calendar-day out"></div>');
   const today=new Date();
   for(let day=1;day<=days;day++){
     const dayKey=`${year}-${pad2(month)}-${pad2(day)}`;
     const bills=appState.bills.filter(b=>billDueDateKey(b)===dayKey&&!b.archived&&!b.cancelled);
     const overdue=bills.some(b=>billStatus(b)==='overdue');
-    const cls=[today.getFullYear()===year&&today.getMonth()===month-1&&today.getDate()===day?'today':'',bills.length?(overdue?'has-overdue':'has-due'):''].join(' ');
-    const total=sumCents(bills.map(b=>remainingForBill(b)));
-    cells.push(`<button class="calendar-day ${cls}" data-calendar-day="${day}"><span class="day-num">${day}</span>${bills.length?`<small>${bills.length} · <span data-money>${money(total)}</span></small>`:''}</button>`);
+    const dueTotal=sumCents(bills.map(b=>remainingForBill(b)));
+    const spent=spendingForDate(dayKey);
+    const cls=[
+      today.getFullYear()===year&&today.getMonth()===month-1&&today.getDate()===day?'today':'',
+      bills.length?(overdue?'has-overdue':'has-due'):'',
+      spent.total>0?'has-spent':''
+    ].join(' ');
+    const dueLine=bills.length?`<small class="calendar-due">${bills.length} venc. · <span data-money>${money(dueTotal)}</span></small>`:'';
+    const spentLine=spent.total>0?`<small class="calendar-spent">Gasto · <span data-money>${money(spent.total)}</span></small>`:'';
+    cells.push(`<button class="calendar-day ${cls}" data-calendar-day="${day}"><span class="day-num">${day}</span>${spentLine}${dueLine}</button>`);
   }
   setHTML('#calendarGrid', headers+cells.join(''));
+
   const monthBills=appState.bills.filter(b=>billInMonth(b)&&!b.archived&&!b.cancelled).sort(compareBillsByDue);
   setHTML('#calendarAgenda', monthBills.length?monthBills.map(b=>billRowHtml(b)).join(''):empty('Sem vencimentos neste mês.'));
 }
@@ -247,8 +271,8 @@ function renderPlanning() {
   const p=monthProfile();
   const n=monthNumbers();
   $('#accountBalance').value=Number.isSafeInteger(p.accountBalanceCents)?(p.accountBalanceCents/100).toFixed(2).replace('.',','):'';
-  $('#openingBalance').value=(p.openingBalanceCents/100).toFixed(2).replace('.',',');
-  $('#monthlyBudget').value=(p.budgetCents/100).toFixed(2).replace('.',',');
+  $('#openingBalance').value=p.openingBalanceCents===0?'':(p.openingBalanceCents/100).toFixed(2).replace('.',',');
+  $('#monthlyBudget').value=p.budgetCents===0?'':(p.budgetCents/100).toFixed(2).replace('.',',');
   setHTML('#accountBalanceInfo',Number.isSafeInteger(p.accountBalanceCents)
     ? `<div class="detail-grid"><div class="detail-item"><small>Saldo da conta</small><strong data-money>${money(p.accountBalanceCents)}</strong></div><div class="detail-item"><small>Saldo calculado pelos registos</small><strong data-money>${money(n.ledgerCurrent)}</strong></div><div class="detail-item full-detail"><small>Diferença de conciliação</small><strong class="${n.reconciliationDiff===0?'success-text':'warning-text'}" data-money>${money(n.reconciliationDiff)}</strong></div></div>`
     : '<p class="muted">Ainda não foi registado o saldo real da conta para este mês.</p>');

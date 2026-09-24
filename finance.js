@@ -232,6 +232,33 @@ function monthNumbers(month = selectedMonth, now = new Date()) {
   const budgetUsed = sumCents([paymentTotal,marketSpent]);
   return { profile, incomes, paymentTotal, marketSpent, pending, overdue, outstanding, ledgerCurrent, hasAccountBalance, reconciliationDiff, current, projected, budgetUsed, bills };
 }
+function spendingForDate(dateKey) {
+  const key=cleanDateKey(dateKey);
+  if(!key)return { paymentTotal:0, marketSpent:0, total:0 };
+  const paymentTotal=sumCents((appState?.payments||[]).filter(p=>dateKeyFromValue(p.paidAt)===key).map(p=>p.amountCents));
+  const marketSpent=sumCents((appState?.market||[])
+    .filter(item=>item.purchased&&dateKeyFromValue(item.purchasedAt||item.updatedAt)===key)
+    .map(item=>marketLineCents(item.actualCents||item.estimatedCents||0,item.quantity)));
+  return { paymentTotal, marketSpent, total:sumCents([paymentTotal,marketSpent]) };
+}
+
+function monthlySpendHistory(month = selectedMonth, count = 6) {
+  if(!/^\d{4}-\d{2}$/.test(String(month||'')))return [];
+  const safeCount=clamp(Math.trunc(Number(count)||6),1,24);
+  const [year,monthNumber]=month.split('-').map(Number);
+  const rows=[];
+  for(let offset=safeCount-1;offset>=0;offset--){
+    const date=new Date(year,monthNumber-1-offset,1);
+    const key=`${date.getFullYear()}-${pad2(date.getMonth()+1)}`;
+    const paymentTotal=sumCents((appState?.payments||[]).filter(p=>inSelectedMonth(p.paidAt,key)).map(p=>p.amountCents));
+    const marketSpent=sumCents((appState?.market||[])
+      .filter(item=>item.purchased&&inSelectedMonth(item.purchasedAt||item.updatedAt,key))
+      .map(item=>marketLineCents(item.actualCents||item.estimatedCents||0,item.quantity)));
+    rows.push({month:key,paymentTotal,marketSpent,total:sumCents([paymentTotal,marketSpent])});
+  }
+  return rows;
+}
+
 function dashboardNumbers(month = selectedMonth, now = new Date()) {
   const n = monthNumbers(month, now);
   const pendingBills = n.bills.filter(b=>['pending','partial','due-today'].includes(billStatus(b,now)));

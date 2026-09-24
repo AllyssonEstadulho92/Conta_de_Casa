@@ -451,3 +451,14 @@ Decisão:
 - categoria, vencimento, método e nome comercial do fornecedor não são inventados;
 - a data do documento não é tratada como data de vencimento;
 - a gravação final continua dependente da validação canónica de `handleBillSubmit()`.
+
+
+## D-122 — o calendário distingue vencimento de gasto efetivo
+
+A data de vencimento de uma fatura não representa necessariamente a data em que o dinheiro saiu. Para dar uma noção mensal correta dos gastos, o calendário passa a usar a data real do pagamento e a data real da compra de Mercado para os valores gastos, mantendo os vencimentos como informação separada.
+
+O histórico mensal é calculado a partir dos movimentos já persistidos e não por snapshots duplicados. Assim, correções a pagamentos continuam refletidas no mês correto sem criar divergências entre duas fontes de verdade.
+
+## D-123 — o rollover mensal muda o período, não apaga histórico
+
+Quando o mês muda, a aplicação avança automaticamente para o novo mês apenas se o utilizador estava a seguir o mês corrente. O mês anterior permanece consultável e intacto. Campos mensais com valor zero são apresentados vazios no novo período para facilitar o próximo registo, sem apagar movimentos nem alterar o cofre.
