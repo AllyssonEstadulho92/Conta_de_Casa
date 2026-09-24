@@ -223,3 +223,22 @@ Correção aplicada:
 - revisões públicas: arquitetura `76-architecture-unblock6`, captura `76-invoice-unblock6`, Service Worker `76-safe-refresh4`.
 
 Pendente apenas validação física no mesmo iPhone depois do deploy. Dados financeiros, cofre, IndexedDB e regras de negócio não foram alterados.
+
+
+## Faturas — preenchimento automático após leitura QR (24/09/2026)
+
+Revisão técnica: `76-invoice-autofill7`.
+
+A análise do formulário confirmou que os campos obrigatórios reais são **Descrição**, **Categoria**, **Valor total** e **Vencimento**. Categoria e vencimento já nascem com valores do formulário; o QR da AT fornece de forma fiável o identificador do documento, NIF do emitente, data do documento e total, mas não fornece o nome comercial do fornecedor, categoria, método de pagamento ou data limite de pagamento.
+
+Alteração aplicada:
+
+- após um QR AT válido, a aplicação preenche automaticamente **Descrição**, **Valor total**, **Fornecedor/NIF** e **Referência**, sem exigir o segundo toque em “Preencher campos”;
+- campos já preenchidos manualmente não são substituídos;
+- eventos `input` e `change` são emitidos nos campos alterados para manter validação/UI sincronizadas;
+- o formulário verifica se **Descrição**, **Categoria**, **Valor total** e **Vencimento** ficaram preenchidos;
+- **Categoria**, **Vencimento**, **Método** e o nome do fornecedor permanecem explicitamente marcados para revisão, porque não podem ser obtidos de forma fiável a partir do QR AT;
+- o botão de revisão passa a “Reaplicar dados”, como ação secundária opcional;
+- nova revisão pública do runtime de captura: `76-invoice-autofill7`.
+
+Não foi inventada uma data de vencimento nem uma categoria a partir da data do documento. Dados financeiros e persistência continuam a ser gravados apenas pelo submit canónico de `forms.js`.
