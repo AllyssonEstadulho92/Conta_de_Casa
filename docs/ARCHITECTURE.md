@@ -412,3 +412,12 @@ O calendário financeiro usa duas dimensões distintas:
 `syncMonthRollover()` mantém `observedLocalMonth`. Quando o mês civil muda, a aplicação só avança automaticamente se o utilizador ainda estiver a acompanhar o mês que acabou. Se estiver a consultar um mês histórico, a seleção é respeitada.
 
 Um novo perfil mensal mantém valores financeiros neutros, mas a interface apresenta **Saldo inicial** e **Orçamento** vazios enquanto forem zero, evitando transportar visualmente valores do mês anterior.
+
+
+## Disclosure dos filtros de Despesas
+
+Em ecrãs até 820 px, `#billFiltersToggle` controla apenas a visibilidade de `#billFilterGrid`. A grelha canónica e os respetivos IDs permanecem únicos no DOM.
+
+O estado visual é representado pela classe `bill-filters-open` em `#page-bills` e sincronizado com `aria-expanded`. `renderBills()` continua a ler os mesmos controlos e `syncBillFilterToggle()` calcula quantas opções estão fora do estado padrão, apresentando essa contagem no botão compacto.
+
+A camada final de geometria é `v76-mobile-shell.css` (`76-mobile-shell3`). Em desktop o botão de disclosure fica oculto e a grelha mantém a apresentação permanente.
