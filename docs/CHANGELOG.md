@@ -415,3 +415,15 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - a página recarrega automaticamente quando o novo worker assume o controlo;
 - aplicação passa a verificar novas compilações periodicamente enquanto está aberta e online;
 - preservados cálculos, IndexedDB, cofre, PIN, Mercado e sincronização.
+
+
+### 24 de setembro de 2026 — captura nativa de faturas e refresh seguro
+
+- **Ler fatura** passa a abrir o seletor através de input nativo integrado no tab;
+- **QR Code** móvel passa a abrir a câmara nativa com `capture=environment`;
+- eliminado o `input.click()` programático do caminho móvel principal;
+- leitura de imagem usa `BarcodeDetector` quando disponível e ZXing como fallback;
+- CSS exclui os inputs nativos das regras genéricas dos campos do formulário;
+- atualizações continuam automáticas, mas reload é adiado enquanto existir registo/modal ativo;
+- novas revisões de cache: arquitetura `76-architecture-native4`, captura `76-invoice-native4` e Service Worker `76-safe-refresh3`;
+- sem alterações a cálculos, cofre/PIN, IndexedDB, Mercado ou sincronização.
