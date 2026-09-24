@@ -462,3 +462,10 @@ O histórico mensal é calculado a partir dos movimentos já persistidos e não 
 ## D-123 — o rollover mensal muda o período, não apaga histórico
 
 Quando o mês muda, a aplicação avança automaticamente para o novo mês apenas se o utilizador estava a seguir o mês corrente. O mês anterior permanece consultável e intacto. Campos mensais com valor zero são apresentados vazios no novo período para facilitar o próximo registo, sem apagar movimentos nem alterar o cofre.
+
+
+## D-124 — filtros avançados ficam recolhidos por defeito no mobile
+
+O cartão de filtros ocupava demasiado espaço vertical numa rota em que a tarefa principal é consultar e adicionar despesas. A decisão é manter todos os filtros canónicos, mas esconder a grelha por defeito em ecrãs móveis e expô-la através de um único botão **Filtros**.
+
+Não são criados formulários alternativos nem cópias dos filtros. O mesmo `billFilterGrid` continua a alimentar `renderBills()`. Em desktop, a grelha permanece sempre visível.
