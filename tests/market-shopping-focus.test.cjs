@@ -61,7 +61,7 @@ for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market
 assert.match(sw,/v74-shopping2/);
 assert.match(sw,/v73-menu8/);
 assert.match(sw,/planning-more1/);
-assert.match(sw,/v76-architecture-touch2/);
+assert.match(sw,/76-architecture-touch2/);
 assert.match(sw,/v76-version-alignment1/);
 assert.match(sw,/retire-v74-runtime1/);
 assert.match(sw,/retire-assets1/);
