@@ -66,6 +66,23 @@ assert.equal(n.projected,106500);
 assert.equal(n.reconciliationDiff,0);
 assert.equal(n.budgetUsed,15800);
 
+const sep2=vm.runInContext("spendingForDate('2026-09-02')",context);
+assert.equal(sep2.paymentTotal,800);
+assert.equal(sep2.marketSpent,0);
+assert.equal(sep2.total,800);
+const sep5=vm.runInContext("spendingForDate('2026-09-05')",context);
+assert.equal(sep5.paymentTotal,5000);
+assert.equal(sep5.total,5000);
+const sep6=vm.runInContext("spendingForDate('2026-09-06')",context);
+assert.equal(sep6.marketSpent,10000);
+assert.equal(sep6.total,10000);
+const history=JSON.parse(JSON.stringify(vm.runInContext("monthlySpendHistory('2026-09',2)",context)));
+assert.equal(history.length,2);
+assert.equal(history[0].month,'2026-08');
+assert.equal(history[0].total,0);
+assert.equal(history[1].month,'2026-09');
+assert.equal(history[1].total,15800);
+
 vm.runInContext("appState.months['2026-09'].accountBalanceCents=120000;appState.months['2026-09'].accountBalanceUpdatedAt='2026-09-02T12:00:00.000Z'",context);
 const reconciled=vm.runInContext(`monthNumbers('2026-09',${now})`,context);
 assert.equal(reconciled.hasAccountBalance,true);
