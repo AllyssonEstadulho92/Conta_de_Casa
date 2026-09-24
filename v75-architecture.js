@@ -24,6 +24,12 @@
  * - o click sintetizado após touchend é deduplicado para evitar dupla abertura;
  * - desktop/teclado continuam no caminho click/keydown existente.
  *
+ * 76-expense-ios-tab-direct3:
+ * - os três botões recebem listeners diretos quando são criados;
+ * - o gesto deixa de depender de delegação global do document no Safari/iOS;
+ * - touchend preserva a ativação do utilizador para o seletor de ficheiros/câmara;
+ * - o click sintetizado continua deduplicado.
+ *
  * 76-mobile-label-fit1:
  * - a rota continua a chamar-se Planeamento; apenas o label do dock passa a “Plano”
  *   para evitar truncamento em iPhones estreitos sem reduzir a legibilidade.
@@ -337,11 +343,46 @@
     }
   }
 
+  function activateBillModeButton(button,event){
+    const mode=button?.dataset?.v75BillMode||'';
+    if(!['manual','image','qr'].includes(mode))return;
+
+    if(event.type==='click'&&lastBillModeTouchValue===mode&&Date.now()-lastBillModeTouchAt<900){
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    if(event.type==='touchend'){
+      lastBillModeTouchAt=Date.now();
+      lastBillModeTouchValue=mode;
+    }else if(event.cancelable){
+      event.preventDefault();
+    }
+
+    event.stopPropagation();
+    setBillMode(mode);
+    schedule();
+  }
+
+  function bindBillTabs(form){
+    qa('.v75-bill-tabs [data-v75-bill-mode]',form).forEach(button=>{
+      if(button.dataset.v75DirectBound==='true')return;
+      button.dataset.v75DirectBound='true';
+      const activate=event=>activateBillModeButton(button,event);
+      button.addEventListener('touchend',activate,{passive:true});
+      button.addEventListener('click',activate);
+    });
+  }
+
   function ensureBillTabs(form){
-    if(!form||form.querySelector('.v75-bill-tabs'))return;
+    if(!form)return;
     const isNew=!String(form.elements.id?.value||'');
     if(!isNew)return;
-    form.insertAdjacentHTML('afterbegin',`<div class="v75-bill-tabs full-row" role="tablist" aria-label="Modo de registo"><button type="button" class="active" role="tab" aria-selected="true" tabindex="0" data-v75-bill-mode="manual">Manual</button><button type="button" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="image">Ler fatura</button><button type="button" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="qr">QR Code</button></div>`);
+    if(!form.querySelector('.v75-bill-tabs')){
+      form.insertAdjacentHTML('afterbegin',`<div class="v75-bill-tabs full-row" role="tablist" aria-label="Modo de registo"><button type="button" class="active" role="tab" aria-selected="true" tabindex="0" data-v75-bill-mode="manual">Manual</button><button type="button" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="image">Ler fatura</button><button type="button" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="qr">QR Code</button></div>`);
+    }
+    bindBillTabs(form);
   }
 
   function syncBillModeButtons(form,mode){
@@ -440,36 +481,6 @@
     dialog.dispatchEvent(new CustomEvent('cdc:bill-mode-change',{bubbles:true,detail:{mode}}));
   }
 
-  function billModeButtonFromEvent(event){
-    const target=event.target;
-    if(!(target instanceof Element))return null;
-    return target.closest('.v75-bill-tabs [data-v75-bill-mode]');
-  }
-
-  function activateBillModeFromPointerEvent(event){
-    const button=billModeButtonFromEvent(event);
-    if(!button)return false;
-    const mode=button.dataset.v75BillMode||'';
-    if(!['manual','image','qr'].includes(mode))return false;
-
-    if(event.type==='click'&&lastBillModeTouchValue===mode&&Date.now()-lastBillModeTouchAt<900){
-      event.preventDefault();
-      return true;
-    }
-
-    if(event.type==='touchend'){
-      lastBillModeTouchAt=Date.now();
-      lastBillModeTouchValue=mode;
-      if(event.cancelable)event.preventDefault();
-    }else{
-      event.preventDefault();
-    }
-
-    setBillMode(mode);
-    schedule();
-    return true;
-  }
-
   function handleBillModeKeydown(event){
     const current=event.target.closest?.('.v75-bill-tabs [data-v75-bill-mode]');
     if(!current)return;
@@ -508,11 +519,7 @@
   function start(){
     document.documentElement.classList.add('cdc-v75');
     document.documentElement.dataset.v76Architecture=REVISION;
-    document.addEventListener('touchend',event=>{
-      activateBillModeFromPointerEvent(event);
-    },{capture:true,passive:false});
     document.addEventListener('click',event=>{
-      if(activateBillModeFromPointerEvent(event))return;
       const target=event.target instanceof Element?event.target:null;
       const monthStep=target?.closest('[data-v75-month-step]');
       if(monthStep){event.preventDefault();stepMonth(monthStep.dataset.v75MonthStep);schedule();return;}

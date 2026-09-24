@@ -1,14 +1,14 @@
 'use strict';
 
 /*
- * Conta de Casa — Versão e Atualizações (v76 update-fallback1)
+ * Conta de Casa — Versão e Atualizações (v76 auto-refresh2)
  *
  * Política:
  * - a versão da aplicação vem do package.json e é injetada no HTML publicado;
  * - a release pública continua identificada por app-build/release-manifest.json;
  * - o build exato é identificado pelo SHA curto e data de compilação;
- * - a verificação manual consulta sempre o Service Worker antes de declarar que está atualizado;
- * - instalar uma atualização exige ação explícita do utilizador;
+ * - a verificação manual continua disponível para diagnóstico;
+ * - novas compilações são ativadas automaticamente e a página reinicia quando o novo Service Worker assume o controlo;
  * - dados financeiros, cofre, PIN e IndexedDB não são modificados por esta camada.
  */
 (function installSoftwareUpdateCenter(root){
@@ -194,7 +194,7 @@
 
       <div class="software-update-options" role="group" aria-label="Opções de atualização">
         <button class="software-update-row" type="button" data-update-explain="controlled">
-          <span>Instalação de atualizações</span><span class="software-update-row-value">Ao confirmar ${icon('chevron',18)}</span>
+          <span>Instalação de atualizações</span><span class="software-update-row-value">Automática ${icon('chevron',18)}</span>
         </button>
         <button class="software-update-row" type="button" data-update-details-row>
           <span>Histórico de versões</span><span class="software-update-row-value">${releaseCount} versões ${icon('chevron',18)}</span>
@@ -234,7 +234,7 @@
       if(event.target.closest('[data-update-details], [data-update-details-row]')){detailsOpen=!detailsOpen;renderDialog();return;}
       const explanation=event.target.closest('[data-update-explain]')?.dataset.updateExplain;
       if(explanation==='controlled'){
-        root.toast?.('A aplicação só aplica uma nova compilação quando confirmar em Verificar e atualizar agora.');
+        root.toast?.('As novas compilações são aplicadas automaticamente. A verificação manual continua disponível para diagnóstico.');
         return;
       }
       if(event.target.closest('[data-update-check]'))runUpdateAction();

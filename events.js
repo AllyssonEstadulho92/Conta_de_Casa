@@ -528,15 +528,35 @@ async function enterApp() {
     (async()=>{
       try{
         const reg=await navigator.serviceWorker.register('./sw.js?v=53',{updateViaCache:'none'});
+        const requestWaitingActivation=()=>{
+          try{reg.waiting?.postMessage({type:'APPLY_UPDATE',reason:'automatic-refresh'});}catch(_error){}
+        };
+        const watchInstalling=()=>{
+          const worker=reg.installing;
+          if(!worker)return;
+          worker.addEventListener('statechange',()=>{
+            if(worker.state==='installed')requestWaitingActivation();
+          });
+        };
+        reg.addEventListener('updatefound',watchInstalling);
         await reg.update().catch(()=>{});
+        requestWaitingActivation();
+
         if(!window.__swReloadBound){
           window.__swReloadBound=true;
           let refreshing=false;
           navigator.serviceWorker.addEventListener('controllerchange',()=>{
-            if(refreshing) return;
+            if(refreshing)return;
             refreshing=true;
             location.reload();
           });
+        }
+
+        if(!window.__swAutoUpdateTimer){
+          window.__swAutoUpdateTimer=setInterval(()=>{
+            if(document.hidden||navigator.onLine===false)return;
+            reg.update().then(requestWaitingActivation).catch(()=>{});
+          },30000);
         }
       }catch(_err){}
     })();
