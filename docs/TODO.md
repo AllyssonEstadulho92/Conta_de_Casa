@@ -187,3 +187,10 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [x] devolver foco ao preenchimento ao selecionar **Manual**.
 - [x] adicionar testes de regressão para o contrato de interação e invalidar cache PWA.
 - [ ] validar fisicamente o fluxo no mesmo iPhone/Safari/PWA, incluindo permissões e cancelamento.
+
+
+## Performance do registo de faturas
+
+- [x] `76-invoice-capture-warmup1`: preparar o leitor QR em background quando o formulário de nova fatura abre.
+- [ ] medir no iPhone/Safari/PWA a diferença entre primeiro uso e usos seguintes.
+- [ ] empacotar ZXing localmente para eliminar a latência e dependência da origem remota.
