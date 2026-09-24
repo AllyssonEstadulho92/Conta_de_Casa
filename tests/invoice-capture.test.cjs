@@ -97,6 +97,13 @@ assert.match(mobileTouchBlock,/#dialogBody\{[\s\S]*overflow:visible!important/,'
 assert.match(mobileTouchBlock,/\.v75-bill-tabs \[data-v75-bill-mode\]\{[\s\S]*pointer-events:auto!important[\s\S]*touch-action:manipulation!important/,'expense mode tabs must remain tappable on iOS');
 assert.match(source,/76-expense-native-input4/,'native invoice capture revision must remain explicit');
 assert.match(source,/76-expense-picker-unblock6/,'native picker unblock revision must remain explicit');
+assert.match(source,/76-invoice-autofill7/,'invoice autofill revision must remain explicit');
+assert.match(source,/function setBlankField\(field,value\)/,'autofill must use one non-destructive field writer');
+assert.match(source,/function requiredInvoiceFieldsReady\(form\)/,'autofill must verify required invoice fields after applying QR data');
+assert.match(source,/applyInvoiceToForm\(\{announce:false,focus:false\}\)/,'a valid QR must autofill the form without requiring a second button press');
+assert.match(source,/form\.elements\.title[\s\S]{0,500}form\.elements\.amount[\s\S]{0,500}form\.elements\.reference/,'autofill must cover description, total and reference');
+assert.match(source,/invoiceReviewFields='provider,category,dueDate,method'/,'fields not supplied authoritatively by the AT QR must remain marked for review');
+assert.match(source,/Categoria, vencimento e método não constam do QR da AT/,'UI must explain which required/business fields cannot be extracted from the QR');
 assert.match(source,/function decodeQrFromImage\(file,objectUrl\)/,'image decoding must have a single resilient path');
 assert.match(source,/BarcodeDetector/,'native QR decoding must be attempted when the browser provides it');
 assert.match(source,/event\.detail\?\.native/,'native file/camera selection must not recursively invoke programmatic pickers');
@@ -109,5 +116,6 @@ const sw=fs.readFileSync('sw.js','utf8');
 assert.match(sw,/expense-form-professional1-expense-ios-touch1/,'PWA cache must invalidate the frozen iOS expense dialog revision');
 assert.match(sw,/invoice-mode-action1/,'PWA cache must invalidate the previous inert invoice-mode runtime');
 assert.match(sw,/invoice-capture-warmup1/,'PWA cache must invalidate the slower first-use reader runtime');
+assert.match(sw,/invoice-autofill7/,'PWA cache must invalidate the previous manual-apply invoice runtime');
 
 console.log('Invoice capture tests: exact AT QR parser plus deterministic modes, professional expense UI and iOS touch stability: OK');
