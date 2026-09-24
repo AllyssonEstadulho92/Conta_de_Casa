@@ -60,7 +60,7 @@ assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const CATEGORY_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '75-architecture2'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '76-architecture-touch2'/);
 assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-more1'/);
 assert.match(prepare,/const HEADER_REV = '75-header2'/);
 assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
