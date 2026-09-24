@@ -6,13 +6,14 @@ const {spawnSync}=require('node:child_process');
 
 const css=fs.readFileSync('v75-expenses-modern.css','utf8');
 const mobileCss=fs.readFileSync('mobile-layout.css','utf8');
+const mobileShell=fs.readFileSync('v76-mobile-shell.css','utf8');
 const prep=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 
 assert.match(css,/html\.cdc-v75 #page-bills/,'A camada deve ficar isolada a #page-bills.');
 assert.match(css,/\.bill-command-bar/,'A barra de pesquisa\/criação deve ser estilizada.');
-assert.match(css,/\.bill-filter-grid/,'Os filtros canónicos devem permanecer visíveis e estilizados.');
+assert.match(css,/\.bill-filter-grid/,'Os filtros canónicos devem permanecer presentes e estilizados.');
 assert.match(css,/\.bill-summary-grid/,'O resumo financeiro deve permanecer presente.');
 assert.match(css,/\.bill-table-shell/,'A tabela desktop deve manter uma apresentação própria.');
 assert.match(css,/\.bill-mobile-card/,'Os cartões mobile devem manter uma apresentação própria.');
@@ -34,13 +35,17 @@ assert.doesNotMatch(mobileCss,/scroll-snap-type:x proximity/,'A camada final nã
 assert.match(mobileCss,/@media\(prefers-reduced-motion:reduce\)/,'A revisão deve respeitar reduced motion.');
 assert.match(mobileCss,/@media\(forced-colors:active\)/,'A revisão deve ter fallback de alto contraste.');
 
-for(const source of [css,mobileCss]){
+assert.match(mobileShell,/76-bills-filter-collapse1/,'A camada final deve recolher filtros avançados no telemóvel.');
+assert.match(mobileShell,/#page-bills:not\(\.bill-filters-open\)>\.bill-filter-grid\{[\s\S]*display:none!important/,'Filtros avançados devem começar ocultos em mobile.');
+assert.match(mobileShell,/#billFiltersToggle\{[\s\S]*display:inline-flex!important/,'O acesso aos filtros deve permanecer disponível através de um botão compacto.');
+
+for(const source of [css,mobileCss,mobileShell]){
   for(const forbidden of ['commit(','saveState(','estimatedCents','actualCents','PBKDF2','AES-GCM','indexedDB']){
     assert.equal(source.includes(forbidden),false,`CSS visual não pode conter lógica/segurança: ${forbidden}`);
   }
 }
 
-for(const canonical of ['billSearch','newBillBtn','billStatusFilter','billCategoryFilter','billDateFrom','billDateTo','billSort','billClearFilters','billSummary','billsList']){
+for(const canonical of ['billSearch','billFiltersToggle','billFilterGrid','newBillBtn','billStatusFilter','billCategoryFilter','billDateFrom','billDateTo','billSort','billClearFilters','billSummary','billsList']){
   assert.match(index,new RegExp(`id="${canonical}"`),`Fluxo canónico de Despesas em falta: ${canonical}`);
 }
 
@@ -64,4 +69,4 @@ const usabilityPos=distIndex.indexOf('v75-usability.css');
 assert.ok(pagesPos>=0&&expensesPos>pagesPos,'A camada moderna deve carregar depois de v75-pages.');
 assert.ok(usabilityPos>expensesPos,'A política de usabilidade deve continuar depois da base de Despesas.');
 
-console.log('v76 canonical Expenses flow keeps one functional source and a non-scrolling aligned mobile filter presentation: OK');
+console.log('v76 canonical Expenses flow keeps one functional source with filters collapsed by default on mobile: OK');

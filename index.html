@@ -132,9 +132,10 @@
         <nav class="section-tabs" aria-label="Vistas de faturas"><button class="section-tab" type="button" data-page="bills">Lista de faturas</button><button class="section-tab" type="button" data-page="calendar">Calendário</button></nav>
         <div class="bill-command-bar">
           <div class="search-wrap bill-search-wrap"><label class="sr-only" for="billSearch">Pesquisar faturas</label><input id="billSearch" type="search" placeholder="Pesquisar por descrição, fornecedor ou referência..." autocomplete="off" /></div>
+          <button id="billFiltersToggle" class="btn secondary bill-filter-toggle" type="button" aria-expanded="false" aria-controls="billFilterGrid"><span>Filtros</span><span id="billFilterCount" class="bill-filter-count" hidden>0</span></button>
           <button id="newBillBtn" class="btn primary bill-new-btn" type="button">+ Nova fatura</button>
         </div>
-        <div class="bill-filter-grid" role="group" aria-label="Filtros e ordenação de faturas">
+        <div id="billFilterGrid" class="bill-filter-grid" role="group" aria-label="Filtros e ordenação de faturas">
           <label class="bill-filter-field"><span>Estado</span><select id="billStatusFilter"><option value="all">Todos os estados</option><option value="pending">Por pagar</option><option value="partial">Pago parcialmente</option><option value="paid">Pago</option><option value="overdue">Em atraso</option><option value="due-today">Vence hoje</option><option value="cancelled">Cancelado</option><option value="invalid">Dados inválidos</option></select></label>
           <label class="bill-filter-field"><span>Categoria</span><select id="billCategoryFilter"><option value="all">Todas as categorias</option></select></label>
           <label class="bill-filter-field"><span>De</span><input id="billDateFrom" type="date" /></label>

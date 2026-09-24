@@ -4,6 +4,8 @@ const fs=require('node:fs');
 const css=fs.readFileSync('mobile-layout.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const events=fs.readFileSync('events.js','utf8');
+const render=fs.readFileSync('render.js','utf8');
+const shell=fs.readFileSync('v76-mobile-shell.css','utf8');
 
 assert.match(css,/76-bills-mobile-filters1/,'mobile bill filters revision marker must remain explicit');
 assert.match(css,/76-bills-mobile-spacing1/,'mobile bills spacing revision marker must remain explicit');
@@ -21,10 +23,17 @@ assert.match(css,/@media\(max-width:360px\)[\s\S]*\.bill-filter-field\{[\s\S]*ma
 assert.match(css,/@media\(forced-colors:active\)/,'forced-colors fallback must remain explicit');
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)/,'reduced-motion fallback must remain explicit');
 
-for(const id of ['billSearch','newBillBtn','billStatusFilter','billCategoryFilter','billDateFrom','billDateTo','billSort','billClearFilters']){
+for(const id of ['billSearch','billFiltersToggle','billFilterCount','newBillBtn','billFilterGrid','billStatusFilter','billCategoryFilter','billDateFrom','billDateTo','billSort','billClearFilters']){
   assert.match(index,new RegExp(`id="${id}"`),`${id} must remain in canonical bills markup`);
 }
+assert.match(index,/id="billFiltersToggle"[\s\S]*aria-expanded="false"[\s\S]*aria-controls="billFilterGrid"/,'mobile filters must start behind an accessible disclosure');
+assert.match(shell,/76-bills-filter-collapse1/,'final mobile shell must own the collapsed-filter state');
+assert.match(shell,/#page-bills:not\(\.bill-filters-open\)>\.bill-filter-grid\{[\s\S]*display:none!important/,'filter card must stay hidden until requested on mobile');
+assert.match(shell,/#page-bills\.bill-filters-open>\.bill-filter-grid\{[\s\S]*display:grid!important/,'opening filters must restore the canonical grid');
+assert.match(events,/setBillFiltersOpen/,'filter disclosure must have one state controller');
+assert.match(events,/classList\.toggle\('bill-filters-open',expanded\)/,'filter disclosure must toggle the page state rather than duplicate controls');
+assert.match(render,/function syncBillFilterToggle\(criteria=billFilterState\(\)\)/,'active filter count must remain synchronized with the disclosure');
 assert.match(events,/\['#billStatusFilter','#billCategoryFilter','#billDateFrom','#billDateTo','#billSort'\]/,'existing bill filter listeners must remain the functional authority');
 assert.match(events,/\$\('#billSearch'\)\.addEventListener\('input',renderBills\)/,'bill search listener must remain unchanged');
 
-console.log('Conta de Casa mobile bills search/filter layout preserves canonical IDs, handlers, spacing and accessibility fallbacks: OK');
+console.log('Conta de Casa mobile bills filters stay canonical but collapse behind an accessible compact disclosure: OK');
