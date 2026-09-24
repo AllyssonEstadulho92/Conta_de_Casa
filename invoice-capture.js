@@ -5,6 +5,7 @@
  * O ficheiro/imagem nunca é guardado; os dados só preenchem o formulário após confirmação.
  * 76-expense-mode-stability1 mantém imagem e câmara separadas, sem OCR fictício.
  * 76-expense-mode-action1 torna Manual / Ler fatura / QR Code ações diretas: foco, ficheiro e câmara.
+ * 76-invoice-capture-warmup1 prepara o leitor QR em background quando o formulário abre, reduzindo a espera no primeiro uso.
  */
 (function installInvoiceCapture(root){
   const MAX_IMAGE_BYTES=15*1024*1024;
@@ -31,6 +32,7 @@
   let scannerBusy=false;
   let pendingInvoice=null;
   let zxingPromise=null;
+  let readerWarmupScheduled=false;
 
   const clean=(value,max=180)=>String(value??'')
     .replace(/[\u0000-\u001f\u007f]/g,' ')
@@ -139,6 +141,16 @@
     }catch(_error){return '';}
   }
 
+  function prewarmZxing(){
+    if(readerWarmupScheduled||root.ZXingBrowser?.BrowserQRCodeReader)return;
+    readerWarmupScheduled=true;
+    setTimeout(()=>{
+      readerWarmupScheduled=false;
+      if(document.hidden||!document.querySelector('#billForm'))return;
+      loadZxing().catch(()=>undefined);
+    },0);
+  }
+
   function loadZxing(){
     if(root.ZXingBrowser?.BrowserQRCodeReader)return Promise.resolve(root.ZXingBrowser);
     if(zxingPromise)return zxingPromise;
@@ -236,7 +248,7 @@
     const form=document.querySelector('#billForm');
     if(!form)return;
     const existing=form.querySelector('[data-invoice-capture]');
-    if(existing){syncCaptureMode();return;}
+    if(existing){syncCaptureMode();prewarmZxing();return;}
     if(String(form.elements.id?.value||''))return;
     const wrapper=document.createElement('div');
     wrapper.innerHTML=captureUiHtml();
@@ -244,6 +256,7 @@
     const first=form.querySelector('label');
     form.insertBefore(section,first||form.firstChild);
     syncCaptureMode();
+    prewarmZxing();
   }
 
   function stopScanner(){

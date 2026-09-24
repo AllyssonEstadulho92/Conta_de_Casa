@@ -383,3 +383,13 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - mantida a separação de responsabilidades entre arquitetura visual e `invoice-capture.js`;
 - acrescentados testes de regressão e token `invoice-mode-action1` no cache PWA;
 - sem alterações a cálculos financeiros, IndexedDB, cifra, pagamentos, Mercado ou sincronização.
+
+
+### 24 de setembro de 2026 — desempenho do leitor de faturas
+
+- o ZXing passa a ser preparado em background quando abre uma nova fatura;
+- reduzida a espera no primeiro uso de **Ler fatura** e **QR Code**;
+- o pré-aquecimento não solicita a câmara nem bloqueia a interface;
+- mantido fallback normal se a preparação antecipada falhar;
+- cache PWA invalidada com `invoice-capture-warmup1`;
+- sem alterações ao domínio financeiro, armazenamento ou segurança do cofre.
