@@ -124,3 +124,20 @@ Revisão técnica: `76-expense-mode-action1`.
 - o cache do Service Worker foi invalidado com `invoice-mode-action1` para impedir reutilização do runtime anterior.
 
 Pendente: validação física em iPhone/Safari/PWA das permissões da câmara, cancelamento do seletor de imagem e retorno ao modo Manual.
+
+
+## Performance do leitor de faturas — 24/09/2026
+
+Revisão técnica: `76-invoice-capture-warmup1`.
+
+Foi confirmado que a publicação anterior já estava concluída no GitHub Pages. A latência sentida no primeiro uso do leitor pode ocorrer porque o ZXing ainda é carregado remotamente quando necessário.
+
+Para reduzir a espera sem alterar o fluxo funcional:
+
+- o leitor ZXing passa a ser preparado em background assim que o formulário de nova fatura existe;
+- o carregamento é assíncrono e não bloqueia a abertura do formulário;
+- falha de pré-aquecimento não impede o utilizador de continuar, porque o fluxo normal mantém a tentativa ao usar **Ler fatura** ou **QR Code**;
+- nenhum cálculo, dado financeiro, cofre, IndexedDB ou sincronização é alterado;
+- o Service Worker recebe `invoice-capture-warmup1` para distribuir a revisão.
+
+Dívida técnica mantida: empacotar ZXing localmente e retirar a dependência remota, conforme o plano de segurança existente.
