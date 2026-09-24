@@ -366,3 +366,14 @@ A apresentação de **Manual**, **Ler fatura** e **QR Code** como controlo segme
 - não se introduz OCR fictício: fotografia significa procurar QR AT na imagem;
 - nenhum ficheiro ou fotograma é guardado pelo módulo;
 - Service Worker deve invalidar o runtime anterior sempre que este contrato de interação mudar.
+
+
+## D-113 — o leitor QR pode ser preparado antes do primeiro toque
+
+A dependência ZXing continua temporariamente remota. Para reduzir a espera no primeiro uso sem antecipar permissões de câmara nem bloquear o formulário:
+
+- o runtime do leitor pode ser carregado em background quando a nova fatura abre;
+- a câmara não é ativada durante o pré-aquecimento;
+- erros de pré-aquecimento são silenciosos e recuperáveis pela ação explícita posterior;
+- `zxingPromise` continua a deduplicar carregamentos;
+- esta otimização não substitui a decisão já pendente de empacotar ZXing localmente.
