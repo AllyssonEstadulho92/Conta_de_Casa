@@ -34,6 +34,10 @@ assert.match(css,/Grelhas partilhadas:/);
 assert.match(css,/\.kpi-grid,\.dashboard-grid,\.two-col,\.goal-grid,\.bill-summary-grid,\.market-summary-grid/);
 assert.match(css,/\.market-visual-product-media img\{[\s\S]*object-fit:contain!important;[\s\S]*object-position:center!important/);
 assert.match(css,/\.market-visual-catalog-fallback\{/);
+assert.match(css,/\.calendar-summary-grid\{/,'monthly calendar summary must use a responsive grid');
+assert.match(css,/\.calendar-history\{/,'monthly spend history must remain horizontally usable on mobile');
+assert.match(css,/\.calendar-day\.has-spent/,'calendar must visually distinguish days with effective spending');
+assert.match(css,/@media\(max-width:520px\)[\s\S]*\.calendar-summary-grid/,'monthly spending summary must adapt to narrow phones');
 
 assert.match(css,/\.section-tabs\{/);
 assert.match(css,/\.dialog-shell\{/);
