@@ -173,3 +173,21 @@ Revisões técnicas: `76-expense-ios-tab-direct3` e `auto-refresh2`.
 - cofre, PIN, IndexedDB, cálculos, Mercado e sincronização não são alterados.
 
 Validação pendente: confirmar no mesmo iPhone, após o novo deploy automático, que **Ler fatura** abre o seletor e **QR Code** abre a câmara no primeiro toque.
+
+
+## Despesas — captura nativa e refresh seguro (24/09/2026)
+
+A validação física no mesmo iPhone confirmou que **Ler fatura** e **QR Code** continuavam sem concluir a ação e que a página podia aparentar bloqueio. A captura não permite atribuir uma única causa com certeza. Dois pontos foram eliminados da cadeia crítica: abertura programática de ficheiro/câmara e reload automático durante um formulário aberto.
+
+Revisões: `76-expense-native-input4` e `safe-refresh3`.
+
+- **Ler fatura** passa a usar um `input[type=file]` nativo integrado no próprio tab;
+- **QR Code** passa a usar `input[type=file][capture=environment]` em dispositivos táteis, abrindo a câmara nativa sem depender de `getUserMedia` para a primeira ação;
+- desktop mantém o leitor QR ao vivo quando existe apontador fino;
+- leitura de fotografia tenta `BarcodeDetector` quando disponível e usa ZXing como fallback;
+- o modo nativo não executa um segundo `input.click()` programático;
+- atualização automática continua ativa, mas um novo build não recarrega a página enquanto existir formulário/modal ativo ou campo em edição;
+- ao fechar o registo, a atualização pendente recarrega automaticamente a página;
+- dados financeiros, cofre/PIN e IndexedDB não são alterados.
+
+Pendente: validação física no mesmo iPhone após publicação desta revisão.
