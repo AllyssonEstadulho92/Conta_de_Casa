@@ -320,3 +320,19 @@ O build publica revisões próprias para esta área:
 - Service Worker: `76-invoice-touch2`.
 
 A separação mantém-se: a arquitetura seleciona o modo; `invoice-capture.js` executa ficheiro, câmara e leitura QR.
+
+
+## Entrega automática de novas compilações
+
+O ciclo PWA passa a privilegiar atualização automática de código, sem alterar dados locais.
+
+1. `events.js` regista o Service Worker com `updateViaCache:'none'`, pede uma verificação imediata e volta a verificar enquanto a aplicação está aberta e online.
+2. `sw.js` só chama `skipWaiting()` depois de `cache.addAll(PUBLIC_ASSETS)` terminar com sucesso.
+3. Na ativação, caches antigos são removidos e `clients.claim()` transfere o controlo para o novo worker.
+4. `events.js` escuta `controllerchange` e executa `location.reload()` uma única vez.
+
+A atualização automática substitui código e assets públicos. IndexedDB, cofre cifrado, PIN e estado financeiro não são apagados nem reescritos por este mecanismo.
+
+## Tabs de registo de fatura no iOS
+
+`ensureBillTabs()` cria os três controlos e chama `bindBillTabs()`. Cada botão recebe listeners próprios de `touchend` e `click`. A seleção continua a passar por `setBillMode()`, que atualiza o estado visual e emite `cdc:bill-mode-change`; `invoice-capture.js` permanece a autoridade para ficheiro, câmara e leitura QR.
