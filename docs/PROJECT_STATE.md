@@ -191,3 +191,16 @@ Revisões: `76-expense-native-input4` e `safe-refresh3`.
 - dados financeiros, cofre/PIN e IndexedDB não são alterados.
 
 Pendente: validação física no mesmo iPhone após publicação desta revisão.
+
+
+## Despesas — identificação explícita dos três modos (24/09/2026)
+
+Revisão técnica: `76-expense-action-map5`.
+
+Foi revisto o código real dos três controlos. Antes desta revisão existiam modos funcionais e inputs nativos, mas a identificação da ação estava distribuída entre `data-v75-bill-mode`, labels e inputs. Agora cada opção tem identidade e ação explícitas:
+
+- **Manual**: `#expenseModeManual` → `data-v75-bill-action="expense-manual"` → modo `manual`;
+- **Ler fatura**: `#expenseModeImage` → `data-v75-bill-action="expense-image"` → input nativo `#expenseModeImageInput`;
+- **QR Code**: `#expenseModeQr` → `data-v75-bill-action="expense-qr"` → input nativo `#expenseModeQrInput` com `capture="environment"` em mobile.
+
+Um único mapa `BILL_MODE_ACTIONS` resolve controlo → ação → modo → caminho nativo. O diálogo expõe `data-v75-bill-action` com a ação selecionada, facilitando diagnóstico e testes. Nenhuma regra financeira ou persistência foi alterada.
