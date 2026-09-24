@@ -388,3 +388,20 @@ A captura real em Safari/iOS mostrou os três modos de registo renderizados, mas
 - o `click` posterior ao toque é deduplicado;
 - revisões de URL dos scripts e do Service Worker mudam juntamente com a correção para evitar runtime antigo em Safari/PWA;
 - testes estáticos continuam obrigatórios, mas não substituem validação física WebKit.
+
+
+## D-115 — tabs críticos não dependem de delegação global no Safari/iOS
+
+Após repetição da regressão física, os controlos **Manual / Ler fatura / QR Code** deixam de depender exclusivamente de listeners delegados no `document`. Cada botão é ligado diretamente quando o formulário é composto. O contrato funcional continua centralizado em `setBillMode()` e `cdc:bill-mode-change`.
+
+O `touchend` não é cancelado. Isto preserva o contexto de ativação do utilizador para APIs sensíveis a gesto, como o seletor de ficheiros. O click sintetizado posterior é deduplicado.
+
+## D-116 — novas compilações PWA são ativadas automaticamente
+
+A política anterior exigia confirmação manual para promover um worker em espera. Isso podia manter uma compilação anterior ativa mesmo após Pages concluir o deploy. A partir de `auto-refresh2`:
+
+- o worker só promove a nova compilação depois de todos os assets públicos terem sido colocados em cache com sucesso;
+- depois chama `skipWaiting()` e assume os clientes;
+- `controllerchange` recarrega a página automaticamente;
+- a aplicação verifica novas compilações periodicamente enquanto está aberta e online;
+- dados persistentes do utilizador ficam fora deste ciclo.
