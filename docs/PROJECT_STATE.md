@@ -260,3 +260,20 @@ O calendário passa a mostrar não apenas vencimentos, mas também o que foi efe
 - num mês novo sem planeamento, **Saldo inicial** e **Orçamento do mês** aparecem vazios em vez de `0,00`, ficando prontos para o próximo registo.
 
 Nenhuma despesa histórica é eliminada no rollover. A mudança mensal apenas altera o período em análise e cria o perfil mensal vazio se ainda não existir.
+
+
+## Despesas — filtros recolhidos no telemóvel (25/09/2026)
+
+Revisão técnica: `76-bills-filter-collapse1` / `76-mobile-shell3`.
+
+A captura física mostrou que o cartão **Filtros** ocupava uma parte excessiva do ecrã antes da lista de despesas. A funcionalidade permanece intacta, mas no mobile os filtros avançados passam a iniciar recolhidos.
+
+- novo botão compacto **Filtros** junto da pesquisa e de **Nova fatura**;
+- o cartão com Estado, Categoria, datas, Ordenar e Limpar filtros só aparece quando o utilizador pede;
+- o botão expõe `aria-expanded` e `aria-controls` para acessibilidade;
+- quando existem critérios diferentes do padrão, o botão mostra a quantidade de opções alteradas;
+- **Limpar filtros** repõe os valores e volta a recolher o painel no telemóvel;
+- desktop continua com os filtros sempre visíveis;
+- os IDs e listeners canónicos não foram substituídos nem duplicados.
+
+Objetivo: libertar área vertical e colocar resumo/lista de despesas mais perto do topo sem perder capacidade de pesquisa avançada.
