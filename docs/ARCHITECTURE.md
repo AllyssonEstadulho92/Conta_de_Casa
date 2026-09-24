@@ -352,3 +352,14 @@ Os tabs **Ler fatura** e **QR Code** deixam de depender de uma chamada programá
 ## Refresh automático seguro
 
 O Service Worker pode assumir automaticamente uma nova compilação, mas `events.js` só executa `location.reload()` quando não existem diálogos críticos abertos, scanner ativo ou campos editáveis com foco. Se existir edição em curso, o reload é adiado e repetido até a página ficar segura.
+
+
+## Mapa de ações dos modos de despesa
+
+Os três controlos de registo são identificados por IDs estáveis e `data-v75-bill-action`. A resolução funcional é centralizada em `BILL_MODE_ACTIONS`:
+
+- `expense-manual` → `manual`, sem captura nativa;
+- `expense-image` → `image`, captura nativa de imagem;
+- `expense-qr` → `qr`, captura nativa automática em dispositivos táteis e scanner ao vivo quando apropriado em desktop.
+
+`activateBillModeAction()` é o único controlador visual destes três modos. `setBillMode()` grava simultaneamente `data-v75-bill-mode` e `data-v75-bill-action` no diálogo e emite `cdc:bill-mode-change` para `invoice-capture.js`. Assim, identificação visual, ação selecionada e função executada deixam de depender de inferência pelo texto do botão.

@@ -427,3 +427,13 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - atualizações continuam automáticas, mas reload é adiado enquanto existir registo/modal ativo;
 - novas revisões de cache: arquitetura `76-architecture-native4`, captura `76-invoice-native4` e Service Worker `76-safe-refresh3`;
 - sem alterações a cálculos, cofre/PIN, IndexedDB, Mercado ou sincronização.
+
+
+### 24 de setembro de 2026 — identificação explícita dos modos de despesa
+
+- Manual, Ler fatura e QR Code passam a ter IDs e ações estáveis no DOM;
+- criado `BILL_MODE_ACTIONS` como mapa único entre menu e função;
+- diálogo passa a registar `data-v75-bill-action` para diagnóstico;
+- mantida captura nativa de imagem/câmara no iPhone e scanner compatível em desktop;
+- cache da arquitetura invalidada com `76-architecture-actions5`;
+- sem alterações a cálculos, cofre, PIN, IndexedDB, Mercado ou sincronização.

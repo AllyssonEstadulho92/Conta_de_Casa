@@ -416,3 +416,10 @@ O QR móvel usa `capture="environment"`, reduzindo dependência de `getUserMedia
 ## D-118 — atualização automática não interrompe um registo em edição
 
 A aplicação continua a promover novas compilações automaticamente, mas `controllerchange` não pode recarregar uma página com formulário/modal ativo. O reload fica pendente até a interface voltar a um estado seguro. Isto preserva o pedido de atualização automática sem criar perda de contexto ou sensação de bloqueio durante a edição.
+
+
+## D-119 — os modos de registo têm identidade de ação explícita
+
+A existência de texto visível ou de `data-v75-bill-mode` não é suficiente como contrato de interação. **Manual**, **Ler fatura** e **QR Code** passam a ter IDs e `data-v75-bill-action` estáveis, ligados a um único mapa funcional.
+
+Isto permite confirmar por código e por teste qual função pertence a cada controlo, reduz ambiguidade entre label, input nativo e modo visual, e permite expor no diálogo a última ação escolhida sem alterar o domínio financeiro.

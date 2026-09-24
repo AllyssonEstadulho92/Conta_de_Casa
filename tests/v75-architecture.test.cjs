@@ -80,11 +80,22 @@ assert.match(js,/cdc:bill-mode-change/,'mode selection must delegate the action 
 assert.match(js,/76-expense-ios-tab-touch2/,'physical Safari regression lineage must remain explicit');
 assert.match(js,/76-expense-ios-tab-direct3/,'direct iOS tab binding lineage must remain explicit');
 assert.match(js,/76-expense-native-input4/,'native invoice input revision must remain explicit');
+assert.match(js,/76-expense-action-map5/,'explicit expense action map revision must remain visible');
+assert.match(js,/const BILL_MODE_ACTIONS=Object\.freeze/,'expense modes must be backed by one explicit action map');
+assert.match(js,/'expense-manual':Object\.freeze\(\{mode:'manual',native:false\}\)/,'Manual must map to the manual action');
+assert.match(js,/'expense-image':Object\.freeze\(\{mode:'image',native:true\}\)/,'Ler fatura must map to the image action');
+assert.match(js,/'expense-qr':Object\.freeze\(\{mode:'qr',native:'auto'\}\)/,'QR Code must map to the QR action');
+assert.match(js,/id="expenseModeManual"[\s\S]*data-v75-bill-action="expense-manual"/,'Manual must have a stable action identity');
+assert.match(js,/id="expenseModeImage"[\s\S]*data-v75-bill-action="expense-image"[\s\S]*for="expenseModeImageInput"/,'Ler fatura must have a stable action identity and native target');
+assert.match(js,/id="expenseModeQr"[\s\S]*data-v75-bill-action="expense-qr"[\s\S]*for="expenseModeQrInput"/,'QR Code must have a stable action identity and native target');
+assert.match(js,/function resolveBillModeAction\(control\)/,'mode controls must resolve through the action map');
+assert.match(js,/function activateBillModeAction\(control,event\)/,'mode controls must activate through one explicit controller');
+assert.match(js,/dialog\.dataset\.v75BillAction=action/,'dialog must expose the selected expense action for diagnostics');
 assert.match(js,/data-v75-native-invoice="image"/,'Ler fatura must expose a native image input');
 assert.match(js,/data-v75-native-invoice="qr"/,'QR Code must expose a native capture input');
 assert.match(js,/capture="environment"/,'QR Code must request the rear camera through the native input on touch devices');
 assert.match(js,/function prefersNativeQrCapture\(\)/,'runtime must select native camera capture on touch devices');
-assert.match(js,/setBillMode\(mode,\{native:true\}\)/,'native inputs must switch mode without recursively opening a second picker');
+assert.match(js,/setBillMode\(resolved\.mode,\{native:resolved\.native,action:resolved\.action\}\)/,'resolved actions must switch mode without recursively opening a second picker');
 assert.doesNotMatch(js,/document\.addEventListener\('touchend'/,'invoice tabs must not depend on document-level touch delegation');
 assert.doesNotMatch(js,/if\(mode==='image'\)setTimeout\(\(\)=>byId\('invoiceImageInput'\)\?\.click/,'architecture layer must not bypass invoice-capture when opening the file picker');
 assert.doesNotMatch(js,/if\(mode==='qr'\)setTimeout\(\(\)=>q\('\[data-invoice-camera\]'/,'architecture layer must not bypass invoice-capture when opening the camera');
@@ -146,14 +157,14 @@ assert.match(invoiceCss,/@media\(forced-colors:active\)[\s\S]*\.v75-bill-tabs \[
 assert.match(invoiceCss,/\.v75-bill-native-tab>\[data-v75-native-invoice\]\{[\s\S]*position:absolute!important[\s\S]*opacity:\.001!important/,'native file inputs must cover the visual tab without relying on programmatic input.click()');
 
 assert.match(prepare,/const BUILD = 'v76'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '76-architecture-native4'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '76-architecture-actions5'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
 assert.ok(prepare.includes("'invoice-capture.css'"));
 assert.match(prepare,/const INVOICE_CAPTURE_REV = '76-invoice-native4'/,'invoice runtime must use an independent cache-busting revision');
 assert.match(prepare,/const SERVICE_WORKER_REV = '76-safe-refresh3'/,'service worker URL must change for this physical iOS fix');
 assert.ok(prepare.includes("invoice-capture\\.js\\?v=[^\"']+"),'Pages build must rewrite the invoice runtime query token');
-assert.match(sw,/conta-de-casa-public-v76-version-alignment1-76-architecture-native4/);
+assert.match(sw,/conta-de-casa-public-v76-version-alignment1-76-architecture-actions5/);
 assert.match(sw,/expense-mode1/,'PWA cache must retain the improved expense mode control');
 assert.match(sw,/expense-mode-stability1/,'PWA cache must refresh deterministic expense mode behavior');
 assert.match(sw,/prototype-system1/,'PWA cache must refresh the approved prototype composition');
@@ -163,6 +174,7 @@ assert.match(sw,/planning-ring-shape1/,'PWA cache must refresh the normalized pl
 assert.match(sw,/expense-ios-tab-direct3/,'PWA cache must include the direct Safari invoice-tab fix');
 assert.match(sw,/auto-refresh2/,'PWA cache must include automatic refresh delivery');
 assert.match(sw,/expense-native-input4/,'PWA cache must include native invoice capture controls');
+assert.match(sw,/expense-action-map5/,'PWA cache must include the explicit expense action map');
 assert.match(sw,/safe-refresh3/,'PWA cache must include safe reload delivery');
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
