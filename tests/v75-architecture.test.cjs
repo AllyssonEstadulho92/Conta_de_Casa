@@ -101,7 +101,7 @@ assert.match(js,/data-v75-native-invoice="image"/,'Ler fatura must expose a nati
 assert.match(js,/data-v75-native-invoice="qr"/,'QR Code must expose a native capture input');
 assert.match(js,/capture="environment"/,'QR Code must request the rear camera through the native input on touch devices');
 assert.match(js,/function prefersNativeQrCapture\(\)/,'runtime must select native camera capture on touch devices');
-assert.match(js,/setBillMode\(resolved\.mode,\{native:resolved\.native,action:resolved\.action\}\)/,'resolved actions must switch mode without recursively opening a second picker');
+assert.match(js,/setBillMode\(resolved\.mode,\{native:true,action:resolved\.action\}\)/,'native picker change must switch mode only after the system returns a file');
 assert.doesNotMatch(js,/document\.addEventListener\('touchend'/,'invoice tabs must not depend on document-level touch delegation');
 assert.doesNotMatch(js,/if\(mode==='image'\)setTimeout\(\(\)=>byId\('invoiceImageInput'\)\?\.click/,'architecture layer must not bypass invoice-capture when opening the file picker');
 assert.doesNotMatch(js,/if\(mode==='qr'\)setTimeout\(\(\)=>q\('\[data-invoice-camera\]'/,'architecture layer must not bypass invoice-capture when opening the camera');
