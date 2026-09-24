@@ -30,6 +30,12 @@
  * - touchend preserva a ativação do utilizador para o seletor de ficheiros/câmara;
  * - o click sintetizado continua deduplicado.
  *
+ * 76-expense-native-input4:
+ * - Ler fatura usa um input file nativo embebido no próprio tab;
+ * - QR Code usa input file nativo com capture=environment em dispositivos táteis;
+ * - o fluxo deixa de depender de input.click() programático para abrir UI do iOS;
+ * - desktop mantém o leitor QR ao vivo quando existe apontador fino.
+ *
  * 76-mobile-label-fit1:
  * - a rota continua a chamar-se Planeamento; apenas o label do dock passa a “Plano”
  *   para evitar truncamento em iPhones estreitos sem reduzir a legibilidade.
@@ -87,8 +93,6 @@
 
   let scheduled=false;
   let observer=null;
-  let lastBillModeTouchAt=0;
-  let lastBillModeTouchValue='';
   const byId=id=>document.getElementById(id);
   const q=(selector,node=document)=>node.querySelector(selector);
   const qa=(selector,node=document)=>[...node.querySelectorAll(selector)];
@@ -343,35 +347,51 @@
     }
   }
 
-  function activateBillModeButton(button,event){
-    const mode=button?.dataset?.v75BillMode||'';
-    if(!['manual','image','qr'].includes(mode))return;
+  function prefersNativeQrCapture(){
+    const coarse=Boolean(root.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches);
+    const ios=/iPad|iPhone|iPod/.test(String(root.navigator?.userAgent||''))||root.navigator?.platform==='MacIntel'&&Number(root.navigator?.maxTouchPoints||0)>1;
+    return coarse||ios;
+  }
 
-    if(event.type==='click'&&lastBillModeTouchValue===mode&&Date.now()-lastBillModeTouchAt<900){
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
-
-    if(event.type==='touchend'){
-      lastBillModeTouchAt=Date.now();
-      lastBillModeTouchValue=mode;
-    }else if(event.cancelable){
-      event.preventDefault();
-    }
-
-    event.stopPropagation();
-    setBillMode(mode);
-    schedule();
+  function billTabsHtml(){
+    return `<div class="v75-bill-tabs full-row" role="tablist" aria-label="Modo de registo">
+      <button type="button" class="active" role="tab" aria-selected="true" tabindex="0" data-v75-bill-mode="manual">Manual</button>
+      <label class="v75-bill-native-tab" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="image">
+        <span>Ler fatura</span>
+        <input type="file" accept="image/*" data-v75-native-invoice="image" tabindex="-1" aria-label="Selecionar fotografia da fatura">
+      </label>
+      <label class="v75-bill-native-tab" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="qr">
+        <span>QR Code</span>
+        <input type="file" accept="image/*" capture="environment" data-v75-native-invoice="qr" tabindex="-1" aria-label="Abrir câmara para fotografar o QR da fatura">
+      </label>
+    </div>`;
   }
 
   function bindBillTabs(form){
-    qa('.v75-bill-tabs [data-v75-bill-mode]',form).forEach(button=>{
-      if(button.dataset.v75DirectBound==='true')return;
-      button.dataset.v75DirectBound='true';
-      const activate=event=>activateBillModeButton(button,event);
-      button.addEventListener('touchend',activate,{passive:true});
-      button.addEventListener('click',activate);
+    const manual=q('.v75-bill-tabs [data-v75-bill-mode="manual"]',form);
+    if(manual&&manual.dataset.v75DirectBound!=='true'){
+      manual.dataset.v75DirectBound='true';
+      manual.addEventListener('click',event=>{
+        event.preventDefault();
+        setBillMode('manual');
+        schedule();
+      });
+    }
+
+    qa('.v75-bill-tabs [data-v75-native-invoice]',form).forEach(input=>{
+      if(input.dataset.v75DirectBound==='true')return;
+      input.dataset.v75DirectBound='true';
+      input.addEventListener('click',event=>{
+        const mode=input.dataset.v75NativeInvoice;
+        if(!['image','qr'].includes(mode))return;
+        if(mode==='qr'&&!prefersNativeQrCapture()){
+          event.preventDefault();
+          setBillMode('qr');
+        }else{
+          setBillMode(mode,{native:true});
+        }
+        schedule();
+      });
     });
   }
 
@@ -379,9 +399,7 @@
     if(!form)return;
     const isNew=!String(form.elements.id?.value||'');
     if(!isNew)return;
-    if(!form.querySelector('.v75-bill-tabs')){
-      form.insertAdjacentHTML('afterbegin',`<div class="v75-bill-tabs full-row" role="tablist" aria-label="Modo de registo"><button type="button" class="active" role="tab" aria-selected="true" tabindex="0" data-v75-bill-mode="manual">Manual</button><button type="button" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="image">Ler fatura</button><button type="button" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="qr">QR Code</button></div>`);
-    }
+    if(!form.querySelector('.v75-bill-tabs'))form.insertAdjacentHTML('afterbegin',billTabsHtml());
     bindBillTabs(form);
   }
 
@@ -472,18 +490,23 @@
     picker.dispatchEvent(new Event('change',{bubbles:true}));
   }
 
-  function setBillMode(mode){
+  function setBillMode(mode,options={}){
     const dialog=byId('formDialog');
     const form=byId('billForm');
     if(!dialog||!form||!['manual','image','qr'].includes(mode))return;
     dialog.dataset.v75BillMode=mode;
     syncBillModeButtons(form,mode);
-    dialog.dispatchEvent(new CustomEvent('cdc:bill-mode-change',{bubbles:true,detail:{mode}}));
+    dialog.dispatchEvent(new CustomEvent('cdc:bill-mode-change',{bubbles:true,detail:{mode,native:Boolean(options.native)}}));
   }
 
   function handleBillModeKeydown(event){
     const current=event.target.closest?.('.v75-bill-tabs [data-v75-bill-mode]');
     if(!current)return;
+    if((event.key==='Enter'||event.key===' ')&&current.matches('.v75-bill-native-tab')){
+      event.preventDefault();
+      current.querySelector('[data-v75-native-invoice]')?.click();
+      return;
+    }
     const buttons=qa('.v75-bill-tabs [data-v75-bill-mode]',current.closest('.v75-bill-tabs'));
     const index=buttons.indexOf(current);
     let next=index;
@@ -494,7 +517,7 @@
     else return;
     event.preventDefault();
     const button=buttons[next];
-    setBillMode(button.dataset.v75BillMode);
+    setBillMode(button.dataset.v75BillMode,{native:button.matches('.v75-bill-native-tab')});
     button.focus({preventScroll:true});
     schedule();
   }

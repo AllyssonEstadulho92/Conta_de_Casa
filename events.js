@@ -545,11 +545,39 @@ async function enterApp() {
         if(!window.__swReloadBound){
           window.__swReloadBound=true;
           let refreshing=false;
-          navigator.serviceWorker.addEventListener('controllerchange',()=>{
+
+          const canReloadForNewBuild=()=>{
+            if(document.querySelector('#formDialog[open],#quickDialog[open],dialog.software-update-dialog[open],[data-invoice-scanner-overlay]'))return false;
+            const active=document.activeElement;
+            if(active?.matches?.('input,textarea,select,[contenteditable="true"]'))return false;
+            return true;
+          };
+
+          const reloadForNewBuildWhenSafe=()=>{
             if(refreshing)return;
-            refreshing=true;
-            location.reload();
-          });
+            if(canReloadForNewBuild()){
+              refreshing=true;
+              location.reload();
+              return;
+            }
+
+            if(!window.__swDeferredReloadNotice){
+              window.__swDeferredReloadNotice=true;
+              if(typeof toast==='function')toast('Atualização pronta. A página será atualizada automaticamente quando fechar o registo.');
+            }
+
+            if(!window.__swDeferredReloadTimer){
+              window.__swDeferredReloadTimer=setInterval(()=>{
+                if(refreshing||!canReloadForNewBuild())return;
+                clearInterval(window.__swDeferredReloadTimer);
+                window.__swDeferredReloadTimer=null;
+                refreshing=true;
+                location.reload();
+              },750);
+            }
+          };
+
+          navigator.serviceWorker.addEventListener('controllerchange',reloadForNewBuildWhenSafe);
         }
 
         if(!window.__swAutoUpdateTimer){

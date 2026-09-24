@@ -216,3 +216,16 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [x] verificar novas compilações a cada 30 segundos quando a aplicação está visível e online.
 - [ ] validar fisicamente **Ler fatura** no mesmo iPhone após o novo deploy.
 - [ ] validar fisicamente **QR Code** e pedido de câmara no mesmo iPhone.
+
+
+## Captura nativa e atualização segura
+
+- [x] `76-expense-native-input4`: substituir abertura programática pelo input nativo em **Ler fatura**.
+- [x] usar `capture=environment` no **QR Code** móvel.
+- [x] impedir abertura duplicada do picker no caminho nativo.
+- [x] tentar `BarcodeDetector` antes de ZXing quando disponível.
+- [x] `safe-refresh3`: adiar reload automático enquanto houver edição/modal ativo.
+- [x] versionar separadamente arquitetura, invoice JS/CSS e Service Worker no Pages build.
+- [ ] validar fisicamente **Ler fatura** no mesmo iPhone.
+- [ ] validar fisicamente **QR Code** e retorno da câmara no mesmo iPhone.
+- [ ] confirmar que um deploy novo recarrega automaticamente depois de fechar o formulário, sem interromper edição.
