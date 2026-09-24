@@ -3,7 +3,8 @@
 /* Conta de Casa — captura assistida de faturas portuguesas.
  * Lê o Código QR definido pela AT a partir da câmara ou de uma imagem local.
  * O ficheiro/imagem nunca é guardado; os dados só preenchem o formulário após confirmação.
- * 76-expense-mode-stability1 mantém imagem e câmara como ações explícitas, sem OCR fictício.
+ * 76-expense-mode-stability1 mantém imagem e câmara separadas, sem OCR fictício.
+ * 76-expense-mode-action1 torna Manual / Ler fatura / QR Code ações diretas: foco, ficheiro e câmara.
  */
 (function installInvoiceCapture(root){
   const MAX_IMAGE_BYTES=15*1024*1024;
@@ -256,10 +257,10 @@
     if(video)video.srcObject=null;
   }
 
-  function closeScanner(){
+  function closeScanner(restoreFocus=true){
     stopScanner();
     document.querySelector('[data-invoice-scanner-overlay]')?.remove();
-    document.querySelector('[data-invoice-camera]')?.focus({preventScroll:true});
+    if(restoreFocus)document.querySelector('[data-invoice-camera]')?.focus({preventScroll:true});
   }
 
   function scannerHtml(){
@@ -278,7 +279,7 @@
     const data=parseAtInvoiceQr(text);
     if(!data)return false;
     scannerBusy=true;
-    closeScanner();
+    closeScanner(false);
     showPreview(data);
     return true;
   }
@@ -290,7 +291,7 @@
       status('A leitura pela câmara exige HTTPS e um navegador com acesso à câmara.','warning');
       return;
     }
-    closeScanner();
+    closeScanner(false);
     document.querySelector('#formDialog .dialog-shell')?.insertAdjacentHTML('beforeend',scannerHtml());
     const session=scannerSession;
     const video=document.querySelector('#invoiceQrVideo');
@@ -310,7 +311,7 @@
       if(state)state.textContent='Aponte para o QR da fatura';
     }catch(error){
       if(session!==scannerSession)return;
-      closeScanner();
+      closeScanner(false);
       const name=String(error?.name||'');
       const message=name==='NotAllowedError'||name==='SecurityError'
         ?'A câmara não foi autorizada. Permita o acesso nas definições do navegador e tente novamente.'
@@ -368,11 +369,32 @@
     scanImage(file).finally(()=>{event.target.value='';});
   }
 
-  function handleModeChange(event){
-    const mode=event.detail?.mode||currentCaptureMode();
-    closeScanner();
+  function focusManualField(){
+    const form=document.querySelector('#billForm');
+    const title=form?.elements?.title;
+    if(!title||typeof title.focus!=='function')return;
+    requestAnimationFrame(()=>title.focus({preventScroll:true}));
+  }
+
+  function activateMode(mode){
+    ensureCaptureUi();
+    closeScanner(false);
     syncCaptureMode(mode);
     if(document.querySelector('#invoiceCapturePreview')?.hidden!==false)status('');
+    if(mode==='manual'){focusManualField();return;}
+    if(mode==='image'){
+      const input=document.querySelector('#invoiceImageInput');
+      if(!input){status('Não foi possível abrir o seletor da fatura.','warning');return;}
+      input.value='';
+      input.click();
+      return;
+    }
+    if(mode==='qr')openCamera().catch(()=>status('Não foi possível abrir a câmara.','warning'));
+  }
+
+  function handleModeChange(event){
+    const mode=event.detail?.mode||currentCaptureMode();
+    activateMode(mode==='image'||mode==='qr'?mode:'manual');
   }
 
   function installDom(){
@@ -383,8 +405,8 @@
     const body=document.body;
     if(body)observer.observe(body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-v75-bill-mode','open']});
     ensureCaptureUi();
-    document.addEventListener('visibilitychange',()=>{if(document.hidden)closeScanner();});
-    root.addEventListener('pagehide',closeScanner);
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)closeScanner(false);});
+    root.addEventListener('pagehide',()=>closeScanner(false));
   }
 
   root.CDCInvoiceCapture=Object.freeze({parseAtInvoiceQr,parseMoneyCents,parseAtDate,syncCaptureMode,currentCaptureMode});
