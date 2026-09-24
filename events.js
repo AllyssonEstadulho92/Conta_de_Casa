@@ -1,4 +1,20 @@
 let eventsWired = false;
+let observedLocalMonth = currentLocalMonthKey();
+
+function syncMonthRollover(){
+  if(!appState)return;
+  const nowMonth=currentLocalMonthKey();
+  if(nowMonth===observedLocalMonth)return;
+  const followCurrent=selectedMonth===observedLocalMonth;
+  observedLocalMonth=nowMonth;
+  if(!followCurrent)return;
+  selectedMonth=nowMonth;
+  monthProfile(nowMonth);
+  const picker=$('#monthPicker');
+  if(picker)picker.value=nowMonth;
+  renderCurrentPage();
+  toast('Novo mês iniciado. O histórico anterior ficou guardado e os campos mensais estão prontos para novos valores.');
+}
 
 function ensureDialogShellIsContainer() {
   const shell = $('#dialogShell');
@@ -354,6 +370,16 @@ function wireEvents(){
   formDialog.addEventListener('close',()=>{formDialog.classList.remove('detail-dialog');delete formDialog.dataset.mode;});
   $('#upcomingBills').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#calendarAgenda').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
+  $('#calendarHistory')?.addEventListener('click',e=>{
+    const button=e.target.closest('[data-calendar-month]');
+    if(!button)return;
+    const value=button.dataset.calendarMonth||'';
+    if(!/^\d{4}-\d{2}$/.test(value))return;
+    const picker=$('#monthPicker');
+    if(!picker)return;
+    picker.value=value;
+    picker.dispatchEvent(new Event('change',{bubbles:true}));
+  });
   $('#dialogBody').addEventListener('click',async e=>{
     const pay=e.target.closest('[data-detail-pay]');
     if(pay){openPaymentForm(pay.dataset.detailPay);return;}
@@ -494,6 +520,9 @@ function wireEvents(){
   $('#exportBackupBtn').addEventListener('click',exportBackup); $('#importBackupInput').addEventListener('change',async e=>{try{if(e.target.files[0])await importBackup(e.target.files[0]);}catch(err){$('#backupMessage').textContent=safeUserError(err);$('#backupMessage').className='form-message error';}finally{e.target.value='';}});
   $('#resetDataBtn').addEventListener('click',async()=>{if(confirm('ATENÇÃO: isto apaga definitivamente o cofre e todos os dados deste dispositivo. Continuar?')){await idbClearAll();location.reload();}});
   $('#notificationsBtn').addEventListener('click',()=>{showPage('dashboard');toast('Os alertas importantes aparecem no topo do Início.');});
+  window.addEventListener('focus',syncMonthRollover);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncMonthRollover();});
+  setInterval(syncMonthRollover,60000);
 }
 
 async function enterApp() {
