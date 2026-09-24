@@ -403,3 +403,15 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - adicionada deduplicação do click sintetizado para impedir dupla execução;
 - alterados tokens de cache da arquitetura, captura de fatura e Service Worker;
 - sem alterações a cálculos, persistência, cifra ou regras financeiras.
+
+
+### 24 de setembro de 2026 — tabs diretos e atualização automática
+
+- nova captura física mostrou os modos de fatura ainda sem reação observável no iPhone;
+- os tabs passam a receber listeners diretamente nos próprios botões;
+- removida a dependência de `touchend` delegado no `document` para este fluxo;
+- o gesto de toque deixa de ser cancelado antes de abrir ficheiro/câmara;
+- novo Service Worker promove automaticamente a compilação depois de concluir o precache;
+- a página recarrega automaticamente quando o novo worker assume o controlo;
+- aplicação passa a verificar novas compilações periodicamente enquanto está aberta e online;
+- preservados cálculos, IndexedDB, cofre, PIN, Mercado e sincronização.
