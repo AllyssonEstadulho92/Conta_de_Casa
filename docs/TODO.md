@@ -263,3 +263,15 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [x] não usar data do documento como vencimento.
 - [x] manter submit/persistência exclusivamente em `forms.js`.
 - [ ] validar fisicamente no iPhone que os campos aparecem preenchidos logo após a leitura.
+
+
+## Calendário financeiro mensal
+
+- [x] `76-monthly-spend-calendar1`: mostrar gasto efetivo por dia no calendário.
+- [x] mostrar resumo do mês com gasto total, faturas pagas, Mercado e por pagar.
+- [x] manter histórico dos últimos seis meses com total gasto.
+- [x] permitir mudar de mês diretamente pelo histórico.
+- [x] avançar automaticamente para o novo mês quando o utilizador estava no mês corrente.
+- [x] manter meses anteriores intactos e consultáveis.
+- [x] apresentar Saldo inicial e Orçamento vazios num mês novo quando ainda estão a zero.
+- [ ] validar visualmente o calendário mensal no mesmo iPhone/Safari/PWA.
