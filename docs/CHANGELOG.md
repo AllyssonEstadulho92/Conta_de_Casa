@@ -373,3 +373,13 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - testes estáticos não substituem E2E/validação WebKit real;
 - ZXing deve migrar de origem remota para bundle local antes de endurecer `script-src`;
 - migração TypeScript continua por blocos com paridade e regressões.
+
+### 24 de setembro de 2026 — modos de registo de fatura
+
+- corrigidos os tabs **Manual**, **Ler fatura** e **QR Code**, que anteriormente podiam aparentar não executar nenhuma ação;
+- **Ler fatura** passa a abrir o seletor de imagem no próprio toque;
+- **QR Code** passa a iniciar diretamente o leitor de câmara;
+- **Manual** devolve o foco ao fluxo de introdução manual;
+- mantida a separação de responsabilidades entre arquitetura visual e `invoice-capture.js`;
+- acrescentados testes de regressão e token `invoice-mode-action1` no cache PWA;
+- sem alterações a cálculos financeiros, IndexedDB, cifra, pagamentos, Mercado ou sincronização.

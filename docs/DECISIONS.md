@@ -353,3 +353,16 @@ A captura física após o PR #163 mostrou a secção deslocada e cortada lateral
 - `marketId|pid` canónico;
 - QR/scanner/backup/PWA/offline sem regressões;
 - nenhum segredo no repositório público.
+
+## D-112 — selecionar um modo de fatura executa a respetiva ação
+
+A apresentação de **Manual**, **Ler fatura** e **QR Code** como controlo segmentado cria expectativa de ação imediata. Um modo que apenas muda de estado visual, obrigando a procurar um segundo controlo, é considerado comportamento incompleto para este fluxo.
+
+- `v75-architecture.js` continua a ser responsável apenas pela seleção e semântica dos tabs;
+- `invoice-capture.js` é a única autoridade funcional de captura;
+- selecionar **Manual** foca o fluxo de preenchimento;
+- selecionar **Ler fatura** abre diretamente o seletor de imagem;
+- selecionar **QR Code** abre diretamente o fluxo da câmara;
+- não se introduz OCR fictício: fotografia significa procurar QR AT na imagem;
+- nenhum ficheiro ou fotograma é guardado pelo módulo;
+- Service Worker deve invalidar o runtime anterior sempre que este contrato de interação mudar.

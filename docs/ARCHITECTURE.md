@@ -283,3 +283,18 @@ Limitação: testes estáticos não substituem Safari/WebKit real para rendering
 5. endurecer CSP depois da remoção da dependência remota;
 6. criar E2E WebKit/Chromium;
 7. continuar redução de cascade por componente e migração TypeScript de baixo acoplamento.
+
+
+## Ações diretas do registo de faturas
+
+O controlo segmentado **Manual / Ler fatura / QR Code** tem responsabilidades separadas entre composição e captura.
+
+- `v75-architecture.js` mantém o estado `data-v75-bill-mode` e emite `cdc:bill-mode-change`;
+- `invoice-capture.js` recebe o evento e executa a ação correspondente;
+- `manual`: termina qualquer sessão de scanner e foca o primeiro campo manual;
+- `image`: garante que a superfície de captura existe e chama o `input[type=file]` no mesmo gesto do utilizador;
+- `qr`: garante a superfície de captura e inicia o leitor de câmara;
+- a leitura de imagem e câmara continua a validar apenas QR de faturação AT;
+- o módulo não escreve diretamente em IndexedDB nem persiste ficheiros; apenas preenche campos compatíveis depois da leitura e revisão.
+
+A abertura do seletor de ficheiro permanece síncrona ao gesto do utilizador para compatibilidade com Safari/iOS. A câmara exige contexto seguro e autorização do navegador.
