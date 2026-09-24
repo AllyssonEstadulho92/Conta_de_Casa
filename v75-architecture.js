@@ -15,9 +15,9 @@
  * - elimina data-v74-nav, que servia apenas um runtime v74 já removido do repositório.
  *
  * 76-expense-mode-stability1:
- * - Manual / Ler fatura / QR Code passam a ser modos determinísticos e acessíveis;
- * - mudar de modo deixa de abrir automaticamente ficheiro ou câmara;
- * - ações de captura são explícitas e ficam a cargo de invoice-capture.js.
+ * - Manual / Ler fatura / QR Code são modos determinísticos e acessíveis;
+ * - a arquitetura apenas seleciona o modo e emite cdc:bill-mode-change;
+ * - invoice-capture.js é a autoridade que executa a ação direta: foco, ficheiro ou câmara.
  *
  * 76-mobile-label-fit1:
  * - a rota continua a chamar-se Planeamento; apenas o label do dock passa a “Plano”
