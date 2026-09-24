@@ -403,7 +403,7 @@ O calendário financeiro usa duas dimensões distintas:
 - **vencimentos**, obtidos de `billDueDateKey()` e apresentados pela data limite da fatura;
 - **gastos efetivos**, obtidos de pagamentos em `paidAt` e compras de Mercado em `purchasedAt || updatedAt`.
 
-`spendingForDate(dateKey)` devolve `paymentTotal`, `marketSpent` e `total` para um dia civil. `monthlySpendHistory(month,count)` usa `monthNumbers()` para produzir o histórico mensal sem duplicar ou materializar saldos.
+`spendingForDate(dateKey)` devolve `paymentTotal`, `marketSpent` e `total` para um dia civil. `monthlySpendHistory(month,count)` lê diretamente pagamentos e compras datados para produzir o histórico mensal, sem criar perfis vazios nem materializar snapshots.
 
 `renderCalendar()` apresenta resumo mensal, histórico recente, gasto diário e agenda de vencimentos. O histórico permanece derivado dos movimentos persistidos, portanto mudar para um novo mês não altera meses anteriores.
 
