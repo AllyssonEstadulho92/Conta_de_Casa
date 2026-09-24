@@ -142,6 +142,33 @@ function renderCategoryBars(selector, entries) {
   setHTML(root, entries.slice(0,8).map(([name,val])=>`<div class="bar-item"><span>${esc(name)}</span><div class="bar-track"><span class="bar-fill" data-width="${Math.max(4,val/max*100)}"></span></div><span data-money>${money(val)}</span></div>`).join(''));
 }
 
+function billFilterState(){
+  return {
+    status:$('#billStatusFilter')?.value||'all',
+    category:$('#billCategoryFilter')?.value||'all',
+    from:$('#billDateFrom')?.value||'',
+    to:$('#billDateTo')?.value||'',
+    sort:$('#billSort')?.value||'due-asc'
+  };
+}
+
+function syncBillFilterToggle(criteria=billFilterState()){
+  const toggle=$('#billFiltersToggle');
+  const countNode=$('#billFilterCount');
+  if(!toggle||!countNode)return;
+  const count=[
+    criteria.status!=='all',
+    criteria.category!=='all',
+    Boolean(criteria.from),
+    Boolean(criteria.to),
+    criteria.sort!=='due-asc'
+  ].filter(Boolean).length;
+  countNode.textContent=String(count);
+  countNode.hidden=count===0;
+  toggle.classList.toggle('has-active-filters',count>0);
+  const label=count?('Filtros, '+count+' opção'+(count===1?'':'ões')+' alterada'+(count===1?'':'s')):'Filtros';
+  toggle.setAttribute('aria-label',label);
+}
 function renderBills() {
   const all=appState.bills.filter(b=>billInMonth(b) && !b.archived);
   const categorySelect=$('#billCategoryFilter');
@@ -151,14 +178,12 @@ function renderBills() {
     setHTML(categorySelect,`<option value="all">Todas as categorias</option>${categories.map(c=>`<option value="${attr(c)}">${esc(c)}</option>`).join('')}`);
     categorySelect.value=categories.includes(selected)?selected:'all';
   }
+  const filterState=billFilterState();
   const criteria={
     search:$('#billSearch')?.value||'',
-    status:$('#billStatusFilter')?.value||'all',
-    category:$('#billCategoryFilter')?.value||'all',
-    from:$('#billDateFrom')?.value||'',
-    to:$('#billDateTo')?.value||'',
-    sort:$('#billSort')?.value||'due-asc'
+    ...filterState
   };
+  syncBillFilterToggle(filterState);
   const list=filterBills(all,criteria);
   const totals=monthNumbers();
   const summary=[
