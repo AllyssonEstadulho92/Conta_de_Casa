@@ -141,3 +141,18 @@ Para reduzir a espera sem alterar o fluxo funcional:
 - o Service Worker recebe `invoice-capture-warmup1` para distribuir a revisão.
 
 Dívida técnica mantida: empacotar ZXing localmente e retirar a dependência remota, conforme o plano de segurança existente.
+
+
+## Despesas — regressão física dos modos de registo (24/09/2026)
+
+A validação física no iPhone/Safari após o deploy do commit `1c0adc1` confirmou que **Manual / Ler fatura / QR Code** continuavam visualmente presentes, mas o toque em **Ler fatura** e **QR Code** não produzia ação observável. O deploy estava concluído, portanto o problema deixou de ser tratado como atraso de publicação.
+
+Correção `76-expense-ios-tab-touch2`:
+
+- adiciona ativação explícita por `touchend` em Safari/iOS;
+- mantém `click` e teclado para desktop e acessibilidade;
+- deduplica o `click` sintetizado depois do toque para evitar abrir ficheiro/câmara duas vezes;
+- altera os tokens de cache de `v75-architecture.js`, `invoice-capture.js` e do Service Worker, para impedir reutilização do runtime anterior;
+- não altera domínio financeiro, IndexedDB, cofre, Mercado ou sincronização.
+
+Pendente: confirmação física no mesmo iPhone de que **Ler fatura** abre o seletor e **QR Code** inicia a câmara no primeiro toque.
