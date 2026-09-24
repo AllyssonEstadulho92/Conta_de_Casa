@@ -472,3 +472,14 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - Saldo inicial e Orçamento do mês aparecem vazios num novo período enquanto não forem definidos;
 - cache PWA invalidada com `monthly-spend-calendar1`;
 - preservadas regras de pagamentos, cofre, IndexedDB, sincronização e auditoria financeira.
+
+
+### 25 de setembro de 2026 — filtros de Despesas recolhidos no mobile
+
+- cartão de filtros deixa de ocupar espaço permanente no telemóvel;
+- adicionado botão compacto **Filtros** junto da barra de pesquisa;
+- Estado, Categoria, datas, Ordenar e Limpar filtros continuam disponíveis sob demanda;
+- contador indica critérios alterados;
+- limpar filtros volta a recolher o painel em mobile;
+- desktop mantém a grelha aberta;
+- revisão do shell atualizada para `76-mobile-shell3` e cache invalidada com `bills-filters-collapse1`.
