@@ -8,6 +8,7 @@
  * 76-invoice-capture-warmup1 prepara o leitor QR em background quando o formulário abre, reduzindo a espera no primeiro uso.
  * 76-expense-native-input4 usa controlos file/capture nativos no iOS para evitar bloqueios de input.click()/getUserMedia.
  * 76-expense-picker-unblock6 não pré-carrega ZXing em touch/iOS antes da escolha nativa.
+ * 76-invoice-autofill7 preenche automaticamente os campos seguros logo após um QR AT válido.
  */
 (function installInvoiceCapture(root){
   const MAX_IMAGE_BYTES=15*1024*1024;
@@ -198,7 +199,7 @@
   function previewHtml(data){
     const atcud=data.atcud?`<span><small>ATCUD</small><strong>${escapeHtml(data.atcud)}</strong></span>`:'';
     const tax=Number.isSafeInteger(data.taxCents)?`<span><small>Impostos</small><strong>${escapeHtml(centsText(data.taxCents))}</strong></span>`:'';
-    return `<div class="invoice-capture-preview-head"><div>${icon('check',18)}<strong>QR de fatura reconhecido</strong></div><button class="btn primary" type="button" data-invoice-apply>Preencher campos</button></div>
+    return `<div class="invoice-capture-preview-head"><div>${icon('check',18)}<strong>QR de fatura reconhecido</strong></div><button class="btn secondary" type="button" data-invoice-apply>Reaplicar dados</button></div>
       <div class="invoice-capture-preview-grid">
         <span><small>NIF emitente</small><strong>${escapeHtml(data.issuerNif)}</strong></span>
         <span><small>Documento</small><strong>${escapeHtml(data.documentId)}</strong></span>
@@ -206,35 +207,63 @@
         <span><small>Total</small><strong>${escapeHtml(centsText(data.totalCents))}</strong></span>
         ${atcud}${tax}
       </div>
-      <small class="invoice-capture-review-note">Confirme o fornecedor e o vencimento antes de guardar. O QR identifica o documento e o total, mas não contém o nome comercial do fornecedor nem a data limite de pagamento.</small>`;
+      <small class="invoice-capture-review-note">Descrição, valor, NIF do emitente e referência são preenchidos automaticamente quando estiverem vazios. Categoria, vencimento e método não constam do QR da AT e devem ser confirmados antes de guardar.</small>`;
+  }
+
+  function setBlankField(field,value){
+    if(!field||String(field.value||'').trim()||value===null||value===undefined||value==='')return false;
+    field.value=String(value);
+    field.dispatchEvent(new Event('input',{bubbles:true}));
+    field.dispatchEvent(new Event('change',{bubbles:true}));
+    return true;
+  }
+
+  function requiredInvoiceFieldsReady(form){
+    const title=String(form?.elements?.title?.value||'').trim();
+    const amount=String(form?.elements?.amount?.value||'').trim();
+    const category=String(form?.elements?.category?.value||'').trim();
+    const dueDate=String(form?.elements?.dueDate?.value||'').trim();
+    return Boolean(title&&amount&&category&&dueDate);
+  }
+
+  function applyInvoiceToForm(options={}){
+    const form=document.querySelector('#billForm');
+    const data=pendingInvoice;
+    if(!form||!data||String(form.elements.id?.value||''))return {applied:false,ready:false,changed:[]};
+
+    const changed=[];
+    if(setBlankField(form.elements.title,clean(`Fatura ${data.documentId}`,80)))changed.push('Descrição');
+    if(setBlankField(form.elements.provider,`NIF ${data.issuerNif}`))changed.push('Fornecedor');
+    if(data.totalCents>0&&setBlankField(form.elements.amount,(data.totalCents/100).toFixed(2).replace('.',',')))changed.push('Valor total');
+    if(setBlankField(form.elements.reference,clean([data.documentId,data.atcud?`ATCUD ${data.atcud}`:''].filter(Boolean).join(' · '),160)))changed.push('Referência');
+
+    form.dataset.invoiceQrVerified='true';
+    form.dataset.invoiceReviewFields='provider,category,dueDate,method';
+    const ready=requiredInvoiceFieldsReady(form);
+
+    if(options.announce!==false){
+      const changedText=changed.length?changed.join(', '):'os campos compatíveis';
+      status(ready
+        ?`${changedText} preenchidos a partir do QR. Os campos obrigatórios estão preenchidos; confirme categoria, vencimento, método e o nome do fornecedor antes de guardar.`
+        :`${changedText} preenchidos a partir do QR. Ainda existem campos obrigatórios por completar antes de guardar.`,
+        ready?'success':'warning');
+    }
+
+    if(options.focus!==false)form.elements.title?.focus?.({preventScroll:true});
+    return {applied:true,ready,changed};
   }
 
   function showPreview(data){
     pendingInvoice=data;
+    const applied=applyInvoiceToForm({announce:false,focus:false});
     const node=document.querySelector('#invoiceCapturePreview');
     if(!node)return;
     node.innerHTML=previewHtml(data);
     node.hidden=false;
-    status('Dados lidos localmente. Reveja a pré-visualização e escolha “Preencher campos”.','success');
-  }
-
-  function applyInvoiceToForm(){
-    const form=document.querySelector('#billForm');
-    const data=pendingInvoice;
-    if(!form||!data||String(form.elements.id?.value||''))return;
-    const title=form.elements.title;
-    const provider=form.elements.provider;
-    const amount=form.elements.amount;
-    const reference=form.elements.reference;
-    if(title&&!title.value.trim())title.value=clean(`Fatura ${data.documentId}`,80);
-    if(provider&&!provider.value.trim())provider.value=`NIF ${data.issuerNif}`;
-    if(amount&&!amount.value.trim()&&data.totalCents>0)amount.value=(data.totalCents/100).toFixed(2).replace('.',',');
-    if(reference&&!reference.value.trim()){
-      reference.value=clean([data.documentId,data.atcud?`ATCUD ${data.atcud}`:''].filter(Boolean).join(' · '),160);
-    }
-    form.dataset.invoiceQrVerified='true';
-    status('Campos compatíveis preenchidos. Confirme o nome do fornecedor, categoria, vencimento e método antes de guardar.','success');
-    title?.focus({preventScroll:true});
+    status(applied.ready
+      ?'QR reconhecido. Descrição, valor e restantes dados compatíveis foram preenchidos automaticamente. Confirme categoria, vencimento, método e fornecedor.'
+      :'QR reconhecido e dados compatíveis preenchidos. Complete os campos obrigatórios em falta antes de guardar.',
+      applied.ready?'success':'warning');
   }
 
   function captureUiHtml(){
