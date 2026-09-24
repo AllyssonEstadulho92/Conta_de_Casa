@@ -393,3 +393,13 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - mantido fallback normal se a preparação antecipada falhar;
 - cache PWA invalidada com `invoice-capture-warmup1`;
 - sem alterações ao domínio financeiro, armazenamento ou segurança do cofre.
+
+
+### 24 de setembro de 2026 — correção física dos tabs de fatura
+
+- validação real no iPhone confirmou que **Ler fatura** e **QR Code** continuavam sem reação ao toque apesar do deploy concluído;
+- adicionada ativação explícita por `touchend` para Safari/iOS;
+- mantidos `click` e teclado para desktop;
+- adicionada deduplicação do click sintetizado para impedir dupla execução;
+- alterados tokens de cache da arquitetura, captura de fatura e Service Worker;
+- sem alterações a cálculos, persistência, cifra ou regras financeiras.
