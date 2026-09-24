@@ -156,3 +156,20 @@ Correção `76-expense-ios-tab-touch2`:
 - não altera domínio financeiro, IndexedDB, cofre, Mercado ou sincronização.
 
 Pendente: confirmação física no mesmo iPhone de que **Ler fatura** abre o seletor e **QR Code** inicia a câmara no primeiro toque.
+
+
+## Despesas — listeners diretos e atualização automática (24/09/2026)
+
+A nova captura física no iPhone mostrou novamente **Manual / Ler fatura / QR Code** visíveis, mas sem reação observável ao toque. O deploy anterior estava concluído. Não é possível confirmar apenas pela captura qual build estava efetivamente a controlar a página, e a política anterior permitia que um Service Worker novo ficasse em espera até ação explícita do utilizador.
+
+Revisões técnicas: `76-expense-ios-tab-direct3` e `auto-refresh2`.
+
+- os três tabs de registo recebem listeners diretamente nos próprios botões, em vez de dependerem do listener global do `document`;
+- `touchend` não é cancelado, preservando o gesto do utilizador para abertura do seletor de ficheiros/câmara;
+- o click sintetizado continua deduplicado;
+- um Service Worker novo chama `skipWaiting()` só depois de concluir o cache dos assets públicos;
+- ao assumir o controlo, `controllerchange` recarrega a página automaticamente;
+- enquanto a aplicação está aberta e online, o runtime verifica atualizações a cada 30 segundos;
+- cofre, PIN, IndexedDB, cálculos, Mercado e sincronização não são alterados.
+
+Validação pendente: confirmar no mesmo iPhone, após o novo deploy automático, que **Ler fatura** abre o seletor e **QR Code** abre a câmara no primeiro toque.
