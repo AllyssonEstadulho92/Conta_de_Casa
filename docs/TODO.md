@@ -177,3 +177,13 @@ Atualizado: 15 de setembro de 2026
 ## Critério de conclusão
 
 Só concluir quando as rotas partilharem sistema visual e comportamento coerentes, mobile/desktop preservarem informação essencial, não houver sobreposição/overflow conhecido, acessibilidade estiver coberta, CI/Pages estiverem verdes, validação física/E2E confirmar o produto e a migração TypeScript seguir o plano sem regressão de domínio.
+
+
+## Concluído em 24/09/2026
+
+- [x] `76-expense-mode-action1`: tornar **Manual**, **Ler fatura** e **QR Code** ações funcionais imediatas.
+- [x] abrir o seletor de imagem diretamente a partir de **Ler fatura**.
+- [x] iniciar a câmara diretamente a partir de **QR Code**.
+- [x] devolver foco ao preenchimento ao selecionar **Manual**.
+- [x] adicionar testes de regressão para o contrato de interação e invalidar cache PWA.
+- [ ] validar fisicamente o fluxo no mesmo iPhone/Safari/PWA, incluindo permissões e cancelamento.
