@@ -305,3 +305,18 @@ A abertura do seletor de ficheiro permanece síncrona ao gesto do utilizador par
 Quando um novo formulário de fatura é criado, `invoice-capture.js` inicia de forma assíncrona a preparação do ZXing. O objetivo é reduzir a latência do primeiro uso de **Ler fatura** e **QR Code** sem bloquear a renderização do formulário.
 
 O pré-aquecimento é apenas uma otimização. A ação explícita continua a ser a autoridade funcional e volta a chamar `loadZxing()` se a biblioteca ainda não estiver pronta. A promessa interna é deduplicada por `zxingPromise`, evitando pedidos concorrentes para o mesmo runtime.
+
+
+## Ativação tátil dos modos de fatura
+
+Em mobile, a seleção de **Manual / Ler fatura / QR Code** não depende apenas do `click` sintetizado pelo browser. `v75-architecture.js` escuta também `touchend` em capture phase com `passive:false`, resolve o botão do modo e chama o mesmo `setBillMode()` usado por desktop.
+
+Depois de um `touchend`, o `click` equivalente é ignorado por uma janela curta de deduplicação. Isto evita duas chamadas a `input.click()` ou duas tentativas de abrir a câmara.
+
+O build publica revisões próprias para esta área:
+
+- arquitetura: `76-architecture-touch2`;
+- captura: `76-invoice-touch2`;
+- Service Worker: `76-invoice-touch2`.
+
+A separação mantém-se: a arquitetura seleciona o modo; `invoice-capture.js` executa ficheiro, câmara e leitura QR.
