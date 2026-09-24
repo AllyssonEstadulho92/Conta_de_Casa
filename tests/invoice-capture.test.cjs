@@ -43,7 +43,9 @@ assert.match(source,/Abrir câmara/);
 assert.match(source,/Selecionar imagem/);
 assert.match(source,/cdc:bill-mode-change/,'capture surface must react to the selected registration mode');
 assert.match(source,/function activateMode\(mode\)/,'mode selection must have one canonical activation path');
-assert.match(source,/function prewarmZxing\(\)/,'invoice form must prewarm the QR reader');
+assert.match(source,/function prewarmZxing\(\)/,'invoice form may prewarm the QR reader where safe');
+assert.match(source,/function isTouchInvoiceDevice\(\)/,'invoice capture must detect touch/iOS before prewarming');
+assert.match(source,/function prewarmZxing\(\)\{[\s\S]{0,120}if\(isTouchInvoiceDevice\(\)\)return/,'touch/iOS must not preload ZXing before the native picker opens');
 assert.match(source,/loadZxing\(\)\.catch\(\(\)=>undefined\)/,'reader warmup must stay non-blocking and silent');
 assert.match(source,/mode==='image'[\s\S]{0,500}input\.click\(\)/,'the secondary image action may still open its local picker programmatically outside the native top-tab path');
 assert.match(source,/mode==='qr'[\s\S]{0,260}openCamera\(\)/,'QR Code must start the camera flow from the mode tap');
@@ -94,6 +96,7 @@ assert.match(mobileTouchBlock,/\.dialog-shell\{[\s\S]*height:auto!important[\s\S
 assert.match(mobileTouchBlock,/#dialogBody\{[\s\S]*overflow:visible!important/,'dialog body must not create a second mobile scroll port');
 assert.match(mobileTouchBlock,/\.v75-bill-tabs \[data-v75-bill-mode\]\{[\s\S]*pointer-events:auto!important[\s\S]*touch-action:manipulation!important/,'expense mode tabs must remain tappable on iOS');
 assert.match(source,/76-expense-native-input4/,'native invoice capture revision must remain explicit');
+assert.match(source,/76-expense-picker-unblock6/,'native picker unblock revision must remain explicit');
 assert.match(source,/function decodeQrFromImage\(file,objectUrl\)/,'image decoding must have a single resilient path');
 assert.match(source,/BarcodeDetector/,'native QR decoding must be attempted when the browser provides it');
 assert.match(source,/event\.detail\?\.native/,'native file/camera selection must not recursively invoke programmatic pickers');

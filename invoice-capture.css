@@ -99,6 +99,7 @@
 /* --------------------------------------------------------------------------
    76-expense-mode1 — Manual / Ler fatura / QR Code
    76-expense-native-input4 — inputs nativos sobre Ler fatura / QR Code no iOS
+   76-expense-picker-unblock6 — gesto nativo sem listeners JS antes do picker
    -------------------------------------------------------------------------- */
 html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs{
   display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
@@ -156,6 +157,7 @@ html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs [data-v75-bill-
   box-shadow:0 0 0 3px color-mix(in srgb,var(--v76-primary,#087b78) 22%,transparent)!important
 }
 @media(hover:hover) and (pointer:fine){
+  html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-native-tab[data-v75-bill-mode="qr"]>[data-v75-native-invoice]{pointer-events:none!important}
   html.cdc-v75 #formDialog[data-v75-kind="expense"] .v75-bill-tabs [data-v75-bill-mode]:not(.active):hover{
     background:var(--v76-surface,var(--v75-surface,var(--surface)))!important;
     color:var(--v76-primary,var(--v75-primary,var(--primary)))!important;

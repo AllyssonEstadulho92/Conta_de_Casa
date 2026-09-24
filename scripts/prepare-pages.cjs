@@ -25,7 +25,7 @@ const MENU_REV = '73-menu8';
 const MODERN_UI_REV = '76-modern-ui2';
 const PRODUCT_PAGES_REV = '76-dashboard-clean1';
 const MOBILE_SHELL_REV = '76-mobile-shell2';
-const ARCHITECTURE_REV = '76-architecture-actions5';
+const ARCHITECTURE_REV = '76-architecture-unblock6';
 const PLANNING_MORE_REV = '76-planning-more1';
 const HEADER_REV = '75-header2';
 const STABILITY_REV = '75-stability1';
@@ -42,8 +42,8 @@ const CATALOG_REV = '75-catalog4';
 const PD_PHOTO_REV = '75-pd-photo1';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
-const INVOICE_CAPTURE_REV = '76-invoice-native4';
-const SERVICE_WORKER_REV = '76-safe-refresh3';
+const INVOICE_CAPTURE_REV = '76-invoice-unblock6';
+const SERVICE_WORKER_REV = '76-safe-refresh4';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
   throw new Error(`Invalid package application version: ${APP_VERSION||'(empty)'}`);

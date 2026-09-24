@@ -42,6 +42,12 @@
  * - o diálogo regista a última ação selecionada para diagnóstico e testes;
  * - o caminho nativo continua a abrir Fotos/Câmara sem uma segunda ação programática.
  *
+ * 76-expense-picker-unblock6:
+ * - inputs nativos deixam de executar JavaScript no click que abre Fotos/Câmara;
+ * - o modo é confirmado apenas no change, depois do picker nativo devolver um ficheiro;
+ * - remove-se o atributo for redundante dos labels para evitar dupla ativação no WebKit;
+ * - desktop QR mantém o scanner ao vivo sem afetar o caminho móvel.
+ *
  * 76-mobile-label-fit1:
  * - a rota continua a chamar-se Planeamento; apenas o label do dock passa a “Plano”
  *   para evitar truncamento em iPhones estreitos sem reduzir a legibilidade.
@@ -368,11 +374,11 @@
   function billTabsHtml(){
     return `<div class="v75-bill-tabs full-row" role="tablist" aria-label="Modo de registo">
       <button id="expenseModeManual" type="button" class="active" role="tab" aria-selected="true" tabindex="0" data-v75-bill-mode="manual" data-v75-bill-action="expense-manual">Manual</button>
-      <label id="expenseModeImage" class="v75-bill-native-tab" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="image" data-v75-bill-action="expense-image" for="expenseModeImageInput">
+      <label id="expenseModeImage" class="v75-bill-native-tab" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="image" data-v75-bill-action="expense-image">
         <span>Ler fatura</span>
         <input id="expenseModeImageInput" type="file" accept="image/*" data-v75-native-invoice="image" tabindex="-1" aria-label="Selecionar fotografia da fatura">
       </label>
-      <label id="expenseModeQr" class="v75-bill-native-tab" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="qr" data-v75-bill-action="expense-qr" for="expenseModeQrInput">
+      <label id="expenseModeQr" class="v75-bill-native-tab" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="qr" data-v75-bill-action="expense-qr">
         <span>QR Code</span>
         <input id="expenseModeQrInput" type="file" accept="image/*" capture="environment" data-v75-native-invoice="qr" tabindex="-1" aria-label="Abrir câmara para fotografar o QR da fatura">
       </label>
@@ -390,20 +396,46 @@
   function activateBillModeAction(control,event){
     const resolved=resolveBillModeAction(control);
     if(!resolved)return;
+    if(resolved.mode==='manual'){
+      event?.preventDefault?.();
+      setBillMode('manual',{native:false,action:resolved.action});
+      schedule();
+      return;
+    }
+    if(resolved.mode==='qr'&&!resolved.native){
+      event?.preventDefault?.();
+      setBillMode('qr',{native:false,action:resolved.action});
+      schedule();
+    }
+  }
 
-    const inputTarget=event?.target instanceof HTMLInputElement&&event.target.matches('[data-v75-native-invoice]');
-    if(resolved.mode==='manual'||resolved.mode==='qr'&&!resolved.native&&inputTarget)event.preventDefault();
-
-    setBillMode(resolved.mode,{native:resolved.native,action:resolved.action});
+  function confirmNativeBillMode(input){
+    if(!(input instanceof HTMLInputElement)||!input.files?.length)return;
+    const control=input.closest('[data-v75-bill-action]');
+    const resolved=resolveBillModeAction(control);
+    if(!resolved||!['image','qr'].includes(resolved.mode))return;
+    setBillMode(resolved.mode,{native:true,action:resolved.action});
     schedule();
   }
 
   function bindBillTabs(form){
-    qa('.v75-bill-tabs [data-v75-bill-action]',form).forEach(control=>{
-      if(control.dataset.v75ActionBound==='true')return;
-      control.dataset.v75ActionBound='true';
-      control.addEventListener('click',event=>activateBillModeAction(control,event));
+    const manual=q('.v75-bill-tabs [data-v75-bill-action="expense-manual"]',form);
+    if(manual&&manual.dataset.v75ActionBound!=='true'){
+      manual.dataset.v75ActionBound='true';
+      manual.addEventListener('click',event=>activateBillModeAction(manual,event));
+    }
+
+    qa('.v75-bill-tabs [data-v75-native-invoice]',form).forEach(input=>{
+      if(input.dataset.v75NativeBound==='true')return;
+      input.dataset.v75NativeBound='true';
+      input.addEventListener('change',()=>confirmNativeBillMode(input));
     });
+
+    const qr=q('.v75-bill-tabs [data-v75-bill-action="expense-qr"]',form);
+    if(qr&&!prefersNativeQrCapture()&&qr.dataset.v75DesktopBound!=='true'){
+      qr.dataset.v75DesktopBound='true';
+      qr.addEventListener('click',event=>activateBillModeAction(qr,event));
+    }
   }
 
   function ensureBillTabs(form){

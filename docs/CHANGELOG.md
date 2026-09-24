@@ -437,3 +437,15 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - mantida captura nativa de imagem/câmara no iPhone e scanner compatível em desktop;
 - cache da arquitetura invalidada com `76-architecture-actions5`;
 - sem alterações a cálculos, cofre, PIN, IndexedDB, Mercado ou sincronização.
+
+
+### 24 de setembro de 2026 — desbloqueio do picker nativo iOS
+
+- removida lógica JavaScript do gesto inicial de **Ler fatura** e **QR Code** em mobile;
+- modo nativo passa a ser confirmado apenas após o evento `change`;
+- removidos atributos `for` redundantes dos labels de captura;
+- inputs invisíveis deixam de acionar a gestão de foco/visual viewport;
+- ZXing deixa de ser pré-carregado em iOS/touch antes de existir uma imagem;
+- desktop mantém scanner QR ao vivo;
+- novas revisões públicas: `76-architecture-unblock6`, `76-invoice-unblock6`, `76-safe-refresh4`;
+- preservados cálculos, cofre/PIN, IndexedDB, Mercado e sincronização.

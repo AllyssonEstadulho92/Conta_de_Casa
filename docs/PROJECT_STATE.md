@@ -204,3 +204,22 @@ Foi revisto o código real dos três controlos. Antes desta revisão existiam mo
 - **QR Code**: `#expenseModeQr` → `data-v75-bill-action="expense-qr"` → input nativo `#expenseModeQrInput` com `capture="environment"` em mobile.
 
 Um único mapa `BILL_MODE_ACTIONS` resolve controlo → ação → modo → caminho nativo. O diálogo expõe `data-v75-bill-action` com a ação selecionada, facilitando diagnóstico e testes. Nenhuma regra financeira ou persistência foi alterada.
+
+
+## Despesas — desbloqueio do seletor nativo iOS (24/09/2026)
+
+Revisão técnica: `76-expense-picker-unblock6`.
+
+A auditoria do fluxo de faturas encontrou três interferências no mesmo gesto que abre Fotos/Câmara no Safari: listener JavaScript no controlo nativo, associação `for` redundante num `label` que já contém o próprio input e gestão de `focusin/visualViewport` aplicada aos inputs invisíveis. O ZXing também era pré-carregado em mobile antes de existir uma imagem para processar.
+
+Correção aplicada:
+
+- **Ler fatura** e **QR Code** deixam de executar JavaScript no `click` que abre o picker nativo;
+- a seleção do modo nativo só é confirmada no evento `change`, depois de o iOS devolver um ficheiro;
+- removidos os atributos `for` redundantes dos dois labels;
+- inputs `data-v75-native-invoice` são excluídos da gestão de foco/viewport;
+- o pré-aquecimento do ZXing é desativado em iOS/touch e mantido apenas onde não interfere com o picker;
+- em desktop, QR continua a poder usar o scanner ao vivo;
+- revisões públicas: arquitetura `76-architecture-unblock6`, captura `76-invoice-unblock6`, Service Worker `76-safe-refresh4`.
+
+Pendente apenas validação física no mesmo iPhone depois do deploy. Dados financeiros, cofre, IndexedDB e regras de negócio não foram alterados.

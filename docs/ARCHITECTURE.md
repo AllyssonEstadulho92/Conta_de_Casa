@@ -363,3 +363,20 @@ Os três controlos de registo são identificados por IDs estáveis e `data-v75-b
 - `expense-qr` → `qr`, captura nativa automática em dispositivos táteis e scanner ao vivo quando apropriado em desktop.
 
 `activateBillModeAction()` é o único controlador visual destes três modos. `setBillMode()` grava simultaneamente `data-v75-bill-mode` e `data-v75-bill-action` no diálogo e emite `cdc:bill-mode-change` para `invoice-capture.js`. Assim, identificação visual, ação selecionada e função executada deixam de depender de inferência pelo texto do botão.
+
+
+## Picker nativo sem JavaScript no gesto de abertura
+
+No caminho mobile de **Ler fatura** e **QR Code**, o primeiro gesto pertence exclusivamente ao controlo nativo do browser. Não existe listener de `click` no `input[type=file]` que altere estado, dispare eventos internos ou execute tarefas antes de o sistema abrir Fotos/Câmara.
+
+O fluxo é:
+
+1. utilizador toca no input nativo sobre o tab;
+2. iOS abre Fotos ou Câmara;
+3. o utilizador escolhe/captura a imagem;
+4. o input emite `change`;
+5. `confirmNativeBillMode()` sincroniza modo/ação;
+6. o listener delegado de `invoice-capture.js` processa o ficheiro;
+7. `scanImage()` tenta `BarcodeDetector` e usa ZXing como fallback.
+
+Os inputs nativos são excluídos de `keepFocusedDialogFieldVisible()` e do listener global de `focusin`, evitando cálculos de viewport enquanto o picker do sistema está a abrir. Em dispositivos touch/iOS, `prewarmZxing()` retorna sem carregar a biblioteca remota antes da seleção.

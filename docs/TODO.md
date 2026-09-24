@@ -239,3 +239,16 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [x] expor no diálogo a ação atualmente selecionada.
 - [x] proteger o contrato com testes.
 - [ ] validar fisicamente no iPhone os três caminhos após publicação.
+
+
+## Desbloqueio do picker iOS
+
+- [x] `76-expense-picker-unblock6`: retirar lógica de click dos inputs nativos de fatura.
+- [x] confirmar modo apenas no `change` depois de Fotos/Câmara devolver imagem.
+- [x] remover `for` redundante dos labels que contêm os inputs.
+- [x] excluir inputs nativos de `focusin`/gestão de visual viewport.
+- [x] impedir pré-aquecimento do ZXing em iOS/touch.
+- [x] manter scanner ao vivo no desktop sem afetar mobile.
+- [ ] validar **Ler fatura** no mesmo iPhone.
+- [ ] validar **QR Code** no mesmo iPhone.
+- [ ] confirmar que regressar de Fotos/Câmara não deixa o formulário bloqueado.

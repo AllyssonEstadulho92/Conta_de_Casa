@@ -423,3 +423,18 @@ A aplicação continua a promover novas compilações automaticamente, mas `cont
 A existência de texto visível ou de `data-v75-bill-mode` não é suficiente como contrato de interação. **Manual**, **Ler fatura** e **QR Code** passam a ter IDs e `data-v75-bill-action` estáveis, ligados a um único mapa funcional.
 
 Isto permite confirmar por código e por teste qual função pertence a cada controlo, reduz ambiguidade entre label, input nativo e modo visual, e permite expor no diálogo a última ação escolhida sem alterar o domínio financeiro.
+
+
+## D-120 — o gesto que abre Fotos/Câmara no iOS não executa lógica de aplicação
+
+A auditoria confirmou que o caminho nativo ainda executava JavaScript no mesmo `click` usado para abrir o seletor do sistema. Em WebKit real isso permanecia um ponto de interferência, mesmo com o input nativo sobre o tab.
+
+Decisão:
+
+- inputs nativos de **Ler fatura** e **QR Code** não recebem lógica de `click` da aplicação;
+- a aplicação reage apenas a `change`, depois de o sistema devolver uma imagem;
+- labels que contêm o próprio input não usam `for` redundante;
+- inputs invisíveis não participam na gestão de foco/visual viewport;
+- ZXing não é pré-carregado em mobile/touch antes da escolha nativa.
+
+O objetivo é reduzir o primeiro gesto ao comportamento nativo mínimo do browser e deixar processamento, mudança de modo e leitura QR para depois da seleção.
