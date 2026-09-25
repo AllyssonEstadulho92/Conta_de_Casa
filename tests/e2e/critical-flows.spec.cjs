@@ -33,11 +33,13 @@ async function unlockExistingVault(page){
 }
 
 async function goTo(page,target){
-  const mobile=page.locator(`#mobileNav [data-mobile="${target}"]`);
-  if(await mobile.isVisible()){
-    await mobile.click();
+  const desktop=page.locator(`#desktopNav [data-page="${target}"]`);
+  if(await desktop.isVisible()){
+    await desktop.click();
   }else{
-    await page.locator(`#desktopNav [data-page="${target}"]`).click();
+    const mobile=page.locator(`#mobileNav [data-mobile="${target}"]`);
+    await expect(mobile).toBeVisible();
+    await mobile.tap();
   }
   await expect(page.locator(`#page-${target}`)).toHaveClass(/active/);
 }
@@ -67,6 +69,8 @@ test('fatura criada persiste após reload e novo desbloqueio',async({page})=>{
 
   await page.locator('#billForm [name="title"]').fill('Internet E2E');
   await page.locator('#billForm [name="amount"]').fill('42,50');
+  const selectedMonth=await page.locator('#monthPicker').inputValue();
+  await page.locator('#billForm [name="dueDate"]').fill(`${selectedMonth}-15`);
   await page.locator('#billForm button[type="submit"]').click();
 
   await expect(page.locator('#formDialog')).not.toHaveAttribute('open','');
