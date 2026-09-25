@@ -318,7 +318,7 @@ function renderCalendar() {
   }
   setHTML('#calendarGrid', headers+cells.join(''));
 
-  const monthBills=appState.bills.filter(b=>billInMonth(b)&&!b.archived&&!b.cancelled).sort(compareBillsByDue);
+  const monthBills=appState.bills.filter(b=>billInMonth(b,selectedMonth)&&!b.archived&&!b.cancelled).sort(compareBillsByDue);
   setHTML('#calendarAgenda', monthBills.length?monthBills.map(b=>billRowHtml(b)).join(''):empty('Sem vencimentos neste mês.'));
 }
 
