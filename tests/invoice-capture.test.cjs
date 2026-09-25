@@ -53,6 +53,11 @@ assert.match(source,/mode==='manual'[\s\S]{0,120}focusManualField\(\)/,'Manual m
 assert.match(source,/currentCaptureMode\(\)!=='qr'/,'camera must only start from explicit QR mode');
 assert.match(source,/requestedMode==='qr'\?'qr':'image'/,'image decoding must explicitly support both invoice-photo and native QR-camera sources');
 assert.match(source,/BrowserQRCodeReader/);
+assert.match(source,/function readerSource\(\)/);
+assert.match(source,/new URL\(value,document\.baseURI\)/,'reader path must resolve against the current app origin');
+assert.match(source,/url\.origin!==location\.origin/,'reader source must reject cross-origin scripts');
+assert.match(source,/\/vendor\\\/zxing-browser\\\.min\\\.js\$/,'reader source must be pinned to the local ZXing asset');
+assert.doesNotMatch(source,/unpkg\.com/,'invoice capture must not depend on an external script CDN');
 assert.match(source,/decodeFromImageUrl/);
 assert.match(source,/facingMode:\{ideal:'environment'\}/);
 assert.match(source,/getTracks\(\).*track\.stop/);
