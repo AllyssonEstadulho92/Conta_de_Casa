@@ -421,3 +421,24 @@ Em ecrãs até 820 px, `#billFiltersToggle` controla apenas a visibilidade de `#
 O estado visual é representado pela classe `bill-filters-open` em `#page-bills` e sincronizado com `aria-expanded`. `renderBills()` continua a ler os mesmos controlos e `syncBillFilterToggle()` calcula quantas opções estão fora do estado padrão, apresentando essa contagem no botão compacto.
 
 A camada final de geometria é `v76-mobile-shell.css` (`76-mobile-shell3`). Em desktop o botão de disclosure fica oculto e a grelha mantém a apresentação permanente.
+
+
+## Política de atividade em background
+
+### Startup local-first
+
+`events.js::enterApp()` é a autoridade canónica da abertura autenticada. Depois de o cofre local ser desbloqueado, a aplicação mostra imediatamente a rota local atual e inicia `syncStartupGate()` como promessa de background. O estado remoto nunca volta a ser requisito para mostrar dados que já foram desbloqueados localmente.
+
+`v75-startup-guard.js` não substitui funções de runtime. A sua única responsabilidade é manter a exclusividade visual entre `#vaultScreen` e `#app`, incluindo `pageshow` em Safari/PWA.
+
+### Sincronização
+
+Alterações locais continuam a usar `queueRemoteSync()` com atraso curto. Para reconciliação passiva, `requestBackgroundSync()` aplica três guardas: aplicação visível, rede disponível e sync configurado. Foco, pageshow, visible e online convergem neste controlador e são deduplicados por 15 s. O fallback periódico é de 5 min.
+
+### Atualizações da PWA
+
+A aplicação verifica nova compilação ao entrar, regressar ao foreground, pageshow e recuperar rede. Existe ainda fallback de 15 min enquanto visível. Todos os triggers convergem em `window.__swUpdateCheck`, que não corre quando `document.hidden` ou offline. O reload continua protegido por `canReloadForNewBuild()`, portanto não interrompe formulários, scanner ou edição.
+
+### Recomposição da camada de arquitetura
+
+`v75-architecture.js` mantém `requestAnimationFrame` e MutationObservers específicos, mas deixa de agendar `apply()` para cliques sem relevância arquitetural. Isto reduz trabalho DOM em pesquisa, formulários, listas e outros controlos que já têm as suas próprias autoridades funcionais.
