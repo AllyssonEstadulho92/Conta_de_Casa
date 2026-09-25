@@ -558,3 +558,16 @@ Decisão:
 - o objetivo técnico mantém-se: empacotar ZXing localmente e, só depois, remover `unpkg.com` da CSP;
 - alterações desta mensagem visível devem invalidar a revisão de `render.js` e o Service Worker para chegar a clientes PWA já abertos.
 
+## D-133: fila de pagamento inclui atrasos e datas civis usam calendário local
+
+A auditoria transversal identificou duas classes de inconsistência que os testes anteriores não cobriam diretamente.
+
+Decisão:
+
+- uma fila apresentada como orientação de pagamento não pode excluir faturas vencidas do mês;
+- a ordenação continua por vencimento canónico, mas o rótulo visual depende do estado/dias reais da fatura, não apenas da posição ordinal;
+- **Pagar agora** é reservado a faturas em atraso, **Vence hoje** ao próprio dia, e os restantes estados seguem janelas de proximidade;
+- funcionalidades baseadas no conceito de dia do utilizador devem usar data civil local, nunca `toISOString().slice(0,10)`;
+- timestamps de eventos continuam em ISO UTC quando representam um instante e não um dia civil;
+- estas correções são de apresentação/tempo civil e não alteram a contabilidade em cêntimos nem a persistência financeira.
+
