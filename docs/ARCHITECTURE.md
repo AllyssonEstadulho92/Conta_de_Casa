@@ -103,6 +103,18 @@ Contratos:
 
 Autoridade visual: `v76-product-pages.css` / `76-dashboard-priority1`. O shell móvel, safe areas e dock continuam exclusivamente em `v76-mobile-shell.css`.
 
+
+### Entrega PWA da revisão
+
+Uma revisão visual que dependa de HTML/CSS/JavaScript novo deve também produzir uma mudança observável no Service Worker quando se pretende atualização automática de clientes já abertos. Em `76-dashboard-priority-delivery1`:
+
+- `SERVICE_WORKER_REV` identifica a revisão no URL de registo gerado;
+- a chave `CACHE` de `sw.js` muda para garantir novo ciclo install/activate;
+- `registration.update()` pode detetar a nova versão mesmo em clientes que ainda executam a página anterior;
+- `skipWaiting()`, `clients.claim()` e o handler existente de `controllerchange` convergem para um reload seguro;
+- o reload continua adiado enquanto existir formulário/dialog ativo ou um campo editável focado.
+
+Este requisito evita que um deploy correto no Pages fique invisível numa PWA restaurada pelo iOS.
 ## 6. Planeamento mobile
 
 `76-planning-budget-card2` + `76-planning-ring-shape1` + `76-planning-commitment1`:
