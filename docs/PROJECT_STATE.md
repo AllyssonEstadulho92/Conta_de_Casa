@@ -4,7 +4,7 @@ Atualizado: 25 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main` antes deste bloco: `faa1494b33ee58a180307967e94f8d6c051eeac2` (startup local-first consolidado e trabalho de fundo reduzido)
+Baseline funcional em `main` antes deste bloco: `47bd94951b8748fbb8bd4153e967f4b7b948fe32` (Comprometido e Disponível real integrados no Planeamento)
 Branch funcional: `main`
 
 ## Invariantes
@@ -133,8 +133,8 @@ Pendente: validação física no mesmo iPhone/PWA, incluindo orçamento definido
 
 ## Próximo passo
 
-1. validar `76-date-calculator-prototype-inputs5` no iPhone/Safari/PWA;
-2. validar `76-auth-spacing3` e os restantes blocos móveis pendentes;
+1. validar `76-dashboard-priority1` no iPhone/Safari/PWA com seis faturas, nomes longos e largura real do dispositivo;
+2. validar `76-date-calculator-prototype-inputs5` e `76-auth-spacing3` nos mesmos ambientes;
 3. corrigir a descrição factual de rede em Segurança;
 4. empacotar ZXing local e endurecer CSP;
 5. continuar a consolidação por componente e a migração TypeScript sem alterar invariantes.
