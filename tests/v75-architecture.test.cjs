@@ -22,7 +22,7 @@ assert.match(js,/76-expense-mode-stability1/);
 assert.match(js,/76-prototype-planning1/);
 assert.match(js,/76-drawer-hierarchy1/);
 assert.match(js,/76-planning-budget-card2/,'planning prototype refinement must remain explicit');
-assert.match(js,/76-security-network-copy1/,'planning commitment hierarchy must remain explicit');
+assert.match(js,/76-month-context-sync1/,'planning month-context hierarchy must remain explicit');
 assert.match(js,/bills:\['Despesas','Movimentos'\]/);
 assert.match(js,/market:\['Mercado','Compras'\]/);
 assert.match(js,/security:\['Segurança e sincronização','Conta e dados'\]/);
