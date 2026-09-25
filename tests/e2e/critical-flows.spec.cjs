@@ -39,7 +39,15 @@ async function goTo(page,target){
   }else{
     const mobile=page.locator(`#mobileNav [data-mobile="${target}"]`);
     await expect(mobile).toBeVisible();
-    await mobile.tap();
+    const box=await mobile.boundingBox();
+    expect(box?.width||0).toBeGreaterThanOrEqual(44);
+    expect(box?.height||0).toBeGreaterThanOrEqual(44);
+    const hit=await page.evaluate(({x,y,target})=>{
+      const node=document.elementFromPoint(x,y);
+      return node?.closest?.(`#mobileNav [data-mobile="${target}"]`)?.dataset?.mobile===target;
+    },{x:(box?.x||0)+(box?.width||0)/2,y:(box?.y||0)+(box?.height||0)/2,target});
+    expect(hit).toBeTruthy();
+    await mobile.dispatchEvent('click');
   }
   await expect(page.locator(`#page-${target}`)).toHaveClass(/active/);
 }
