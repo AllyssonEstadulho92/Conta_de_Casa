@@ -427,16 +427,39 @@
     return {ready,review,changed};
   }
   function showPreview(data){
-    pendingInvoice=data;
-    const applied=applyInvoiceToForm({announce:false,focus:false});
+    const form=document.querySelector('#billForm');
+    initInvoiceFieldHierarchy(form);
+    resetAutomaticInvoiceFields(form);
+    pendingInvoice={at:data,ocr:null};
+    const applied=applyPendingInvoice({announce:false,focus:false});
     const node=document.querySelector('#invoiceCapturePreview');
     if(!node)return;
-    node.innerHTML=previewHtml(data);
+    node.innerHTML=previewHtml(pendingInvoice);
     node.hidden=false;
     status(applied.ready
-      ?'QR reconhecido. Descrição, valor e restantes dados compatíveis foram preenchidos automaticamente. Confirme categoria, vencimento, método e fornecedor.'
-      :'QR reconhecido e dados compatíveis preenchidos. Complete os campos obrigatórios em falta antes de guardar.',
+      ?'QR AT reconhecido e aplicado. Confirme os campos ainda em revisão.'
+      :'QR AT reconhecido. Complete os campos obrigatórios em falta.',
       applied.ready?'success':'warning');
+  }
+
+  function showCombinedPreview(atData,ocrData){
+    pendingInvoice={at:atData||null,ocr:ocrData||null};
+    const applied=applyPendingInvoice({announce:false,focus:false});
+    const node=document.querySelector('#invoiceCapturePreview');
+    if(node){
+      node.innerHTML=previewHtml(pendingInvoice);
+      node.hidden=false;
+    }
+    const form=document.querySelector('#billForm');
+    const review=syncReviewFields(form);
+    if(applied.ready){
+      status(review.length
+        ?`Leitura concluída. Confirme ${review.length} campo(s) marcado(s) antes de guardar.`
+        :'Leitura concluída. Os campos obrigatórios foram preenchidos.',
+        review.length?'warning':'success');
+    }else{
+      status('Leitura concluída parcialmente. Complete os campos obrigatórios em falta.','warning');
+    }
   }
 
   function captureUiHtml(){
@@ -458,6 +481,7 @@
   function ensureCaptureUi(){
     const form=document.querySelector('#billForm');
     if(!form)return;
+    initInvoiceFieldHierarchy(form);
     const existing=form.querySelector('[data-invoice-capture]');
     if(existing){syncCaptureMode();prewarmZxing();return;}
     if(String(form.elements.id?.value||''))return;
