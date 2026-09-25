@@ -12,6 +12,7 @@
  */
 (function installInvoiceCapture(root){
   const MAX_IMAGE_BYTES=15*1024*1024;
+  const QR_IMAGE_DECODE_TIMEOUT_MS=6000;
   const ZXING_LOAD_TIMEOUT_MS=12000;
   const MODE_COPY=Object.freeze({
     image:Object.freeze({
@@ -374,13 +375,21 @@
     }
   }
 
+  function withDecodeTimeout(promise,timeoutMs=QR_IMAGE_DECODE_TIMEOUT_MS){
+    let timer=0;
+    const timeout=new Promise((_,reject)=>{
+      timer=setTimeout(()=>reject(new Error('QR_IMAGE_DECODE_TIMEOUT')),timeoutMs);
+    });
+    return Promise.race([Promise.resolve(promise),timeout]).finally(()=>clearTimeout(timer));
+  }
+
   async function decodeQrFromImage(file,objectUrl){
     if(typeof root.BarcodeDetector==='function'&&typeof root.createImageBitmap==='function'){
       let bitmap=null;
       try{
         const detector=new root.BarcodeDetector({formats:['qr_code']});
         bitmap=await root.createImageBitmap(file);
-        const detected=await detector.detect(bitmap);
+        const detected=await withDecodeTimeout(detector.detect(bitmap));
         const raw=detected?.find?.(item=>String(item?.rawValue||'').trim())?.rawValue||detected?.[0]?.rawValue||'';
         if(raw)return String(raw);
       }catch(_error){
@@ -392,7 +401,7 @@
 
     const zxing=await loadZxing();
     const reader=new zxing.BrowserQRCodeReader();
-    const result=await reader.decodeFromImageUrl(objectUrl);
+    const result=await withDecodeTimeout(reader.decodeFromImageUrl(objectUrl));
     return result?.getText?.()||result?.text||'';
   }
 
