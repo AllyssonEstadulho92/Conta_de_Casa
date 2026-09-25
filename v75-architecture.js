@@ -73,10 +73,16 @@
  * - mês, intervalo, orçamento, gasto e disponível continuam derivados do domínio real;
  * - ações “Definir/Editar orçamento” apenas deslocam e focam o campo mensal existente;
  * - não cria segundo formulário nem altera persistência, fórmulas ou listeners canónicos.
+ *
+ * 76-planning-commitment1:
+ * - “Gasto este mês” mantém apenas pagamentos e compras efetivamente registados;
+ * - “Comprometido” usa o valor ainda por pagar das faturas ativas do mês;
+ * - “Disponível real” desconta gasto efetivo e comprometido ao orçamento;
+ * - a alteração é apenas de apresentação e reutiliza os cálculos financeiros canónicos.
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
-  const REVISION='76-architecture-consolidation1';
+  const REVISION='76-planning-commitment1';
   const LABELS=Object.freeze({
     dashboard:['Início','Visão geral'],
     bills:['Despesas','Movimentos'],
@@ -201,10 +207,14 @@
       const spent=typeof sumCents==='function'
         ? sumCents([numbers.paymentTotal||0,numbers.marketSpent||0])
         : Number(numbers.paymentTotal||0)+Number(numbers.marketSpent||0);
+      const committed=Number(numbers.outstanding||0);
       const budget=Number(numbers.profile?.budgetCents||0);
       const pct=budget>0?Math.max(0,Math.min(100,Math.round(spent/budget*100))):0;
       const remaining=budget>0?Math.max(0,budget-spent):0;
-      return {spent,budget,pct,remaining,projected:Number(numbers.projected||0),current:Number(numbers.current||0)};
+      const availableReal=budget>0
+        ? (typeof sumCents==='function'?sumCents([budget,-spent,-committed]):budget-spent-committed)
+        : 0;
+      return {spent,committed,budget,pct,remaining,availableReal,projected:Number(numbers.projected||0),current:Number(numbers.current||0)};
     }catch(_error){return null;}
   }
 
@@ -336,7 +346,8 @@
     const total=entries.reduce((sum,entry)=>sum+Number(entry[1]||0),0)||1;
     const hasBudget=metrics.budget>0;
     const budgetLabel=hasBudget?moneyText(metrics.budget):'Por definir';
-    const remainingLabel=hasBudget?moneyText(metrics.remaining):'—';
+    const committedLabel=moneyText(metrics.committed);
+    const availableRealLabel=hasBudget?moneyText(metrics.availableReal):'—';
     const ringClass=hasBudget?'':' is-unset';
     const ringLead=hasBudget?`<strong>${metrics.pct}%</strong>`:`<span class="v76-budget-ring-icon">${iconMarkup('wallet',30)}</span>`;
     const ringDetail=hasBudget?`<span data-money>${moneyText(metrics.spent)}</span><small>de ${budgetLabel}</small>`:'<span>Por definir</span><small>Defina um orçamento mensal</small>';
@@ -345,8 +356,8 @@
     const ctaLabel=hasBudget?'Editar orçamento':'Definir orçamento';
     const ctaIcon=hasBudget?'settings':'plus';
     const guidanceTitle=hasBudget?'Orçamento mensal definido':'Defina um orçamento mensal';
-    const guidanceText=hasBudget?'Pode ajustar o limite de gastos sempre que precisar.':'Estabeleça o seu limite de gastos para acompanhar o progresso ao longo do mês.';
-    return `${planningMonthHtml()}<section class="v76-planning-budget-card" aria-labelledby="v76BudgetTitle"><header class="v76-budget-card-head"><span class="v76-budget-card-icon" aria-hidden="true">${iconMarkup('plan',22)}</span><span class="v76-budget-card-copy"><strong id="v76BudgetTitle">Orçamento mensal</strong><small>Acompanhe os seus gastos e mantenha o controlo.</small></span><button type="button" class="v76-budget-head-action" data-v75-budget-focus>${iconMarkup('settings',18)}<span>${actionLabel}</span></button></header><section class="v75-budget-summary" aria-label="Resumo do orçamento"><div class="cdc-budget-ring${ringClass}" style="--pct:${hasBudget?metrics.pct:0}" aria-label="${attr(ringLabel)}"><div>${ringLead}${ringDetail}</div></div><div class="v75-budget-metrics"><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('banknote',20)}</span><span class="v76-budget-metric-copy"><small>Gasto este mês</small><strong data-money>${moneyText(metrics.spent)}</strong></span></div><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('goal',20)}</span><span class="v76-budget-metric-copy"><small>Orçamento</small><strong${hasBudget?' data-money':''}>${budgetLabel}</strong></span><button type="button" class="v76-budget-metric-action" data-v75-budget-focus aria-label="${actionLabel} orçamento">${iconMarkup('chevron',18)}</button></div><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('wallet',20)}</span><span class="v76-budget-metric-copy"><small>Disponível</small><strong${hasBudget?' data-money':''}>${remainingLabel}</strong></span></div></div></section><div class="v76-budget-guidance"><span class="v76-budget-guidance-icon" aria-hidden="true">${iconMarkup('info',20)}</span><span><strong>${guidanceTitle}</strong><small>${guidanceText}</small></span><button type="button" data-v75-budget-focus aria-label="${actionLabel} orçamento">${iconMarkup('chevron',18)}</button></div><button type="button" class="btn primary v76-budget-cta" data-v75-budget-focus>${iconMarkup(ctaIcon,20)}<span>${ctaLabel}</span></button></section><div class="v75-section-heading"><strong>Despesas por categoria</strong><small>${entries.length?'Distribuição do mês':'Sem movimentos neste mês'}</small></div><div class="cdc-planning-categories">${entries.map(([name,value],index)=>{const pct=Math.round(Number(value||0)/total*100);return `<div><span class="cdc-category-dot ${['food','home','transport','health','other'][index%5]}" aria-hidden="true"></span><strong>${esc(name)}</strong><span class="cdc-plan-track"><i style="width:${Math.max(5,pct)}%"></i></span><b data-money>${moneyText(value)}</b></div>`;}).join('')||'<p class="cdc-empty-note">Ainda não existem despesas para distribuir.</p>'}</div>`;
+    const guidanceText=hasBudget?'Disponível real desconta o gasto efetivo e as faturas ainda por pagar deste mês.':'Estabeleça o seu limite de gastos para acompanhar o progresso ao longo do mês.';
+    return `${planningMonthHtml()}<section class="v76-planning-budget-card" aria-labelledby="v76BudgetTitle"><header class="v76-budget-card-head"><span class="v76-budget-card-icon" aria-hidden="true">${iconMarkup('plan',22)}</span><span class="v76-budget-card-copy"><strong id="v76BudgetTitle">Orçamento mensal</strong><small>Acompanhe os seus gastos e mantenha o controlo.</small></span><button type="button" class="v76-budget-head-action" data-v75-budget-focus>${iconMarkup('settings',18)}<span>${actionLabel}</span></button></header><section class="v75-budget-summary" aria-label="Resumo do orçamento"><div class="cdc-budget-ring${ringClass}" style="--pct:${hasBudget?metrics.pct:0}" aria-label="${attr(ringLabel)}"><div>${ringLead}${ringDetail}</div></div><div class="v75-budget-metrics"><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('banknote',20)}</span><span class="v76-budget-metric-copy"><small>Gasto este mês</small><strong data-money>${moneyText(metrics.spent)}</strong></span></div><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('bill',20)}</span><span class="v76-budget-metric-copy"><small>Comprometido</small><strong data-money>${committedLabel}</strong></span></div><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('goal',20)}</span><span class="v76-budget-metric-copy"><small>Orçamento</small><strong${hasBudget?' data-money':''}>${budgetLabel}</strong></span><button type="button" class="v76-budget-metric-action" data-v75-budget-focus aria-label="${actionLabel} orçamento">${iconMarkup('chevron',18)}</button></div><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('wallet',20)}</span><span class="v76-budget-metric-copy"><small>Disponível real</small><strong${hasBudget?' data-money':''}${hasBudget&&metrics.availableReal<0?' class="danger-text"':''}>${availableRealLabel}</strong></span></div></div></section><div class="v76-budget-guidance"><span class="v76-budget-guidance-icon" aria-hidden="true">${iconMarkup('info',20)}</span><span><strong>${guidanceTitle}</strong><small>${guidanceText}</small></span><button type="button" data-v75-budget-focus aria-label="${actionLabel} orçamento">${iconMarkup('chevron',18)}</button></div><button type="button" class="btn primary v76-budget-cta" data-v75-budget-focus>${iconMarkup(ctaIcon,20)}<span>${ctaLabel}</span></button></section><div class="v75-section-heading"><strong>Despesas por categoria</strong><small>${entries.length?'Distribuição do mês':'Sem movimentos neste mês'}</small></div><div class="cdc-planning-categories">${entries.map(([name,value],index)=>{const pct=Math.round(Number(value||0)/total*100);return `<div><span class="cdc-category-dot ${['food','home','transport','health','other'][index%5]}" aria-hidden="true"></span><strong>${esc(name)}</strong><span class="cdc-plan-track"><i style="width:${Math.max(5,pct)}%"></i></span><b data-money>${moneyText(value)}</b></div>`;}).join('')||'<p class="cdc-empty-note">Ainda não existem despesas para distribuir.</p>'}</div>`;
   }
 
   function renderPlanningArchitecture(){
@@ -354,7 +365,7 @@
     if(!rootNode||!appReady())return;
     const metrics=dashboardMetrics();
     const entries=categoryEntries().slice(0,5);
-    const key=`${selectedMonthKey()}|${metrics?.spent||0}|${metrics?.budget||0}|${entries.map(entry=>`${entry[0]}:${entry[1]}`).join(',')}`;
+    const key=`${selectedMonthKey()}|${metrics?.spent||0}|${metrics?.committed||0}|${metrics?.budget||0}|${metrics?.availableReal||0}|${entries.map(entry=>`${entry[0]}:${entry[1]}`).join(',')}`;
     if(rootNode.dataset.v75Key===key)return;
     const html=planningArchitectureHtml(metrics,entries);
     if(html){
