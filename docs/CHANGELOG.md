@@ -12,6 +12,8 @@ A fila do Início deixa de excluir faturas vencidas do mês. Valores pendentes c
 ### Datas locais
 
 - o orçamento diário de consultas do catálogo do Mercado deixa de usar a data UTC e passa a seguir o dia local do dispositivo;
+- a biblioteca Pingo Doce aplica a mesma correção às quotas diárias;
+- a preferência de supermercado deixa de ser gravada numa chave bloqueada pela política de Web Storage e passa para `cdc_public_store_choice_v1`, mantendo leitura da chave antiga;
 - o nome do backup cifrado passa a usar a data civil local.
 
 ### Regressão e distribuição
