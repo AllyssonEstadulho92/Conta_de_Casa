@@ -115,6 +115,24 @@ Uma revisão visual que dependa de HTML/CSS/JavaScript novo deve também produzi
 - o reload continua adiado enquanto existir formulário/dialog ativo ou um campo editável focado.
 
 Este requisito evita que um deploy correto no Pages fique invisível numa PWA restaurada pelo iOS.
+## 5.2 Autoridade do mês selecionado
+
+A navegação mensal de Planeamento, Calendário e seletor global partilha uma única autoridade de UI: `selectAppMonth(month, options)` em `events.js`.
+
+Contrato:
+
+- aceita apenas chaves civis `YYYY-MM` válidas entre 01 e 12;
+- atualiza `selectedMonth` e garante o perfil mensal correspondente;
+- mantém `#monthPicker` sincronizado;
+- renderiza a rota ativa;
+- emite `cdc:month-change` para camadas progressivas que não pertencem ao renderer canónico;
+- histórico do Calendário e setas do Planeamento não alteram `selectedMonth` diretamente;
+- `renderCalendar()` e `renderPlanning()` capturam `activeMonth` uma vez e passam-no explicitamente a todas as funções financeiras usadas nesse ciclo;
+- `v75-architecture.js` escuta `cdc:month-change` e não depende de defaults implícitos de mês;
+- guardar `monthPlanForm` emite `cdc:planning-change` depois do `commit()` para atualizar imediatamente o resumo visual.
+
+Esta sincronização é estado de navegação e apresentação. Não persiste um novo campo no cofre nem altera a semântica de pagamentos por data, vencimentos por mês ou orçamento mensal.
+
 ## 6. Planeamento mobile
 
 `76-planning-budget-card2` + `76-planning-ring-shape1` + `76-planning-commitment1`:
