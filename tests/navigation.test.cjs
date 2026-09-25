@@ -38,6 +38,8 @@ assert.match(events,/selectAppMonth\(nowMonth,\{source:'month-rollover'\}\)/,'mo
 assert.match(events,/data-calendar-month/,'calendar history must allow switching back to saved months');
 assert.match(events,/function selectAppMonth\(value,\{source='ui',render=true\}=\{\}\)/,'calendar and planning must share one month-selection authority');
 assert.match(events,/cdc:month-change/,'month changes must notify presentation layers');
+assert.match(events,/const activeMonth=selectedMonth;[\s\S]*monthProfile\(activeMonth\)/,'planning saves must target the selected month explicitly');
+assert.match(events,/cdc:planning-change/,'saving planning must notify the visual planning layer');
 assert.match(render,/const activeMonth=selectedMonth;[\s\S]*monthNumbers\(activeMonth\)/,'calendar must snapshot the active month explicitly');
 assert.match(render,/function renderPlanning\(\)[\s\S]*monthProfile\(activeMonth\)[\s\S]*monthNumbers\(activeMonth\)/,'planning must use the same explicit active month as calendar');
 assert.match(render,/openingBalanceCents===0\?'':/,'a fresh month must show an empty opening-balance field');
