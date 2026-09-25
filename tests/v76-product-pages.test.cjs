@@ -7,6 +7,7 @@ const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 
+const html=read('index.html');
 const css=read('v76-product-pages.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
@@ -17,6 +18,12 @@ const market=read('market-experience.js');
 
 assert.match(css,/76-product-pages1/);
 assert.match(css,/76-prototype-dashboard1/);
+assert.match(html,/class="panel span-2 dashboard-priority-panel"/,'upcoming payments must use the dedicated priority panel');
+assert.match(html,/Ordenado por prioridade de pagamento\./,'upcoming header must explain the ordering');
+assert.match(html,/class="link-btn dashboard-feature-action" data-go="bills"/,'Ver faturas must remain a real navigation action');
+assert.match(html,/id="upcomingBills" class="stack-list dashboard-priority-list"/);
+assert.match(html,/class="panel dashboard-budget-panel"/);
+assert.match(html,/class="icon-btn dashboard-budget-open"[^>]*data-go="planning"/,'budget chevron must open canonical Planning');
 assert.match(css,/#page-dashboard>#kpiGrid\{order:1\}/);
 assert.match(css,/\.account-balance-kpi\{[\s\S]*grid-column:1\/-1!important/);
 assert.match(css,/\.account-balance-kpi\{[\s\S]*background:var\(--v76-primary-strong,var\(--v76-primary\)\)!important[\s\S]*box-shadow:none!important/,'Saldo atual deve ser o hero teal sólido do protótipo');
