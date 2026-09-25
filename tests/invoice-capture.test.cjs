@@ -109,6 +109,10 @@ assert.match(source,/applyInvoiceToForm\(\{announce:false,focus:false\}\)/,'a va
 assert.match(source,/form\.elements\.title[\s\S]{0,500}form\.elements\.amount[\s\S]{0,500}form\.elements\.reference/,'autofill must cover description, total and reference');
 assert.match(source,/invoiceReviewFields='provider,category,dueDate,method'/,'fields not supplied authoritatively by the AT QR must remain marked for review');
 assert.match(source,/Categoria, vencimento e método não constam do QR da AT/,'UI must explain which required/business fields cannot be extracted from the QR');
+assert.match(source,/const QR_IMAGE_DECODE_TIMEOUT_MS=6000/,'invoice image decoding must have a hard upper bound');
+assert.match(source,/function withDecodeTimeout\(promise,timeoutMs=QR_IMAGE_DECODE_TIMEOUT_MS\)/,'all asynchronous QR image decoders must share the timeout guard');
+assert.match(source,/withDecodeTimeout\(detector\.detect\(bitmap\)\)/,'native BarcodeDetector must be bounded');
+assert.match(source,/withDecodeTimeout\(reader\.decodeFromImageUrl\(objectUrl\)\)/,'ZXing image decoding must be bounded');
 assert.match(source,/function decodeQrFromImage\(file,objectUrl\)/,'image decoding must have a single resilient path');
 assert.match(source,/BarcodeDetector/,'native QR decoding must be attempted when the browser provides it');
 assert.match(source,/event\.detail\?\.native/,'native file/camera selection must not recursively invoke programmatic pickers');
