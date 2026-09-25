@@ -23,7 +23,8 @@ const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const MODERN_UI_REV = '76-modern-ui2';
-const PRODUCT_PAGES_REV = '76-dashboard-clean1';
+const PRODUCT_PAGES_REV = '76-dashboard-priority1';
+const DASHBOARD_REV = '76-dashboard-priority1';
 const MOBILE_SHELL_REV = '76-mobile-shell3';
 const ARCHITECTURE_REV = '76-planning-commitment1';
 const PLANNING_MORE_REV = '76-planning-more1';
@@ -171,6 +172,7 @@ index=index.replace(/<meta name="theme-color" content="[^"]+"\s*\/>/,'<meta name
 index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
 index=index.replace(/invoice-capture\.css\?v=[^"']+/,`invoice-capture.css?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/invoice-capture\.js\?v=[^"']+/,`invoice-capture.js?v=${INVOICE_CAPTURE_REV}`);
+index=index.replace(/render\.js\?v=[^"']+/,`render.js?v=${DASHBOARD_REV}`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${APP_VERSION} · ${BUILD}</strong>`);
 
 /* Remove referências históricas/retiradas caso um source HTML antigo volte a introduzi-las. */
