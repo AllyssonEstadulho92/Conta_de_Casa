@@ -24,9 +24,10 @@ const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const MODERN_UI_REV = '76-modern-ui2';
 const PRODUCT_PAGES_REV = '76-dashboard-priority1';
-const DASHBOARD_REV = '76-dashboard-priority1';
+const DASHBOARD_REV = '76-month-sync1';
 const MOBILE_SHELL_REV = '76-mobile-shell3';
 const ARCHITECTURE_REV = '76-planning-commitment1';
+const ARCHITECTURE_JS_REV = '76-month-sync1';
 const PLANNING_MORE_REV = '76-planning-more1';
 const HEADER_REV = '75-header2';
 const STABILITY_REV = '75-stability1';
@@ -44,7 +45,7 @@ const PD_PHOTO_REV = '75-pd-photo1';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
-const SERVICE_WORKER_REV = '76-dashboard-priority-delivery1';
+const SERVICE_WORKER_REV = '76-month-sync1';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
   throw new Error(`Invalid package application version: ${APP_VERSION||'(empty)'}`);
@@ -173,6 +174,7 @@ index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
 index=index.replace(/invoice-capture\.css\?v=[^"']+/,`invoice-capture.css?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/invoice-capture\.js\?v=[^"']+/,`invoice-capture.js?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/render\.js\?v=[^"']+/,`render.js?v=${DASHBOARD_REV}`);
+index=index.replace(/events\.js\?v=[^"']+/,`events.js?v=${DASHBOARD_REV}`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${APP_VERSION} · ${BUILD}</strong>`);
 
 /* Remove referências históricas/retiradas caso um source HTML antigo volte a introduzi-las. */
@@ -232,7 +234,7 @@ if(!index.includes('market-category-groups.js'))index=index.replace('</body>',` 
 if(!index.includes('v64-runtime.js'))index=index.replace('</body>',`  <script src="./v64-runtime.js?v=${RUNTIME_REV}" defer></script>\n</body>`);
 if(!index.includes('market-shopping-focus.js'))index=index.replace('</body>',`  <script src="./market-shopping-focus.js?v=${SHOPPING_REV}" defer></script>\n</body>`);
 if(!index.includes('mobile-menu-toggle.js'))index=index.replace('</body>',`  <script src="./mobile-menu-toggle.js?v=${MENU_REV}" defer></script>\n</body>`);
-if(!index.includes('v75-architecture.js'))index=index.replace('</body>',`  <script src="./v75-architecture.js?v=${ARCHITECTURE_REV}" defer></script>\n</body>`);
+if(!index.includes('v75-architecture.js'))index=index.replace('</body>',`  <script src="./v75-architecture.js?v=${ARCHITECTURE_JS_REV}" defer></script>\n</body>`);
 if(!index.includes('date-calculator.js'))index=index.replace('</body>',`  <script src="./date-calculator.js?v=${DATE_CALCULATOR_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-stability.js'))index=index.replace('</body>',`  <script src="./v75-stability.js?v=${STABILITY_REV}" defer></script>\n</body>`);
 if(!index.includes('v75-startup-guard.js'))index=index.replace('</body>',`  <script src="./v75-startup-guard.js?v=${STARTUP_REV}" defer></script>\n</body>`);
@@ -258,4 +260,4 @@ for(const name of Object.keys(GENERATED_PUBLIC_FILES)){
   }
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; architecture ${ARCHITECTURE_REV}; planning-more ${PLANNING_MORE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}; date-calculator ${DATE_CALCULATOR_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; architecture ${ARCHITECTURE_REV}/${ARCHITECTURE_JS_REV}; planning-more ${PLANNING_MORE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}; date-calculator ${DATE_CALCULATOR_REV}).`);
