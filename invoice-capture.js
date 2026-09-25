@@ -9,6 +9,7 @@
  * 76-expense-native-input4 usa controlos file/capture nativos no iOS para evitar bloqueios de input.click()/getUserMedia.
  * 76-expense-picker-unblock6 não pré-carrega ZXing em touch/iOS antes da escolha nativa.
  * 76-invoice-autofill7 preenche automaticamente os campos seguros logo após um QR AT válido.
+ * 76-invoice-hierarchy8 combina QR estruturado + OCR local com prioridade manual > estruturado > OCR > regra > default.
  */
 (function installInvoiceCapture(root){
   const MAX_IMAGE_BYTES=15*1024*1024;
@@ -17,8 +18,8 @@
   const MODE_COPY=Object.freeze({
     image:Object.freeze({
       title:'Ler fatura por imagem',
-      subtitle:'Fotografia com QR da Autoridade Tributária',
-      description:'Selecione uma fotografia da fatura. A aplicação procura o código QR da AT na imagem; não faz OCR do texto completo. A imagem é processada neste dispositivo e não é guardada nem enviada.',
+      subtitle:'OCR local + QR · sem enviar a fatura',
+      description:'Selecione uma fotografia da fatura. A aplicação tenta primeiro dados estruturados do QR e depois lê o texto localmente para completar montante, vencimento, fornecedor, referência e outros campos reconhecíveis. A imagem não é guardada nem enviada.',
       icon:'image',
       action:'Selecionar imagem'
     }),
