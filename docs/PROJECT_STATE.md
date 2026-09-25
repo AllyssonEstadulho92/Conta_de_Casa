@@ -14,7 +14,8 @@ Auditoria executada sobre o estado publicado após `ae17e96`, abrangendo domíni
 Erros concretos encontrados e corrigidos:
 
 - **Prioridade de pagamentos:** a lista do Início excluía faturas já vencidas porque exigia `days >= 0`. Faturas em atraso do mês podiam aparecer no alerta, mas desaparecer da fila que orienta o que pagar primeiro. A fila passa a incluir todo o saldo pendente com data válida, ordenar por vencimento e rotular segundo o estado real: **Pagar agora**, **Vence hoje**, **Prioridade**, **A seguir**, **Depois** e **Mais tarde**.
-- **Mercado / quota diária:** o catálogo visual usava `toISOString().slice(0,10)`, portanto o limite diário podia mudar segundo UTC em vez da data local do dispositivo. Passa a usar componentes civis locais.
+- **Mercado / quotas diárias:** o catálogo visual e a biblioteca Pingo Doce usavam `toISOString().slice(0,10)`, portanto os limites diários podiam mudar segundo UTC em vez da data local do dispositivo. Ambos passam a usar componentes civis locais.
+- **Preferência de supermercado:** `v64-runtime.js` tentava guardar a loja preferida em `cdc.market.scan.retailer.v1`, mas a política de segurança bloqueia qualquer escrita em Web Storage que não use uma chave pública permitida. O erro era silenciosamente ignorado e a preferência não persistia. A nova chave é `cdc_public_store_choice_v1`, mantendo leitura da chave antiga para migração.
 - **Backup:** o nome do ficheiro de backup também usava a data UTC e podia ficar com o dia anterior/próximo em determinados fusos. Passa a usar `currentLocalDateKey()`.
 - **Distribuição PWA:** `render.js` e o Service Worker recebem a revisão `76-full-audit-fixes1` para impedir reutilização do runtime anterior.
 
