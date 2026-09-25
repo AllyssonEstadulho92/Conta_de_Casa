@@ -7,7 +7,7 @@
  */
 (function marketBarcodeScanner(){
   const DIALOG_SELECTOR='#formDialog[data-mode="market-browser"]';
-  const ZXING_URL='https://unpkg.com/@zxing/browser@0.2.0/umd/zxing-browser.min.js';
+  const ZXING_URL='./vendor/zxing-browser.min.js';
   const OFF_PRODUCT_URL='https://world.openfoodfacts.org/api/v2/product/';
   const LOOKUP_TIMEOUT_MS=9000;
   const LIBRARY_TIMEOUT_MS=12000;
