@@ -330,31 +330,79 @@
 
   function applyInvoiceToForm(options={}){
     const form=document.querySelector('#billForm');
-    const data=pendingInvoice;
-    if(!form||!data||String(form.elements.id?.value||''))return {applied:false,ready:false,changed:[]};
+    const data=pendingInvoice?.at||pendingInvoice;
+    if(!form||!data?.issuerNif||String(form.elements.id?.value||''))return {applied:false,ready:false,changed:[],review:[]};
+    initInvoiceFieldHierarchy(form);
 
     const changed=[];
-    if(setBlankField(form.elements.title,clean(`Fatura ${data.documentId}`,80)))changed.push('Descrição');
-    if(setBlankField(form.elements.provider,`NIF ${data.issuerNif}`))changed.push('Fornecedor');
-    if(data.totalCents>0&&setBlankField(form.elements.amount,(data.totalCents/100).toFixed(2).replace('.',',')))changed.push('Valor total');
-    if(setBlankField(form.elements.reference,clean([data.documentId,data.atcud?`ATCUD ${data.atcud}`:''].filter(Boolean).join(' · '),160)))changed.push('Referência');
+    if(setFieldByAuthority(form.elements.title,clean(`Fatura ${data.documentId}`,80),'structured-qr'))changed.push('Descrição');
+    if(setFieldByAuthority(form.elements.provider,`NIF ${data.issuerNif}`,'structured-placeholder'))changed.push('Fornecedor');
+    if(data.totalCents>0&&setFieldByAuthority(form.elements.amount,(data.totalCents/100).toFixed(2).replace('.',','),'structured-qr'))changed.push('Valor total');
+    if(setFieldByAuthority(form.elements.reference,clean([data.documentId,data.atcud?`ATCUD ${data.atcud}`:''].filter(Boolean).join(' · '),160),'structured-qr'))changed.push('Referência');
 
     form.dataset.invoiceQrVerified='true';
-    form.dataset.invoiceReviewFields='provider,category,dueDate,method';
+    form.dataset.invoiceIssuerNif=data.issuerNif;
+    const review=syncReviewFields(form);
     const ready=requiredInvoiceFieldsReady(form);
 
     if(options.announce!==false){
-      const changedText=changed.length?changed.join(', '):'os campos compatíveis';
+      const changedText=changed.length?changed.join(', '):'os dados estruturados';
       status(ready
-        ?`${changedText} preenchidos a partir do QR. Os campos obrigatórios estão preenchidos; confirme categoria, vencimento, método e o nome do fornecedor antes de guardar.`
-        :`${changedText} preenchidos a partir do QR. Ainda existem campos obrigatórios por completar antes de guardar.`,
+        ?`${changedText} aplicados a partir do QR. Confirme apenas os campos ainda marcados para revisão.`
+        :`${changedText} aplicados a partir do QR. Ainda existem campos obrigatórios por completar.`,
         ready?'success':'warning');
     }
 
     if(options.focus!==false)form.elements.title?.focus?.({preventScroll:true});
-    return {applied:true,ready,changed};
+    return {applied:true,ready,changed,review};
   }
 
+  function applyExtractedInvoiceToForm(data,options={}){
+    const form=document.querySelector('#billForm');
+    if(!form||!data?.hasUsefulData||String(form.elements.id?.value||''))return {applied:false,ready:false,changed:[],review:[]};
+    initInvoiceFieldHierarchy(form);
+    const changed=[];
+
+    if(data.title&&setFieldByAuthority(form.elements.title,clean(data.title,80),data.provider?'provider-rule':'ocr-labeled'))changed.push('Descrição');
+    if(data.provider&&setFieldByAuthority(form.elements.provider,clean(data.provider,80),'provider-rule'))changed.push('Fornecedor');
+    else if(data.issuerNif&&setFieldByAuthority(form.elements.provider,`NIF ${data.issuerNif}`,'ocr-labeled'))changed.push('Fornecedor');
+    if(data.category&&setFieldByAuthority(form.elements.category,clean(data.category,80),'provider-rule'))changed.push('Categoria');
+    if(Number.isSafeInteger(data.amountCents)&&data.amountCents>0&&setFieldByAuthority(form.elements.amount,(data.amountCents/100).toFixed(2).replace('.',','),'ocr-labeled'))changed.push('Valor total');
+    if(data.dueDate&&setFieldByAuthority(form.elements.dueDate,data.dueDate,'ocr-labeled'))changed.push('Vencimento');
+    if(data.method&&setFieldByAuthority(form.elements.method,clean(data.method,60),'ocr-labeled'))changed.push('Método');
+    if(data.reference&&setFieldByAuthority(form.elements.reference,clean(data.reference,160),'ocr-labeled'))changed.push('Referência');
+    if(data.notes&&setFieldByAuthority(form.elements.notes,clean(data.notes,1200),'ocr-labeled'))changed.push('Observações');
+
+    form.dataset.invoiceOcrRules=clean(data.rulesRevision,80);
+    const review=syncReviewFields(form);
+    const ready=requiredInvoiceFieldsReady(form);
+
+    if(options.announce!==false){
+      const changedText=changed.length?changed.join(', '):'os campos reconhecidos';
+      status(ready
+        ?`${changedText} preenchidos pela leitura local. Confirme os campos marcados antes de guardar.`
+        :`${changedText} preenchidos pela leitura local. Complete os campos obrigatórios ainda em falta.`,
+        ready?'success':'warning');
+    }
+
+    if(options.focus!==false)form.elements.title?.focus?.({preventScroll:true});
+    return {applied:true,ready,changed,review};
+  }
+
+  function applyPendingInvoice(options={}){
+    const atResult=pendingInvoice?.at?applyInvoiceToForm({announce:false,focus:false}):{changed:[]};
+    const ocrResult=pendingInvoice?.ocr?applyExtractedInvoiceToForm(pendingInvoice.ocr,{announce:false,focus:false}):{changed:[]};
+    const form=document.querySelector('#billForm');
+    const ready=requiredInvoiceFieldsReady(form);
+    const review=syncReviewFields(form);
+    const changed=[...(atResult.changed||[]),...(ocrResult.changed||[])];
+    if(options.announce!==false){
+      const reviewText=review.length?`Confirme ${review.length} campo(s) ainda em revisão antes de guardar.`:'Os campos obrigatórios estão completos.';
+      status(ready?`Fatura preenchida. ${reviewText}`:'A leitura foi aplicada, mas ainda faltam campos obrigatórios.',ready?'success':'warning');
+    }
+    if(options.focus!==false)form?.elements?.title?.focus?.({preventScroll:true});
+    return {ready,review,changed};
+  }
   function showPreview(data){
     pendingInvoice=data;
     const applied=applyInvoiceToForm({announce:false,focus:false});
