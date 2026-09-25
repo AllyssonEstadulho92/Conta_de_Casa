@@ -3,6 +3,26 @@
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
 
+## 2026-09-25: `76-full-audit-fixes1`: auditoria transversal e correções
+
+### Pagamentos
+
+A fila do Início deixa de excluir faturas vencidas do mês. Valores pendentes com data válida são ordenados pelo vencimento e recebem indicação coerente com o estado real: **Pagar agora**, **Vence hoje**, **Prioridade**, **A seguir**, **Depois** ou **Mais tarde**.
+
+### Datas locais
+
+- o orçamento diário de consultas do catálogo do Mercado deixa de usar a data UTC e passa a seguir o dia local do dispositivo;
+- o nome do backup cifrado passa a usar a data civil local.
+
+### Regressão e distribuição
+
+Foram acrescentados contratos para estes três casos. `render.js` e o Service Worker recebem a revisão `76-full-audit-fixes1` para distribuição em Safari/PWA.
+
+### Preservado
+
+Sem alteração de `STATE_VERSION`, IndexedDB, PBKDF2/AES-GCM, PIN/cofre, pagamentos, sync, cálculos monetários ou identidade do Mercado.
+
+
 ## 2026-09-25: `76-security-network-copy1`: descrição de rede corrigida
 
 A página Segurança deixou de afirmar **Sem CDNs**. O texto passa a declarar que o leitor QR pode carregar ZXing Browser 0.2.0 de `unpkg.com`, sem credenciais e sob a CSP existente. A sincronização e o cofre permanecem inalterados.
