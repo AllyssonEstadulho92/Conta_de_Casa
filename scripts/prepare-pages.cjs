@@ -82,7 +82,7 @@ const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-hierarchy8';
 const INVOICE_EXTRACTOR_REV = '76-invoice-hierarchy1';
 const INVOICE_OCR_REV = '76-invoice-local-ocr1';
-const SERVICE_WORKER_REV = '76-local-zxing-e2e6';
+const SERVICE_WORKER_REV = '76-invoice-hierarchy-ocr7';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
   throw new Error(`Invalid package application version: ${APP_VERSION||'(empty)'}`);
