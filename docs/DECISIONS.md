@@ -533,3 +533,16 @@ Decisão:
 - a ativação continua a usar o reload seguro já existente e não deve interromper formulários ou edição ativa;
 - esta política é de distribuição/cache e não pode alterar estado financeiro ou persistência.
 
+## D-131: Calendário e Planeamento partilham um único contexto de mês
+
+Alterar o mês não pode depender de caminhos diferentes conforme a origem do gesto. O seletor global, o histórico do Calendário, as setas do Planeamento e a mudança automática de mês devem convergir na mesma operação.
+
+Decisão:
+
+- `selectedMonth` continua a única fonte de verdade do mês ativo;
+- `selectMonthContext()` concentra a atualização do mês no runtime de eventos;
+- uma mudança válida sincroniza o `monthPicker`, garante `monthProfile(next)`, renderiza a página atual e emite `cdc:month-change`;
+- componentes visuais derivados devem reagir a `cdc:month-change` em vez de depender de mutações indiretas do DOM;
+- o Calendário deve filtrar explicitamente pelo mês recebido/selecionado;
+- não se herdam automaticamente orçamento, saldo inicial, saldo real ou rendimentos de um mês para outro.
+
