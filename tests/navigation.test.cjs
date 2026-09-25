@@ -34,7 +34,9 @@ assert.match(render,/function renderCalendar\(\)[\s\S]*monthNumbers\(selectedMon
 assert.match(render,/spendingForDate\(dayKey\)/,'calendar day cells must show actual spend by payment date');
 assert.match(render,/monthlySpendHistory\(selectedMonth,6\)/,'calendar must expose recent monthly spend history');
 assert.match(events,/function syncMonthRollover\(\)/,'runtime must detect local month rollover');
-assert.match(events,/selectedMonth=nowMonth[\s\S]*monthProfile\(nowMonth\)/,'month rollover must start a fresh month profile without deleting prior records');
+assert.match(events,/function selectMonthContext\(value,[\s\S]*selectedMonth=next[\s\S]*monthProfile\(next\)[\s\S]*cdc:month-change/,'selected month changes must use one shared context and notify dependent views');
+assert.match(events,/selectMonthContext\(nowMonth\)/,'month rollover must use the shared month context');
+assert.match(events,/#monthPicker'[\s\S]*selectMonthContext\(next\)/,'month picker changes must update the same context used by Calendar and Planning');
 assert.match(events,/data-calendar-month/,'calendar history must allow switching back to saved months');
 assert.match(render,/openingBalanceCents===0\?'':/,'a fresh month must show an empty opening-balance field');
 assert.match(render,/budgetCents===0\?'':/,'a fresh month must show an empty monthly-budget field');

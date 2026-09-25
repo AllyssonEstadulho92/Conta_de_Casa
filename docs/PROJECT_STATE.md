@@ -124,6 +124,21 @@ Não existem logos remotos nem novas dependências. O selo de identidade usa ape
 
 Pendente: validação física em iPhone/Safari/PWA, sobretudo largura de 390 px, nomes longos, seis vencimentos e dark mode.
 
+## Planeamento e Calendário: contexto mensal sincronizado
+
+Revisão técnica: `76-month-context-sync1`.
+
+Foi corrigida uma divergência de atualização entre o mês selecionado e a camada visual de Planeamento. O seletor global, o histórico do Calendário e as setas do Planeamento passam a convergir no mesmo contexto mensal:
+
+- `selectMonthContext()` é a autoridade para alterar `selectedMonth` no runtime de eventos;
+- a mudança atualiza o `monthPicker`, garante o perfil do mês e volta a renderizar a página ativa;
+- é emitido `cdc:month-change` quando o mês muda;
+- `v75-architecture.js` escuta esse evento e recompõe imediatamente o resumo visual do Planeamento;
+- o Calendário filtra explicitamente os vencimentos pelo mesmo `selectedMonth`;
+- mudança automática de mês também usa a mesma função, evitando caminhos diferentes.
+
+Preservado: os valores continuam separados por mês, sem copiar orçamento, saldo ou rendimentos entre meses.
+
 ## Planeamento
 
 `76-planning-budget-card2` + `76-planning-ring-shape1` permanecem integrados. A revisão `76-planning-commitment1` acrescenta uma hierarquia financeira sem alterar a origem dos dados:

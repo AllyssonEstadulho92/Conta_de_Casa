@@ -3,6 +3,21 @@ let observedLocalMonth = currentLocalMonthKey();
 const MONTH_ROLLOVER_INTERVAL_MS = 5 * 60 * 1000;
 const APP_UPDATE_INTERVAL_MS = 15 * 60 * 1000;
 
+function selectMonthContext(value,{render=true,announce=true}={}){
+  const next=String(value||'').trim();
+  if(!/^\d{4}-\d{2}$/.test(next))return false;
+  const previous=selectedMonth;
+  selectedMonth=next;
+  monthProfile(next);
+  const picker=$('#monthPicker');
+  if(picker&&picker.value!==next)picker.value=next;
+  if(render)renderCurrentPage();
+  if(announce&&previous!==next){
+    document.dispatchEvent(new CustomEvent('cdc:month-change',{detail:{month:next,previous}}));
+  }
+  return true;
+}
+
 function syncMonthRollover(){
   if(!appState)return;
   const nowMonth=currentLocalMonthKey();
@@ -10,11 +25,7 @@ function syncMonthRollover(){
   const followCurrent=selectedMonth===observedLocalMonth;
   observedLocalMonth=nowMonth;
   if(!followCurrent)return;
-  selectedMonth=nowMonth;
-  monthProfile(nowMonth);
-  const picker=$('#monthPicker');
-  if(picker)picker.value=nowMonth;
-  renderCurrentPage();
+  selectMonthContext(nowMonth);
   toast('Novo mês iniciado. O histórico anterior ficou guardado e os campos mensais estão prontos para novos valores.');
 }
 
@@ -448,7 +459,11 @@ function wireEvents(){
       }
     }
   });
-  $('#monthPicker').addEventListener('change',()=>{selectedMonth=$('#monthPicker').value||selectedMonth;monthProfile();renderCurrentPage();});
+  $('#monthPicker').addEventListener('change',()=>{
+    const picker=$('#monthPicker');
+    const next=picker?.value||selectedMonth;
+    if(!selectMonthContext(next))picker.value=selectedMonth;
+  });
   $('#monthPlanForm').addEventListener('submit',async e=>{
     e.preventDefault();
     const balanceRaw=$('#accountBalance').value.trim();

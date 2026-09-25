@@ -63,6 +63,11 @@ Atualizado: 25 de setembro de 2026
 
 ## P0 — Planeamento + Calendário
 
+- [x] `76-month-context-sync1`: unificar mudança de mês entre Planeamento, Calendário e seletor global.
+- [x] Emitir `cdc:month-change` e recompor a camada visual do Planeamento.
+- [x] Tornar o filtro mensal do Calendário explícito com `selectedMonth`.
+- [ ] Validar no iPhone a sequência setembro → outubro → calendário → planeamento e regresso.
+
 - [x] Planeamento v76 e estado `Por definir` para orçamento ausente.
 - [x] `plan` usa `CalendarCheck2` do snapshot Lucide fixado.
 - [x] `76-planning-budget-card2`: seletor mensal, resumo e CTA sem duplicar gravação.

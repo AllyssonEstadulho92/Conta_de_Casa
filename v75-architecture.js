@@ -82,7 +82,7 @@
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
-  const REVISION='76-planning-commitment1';
+  const REVISION='76-month-context-sync1';
   const LABELS=Object.freeze({
     dashboard:['Início','Visão geral'],
     bills:['Despesas','Movimentos'],
@@ -619,6 +619,7 @@
     },true);
     document.addEventListener('keydown',handleBillModeKeydown,true);
     window.addEventListener('hashchange',schedule,{passive:true});
+    document.addEventListener('cdc:month-change',schedule,{passive:true});
     root.matchMedia?.(MOBILE_QUERY)?.addEventListener?.('change',schedule);
     observer=new MutationObserver(schedule);
     const title=byId('pageTitle');if(title)observer.observe(title,{childList:true,characterData:true,subtree:true});
