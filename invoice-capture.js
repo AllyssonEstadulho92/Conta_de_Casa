@@ -213,12 +213,111 @@
       <small class="invoice-capture-review-note">Descrição, valor, NIF do emitente e referência são preenchidos automaticamente quando estiverem vazios. Categoria, vencimento e método não constam do QR da AT e devem ser confirmados antes de guardar.</small>`;
   }
 
-  function setBlankField(field,value){
-    if(!field||String(field.value||'').trim()||value===null||value===undefined||value==='')return false;
-    field.value=String(value);
+  const FIELD_AUTHORITY_RANK=Object.freeze({
+    empty:0,
+    'form-default':100,
+    'structured-placeholder':250,
+    'provider-rule':320,
+    'ocr-labeled':350,
+    'structured-qr':400,
+    manual:500
+  });
+  const MANAGED_FIELDS=Object.freeze(['title','provider','category','amount','dueDate','method','reference','notes']);
+
+  function initInvoiceFieldHierarchy(form){
+    if(!form||form.dataset.invoiceHierarchyBound==='true')return;
+    form.dataset.invoiceHierarchyBound='true';
+    for(const name of MANAGED_FIELDS){
+      const field=form.elements?.[name];
+      if(!field)continue;
+      const value=String(field.value||'');
+      field.dataset.invoiceDefault=value;
+      field.dataset.invoiceAuthority=value?'form-default':'empty';
+    }
+    const markManual=event=>{
+      if(!event.isTrusted)return;
+      const field=event.target;
+      if(!field?.name||!MANAGED_FIELDS.includes(field.name))return;
+      field.dataset.invoiceAuthority='manual';
+      field.dataset.invoiceUserEdited='true';
+      field.removeAttribute('data-invoice-review');
+      syncReviewFields(form);
+    };
+    form.addEventListener('input',markManual,true);
+    form.addEventListener('change',markManual,true);
+    syncReviewFields(form);
+  }
+
+  function fieldAuthority(field){
+    if(!field)return 'empty';
+    if(field.dataset.invoiceAuthority)return field.dataset.invoiceAuthority;
+    return String(field.value||'').trim()?'form-default':'empty';
+  }
+
+  function authorityRank(value){
+    return FIELD_AUTHORITY_RANK[value]??0;
+  }
+
+  function setFieldByAuthority(field,value,authority,options={}){
+    if(!field||value===null||value===undefined||value==='')return false;
+    const next=String(value);
+    const currentAuthority=fieldAuthority(field);
+    if(currentAuthority==='manual')return false;
+    if(options.onlyIfEmpty&&String(field.value||'').trim())return false;
+    if(authorityRank(currentAuthority)>authorityRank(authority))return false;
+    if(String(field.value||'')===next&&currentAuthority===authority)return false;
+    field.value=next;
+    field.dataset.invoiceAuthority=authority;
+    field.dataset.invoiceAutoFilled='true';
     field.dispatchEvent(new Event('input',{bubbles:true}));
     field.dispatchEvent(new Event('change',{bubbles:true}));
     return true;
+  }
+
+  function setBlankField(field,value){
+    return setFieldByAuthority(field,value,'structured-qr',{onlyIfEmpty:true});
+  }
+
+  function resetAutomaticInvoiceFields(form){
+    if(!form)return;
+    for(const name of MANAGED_FIELDS){
+      const field=form.elements?.[name];
+      if(!field||fieldAuthority(field)==='manual')continue;
+      const defaultValue=String(field.dataset.invoiceDefault??'');
+      if(String(field.value||'')!==defaultValue){
+        field.value=defaultValue;
+        field.dispatchEvent(new Event('input',{bubbles:true}));
+        field.dispatchEvent(new Event('change',{bubbles:true}));
+      }
+      field.dataset.invoiceAuthority=defaultValue?'form-default':'empty';
+      delete field.dataset.invoiceAutoFilled;
+      field.removeAttribute('data-invoice-review');
+    }
+    delete form.dataset.invoiceQrVerified;
+    delete form.dataset.invoiceOcrRules;
+    syncReviewFields(form);
+  }
+
+  function reviewFieldNames(form){
+    if(!form)return [];
+    return ['provider','category','dueDate','method'].filter(name=>{
+      const field=form.elements?.[name];
+      if(!field)return false;
+      return ['empty','form-default','structured-placeholder'].includes(fieldAuthority(field));
+    });
+  }
+
+  function syncReviewFields(form){
+    if(!form)return [];
+    const review=reviewFieldNames(form);
+    form.dataset.invoiceReviewFields=review.join(',');
+    for(const name of ['provider','category','dueDate','method']){
+      const field=form.elements?.[name];
+      if(!field)continue;
+      if(review.includes(name))field.dataset.invoiceReview='true';
+      else field.removeAttribute('data-invoice-review');
+    }
+    return review;
   }
 
   function requiredInvoiceFieldsReady(form){
