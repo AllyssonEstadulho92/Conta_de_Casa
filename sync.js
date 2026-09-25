@@ -658,7 +658,7 @@ function requestBackgroundSync(reason='interval'){
   const now=Date.now();
   if(now-syncLastBackgroundAt<SYNC_BACKGROUND_DEDUP_MS)return 'deduped';
   syncLastBackgroundAt=now;
-  void syncNow(reason);
+  void syncNow(reason).catch(()=>undefined);
   return 'scheduled';
 }
 
