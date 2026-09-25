@@ -51,6 +51,8 @@ assert.match(escaped, /&lt;img/);
 assert.doesNotMatch(vm.runInContext('attr(`" autofocus onfocus=alert(1)`)', context), /"/);
 
 vm.runInContext('installStorageGuards(); localStorage.setItem("cdc_public_theme", "light")', context);
+assert.doesNotThrow(() => vm.runInContext('localStorage.setItem("cdc_public_store_choice_v1", "continente")', context));
+assert.equal(vm.runInContext('localStorage.getItem("cdc_public_store_choice_v1")', context),'continente');
 assert.throws(() => vm.runInContext('localStorage.setItem("bill", "Fornecedor privado")', context), /Armazenamento em claro bloqueado/);
 assert.throws(() => vm.runInContext('sessionStorage.setItem("cdc_public_note", "amountCents=123")', context), /Armazenamento em claro bloqueado/);
 assert.throws(() => vm.runInContext('localStorage.setItem("cdc_public_auditTrail", "alteração")', context), /Armazenamento em claro bloqueado/);
