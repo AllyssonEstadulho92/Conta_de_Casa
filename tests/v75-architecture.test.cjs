@@ -170,7 +170,7 @@ assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
 assert.ok(prepare.includes("'invoice-capture.css'"));
 assert.match(prepare,/const INVOICE_CAPTURE_REV = '76-invoice-autofill7'/,'invoice runtime must use an independent cache-busting revision');
-assert.match(prepare,/const SERVICE_WORKER_REV = '76-background-efficiency5'/,'service worker URL must change for this physical iOS fix');
+assert.match(prepare,/const SERVICE_WORKER_REV = '76-local-zxing-e2e6'/,'service worker URL must change for this physical iOS fix');
 assert.ok(prepare.includes("invoice-capture\\.js\\?v=[^\"']+"),'Pages build must rewrite the invoice runtime query token');
 assert.match(sw,/conta-de-casa-public-v76-version-alignment1-76-architecture-efficiency7/);
 assert.match(sw,/expense-mode1/,'PWA cache must retain the improved expense mode control');
@@ -186,6 +186,7 @@ assert.match(sw,/expense-action-map5/,'PWA cache must include the explicit expen
 assert.match(sw,/expense-picker-unblock6/,'PWA cache must include the iOS native-picker unblock');
 assert.match(sw,/safe-refresh3/,'PWA cache must include safe reload delivery');
 assert.match(sw,/runtime-efficiency1/,'PWA cache must include the runtime efficiency pass');
+assert.match(sw,/local-zxing1/,'PWA cache must include the local ZXing hardening revision');
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
 assert.ok(sw.includes("'./invoice-capture.css'"));
