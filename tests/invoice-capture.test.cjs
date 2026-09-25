@@ -36,8 +36,8 @@ assert.match(source,/76-expense-mode-action1/,'invoice registration modes must r
 assert.match(source,/76-invoice-capture-warmup1/,'invoice reader warmup revision must remain explicit');
 assert.match(source,/MODE_COPY=Object\.freeze/);
 assert.match(source,/Ler fatura por imagem/);
-assert.match(source,/Fotografia com QR da Autoridade Tributária/);
-assert.match(source,/não faz OCR do texto completo/,'image mode must describe the real QR-in-image capability instead of promising OCR');
+assert.match(source,/OCR local \+ QR · sem enviar a fatura/);
+assert.match(source,/lê o texto localmente/,'image mode must disclose the local OCR capability');
 assert.match(source,/Ler QR da fatura/);
 assert.match(source,/Abrir câmara/);
 assert.match(source,/Selecionar imagem/);
@@ -66,7 +66,7 @@ assert.match(source,/data-invoice-apply/);
 assert.match(source,/String\(form\.elements\.id\?\.value\|\|''\)/,'capture UI must stay limited to new invoices');
 assert.doesNotMatch(source,/localStorage|sessionStorage|idbPut|idbGet|appState|saveState|commit\(/,'invoice capture must not persist files or mutate financial state directly');
 assert.doesNotMatch(source,/fetch\(|XMLHttpRequest|sendBeacon/,'invoice QR capture must not upload the invoice or its image');
-assert.doesNotMatch(source,/\.pdf|application\/pdf/i,'PDF parsing is deliberately not implemented in this local QR-only capture');
+assert.doesNotMatch(source,/\.pdf|application\/pdf/i,'PDF parsing is deliberately not implemented in this image-based local capture');
 
 const css=fs.readFileSync('invoice-capture.css','utf8');
 assert.match(css,/env\(safe-area-inset-top\)/);
@@ -103,12 +103,26 @@ assert.match(mobileTouchBlock,/\.v75-bill-tabs \[data-v75-bill-mode\]\{[\s\S]*po
 assert.match(source,/76-expense-native-input4/,'native invoice capture revision must remain explicit');
 assert.match(source,/76-expense-picker-unblock6/,'native picker unblock revision must remain explicit');
 assert.match(source,/76-invoice-autofill7/,'invoice autofill revision must remain explicit');
-assert.match(source,/function setBlankField\(field,value\)/,'autofill must use one non-destructive field writer');
+assert.match(source,/76-invoice-hierarchy8/,'generic invoice hierarchy revision must remain explicit');
+assert.match(source,/FIELD_AUTHORITY_RANK=Object\.freeze/,'invoice fields must use one authority hierarchy');
+assert.match(source,/manual:500/,'manual user edits must remain the highest authority');
+assert.match(source,/'structured-qr':400/,'structured QR data must outrank OCR');
+assert.match(source,/'ocr-labeled':350/,'labeled OCR must outrank defaults');
+assert.match(source,/function initInvoiceFieldHierarchy\(form\)/);
+assert.match(source,/if\(!event\.isTrusted\)return/,'only trusted user edits may become manual authority');
+assert.match(source,/currentAuthority==='manual'/,'automatic sources must never overwrite manual edits');
+assert.match(source,/function resetAutomaticInvoiceFields\(form\)/,'a new scan may reset only previous automatic values');
+assert.match(source,/function setBlankField\(field,value\)/,'legacy structured autofill must remain non-destructive');
 assert.match(source,/function requiredInvoiceFieldsReady\(form\)/,'autofill must verify required invoice fields after applying QR data');
 assert.match(source,/applyInvoiceToForm\(\{announce:false,focus:false\}\)/,'a valid QR must autofill the form without requiring a second button press');
 assert.match(source,/form\.elements\.title[\s\S]{0,500}form\.elements\.amount[\s\S]{0,500}form\.elements\.reference/,'autofill must cover description, total and reference');
-assert.match(source,/invoiceReviewFields='provider,category,dueDate,method'/,'fields not supplied authoritatively by the AT QR must remain marked for review');
-assert.match(source,/Categoria, vencimento e método não constam do QR da AT/,'UI must explain which required/business fields cannot be extracted from the QR');
+assert.match(source,/function syncReviewFields\(form\)/,'review state must be derived from field authority');
+assert.match(source,/data-invoice-review/,'fields without authoritative data must remain visibly reviewable');
+assert.match(source,/function applyExtractedInvoiceToForm\(data,options=\{\}\)/,'generic OCR data must use the same canonical bill form');
+assert.match(source,/function applyPendingInvoice\(options=\{\}\)/,'QR and OCR must converge before user confirmation');
+assert.match(source,/CDCInvoiceExtractor\?\.loadRules\?\.\(\{fresh:true\}\)/,'invoice rules must refresh independently for each read');
+assert.match(source,/CDCInvoiceOcr\.recognize\(file/,'invoice image mode must use local OCR');
+assert.match(source,/Promise\.all\(\[qrPromise,ocrPromise,rulesPromise/,'QR, OCR and rule loading should proceed together without serial waits');
 assert.match(source,/const QR_IMAGE_DECODE_TIMEOUT_MS=6000/,'invoice image decoding must have a hard upper bound');
 assert.match(source,/function withDecodeTimeout\(promise,timeoutMs=QR_IMAGE_DECODE_TIMEOUT_MS\)/,'all asynchronous QR image decoders must share the timeout guard');
 assert.match(source,/withDecodeTimeout\(detector\.detect\(bitmap\)\)/,'native BarcodeDetector must be bounded');
@@ -126,5 +140,7 @@ assert.match(sw,/expense-form-professional1-expense-ios-touch1/,'PWA cache must 
 assert.match(sw,/invoice-mode-action1/,'PWA cache must invalidate the previous inert invoice-mode runtime');
 assert.match(sw,/invoice-capture-warmup1/,'PWA cache must invalidate the slower first-use reader runtime');
 assert.match(sw,/invoice-autofill7/,'PWA cache must invalidate the previous manual-apply invoice runtime');
+assert.match(sw,/invoice-hierarchy1-local-ocr1/,'PWA cache must invalidate the pre-OCR invoice runtime');
+assert.match(sw,/OCR_CACHE = 'conta-de-casa-ocr-tesseract-7\.0\.0-por-1\.0\.0'/,'OCR vendor assets must use a separate versioned cache');
 
-console.log('Invoice capture tests: exact AT QR parser plus deterministic modes, professional expense UI and iOS touch stability: OK');
+console.log('Invoice capture tests: AT QR + local OCR hierarchy, manual precedence, generic invoice filling and iOS touch stability: OK');
