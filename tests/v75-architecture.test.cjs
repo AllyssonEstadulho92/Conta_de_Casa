@@ -172,7 +172,7 @@ assert.match(invoiceCss,/@media\(forced-colors:active\)[\s\S]*\.v75-bill-tabs \[
 assert.match(invoiceCss,/\.v75-bill-native-tab>\[data-v75-native-invoice\]\{[\s\S]*position:absolute!important[\s\S]*opacity:\.001!important/,'native file inputs must cover the visual tab without relying on programmatic input.click()');
 
 assert.match(prepare,/const BUILD = 'v76'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '76-security-network-copy1'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '76-month-context-sync1'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
 assert.ok(prepare.includes("'invoice-capture.css'"));
