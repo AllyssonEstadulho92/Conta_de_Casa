@@ -11,8 +11,8 @@ class StorageMock {
   clear() { this.data.clear(); }
 }
 
-const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','market-experience.js','market-barcode.js','styles.css','sw.js','manifest.webmanifest'];
-const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','market-barcode.js','sw.js'];
+const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','market-experience.js','market-barcode.js','invoice-capture.js','styles.css','sw.js','manifest.webmanifest'];
+const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','market-barcode.js','invoice-capture.js','sw.js'];
 const context = vm.createContext({
   crypto: webcrypto,
   TextEncoder,
@@ -71,15 +71,13 @@ const approvedExternalOrigins = new Set([
   'https://api.github.com',
   'https://cesta.pt',
   'https://world.openfoodfacts.org',
-  'https://images.openfoodfacts.org',
-  'https://unpkg.com'
+  'https://images.openfoodfacts.org'
 ]);
 const approvedOriginFiles = new Map([
   ['https://api.github.com',new Set(['index.html','sync.js'])],
   ['https://cesta.pt',new Set(['index.html','market-experience.js'])],
   ['https://world.openfoodfacts.org',new Set(['index.html','market-experience.js','market-barcode.js'])],
-  ['https://images.openfoodfacts.org',new Set(['index.html'])],
-  ['https://unpkg.com',new Set(['index.html','market-barcode.js'])]
+  ['https://images.openfoodfacts.org',new Set(['index.html'])]
 ]);
 for (const file of appFiles) {
   const content = fs.readFileSync(file, 'utf8');
@@ -99,7 +97,9 @@ for (const file of executableFiles) {
 
 const index = fs.readFileSync('index.html','utf8');
 assert.match(index, /Content-Security-Policy/);
-assert.match(index, /script-src 'self' https:\/\/unpkg\.com/);
+assert.match(index, /script-src 'self';/);
+assert.doesNotMatch(index,/unpkg\.com/,'runtime CSP must not allow external script CDNs');
+assert.match(index,/name="barcode-reader-src" content="\.\/vendor\/zxing-browser\.min\.js"/);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
 assert.match(index, /https:\/\/cesta\.pt/);
 assert.match(index, /https:\/\/world\.openfoodfacts\.org/);
@@ -108,8 +108,17 @@ assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline even
 assert.doesNotMatch(index, /target_name=|Destino automático/);
 
 const barcode = fs.readFileSync('market-barcode.js','utf8');
-assert.match(barcode, /https:\/\/unpkg\.com\/@zxing\/browser@0\.2\.0\/umd\/zxing-browser\.min\.js/);
-assert.doesNotMatch(barcode, /@latest|unpkg\.com\/@zxing\/browser\/umd/i, 'ZXing CDN dependency must stay pinned to an exact version');
+const invoiceCapture = fs.readFileSync('invoice-capture.js','utf8');
+const preparePages = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
+const packageJson = JSON.parse(fs.readFileSync('package.json','utf8'));
+assert.match(barcode, /const ZXING_URL='\.\/vendor\/zxing-browser\.min\.js'/);
+assert.doesNotMatch(barcode,/https:\/\/unpkg\.com|@latest/,'market scanner must not depend on a runtime CDN');
+assert.match(invoiceCapture,/url\.origin!==location\.origin/,'invoice scanner must reject cross-origin reader scripts');
+assert.match(invoiceCapture,/\/vendor\\\/zxing-browser\\\.min\\\.js\$/,'invoice scanner must accept only the vendored reader path');
+assert.doesNotMatch(invoiceCapture,/unpkg\.com/);
+assert.equal(packageJson.devDependencies['@zxing/browser'],'0.2.0');
+assert.match(preparePages,/vendor\/zxing-browser\.min\.js/);
+assert.match(preparePages,/vendor\/ZXING_LICENSE\.txt/);
 assert.match(barcode, /credentials:'omit'/);
 assert.match(barcode, /referrerPolicy:'no-referrer'/);
 assert.doesNotMatch(barcode, /localStorage|sessionStorage|idbPut|appState\.market\.push/);
