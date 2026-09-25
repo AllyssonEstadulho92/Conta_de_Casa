@@ -149,7 +149,16 @@ assert.match(source, /let syncPending = false/);
 assert.match(source, /if\(syncBusy\)\{syncPending=true;return 'syncing';\}/);
 assert.match(source, /syncPending=true;[\s\S]*if\(syncBusy\) return/);
 assert.match(source, /syncNow\('pending-change'\)/);
-assert.match(source, /window\.addEventListener\('focus'/);
+assert.match(source, /const SYNC_INTERVAL_MS = 5 \* 60 \* 1000/,'background reconciliation fallback must be five minutes, not every minute');
+assert.match(source, /const SYNC_BACKGROUND_DEDUP_MS = 15000/,'focus\/pageshow\/visibility bursts must be deduplicated');
+assert.match(source, /function syncBackgroundAllowed\(\)/);
+assert.match(source, /document\.visibilityState==='hidden'/,'automatic sync must pause while the app is hidden');
+assert.match(source, /function requestBackgroundSync\(reason='interval'\)/);
+assert.match(source, /now-syncLastBackgroundAt<SYNC_BACKGROUND_DEDUP_MS/);
+assert.match(source, /window\.addEventListener\('focus',\(\)=>requestBackgroundSync\('focus'\)/);
+assert.match(source, /window\.addEventListener\('pageshow',\(\)=>requestBackgroundSync\('pageshow'\)/);
+assert.match(source, /syncIntervalTimer=setInterval\(\(\)=>requestBackgroundSync\('interval'\),SYNC_INTERVAL_MS\)/);
+assert.doesNotMatch(source, /setInterval\(\(\)=>syncNow\('interval'\)/,'interval must not bypass visibility\/dedupe guards');
 assert.match(source, /syncHeaderStatus/);
 
 console.log('Automatic bidirectional sync queue tests: OK');
