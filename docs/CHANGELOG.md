@@ -3,6 +3,13 @@
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
 
+## 2026-09-25: `76-security-network-copy1`: descrição de rede corrigida
+
+A página Segurança deixou de afirmar **Sem CDNs**. O texto passa a declarar que o leitor QR pode carregar ZXing Browser 0.2.0 de `unpkg.com`, sem credenciais e sob a CSP existente. A sincronização e o cofre permanecem inalterados.
+
+O build passa a versionar `render.js` com `76-security-network-copy1` e invalida o Service Worker para distribuição imediata em Safari/PWA.
+
+
 ## 2026-09-25: `76-month-context-sync1`: sincronização entre Planeamento e Calendário
 
 ### Correção
