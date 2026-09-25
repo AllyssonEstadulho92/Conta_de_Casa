@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "revision": "2026-09-25.1",
+  "hierarchy": [
+    "manual",
+    "structured-qr",
+    "ocr-labeled",
+    "provider-rule",
+    "form-default"
+  ],
+  "fields": {
+    "amount": {
+      "labels": [
+        "total a pagar",
+        "valor a pagar",
+        "montante",
+        "saldo atual",
+        "total faturado no período",
+        "total faturado no periodo",
+        "total da fatura",
+        "total fatura",
+        "total"
+      ],
+      "maxCents": 999999999999
+    },
+    "dueDate": {
+      "labels": [
+        "data limite",
+        "data de vencimento",
+        "data vencimento",
+        "vencimento",
+        "pagar até",
+        "pagar ate",
+        "limite de pagamento"
+      ]
+    },
+    "issueDate": {
+      "labels": [
+        "data emissão",
+        "data emissao",
+        "data de emissão",
+        "data de emissao",
+        "emitida em",
+        "data documento"
+      ]
+    },
+    "reference": {
+      "labels": [
+        "referência",
+        "referencia",
+        "ref. multibanco",
+        "referência multibanco",
+        "referencia multibanco"
+      ]
+    },
+    "entity": {
+      "labels": [
+        "entidade",
+        "entidade multibanco"
+      ]
+    },
+    "clientNumber": {
+      "labels": [
+        "cliente nº",
+        "cliente n°",
+        "cliente no",
+        "nº cliente",
+        "n° cliente",
+        "numero cliente",
+        "número cliente"
+      ]
+    },
+    "issuerNif": {
+      "labels": [
+        "nif",
+        "nif emitente",
+        "contribuinte",
+        "número de contribuinte",
+        "numero de contribuinte"
+      ]
+    }
+  },
+  "methods": [
+    {
+      "id": "multibanco",
+      "matchAll": [
+        "entidade",
+        "referencia"
+      ],
+      "matchAny": [
+        "multibanco",
+        "mb"
+      ],
+      "value": "Referência Multibanco"
+    }
+  ],
+  "providers": [
+    {
+      "id": "goldenergy",
+      "match": [
+        "goldenergy",
+        "gold energy"
+      ],
+      "name": "Goldenergy",
+      "category": "Energia",
+      "title": "Fatura Goldenergy"
+    }
+  ]
+}
