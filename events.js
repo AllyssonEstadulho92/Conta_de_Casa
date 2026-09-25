@@ -3,6 +3,19 @@ let observedLocalMonth = currentLocalMonthKey();
 const MONTH_ROLLOVER_INTERVAL_MS = 5 * 60 * 1000;
 const APP_UPDATE_INTERVAL_MS = 15 * 60 * 1000;
 
+function selectAppMonth(value,{source='ui',render=true}={}){
+  const month=String(value||'').trim();
+  if(!/^\d{4}-\d{2}$/.test(month))return false;
+  const previous=selectedMonth;
+  selectedMonth=month;
+  monthProfile(month);
+  const picker=$('#monthPicker');
+  if(picker&&picker.value!==month)picker.value=month;
+  if(render)renderCurrentPage();
+  document.dispatchEvent(new CustomEvent('cdc:month-change',{detail:{month,previous,source,changed:previous!==month}}));
+  return true;
+}
+
 function syncMonthRollover(){
   if(!appState)return;
   const nowMonth=currentLocalMonthKey();
@@ -10,11 +23,7 @@ function syncMonthRollover(){
   const followCurrent=selectedMonth===observedLocalMonth;
   observedLocalMonth=nowMonth;
   if(!followCurrent)return;
-  selectedMonth=nowMonth;
-  monthProfile(nowMonth);
-  const picker=$('#monthPicker');
-  if(picker)picker.value=nowMonth;
-  renderCurrentPage();
+  selectAppMonth(nowMonth,{source:'month-rollover'});
   toast('Novo mês iniciado. O histórico anterior ficou guardado e os campos mensais estão prontos para novos valores.');
 }
 
@@ -391,10 +400,7 @@ function wireEvents(){
     if(!button)return;
     const value=button.dataset.calendarMonth||'';
     if(!/^\d{4}-\d{2}$/.test(value))return;
-    const picker=$('#monthPicker');
-    if(!picker)return;
-    picker.value=value;
-    picker.dispatchEvent(new Event('change',{bubbles:true}));
+    selectAppMonth(value,{source:'calendar-history'});
   });
   $('#dialogBody').addEventListener('click',async e=>{
     const pay=e.target.closest('[data-detail-pay]');
@@ -448,7 +454,7 @@ function wireEvents(){
       }
     }
   });
-  $('#monthPicker').addEventListener('change',()=>{selectedMonth=$('#monthPicker').value||selectedMonth;monthProfile();renderCurrentPage();});
+  $('#monthPicker').addEventListener('change',()=>{selectAppMonth($('#monthPicker').value||selectedMonth,{source:'month-picker'});});
   $('#monthPlanForm').addEventListener('submit',async e=>{
     e.preventDefault();
     const balanceRaw=$('#accountBalance').value.trim();
