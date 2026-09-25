@@ -22,7 +22,7 @@ assert.match(js,/76-expense-mode-stability1/);
 assert.match(js,/76-prototype-planning1/);
 assert.match(js,/76-drawer-hierarchy1/);
 assert.match(js,/76-planning-budget-card2/,'planning prototype refinement must remain explicit');
-assert.match(js,/76-planning-commitment1/,'planning commitment hierarchy must remain explicit');
+assert.match(js,/76-month-context-sync1/,'planning commitment hierarchy must remain explicit');
 assert.match(js,/bills:\['Despesas','Movimentos'\]/);
 assert.match(js,/market:\['Mercado','Compras'\]/);
 assert.match(js,/security:\['Segurança e sincronização','Conta e dados'\]/);
@@ -171,12 +171,12 @@ assert.match(invoiceCss,/@media\(forced-colors:active\)[\s\S]*\.v75-bill-tabs \[
 assert.match(invoiceCss,/\.v75-bill-native-tab>\[data-v75-native-invoice\]\{[\s\S]*position:absolute!important[\s\S]*opacity:\.001!important/,'native file inputs must cover the visual tab without relying on programmatic input.click()');
 
 assert.match(prepare,/const BUILD = 'v76'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '76-planning-commitment1'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '76-month-context-sync1'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
 assert.ok(prepare.includes("'invoice-capture.css'"));
 assert.match(prepare,/const INVOICE_CAPTURE_REV = '76-invoice-autofill7'/,'invoice runtime must use an independent cache-busting revision');
-assert.match(prepare,/const SERVICE_WORKER_REV = '76-dashboard-priority-delivery1'/,'service worker URL must change for this physical iOS fix');
+assert.match(prepare,/const SERVICE_WORKER_REV = '76-month-context-sync1'/,'service worker URL must change for this physical iOS fix');
 assert.ok(prepare.includes("invoice-capture\\.js\\?v=[^\"']+"),'Pages build must rewrite the invoice runtime query token');
 assert.match(sw,/conta-de-casa-public-v76-version-alignment1-76-architecture-efficiency7/);
 assert.match(sw,/expense-mode1/,'PWA cache must retain the improved expense mode control');
