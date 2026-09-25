@@ -79,10 +79,16 @@
  * - “Comprometido” usa o valor ainda por pagar das faturas ativas do mês;
  * - “Disponível real” desconta gasto efetivo e comprometido ao orçamento;
  * - a alteração é apenas de apresentação e reutiliza os cálculos financeiros canónicos.
+ *
+ * 76-month-sync1:
+ * - Planeamento e Calendário passam a reagir à mesma mudança canónica de mês;
+ * - o resumo visual do Planeamento deixa de depender de defaults implícitos;
+ * - alterações pelo seletor global, histórico do calendário ou setas do Planeamento
+ *   convergem no evento cdc:month-change.
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
-  const REVISION='76-planning-commitment1';
+  const REVISION='76-month-sync1';
   const LABELS=Object.freeze({
     dashboard:['Início','Visão geral'],
     bills:['Despesas','Movimentos'],
@@ -200,10 +206,10 @@
     return `<svg class="svg-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.settings}</svg>`;
   }
 
-  function dashboardMetrics(){
+  function dashboardMetrics(month=selectedMonthKey()){
     try{
-      if(typeof dashboardNumbers!=='function')return null;
-      const numbers=dashboardNumbers();
+      if(typeof dashboardNumbers!=='function'||!/^\d{4}-\d{2}$/.test(month))return null;
+      const numbers=dashboardNumbers(month);
       const spent=typeof sumCents==='function'
         ? sumCents([numbers.paymentTotal||0,numbers.marketSpent||0])
         : Number(numbers.paymentTotal||0)+Number(numbers.marketSpent||0);
@@ -218,8 +224,8 @@
     }catch(_error){return null;}
   }
 
-  function categoryEntries(){
-    try{return typeof categoryTotals==='function'?categoryTotals().filter(entry=>Number(entry?.[1])>0):[];}
+  function categoryEntries(month=selectedMonthKey()){
+    try{return typeof categoryTotals==='function'?categoryTotals(month).filter(entry=>Number(entry?.[1])>0):[];}
     catch(_error){return [];}
   }
 
@@ -363,9 +369,10 @@
   function renderPlanningArchitecture(){
     const rootNode=ensurePlanningShell();
     if(!rootNode||!appReady())return;
-    const metrics=dashboardMetrics();
-    const entries=categoryEntries().slice(0,5);
-    const key=`${selectedMonthKey()}|${metrics?.spent||0}|${metrics?.committed||0}|${metrics?.budget||0}|${metrics?.availableReal||0}|${entries.map(entry=>`${entry[0]}:${entry[1]}`).join(',')}`;
+    const month=selectedMonthKey();
+    const metrics=dashboardMetrics(month);
+    const entries=categoryEntries(month).slice(0,5);
+    const key=`${month}|${metrics?.spent||0}|${metrics?.committed||0}|${metrics?.budget||0}|${metrics?.availableReal||0}|${entries.map(entry=>`${entry[0]}:${entry[1]}`).join(',')}`;
     if(rootNode.dataset.v75Key===key)return;
     const html=planningArchitectureHtml(metrics,entries);
     if(html){
@@ -545,6 +552,10 @@
     const [year,month]=key.split('-').map(Number);
     const next=new Date(year,month-1+Number(delta||0),1);
     const value=`${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}`;
+    if(typeof selectAppMonth==='function'){
+      selectAppMonth(value,{source:'planning-step'});
+      return;
+    }
     const picker=byId('monthPicker');
     if(!picker)return;
     picker.value=value;
@@ -619,6 +630,8 @@
     },true);
     document.addEventListener('keydown',handleBillModeKeydown,true);
     window.addEventListener('hashchange',schedule,{passive:true});
+    document.addEventListener('cdc:month-change',schedule);
+    document.addEventListener('cdc:planning-change',schedule);
     root.matchMedia?.(MOBILE_QUERY)?.addEventListener?.('change',schedule);
     observer=new MutationObserver(schedule);
     const title=byId('pageTitle');if(title)observer.observe(title,{childList:true,characterData:true,subtree:true});

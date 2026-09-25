@@ -279,12 +279,13 @@ function billCardHtml(b) {
 }
 
 function renderCalendar() {
-  const [year, month] = selectedMonth.split('-').map(Number);
+  const activeMonth=selectedMonth;
+  const [year, month] = activeMonth.split('-').map(Number);
   const first = new Date(year,month-1,1); const days=new Date(year,month,0).getDate();
   const offset=(first.getDay()+6)%7;
   const headers=['S','T','Q','Q','S','S','D'].map(d=>`<div class="calendar-head">${d}</div>`).join('');
-  const numbers=monthNumbers(selectedMonth);
-  const history=monthlySpendHistory(selectedMonth,6);
+  const numbers=monthNumbers(activeMonth);
+  const history=monthlySpendHistory(activeMonth,6);
 
   setHTML('#calendarMonthSummary',[
     ['Gasto no mês',numbers.budgetUsed,'Pagamentos + compras','primary'],
@@ -296,7 +297,7 @@ function renderCalendar() {
   setHTML('#calendarHistory',history.map(item=>{
     const [hy,hm]=item.month.split('-').map(Number);
     const label=new Intl.DateTimeFormat('pt-PT',{month:'short',year:'2-digit'}).format(new Date(hy,hm-1,1));
-    return `<button type="button" class="calendar-history-item${item.month===selectedMonth?' active':''}" data-calendar-month="${attr(item.month)}"><span>${esc(label)}</span><strong data-money>${money(item.total)}</strong></button>`;
+    return `<button type="button" class="calendar-history-item${item.month===activeMonth?' active':''}" data-calendar-month="${attr(item.month)}"><span>${esc(label)}</span><strong data-money>${money(item.total)}</strong></button>`;
   }).join(''));
 
   const cells=[]; for(let i=0;i<offset;i++) cells.push('<div class="calendar-day out"></div>');
@@ -318,20 +319,21 @@ function renderCalendar() {
   }
   setHTML('#calendarGrid', headers+cells.join(''));
 
-  const monthBills=appState.bills.filter(b=>billInMonth(b)&&!b.archived&&!b.cancelled).sort(compareBillsByDue);
+  const monthBills=appState.bills.filter(b=>billInMonth(b,activeMonth)&&!b.archived&&!b.cancelled).sort(compareBillsByDue);
   setHTML('#calendarAgenda', monthBills.length?monthBills.map(b=>billRowHtml(b)).join(''):empty('Sem vencimentos neste mês.'));
 }
 
 function renderPlanning() {
-  const p=monthProfile();
-  const n=monthNumbers();
+  const activeMonth=selectedMonth;
+  const p=monthProfile(activeMonth);
+  const n=monthNumbers(activeMonth);
   $('#accountBalance').value=Number.isSafeInteger(p.accountBalanceCents)?(p.accountBalanceCents/100).toFixed(2).replace('.',','):'';
   $('#openingBalance').value=p.openingBalanceCents===0?'':(p.openingBalanceCents/100).toFixed(2).replace('.',',');
   $('#monthlyBudget').value=p.budgetCents===0?'':(p.budgetCents/100).toFixed(2).replace('.',',');
   setHTML('#accountBalanceInfo',Number.isSafeInteger(p.accountBalanceCents)
     ? `<div class="detail-grid"><div class="detail-item"><small>Saldo da conta</small><strong data-money>${money(p.accountBalanceCents)}</strong></div><div class="detail-item"><small>Saldo calculado pelos registos</small><strong data-money>${money(n.ledgerCurrent)}</strong></div><div class="detail-item full-detail"><small>Diferença de conciliação</small><strong class="${n.reconciliationDiff===0?'success-text':'warning-text'}" data-money>${money(n.reconciliationDiff)}</strong></div></div>`
     : '<p class="muted">Ainda não foi registado o saldo real da conta para este mês.</p>');
-  const incomes=appState.incomes.filter(i=>inSelectedMonth(i.receivedAt)).sort((a,b)=>new Date(b.receivedAt)-new Date(a.receivedAt));
+  const incomes=appState.incomes.filter(i=>inSelectedMonth(i.receivedAt,activeMonth)).sort((a,b)=>new Date(b.receivedAt)-new Date(a.receivedAt));
   setHTML('#incomeList', incomes.length?incomes.map(i=>`<div class="list-row"><div class="list-main"><strong>${esc(i.description)}</strong><small>${fmtDate(i.receivedAt)}</small></div><div class="list-side"><strong class="success-text" data-money>+${money(i.amountCents)}</strong><br><button class="link-btn danger-text" data-delete-income="${attr(i.id)}">Eliminar</button></div></div>`).join(''):empty('Sem rendimentos registados neste mês.'));
 }
 

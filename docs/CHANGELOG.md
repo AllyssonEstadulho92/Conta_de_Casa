@@ -3,6 +3,26 @@
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
 
+## 2026-09-25: `76-month-sync1`: Planeamento e Calendário sincronizados pelo mesmo mês
+
+### Problema
+
+Ao mudar o mês pelo seletor global, o Calendário era refeito com o novo `selectedMonth`, mas o resumo progressivo de Planeamento podia manter a composição do mês anterior. Guardar saldo/orçamento também atualizava o formulário canónico sem um sinal explícito para recompor o cartão visual.
+
+### Correção
+
+- nova função `selectAppMonth()` centraliza todas as mudanças de mês da interface;
+- histórico do Calendário, setas do Planeamento, seletor global e rollover passam pela mesma função;
+- `renderCalendar()` e `renderPlanning()` usam `activeMonth` explícito;
+- `v75-architecture.js` recebe o mês explicitamente em métricas/categorias e reage a `cdc:month-change`;
+- guardar Planeamento emite `cdc:planning-change` após persistência;
+- assets de runtime e Service Worker recebem `76-month-sync1` para atualização automática em Safari/PWA.
+
+### Preservado
+
+Sem alteração de cálculos financeiros, datas civis, schema IndexedDB, faturas, pagamentos, Mercado, cofre/PIN, cifra ou sync.
+
+
 ## 2026-09-25: `76-dashboard-priority-delivery1`: correção de atualização do Início no Safari/PWA
 
 ### Problema confirmado

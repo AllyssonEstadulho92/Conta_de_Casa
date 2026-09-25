@@ -533,3 +533,17 @@ Decisão:
 - a ativação continua a usar o reload seguro já existente e não deve interromper formulários ou edição ativa;
 - esta política é de distribuição/cache e não pode alterar estado financeiro ou persistência.
 
+## D-131: Planeamento e Calendário usam uma única autoridade de seleção mensal
+
+A variável `selectedMonth` já era partilhada pelo domínio, mas existiam vários caminhos de UI que a alteravam ou dependiam dela de forma implícita. Isso permitia que o Calendário mostrasse o mês novo enquanto o resumo progressivo de Planeamento permanecia no mês anterior até outro ciclo de composição.
+
+Decisão:
+
+- toda a mudança de mês iniciada pela interface converge em `selectAppMonth()`;
+- seletor global, histórico do Calendário, setas do Planeamento e rollover automático não devem duplicar lógica de seleção;
+- renderizadores financeiros recebem o mês explicitamente sempre que possível;
+- camadas progressivas devem reagir a `cdc:month-change` em vez de tentar inferir alterações por MutationObserver;
+- guardar os valores mensais deve emitir `cdc:planning-change` depois de persistir, para impedir cartão visual desatualizado;
+- o mês continua a ser contexto de navegação, não um novo dado persistido;
+- alterações nesta cadeia exigem revisão de assets e Service Worker para chegar a Safari/PWA já abertos.
+

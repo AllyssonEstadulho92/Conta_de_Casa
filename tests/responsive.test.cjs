@@ -125,7 +125,7 @@ try{
   assert.match(builtIndex,/design-system\.css\?v=76/);
   assert.match(builtIndex,/v75-architecture\.css\?v=76-planning-commitment1/);
   assert.match(builtIndex,/v76-planning-more\.css\?v=76-planning-more1/);
-  assert.match(builtIndex,/v75-architecture\.js\?v=76-planning-commitment1/);
+  assert.match(builtIndex,/v75-architecture\.js\?v=76-month-sync1/);
   assert.match(builtIndex,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.doesNotMatch(builtIndex,/v74-experience\.(?:css|js)/);
   assert.doesNotMatch(builtIndex,/v75-market-featured\.(?:css|js)/);

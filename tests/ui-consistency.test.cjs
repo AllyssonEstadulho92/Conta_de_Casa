@@ -161,7 +161,7 @@ try{
   assert.match(index,/v75-architecture\.css\?v=76-planning-commitment1/);
   assert.match(index,/v76-planning-more\.css\?v=76-planning-more1/);
   assert.match(index,/v75-header-refinement\.css\?v=75-header2/);
-  assert.match(index,/v75-architecture\.js\?v=76-planning-commitment1/);
+  assert.match(index,/v75-architecture\.js\?v=76-month-sync1/);
   assert.match(index,/<meta name="theme-color" content="#f4f8f8"/);
   assert.doesNotMatch(index,/v74-experience\.(?:css|js)/);
   assert.doesNotMatch(index,/v75-market-featured\.(?:css|js)/);

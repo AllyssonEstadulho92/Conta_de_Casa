@@ -124,6 +124,27 @@ Não existem logos remotos nem novas dependências. O selo de identidade usa ape
 
 Pendente: validação física em iPhone/Safari/PWA, sobretudo largura de 390 px, nomes longos, seis vencimentos e dark mode.
 
+## Planeamento e Calendário: mês canónico
+
+Revisão técnica: `76-month-sync1`.
+
+Foi identificada uma divergência real de atualização entre Planeamento e Calendário. Ambos usavam `selectedMonth`, mas a mudança de mês não tinha uma autoridade única de UI: o Calendário era refeito diretamente, enquanto o resumo progressivo de Planeamento podia manter o mês anterior quando a alteração vinha do seletor global. Depois de guardar o orçamento/saldo, o formulário canónico também era atualizado sem notificar explicitamente o resumo visual.
+
+Correção:
+
+- `selectAppMonth()` passa a ser a única função de seleção mensal para o seletor global, histórico do Calendário, setas do Planeamento e rollover automático;
+- a função valida o mês, atualiza `selectedMonth`, garante `monthProfile(month)`, sincroniza `#monthPicker`, renderiza a página ativa e emite `cdc:month-change`;
+- Calendário usa um snapshot explícito `activeMonth` para resumo, histórico e agenda;
+- Planeamento usa o mesmo `activeMonth` para perfil, números mensais e rendimentos;
+- a camada visual v75 escuta `cdc:month-change` e recebe o mês explicitamente em `dashboardNumbers(month)` e `categoryTotals(month)`;
+- ao guardar Planeamento é emitido `cdc:planning-change`, garantindo atualização imediata do cartão visual de orçamento;
+- `render.js`, `events.js` e `v75-architecture.js` recebem revisão `76-month-sync1` no bundle;
+- o Service Worker também é invalidado para que Safari/PWA já abertos recebam a correção.
+
+Preservado: fórmulas financeiras, datas civis, faturas, pagamentos, Mercado, IndexedDB, cofre/PIN e sync.
+
+Pendente: validação física no iPhone alternando setembro/outubro entre Planeamento e Calendário, incluindo guardar valores diferentes em cada mês.
+
 ## Planeamento
 
 `76-planning-budget-card2` + `76-planning-ring-shape1` permanecem integrados. A revisão `76-planning-commitment1` acrescenta uma hierarquia financeira sem alterar a origem dos dados:
