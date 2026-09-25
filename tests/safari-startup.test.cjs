@@ -22,6 +22,8 @@ assert.doesNotMatch(guard,/root\.enterApp\s*=/,'startup guard must not monkey-pa
 assert.doesNotMatch(guard,/root\.syncStartupGate\s*=/,'startup guard must not monkey-patch syncStartupGate');
 
 assert.match(events,/let startupSyncPromise=null/);
+assert.match(events,/let controllerEstablished=Boolean\(navigator\.serviceWorker\.controller\)/,'initial worker control must be distinguished from a real update');
+assert.match(events,/if\(!controllerEstablished\)\{[\s\S]{0,120}controllerEstablished=true;[\s\S]{0,120}return;/,'first service-worker claim must not force a reload');
 assert.match(events,/startupSyncPromise=Promise\.resolve\(\)[\s\S]*\.then\(\(\)=>syncStartupGate\(\)\)/);
 assert.match(events,/\$\('#app'\)\.hidden=false;[\s\S]*showPage\(currentPage\(\)\);[\s\S]*if\(startupSyncPromise\)void startupSyncPromise/,'local UI must become visible without awaiting remote sync');
 assert.doesNotMatch(events,/mayShowFinancialData/,'sync state must not gate visibility of already-unlocked local data');
@@ -44,7 +46,7 @@ assert.ok(sw.includes("'./v75-startup-guard.js'"));
 assert.match(prepare,/const STARTUP_REV = '76-startup-canonical3'/);
 assert.ok(prepare.includes("'v75-startup-guard.js'"));
 assert.match(prepare,/v75-startup-guard\.js\?v=\$\{STARTUP_REV\}/);
-assert.match(prepare,/const SERVICE_WORKER_REV = '76-background-efficiency5'/);
+assert.match(prepare,/const SERVICE_WORKER_REV = '76-local-zxing-e2e6'/);
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -55,7 +57,7 @@ try{
   assert.ok(index.indexOf('v75-startup-guard.js')>index.indexOf('v75-stability.js'),'startup guard must load after stability');
   assert.ok(fs.existsSync(path.join(dist,'v75-startup-guard.js')));
   assert.match(fs.readFileSync(path.join(dist,'v75-startup-guard.js'),'utf8'),/76-auth-canonical2/);
-  assert.match(builtEvents,/\.\/sw\.js\?v=76-background-efficiency5/);
+  assert.match(builtEvents,/\.\/sw\.js\?v=76-local-zxing-e2e6/);
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
