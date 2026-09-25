@@ -9,9 +9,13 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "build:runtime": "node scripts/build-typescript-runtime.cjs",
-    "build:pages": "node scripts/prepare-pages.cjs"
+    "build:pages": "node scripts/prepare-pages.cjs",
+    "test:e2e": "playwright test",
+    "serve:dist": "node scripts/serve-dist.cjs"
   },
   "devDependencies": {
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "@playwright/test": "1.63.0",
+    "@zxing/browser": "0.2.0"
   }
 }
