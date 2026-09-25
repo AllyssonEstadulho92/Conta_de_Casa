@@ -104,9 +104,9 @@ Atualizado: 15 de setembro de 2026
 ## P0 — Segurança + Diagnóstico + Definições
 
 - [x] `settings` usa engrenagem Lucide.
-- [ ] Corrigir texto `Sem CDNs` enquanto ZXing usar origem remota.
-- [ ] Empacotar ZXing localmente com licença preservada.
-- [ ] Depois remover a origem remota de `script-src`.
+- [x] Corrigir o texto de rede da página Segurança e alinhá-lo com os endpoints realmente usados.
+- [x] Empacotar ZXing localmente com licença MIT preservada (`76-local-zxing-e2e1`).
+- [x] Remover `unpkg.com` de `script-src`; scripts de runtime ficam same-origin.
 - [ ] Reduzir `style-src 'unsafe-inline'` quando a arquitetura permitir.
 - [ ] Rever feedback/destructive actions/dark mode/forced-colors fisicamente.
 - [ ] Confirmar offline/update da PWA após cada invalidação relevante de cache.
@@ -163,8 +163,8 @@ Atualizado: 15 de setembro de 2026
 
 - [ ] Safari/iPhone web.
 - [ ] Safari/iPhone PWA.
-- [ ] WebKit E2E.
-- [ ] Chromium E2E.
+- [x] WebKit E2E automatizado para fluxos críticos (Playwright).
+- [x] Chromium E2E automatizado para fluxos críticos (Playwright).
 - [ ] Android/Chrome.
 - [ ] tablet.
 - [ ] desktop.
@@ -300,3 +300,20 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [ ] validar no iPhone/Safari/PWA que desbloqueio abre imediatamente sem ecrã vazio.
 - [ ] validar retorno do background e atualização automática sem interromper edição.
 - [ ] medir tempos de abertura e interação em dispositivo real antes do próximo bloco de consolidação.
+
+
+## Browser E2E + scanner local
+
+- [x] `76-local-zxing-e2e1`: retirar ZXing de CDN em runtime.
+- [x] publicar runtime e licença ZXing em `dist/vendor/`.
+- [x] restringir `script-src` a `self`.
+- [x] validar no código que o leitor de faturas só aceita a origem da própria aplicação.
+- [x] adicionar Playwright 1.63.0 como ferramenta de QA.
+- [x] criar projetos Chromium desktop e WebKit/iPhone.
+- [x] testar criação local/offline do cofre depois do carregamento.
+- [x] testar criação de fatura + reload + desbloqueio + persistência.
+- [x] testar filtros móveis recolhidos no WebKit.
+- [x] testar abertura dos pickers Ler fatura/QR no WebKit.
+- [x] tornar Browser E2E parte do workflow CI que antecede Pages.
+- [ ] validar fisicamente câmara e permissões no Safari/iPhone real.
+- [ ] consolidar `style-src 'unsafe-inline'` apenas depois da redução segura da cascade histórica.
