@@ -60,6 +60,7 @@ assert.doesNotMatch(js,/<strong>\$\{metrics\.pct\}%<\/strong><span data-money>/,
 
 /* 76-planning-budget-card2: approved mobile hierarchy reuses canonical domain/actions. */
 assert.match(js,/function monthRangeLabel\(\)/,'month card must expose the real selected-month interval');
+assert.match(js,/document\.addEventListener\('cdc:month-change',schedule/,'Planning architecture must rerender whenever the shared month context changes');
 assert.match(js,/const lastDay=new Date\(year,month,0\)\.getDate\(\)/,'month interval must derive its last day instead of hard-coding it');
 assert.match(js,/iconMarkup\('chevron',20\)/,'month navigation must use the local icon system');
 assert.match(js,/class="v76-planning-budget-card"/,'planning must expose one coherent budget card');
