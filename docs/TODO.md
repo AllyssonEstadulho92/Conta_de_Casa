@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 15 de setembro de 2026
+Atualizado: 25 de setembro de 2026
 
 ## P0 — Invariantes
 
@@ -52,8 +52,14 @@ Atualizado: 15 de setembro de 2026
 - [x] `76-planning-budget-card2`: seletor mensal, resumo e CTA sem duplicar gravação.
 - [x] `76-planning-ring-shape1`: neutralizar altura legada e garantir proporção 1:1.
 - [x] Anel móvel usa 136/128/116 px conforme breakpoint.
+- [x] `76-planning-commitment1`: separar Gasto este mês, Comprometido, Orçamento e Disponível real.
+- [x] Comprometido reutiliza `monthNumbers().outstanding` sem criar nova persistência.
+- [x] Disponível real = orçamento menos gasto efetivo menos comprometido, preservando valores negativos.
+- [x] Chave de recomposição inclui comprometido para evitar resumo desatualizado.
 - [ ] Confirmar fisicamente o anel no mesmo iPhone/Safari/PWA.
 - [ ] Validar estado sem orçamento e com orçamento definido.
+- [ ] Validar Comprometido com fatura pendente, pagamento parcial, fatura vencida e fatura liquidada.
+- [ ] Validar Disponível real positivo, zero e negativo em mobile e desktop.
 - [ ] Rever calendário/vencimentos em E2E e densidade tablet/desktop.
 
 ## P0 — Calculadora de datas
