@@ -85,6 +85,24 @@ Autoridade funcional:
 
 Apresentação móvel final: `76-bills-mobile-alignment2`, com grelha contida e fallback para uma coluna antes de cortar conteúdo.
 
+## 5.1 Início e fila de pagamentos
+
+`renderDashboard()` continua a obter todos os valores de `dashboardNumbers()`. A revisão `76-dashboard-priority1` altera apenas a leitura visual dos próximos vencimentos.
+
+Contratos:
+
+- a seleção de próximos vencimentos continua limitada a faturas com `remainingForBill() > 0`, data válida e `billDaysUntil() >= 0`;
+- a ordem continua a ser produzida por `compareBillsByDue()`;
+- `dashboardUpcomingBillHtml()` recebe o índice depois da ordenação e apresenta a posição ordinal;
+- a posição é mapeada para rótulos visuais **Pagar**, **A seguir**, **Depois** e **Mais tarde**;
+- a cor da posição não é gravada no estado nem altera `billUrgency()`, `billStatus()` ou regras de vencimento;
+- a identidade visual de cada fatura usa uma inicial local e determinística, sem imagens remotas;
+- a linha inteira preserva `data-bill-id`, portanto usa o mesmo controlador de abertura da fatura;
+- o cartão de orçamento do Início continua a usar `profile.budgetCents` e `budgetUsed`; a barra é apenas apresentação e fica limitada visualmente a 0–100%;
+- nenhum destes componentes escreve em IndexedDB, altera pagamentos ou cria uma segunda fonte de verdade.
+
+Autoridade visual: `v76-product-pages.css` / `76-dashboard-priority1`. O shell móvel, safe areas e dock continuam exclusivamente em `v76-mobile-shell.css`.
+
 ## 6. Planeamento mobile
 
 `76-planning-budget-card2` + `76-planning-ring-shape1` + `76-planning-commitment1`:
