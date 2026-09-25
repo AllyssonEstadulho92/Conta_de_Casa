@@ -574,6 +574,7 @@ async function enterApp() {
   if ('serviceWorker' in navigator) {
     (async()=>{
       try{
+        let controllerEstablished=Boolean(navigator.serviceWorker.controller);
         const reg=await navigator.serviceWorker.register('./sw.js?v=53',{updateViaCache:'none'});
         window.__swRegistration=reg;
 
@@ -640,7 +641,13 @@ async function enterApp() {
             }
           };
 
-          navigator.serviceWorker.addEventListener('controllerchange',reloadForNewBuildWhenSafe);
+          navigator.serviceWorker.addEventListener('controllerchange',()=>{
+            if(!controllerEstablished){
+              controllerEstablished=true;
+              return;
+            }
+            reloadForNewBuildWhenSafe();
+          });
         }
 
         if(!window.__swUpdateTriggersBound){
