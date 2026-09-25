@@ -496,3 +496,16 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - camada de arquitetura deixa de recompor depois de clicks sem relevância;
 - revisões públicas: `76-architecture-efficiency7`, `76-startup-canonical3`, `76-background-efficiency5`, cache `runtime-efficiency1`;
 - sem alteração de `STATE_VERSION`, cálculos em cêntimos, IndexedDB, PBKDF2/AES-GCM, QR, Mercado ou regras de conflito.
+
+
+### 25 de setembro de 2026 — WebKit E2E e ZXing local
+
+- ZXing deixa de ser carregado de `unpkg.com` e passa a ser publicado same-origin a partir da dependência fixada `@zxing/browser@0.2.0`;
+- licença MIT do ZXing passa a acompanhar o bundle público;
+- CSP de scripts passa para `script-src 'self'`;
+- leitor de faturas rejeita origem de script diferente da própria aplicação;
+- disclosure de Segurança passa a refletir corretamente sync, pesquisas Mercado e hosts de imagem;
+- adicionada fundação Playwright com Chromium e WebKit/iPhone;
+- E2E cobre cofre local-first offline, persistência de faturas, filtros mobile, scanner local e pickers nativos;
+- job Browser E2E passa a integrar o workflow CI que condiciona o deploy Pages;
+- preservados domínio financeiro, cifra, IndexedDB, sync, QR AT e regras de Mercado.
