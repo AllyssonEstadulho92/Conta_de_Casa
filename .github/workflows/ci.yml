@@ -53,6 +53,8 @@ jobs:
           node --check ui-icons.js
           node --check design-asset-library.js
           node --check asset-loader.js
+          node --check invoice-extractor.js
+          node --check invoice-ocr.js
           node --check invoice-capture.js
           node --check app-update.js
           node --check market-image-library.js
@@ -96,7 +98,10 @@ jobs:
       - name: Invoice form regression tests
         run: node tests/form-regression.test.cjs
 
-      - name: Invoice QR capture tests
+      - name: Invoice extraction tests
+        run: node tests/invoice-extractor.test.cjs
+
+      - name: Invoice QR/OCR capture tests
         run: node tests/invoice-capture.test.cjs
 
       - name: Market category tests
