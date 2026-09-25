@@ -299,3 +299,22 @@ Alterações executadas:
 Impacto esperado: menos rede, menos timers ativos, menos recomposição DOM, menor consumo de bateria e menor probabilidade de sensação de bloqueio em Safari/PWA.
 
 Pendente: validação física no mesmo iPhone/Safari/PWA de arranque, desbloqueio, registo de fatura, retorno de background e atualização automática.
+
+
+## Hardening de browser e scanner local — 25/09/2026
+
+Revisão técnica: `76-local-zxing-e2e1`; Service Worker `76-local-zxing-e2e6`.
+
+Este bloco responde diretamente à auditoria de estabilidade:
+
+- o scanner ZXing deixa de ser carregado a partir de `unpkg.com`; o build fixa `@zxing/browser@0.2.0` e publica `vendor/zxing-browser.min.js` com a licença MIT em `vendor/ZXING_LICENSE.txt`;
+- `script-src` passa a aceitar apenas `self`; `invoice-capture.js` rejeita qualquer origem diferente da aplicação para o leitor QR;
+- a página Segurança e `SECURITY.md` passam a descrever a superfície de rede real, distinguindo sincronização cifrada de pesquisas/imagens do Mercado;
+- Playwright passa a fazer parte do QA com Chromium desktop e WebKit em perfil iPhone;
+- os E2E críticos cobrem cofre local offline após carregamento, persistência de fatura através de reload/desbloqueio, filtros móveis, uso de ZXing same-origin e abertura dos pickers nativos de Ler fatura/QR no WebKit;
+- o workflow CI ganha um job Browser E2E paralelo; o deploy Pages só ocorre quando o workflow CI completo termina com sucesso;
+- o servidor E2E é local e serve apenas `dist/`, com `no-store`, `nosniff` e sem backend de aplicação.
+
+Invariantes preservados: `STATE_VERSION = 5`, dinheiro em cêntimos, IndexedDB cifrado, PBKDF2/AES-GCM, regras de pagamentos, Mercado, sync e parsing QR AT.
+
+Pendente após este bloco: validação física no iPhone real continua necessária para permissões de câmara, top-layer/dialog e particularidades do Safari que não são reproduzidas integralmente pelo WebKit headless.
