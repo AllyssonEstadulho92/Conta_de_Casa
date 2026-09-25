@@ -156,6 +156,14 @@ A chave de recomposição do resumo inclui agora o valor comprometido, evitando 
 
 Pendente: validação física no mesmo iPhone/PWA, incluindo orçamento definido, ausência de orçamento, valor comprometido e cenário de disponível real negativo.
 
+## Segurança — descrição factual da rede
+
+Revisão técnica: `76-security-network-copy1`.
+
+Foi removida a afirmação incorreta **Sem CDNs** da página Segurança. O scanner QR ainda pode carregar **ZXing Browser 0.2.0** de `unpkg.com`, com versão fixada, sem credenciais e limitada pela CSP. A sincronização continua restrita ao GitHub e os dados financeiros do cofre não são enviados para o scanner.
+
+A dívida técnica de empacotar ZXing localmente permanece aberta. O Service Worker é invalidado para que a correção textual chegue também à PWA já instalada.
+
 ## Segurança — dívida aberta
 
 - corrigir o texto de rede da página Segurança enquanto existir dependência remota do scanner;
