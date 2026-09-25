@@ -631,6 +631,7 @@
     document.addEventListener('keydown',handleBillModeKeydown,true);
     window.addEventListener('hashchange',schedule,{passive:true});
     document.addEventListener('cdc:month-change',schedule);
+    document.addEventListener('cdc:planning-change',schedule);
     root.matchMedia?.(MOBILE_QUERY)?.addEventListener?.('change',schedule);
     observer=new MutationObserver(schedule);
     const title=byId('pageTitle');if(title)observer.observe(title,{childList:true,characterData:true,subtree:true});
