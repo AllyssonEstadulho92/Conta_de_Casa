@@ -1,6 +1,6 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 15 de setembro de 2026  
+Atualizado: 25 de setembro de 2026  
 Versão: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
@@ -87,13 +87,20 @@ Apresentação móvel final: `76-bills-mobile-alignment2`, com grelha contida e 
 
 ## 6. Planeamento mobile
 
-`76-planning-budget-card2` + `76-planning-ring-shape1`:
+`76-planning-budget-card2` + `76-planning-ring-shape1` + `76-planning-commitment1`:
 
 - `#monthPicker` continua a autoridade do mês;
 - `#monthPlanForm` e `#monthlyBudget` continuam a única gravação do orçamento;
 - orçamento ausente permanece `Por definir`;
 - o anel neutraliza altura legada e mantém proporção 1:1;
-- a apresentação não altera cálculos ou persistência.
+- `dashboardNumbers()` / `monthNumbers()` continuam a fonte financeira do resumo;
+- **Gasto este mês** = `paymentTotal + marketSpent`;
+- **Comprometido** = `outstanding`, já calculado pelo domínio a partir do remanescente das faturas ativas do mês;
+- **Disponível real** = `budgetCents - budgetUsed - outstanding`;
+- pagamentos parciais não são duplicados: a parte paga entra em gasto e apenas o remanescente fica comprometido;
+- a percentagem do anel continua baseada exclusivamente em gasto efetivo;
+- disponível real pode ser negativo para representar sobrecompromisso;
+- a apresentação não cria uma segunda fonte de verdade e não altera persistência, estado ou regras de pagamento.
 
 ## 7. Calculadora de datas
 

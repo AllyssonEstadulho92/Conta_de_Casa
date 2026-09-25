@@ -22,6 +22,7 @@ assert.match(js,/76-expense-mode-stability1/);
 assert.match(js,/76-prototype-planning1/);
 assert.match(js,/76-drawer-hierarchy1/);
 assert.match(js,/76-planning-budget-card2/,'planning prototype refinement must remain explicit');
+assert.match(js,/76-planning-commitment1/,'planning commitment hierarchy must remain explicit');
 assert.match(js,/bills:\['Despesas','Movimentos'\]/);
 assert.match(js,/market:\['Mercado','Compras'\]/);
 assert.match(js,/security:\['Segurança e sincronização','Conta e dados'\]/);
@@ -48,6 +49,11 @@ assert.match(js,/ensurePlanningShell/,'Planning overview shell must be owned by 
 assert.match(js,/dashboardMetrics/);
 assert.match(js,/categoryEntries/);
 assert.match(js,/const hasBudget=metrics\.budget>0/,'planning must explicitly distinguish an undefined budget from a true zero-percent usage');
+assert.match(js,/const committed=Number\(numbers\.outstanding\|\|0\)/,'planning commitment must reuse the canonical outstanding amount');
+assert.match(js,/sumCents\(\[budget,-spent,-committed\]\)/,'available real must subtract actual spend and committed bills from the budget');
+assert.match(js,/Comprometido/,'planning must expose pending bill commitments without counting them as spent');
+assert.match(js,/Disponível real/,'planning must label the post-commitment balance explicitly');
+assert.match(js,/metrics\?\.committed\|\|0/,'planning render key must refresh when outstanding commitments change');
 assert.match(js,/Orçamento mensal por definir/,'undefined budget must expose truthful accessible copy');
 assert.match(js,/Defina um orçamento mensal/);
 assert.doesNotMatch(js,/<strong>\$\{metrics\.pct\}%<\/strong><span data-money>/,'planning must not unconditionally print 0% beside Por definir');
@@ -165,7 +171,7 @@ assert.match(invoiceCss,/@media\(forced-colors:active\)[\s\S]*\.v75-bill-tabs \[
 assert.match(invoiceCss,/\.v75-bill-native-tab>\[data-v75-native-invoice\]\{[\s\S]*position:absolute!important[\s\S]*opacity:\.001!important/,'native file inputs must cover the visual tab without relying on programmatic input.click()');
 
 assert.match(prepare,/const BUILD = 'v76'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '76-architecture-efficiency7'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '76-planning-commitment1'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
 assert.ok(prepare.includes("'invoice-capture.css'"));
