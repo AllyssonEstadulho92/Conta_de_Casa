@@ -2,6 +2,45 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+
+## 2026-09-25: `76-planning-commitment1`: hierarquia de gasto, compromisso e disponível real
+
+### Alteração
+
+O resumo de Planeamento passa a distinguir quatro valores:
+
+- **Gasto este mês**: pagamentos registados e compras de Mercado concluídas;
+- **Comprometido**: valor ainda por pagar das faturas ativas do mês;
+- **Orçamento**: limite mensal configurado;
+- **Disponível real**: orçamento menos gasto efetivo menos comprometido.
+
+A fonte do compromisso é `monthNumbers().outstanding`, já existente no domínio financeiro. Pagamentos parciais continuam sem duplicação: a parte paga entra em gasto e apenas o remanescente fica comprometido.
+
+### Hierarquia e atualização
+
+- o anel continua a representar apenas a percentagem de gasto efetivo sobre o orçamento;
+- `Disponível real` pode ficar negativo para indicar sobrecompromisso;
+- o texto de orientação explica que o disponível real desconta as faturas ainda por pagar;
+- a chave de recomposição inclui `committed` e `availableReal`, evitando valores visuais desatualizados após mudanças nas faturas;
+- `v75-architecture.js` recebe a revisão `76-planning-commitment1`;
+- `scripts/prepare-pages.cjs` atualiza o token do asset da arquitetura;
+- o Service Worker mantém a política atual, porque os assets públicos são pedidos network-first com `cache:'no-store'` e a alteração não exige nova política de cache.
+
+### Preservado
+
+Sem alteração de `STATE_VERSION`, estrutura de IndexedDB, pagamentos, regras de faturas, Mercado, PIN/cofre, cifragem, sync, scanner, QR, orçamento canónico, `v76` ou `0.76.0`.
+
+### Validação necessária
+
+- testes automatizados do contrato de arquitetura;
+- cenário com orçamento e sem faturas;
+- fatura pendente;
+- pagamento parcial;
+- fatura vencida;
+- fatura totalmente paga;
+- disponível real negativo;
+- validação física em iPhone/Safari/PWA e desktop.
+
 ## 2026-09-15 — PR #165 / `76-date-calculator-prototype-inputs5` — correção WebKit/iOS dos campos de data — publicado
 
 ### Problema confirmado
