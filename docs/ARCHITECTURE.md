@@ -442,3 +442,20 @@ A aplicação verifica nova compilação ao entrar, regressar ao foreground, pag
 ### Recomposição da camada de arquitetura
 
 `v75-architecture.js` mantém `requestAnimationFrame` e MutationObservers específicos, mas deixa de agendar `apply()` para cliques sem relevância arquitetural. Isto reduz trabalho DOM em pesquisa, formulários, listas e outros controlos que já têm as suas próprias autoridades funcionais.
+
+
+## Scanner QR vendorizado
+
+O runtime de leitura de códigos deixa de depender de CDN. `@zxing/browser@0.2.0` é dependência de build e `scripts/prepare-pages.cjs` copia apenas o UMD minificado e a respetiva licença para `dist/vendor/`.
+
+`index.html` aponta `barcode-reader-src` para `./vendor/zxing-browser.min.js` e a CSP usa `script-src 'self'`. `market-barcode.js` usa o mesmo caminho local. `invoice-capture.js::readerSource()` resolve a URL contra `document.baseURI`, exige `location.origin` e restringe o pathname a `/vendor/zxing-browser.min.js`.
+
+O Service Worker inclui o runtime e a licença na allowlist pública, portanto o fallback ZXing continua disponível offline depois de o bundle ter sido instalado.
+
+## QA de browser
+
+`playwright.config.cjs` define dois projetos: Chromium desktop e WebKit com perfil iPhone. O servidor `scripts/serve-dist.cjs` expõe exclusivamente o bundle preparado em `dist/`.
+
+A suite `tests/e2e/critical-flows.spec.cjs` valida os contratos que os testes Node não conseguem provar sozinhos: desbloqueio/local-first, persistência IndexedDB através de reload, navegação real, disclosure móvel de filtros, ausência de CDN executável e file chooser dos modos de fatura no WebKit.
+
+O job `browser-e2e` faz parte do mesmo workflow `CI`; como o deploy Pages é acionado apenas quando esse workflow termina com `success`, estes fluxos passam a integrar a barreira de publicação.
