@@ -115,6 +115,19 @@ Uma revisão visual que dependa de HTML/CSS/JavaScript novo deve também produzi
 - o reload continua adiado enquanto existir formulário/dialog ativo ou um campo editável focado.
 
 Este requisito evita que um deploy correto no Pages fique invisível numa PWA restaurada pelo iOS.
+## 5.2 Contexto mensal partilhado
+
+Calendário e Planeamento usam `selectedMonth` como única referência de mês. A revisão `76-month-context-sync1` formaliza o fluxo:
+
+- alterações no `#monthPicker` passam por `selectMonthContext()`;
+- o histórico do Calendário continua a escrever no mesmo `#monthPicker` e a disparar `change`;
+- as setas do Planeamento continuam a alterar o `#monthPicker`, portanto entram no mesmo fluxo;
+- `selectMonthContext()` atualiza `selectedMonth`, chama `monthProfile(next)`, sincroniza o campo, renderiza a página ativa e emite `cdc:month-change`;
+- a arquitetura visual do Planeamento escuta `cdc:month-change` e recompõe o cartão mensal;
+- `renderCalendar()` passa a chamar `billInMonth(b, selectedMonth)` de forma explícita.
+
+Não existe cópia automática de orçamento ou saldo entre meses. Cada perfil mensal continua independente.
+
 ## 6. Planeamento mobile
 
 `76-planning-budget-card2` + `76-planning-ring-shape1` + `76-planning-commitment1`:
