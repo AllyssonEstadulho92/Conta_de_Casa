@@ -7,6 +7,19 @@ Distribuição: GitHub Pages / PWA
 Baseline funcional em `main` antes deste bloco: `47bd94951b8748fbb8bd4153e967f4b7b948fe32` (Comprometido e Disponível real integrados no Planeamento)
 Branch funcional: `main`
 
+## Auditoria transversal rápida — 76-full-audit-fixes1
+
+Auditoria executada sobre o estado publicado após `ae17e96`, abrangendo domínio financeiro, navegação, Planeamento/Calendário, faturas/pagamentos, Mercado, PWA/cache, Segurança e contratos de regressão.
+
+Erros concretos encontrados e corrigidos:
+
+- **Prioridade de pagamentos:** a lista do Início excluía faturas já vencidas porque exigia `days >= 0`. Faturas em atraso do mês podiam aparecer no alerta, mas desaparecer da fila que orienta o que pagar primeiro. A fila passa a incluir todo o saldo pendente com data válida, ordenar por vencimento e rotular segundo o estado real: **Pagar agora**, **Vence hoje**, **Prioridade**, **A seguir**, **Depois** e **Mais tarde**.
+- **Mercado / quota diária:** o catálogo visual usava `toISOString().slice(0,10)`, portanto o limite diário podia mudar segundo UTC em vez da data local do dispositivo. Passa a usar componentes civis locais.
+- **Backup:** o nome do ficheiro de backup também usava a data UTC e podia ficar com o dia anterior/próximo em determinados fusos. Passa a usar `currentLocalDateKey()`.
+- **Distribuição PWA:** `render.js` e o Service Worker recebem a revisão `76-full-audit-fixes1` para impedir reutilização do runtime anterior.
+
+Não foram alterados `STATE_VERSION`, IndexedDB, cifra, PIN/cofre, regras de pagamentos, fórmulas em cêntimos, sync ou identidade `marketId|pid`.
+
 ## Invariantes
 
 - `STATE_VERSION = 5`;
