@@ -461,13 +461,15 @@ function wireEvents(){
     const balance=balanceRaw===''?null:parseCents(balanceRaw);
     const open=parseCents($('#openingBalance').value),budget=parseCents($('#monthlyBudget').value);
     if((balance!==null&&!validCents(balance,-MAX_MONEY_CENTS))||!validCents(open,-MAX_MONEY_CENTS)||!validCents(budget,0)){toast('Valores de planeamento inválidos.');return;}
-    const p=monthProfile(),now=new Date().toISOString();
+    const activeMonth=selectedMonth;
+    const p=monthProfile(activeMonth),now=new Date().toISOString();
     p.accountBalanceCents=balance;
     p.accountBalanceUpdatedAt=balance===null?null:now;
     p.openingBalanceCents=open;
     p.budgetCents=budget;
     p.updatedAt=now;
     await commit('updated','planning');
+    document.dispatchEvent(new CustomEvent('cdc:planning-change',{detail:{month:activeMonth}}));
     toast('Planeamento guardado.');
   });
   $('#incomeList').addEventListener('click',async e=>{const b=e.target.closest('[data-delete-income]');if(b&&confirm('Eliminar este rendimento?')){if(typeof recordSyncDeletion==='function')recordSyncDeletion('income',b.dataset.deleteIncome);appState.incomes=appState.incomes.filter(x=>x.id!==b.dataset.deleteIncome);await commit('deleted','income');}});
