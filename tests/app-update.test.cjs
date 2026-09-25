@@ -137,7 +137,9 @@ assert.match(events,/window\.addEventListener\('pageshow',requestUpdate/,'restor
 assert.match(events,/window\.addEventListener\('online',requestUpdate/,'returning online must trigger an update check');
 assert.match(events,/visibilitychange[\s\S]{0,100}!document\.hidden/,'visible pages must refresh update state without aggressive polling');
 assert.match(events,/requestWaitingActivation/,'waiting workers must be activated without requiring the settings screen');
-assert.match(events,/controllerchange[\s\S]{0,220}reloadForNewBuildWhenSafe/,'taking control with a new worker must enter the safe automatic reload path');
+assert.match(events,/controllerchange[\s\S]{0,360}reloadForNewBuildWhenSafe/,'taking control with an updated worker must enter the safe automatic reload path');
+assert.match(events,/let controllerEstablished=Boolean\(navigator\.serviceWorker\.controller\)/,'runtime must distinguish first install from a genuine update');
+assert.match(events,/if\(!controllerEstablished\)\{[\s\S]{0,120}controllerEstablished=true;[\s\S]{0,120}return;/,'first worker claim must not reload an already current page');
 assert.match(events,/canReloadForNewBuild/,'automatic reload must defer while an expense form or editable field is active');
 assert.match(events,/#formDialog\[open\]/,'active expense dialogs must block mid-edit reloads');
 assert.match(events,/__swDeferredReloadTimer/,'deferred updates must retry until the page is safe to reload');
