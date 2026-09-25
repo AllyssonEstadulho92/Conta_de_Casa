@@ -486,3 +486,20 @@ Esta decisão reduz tráfego, timers e trabalho de foreground sem retirar atuali
 ## D-127 — composição visual não reage a cliques irrelevantes
 
 A camada de arquitetura só deve recompor quando existe uma alteração de arquitetura, estado observado ou ação explicitamente controlada por essa camada. O fallback histórico que chamava `schedule()` depois de qualquer click é removido para evitar trabalho duplicado sobre componentes com controladores próprios.
+
+## D-128: gasto efetivo e compromisso permanecem conceitos separados no Planeamento
+
+O orçamento mensal deve distinguir dinheiro já gasto de obrigações ainda pendentes. Criar uma fatura não transforma o respetivo valor em gasto efetivo.
+
+Decisão:
+
+- **Gasto este mês** continua a somar pagamentos registados e compras de Mercado concluídas;
+- **Comprometido** usa o valor `outstanding` já calculado por `monthNumbers()`, incluindo o remanescente de faturas pendentes, vencidas e parcialmente pagas do mês selecionado;
+- **Disponível real** é calculado como `budgetCents - budgetUsed - outstanding`;
+- um pagamento parcial entra apenas uma vez: a parte paga fica em gasto e a parte restante fica em comprometido;
+- a percentagem do orçamento continua a representar gasto efetivo, não obrigações pendentes;
+- um disponível real negativo é mostrado como tal e não é truncado para zero;
+- a camada de apresentação não persiste estes valores derivados nem cria uma segunda regra financeira;
+- alterações no comprometido fazem parte da chave de recomposição do resumo, para evitar métricas visuais desatualizadas;
+- a revisão do URL de `v75-architecture.js` é suficiente para esta alteração porque os assets públicos usam estratégia network-first com `cache:'no-store'`; não é necessária uma nova política de Service Worker para mudar a regra financeira, que permanece intacta.
+
