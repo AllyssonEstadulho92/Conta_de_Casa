@@ -4,7 +4,7 @@ Atualizado: 25 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main` antes deste bloco: `4ceb3e54a26dc39e97585d63af29b02ac8e82c7e` — filtros móveis recolhidos
+Baseline funcional em `main` antes deste bloco: `faa1494b33ee58a180307967e94f8d6c051eeac2` — startup local-first e runtime de background consolidado
 Branch funcional: `main`
 
 ## Invariantes
