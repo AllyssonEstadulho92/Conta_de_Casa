@@ -604,7 +604,7 @@
     if(!file)return;
     const mode=requestedMode==='qr'?'qr':'image';
     if(!String(file.type||'').startsWith('image/')){
-      status(mode==='qr'?'Capture uma fotografia do QR da fatura.':'Selecione uma imagem da fatura. PDFs não são processados nesta versão.','warning');
+      status(mode==='qr'?'Capture uma fotografia da fatura.':'Selecione uma imagem da fatura. PDFs não são processados nesta versão.','warning');
       return;
     }
     if(file.size<=0||file.size>MAX_IMAGE_BYTES){
@@ -613,29 +613,48 @@
     }
 
     ensureCaptureUi();
+    const form=document.querySelector('#billForm');
+    initInvoiceFieldHierarchy(form);
+    resetAutomaticInvoiceFields(form);
+    pendingInvoice=null;
     syncCaptureMode(mode);
-    status(mode==='qr'?'A ler o QR captado pela câmara…':'A procurar o QR da AT na imagem local…');
+    status('A analisar a fatura localmente…');
 
     const objectUrl=URL.createObjectURL(file);
+    let atData=null;
+    let ocrData=null;
     try{
-      const text=await decodeQrFromImage(file,objectUrl);
-      const data=parseAtInvoiceQr(text);
-      if(!data){
+      const rulesPromise=root.CDCInvoiceExtractor?.loadRules?.({fresh:true}).catch(()=>root.CDCInvoiceExtractor?.FALLBACK_RULES);
+      const qrPromise=decodeQrFromImage(file,objectUrl).then(text=>parseAtInvoiceQr(text)).catch(()=>null);
+      const ocrPromise=root.CDCInvoiceOcr?.recognize
+        ?root.CDCInvoiceOcr.recognize(file,{onProgress:progress=>{if(progress?.text)status(progress.text);}}).catch(()=>null)
+        :Promise.resolve(null);
+
+      const [qrResult,ocrResult,rulesResult]=await Promise.all([qrPromise,ocrPromise,rulesPromise||Promise.resolve(null)]);
+      atData=qrResult||null;
+      if(ocrResult?.text&&root.CDCInvoiceExtractor?.extract){
+        try{
+          ocrData=root.CDCInvoiceExtractor.extract(ocrResult.text,rulesResult||undefined);
+        }catch(_error){ocrData=null;}
+      }
+
+      const usefulOcr=Boolean(ocrData?.hasUsefulData);
+      if(!atData&&!usefulOcr){
         status(mode==='qr'
-          ?'A fotografia não contém um QR de faturação AT legível. Aproxime a câmara do código e tente novamente.'
-          :'Foi encontrado um código, mas não corresponde ao formato QR de faturação da AT.','warning');
+          ?'Não foi possível reconhecer dados suficientes nesta fotografia. Aproxime a câmara da fatura e tente novamente.'
+          :'Não foi possível reconhecer dados suficientes. Tente uma fotografia frontal, nítida e bem iluminada.',
+          'warning');
         return;
       }
-      showPreview(data);
+
+      pendingInvoice={at:atData,ocr:usefulOcr?ocrData:null};
+      showCombinedPreview(atData,usefulOcr?ocrData:null);
     }catch(_error){
-      status(mode==='qr'
-        ?'Não foi possível ler o QR nesta fotografia. Tente novamente com o código mais próximo e bem iluminado.'
-        :'Não foi possível encontrar um QR de faturação legível nesta imagem. Tente uma fotografia mais nítida.','warning');
+      status('Não foi possível concluir a leitura local desta fatura. Pode continuar no modo Manual sem perder o que já escreveu.','warning');
     }finally{
       URL.revokeObjectURL(objectUrl);
     }
   }
-
   function toggleTorch(){
     if(typeof scannerControls?.switchTorch!=='function')return;
     const button=document.querySelector('[data-invoice-torch]');
@@ -651,7 +670,7 @@
     }
     if(event.target.closest?.('[data-invoice-scanner-close]')){event.preventDefault();closeScanner();return;}
     if(event.target.closest?.('[data-invoice-torch]')){event.preventDefault();toggleTorch();return;}
-    if(event.target.closest?.('[data-invoice-apply]')){event.preventDefault();applyInvoiceToForm();}
+    if(event.target.closest?.('[data-invoice-apply]')){event.preventDefault();applyPendingInvoice();}
   }
 
   function handleChange(event){
