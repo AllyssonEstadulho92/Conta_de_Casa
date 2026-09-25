@@ -48,6 +48,11 @@
  * - remove-se o atributo for redundante dos labels para evitar dupla ativação no WebKit;
  * - desktop QR mantém o scanner ao vivo sem afetar o caminho móvel.
  *
+ * 76-runtime-efficiency7:
+ * - a arquitetura deixa de recompor a interface depois de qualquer click irrelevante;
+ * - apenas ações que realmente alteram arquitetura pedem novo ciclo de apply();
+ * - MutationObserver continua a cobrir mudanças estruturais do título, diálogo e sync.
+ *
  * 76-mobile-label-fit1:
  * - a rota continua a chamar-se Planeamento; apenas o label do dock passa a “Plano”
  *   para evitar truncamento em iPhones estreitos sem reduzir a legibilidade.
@@ -600,7 +605,6 @@
       if(target?.closest('[data-v75-sync]')){event.preventDefault();handleSync();schedule();return;}
       if(target?.closest('[data-v75-theme]')){event.preventDefault();byId('themeToggle')?.click();setTimeout(schedule,0);return;}
       if(target?.closest('[data-v75-preferences]')){event.preventDefault();handlePreferences();schedule();return;}
-      setTimeout(schedule,0);
     },true);
     document.addEventListener('keydown',handleBillModeKeydown,true);
     window.addEventListener('hashchange',schedule,{passive:true});

@@ -1,10 +1,10 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 24 de setembro de 2026  
+Atualizado: 25 de setembro de 2026  
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main`: `a80c0f9bfdbd9135dea69368ca2bde56196fab5d` — PR #165  
+Baseline funcional em `main` antes deste bloco: `4ceb3e54a26dc39e97585d63af29b02ac8e82c7e` — filtros móveis recolhidos
 Branch funcional: `main`
 
 ## Invariantes
@@ -277,3 +277,25 @@ A captura física mostrou que o cartão **Filtros** ocupava uma parte excessiva 
 - os IDs e listeners canónicos não foram substituídos nem duplicados.
 
 Objetivo: libertar área vertical e colocar resumo/lista de despesas mais perto do topo sem perder capacidade de pesquisa avançada.
+
+
+## Estabilidade e eficiência de runtime — 25/09/2026
+
+Revisão técnica: `76-runtime-efficiency1`, arquitetura `76-architecture-efficiency7`, startup `76-startup-canonical3`, Service Worker `76-background-efficiency5`.
+
+Objetivo deste bloco: reduzir trabalho de fundo e remover autoridades duplicadas sem alterar domínio financeiro, persistência, cofre, QR, Mercado ou sincronização de dados.
+
+Alterações executadas:
+
+- **startup local-first passou a canónico em `events.js`**: depois de um PIN válido, a interface local abre imediatamente; a verificação remota de sync corre em background;
+- **`v75-startup-guard.js` deixou de substituir `enterApp` e `syncStartupGate`** e mantém apenas exclusividade visual cofre/shell no Safari/PWA;
+- **sincronização automática** continua imediata após alterações locais, foco/retoma e regresso online, mas a reconciliação periódica passa de 1 minuto para 5 minutos e pausa quando a aplicação está oculta;
+- eventos próximos de foco/pageshow/visibility são deduplicados por 15 segundos;
+- **verificação de nova versão** mantém check imediato e ao regressar à aplicação/Internet, com fallback periódico de 15 minutos em vez de 30 segundos;
+- o ciclo de atualização não corre quando a aplicação está oculta ou offline;
+- a camada `v75-architecture.js` deixa de executar `apply()` depois de qualquer click irrelevante; apenas ações arquiteturais e MutationObservers dedicados pedem recomposição;
+- transição mensal de calendário mantém verificação por foco/visibilidade e reduz o fallback temporal para 5 minutos.
+
+Impacto esperado: menos rede, menos timers ativos, menos recomposição DOM, menor consumo de bateria e menor probabilidade de sensação de bloqueio em Safari/PWA.
+
+Pendente: validação física no mesmo iPhone/Safari/PWA de arranque, desbloqueio, registo de fatura, retorno de background e atualização automática.

@@ -285,3 +285,18 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [x] manter IDs, listeners e `renderBills()` como autoridades existentes.
 - [x] manter filtros sempre visíveis em desktop.
 - [ ] validar fisicamente em iPhone que a lista/resumo aparecem imediatamente sem o cartão alto de filtros.
+
+
+## Estabilidade e eficiência de runtime
+
+- [x] `76-runtime-efficiency1`: tornar startup local-first canónico em `events.js`.
+- [x] retirar monkey-patching de `enterApp` / `syncStartupGate` do startup guard.
+- [x] reduzir sync passivo para fallback de 5 min, mantendo push imediato de alterações locais.
+- [x] deduplicar triggers de sync de foco/pageshow/visibilidade.
+- [x] tornar checks da PWA event-driven com fallback de 15 min.
+- [x] suspender checks de versão em background/offline.
+- [x] remover recomposição global da arquitetura após clicks irrelevantes.
+- [x] atualizar revisões de Pages/PWA e testes de regressão.
+- [ ] validar no iPhone/Safari/PWA que desbloqueio abre imediatamente sem ecrã vazio.
+- [ ] validar retorno do background e atualização automática sem interromper edição.
+- [ ] medir tempos de abertura e interação em dispositivo real antes do próximo bloco de consolidação.

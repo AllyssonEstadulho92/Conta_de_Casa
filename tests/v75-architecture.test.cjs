@@ -96,6 +96,8 @@ assert.match(js,/function confirmNativeBillMode\(input\)/,'native photo and came
 assert.match(js,/input\.addEventListener\('change',\(\)=>confirmNativeBillMode\(input\)\)/,'native inputs must use change instead of click handlers');
 assert.doesNotMatch(js,/input\.addEventListener\('click'/,'native invoice inputs must not run JS during the picker-opening click');
 assert.match(js,/76-expense-picker-unblock6/,'iOS picker unblock revision must remain explicit');
+assert.match(js,/76-runtime-efficiency7/,'architecture efficiency revision must remain explicit');
+assert.doesNotMatch(js,/setTimeout\(schedule,0\);\s*\},true\);/,'document-level click capture must not reschedule architecture for every unrelated click');
 assert.match(js,/dialog\.dataset\.v75BillAction=action/,'dialog must expose the selected expense action for diagnostics');
 assert.match(js,/data-v75-native-invoice="image"/,'Ler fatura must expose a native image input');
 assert.match(js,/data-v75-native-invoice="qr"/,'QR Code must expose a native capture input');
@@ -163,14 +165,14 @@ assert.match(invoiceCss,/@media\(forced-colors:active\)[\s\S]*\.v75-bill-tabs \[
 assert.match(invoiceCss,/\.v75-bill-native-tab>\[data-v75-native-invoice\]\{[\s\S]*position:absolute!important[\s\S]*opacity:\.001!important/,'native file inputs must cover the visual tab without relying on programmatic input.click()');
 
 assert.match(prepare,/const BUILD = 'v76'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '76-architecture-unblock6'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '76-architecture-efficiency7'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
 assert.ok(prepare.includes("'invoice-capture.css'"));
 assert.match(prepare,/const INVOICE_CAPTURE_REV = '76-invoice-autofill7'/,'invoice runtime must use an independent cache-busting revision');
-assert.match(prepare,/const SERVICE_WORKER_REV = '76-safe-refresh4'/,'service worker URL must change for this physical iOS fix');
+assert.match(prepare,/const SERVICE_WORKER_REV = '76-background-efficiency5'/,'service worker URL must change for this physical iOS fix');
 assert.ok(prepare.includes("invoice-capture\\.js\\?v=[^\"']+"),'Pages build must rewrite the invoice runtime query token');
-assert.match(sw,/conta-de-casa-public-v76-version-alignment1-76-architecture-unblock6/);
+assert.match(sw,/conta-de-casa-public-v76-version-alignment1-76-architecture-efficiency7/);
 assert.match(sw,/expense-mode1/,'PWA cache must retain the improved expense mode control');
 assert.match(sw,/expense-mode-stability1/,'PWA cache must refresh deterministic expense mode behavior');
 assert.match(sw,/prototype-system1/,'PWA cache must refresh the approved prototype composition');
@@ -183,6 +185,7 @@ assert.match(sw,/expense-native-input4/,'PWA cache must include native invoice c
 assert.match(sw,/expense-action-map5/,'PWA cache must include the explicit expense action map');
 assert.match(sw,/expense-picker-unblock6/,'PWA cache must include the iOS native-picker unblock');
 assert.match(sw,/safe-refresh3/,'PWA cache must include safe reload delivery');
+assert.match(sw,/runtime-efficiency1/,'PWA cache must include the runtime efficiency pass');
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
 assert.ok(sw.includes("'./invoice-capture.css'"));

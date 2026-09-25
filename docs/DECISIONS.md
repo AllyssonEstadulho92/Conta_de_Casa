@@ -469,3 +469,20 @@ Quando o mês muda, a aplicação avança automaticamente para o novo mês apena
 O cartão de filtros ocupava demasiado espaço vertical numa rota em que a tarefa principal é consultar e adicionar despesas. A decisão é manter todos os filtros canónicos, mas esconder a grelha por defeito em ecrãs móveis e expô-la através de um único botão **Filtros**.
 
 Não são criados formulários alternativos nem cópias dos filtros. O mesmo `billFilterGrid` continua a alimentar `renderBills()`. Em desktop, a grelha permanece sempre visível.
+
+
+## D-125 — abertura autenticada não depende de rede
+
+Depois de um PIN válido, o cofre local já está autenticado e decifrado. A sincronização remota é opcional e não deve manter o shell oculto nem redirecionar o utilizador para Segurança enquanto a rede responde. `enterApp()` passa a mostrar a rota local imediatamente e executa `syncStartupGate()` em background.
+
+O startup guard deixa de fazer monkey-patching de `enterApp` e `syncStartupGate`; mantém apenas exclusividade visual no Safari/PWA.
+
+## D-126 — polling agressivo é substituído por eventos + fallback lento
+
+Atualizações locais continuam imediatas. Verificações remotas passivas devem privilegiar sinais reais de uso, como foco, pageshow, visibilidade e regresso online. O fallback de sync passa para 5 min e o de update da PWA para 15 min, ambos suspensos quando a aplicação está oculta/offline quando aplicável.
+
+Esta decisão reduz tráfego, timers e trabalho de foreground sem retirar atualização automática nem sincronização eventual.
+
+## D-127 — composição visual não reage a cliques irrelevantes
+
+A camada de arquitetura só deve recompor quando existe uma alteração de arquitetura, estado observado ou ação explicitamente controlada por essa camada. O fallback histórico que chamava `schedule()` depois de qualquer click é removido para evitar trabalho duplicado sobre componentes com controladores próprios.

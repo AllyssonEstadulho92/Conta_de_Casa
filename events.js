@@ -1,5 +1,7 @@
 let eventsWired = false;
 let observedLocalMonth = currentLocalMonthKey();
+const MONTH_ROLLOVER_INTERVAL_MS = 5 * 60 * 1000;
+const APP_UPDATE_INTERVAL_MS = 15 * 60 * 1000;
 
 function syncMonthRollover(){
   if(!appState)return;
@@ -536,7 +538,7 @@ function wireEvents(){
   $('#notificationsBtn').addEventListener('click',()=>{showPage('dashboard');toast('Os alertas importantes aparecem no topo do Início.');});
   window.addEventListener('focus',syncMonthRollover);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncMonthRollover();});
-  setInterval(syncMonthRollover,60000);
+  setInterval(syncMonthRollover,MONTH_ROLLOVER_INTERVAL_MS);
 }
 
 async function enterApp() {
@@ -556,34 +558,52 @@ async function enterApp() {
   wireEvents();
   installSessionLockGuards();
 
-  let startupSyncState='not-configured';
+  let startupSyncPromise=null;
   if(typeof syncStartupGate==='function'){
-    try{startupSyncState=await syncStartupGate();}
-    catch(_err){startupSyncState='error';}
+    startupSyncPromise=Promise.resolve()
+      .then(()=>syncStartupGate())
+      .catch(()=> 'error');
   }
 
   $('#app').hidden=false;
-  const mayShowFinancialData=['synced','offline-paired'].includes(startupSyncState);
-  showPage(mayShowFinancialData?currentPage():'security');
+  showPage(currentPage());
   recordUserActivity();
+
+  if(startupSyncPromise)void startupSyncPromise;
 
   if ('serviceWorker' in navigator) {
     (async()=>{
       try{
         const reg=await navigator.serviceWorker.register('./sw.js?v=53',{updateViaCache:'none'});
-        const requestWaitingActivation=()=>{
-          try{reg.waiting?.postMessage({type:'APPLY_UPDATE',reason:'automatic-refresh'});}catch(_error){}
+        window.__swRegistration=reg;
+
+        const requestWaitingActivation=registration=>{
+          try{registration?.waiting?.postMessage({type:'APPLY_UPDATE',reason:'automatic-refresh'});}catch(_error){}
         };
-        const watchInstalling=()=>{
-          const worker=reg.installing;
-          if(!worker)return;
-          worker.addEventListener('statechange',()=>{
-            if(worker.state==='installed')requestWaitingActivation();
+
+        window.__swUpdateCheck=async()=>{
+          const activeReg=window.__swRegistration;
+          if(!activeReg||document.hidden||navigator.onLine===false)return;
+          try{
+            await activeReg.update();
+            requestWaitingActivation(activeReg);
+          }catch(_error){}
+        };
+
+        window.__swObservedRegistrations ||= new WeakSet();
+        if(!window.__swObservedRegistrations.has(reg)){
+          window.__swObservedRegistrations.add(reg);
+          reg.addEventListener('updatefound',()=>{
+            const worker=reg.installing;
+            if(!worker)return;
+            worker.addEventListener('statechange',()=>{
+              if(worker.state==='installed')requestWaitingActivation(reg);
+            });
           });
-        };
-        reg.addEventListener('updatefound',watchInstalling);
-        await reg.update().catch(()=>{});
-        requestWaitingActivation();
+        }
+
+        await window.__swUpdateCheck();
+        requestWaitingActivation(reg);
 
         if(!window.__swReloadBound){
           window.__swReloadBound=true;
@@ -623,11 +643,19 @@ async function enterApp() {
           navigator.serviceWorker.addEventListener('controllerchange',reloadForNewBuildWhenSafe);
         }
 
+        if(!window.__swUpdateTriggersBound){
+          window.__swUpdateTriggersBound=true;
+          const requestUpdate=()=>{void window.__swUpdateCheck?.();};
+          window.addEventListener('focus',requestUpdate,{passive:true});
+          window.addEventListener('pageshow',requestUpdate,{passive:true});
+          window.addEventListener('online',requestUpdate,{passive:true});
+          document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestUpdate();},{passive:true});
+        }
+
         if(!window.__swAutoUpdateTimer){
           window.__swAutoUpdateTimer=setInterval(()=>{
-            if(document.hidden||navigator.onLine===false)return;
-            reg.update().then(requestWaitingActivation).catch(()=>{});
-          },30000);
+            void window.__swUpdateCheck?.();
+          },APP_UPDATE_INTERVAL_MS);
         }
       }catch(_err){}
     })();

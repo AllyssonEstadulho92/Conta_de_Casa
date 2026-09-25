@@ -483,3 +483,16 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - limpar filtros volta a recolher o painel em mobile;
 - desktop mantém a grelha aberta;
 - revisão do shell atualizada para `76-mobile-shell3` e cache invalidada com `bills-filters-collapse1`.
+
+
+### 25 de setembro de 2026 — estabilidade e eficiência de runtime
+
+- abertura após PIN passa a ser local-first diretamente no runtime canónico;
+- `v75-startup-guard.js` deixa de substituir funções e mantém apenas exclusividade visual cofre/shell;
+- sync passivo deixa de consultar a rede a cada minuto e passa a eventos + fallback de 5 min, com deduplicação;
+- alterações locais continuam a sincronizar imediatamente pelo fluxo existente;
+- atualização da PWA deixa o polling de 30 s e passa a checks em foreground/online + fallback de 15 min;
+- checks de versão não correm com a aplicação oculta ou offline;
+- camada de arquitetura deixa de recompor depois de clicks sem relevância;
+- revisões públicas: `76-architecture-efficiency7`, `76-startup-canonical3`, `76-background-efficiency5`, cache `runtime-efficiency1`;
+- sem alteração de `STATE_VERSION`, cálculos em cêntimos, IndexedDB, PBKDF2/AES-GCM, QR, Mercado ou regras de conflito.
