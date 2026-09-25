@@ -26,6 +26,7 @@ assert.match(source,/BACKGROUND_IMAGE_INTERVAL_MS=7000/);
 assert.match(source,/stores:\[STORE_ID\],limit:20/);
 assert.match(source,/navigator\.connection\?\.saveData/);
 assert.match(source,/document\.visibilityState==='hidden'/);
+assert.match(source,/document\.querySelector\('#page-market\.page\.active'\)/,'Pingo Doce background network work must run only while Mercado is active');
 assert.match(source,/CDCMarketImageLibrary/);
 assert.match(source,/CDCOfficialMarketImages/);
 assert.match(source,/Biblioteca Pingo Doce/);
