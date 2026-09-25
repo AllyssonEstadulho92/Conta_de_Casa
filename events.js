@@ -5,7 +5,7 @@ const APP_UPDATE_INTERVAL_MS = 15 * 60 * 1000;
 
 function selectAppMonth(value,{source='ui',render=true}={}){
   const month=String(value||'').trim();
-  if(!/^\d{4}-\d{2}$/.test(month))return false;
+  if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))return false;
   const previous=selectedMonth;
   selectedMonth=month;
   monthProfile(month);
