@@ -69,6 +69,8 @@ assert.match(shell,/76-auth-transition1/);
 assert.match(shell,/#vaultScreen:not\(\[hidden\]\) \+ #app\{[\s\S]*display:none!important/);
 assert.match(shell,/76-ui-audit1/);
 assert.match(shell,/76-bills-filter-collapse1/,'mobile shell must own the compact filter disclosure');
+assert.match(shell,/76-desktop-dock-hide1/,'desktop shell must explicitly hide the mobile dock');
+assert.match(shell,/@media\(min-width:821px\)[\s\S]*\.mobile-nav\{[\s\S]*display:none!important/,'mobile dock must not coexist with the desktop sidebar');
 assert.match(shell,/#page-bills:not\(\.bill-filters-open\)>\.bill-filter-grid\{[\s\S]*display:none!important/,'advanced bill filters must be collapsed by default on mobile');
 assert.match(shell,/#page-bills\.bill-filters-open>\.bill-filter-grid\{[\s\S]*display:grid!important/,'filter toggle must restore the canonical controls');
 assert.match(shell,/#billFiltersToggle\{[\s\S]*display:inline-flex!important/,'mobile filter disclosure must remain a visible touch target');
