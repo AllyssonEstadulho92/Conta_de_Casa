@@ -1109,3 +1109,11 @@ html.cdc-v75 #page-bills #billFiltersToggle{
   html.cdc-v75 #page-bills #billFiltersToggle{border-color:CanvasText!important}
   html.cdc-v75 #page-bills .bill-filter-count{background:Highlight!important;color:HighlightText!important}
 }
+
+
+/* 76-desktop-dock-hide1 — o dock móvel não pode coexistir com a sidebar desktop. */
+@media(min-width:821px){
+  html.cdc-v75.app-active body .mobile-nav{
+    display:none!important;
+  }
+}
