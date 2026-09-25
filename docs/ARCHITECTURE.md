@@ -85,13 +85,23 @@ Autoridade funcional:
 
 Apresentação móvel final: `76-bills-mobile-alignment2`, com grelha contida e fallback para uma coluna antes de cortar conteúdo.
 
+## 4.1 Datas civis em funcionalidades locais
+
+A aplicação distingue timestamps absolutos de datas civis do utilizador. Funcionalidades cuja semântica é **o dia local** não podem derivar a data através de `toISOString().slice(0,10)`, porque isso usa UTC.
+
+Contratos reforçados em `76-full-audit-fixes1`:
+
+- o limite diário do catálogo do Mercado usa ano/mês/dia locais;
+- o nome do backup cifrado usa `currentLocalDateKey()`;
+- timestamps de auditoria, pagamentos, sync e `updatedAt` continuam ISO UTC, porque representam instantes absolutos.
+
 ## 5.1 Início e fila de pagamentos
 
 `renderDashboard()` continua a obter todos os valores de `dashboardNumbers()`. A revisão `76-dashboard-priority1` altera apenas a leitura visual dos próximos vencimentos.
 
 Contratos:
 
-- a seleção de próximos vencimentos continua limitada a faturas com `remainingForBill() > 0`, data válida e `billDaysUntil() >= 0`;
+- a fila de prioridade inclui faturas do mês com `remainingForBill() > 0` e data válida, incluindo vencidas; a ordenação continua cronológica por vencimento;
 - a ordem continua a ser produzida por `compareBillsByDue()`;
 - `dashboardUpcomingBillHtml()` recebe o índice depois da ordenação e apresenta a posição ordinal;
 - a posição é mapeada para rótulos visuais **Pagar**, **A seguir**, **Depois** e **Mais tarde**;
