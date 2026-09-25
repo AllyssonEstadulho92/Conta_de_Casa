@@ -3,7 +3,8 @@
 const SYNC_API_ROOT = 'https://api.github.com';
 const SYNC_DEFAULT_PATH = 'sync/vault.json';
 const SYNC_FORMAT_VERSION = 1;
-const SYNC_INTERVAL_MS = 60000;
+const SYNC_INTERVAL_MS = 5 * 60 * 1000;
+const SYNC_BACKGROUND_DEDUP_MS = 15000;
 const SYNC_PUSH_DELAY_MS = 1400;
 const SYNC_RETRY_DELAYS_MS = [5000,15000,60000,180000,300000];
 
@@ -21,6 +22,7 @@ let syncRetryTimer = null;
 let syncRetryAttempt = 0;
 let syncCredentialTimer = null;
 let syncReviewBusy = false;
+let syncLastBackgroundAt = 0;
 
 const SYNC_CONFLICT_FIELDS = Object.freeze({
   bill:['title','provider','category','totalCents','dueDate','dueTime','issueAt','method','recurrence','reference','notes','cancelled','archived'],
@@ -643,6 +645,21 @@ async function pushLocalEncryptedVault(token,cfg,remote=null,revision=null) {
   const confirmed=await confirmRemoteWrite(token,cfg,sha,nextRevision);
   await saveSyncDeviceMeta({lastRemoteSha:confirmed.sha,lastRevision:confirmed.revision,lastSyncedAt:new Date().toISOString()});
   return {sha:confirmed.sha,revision:confirmed.revision};
+}
+
+function syncBackgroundAllowed(){
+  if(!appState||!vaultKey||navigator.onLine===false)return false;
+  if(typeof document!=='undefined'&&document.visibilityState==='hidden')return false;
+  return Boolean(syncConfig()?.enabled);
+}
+
+function requestBackgroundSync(reason='interval'){
+  if(!syncBackgroundAllowed())return 'paused';
+  const now=Date.now();
+  if(now-syncLastBackgroundAt<SYNC_BACKGROUND_DEDUP_MS)return 'deduped';
+  syncLastBackgroundAt=now;
+  void syncNow(reason);
+  return 'scheduled';
 }
 
 async function syncNow(reason='manual') {
@@ -1292,12 +1309,12 @@ function startSyncLifecycle(options={}) {
   renderSyncUi();
   if(!syncLifecycleInstalled){
     syncLifecycleInstalled=true;
-    window.addEventListener('online',()=>syncNow('online'));
-    window.addEventListener('focus',()=>syncNow('focus'));
-    window.addEventListener('pageshow',()=>syncNow('pageshow'));
-    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible') syncNow('visible');});
+    window.addEventListener('online',()=>requestBackgroundSync('online'),{passive:true});
+    window.addEventListener('focus',()=>requestBackgroundSync('focus'),{passive:true});
+    window.addEventListener('pageshow',()=>requestBackgroundSync('pageshow'),{passive:true});
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')requestBackgroundSync('visible');},{passive:true});
   }
   clearInterval(syncIntervalTimer);
-  syncIntervalTimer=setInterval(()=>syncNow('interval'),SYNC_INTERVAL_MS);
-  if(!options.skipInitial) setTimeout(()=>syncNow('unlock'),700);
+  syncIntervalTimer=setInterval(()=>requestBackgroundSync('interval'),SYNC_INTERVAL_MS);
+  if(!options.skipInitial)setTimeout(()=>requestBackgroundSync('unlock'),700);
 }
