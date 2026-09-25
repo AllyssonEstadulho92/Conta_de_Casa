@@ -63,6 +63,13 @@ Atualizado: 25 de setembro de 2026
 
 ## P0 — Planeamento + Calendário
 
+- [x] `76-month-sync1`: unificar mudança de mês entre seletor global, Planeamento, Calendário e rollover.
+- [x] Planeamento e Calendário usam `activeMonth` explícito nos cálculos/renderização do ciclo.
+- [x] Resumo visual de Planeamento reage a `cdc:month-change` e `cdc:planning-change`.
+- [x] Versionar `render.js`, `events.js`, `v75-architecture.js` e Service Worker para entrega PWA.
+- [ ] Validar no iPhone setembro → outubro → setembro em Planeamento e Calendário sem divergência visual.
+- [ ] Guardar orçamento/saldo diferentes em dois meses e confirmar isolamento mensal após alternância.
+
 - [x] Planeamento v76 e estado `Por definir` para orçamento ausente.
 - [x] `plan` usa `CalendarCheck2` do snapshot Lucide fixado.
 - [x] `76-planning-budget-card2`: seletor mensal, resumo e CTA sem duplicar gravação.
