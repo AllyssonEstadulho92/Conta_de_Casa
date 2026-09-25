@@ -8,6 +8,9 @@ const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
 const GENERATED = path.join(ROOT, '.generated');
 const ZXING_PACKAGE_ROOT = path.join(ROOT,'node_modules','@zxing','browser');
+const TESSERACT_PACKAGE_ROOT = path.join(ROOT,'node_modules','tesseract.js');
+const TESSERACT_CORE_ROOT = path.join(ROOT,'node_modules','tesseract.js-core');
+const TESSERACT_POR_ROOT = path.join(ROOT,'node_modules','@tesseract.js-data','por');
 const BUILD_TYPESCRIPT_RUNTIME = path.join(ROOT, 'scripts', 'build-typescript-runtime.cjs');
 const GENERATED_PUBLIC_FILES = Object.freeze({
   'market-branding.js': path.join(GENERATED, 'market-branding.js'),
@@ -16,6 +19,37 @@ const GENERATED_PUBLIC_FILES = Object.freeze({
   'vendor/zxing-browser.min.js': path.join(ZXING_PACKAGE_ROOT,'umd','zxing-browser.min.js'),
   'vendor/ZXING_LICENSE.txt': path.join(ZXING_PACKAGE_ROOT,'LICENSE')
 });
+function firstExisting(candidates,label){
+  const found=candidates.find(candidate=>fs.existsSync(candidate)&&fs.statSync(candidate).isFile());
+  if(!found)throw new Error(`Required runtime asset missing: ${label}`);
+  return found;
+}
+
+const OCR_VENDOR_FILES = Object.freeze({
+  'vendor/ocr/tesseract.min.js': path.join(TESSERACT_PACKAGE_ROOT,'dist','tesseract.min.js'),
+  'vendor/ocr/worker.min.js': path.join(TESSERACT_PACKAGE_ROOT,'dist','worker.min.js'),
+  'vendor/ocr/lang/por.traineddata.gz': path.join(TESSERACT_POR_ROOT,'4.0.0_best_int','por.traineddata.gz'),
+  'vendor/ocr/TESSERACT_JS_LICENSE.txt': firstExisting([
+    path.join(TESSERACT_PACKAGE_ROOT,'LICENSE.md'),
+    path.join(TESSERACT_PACKAGE_ROOT,'LICENSE')
+  ],'Tesseract.js license'),
+  'vendor/ocr/TESSERACT_CORE_LICENSE.txt': firstExisting([
+    path.join(TESSERACT_CORE_ROOT,'LICENSE'),
+    path.join(TESSERACT_CORE_ROOT,'LICENSE.md')
+  ],'Tesseract core license'),
+  'vendor/ocr/TESSDATA_LICENSE.txt': firstExisting([
+    path.join(TESSERACT_POR_ROOT,'LICENSE'),
+    path.join(TESSERACT_POR_ROOT,'LICENSE.md'),
+    path.join(TESSERACT_POR_ROOT,'../../@tesseract.js-data/por/LICENSE')
+  ],'Portuguese tessdata license')
+});
+
+for(const name of fs.readdirSync(TESSERACT_CORE_ROOT)){
+  if(/^tesseract-core.*\.(?:js|wasm)$/.test(name)){
+    OCR_VENDOR_FILES[`vendor/ocr/core/${name}`]=path.join(TESSERACT_CORE_ROOT,name);
+  }
+}
+
 const PACKAGE = JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
 const APP_VERSION = String(PACKAGE.version||'').trim();
 const BUILD = 'v76';
@@ -45,7 +79,9 @@ const CATALOG_REV = '75-catalog4';
 const PD_PHOTO_REV = '75-pd-photo1';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
-const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
+const INVOICE_CAPTURE_REV = '76-invoice-hierarchy8';
+const INVOICE_EXTRACTOR_REV = '76-invoice-hierarchy1';
+const INVOICE_OCR_REV = '76-invoice-local-ocr1';
 const SERVICE_WORKER_REV = '76-local-zxing-e2e6';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
@@ -118,6 +154,8 @@ const PUBLIC_FILES = Object.freeze([
   'ui-icons.js',
   'design-asset-library.js',
   'asset-loader.js',
+  'invoice-extractor.js',
+  'invoice-ocr.js',
   'invoice-capture.js',
   'app-update.js',
   'market-image-library.js',
@@ -135,6 +173,7 @@ const PUBLIC_FILES = Object.freeze([
   'v75-stability.js',
   'v75-startup-guard.js',
   'v75-market-flow.js',
+  'invoice-extraction-rules.json',
   'release-manifest.json',
   'sw.js',
   'manifest.webmanifest',
@@ -159,13 +198,18 @@ execFileSync(process.execPath,[BUILD_TYPESCRIPT_RUNTIME],{cwd:ROOT,stdio:'inheri
 fs.rmSync(DIST,{recursive:true,force:true});
 fs.mkdirSync(DIST,{recursive:true});
 
-for(const name of PUBLIC_FILES){
-  const source=GENERATED_PUBLIC_FILES[name]||path.join(ROOT,name);
+function copyAsset(name,source){
   if(!fs.existsSync(source)||!fs.statSync(source).isFile())throw new Error(`Public Pages asset missing: ${name}`);
   const destination=path.join(DIST,name);
   fs.mkdirSync(path.dirname(destination),{recursive:true});
   fs.copyFileSync(source,destination);
 }
+
+for(const name of PUBLIC_FILES){
+  const source=GENERATED_PUBLIC_FILES[name]||path.join(ROOT,name);
+  copyAsset(name,source);
+}
+for(const [name,source] of Object.entries(OCR_VENDOR_FILES))copyAsset(name,source);
 
 const distIndex=path.join(DIST,'index.html');
 let index=fs.readFileSync(distIndex,'utf8');
@@ -176,9 +220,12 @@ if(!index.includes('name="app-version"')){
 }
 index=index.replace(/<meta name="theme-color" content="[^"]+"\s*\/>/,'<meta name="theme-color" content="#f4f8f8" />');
 index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
-index=index.replace("script-src 'self' https://unpkg.com;","script-src 'self';");
+index=index.replace("script-src 'self' https://unpkg.com;","script-src 'self' 'wasm-unsafe-eval'; worker-src 'self';");
+index=index.replace("script-src 'self';","script-src 'self' 'wasm-unsafe-eval'; worker-src 'self';");
 index=index.replace(/<meta name="barcode-reader-src" content="[^"]+"\s*\/>/, '<meta name="barcode-reader-src" content="./vendor/zxing-browser.min.js" />');
 index=index.replace(/invoice-capture\.css\?v=[^"']+/,`invoice-capture.css?v=${INVOICE_CAPTURE_REV}`);
+index=index.replace(/invoice-extractor\.js\?v=[^"']+/,`invoice-extractor.js?v=${INVOICE_EXTRACTOR_REV}`);
+index=index.replace(/invoice-ocr\.js\?v=[^"']+/,`invoice-ocr.js?v=${INVOICE_OCR_REV}`);
 index=index.replace(/invoice-capture\.js\?v=[^"']+/,`invoice-capture.js?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${APP_VERSION} · ${BUILD}</strong>`);
 
@@ -259,10 +306,10 @@ for(const entry of forbidden){
   if(fs.existsSync(path.join(DIST,entry)))throw new Error(`Forbidden file copied into Pages bundle: ${entry}`);
 }
 
-for(const name of Object.keys(GENERATED_PUBLIC_FILES)){
+for(const name of [...Object.keys(GENERATED_PUBLIC_FILES),...Object.keys(OCR_VENDOR_FILES)]){
   if(!fs.existsSync(path.join(DIST,name))){
-    throw new Error(`Pages bundle is missing TypeScript-generated ${name}.`);
+    throw new Error(`Pages bundle is missing generated/vendor asset ${name}.`);
   }
 }
 
-console.log(`Prepared ${PUBLIC_FILES.length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; architecture ${ARCHITECTURE_REV}; planning-more ${PLANNING_MORE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}; date-calculator ${DATE_CALCULATOR_REV}).`);
+console.log(`Prepared ${PUBLIC_FILES.length + Object.keys(OCR_VENDOR_FILES).length} public GitHub Pages assets in dist/ for app ${APP_VERSION}, ${BUILD}, build ${BUILD_ID} (${APP_UPDATE_REV}; ${UI_REV}; categories ${CATEGORY_REV}; runtime ${RUNTIME_REV}; shopping ${SHOPPING_REV}; menu ${MENU_REV}; modern-ui ${MODERN_UI_REV}; product-pages ${PRODUCT_PAGES_REV}; mobile-shell ${MOBILE_SHELL_REV}; architecture ${ARCHITECTURE_REV}; planning-more ${PLANNING_MORE_REV}; header ${HEADER_REV}; stability ${STABILITY_REV}; startup ${STARTUP_REV}; layout ${LAYOUT_REV}; pages ${PAGES_REV}; expenses ${EXPENSES_REV}; drawer ${DRAWER_REV}; usability ${USABILITY_REV}; assets ${ASSETS_REV}; market-flow ${MARKET_FLOW_REV}; image-library ${IMAGE_LIBRARY_REV}; visual-catalog ${CATALOG_REV}; pingo-doce-photos ${PD_PHOTO_REV}; photo-loader ${PHOTO_LOADER_REV}; date-calculator ${DATE_CALCULATOR_REV}).`);
