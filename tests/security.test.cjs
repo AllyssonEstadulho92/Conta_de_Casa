@@ -11,8 +11,8 @@ class StorageMock {
   clear() { this.data.clear(); }
 }
 
-const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','market-experience.js','market-barcode.js','invoice-capture.js','styles.css','sw.js','manifest.webmanifest'];
-const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','market-barcode.js','invoice-capture.js','sw.js'];
+const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','market-experience.js','market-barcode.js','invoice-extractor.js','invoice-ocr.js','invoice-capture.js','styles.css','sw.js','manifest.webmanifest'];
+const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','market-barcode.js','invoice-extractor.js','invoice-ocr.js','invoice-capture.js','sw.js'];
 const context = vm.createContext({
   crypto: webcrypto,
   TextEncoder,
@@ -97,7 +97,7 @@ for (const file of executableFiles) {
 
 const index = fs.readFileSync('index.html','utf8');
 assert.match(index, /Content-Security-Policy/);
-assert.match(index, /script-src 'self';/);
+assert.match(index, /script-src 'self' 'wasm-unsafe-eval'; worker-src 'self';/,'OCR WebAssembly and its worker must remain same-origin');
 assert.doesNotMatch(index,/unpkg\.com/,'runtime CSP must not allow external script CDNs');
 assert.match(index,/name="barcode-reader-src" content="\.\/vendor\/zxing-browser\.min\.js"/);
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
@@ -108,6 +108,8 @@ assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline even
 assert.doesNotMatch(index, /target_name=|Destino automático/);
 
 const barcode = fs.readFileSync('market-barcode.js','utf8');
+const invoiceExtractor = fs.readFileSync('invoice-extractor.js','utf8');
+const invoiceOcr = fs.readFileSync('invoice-ocr.js','utf8');
 const invoiceCapture = fs.readFileSync('invoice-capture.js','utf8');
 const preparePages = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const packageJson = JSON.parse(fs.readFileSync('package.json','utf8'));
@@ -117,6 +119,16 @@ assert.match(invoiceCapture,/url\.origin!==location\.origin/,'invoice scanner mu
 assert.match(invoiceCapture,/\/vendor\\\/zxing-browser\\\.min\\\.js\$/,'invoice scanner must accept only the vendored reader path');
 assert.doesNotMatch(invoiceCapture,/unpkg\.com/);
 assert.equal(packageJson.devDependencies['@zxing/browser'],'0.2.0');
+assert.equal(packageJson.devDependencies['tesseract.js'],'7.0.0');
+assert.equal(packageJson.devDependencies['tesseract.js-core'],'7.0.0');
+assert.equal(packageJson.devDependencies['@tesseract.js-data/por'],'1.0.0');
+assert.match(invoiceOcr,/\.\/vendor\/ocr\/tesseract\.min\.js/);
+assert.match(invoiceOcr,/\.\/vendor\/ocr\/worker\.min\.js/);
+assert.match(invoiceOcr,/\.\/vendor\/ocr\/core/);
+assert.match(invoiceOcr,/\.\/vendor\/ocr\/lang/);
+assert.doesNotMatch(invoiceOcr,/https?:\/\//,'OCR runtime must not contain remote service URLs');
+assert.match(invoiceExtractor,/fetch\(`\$\{RULES_URL\}\?ts=/,'extraction rules may refresh only through a same-origin relative URL');
+assert.match(invoiceExtractor,/cache:'no-store'/,'invoice rules must bypass stale HTTP cache');
 assert.match(preparePages,/vendor\/zxing-browser\.min\.js/);
 assert.match(preparePages,/vendor\/ZXING_LICENSE\.txt/);
 assert.match(barcode, /credentials:'omit'/);
