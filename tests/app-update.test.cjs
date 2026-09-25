@@ -150,7 +150,7 @@ assert.match(prepare, /const APP_VERSION = String\(PACKAGE\.version/);
 assert.match(prepare, /git'.*rev-parse.*--short=7.*HEAD/s);
 assert.match(prepare, /const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(prepare, /const BUILD = 'v76'/);
-assert.match(prepare, /const SERVICE_WORKER_REV = '76-month-context-sync1'/);
+assert.match(prepare, /const SERVICE_WORKER_REV = '76-security-network-copy1'/);
 assert.match(prepare, /name="app-version"/);
 assert.match(prepare, /name="app-build-id"/);
 assert.match(prepare, /name="app-build-date"/);
@@ -211,7 +211,7 @@ try {
   assert.ok(index.includes(`id="appBuildVersion">${packageJson.version} · v76</strong>`));
   assert.match(index, /invoice-capture\.css\?v=76-invoice-autofill7/);
   assert.match(index, /invoice-capture\.js\?v=76-invoice-autofill7/);
-  assert.match(events, /\.\/sw\.js\?v=76-month-context-sync1/);
+  assert.match(events, /\.\/sw\.js\?v=76-security-network-copy1/);
   assert.equal(distManifest.latestVersion,'v76');
   assert.equal(distManifest.releases[0].version,'v76');
   assert.equal(distWebManifest.background_color,'#f4f8f8');

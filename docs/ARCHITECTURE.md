@@ -145,6 +145,18 @@ Não existe cópia automática de orçamento ou saldo entre meses. Cada perfil m
 - disponível real pode ser negativo para representar sobrecompromisso;
 - a apresentação não cria uma segunda fonte de verdade e não altera persistência, estado ou regras de pagamento.
 
+## 6.1 Rede e scanner QR
+
+A página Segurança deve refletir as dependências reais da aplicação. Enquanto `invoice-capture.js` e `market-barcode.js` puderem carregar ZXing Browser 0.2.0 de `unpkg.com`, não é permitido afirmar que a aplicação funciona sem CDN.
+
+Contrato atual:
+
+- `script-src` autoriza `self` e `https://unpkg.com`;
+- ZXing é fixado em `@zxing/browser@0.2.0`;
+- o carregamento usa `referrerPolicy='no-referrer'` e não envia credenciais;
+- o scanner não recebe o estado financeiro cifrado;
+- a remoção de `unpkg.com` da CSP só pode ocorrer depois de ZXing estar empacotado localmente.
+
 ## 7. Calculadora de datas
 
 ### 7.1 Autoridade funcional — `76-date-calculator1`

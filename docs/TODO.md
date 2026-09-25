@@ -131,7 +131,7 @@ Atualizado: 25 de setembro de 2026
 ## P0 — Segurança + Diagnóstico + Definições
 
 - [x] `settings` usa engrenagem Lucide.
-- [ ] Corrigir texto `Sem CDNs` enquanto ZXing usar origem remota.
+- [x] `76-security-network-copy1`: corrigir texto `Sem CDNs` enquanto ZXing usar origem remota.
 - [ ] Empacotar ZXing localmente com licença preservada.
 - [ ] Depois remover a origem remota de `script-src`.
 - [ ] Reduzir `style-src 'unsafe-inline'` quando a arquitetura permitir.

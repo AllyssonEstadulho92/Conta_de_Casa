@@ -97,9 +97,12 @@ for (const file of executableFiles) {
   assert.doesNotMatch(fs.readFileSync(file, 'utf8'), /console\./, `${file} must not write app data to console`);
 }
 
+const render = fs.readFileSync('render.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 assert.match(index, /Content-Security-Policy/);
 assert.match(index, /script-src 'self' https:\/\/unpkg\.com/);
+assert.doesNotMatch(render,/Sem CDNs/,'Security copy must not claim there are no CDNs while ZXing is loaded from unpkg');
+assert.match(render,/ZXing 0\.2\.0 de unpkg\.com/,'Security copy must disclose the pinned external QR scanner dependency');
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
 assert.match(index, /https:\/\/cesta\.pt/);
 assert.match(index, /https:\/\/world\.openfoodfacts\.org/);
