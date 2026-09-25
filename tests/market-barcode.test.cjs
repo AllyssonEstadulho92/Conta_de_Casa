@@ -10,15 +10,20 @@ const pages=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 
 assert.match(index,/market-barcode\.css\?v=53/);
 assert.match(index,/market-barcode\.js\?v=53/);
-assert.match(index,/script-src 'self' https:\/\/unpkg\.com;/);
+assert.match(index,/script-src 'self';/);
+assert.doesNotMatch(index,/unpkg\.com/);
 assert.match(index,/connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt https:\/\/world\.openfoodfacts\.org;/);
 for(const asset of ['market-barcode.css','market-barcode.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be cached by the service worker`);
   assert.ok(pages.includes(`'${asset}'`),`${asset} must be included in the Pages bundle`);
 }
+assert.ok(sw.includes("'./vendor/zxing-browser.min.js'"),'vendored ZXing must be cached for offline scanner use');
+assert.ok(pages.includes("'vendor/zxing-browser.min.js'"),'vendored ZXing must be included in the Pages bundle');
+assert.ok(pages.includes("'vendor/ZXING_LICENSE.txt'"),'ZXing MIT license must ship with the public bundle');
 assert.match(js,/facingMode:\{ideal:'environment'\}/);
 assert.match(js,/https:\/\/world\.openfoodfacts\.org\/api\/v2\/product\//);
-assert.match(js,/https:\/\/unpkg\.com\/@zxing\/browser@0\.2\.0\/umd\/zxing-browser\.min\.js/);
+assert.match(js,/const ZXING_URL='\.\/vendor\/zxing-browser\.min\.js'/);
+assert.doesNotMatch(js,/unpkg\.com/);
 assert.match(js,/vídeo não é guardado nem enviado/i);
 assert.match(js,/dispatchEvent\(new Event\('input',\{bubbles:true\}\)\)/);
 assert.match(js,/new Set\(\[8,12,13,14\]\)/);
