@@ -1,5 +1,9 @@
 # Auditoria UI/UX transversal — Conta de Casa
 
+## Nota de atualização — 25 de setembro de 2026
+
+Este documento conserva a auditoria da baseline de 13/09 como registo histórico. Desde então, `v74-experience.js/css` e Featured foram retirados, `mobile-menu-toggle.js` ficou como autoridade funcional única do menu e `v76-mobile-shell.css` continua a autoridade geométrica móvel. Os pontos que ainda mencionam duas autoridades v74/v76 descrevem o estado encontrado na auditoria original, não o bundle publicado atual. O estado operativo deve ser consultado em `PROJECT_STATE.md`, `ARCHITECTURE.md` e `TODO.md`.
+
 Data: 13 de setembro de 2026  
 Baseline auditada: `main` após PR #98 (`56f909846c5f02c466f047792c99a61f7fbac1c7`)  
 Versão: `0.76.0-dev.1`  
