@@ -97,6 +97,10 @@ assert.match(distIndex,/date-calculator\.css\?v=76-date-calculator1/);
 assert.match(distIndex,/date-calculator\.js\?v=76-date-calculator1/);
 assert.ok(!fs.existsSync(path.join(DIST,'v76-veggie-menu.js')),'Pages bundle must not contain retired duplicate menu runtime');
 assert.ok(!fs.existsSync(path.join(DIST,'v76-veggie-menu.css')),'Pages bundle must not contain retired duplicate menu CSS');
+assert.ok(fs.existsSync(path.join(DIST,'vendor','zxing-browser.min.js')),'Pages bundle must contain the local ZXing browser runtime');
+assert.ok(fs.existsSync(path.join(DIST,'vendor','ZXING_LICENSE.txt')),'Pages bundle must contain the ZXing license');
+assert.match(distIndex,/name="barcode-reader-src" content="\.\/vendor\/zxing-browser\.min\.js"/);
+assert.doesNotMatch(distIndex,/unpkg\.com/,'generated Pages HTML must not depend on a script CDN');
 
 fs.rmSync(DIST,{recursive:true,force:true});
 console.log('TypeScript runtime build: active TS modules are generated; date calculator is published; duplicate Veggie menu stays retired.');
