@@ -23,6 +23,11 @@ assert.match(js,/76-prototype-planning1/);
 assert.match(js,/76-drawer-hierarchy1/);
 assert.match(js,/76-planning-budget-card2/,'planning prototype refinement must remain explicit');
 assert.match(js,/76-planning-commitment1/,'planning commitment hierarchy must remain explicit');
+assert.match(js,/76-month-sync1/,'planning and calendar month synchronization must remain explicit');
+assert.match(js,/document\.addEventListener\('cdc:month-change',schedule\)/,'planning overview must refresh on canonical month changes');
+assert.match(js,/dashboardNumbers\(month\)/,'planning metrics must receive the explicit selected month');
+assert.match(js,/categoryTotals\(month\)/,'planning categories must receive the explicit selected month');
+assert.match(js,/selectAppMonth\(value,\{source:'planning-step'\}\)/,'planning arrows must use the canonical month selector');
 assert.match(js,/bills:\['Despesas','Movimentos'\]/);
 assert.match(js,/market:\['Mercado','Compras'\]/);
 assert.match(js,/security:\['Segurança e sincronização','Conta e dados'\]/);
@@ -172,11 +177,12 @@ assert.match(invoiceCss,/\.v75-bill-native-tab>\[data-v75-native-invoice\]\{[\s\
 
 assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '76-planning-commitment1'/);
+assert.match(prepare,/const ARCHITECTURE_JS_REV = '76-month-sync1'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
 assert.ok(prepare.includes("'invoice-capture.css'"));
 assert.match(prepare,/const INVOICE_CAPTURE_REV = '76-invoice-autofill7'/,'invoice runtime must use an independent cache-busting revision');
-assert.match(prepare,/const SERVICE_WORKER_REV = '76-dashboard-priority-delivery1'/,'service worker URL must change for this physical iOS fix');
+assert.match(prepare,/const SERVICE_WORKER_REV = '76-month-sync1'/,'service worker URL must change when month synchronization changes');
 assert.ok(prepare.includes("invoice-capture\\.js\\?v=[^\"']+"),'Pages build must rewrite the invoice runtime query token');
 assert.match(sw,/conta-de-casa-public-v76-version-alignment1-76-architecture-efficiency7/);
 assert.match(sw,/expense-mode1/,'PWA cache must retain the improved expense mode control');
@@ -192,6 +198,7 @@ assert.match(sw,/expense-action-map5/,'PWA cache must include the explicit expen
 assert.match(sw,/expense-picker-unblock6/,'PWA cache must include the iOS native-picker unblock');
 assert.match(sw,/safe-refresh3/,'PWA cache must include safe reload delivery');
 assert.match(sw,/runtime-efficiency1/,'PWA cache must include the runtime efficiency pass');
+assert.match(sw,/month-sync1/,'PWA cache must invalidate for calendar/planning month synchronization');
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));
 assert.ok(sw.includes("'./invoice-capture.css'"));
