@@ -503,3 +503,20 @@ Decisão:
 - alterações no comprometido fazem parte da chave de recomposição do resumo, para evitar métricas visuais desatualizadas;
 - a revisão do URL de `v75-architecture.js` é suficiente para esta alteração porque os assets públicos usam estratégia network-first com `cache:'no-store'`; não é necessária uma nova política de Service Worker para mudar a regra financeira, que permanece intacta.
 
+## D-129: o Início pode orientar a sequência de pagamentos sem alterar o domínio
+
+A lista de **Próximos vencimentos** deve ajudar a perceber visualmente o que vem primeiro, mas a interface não pode inventar uma prioridade financeira separada da data real.
+
+Decisão:
+
+- a lista continua a ser selecionada e ordenada pelos cálculos existentes de vencimento;
+- a posição ordinal é atribuída apenas depois de `compareBillsByDue()`;
+- 1.º usa **Pagar**, 2.º usa **A seguir**, posições intermédias usam **Depois** e a sexta posição usa **Mais tarde**;
+- estes rótulos e cores são apresentação transitória, não campos persistidos;
+- a linha mantém `data-bill-id`, por isso abrir uma prioridade abre a fatura canónica;
+- não se alteram `billStatus()`, `billUrgency()`, `remainingForBill()` nem regras de pagamento;
+- o lugar visual reservado a uma identidade de fornecedor usa uma inicial local e determinística enquanto não existir uma biblioteca de logos autorizada no domínio;
+- nenhuma imagem externa é carregada para simular marcas;
+- o cartão de orçamento do Início pode mostrar percentagem e barra com os dados já calculados, sem criar outra fórmula financeira;
+- alterações de `render.js` e `v76-product-pages.css` recebem revisão própria no HTML gerado para reduzir risco de cache visual antigo.
+
