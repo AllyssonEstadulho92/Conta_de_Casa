@@ -136,10 +136,11 @@
 
   function readerSource(){
     const value=document.querySelector('meta[name="barcode-reader-src"]')?.content?.trim()||'';
+    if(!value)return '';
     try{
-      const url=new URL(value,location.href);
-      if(url.protocol!=='https:'||url.hostname!=='unpkg.com')return '';
-      if(!/@zxing\/browser@0\.2\.0\/umd\/zxing-browser\.min\.js$/.test(url.pathname))return '';
+      const url=new URL(value,document.baseURI);
+      if(url.origin!==location.origin)return '';
+      if(!/\/vendor\/zxing-browser\.min\.js$/.test(url.pathname))return '';
       return url.href;
     }catch(_error){return '';}
   }
