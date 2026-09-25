@@ -3,6 +3,25 @@
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
 
+## 2026-09-25: `76-month-context-sync1`: sincronização entre Planeamento e Calendário
+
+### Correção
+
+O mês ativo passa a ter um único fluxo de atualização. Antes, o Calendário era renderizado diretamente a partir de `selectedMonth`, enquanto a camada visual adicional do Planeamento podia depender de uma atualização indireta e ficar desfasada depois de certas mudanças de mês.
+
+Agora:
+
+- `selectMonthContext()` centraliza a mudança mensal;
+- `#monthPicker`, histórico do Calendário, setas do Planeamento e rollover automático convergem no mesmo contexto;
+- o evento `cdc:month-change` força a recomposição do Planeamento;
+- o Calendário filtra explicitamente vencimentos pelo mês selecionado;
+- a revisão de `v75-architecture.js` e do Service Worker passa para `76-month-context-sync1` para entrega imediata em Safari/PWA.
+
+### Preservado
+
+Sem alteração de fórmulas financeiras, perfis mensais, IndexedDB, PIN/cofre, faturas, pagamentos, Mercado ou sync.
+
+
 ## 2026-09-25: `76-dashboard-priority-delivery1`: correção de atualização do Início no Safari/PWA
 
 ### Problema confirmado
