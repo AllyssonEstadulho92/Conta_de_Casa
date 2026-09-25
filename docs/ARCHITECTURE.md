@@ -92,8 +92,11 @@ A aplicação distingue timestamps absolutos de datas civis do utilizador. Funci
 Contratos reforçados em `76-full-audit-fixes1`:
 
 - o limite diário do catálogo do Mercado usa ano/mês/dia locais;
+- a biblioteca Pingo Doce usa a mesma regra civil local para as quotas diárias;
 - o nome do backup cifrado usa `currentLocalDateKey()`;
 - timestamps de auditoria, pagamentos, sync e `updatedAt` continuam ISO UTC, porque representam instantes absolutos.
+
+Preferências públicas não sensíveis podem usar Web Storage apenas com chaves `cdc_public_*` que não ativem o padrão de dados sensíveis. A preferência de supermercado usa `cdc_public_store_choice_v1`; o estado financeiro continua proibido em Web Storage.
 
 ## 5.1 Início e fila de pagamentos
 
