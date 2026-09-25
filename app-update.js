@@ -21,6 +21,8 @@
         'A release pública, o package, o build e o cache PWA usam a identidade v76.',
         'A navegação móvel mantém Início, Despesas, Mercado, Planeamento e Mais como cinco destinos principais.',
         'Os runtimes e estilos v74/Featured retirados permanecem fora do bundle público.',
+        'O leitor ZXing é servido localmente pela aplicação e a CSP de scripts fica limitada a self.',
+        'A CI executa fluxos críticos em Chromium e WebKit antes do deploy Pages.',
         'Cálculos financeiros, cofre/PIN, IndexedDB, QR, scanner, Mercado e sincronização mantêm os mesmos contratos funcionais.'
       ])
     }),
