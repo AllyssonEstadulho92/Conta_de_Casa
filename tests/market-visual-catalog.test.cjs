@@ -22,6 +22,7 @@ assert.match(catalog,/SESSION_IMAGE_BUDGET=20/);
 assert.match(catalog,/BACKGROUND_QUERY_INTERVAL_MS=15000/);
 assert.match(catalog,/navigator\.connection\?\.saveData/);
 assert.match(catalog,/document\.visibilityState==='hidden'/);
+assert.match(catalog,/document\.querySelector\('#page-market\.page\.active'\)/,'background catalog network work must run only while Mercado is active');
 assert.match(catalog,/queryInFlight/);
 assert.match(catalog,/stores:\['pingodoce','continente'\],limit:20/);
 assert.match(catalog,/\$\{marketId\}\|\$\{pid\}/);
