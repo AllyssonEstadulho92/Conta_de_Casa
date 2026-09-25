@@ -379,7 +379,7 @@ async function exportBackup(){
     const blob=new Blob([text],{type:'application/json'});
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
-    a.download=`Conta_de_Casa_backup_cifrado_${new Date().toISOString().slice(0,10)}.json`;
+    a.download=`Conta_de_Casa_backup_cifrado_${currentLocalDateKey()}.json`;
     a.rel='noopener';
     a.click();
     setTimeout(()=>URL.revokeObjectURL(a.href),1000);
