@@ -520,3 +520,16 @@ Decisão:
 - o cartão de orçamento do Início pode mostrar percentagem e barra com os dados já calculados, sem criar outra fórmula financeira;
 - alterações de `render.js` e `v76-product-pages.css` recebem revisão própria no HTML gerado para reduzir risco de cache visual antigo.
 
+## D-130: alterações visuais que exigem atualização automática devem invalidar o Service Worker
+
+O GitHub Pages pode publicar corretamente novos HTML/CSS/JavaScript sem que uma PWA iOS já aberta abandone imediatamente o documento anterior. O mecanismo de atualização automática da aplicação usa a descoberta de um novo Service Worker como sinal para assumir controlo e recarregar em segurança.
+
+Decisão:
+
+- quando uma mudança relevante da interface deve chegar automaticamente a clientes já abertos, a revisão deve alterar o conteúdo de `sw.js` e o `SERVICE_WORKER_REV` do build;
+- a chave `CACHE` deve mudar para impedir reutilização integral do conjunto anterior;
+- a atualização não deve depender apenas do token de CSS/JavaScript no HTML novo, porque esse HTML pode ainda não ter sido carregado pelo cliente antigo;
+- `registration.update()` do runtime existente é o caminho de descoberta para clientes restaurados por Safari/PWA;
+- a ativação continua a usar o reload seguro já existente e não deve interromper formulários ou edição ativa;
+- esta política é de distribuição/cache e não pode alterar estado financeiro ou persistência.
+
