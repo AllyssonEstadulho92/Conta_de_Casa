@@ -273,7 +273,10 @@
       if(navigator.onLine===false)return false;
       if(navigator.connection?.saveData)return false;
     }
-    if(typeof document!=='undefined'&&document.visibilityState==='hidden')return false;
+    if(typeof document!=='undefined'){
+      if(document.visibilityState==='hidden')return false;
+      if(!document.querySelector('#page-market.page.active'))return false;
+    }
     return true;
   }
 
