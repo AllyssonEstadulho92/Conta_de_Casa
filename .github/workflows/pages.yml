@@ -132,6 +132,13 @@ jobs:
           test -f dist/sync-conflict-policy.js
           test -f dist/vendor/zxing-browser.min.js
           test -f dist/vendor/ZXING_LICENSE.txt
+          test -f dist/invoice-extractor.js
+          test -f dist/invoice-ocr.js
+          test -f dist/invoice-extraction-rules.json
+          test -f dist/vendor/ocr/tesseract.min.js
+          test -f dist/vendor/ocr/worker.min.js
+          test -f dist/vendor/ocr/lang/por.traineddata.gz
+          test -n "$(find dist/vendor/ocr/core -maxdepth 1 -type f -name 'tesseract-core*.wasm' -print -quit)"
           ! grep -q "unpkg.com" dist/index.html
           grep -q 'barcode-reader-src" content="./vendor/zxing-browser.min.js"' dist/index.html
           test ! -f dist/v76-veggie-menu.js
@@ -142,6 +149,8 @@ jobs:
           node --check dist/market-branding.js
           node --check dist/sync-conflict-policy.js
           node --check dist/vendor/zxing-browser.min.js
+          node --check dist/invoice-extractor.js
+          node --check dist/invoice-ocr.js
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
