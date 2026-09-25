@@ -25,7 +25,7 @@ function firstExisting(candidates,label){
   return found;
 }
 
-const OCR_VENDOR_FILES = Object.freeze({
+const OCR_VENDOR_FILES = {
   'vendor/ocr/tesseract.min.js': path.join(TESSERACT_PACKAGE_ROOT,'dist','tesseract.min.js'),
   'vendor/ocr/worker.min.js': path.join(TESSERACT_PACKAGE_ROOT,'dist','worker.min.js'),
   'vendor/ocr/lang/por.traineddata.gz': path.join(TESSERACT_POR_ROOT,'4.0.0_best_int','por.traineddata.gz'),
@@ -39,16 +39,16 @@ const OCR_VENDOR_FILES = Object.freeze({
   ],'Tesseract core license'),
   'vendor/ocr/TESSDATA_LICENSE.txt': firstExisting([
     path.join(TESSERACT_POR_ROOT,'LICENSE'),
-    path.join(TESSERACT_POR_ROOT,'LICENSE.md'),
-    path.join(TESSERACT_POR_ROOT,'../../@tesseract.js-data/por/LICENSE')
+    path.join(TESSERACT_POR_ROOT,'LICENSE.md')
   ],'Portuguese tessdata license')
-});
+};
 
 for(const name of fs.readdirSync(TESSERACT_CORE_ROOT)){
   if(/^tesseract-core.*\.(?:js|wasm)$/.test(name)){
     OCR_VENDOR_FILES[`vendor/ocr/core/${name}`]=path.join(TESSERACT_CORE_ROOT,name);
   }
 }
+Object.freeze(OCR_VENDOR_FILES);
 
 const PACKAGE = JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
 const APP_VERSION = String(PACKAGE.version||'').trim();
