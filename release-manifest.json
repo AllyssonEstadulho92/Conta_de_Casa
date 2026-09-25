@@ -18,7 +18,9 @@
         "O Mercado continua limitado a fontes suportadas e fotografias oficiais/validadas, preservando separação entre preço estimado e valor efetivamente pago.",
         "Os módulos TypeScript de menu v76, branding do Mercado e política de conflitos de sincronização continuam a ser gerados no build e não são mantidos como JavaScript manual duplicado.",
         "Cálculos em cêntimos, STATE_VERSION, IndexedDB, cofre/PIN, PBKDF2-SHA-256, AES-GCM, faturas, QR, scanner, quantidades e sincronização mantêm os mesmos contratos funcionais e de segurança.",
-        "A CI, TypeScript Foundation e GitHub Pages permanecem como barreiras obrigatórias antes de cada integração em main."
+        "A CI, TypeScript Foundation e GitHub Pages permanecem como barreiras obrigatórias antes de cada integração em main.",
+        "O scanner ZXing deixa de depender de CDN em runtime: a versão fixada 0.2.0 é publicada localmente com a respetiva licença, e a CSP de scripts fica limitada a self.",
+        "A CI passa a executar fluxos críticos reais com Playwright em Chromium e WebKit/iPhone, cobrindo cofre local-first, persistência de faturas, filtros móveis e o caminho nativo de Ler fatura/QR."
       ]
     },
     {
