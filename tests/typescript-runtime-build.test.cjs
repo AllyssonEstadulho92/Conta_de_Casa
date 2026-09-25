@@ -99,8 +99,18 @@ assert.ok(!fs.existsSync(path.join(DIST,'v76-veggie-menu.js')),'Pages bundle mus
 assert.ok(!fs.existsSync(path.join(DIST,'v76-veggie-menu.css')),'Pages bundle must not contain retired duplicate menu CSS');
 assert.ok(fs.existsSync(path.join(DIST,'vendor','zxing-browser.min.js')),'Pages bundle must contain the local ZXing browser runtime');
 assert.ok(fs.existsSync(path.join(DIST,'vendor','ZXING_LICENSE.txt')),'Pages bundle must contain the ZXing license');
+assert.ok(fs.existsSync(path.join(DIST,'invoice-extractor.js')),'Pages bundle must contain the configurable invoice extractor');
+assert.ok(fs.existsSync(path.join(DIST,'invoice-ocr.js')),'Pages bundle must contain the local OCR controller');
+assert.ok(fs.existsSync(path.join(DIST,'invoice-extraction-rules.json')),'Pages bundle must contain refreshable invoice rules');
+assert.ok(fs.existsSync(path.join(DIST,'vendor','ocr','tesseract.min.js')),'Pages bundle must contain Tesseract locally');
+assert.ok(fs.existsSync(path.join(DIST,'vendor','ocr','worker.min.js')),'Pages bundle must contain the local OCR worker');
+assert.ok(fs.existsSync(path.join(DIST,'vendor','ocr','lang','por.traineddata.gz')),'Pages bundle must contain Portuguese OCR data');
 assert.match(distIndex,/name="barcode-reader-src" content="\.\/vendor\/zxing-browser\.min\.js"/);
 assert.doesNotMatch(distIndex,/unpkg\.com/,'generated Pages HTML must not depend on a script CDN');
+assert.match(distIndex,/invoice-extractor\.js\?v=76-invoice-hierarchy1/);
+assert.match(distIndex,/invoice-ocr\.js\?v=76-invoice-local-ocr1/);
+assert.match(distIndex,/invoice-capture\.js\?v=76-invoice-hierarchy8/);
+assert.match(distIndex,/script-src 'self' 'wasm-unsafe-eval'; worker-src 'self';/);
 
 fs.rmSync(DIST,{recursive:true,force:true});
-console.log('TypeScript runtime build: active TS modules are generated; date calculator is published; duplicate Veggie menu stays retired.');
+console.log('TypeScript runtime build: generated TS modules plus local invoice OCR assets are published; duplicate Veggie menu stays retired.');
