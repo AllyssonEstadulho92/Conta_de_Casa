@@ -130,6 +130,10 @@ jobs:
         run: |
           test -f dist/market-branding.js
           test -f dist/sync-conflict-policy.js
+          test -f dist/vendor/zxing-browser.min.js
+          test -f dist/vendor/ZXING_LICENSE.txt
+          ! grep -q "unpkg.com" dist/index.html
+          grep -q 'barcode-reader-src" content="./vendor/zxing-browser.min.js"' dist/index.html
           test ! -f dist/v76-veggie-menu.js
           test ! -f dist/v76-veggie-menu.css
           test ! -f v76-veggie-menu.js
@@ -137,6 +141,7 @@ jobs:
           test ! -f sync-conflict-policy.js
           node --check dist/market-branding.js
           node --check dist/sync-conflict-policy.js
+          node --check dist/vendor/zxing-browser.min.js
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
