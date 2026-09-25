@@ -3,6 +3,24 @@
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
 
+## 2026-09-25: `76-dashboard-priority-delivery1`: correção de atualização do Início no Safari/PWA
+
+### Problema confirmado
+
+O artefacto de GitHub Pages do commit anterior continha a nova interface de prioridades, incluindo **Ordenado por prioridade de pagamento**, o novo `render.js` e o CSS correspondente. No iPhone continuava visível a interface anterior. O build do Dashboard tinha mudado, mas `sw.js` e o `SERVICE_WORKER_REV` não tinham sido invalidados.
+
+### Correção
+
+- chave de cache do Service Worker passa a incluir `dashboard-priority-delivery1`;
+- `SERVICE_WORKER_REV` passa para `76-dashboard-priority-delivery1`;
+- clientes antigos podem descobrir a revisão através do `registration.update()` já existente e entrar no fluxo automático de ativação/reload seguro;
+- testes passam a impedir uma futura alteração deste Dashboard sem a revisão correspondente do Service Worker.
+
+### Preservado
+
+Sem alteração de `STATE_VERSION`, IndexedDB, cofre/PIN, cálculos, faturas, pagamentos, Mercado, scanner, sync ou release pública `v76` / `0.76.0`.
+
+
 ## 2026-09-25: `76-dashboard-priority1`: fila visual de pagamentos no Início
 
 ### Alteração
