@@ -7,6 +7,7 @@ const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 
+const html=read('index.html');
 const css=read('v76-product-pages.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
@@ -17,6 +18,12 @@ const market=read('market-experience.js');
 
 assert.match(css,/76-product-pages1/);
 assert.match(css,/76-prototype-dashboard1/);
+assert.match(html,/class="panel span-2 dashboard-priority-panel"/,'upcoming payments must use the dedicated priority panel');
+assert.match(html,/Ordenado por prioridade de pagamento\./,'upcoming header must explain the ordering');
+assert.match(html,/class="link-btn dashboard-feature-action" data-go="bills"/,'Ver faturas must remain a real navigation action');
+assert.match(html,/id="upcomingBills" class="stack-list dashboard-priority-list"/);
+assert.match(html,/class="panel dashboard-budget-panel"/);
+assert.match(html,/class="icon-btn dashboard-budget-open"[^>]*data-go="planning"/,'budget chevron must open canonical Planning');
 assert.match(css,/#page-dashboard>#kpiGrid\{order:1\}/);
 assert.match(css,/\.account-balance-kpi\{[\s\S]*grid-column:1\/-1!important/);
 assert.match(css,/\.account-balance-kpi\{[\s\S]*background:var\(--v76-primary-strong,var\(--v76-primary\)\)!important[\s\S]*box-shadow:none!important/,'Saldo atual deve ser o hero teal sólido do protótipo');
@@ -28,12 +35,31 @@ assert.match(css,/@media\(max-width:820px\)[\s\S]*\.kpi-grid\{[\s\S]*grid-templa
 assert.match(css,/@media\(max-width:359px\)[\s\S]*\.kpi-grid\{grid-template-columns:1fr!important\}/,'iPhone muito estreito deve regressar a uma coluna legível');
 assert.match(css,/grid-template-areas:[\s\S]*"upcoming budget"[\s\S]*"activity category"/);
 assert.match(css,/@media\(max-width:820px\)[\s\S]*grid-template-areas:[\s\S]*"upcoming"[\s\S]*"budget"[\s\S]*"category"[\s\S]*"activity"/);
+assert.match(css,/\.dashboard-feature-head\{[\s\S]*grid-template-columns:44px minmax\(0,1fr\) auto!important/,'Dashboard section headers must match the visual hierarchy');
+assert.match(css,/\.dashboard-priority-row\{[\s\S]*grid-template-areas:[\s\S]*"rank brand copy amount"[\s\S]*"rank brand copy due"/,'priority rows must preserve rank, identity, bill copy, amount and due state');
+assert.match(css,/\.dashboard-priority-rank\{/);
+assert.match(css,/\.dashboard-bill-brand\.tone-5/,'bill identity badge palette must remain local and deterministic');
+assert.match(css,/\.dashboard-priority-due\{/);
+assert.match(css,/\.dashboard-budget-card\{/);
+assert.match(css,/\.dashboard-budget-track>span\{/);
+assert.match(css,/@media\(max-width:390px\)[\s\S]*\.dashboard-feature-action span\{display:none!important\}/,'narrow iPhones must keep the header action accessible without crowding');
 assert.match(css,/@media\(forced-colors:active\)/);
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 
 // O redesign reutiliza os cálculos reais existentes; não inventa um novo modelo financeiro.
 assert.match(render,/const n = dashboardNumbers\(\);/);
 assert.match(render,/account-balance-kpi/);
+assert.match(render,/function dashboardPriorityConfig\(index\)/,'Dashboard must expose one deterministic priority label mapper');
+assert.match(render,/function dashboardUpcomingBillHtml\(bill,index,total\)/,'upcoming bills must use a dedicated Dashboard renderer');
+assert.match(render,/upcoming\.map\(\(bill,index\)=>dashboardUpcomingBillHtml\(bill,index,upcoming\.length\)\)/,'upcoming bills must render their rank after canonical due-date sorting');
+assert.match(render,/tone:'pay',label:'Pagar'/);
+assert.match(render,/tone:'next',label:'A seguir'/);
+assert.match(render,/tone:'soon',label:'Depois'/);
+assert.match(render,/tone:'later',label:'Depois'/);
+assert.match(render,/tone:'relaxed',label:'Mais tarde'/);
+assert.match(render,/dashboard-budget-card/,'Dashboard budget must use the compact visual summary');
+assert.match(render,/rawBudgetPct/,'budget text may show the real percentage while the progress bar stays visually bounded');
+assert.match(render,/role="progressbar"/,'budget progress must expose accessible progress semantics');
 assert.match(render,/\['Por pagar',n\.pending/);
 assert.match(render,/\['Em atraso',n\.overdue/);
 assert.match(render,/\['Saldo projetado',n\.projected/);
@@ -49,6 +75,7 @@ for(const legacyId of ['cdcMobileGreeting','cdcMobileMonthWrap','cdcMonthHero','
   assert.match(css,new RegExp(`#${legacyId}`),`v76 dashboard composition keeps defensive suppression for legacy ${legacyId}`);
 }
 assert.match(css,/v76-dashboard-clean1/);
+assert.match(css,/76-dashboard-priority1/,'dashboard priority hierarchy must remain explicit');
 assert.match(css,/#cdcMobileGreeting,[\s\S]*#cdcMobileMonthWrap,[\s\S]*#cdcMonthHero,[\s\S]*#cdcQuickActions,[\s\S]*#cdcDashboardCategories[\s\S]*display:none!important/);
 assert.match(css,/\.account-balance-kpi::after\{display:none!important\}/);
 assert.match(css,/\.main>\.topbar\{[\s\S]*box-shadow:none!important/);
@@ -71,7 +98,9 @@ assert.match(render,/function renderBills\(/);
 assert.match(render,/function renderMarket\(/);
 
 // A nova camada tem propriedade de composição de página, carrega antes do shell e entra no PWA.
-assert.match(prepare,/const PRODUCT_PAGES_REV = '76-dashboard-clean1'/);
+assert.match(prepare,/const PRODUCT_PAGES_REV = '76-dashboard-priority1'/);
+assert.match(prepare,/const DASHBOARD_REV = '76-dashboard-priority1'/);
+assert.ok(prepare.includes('render.js?v=${DASHBOARD_REV}'),'render.js must receive a dedicated Dashboard cache-busting revision');
 assert.ok(prepare.includes("'v76-product-pages.css'"));
 const modern=prepare.indexOf('v76-modern-ui.css?v=${MODERN_UI_REV}');
 const product=prepare.indexOf('v76-product-pages.css?v=${PRODUCT_PAGES_REV}');

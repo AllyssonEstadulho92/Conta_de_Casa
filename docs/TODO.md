@@ -30,6 +30,18 @@ Atualizado: 25 de setembro de 2026
 - [ ] Validar portrait/landscape e teclado virtual.
 - [ ] Criar E2E WebKit/Chromium para criação/desbloqueio → Dashboard → drawer → Despesas → Adicionar.
 
+## P0 — Início / prioridade de pagamentos
+
+- [x] `76-dashboard-priority1`: próximos vencimentos ordenados pela regra canónica existente.
+- [x] Mostrar posição ordinal e orientação Pagar / A seguir / Depois / Mais tarde.
+- [x] Mostrar identidade local, descrição, data/categoria, valor em falta e contagem para vencimento.
+- [x] Preservar abertura da fatura pelo `data-bill-id` existente.
+- [x] Aproximar cartão de Orçamento do Início ao protótipo com percentagem e barra acessível.
+- [x] Versionar `render.js` e `v76-product-pages.css` com `76-dashboard-priority1`.
+- [ ] Validar fisicamente 390 px e 430 px com seis faturas.
+- [ ] Validar nomes/categorias longos, dark mode e forced-colors.
+- [ ] Confirmar que empates de data/hora mantêm ordem estável e previsível no dispositivo real.
+
 ## P0 — Despesas/Faturas
 
 - [x] Pesquisa, filtros, resumo e lista canónicos restaurados.

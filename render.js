@@ -122,14 +122,44 @@ function renderDashboard() {
   if (n.projected < 0) alerts.push(`<div class="alert danger"><span>O saldo projetado está negativo em <strong data-money>${money(Math.abs(n.projected))}</strong>.</span><button class="link-btn" data-go="planning">Planear</button></div>`);
   setHTML('#alertsPanel', alerts.join(''));
   const upcoming = n.bills.filter(b=>{const days=billDaysUntil(b);return remainingForBill(b)>0&&Number.isFinite(days)&&days>=0;}).sort(compareBillsByDue).slice(0,6);
-  setHTML('#upcomingBills', upcoming.length ? upcoming.map(b=>billRowHtml(b)).join('') : empty('Sem faturas pendentes neste mês.'));
+  setHTML('#upcomingBills', upcoming.length ? upcoming.map((bill,index)=>dashboardUpcomingBillHtml(bill,index,upcoming.length)).join('') : empty('Sem faturas pendentes neste mês.'));
   renderCategoryBars('#categoryBars', categoryTotals());
   const budget = n.profile.budgetCents || 0;
-  const rem = sumCents([budget,-n.budgetUsed]);
-  const pct = budget ? clamp(Math.round(n.budgetUsed/budget*100),0,100) : 0;
-  setHTML('#budgetPanel', budget ? `<div class="detail-grid"><div class="detail-item"><small>Orçado</small><strong data-money>${money(budget)}</strong></div><div class="detail-item"><small>Utilizado</small><strong data-money>${money(n.budgetUsed)}</strong></div></div><div class="section-gap"><div class="progress ${pct>100?'danger':pct>80?'warning':'success'}"><span data-width="${Math.min(pct,100)}"></span></div><div class="goal-values"><span>${pct}% utilizado</span><strong class="${rem<0?'danger-text':'success-text'}" data-money>${money(rem)}</strong></div></div>` : `<p class="muted">Ainda não definiu um orçamento para ${esc(selectedMonth)}.</p><button class="btn secondary" data-go="planning">Definir orçamento</button>`);
+  const rawBudgetPct = budget ? Math.max(0,Math.round(n.budgetUsed/budget*100)) : 0;
+  const budgetBarPct = clamp(rawBudgetPct,0,100);
+  setHTML('#budgetPanel', budget ? `<div class="dashboard-budget-card"><div class="dashboard-budget-top"><span class="dashboard-budget-amount"><small>Orçado</small><strong data-money>${money(budget)}</strong></span><span class="dashboard-budget-usage"><strong>${rawBudgetPct}% utilizado</strong><small><b data-money>${money(n.budgetUsed)}</b> de <span data-money>${money(budget)}</span></small></span></div><div class="dashboard-budget-track" role="progressbar" aria-label="Orçamento utilizado" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${budgetBarPct}"><span data-width="${budgetBarPct}"></span></div></div>` : `<div class="dashboard-budget-empty"><p class="muted">Ainda não definiu um orçamento para ${esc(selectedMonth)}.</p><button class="btn secondary" data-go="planning">Definir orçamento</button></div>`);
   const acts = appState.activity.slice(0,8);
   setHTML('#activityList', acts.length ? acts.map(a=>`<div class="list-row"><div class="list-main"><strong>${esc(a.text)}</strong><small>${fmtDateTime(a.at)}</small></div></div>`).join('') : empty('Ainda não existem atividades.'));
+}
+function dashboardPriorityConfig(index) {
+  if(index===0) return {tone:'pay',label:'Pagar'};
+  if(index===1) return {tone:'next',label:'A seguir'};
+  if(index===2) return {tone:'soon',label:'Depois'};
+  if(index<=4) return {tone:'later',label:'Depois'};
+  return {tone:'relaxed',label:'Mais tarde'};
+}
+function dashboardBillInitial(bill) {
+  const source=String(bill?.provider||bill?.title||'Conta').trim();
+  const words=source.split(/\s+/).filter(Boolean);
+  const value=words.length>1?`${words[0]?.[0]||''}${words[1]?.[0]||''}`:source.slice(0,1);
+  return value.toLocaleUpperCase('pt-PT')||'•';
+}
+function dashboardBillBrandTone(bill) {
+  const source=String(bill?.provider||bill?.title||'Conta');
+  let hash=0;
+  for(const char of source) hash=(hash+char.codePointAt(0))%5;
+  return hash+1;
+}
+function dashboardUpcomingBillHtml(bill,index,total) {
+  const rem=remainingForBill(bill);
+  const priority=dashboardPriorityConfig(index);
+  const rank=index+1;
+  const category=bill.category||bill.provider||'Sem categoria';
+  const due=dueText(bill);
+  const initial=dashboardBillInitial(bill);
+  const brandTone=dashboardBillBrandTone(bill);
+  const label=`Prioridade ${rank} de ${total}: ${bill.title||'Fatura'}, ${due}, ${money(rem)}`;
+  return `<button class="dashboard-priority-row priority-${priority.tone}" data-bill-id="${attr(bill.id)}" type="button" aria-label="${attr(label)}"><span class="dashboard-priority-rank"><strong>${rank}º</strong><small>${esc(priority.label)}</small></span><span class="dashboard-bill-brand tone-${brandTone}" aria-hidden="true">${esc(initial)}</span><span class="dashboard-priority-copy"><strong>${esc(bill.title)}</strong><small>${fmtDate(billDueDateKey(bill))} · ${esc(category)}</small></span><strong class="dashboard-priority-amount" data-money>${money(rem)}</strong><span class="dashboard-priority-due"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>${esc(due)}</span></span></button>`;
 }
 function billRowHtml(bill) {
   const st=billStatus(bill), urg=billUrgency(bill), rem=remainingForBill(bill);

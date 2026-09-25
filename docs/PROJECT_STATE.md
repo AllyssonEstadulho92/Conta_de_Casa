@@ -4,7 +4,7 @@ Atualizado: 25 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main` antes deste bloco: `faa1494b33ee58a180307967e94f8d6c051eeac2` (startup local-first consolidado e trabalho de fundo reduzido)
+Baseline funcional em `main` antes deste bloco: `47bd94951b8748fbb8bd4153e967f4b7b948fe32` (Comprometido e Disponível real integrados no Planeamento)
 Branch funcional: `main`
 
 ## Invariantes
@@ -87,6 +87,25 @@ Pendente: confirmação física no mesmo iPhone/Safari e PWA instalada.
 
 Pendente: validação física final no mesmo iPhone/PWA.
 
+## Início: prioridade dos próximos pagamentos
+
+Revisão técnica: `76-dashboard-priority1`.
+
+O bloco **Próximos vencimentos** passa a explicitar a ordem de pagamento sem criar uma nova regra financeira:
+
+- continua a selecionar até seis faturas ativas com valor em falta e vencimento futuro no mês;
+- continua a ordenar pelo comparador canónico `compareBillsByDue()`;
+- cada linha mostra posição ordinal, orientação (**Pagar**, **A seguir**, **Depois**, **Mais tarde**), identidade local por inicial, descrição, data/categoria, valor em falta e contagem até ao vencimento;
+- cores e faixa lateral representam apenas a posição visual na fila, não uma classificação de risco persistida;
+- tocar numa linha continua a abrir a fatura real através de `data-bill-id`;
+- o cabeçalho indica explicitamente **Ordenado por prioridade de pagamento** e mantém **Ver faturas** como navegação canónica;
+- o cartão de Orçamento do Início foi aproximado ao protótipo com valor orçado, percentagem utilizada, valor consumido e barra acessível;
+- `render.js` e `v76-product-pages.css` recebem o token `76-dashboard-priority1` no build para evitar reutilização visual antiga.
+
+Não existem logos remotos nem novas dependências. O selo de identidade usa apenas uma inicial local derivada dos dados já existentes da fatura.
+
+Pendente: validação física em iPhone/Safari/PWA, sobretudo largura de 390 px, nomes longos, seis vencimentos e dark mode.
+
 ## Planeamento
 
 `76-planning-budget-card2` + `76-planning-ring-shape1` permanecem integrados. A revisão `76-planning-commitment1` acrescenta uma hierarquia financeira sem alterar a origem dos dados:
@@ -114,8 +133,8 @@ Pendente: validação física no mesmo iPhone/PWA, incluindo orçamento definido
 
 ## Próximo passo
 
-1. validar `76-date-calculator-prototype-inputs5` no iPhone/Safari/PWA;
-2. validar `76-auth-spacing3` e os restantes blocos móveis pendentes;
+1. validar `76-dashboard-priority1` no iPhone/Safari/PWA com seis faturas, nomes longos e largura real do dispositivo;
+2. validar `76-date-calculator-prototype-inputs5` e `76-auth-spacing3` nos mesmos ambientes;
 3. corrigir a descrição factual de rede em Segurança;
 4. empacotar ZXing local e endurecer CSP;
 5. continuar a consolidação por componente e a migração TypeScript sem alterar invariantes.

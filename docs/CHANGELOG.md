@@ -3,6 +3,39 @@
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
 
+## 2026-09-25: `76-dashboard-priority1`: fila visual de pagamentos no Início
+
+### Alteração
+
+O cartão **Próximos vencimentos** foi alinhado com o protótipo aprovado para permitir uma leitura imediata da sequência de pagamento:
+
+- cabeçalho com ícone, texto **Ordenado por prioridade de pagamento** e ação **Ver faturas**;
+- cada uma das seis posições pode mostrar ordinal, rótulo Pagar / A seguir / Depois / Mais tarde, identidade local, descrição, data/categoria, valor em falta e prazo até ao vencimento;
+- a faixa lateral e a tonalidade mudam por posição, sem alterar o estado financeiro da fatura;
+- a linha inteira continua a abrir a fatura real;
+- não são carregados logos remotos; o espaço visual de marca usa uma inicial derivada localmente.
+
+O cartão **Orçamento** do Início passa a apresentar uma composição compacta com valor orçado, percentagem utilizada, valor consumido e barra de progresso acessível, preservando os cálculos existentes.
+
+### Regra funcional preservada
+
+A prioridade visual é atribuída apenas depois da lista ser filtrada e ordenada por `compareBillsByDue()`. Não foram alterados `billStatus()`, `billUrgency()`, `remainingForBill()`, pagamentos, faturas, Mercado, IndexedDB, PIN/cofre, cifra ou sync.
+
+### Distribuição
+
+- `v76-product-pages.css` e `render.js` usam a revisão `76-dashboard-priority1` no HTML gerado;
+- o Service Worker continua com a estratégia pública network-first/no-store, portanto não é necessária uma nova política de cache;
+- a release permanece `v76` / `0.76.0`.
+
+### Validação pendente
+
+- iPhone/Safari/PWA em 390 px e 430 px;
+- seis faturas simultâneas;
+- nomes e categorias longos;
+- dark mode e forced-colors;
+- confirmação visual do cartão de orçamento e dos estados de foco.
+
+
 ## 2026-09-25: `76-planning-commitment1`: hierarquia de gasto, compromisso e disponível real
 
 ### Alteração
