@@ -24,7 +24,7 @@ const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const MODERN_UI_REV = '76-modern-ui2';
 const PRODUCT_PAGES_REV = '76-dashboard-priority1';
-const DASHBOARD_REV = '76-security-network-copy1';
+const DASHBOARD_REV = '76-full-audit-fixes1';
 const MOBILE_SHELL_REV = '76-mobile-shell3';
 const ARCHITECTURE_REV = '76-month-context-sync1';
 const PLANNING_MORE_REV = '76-planning-more1';
@@ -44,7 +44,7 @@ const PD_PHOTO_REV = '75-pd-photo1';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
-const SERVICE_WORKER_REV = '76-security-network-copy1';
+const SERVICE_WORKER_REV = '76-full-audit-fixes1';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
   throw new Error(`Invalid package application version: ${APP_VERSION||'(empty)'}`);

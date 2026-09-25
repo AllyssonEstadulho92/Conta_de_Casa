@@ -97,6 +97,8 @@ assert.match(events, /Pagamento eliminado/);
 assert.match(events, /Não é possível cancelar uma fatura com pagamentos/);
 assert.match(forms, /await idbPutVaultPair\(normalized\.meta,normalized\.secure\)/);
 assert.match(forms, /Restaurar este backup substitui o cofre local/);
+assert.match(forms, /Conta_de_Casa_backup_cifrado_\$\{currentLocalDateKey\(\)\}\.json/,'backup filename must use the local civil date');
+assert.doesNotMatch(forms, /Conta_de_Casa_backup_cifrado_\$\{new Date\(\)\.toISOString\(\)\.slice\(0,10\)\}/,'backup filename must not roll over on UTC midnight');
 
 console.log('Financial mutation safety regression tests: OK');
 

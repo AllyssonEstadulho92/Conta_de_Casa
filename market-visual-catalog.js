@@ -293,7 +293,11 @@
     return parseCatalogRecords(text,categoryId);
   }
 
-  function dayKey(){return new Date().toISOString().slice(0,10);}
+  function dayKey(now=new Date()){
+    const date=now instanceof Date?now:new Date(now);
+    if(Number.isNaN(date.getTime()))return '';
+    return `${String(date.getFullYear()).padStart(4,'0')}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+  }
 
   async function schedulerState(){
     const previous=await getMeta('scheduler');

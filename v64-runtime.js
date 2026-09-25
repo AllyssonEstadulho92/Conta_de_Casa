@@ -10,7 +10,8 @@
  */
 (function installV64Runtime(root){
   const VERSION='v64';
-  const RETAILER_KEY='cdc.market.scan.retailer.v1';
+  const RETAILER_KEY='cdc_public_store_choice_v1';
+  const LEGACY_RETAILER_KEY='cdc.market.scan.retailer.v1';
   const RETAILERS=Object.freeze({
     'pingo-doce':'Pingo Doce',
     'continente':'Continente'
@@ -159,7 +160,7 @@
 
   function readRetailerPreference(){
     try{
-      const value=localStorage.getItem(RETAILER_KEY)||'';
+      const value=localStorage.getItem(RETAILER_KEY)||localStorage.getItem(LEGACY_RETAILER_KEY)||'';
       return RETAILERS[value]?value:'';
     }catch(_error){return '';}
   }

@@ -121,8 +121,8 @@ function renderDashboard() {
   if (critical) alerts.push(`<div class="alert warning"><span><strong>${critical} vencimento${critical===1?'':'s'} nas próximas 24 horas.</strong></span><button class="link-btn" data-go="bills">Ver</button></div>`);
   if (n.projected < 0) alerts.push(`<div class="alert danger"><span>O saldo projetado está negativo em <strong data-money>${money(Math.abs(n.projected))}</strong>.</span><button class="link-btn" data-go="planning">Planear</button></div>`);
   setHTML('#alertsPanel', alerts.join(''));
-  const upcoming = n.bills.filter(b=>{const days=billDaysUntil(b);return remainingForBill(b)>0&&Number.isFinite(days)&&days>=0;}).sort(compareBillsByDue).slice(0,6);
-  setHTML('#upcomingBills', upcoming.length ? upcoming.map((bill,index)=>dashboardUpcomingBillHtml(bill,index,upcoming.length)).join('') : empty('Sem faturas pendentes neste mês.'));
+  const priorityBills = n.bills.filter(b=>{const days=billDaysUntil(b);return remainingForBill(b)>0&&Number.isFinite(days);}).sort(compareBillsByDue).slice(0,6);
+  setHTML('#upcomingBills', priorityBills.length ? priorityBills.map((bill,index)=>dashboardUpcomingBillHtml(bill,index,priorityBills.length)).join('') : empty('Sem faturas pendentes neste mês.'));
   renderCategoryBars('#categoryBars', categoryTotals());
   const budget = n.profile.budgetCents || 0;
   const rawBudgetPct = budget ? Math.max(0,Math.round(n.budgetUsed/budget*100)) : 0;
@@ -131,10 +131,13 @@ function renderDashboard() {
   const acts = appState.activity.slice(0,8);
   setHTML('#activityList', acts.length ? acts.map(a=>`<div class="list-row"><div class="list-main"><strong>${esc(a.text)}</strong><small>${fmtDateTime(a.at)}</small></div></div>`).join('') : empty('Ainda não existem atividades.'));
 }
-function dashboardPriorityConfig(index) {
-  if(index===0) return {tone:'pay',label:'Pagar'};
-  if(index===1) return {tone:'next',label:'A seguir'};
-  if(index===2) return {tone:'soon',label:'Depois'};
+function dashboardPriorityConfig(bill,index,now=new Date()) {
+  const status=billStatus(bill,now);
+  const days=billDaysUntil(bill,now);
+  if(status==='overdue') return {tone:'pay',label:'Pagar agora'};
+  if(days===0) return {tone:'pay',label:'Vence hoje'};
+  if(days<=3) return {tone:'next',label:'Prioridade'};
+  if(days<=7) return {tone:'soon',label:'A seguir'};
   if(index<=4) return {tone:'later',label:'Depois'};
   return {tone:'relaxed',label:'Mais tarde'};
 }
@@ -152,7 +155,7 @@ function dashboardBillBrandTone(bill) {
 }
 function dashboardUpcomingBillHtml(bill,index,total) {
   const rem=remainingForBill(bill);
-  const priority=dashboardPriorityConfig(index);
+  const priority=dashboardPriorityConfig(bill,index);
   const rank=index+1;
   const category=bill.category||bill.provider||'Sem categoria';
   const due=dueText(bill);

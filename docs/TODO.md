@@ -32,6 +32,13 @@ Atualizado: 25 de setembro de 2026
 
 ## P0 — Início / prioridade de pagamentos
 
+- [x] `76-full-audit-fixes1`: incluir faturas vencidas na fila de prioridade do mês.
+- [x] Rótulos da fila passam a depender de atraso/vencimento real e não apenas da posição.
+- [x] Corrigir data diária do catálogo do Mercado para o calendário local.
+- [x] Corrigir data diária da biblioteca Pingo Doce para o calendário local.
+- [x] Corrigir persistência da loja preferida para uma chave pública aceite pelo storage guard.
+- [x] Corrigir data do nome do backup para o calendário local.
+
 - [x] `76-dashboard-priority-delivery1`: invalidar Service Worker para que o visual novo chegue a Safari/PWA já abertos.
 - [x] Atualizar `SERVICE_WORKER_REV` e chave `CACHE` em conjunto.
 - [x] Proteger a revisão com testes de app-update, Safari/startup, arquitetura e product-pages.
