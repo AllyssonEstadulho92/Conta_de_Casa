@@ -4,7 +4,7 @@ Atualizado: 25 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main` antes deste bloco: `4ceb3e54a26dc39e97585d63af29b02ac8e82c7e` — filtros móveis recolhidos
+Baseline funcional em `main` antes deste bloco: `faa1494b33ee58a180307967e94f8d6c051eeac2` (startup local-first consolidado e trabalho de fundo reduzido)
 Branch funcional: `main`
 
 ## Invariantes
@@ -89,9 +89,20 @@ Pendente: validação física final no mesmo iPhone/PWA.
 
 ## Planeamento
 
-`76-planning-budget-card2` + `76-planning-ring-shape1` permanecem integrados. Orçamento ausente continua `Por definir`; o anel mantém proporção 1:1 e a gravação continua no formulário canónico.
+`76-planning-budget-card2` + `76-planning-ring-shape1` permanecem integrados. A revisão `76-planning-commitment1` acrescenta uma hierarquia financeira sem alterar a origem dos dados:
 
-Pendente: validação física no mesmo iPhone/PWA.
+- **Gasto este mês** continua a representar apenas pagamentos efetivamente registados e compras de Mercado concluídas;
+- **Comprometido** usa `monthNumbers().outstanding`, isto é, o valor remanescente das faturas ativas do mês, incluindo pendentes, vencidas e parcialmente pagas;
+- **Orçamento** continua a vir de `profile.budgetCents`;
+- **Disponível real** = orçamento menos gasto efetivo menos comprometido;
+- o valor disponível não é limitado artificialmente a zero, para que um mês sobrecomprometido seja visível;
+- a percentagem do anel continua a representar apenas gasto efetivo sobre orçamento, sem transformar faturas pendentes em gasto;
+- `#monthPlanForm` e `#monthlyBudget` continuam a única gravação do orçamento;
+- não existe alteração de `STATE_VERSION`, IndexedDB, pagamentos, Mercado, sync ou cifragem.
+
+A chave de recomposição do resumo inclui agora o valor comprometido, evitando que a área fique desatualizada quando uma fatura pendente é criada, editada, paga parcialmente ou eliminada.
+
+Pendente: validação física no mesmo iPhone/PWA, incluindo orçamento definido, ausência de orçamento, valor comprometido e cenário de disponível real negativo.
 
 ## Segurança — dívida aberta
 
