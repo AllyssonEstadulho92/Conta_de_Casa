@@ -176,7 +176,7 @@ assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
 assert.ok(prepare.includes("'invoice-capture.css'"));
 assert.match(prepare,/const INVOICE_CAPTURE_REV = '76-invoice-autofill7'/,'invoice runtime must use an independent cache-busting revision');
-assert.match(prepare,/const SERVICE_WORKER_REV = '76-background-efficiency5'/,'service worker URL must change for this physical iOS fix');
+assert.match(prepare,/const SERVICE_WORKER_REV = '76-dashboard-priority-delivery1'/,'service worker URL must change for this physical iOS fix');
 assert.ok(prepare.includes("invoice-capture\\.js\\?v=[^\"']+"),'Pages build must rewrite the invoice runtime query token');
 assert.match(sw,/conta-de-casa-public-v76-version-alignment1-76-architecture-efficiency7/);
 assert.match(sw,/expense-mode1/,'PWA cache must retain the improved expense mode control');

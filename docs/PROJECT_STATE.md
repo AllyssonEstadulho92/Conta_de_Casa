@@ -87,6 +87,24 @@ Pendente: confirmação física no mesmo iPhone/Safari e PWA instalada.
 
 Pendente: validação física final no mesmo iPhone/PWA.
 
+## Início: correção de entrega da nova interface
+
+Revisão técnica: `76-dashboard-priority-delivery1`.
+
+Após o merge de `76-dashboard-priority1`, o artefacto publicado no GitHub Pages foi verificado e continha corretamente o novo markup, `render.js` e `v76-product-pages.css`. A captura no iPhone, porém, continuava a mostrar o texto antigo **Contas que exigem atenção.**, prova de que o cliente ainda estava a executar a shell anterior.
+
+Foi identificado um erro na estratégia de atualização: a alteração do Dashboard não modificou o conteúdo de `sw.js` nem o `SERVICE_WORKER_REV`. Como o mecanismo automático depende de uma nova versão do Service Worker para assumir controlo e recarregar a página com segurança, uma PWA/Safari já aberta podia continuar no documento anterior apesar de o Pages já ter a compilação correta.
+
+Correção:
+
+- o nome do cache do Service Worker recebe `dashboard-priority-delivery1`;
+- `SERVICE_WORKER_REV` passa para `76-dashboard-priority-delivery1`;
+- uma instalação já aberta deteta a alteração através de `registration.update()`, ativa o novo worker e entra no fluxo existente de `controllerchange`/reload seguro;
+- o cache antigo é removido na ativação e os assets públicos são recarregados;
+- testes de atualização, Safari/startup, arquitetura e páginas de produto passam a exigir esta revisão.
+
+A correção não altera dados financeiros, IndexedDB, PIN/cofre, pagamentos, Mercado, sync ou fórmulas.
+
 ## Início: prioridade dos próximos pagamentos
 
 Revisão técnica: `76-dashboard-priority1`.

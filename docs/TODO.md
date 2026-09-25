@@ -32,6 +32,10 @@ Atualizado: 25 de setembro de 2026
 
 ## P0 — Início / prioridade de pagamentos
 
+- [x] `76-dashboard-priority-delivery1`: invalidar Service Worker para que o visual novo chegue a Safari/PWA já abertos.
+- [x] Atualizar `SERVICE_WORKER_REV` e chave `CACHE` em conjunto.
+- [x] Proteger a revisão com testes de app-update, Safari/startup, arquitetura e product-pages.
+
 - [x] `76-dashboard-priority1`: próximos vencimentos ordenados pela regra canónica existente.
 - [x] Mostrar posição ordinal e orientação Pagar / A seguir / Depois / Mais tarde.
 - [x] Mostrar identidade local, descrição, data/categoria, valor em falta e contagem para vencimento.

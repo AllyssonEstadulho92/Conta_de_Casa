@@ -107,6 +107,7 @@ const product=prepare.indexOf('v76-product-pages.css?v=${PRODUCT_PAGES_REV}');
 const shell=prepare.indexOf('v76-mobile-shell.css?v=${MOBILE_SHELL_REV}');
 assert.ok(modern>=0 && product>modern && shell>product,'product pages must load after visual tokens and before the mobile shell');
 assert.match(sw,/dashboard-clean1/);
+assert.match(sw,/dashboard-priority-delivery1/,'PWA cache must invalidate for the approved priority Dashboard');
 assert.match(sw,/prototype-dashboard1/,'PWA cache must refresh the prototype Dashboard');
 assert.match(sw,/mobile-drawer-actions1/);
 assert.ok(sw.includes("'./v76-product-pages.css'"));
