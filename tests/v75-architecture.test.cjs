@@ -25,6 +25,7 @@ assert.match(js,/76-planning-budget-card2/,'planning prototype refinement must r
 assert.match(js,/76-planning-commitment1/,'planning commitment hierarchy must remain explicit');
 assert.match(js,/76-month-sync1/,'planning and calendar month synchronization must remain explicit');
 assert.match(js,/document\.addEventListener\('cdc:month-change',schedule\)/,'planning overview must refresh on canonical month changes');
+assert.match(js,/document\.addEventListener\('cdc:planning-change',schedule\)/,'planning overview must refresh immediately after saving monthly values');
 assert.match(js,/dashboardNumbers\(month\)/,'planning metrics must receive the explicit selected month');
 assert.match(js,/categoryTotals\(month\)/,'planning categories must receive the explicit selected month');
 assert.match(js,/selectAppMonth\(value,\{source:'planning-step'\}\)/,'planning arrows must use the canonical month selector');
