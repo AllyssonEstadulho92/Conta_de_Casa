@@ -1,15 +1,27 @@
 # Conta de Casa v76 — auditoria de estabilidade
 
+## Atualização de estado — 25/09/2026
+
+Esta auditoria nasceu numa baseline anterior e algumas constatações abaixo são históricas. No estado atual:
+
+- `mobile-menu-toggle.js` é a única autoridade publicada do drawer; `src/ui/veggie-menu-toggle.ts` permanece apenas como referência de retirada e não é compilado nem publicado;
+- runtimes v74/Featured referidos em auditorias antigas já foram retirados do bundle;
+- startup local-first foi consolidado em `events.js` e o guard de startup deixou de substituir funções;
+- ZXing passa a ser vendorizado same-origin no bloco `76-local-zxing-e2e1`, retirando `unpkg.com` da CSP;
+- Chromium e WebKit passam a ter E2E críticos no workflow CI.
+
+As secções históricas devem ser lidas como origem das decisões, não como descrição integral da arquitetura atual.
+
 ## Objetivo
 
 Consolidar a aplicação numa arquitetura previsível, com uma autoridade por responsabilidade, preservando integralmente o domínio financeiro, os valores em cêntimos, IndexedDB, cofre/PIN, sincronização, Mercado, QR e scanner.
 
 ## Problemas confirmados
 
-1. **Menu móvel com duas autoridades de runtime**
+1. **Menu móvel com duas autoridades de runtime — resolvido**
    - `mobile-menu-toggle.js` controla abertura/fecho, foco, swipe e posição do botão.
-   - `src/ui/veggie-menu-toggle.ts` observa o mesmo controlo, substitui o glyph e move novamente o botão.
-   - Resultado possível: posição divergente, estado visual fora de sincronia com `aria-expanded` e comportamento diferente entre Safari/PWA e browser.
+   - `src/ui/veggie-menu-toggle.ts` já não gera runtime nem entra no bundle; fica temporariamente apenas como referência de retirada.
+   - Testes de build impedem o regresso do runtime duplicado.
 
 2. **Fluxo de despesas com duas camadas de composição**
    - `v75-architecture.js` cria os modos Manual / Ler fatura / QR Code.
