@@ -199,20 +199,43 @@
     node.hidden=!node.textContent;
   }
 
-  function previewHtml(data){
+  function atPreviewGrid(data){
+    if(!data)return '';
     const atcud=data.atcud?`<span><small>ATCUD</small><strong>${escapeHtml(data.atcud)}</strong></span>`:'';
-    const tax=Number.isSafeInteger(data.taxCents)?`<span><small>Impostos</small><strong>${escapeHtml(centsText(data.taxCents))}</strong></span>`:'';
-    return `<div class="invoice-capture-preview-head"><div>${icon('check',18)}<strong>QR de fatura reconhecido</strong></div><button class="btn secondary" type="button" data-invoice-apply>Reaplicar dados</button></div>
-      <div class="invoice-capture-preview-grid">
-        <span><small>NIF emitente</small><strong>${escapeHtml(data.issuerNif)}</strong></span>
-        <span><small>Documento</small><strong>${escapeHtml(data.documentId)}</strong></span>
-        <span><small>Data do documento</small><strong>${escapeHtml(data.documentDate.split('-').reverse().join('/'))}</strong></span>
-        <span><small>Total</small><strong>${escapeHtml(centsText(data.totalCents))}</strong></span>
-        ${atcud}${tax}
-      </div>
-      <small class="invoice-capture-review-note">Descrição, valor, NIF do emitente e referência são preenchidos automaticamente quando estiverem vazios. Categoria, vencimento e método não constam do QR da AT e devem ser confirmados antes de guardar.</small>`;
+    return `<span><small>NIF emitente</small><strong>${escapeHtml(data.issuerNif)}</strong></span>
+      <span><small>Documento</small><strong>${escapeHtml(data.documentId)}</strong></span>
+      <span><small>Data do documento</small><strong>${escapeHtml(data.documentDate.split('-').reverse().join('/'))}</strong></span>
+      <span><small>Total QR</small><strong>${escapeHtml(centsText(data.totalCents))}</strong></span>
+      ${atcud}`;
   }
 
+  function ocrPreviewGrid(data){
+    if(!data)return '';
+    const rows=[];
+    if(data.provider)rows.push(['Fornecedor',data.provider]);
+    if(Number.isSafeInteger(data.amountCents))rows.push(['Total lido',centsText(data.amountCents)]);
+    if(data.dueDate)rows.push(['Vencimento',data.dueDate.split('-').reverse().join('/')]);
+    if(data.reference)rows.push(['Referência',data.reference]);
+    if(data.method)rows.push(['Método',data.method]);
+    if(data.issueDate)rows.push(['Emissão',data.issueDate.split('-').reverse().join('/')]);
+    return rows.map(([label,value])=>`<span><small>${escapeHtml(label)}</small><strong>${escapeHtml(value)}</strong></span>`).join('');
+  }
+
+  function previewHtml(bundle){
+    const at=bundle?.at||null;
+    const ocr=bundle?.ocr||null;
+    const title=at&&ocr?'QR + texto reconhecidos':at?'QR de faturação reconhecido':'Texto da fatura reconhecido';
+    const warning=ocr?.ambiguities?.length
+      ?'<small class="invoice-capture-review-note">Foram encontrados valores concorrentes em alguns rótulos. A hierarquia escolheu a opção mais forte, mas deve confirmar antes de guardar.</small>'
+      :'';
+    return `<div class="invoice-capture-preview-head"><div>${icon('check',18)}<strong>${escapeHtml(title)}</strong></div><button class="btn secondary" type="button" data-invoice-apply>Reaplicar dados</button></div>
+      <div class="invoice-capture-preview-grid">
+        ${atPreviewGrid(at)}
+        ${ocrPreviewGrid(ocr)}
+      </div>
+      ${warning}
+      <small class="invoice-capture-review-note">Prioridade: alterações manuais não são substituídas. QR estruturado tem precedência sobre OCR; OCR pode completar vencimento, fornecedor, referência, método e categoria configurada. Campos sem evidência permanecem para revisão.</small>`;
+  }
   const FIELD_AUTHORITY_RANK=Object.freeze({
     empty:0,
     'form-default':100,
