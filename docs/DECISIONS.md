@@ -546,3 +546,15 @@ Decisão:
 - o Calendário deve filtrar explicitamente pelo mês recebido/selecionado;
 - não se herdam automaticamente orçamento, saldo inicial, saldo real ou rendimentos de um mês para outro.
 
+## D-132: a página Segurança deve descrever dependências de rede reais
+
+Enquanto o scanner QR carregar ZXing Browser 0.2.0 de `unpkg.com`, a aplicação não pode apresentar a afirmação **Sem CDNs**.
+
+Decisão:
+
+- a interface deve mencionar a dependência externa do scanner de forma factual;
+- a versão da biblioteca continua fixada e não pode usar `@latest`;
+- nenhuma credencial ou estado financeiro é enviado para essa origem;
+- o objetivo técnico mantém-se: empacotar ZXing localmente e, só depois, remover `unpkg.com` da CSP;
+- alterações desta mensagem visível devem invalidar a revisão de `render.js` e o Service Worker para chegar a clientes PWA já abertos.
+
