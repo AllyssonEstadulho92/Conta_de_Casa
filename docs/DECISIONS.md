@@ -486,3 +486,16 @@ Esta decisão reduz tráfego, timers e trabalho de foreground sem retirar atuali
 ## D-127 — composição visual não reage a cliques irrelevantes
 
 A camada de arquitetura só deve recompor quando existe uma alteração de arquitetura, estado observado ou ação explicitamente controlada por essa camada. O fallback histórico que chamava `schedule()` depois de qualquer click é removido para evitar trabalho duplicado sobre componentes com controladores próprios.
+
+
+## D-128 — scanners não carregam JavaScript de CDN em runtime
+
+O scanner é uma função crítica e já existia uma versão exata do ZXing fixada. A aplicação passa a transportar essa mesma versão no bundle público em vez de autorizar `unpkg.com` na CSP. A licença acompanha o ficheiro publicado.
+
+Consequências: `script-src` fica limitado a `self`, o funcionamento deixa de depender da disponibilidade do CDN e o Service Worker consegue servir o fallback ZXing offline. A versão permanece `0.2.0` neste bloco para não combinar hardening de distribuição com uma atualização funcional da biblioteca.
+
+## D-129 — WebKit e Chromium E2E fazem parte do gate de release
+
+Testes estáticos/Node continuam necessários, mas não são suficientes para provar comportamento real de `dialog`, IndexedDB, file chooser, service worker, responsive e eventos do browser. O CI passa a executar uma suite curta de fluxos críticos com Playwright em Chromium e WebKit.
+
+O objetivo não é substituir validação física de iPhone. O E2E automatizado passa a impedir regressões reproduzíveis de browser antes do deploy, enquanto câmara/permissões e diferenças específicas do Safari real continuam a exigir validação física.
