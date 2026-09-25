@@ -4,7 +4,7 @@ Esta aplicação está em fase de hardening. Ela reduz riscos para uso local, ma
 
 ## Regra obrigatória de confidencialidade
 
-Nenhum dado financeiro, pessoal, fatura, referência, comprovativo, anexo, histórico, valor, fornecedor ou informação de autenticação pode ser transmitido em claro, incluído em URL, enviado para telemetria ou exposto a terceiros. A única exceção de rede autorizada é a sincronização opcional para o repositório GitHub privado configurado, contendo apenas o envelope cifrado.
+Nenhum dado financeiro, pessoal, fatura, referência, comprovativo, anexo, histórico, valor, fornecedor ou informação de autenticação pode ser transmitido em claro, incluído em URL, enviado para telemetria ou exposto a terceiros. A sincronização opcional pode comunicar com `api.github.com` apenas para ler/escrever o envelope cifrado do cofre. As funções de Mercado podem, quando iniciadas pelo utilizador, consultar fontes externas de catálogo/imagens (`cesta.pt`, `r.jina.ai`, Open Food Facts e hosts oficiais das lojas), sem incluir dados financeiros do cofre nesses pedidos.
 
 ## Implementado
 
@@ -17,7 +17,7 @@ Nenhum dado financeiro, pessoal, fatura, referência, comprovativo, anexo, hist�
 - sanitização/escaping antes de renderizar dados do utilizador;
 - histórico de atividade sem nomes, valores, fornecedores ou referências;
 - guardas contra escrita sensível em `localStorage` e `sessionStorage`;
-- CSP por `meta` compatível com GitHub Pages, bloqueando scripts externos e permitindo apenas `self` e `https://api.github.com` para a sincronização cifrada;
+- CSP por `meta` compatível com GitHub Pages, com `script-src 'self'`; o leitor ZXing é empacotado localmente no bundle publicado. `connect-src` mantém apenas os endpoints necessários à sincronização cifrada e às pesquisas explícitas de Mercado;
 - service worker limitado a assets públicos conhecidos;
 - bloqueio automático por inatividade e ao perder foco;
 - destruição das referências da chave e do estado em memória ao bloquear;
@@ -79,3 +79,13 @@ Riscos residuais adicionais:
 - um token comprometido pode permitir substituir ou apagar o ficheiro cifrado remoto;
 - conflitos simultâneos podem exigir intervenção manual;
 - a segurança continua dependente da conta GitHub, do dispositivo e do navegador.
+
+
+## Dependências de rede do runtime
+
+- **Scripts executáveis:** apenas same-origin (`script-src 'self'`). O ZXing usado pelos scanners é copiado no build para `vendor/zxing-browser.min.js` a partir da versão fixada `@zxing/browser@0.2.0`; a licença MIT é publicada em `vendor/ZXING_LICENSE.txt`.
+- **Sincronização opcional:** `https://api.github.com`, apenas para o envelope cifrado configurado pelo utilizador.
+- **Mercado:** pesquisas/obtenção de imagens podem consultar `cesta.pt`, `r.jina.ai`, Open Food Facts e hosts oficiais de Continente/Pingo Doce. Esses pedidos não recebem o estado financeiro do cofre.
+- **Sem telemetria financeira:** não existe endpoint de analytics, anúncios ou tracking autorizado pela aplicação.
+
+A política CSP continua a usar `style-src 'unsafe-inline'` devido a estilos dinâmicos e camadas históricas de UI. Esta é uma dívida técnica conhecida e deve ser reduzida apenas depois de consolidar os componentes que ainda dependem desses estilos.
