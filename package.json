@@ -16,6 +16,9 @@
   "devDependencies": {
     "typescript": "6.0.3",
     "@playwright/test": "1.63.0",
-    "@zxing/browser": "0.2.0"
+    "@zxing/browser": "0.2.0",
+    "tesseract.js": "7.0.0",
+    "tesseract.js-core": "7.0.0",
+    "@tesseract.js-data/por": "1.0.0"
   }
 }
