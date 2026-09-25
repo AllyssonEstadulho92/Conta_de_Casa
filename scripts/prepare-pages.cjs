@@ -7,11 +7,14 @@ const { execFileSync } = require('node:child_process');
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
 const GENERATED = path.join(ROOT, '.generated');
+const ZXING_PACKAGE_ROOT = path.join(ROOT,'node_modules','@zxing','browser');
 const BUILD_TYPESCRIPT_RUNTIME = path.join(ROOT, 'scripts', 'build-typescript-runtime.cjs');
 const GENERATED_PUBLIC_FILES = Object.freeze({
   'market-branding.js': path.join(GENERATED, 'market-branding.js'),
   'sync-conflict-policy.js': path.join(GENERATED, 'sync-conflict-policy.js'),
-  'date-calculator.js': path.join(GENERATED, 'date-calculator.js')
+  'date-calculator.js': path.join(GENERATED, 'date-calculator.js'),
+  'vendor/zxing-browser.min.js': path.join(ZXING_PACKAGE_ROOT,'umd','zxing-browser.min.js'),
+  'vendor/ZXING_LICENSE.txt': path.join(ZXING_PACKAGE_ROOT,'LICENSE')
 });
 const PACKAGE = JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
 const APP_VERSION = String(PACKAGE.version||'').trim();
@@ -43,7 +46,7 @@ const PD_PHOTO_REV = '75-pd-photo1';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
-const SERVICE_WORKER_REV = '76-background-efficiency5';
+const SERVICE_WORKER_REV = '76-local-zxing-e2e6';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
   throw new Error(`Invalid package application version: ${APP_VERSION||'(empty)'}`);
@@ -136,7 +139,9 @@ const PUBLIC_FILES = Object.freeze([
   'sw.js',
   'manifest.webmanifest',
   'icon.svg',
-  'LUCIDE_LICENSE.txt'
+  'LUCIDE_LICENSE.txt',
+  'vendor/zxing-browser.min.js',
+  'vendor/ZXING_LICENSE.txt'
 ]);
 
 const MANUAL_TYPESCRIPT_RUNTIMES = Object.freeze({
@@ -157,7 +162,9 @@ fs.mkdirSync(DIST,{recursive:true});
 for(const name of PUBLIC_FILES){
   const source=GENERATED_PUBLIC_FILES[name]||path.join(ROOT,name);
   if(!fs.existsSync(source)||!fs.statSync(source).isFile())throw new Error(`Public Pages asset missing: ${name}`);
-  fs.copyFileSync(source,path.join(DIST,name));
+  const destination=path.join(DIST,name);
+  fs.mkdirSync(path.dirname(destination),{recursive:true});
+  fs.copyFileSync(source,destination);
 }
 
 const distIndex=path.join(DIST,'index.html');
@@ -169,6 +176,8 @@ if(!index.includes('name="app-version"')){
 }
 index=index.replace(/<meta name="theme-color" content="[^"]+"\s*\/>/,'<meta name="theme-color" content="#f4f8f8" />');
 index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
+index=index.replace("script-src 'self' https://unpkg.com;","script-src 'self';");
+index=index.replace(/<meta name="barcode-reader-src" content="[^"]+"\s*\/>/, '<meta name="barcode-reader-src" content="./vendor/zxing-browser.min.js" />');
 index=index.replace(/invoice-capture\.css\?v=[^"']+/,`invoice-capture.css?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/invoice-capture\.js\?v=[^"']+/,`invoice-capture.js?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${APP_VERSION} · ${BUILD}</strong>`);
