@@ -573,3 +573,16 @@ Decisão:
 - timestamps de eventos continuam em ISO UTC quando representam um instante e não um dia civil;
 - estas correções são de apresentação/tempo civil e não alteram a contabilidade em cêntimos nem a persistência financeira.
 
+## D-134: orçamento segue o mês da fatura; fluxo de caixa segue a data do pagamento
+
+Uma fatura pode ser paga antes ou depois do respetivo mês. Usar apenas `paidAt` no orçamento permitia que a fatura ficasse **Paga** sem consumir o orçamento do mês a que pertence.
+
+Decisão:
+
+- `paymentTotal` mantém semântica de caixa e usa `paidAt`;
+- `budgetPaymentTotal` usa o mês de vencimento da fatura associada;
+- `budgetUsed` usa `budgetPaymentTotal + marketSpent`;
+- Planeamento e categorias usam a mesma base;
+- calendário e relatórios de caixa mantêm a data real;
+- pagamentos órfãos não entram no orçamento e continuam a ser sinalizados pelo diagnóstico.
+

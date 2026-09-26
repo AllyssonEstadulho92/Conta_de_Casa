@@ -141,6 +141,16 @@ Calendário e Planeamento usam `selectedMonth` como única referência de mês. 
 
 Não existe cópia automática de orçamento ou saldo entre meses. Cada perfil mensal continua independente.
 
+## 5.3 Fluxo de caixa vs. orçamento
+
+A aplicação separa duas leituras dos pagamentos:
+
+- `paymentTotal`: usa `paidAt` e representa quando o dinheiro saiu efetivamente;
+- `budgetPaymentTotal`: usa a fatura associada e o mês do respetivo vencimento;
+- `budgetUsed`: `budgetPaymentTotal + marketSpent`.
+
+Assim, uma fatura de outubro paga em setembro reduz o orçamento de outubro sem deslocar artificialmente o movimento real de setembro. `categoryTotals()` segue a mesma base do orçamento.
+
 ## 6. Planeamento mobile
 
 `76-planning-budget-card2` + `76-planning-ring-shape1` + `76-planning-commitment1`:

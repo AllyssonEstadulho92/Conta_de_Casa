@@ -85,6 +85,7 @@ try {
   assert.match(builtIndex, /v76-modern-ui\.css\?v=76-modern-ui2/);
   assert.match(builtIndex, /v76-product-pages\.css\?v=76-dashboard-priority1/);
   assert.match(builtIndex, /render\.js\?v=76-full-audit-fixes1/);
+  assert.match(builtIndex, /finance\.js\?v=76-budget-bill-month2/);
   assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-mobile-shell3/);
   assert.match(builtIndex, /v75-usability\.css\?v=76-auth1/);
 
