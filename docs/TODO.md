@@ -63,6 +63,11 @@ Atualizado: 25 de setembro de 2026
 
 ## P0 — Planeamento + Calendário
 
+- [x] `76-budget-bill-month1`: corrigir orçamento que permanecia em 0 após pagar uma fatura de outro mês civil.
+- [x] Separar `paymentTotal` (caixa) de `budgetPaymentTotal` (orçamento do mês da fatura).
+- [x] Alinhar categorias e Planeamento com `budgetUsed`.
+- [x] Adicionar regressão para fatura de outubro paga antecipadamente em setembro.
+
 - [x] `76-month-context-sync1`: unificar mudança de mês entre Planeamento, Calendário e seletor global.
 - [x] Emitir `cdc:month-change` e recompor a camada visual do Planeamento.
 - [x] Tornar o filtro mensal do Calendário explícito com `selectedMonth`.
