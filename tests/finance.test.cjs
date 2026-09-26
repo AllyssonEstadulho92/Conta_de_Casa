@@ -55,6 +55,7 @@ assert.equal(vm.runInContext(`dueText(appState.bills.find(b=>b.id==='b4'),${now}
 const n=vm.runInContext(`monthNumbers('2026-09',${now})`,context);
 assert.equal(n.incomes,50000);
 assert.equal(n.paymentTotal,5800);
+assert.equal(n.budgetPaymentTotal,5800);
 assert.equal(n.marketSpent,10000);
 assert.equal(n.pending,24700);
 assert.equal(n.overdue,3000);
@@ -133,5 +134,31 @@ assert.equal(vm.runInContext(`monthNumbers('2026-09',${now}).pending`,context),b
 const diagnostic=vm.runInContext(`financialDiagnostics('2026-09',${now})`,context);
 assert.equal(diagnostic.ok,true);
 assert.equal(diagnostic.issues.length,0);
+
+
+// O orçamento segue o mês da fatura; o fluxo de caixa mantém a data real do pagamento.
+vm.runInContext(`
+appState.months['2026-10']={openingBalanceCents:0,budgetCents:60000};
+appState.bills.push({
+  id:'b-oct',title:'Fatura outubro',category:'Crédito',totalCents:12000,
+  dueDate:'2026-10-02',dueTime:'12:00',dueAt:composeLocalDateTimeIso('2026-10-02','12:00'),
+  recurrence:'none',cancelled:false,archived:false
+});
+appState.payments.push({
+  id:'p-oct-early',billId:'b-oct',amountCents:12000,
+  paidAt:'2026-09-26T12:00:00.000Z',method:'Transferência'
+});
+`,context);
+const sepAfterEarlyOctoberPayment=vm.runInContext("monthNumbers('2026-09',new Date(2026,8,26,12,0,0,0))",context);
+assert.equal(sepAfterEarlyOctoberPayment.paymentTotal,17800);
+assert.equal(sepAfterEarlyOctoberPayment.budgetPaymentTotal,5800);
+assert.equal(sepAfterEarlyOctoberPayment.budgetUsed,15800);
+const octAfterEarlyPayment=vm.runInContext("monthNumbers('2026-10',new Date(2026,9,1,12,0,0,0))",context);
+assert.equal(octAfterEarlyPayment.paymentTotal,0);
+assert.equal(octAfterEarlyPayment.budgetPaymentTotal,12000);
+assert.equal(octAfterEarlyPayment.budgetUsed,12000);
+assert.equal(octAfterEarlyPayment.outstanding,0);
+const octoberCategories=Object.fromEntries(JSON.parse(JSON.stringify(vm.runInContext("categoryTotals('2026-10')",context))));
+assert.equal(octoberCategories['Crédito'],12000);
 
 console.log('Filter, mutation and financial invariant tests: OK');
