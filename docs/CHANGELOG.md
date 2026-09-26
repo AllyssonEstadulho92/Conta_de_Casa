@@ -3,6 +3,22 @@
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
 
+## 2026-09-26: `76-budget-bill-month1`: orçamento passa a reagir ao pagamento da fatura
+
+### Problema confirmado
+
+Uma fatura de um mês futuro podia ser paga antecipadamente e ficar com estado **Pago**, mas o cartão **Orçamento** desse mês permanecia em 0,00 €. O motivo era `budgetUsed` usar exclusivamente a data real do pagamento.
+
+### Correção
+
+- criado `budgetPaymentTotal`, alocado pelo mês de vencimento da fatura;
+- `paymentTotal` continua a usar `paidAt` para fluxo de caixa;
+- `budgetUsed` passa a usar pagamentos das faturas do mês + compras do Mercado;
+- Planeamento e categorias usam a mesma base do orçamento;
+- testes cobrem pagamento antecipado sem alterar a data real do movimento;
+- revisão de `finance.js`, arquitetura e Service Worker atualizada para distribuição PWA.
+
+
 ## 2026-09-25: `76-security-network-copy1`: descrição de rede corrigida
 
 A página Segurança deixou de afirmar **Sem CDNs**. O texto passa a declarar que o leitor QR pode carregar ZXing Browser 0.2.0 de `unpkg.com`, sem credenciais e sob a CSP existente. A sincronização e o cofre permanecem inalterados.
