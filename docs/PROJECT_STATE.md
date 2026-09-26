@@ -139,6 +139,23 @@ Foi corrigida uma divergência de atualização entre o mês selecionado e a cam
 
 Preservado: os valores continuam separados por mês, sem copiar orçamento, saldo ou rendimentos entre meses.
 
+## Auditoria funcional: orçamento e pagamentos
+
+Revisão técnica: `76-budget-bill-month1`.
+
+A auditoria confirmou uma divergência real entre o estado **Pago** de uma fatura e o cartão **Orçamento**. O fluxo de pagamento guardava corretamente o registo, mas `budgetUsed` usava o mês de `paidAt`. Assim, uma fatura de outubro paga antecipadamente em setembro ficava **Paga**, mas o orçamento de outubro continuava em 0,00 €.
+
+Correção:
+
+- `paymentTotal` continua a representar o fluxo de caixa real pelo mês em que o dinheiro saiu;
+- `budgetPaymentTotal` passa a representar pagamentos associados às faturas do mês selecionado;
+- `budgetUsed = budgetPaymentTotal + marketSpent`;
+- Planeamento e Orçamento usam `budgetUsed`;
+- categorias do orçamento usam a mesma alocação por mês da fatura;
+- relatórios diários/mensais de caixa continuam a usar `paidAt`, evitando falsificar a data real do pagamento;
+- pagamentos antecipados e tardios ficam cobertos por testes de regressão;
+- `finance.js`, `v75-architecture.js` e Service Worker recebem revisão própria para impedir cache antigo no iPhone/PWA.
+
 ## Planeamento
 
 `76-planning-budget-card2` + `76-planning-ring-shape1` permanecem integrados. A revisão `76-planning-commitment1` acrescenta uma hierarquia financeira sem alterar a origem dos dados:
