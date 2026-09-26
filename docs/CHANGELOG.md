@@ -3,6 +3,13 @@
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
 
+## 2026-09-26: `76-budget-bill-month2`: orçamento reage ao pagamento da fatura
+
+Uma fatura de um mês futuro podia ser paga antecipadamente e ficar **Paga**, enquanto o orçamento desse mês permanecia em 0,00 €. Foi separado o fluxo de caixa (`paymentTotal`, por `paidAt`) da utilização do orçamento (`budgetPaymentTotal`, pelo mês da fatura).
+
+`budgetUsed`, Planeamento e categorias usam agora a mesma base mensal. Calendário e relatórios de caixa continuam a respeitar a data real do pagamento. A correção inclui testes de regressão e invalidação do runtime PWA.
+
+
 ## 2026-09-25: `76-full-audit-fixes1`: auditoria transversal e correções
 
 ### Pagamentos
