@@ -82,7 +82,7 @@
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
-  const REVISION='76-month-context-sync1';
+  const REVISION='76-budget-bill-month1';
   const LABELS=Object.freeze({
     dashboard:['Início','Visão geral'],
     bills:['Despesas','Movimentos'],
@@ -204,9 +204,7 @@
     try{
       if(typeof dashboardNumbers!=='function')return null;
       const numbers=dashboardNumbers();
-      const spent=typeof sumCents==='function'
-        ? sumCents([numbers.paymentTotal||0,numbers.marketSpent||0])
-        : Number(numbers.paymentTotal||0)+Number(numbers.marketSpent||0);
+      const spent=Number(numbers.budgetUsed||0);
       const committed=Number(numbers.outstanding||0);
       const budget=Number(numbers.profile?.budgetCents||0);
       const pct=budget>0?Math.max(0,Math.min(100,Math.round(spent/budget*100))):0;
