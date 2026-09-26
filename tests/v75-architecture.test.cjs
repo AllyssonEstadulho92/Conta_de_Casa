@@ -50,6 +50,7 @@ assert.match(js,/dashboardMetrics/);
 assert.match(js,/categoryEntries/);
 assert.match(js,/const hasBudget=metrics\.budget>0/,'planning must explicitly distinguish an undefined budget from a true zero-percent usage');
 assert.match(js,/const committed=Number\(numbers\.outstanding\|\|0\)/,'planning commitment must reuse the canonical outstanding amount');
+assert.match(js,/const spent=Number\(numbers\.budgetUsed\|\|0\)/,'Planning spend must use the same selected-month budget allocation as the Dashboard');
 assert.match(js,/sumCents\(\[budget,-spent,-committed\]\)/,'available real must subtract actual spend and committed bills from the budget');
 assert.match(js,/Comprometido/,'planning must expose pending bill commitments without counting them as spent');
 assert.match(js,/Disponível real/,'planning must label the post-commitment balance explicitly');
