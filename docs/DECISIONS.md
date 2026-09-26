@@ -558,3 +558,16 @@ Decisão:
 - o objetivo técnico mantém-se: empacotar ZXing localmente e, só depois, remover `unpkg.com` da CSP;
 - alterações desta mensagem visível devem invalidar a revisão de `render.js` e o Service Worker para chegar a clientes PWA já abertos.
 
+## D-133: orçamento segue o mês da fatura; fluxo de caixa segue a data do pagamento
+
+Uma fatura pode ser paga antes ou depois do respetivo mês de vencimento. Usar apenas `paidAt` para o orçamento fazia uma fatura paga ficar concluída sem consumir o orçamento do mês a que pertence.
+
+Decisão:
+
+- `paymentTotal` mantém semântica de caixa e usa `paidAt`;
+- `budgetPaymentTotal` usa a associação do pagamento à fatura e o mês de vencimento dessa fatura;
+- `budgetUsed` usa `budgetPaymentTotal + marketSpent`;
+- o Planeamento e as categorias do orçamento usam `budgetUsed`;
+- relatórios e calendário de movimentos reais não mudam de mês por causa desta regra;
+- pagamentos órfãos não entram no orçamento e continuam a ser sinalizados pelo diagnóstico financeiro.
+
