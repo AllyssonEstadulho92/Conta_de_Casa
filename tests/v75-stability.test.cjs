@@ -117,7 +117,7 @@ try{
   assert.match(builtIndex,/v75-stability\.css\?v=75-stability1/);
   assert.match(builtIndex,/v75-pages\.css\?v=75-pages1/);
   assert.match(builtIndex,/v75-usability\.css\?v=76-auth1/);
-  assert.match(builtIndex,/v75-architecture\.js\?v=76-month-context-sync1/);
+  assert.match(builtIndex,/v75-architecture\.js\?v=76-budget-bill-month1/);
   assert.match(builtIndex,/v75-stability\.js\?v=75-stability1/);
   assert.ok(builtIndex.indexOf('v75-stability.css')>builtIndex.indexOf('v75-header-refinement.css'));
   assert.ok(builtIndex.indexOf('v75-pages.css')>builtIndex.indexOf('v75-drawer-theme.css'));
