@@ -52,6 +52,7 @@ const now="new Date(2026,8,10,12,0,0,0)";
 const n=vm.runInContext(`monthNumbers('2026-09',${now})`,context);
 assert.equal(n.incomes,50000);
 assert.equal(n.paymentTotal,14500);
+assert.equal(n.budgetPaymentTotal,14500);
 assert.equal(n.marketSpent,7000);
 assert.equal(n.pending,14500);
 assert.equal(n.overdue,10000);
