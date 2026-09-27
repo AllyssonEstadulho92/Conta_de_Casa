@@ -1,11 +1,27 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 25 de setembro de 2026  
+Atualizado: 27 de setembro de 2026  
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main` antes deste bloco: `47bd94951b8748fbb8bd4153e967f4b7b948fe32` (Comprometido e Disponível real integrados no Planeamento)
-Branch funcional: `main`
+Baseline funcional em `main` antes deste bloco: `efeddabc5d1b65ba15294e3d4fc066570a95d5af` (`76-budget-bill-month2`)
+Branch funcional: `main`; implementação preparada em `76-budget-cash-separation3`
+
+## Correção completa de orçamento e fluxo de caixa: 76-budget-cash-separation3
+
+A revisão de `76-budget-bill-month2` confirmou que a regra de orçamento estava correta, mas duas superfícies continuavam a misturar semânticas: o Calendário mostrava `budgetUsed` como **Gasto no mês** apesar de os dias e o histórico usarem a data real do pagamento, e os Relatórios combinavam total de caixa com categorias alocadas ao mês da fatura.
+
+A separação passa a ser explícita:
+
+- `cashSpent = paymentTotal + marketSpent`: dinheiro efetivamente movimentado no mês, pela data `paidAt`, usado no Calendário e nos Relatórios;
+- `budgetUsed = budgetPaymentTotal + marketSpent`: consumo do orçamento do mês da fatura, usado no Início e no Planeamento;
+- `categoryTotals()` mantém a distribuição por orçamento;
+- `cashCategoryTotals()` fornece a distribuição dos Relatórios por data real do pagamento;
+- o Planeamento passa a chamar a métrica **Orçamento utilizado**, evitando apresentar alocação orçamental como gasto de caixa;
+- os diagnósticos verificam separadamente total de caixa, total orçamental e respetivas categorias;
+- `render.js`, `finance.js`, arquitetura e Service Worker recebem a revisão `76-budget-cash-separation3`.
+
+Não existe migração de dados, alteração de `STATE_VERSION`, IndexedDB, cifra, PIN/cofre, pagamentos gravados ou sincronização.
 
 ## Auditoria transversal rápida — 76-full-audit-fixes1
 
@@ -173,12 +189,12 @@ Correção:
 
 `76-planning-budget-card2` + `76-planning-ring-shape1` permanecem integrados. A revisão `76-planning-commitment1` acrescenta uma hierarquia financeira sem alterar a origem dos dados:
 
-- **Gasto este mês** continua a representar apenas pagamentos efetivamente registados e compras de Mercado concluídas;
+- **Orçamento utilizado** usa `budgetUsed`, isto é, pagamentos alocados ao mês da respetiva fatura mais compras de Mercado concluídas no mês;
 - **Comprometido** usa `monthNumbers().outstanding`, isto é, o valor remanescente das faturas ativas do mês, incluindo pendentes, vencidas e parcialmente pagas;
 - **Orçamento** continua a vir de `profile.budgetCents`;
-- **Disponível real** = orçamento menos gasto efetivo menos comprometido;
+- **Disponível real** = orçamento menos `budgetUsed` menos comprometido;
 - o valor disponível não é limitado artificialmente a zero, para que um mês sobrecomprometido seja visível;
-- a percentagem do anel continua a representar apenas gasto efetivo sobre orçamento, sem transformar faturas pendentes em gasto;
+- a percentagem do anel representa `budgetUsed` sobre o orçamento, sem transformar o remanescente de faturas pendentes em valor já utilizado;
 - `#monthPlanForm` e `#monthlyBudget` continuam a única gravação do orçamento;
 - não existe alteração de `STATE_VERSION`, IndexedDB, pagamentos, Mercado, sync ou cifragem.
 
