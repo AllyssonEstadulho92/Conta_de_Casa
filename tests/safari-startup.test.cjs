@@ -44,7 +44,7 @@ assert.ok(sw.includes("'./v75-startup-guard.js'"));
 assert.match(prepare,/const STARTUP_REV = '76-startup-canonical3'/);
 assert.ok(prepare.includes("'v75-startup-guard.js'"));
 assert.match(prepare,/v75-startup-guard\.js\?v=\$\{STARTUP_REV\}/);
-assert.match(prepare,/const SERVICE_WORKER_REV = '76-budget-cash-separation3'/);
+assert.match(prepare,/const SERVICE_WORKER_REV = '76-local-zxing1'/);
 
 const dist=path.join(ROOT,'dist');
 try{
