@@ -13,6 +13,7 @@
 (function installInvoiceCapture(root){
   const MAX_IMAGE_BYTES=15*1024*1024;
   const ZXING_LOAD_TIMEOUT_MS=12000;
+  const LOCAL_ZXING_FILE='zxing-browser.min.js';
   const MODE_COPY=Object.freeze({
     image:Object.freeze({
       title:'Ler fatura por imagem',
@@ -139,7 +140,7 @@
     try{
       const url=new URL(value,location.href);
       if(url.origin!==location.origin)return '';
-      if(!/\/zxing-browser\.min\.js$/.test(url.pathname))return '';
+      if(!url.pathname.endsWith('/'+LOCAL_ZXING_FILE))return '';
       if(url.search&&!/^\?v=[0-9A-Za-z.-]+$/.test(url.search))return '';
       return url.href;
     }catch(_error){return '';}
