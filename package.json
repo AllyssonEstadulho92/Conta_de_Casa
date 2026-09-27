@@ -12,6 +12,8 @@
     "build:pages": "node scripts/prepare-pages.cjs"
   },
   "devDependencies": {
+    "@zxing/browser": "0.2.0",
+    "@zxing/library": "0.22.0",
     "typescript": "6.0.3"
   }
 }
