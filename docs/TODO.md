@@ -154,8 +154,9 @@ Atualizado: 27 de setembro de 2026
 
 - [x] `settings` usa engrenagem Lucide.
 - [x] `76-security-network-copy1`: corrigir texto `Sem CDNs` enquanto ZXing usar origem remota.
-- [ ] Empacotar ZXing localmente com licença preservada.
-- [ ] Depois remover a origem remota de `script-src`.
+- [x] `76-local-zxing1`: empacotar ZXing localmente com licença preservada.
+- [x] Remover `https://unpkg.com` de `script-src` e limitar o scanner a `self`.
+- [ ] Validar fisicamente QR/fatura e código de barras com rede e offline após instalação PWA.
 - [ ] Reduzir `style-src 'unsafe-inline'` quando a arquitetura permitir.
 - [ ] Rever feedback/destructive actions/dark mode/forced-colors fisicamente.
 - [ ] Confirmar offline/update da PWA após cada invalidação relevante de cache.
@@ -242,7 +243,7 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 
 - [x] `76-invoice-capture-warmup1`: preparar o leitor QR em background quando o formulário de nova fatura abre.
 - [ ] medir no iPhone/Safari/PWA a diferença entre primeiro uso e usos seguintes.
-- [ ] empacotar ZXing localmente para eliminar a latência e dependência da origem remota.
+- [x] `76-local-zxing1`: empacotar ZXing localmente para eliminar a dependência da origem remota e permitir fallback offline.
 
 
 ## Regressão física dos modos de fatura
