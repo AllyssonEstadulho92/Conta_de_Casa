@@ -75,6 +75,7 @@ assert.match(finance,/const cashSpent = sumCents\(\[paymentTotal,marketSpent\]\)
 assert.match(finance,/function cashCategoryTotals\(/,'reports must have a cash-date category breakdown');
 assert.match(render,/\['Gasto no mês',numbers\.cashSpent/,'Calendar summary must use actual cash spend');
 assert.match(render,/renderCategoryBars\('#reportCategoryBars',cashCategoryTotals\(\)\)/,'Reports category bars must reconcile with actual cash spend');
+assert.match(render,/function renderReports\(\)[\s\S]*monthlySpendHistory\(selectedMonth,6\)/,'Reports trend must reuse the canonical cash history, including Market quantities');
 
 // O runtime v74 foi removido fisicamente. A camada v76 mantém uma proteção defensiva
 // contra IDs antigos sem depender da existência do runtime que os criava.
