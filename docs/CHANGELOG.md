@@ -2,6 +2,27 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-27: `76-budget-cash-separation3`: caixa e orçamento deixam de se cruzar na apresentação
+
+### Problema confirmado
+
+`76-budget-bill-month2` corrigiu a alocação do orçamento ao mês da fatura, mas o Calendário ainda apresentava `budgetUsed` como **Gasto no mês**, enquanto os dias e o histórico usavam `paidAt`. Nos Relatórios, o total era de caixa, mas as categorias vinham da base orçamental. Uma fatura paga antecipadamente podia, por isso, produzir totais visualmente incompatíveis.
+
+### Correção
+
+- `monthNumbers()` expõe `cashSpent = paymentTotal + marketSpent`;
+- Calendário usa `cashSpent` no resumo mensal;
+- Relatórios usam `cashSpent` nos cartões e `cashCategoryTotals()` nas categorias;
+- `categoryTotals()` mantém a semântica de orçamento;
+- Planeamento mantém `budgetUsed`, mas a métrica passa a chamar-se **Orçamento utilizado**;
+- diagnósticos validam separadamente caixa, orçamento e respetivas distribuições por categoria;
+- `render.js`, `finance.js`, arquitetura e Service Worker recebem a revisão `76-budget-cash-separation3`.
+
+### Preservado
+
+Sem alteração de `STATE_VERSION`, IndexedDB, PBKDF2/AES-GCM, PIN/cofre, pagamentos persistidos, sync ou release pública `v76` / `0.76.0`.
+
+
 
 ## 2026-09-26: `76-budget-bill-month2`: orçamento reage ao pagamento da fatura
 
