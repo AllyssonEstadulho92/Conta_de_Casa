@@ -1,5 +1,16 @@
 # Changelog
 
+## v76: separação completa entre fluxo de caixa e orçamento
+
+- adicionada a métrica derivada `cashSpent`, baseada na data real dos pagamentos e nas compras concluídas;
+- Calendário passa a reconciliar resumo mensal, gasto diário e histórico pela mesma base de caixa;
+- Relatórios passam a usar categorias de caixa através de `cashCategoryTotals()`;
+- Planeamento continua a usar a alocação orçamental pelo mês da fatura e apresenta a designação **Orçamento utilizado**;
+- diagnósticos financeiros verificam separadamente total de caixa e total orçamental;
+- sem migração de dados, alteração do schema, cofre, IndexedDB ou sincronização;
+- revisão pública de runtime e cache: `76-budget-cash-separation3`.
+
+
 ## v50 — hierarquia unificada dos controlos móveis
 
 - botões “+” do cabeçalho, Faturas e Mercado passam a usar a mesma geometria: alvo táctil de 44 px e superfície visível de 36 px;
