@@ -138,8 +138,9 @@
     const value=document.querySelector('meta[name="barcode-reader-src"]')?.content?.trim()||'';
     try{
       const url=new URL(value,location.href);
-      if(url.protocol!=='https:'||url.hostname!=='unpkg.com')return '';
-      if(!/@zxing\/browser@0\.2\.0\/umd\/zxing-browser\.min\.js$/.test(url.pathname))return '';
+      if(url.origin!==location.origin)return '';
+      if(!/\/zxing-browser\.min\.js$/.test(url.pathname))return '';
+      if(url.search&&!/^\?v=[0-9A-Za-z.-]+$/.test(url.search))return '';
       return url.href;
     }catch(_error){return '';}
   }
