@@ -55,7 +55,7 @@ try{
   assert.ok(index.indexOf('v75-startup-guard.js')>index.indexOf('v75-stability.js'),'startup guard must load after stability');
   assert.ok(fs.existsSync(path.join(dist,'v75-startup-guard.js')));
   assert.match(fs.readFileSync(path.join(dist,'v75-startup-guard.js'),'utf8'),/76-auth-canonical2/);
-  assert.match(builtEvents,/\.\/sw\.js\?v=76-budget-cash-separation3/);
+  assert.match(builtEvents,/\.\/sw\.js\?v=76-local-zxing1/);
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
