@@ -121,7 +121,7 @@ Hotfixes e correções internas podem ser publicados mantendo `v76`/`0.76.0` qua
 
 Contratos por regex/sintaxe continuam úteis, mas não contam como validação física de hit-testing, teclado virtual, scroll, foco ou top-layer. Fluxos críticos móveis devem ganhar E2E WebKit/Chromium.
 
-## D-095 — dependência CDN deve ser descrita com precisão
+## D-095 — dependência CDN deve ser descrita com precisão (histórica, substituída por D-136)
 
 Enquanto ZXing for carregado de `unpkg.com`, a página Segurança não pode afirmar literalmente “Sem CDNs”. A direção preferida é bundle local + licença preservada + CSP mais restritiva.
 
@@ -546,7 +546,7 @@ Decisão:
 - o Calendário deve filtrar explicitamente pelo mês recebido/selecionado;
 - não se herdam automaticamente orçamento, saldo inicial, saldo real ou rendimentos de um mês para outro.
 
-## D-132: a página Segurança deve descrever dependências de rede reais
+## D-132: a página Segurança deve descrever dependências de rede reais (histórica, substituída por D-136)
 
 Enquanto o scanner QR carregar ZXing Browser 0.2.0 de `unpkg.com`, a aplicação não pode apresentar a afirmação **Sem CDNs**.
 
@@ -601,3 +601,23 @@ Decisão:
 - os diagnósticos devem reconciliar separadamente `cashSpent` e `budgetUsed`;
 - uma fatura paga antecipadamente pode aparecer como saída de caixa num mês e consumo orçamental noutro, sem duplicar qualquer total;
 - esta separação não altera persistência, schema, pagamentos nem histórico; altera apenas derivação e apresentação das leituras mensais.
+
+## D-136: ZXing é dependência local, versionada e same-origin
+
+A aplicação não deve depender de uma CDN para decodificar QR ou códigos de barras. A versão remota fixada cumpria previsibilidade de versão, mas ainda introduzia latência de primeiro uso, indisponibilidade offline e uma origem adicional em `script-src`.
+
+Decisão:
+
+- manter `@zxing/browser` fixado em `0.2.0` para preservar o comportamento já validado;
+- fixar também o peer `@zxing/library` em `0.22.0` no toolchain de build;
+- gerar/copiar o UMD a partir de `node_modules` durante `build:runtime`, nunca descarregá-lo em execução;
+- validar a versão instalada no build e falhar se divergir;
+- preservar e publicar a licença da dependência;
+- publicar `zxing-browser.min.js` como asset same-origin do Pages;
+- limitar `barcode-reader-src` à própria origem e rejeitar URLs externas nos dois consumidores;
+- permitir que captura de faturas e scanner de Mercado partilhem uma única instância/script carregado;
+- incluir o runtime no precache do Service Worker para permitir fallback offline;
+- remover `https://unpkg.com` de `script-src`;
+- qualquer alteração de versão do ZXing exige revisão explícita, testes dos dois scanners e nova revisão de cache/PWA.
+
+Esta decisão não altera dados financeiros, persistência, cifragem, permissões da câmara ou regras de negócio.
