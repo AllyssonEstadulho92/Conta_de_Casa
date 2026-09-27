@@ -1,6 +1,6 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 25 de setembro de 2026  
+Atualizado: 27 de setembro de 2026  
 Versão: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
@@ -143,13 +143,17 @@ Não existe cópia automática de orçamento ou saldo entre meses. Cada perfil m
 
 ## 5.3 Fluxo de caixa vs. orçamento
 
-A aplicação separa duas leituras dos pagamentos:
+A aplicação mantém duas bases mensais deliberadamente distintas:
 
-- `paymentTotal`: usa `paidAt` e representa quando o dinheiro saiu efetivamente;
-- `budgetPaymentTotal`: usa a fatura associada e o mês do respetivo vencimento;
-- `budgetUsed`: `budgetPaymentTotal + marketSpent`.
+- `paymentTotal`: pagamentos cuja `paidAt` pertence ao mês, representa fluxo de caixa real;
+- `budgetPaymentTotal`: pagamentos associados a faturas cujo vencimento pertence ao mês;
+- `marketSpent`: compras concluídas no mês;
+- `cashSpent = paymentTotal + marketSpent`: gasto efetivamente movimentado no mês;
+- `budgetUsed = budgetPaymentTotal + marketSpent`: consumo do orçamento atribuído ao mês da obrigação.
 
-Assim, uma fatura de outubro paga em setembro reduz o orçamento de outubro sem deslocar artificialmente o movimento real de setembro. `categoryTotals()` segue a mesma base do orçamento.
+Uma fatura de outubro paga em setembro entra em `cashSpent` de setembro e em `budgetUsed` de outubro. Não existe dupla contagem dentro da mesma métrica.
+
+`categoryTotals()` segue a base orçamental. `cashCategoryTotals()` segue a data real do pagamento e é a autoridade das categorias dos Relatórios. O Calendário usa `cashSpent` no resumo, `spendingForDate()` nos dias e `monthlySpendHistory()` no histórico, mantendo as três leituras reconciliadas.
 
 ## 6. Planeamento mobile
 
@@ -160,11 +164,11 @@ Assim, uma fatura de outubro paga em setembro reduz o orçamento de outubro sem 
 - orçamento ausente permanece `Por definir`;
 - o anel neutraliza altura legada e mantém proporção 1:1;
 - `dashboardNumbers()` / `monthNumbers()` continuam a fonte financeira do resumo;
-- **Gasto este mês** = `paymentTotal + marketSpent`;
+- **Orçamento utilizado** = `budgetUsed`;
 - **Comprometido** = `outstanding`, já calculado pelo domínio a partir do remanescente das faturas ativas do mês;
 - **Disponível real** = `budgetCents - budgetUsed - outstanding`;
-- pagamentos parciais não são duplicados: a parte paga entra em gasto e apenas o remanescente fica comprometido;
-- a percentagem do anel continua baseada exclusivamente em gasto efetivo;
+- pagamentos parciais não são duplicados: a parte paga da fatura entra em `budgetUsed` do mês da obrigação e apenas o remanescente fica em `outstanding`;
+- a percentagem do anel é baseada em `budgetUsed`, coerente com a finalidade orçamental do cartão;
 - disponível real pode ser negativo para representar sobrecompromisso;
 - a apresentação não cria uma segunda fonte de verdade e não altera persistência, estado ou regras de pagamento.
 

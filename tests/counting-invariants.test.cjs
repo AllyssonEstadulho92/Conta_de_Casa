@@ -54,6 +54,7 @@ assert.equal(n.incomes,50000);
 assert.equal(n.paymentTotal,14500);
 assert.equal(n.budgetPaymentTotal,14500);
 assert.equal(n.marketSpent,7000);
+assert.equal(n.cashSpent,21500);
 assert.equal(n.pending,14500);
 assert.equal(n.overdue,10000);
 assert.equal(n.outstanding,24500);
@@ -85,6 +86,8 @@ assert.equal(categories.reduce((total,[,value])=>total+value,0),21500);
 assert.equal(Object.fromEntries(categories)['Casa'],12000);
 assert.equal(Object.fromEntries(categories)['Telecomunicações'],2500);
 assert.equal(Object.fromEntries(categories)['Mercado · Alimentação'],7000);
+const cashCategories=JSON.parse(JSON.stringify(vm.runInContext("cashCategoryTotals('2026-09')",context)));
+assert.equal(cashCategories.reduce((total,[,value])=>total+value,0),n.cashSpent);
 
 const diagnostics=vm.runInContext(`financialDiagnostics('2026-09',${now})`,context);
 assert.equal(diagnostics.ok,true);

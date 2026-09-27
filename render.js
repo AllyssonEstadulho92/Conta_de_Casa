@@ -290,7 +290,7 @@ function renderCalendar() {
   const history=monthlySpendHistory(selectedMonth,6);
 
   setHTML('#calendarMonthSummary',[
-    ['Gasto no mês',numbers.budgetUsed,'Pagamentos + compras','primary'],
+    ['Gasto no mês',numbers.cashSpent,'Pagamentos + compras','primary'],
     ['Faturas pagas',numbers.paymentTotal,'Pagamentos registados','success'],
     ['Mercado',numbers.marketSpent,'Compras concluídas','normal'],
     ['Por pagar',numbers.outstanding,'Faturas ainda pendentes',numbers.outstanding>0?'warning':'normal']
@@ -457,12 +457,11 @@ function renderMarket() {
 
 function renderReports() {
   const n=monthNumbers();
-  const expenses=sumCents([n.paymentTotal,n.marketSpent]);
+  const expenses=n.cashSpent;
   const saved=sumCents([n.incomes,-expenses]);
   setHTML('#reportCards', [['Rendimentos',n.incomes,'success'],['Despesas efetivas',expenses,'danger'],['Resultado do mês',saved,saved<0?'danger':'success'],['Por pagar',n.pending,'primary']].map(([l,v,k])=>`<article class="kpi ${k}"><span class="label">${l}</span><strong data-money>${money(v)}</strong></article>`).join(''));
-  renderCategoryBars('#reportCategoryBars',categoryTotals());
-  const [y,m]=selectedMonth.split('-').map(Number); const vals=[];
-  for(let i=5;i>=0;i--){ const d=new Date(y,m-1-i,1); const mk=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; const pay=sumCents(appState.payments.filter(p=>inSelectedMonth(p.paidAt,mk)).map(p=>p.amountCents)); const market=sumCents(appState.market.filter(x=>x.purchased&&inSelectedMonth(x.purchasedAt||x.updatedAt,mk)).map(x=>x.actualCents||x.estimatedCents||0)); vals.push([mk,sumCents([pay,market])]); }
+  renderCategoryBars('#reportCategoryBars',cashCategoryTotals());
+  const vals=monthlySpendHistory(selectedMonth,6).map(item=>[item.month,item.total]);
   const max=Math.max(...vals.map(v=>v[1]),1);
   setHTML('#monthlyTrend', vals.map(([mk,v])=>`<div class="trend-col"><em data-money>${money(v)}</em><div class="trend-bar" data-height="${Math.max(3,v/max*165)}"></div><small>${new Intl.DateTimeFormat('pt-PT',{month:'short'}).format(new Date(`${mk}-01T12:00:00`))}</small></div>`).join(''));
 }

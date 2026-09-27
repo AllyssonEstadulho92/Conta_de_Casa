@@ -71,6 +71,11 @@ assert.match(finance,/function dashboardNumbers\(/);
 assert.match(finance,/pendingCount:/);
 assert.match(finance,/overdueCount:/);
 assert.match(finance,/next7Count:/);
+assert.match(finance,/const cashSpent = sumCents\(\[paymentTotal,marketSpent\]\)/,'month totals must expose actual cash spend separately from budget allocation');
+assert.match(finance,/function cashCategoryTotals\(/,'reports must have a cash-date category breakdown');
+assert.match(render,/\['Gasto no mês',numbers\.cashSpent/,'Calendar summary must use actual cash spend');
+assert.match(render,/renderCategoryBars\('#reportCategoryBars',cashCategoryTotals\(\)\)/,'Reports category bars must reconcile with actual cash spend');
+assert.match(render,/function renderReports\(\)[\s\S]*monthlySpendHistory\(selectedMonth,6\)/,'Reports trend must reuse the canonical cash history, including Market quantities');
 
 // O runtime v74 foi removido fisicamente. A camada v76 mantém uma proteção defensiva
 // contra IDs antigos sem depender da existência do runtime que os criava.
@@ -103,7 +108,7 @@ assert.match(render,/function renderMarket\(/);
 
 // A nova camada tem propriedade de composição de página, carrega antes do shell e entra no PWA.
 assert.match(prepare,/const PRODUCT_PAGES_REV = '76-dashboard-priority1'/);
-assert.match(prepare,/const DASHBOARD_REV = '76-full-audit-fixes1'/);
+assert.match(prepare,/const DASHBOARD_REV = '76-budget-cash-separation3'/);
 assert.ok(prepare.includes('render.js?v=${DASHBOARD_REV}'),'render.js must receive a dedicated cache-busting revision');
 assert.ok(prepare.includes("'v76-product-pages.css'"));
 const modern=prepare.indexOf('v76-modern-ui.css?v=${MODERN_UI_REV}');

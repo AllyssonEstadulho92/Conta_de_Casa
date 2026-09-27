@@ -1,6 +1,6 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 15 de setembro de 2026
+Atualizado: 27 de setembro de 2026
 
 ## D-064 — migração TypeScript incremental
 
@@ -586,3 +586,18 @@ Decisão:
 - calendário e relatórios de caixa mantêm a data real;
 - pagamentos órfãos não entram no orçamento e continuam a ser sinalizados pelo diagnóstico.
 
+## D-135: Calendário e Relatórios usam caixa; Planeamento usa orçamento
+
+A correção do orçamento por mês da fatura criou duas métricas válidas, mas com finalidades diferentes. Uma superfície não pode misturar o total de uma base com categorias ou rótulos da outra.
+
+Decisão:
+
+- `cashSpent = paymentTotal + marketSpent` representa o dinheiro efetivamente movimentado no mês;
+- Calendário, histórico mensal, gasto diário, cartões de Relatórios, tendência e categorias de Relatórios usam a base de caixa;
+- `budgetUsed = budgetPaymentTotal + marketSpent` representa consumo do orçamento do mês da fatura;
+- Início e Planeamento usam a base orçamental;
+- `categoryTotals()` é distribuição orçamental e `cashCategoryTotals()` é distribuição de caixa;
+- a métrica do Planeamento chama-se **Orçamento utilizado**, não **Gasto este mês**;
+- os diagnósticos devem reconciliar separadamente `cashSpent` e `budgetUsed`;
+- uma fatura paga antecipadamente pode aparecer como saída de caixa num mês e consumo orçamental noutro, sem duplicar qualquer total;
+- esta separação não altera persistência, schema, pagamentos nem histórico; altera apenas derivação e apresentação das leituras mensais.
