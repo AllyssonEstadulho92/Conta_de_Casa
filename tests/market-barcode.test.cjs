@@ -10,15 +10,19 @@ const pages=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 
 assert.match(index,/market-barcode\.css\?v=53/);
 assert.match(index,/market-barcode\.js\?v=53/);
-assert.match(index,/script-src 'self' https:\/\/unpkg\.com;/);
+assert.match(index,/script-src 'self';/);
+assert.doesNotMatch(index,/unpkg\.com/);
 assert.match(index,/connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt https:\/\/world\.openfoodfacts\.org;/);
-for(const asset of ['market-barcode.css','market-barcode.js']){
+for(const asset of ['market-barcode.css','market-barcode.js','zxing-browser.min.js','ZXING_BROWSER_LICENSE.txt']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be cached by the service worker`);
   assert.ok(pages.includes(`'${asset}'`),`${asset} must be included in the Pages bundle`);
 }
 assert.match(js,/facingMode:\{ideal:'environment'\}/);
 assert.match(js,/https:\/\/world\.openfoodfacts\.org\/api\/v2\/product\//);
-assert.match(js,/https:\/\/unpkg\.com\/@zxing\/browser@0\.2\.0\/umd\/zxing-browser\.min\.js/);
+assert.doesNotMatch(js,/unpkg\.com|@latest/);
+assert.match(js,/function readerSource\(\)/);
+assert.match(js,/zxing-browser\.min\.js/);
+assert.match(js,/script\[data-market-zxing\],script\[data-invoice-zxing\]/,'market and invoice scanners must reuse one local ZXing script');
 assert.match(js,/vídeo não é guardado nem enviado/i);
 assert.match(js,/dispatchEvent\(new Event\('input',\{bubbles:true\}\)\)/);
 assert.match(js,/new Set\(\[8,12,13,14\]\)/);

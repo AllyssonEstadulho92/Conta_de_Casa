@@ -9,6 +9,9 @@ const {execFileSync}=require('node:child_process');
 const ROOT=path.resolve(__dirname,'..');
 const GENERATED=path.join(ROOT,'.generated');
 const DIST=path.join(ROOT,'dist');
+const PACKAGE=JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
+assert.equal(PACKAGE.devDependencies['@zxing/browser'],'0.2.0','ZXing browser build dependency must stay exactly pinned');
+assert.equal(PACKAGE.devDependencies['@zxing/library'],'0.22.0','ZXing peer dependency must stay exactly pinned');
 
 const runtimes=Object.freeze([
   {
@@ -40,6 +43,14 @@ for(const runtime of runtimes){
 }
 
 execFileSync(process.execPath,['scripts/build-typescript-runtime.cjs'],{cwd:ROOT,stdio:'pipe'});
+
+const localZxing=path.join(GENERATED,'zxing-browser.min.js');
+const localZxingLicense=path.join(GENERATED,'ZXING_BROWSER_LICENSE.txt');
+assert.ok(fs.existsSync(localZxing),'runtime build must materialize pinned ZXing locally');
+assert.ok(fs.statSync(localZxing).size>10000,'local ZXing runtime must contain the published UMD bundle');
+assert.ok(fs.existsSync(localZxingLicense),'runtime build must preserve the ZXing license');
+assert.match(fs.readFileSync(localZxingLicense,'utf8'),/@zxing\/browser 0\.2\.0/);
+assert.match(fs.readFileSync(localZxingLicense,'utf8'),/MIT License/i);
 
 /* O antigo Veggie Burger duplicava o controlador funcional mobile-menu-toggle.js.
    O source TS permanece temporariamente como referência de retirada, mas o build não o
@@ -92,9 +103,13 @@ for(const runtime of runtimes){
   assert.equal(published,generatedByName.get(runtime.output),`${runtime.output} must be exactly the TypeScript-generated runtime`);
 }
 assert.ok(fs.existsSync(path.join(DIST,'date-calculator.css')),'Pages bundle must contain date-calculator.css');
+assert.equal(fs.readFileSync(path.join(DIST,'zxing-browser.min.js'),'utf8'),fs.readFileSync(localZxing,'utf8'),'Pages must publish the exact locally generated ZXing runtime');
+assert.equal(fs.readFileSync(path.join(DIST,'ZXING_BROWSER_LICENSE.txt'),'utf8'),fs.readFileSync(localZxingLicense,'utf8'),'Pages must publish the preserved ZXing license');
 const distIndex=fs.readFileSync(path.join(DIST,'index.html'),'utf8');
 assert.match(distIndex,/date-calculator\.css\?v=76-date-calculator1/);
 assert.match(distIndex,/date-calculator\.js\?v=76-date-calculator1/);
+assert.match(distIndex,/barcode-reader-src" content="\.\/zxing-browser\.min\.js\?v=76-local-zxing1"/);
+assert.doesNotMatch(distIndex,/unpkg\.com/);
 assert.ok(!fs.existsSync(path.join(DIST,'v76-veggie-menu.js')),'Pages bundle must not contain retired duplicate menu runtime');
 assert.ok(!fs.existsSync(path.join(DIST,'v76-veggie-menu.css')),'Pages bundle must not contain retired duplicate menu CSS');
 

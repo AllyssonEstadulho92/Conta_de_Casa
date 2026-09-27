@@ -174,15 +174,19 @@ Uma fatura de outubro paga em setembro entra em `cashSpent` de setembro e em `bu
 
 ## 6.1 Rede e scanner QR
 
-A página Segurança deve refletir as dependências reais da aplicação. Enquanto `invoice-capture.js` e `market-barcode.js` puderem carregar ZXing Browser 0.2.0 de `unpkg.com`, não é permitido afirmar que a aplicação funciona sem CDN.
+A revisão `76-local-zxing1` elimina a CDN do scanner. ZXing Browser 0.2.0 passa a ser dependência de build e artefacto público da própria aplicação.
 
 Contrato atual:
 
-- `script-src` autoriza `self` e `https://unpkg.com`;
-- ZXing é fixado em `@zxing/browser@0.2.0`;
-- o carregamento usa `referrerPolicy='no-referrer'` e não envia credenciais;
-- o scanner não recebe o estado financeiro cifrado;
-- a remoção de `unpkg.com` da CSP só pode ocorrer depois de ZXing estar empacotado localmente.
+- `script-src` autoriza apenas `self`;
+- `@zxing/browser` está fixado em `0.2.0` e `@zxing/library` em `0.22.0`;
+- `scripts/build-typescript-runtime.cjs` valida a versão instalada antes de copiar o UMD para `.generated/zxing-browser.min.js`;
+- a licença da dependência é preservada em `.generated/ZXING_BROWSER_LICENSE.txt` e publicada no Pages;
+- `barcode-reader-src` aponta para o asset local, nunca para uma origem externa;
+- `invoice-capture.js` e `market-barcode.js` validam same-origin antes de inserir o script;
+- ambos os fluxos reutilizam o mesmo script ZXing quando um deles já o carregou;
+- o Service Worker inclui o runtime e a licença na allowlist, permitindo fallback ZXing offline após instalação;
+- o scanner continua sem receber o estado financeiro cifrado nem enviar imagens para serviços externos.
 
 ## 7. Calculadora de datas
 
@@ -338,8 +342,8 @@ Isto permite que o hotfix visual seja recebido por reload normal sem obrigar o u
 - nenhum segredo deve existir no repositório público;
 - CSP está ativa;
 - iconografia Lucide é local/licenciada;
-- ZXing ainda é carregado remotamente, portanto a página Segurança não pode afirmar ausência total de CDN;
-- a localização do ZXing deve ocorrer antes de remover a origem remota da CSP;
+- ZXing é servido localmente e a página Segurança pode declarar ausência de CDN para o scanner;
+- `script-src` permanece restrito a `self`; qualquer reintrodução de origem remota exige decisão técnica explícita e novos testes;
 - `style-src 'unsafe-inline'` permanece dívida de hardening.
 
 ## 13. QA
@@ -368,7 +372,7 @@ Limitação: testes estáticos não substituem Safari/WebKit real para rendering
 1. validar `76-date-calculator-prototype-inputs5` no mesmo iPhone/Safari/PWA;
 2. validar `76-auth-spacing3` e os restantes blocos móveis pendentes;
 3. corrigir descrição factual de rede em Segurança;
-4. empacotar ZXing localmente com licença preservada;
+4. validar fisicamente o fallback ZXing local/offline e manter a licença no bundle público;
 5. endurecer CSP depois da remoção da dependência remota;
 6. criar E2E WebKit/Chromium;
 7. continuar redução de cascade por componente e migração TypeScript de baixo acoplamento.

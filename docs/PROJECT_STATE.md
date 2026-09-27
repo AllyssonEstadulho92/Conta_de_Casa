@@ -4,8 +4,27 @@ Atualizado: 27 de setembro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main` antes deste bloco: `efeddabc5d1b65ba15294e3d4fc066570a95d5af` (`76-budget-bill-month2`)
-Branch funcional: `main`; implementação preparada em `76-budget-cash-separation3`
+Baseline funcional em `main` antes deste bloco: `bc1f0bced58a0141435e85bfa9822fabbc8e7735` (`76-budget-cash-separation3`)
+Branch de implementação: `76-local-zxing1`; base funcional: `main`
+
+## Segurança e offline do scanner: 76-local-zxing1
+
+A dependência remota do leitor ZXing foi retirada do runtime público. A aplicação passa a empacotar a versão fixa `@zxing/browser@0.2.0` durante o build e a publicar o ficheiro resultante como asset da própria aplicação.
+
+Alterações:
+
+- `package.json` fixa `@zxing/browser` em `0.2.0` e `@zxing/library` em `0.22.0`;
+- `scripts/build-typescript-runtime.cjs` valida a versão instalada, copia o UMD para `.generated/zxing-browser.min.js` e preserva a licença em `.generated/ZXING_BROWSER_LICENSE.txt`;
+- `scripts/prepare-pages.cjs` publica os dois artefactos no `dist` e aponta `barcode-reader-src` para o asset local;
+- a CSP deixa de autorizar `https://unpkg.com` em `script-src`, ficando o scanner limitado a `self`;
+- `invoice-capture.js` e `market-barcode.js` rejeitam origens externas e partilham o mesmo carregamento local quando possível;
+- o Service Worker inclui ZXing e a respetiva licença na allowlist/precache, permitindo o fallback ZXing também sem rede depois da instalação;
+- a página Segurança deixa de descrever uma dependência de CDN que já não existe;
+- regressões de build, segurança, captura de faturas, scanner de Mercado e atualização PWA passam a proteger este contrato.
+
+Preservado: regras financeiras, `STATE_VERSION`, IndexedDB, PIN/cofre, cifra, dados de pagamentos, Mercado e sincronização.
+
+Pendente apenas validação física do scanner em iPhone/Safari/PWA, com rede e em modo offline após instalação.
 
 ## Correção completa de orçamento e fluxo de caixa: 76-budget-cash-separation3
 
@@ -206,15 +225,13 @@ Pendente: validação física no mesmo iPhone/PWA, incluindo orçamento definido
 
 Revisão técnica: `76-security-network-copy1`.
 
-Foi removida a afirmação incorreta **Sem CDNs** da página Segurança. O scanner QR ainda pode carregar **ZXing Browser 0.2.0** de `unpkg.com`, com versão fixada, sem credenciais e limitada pela CSP. A sincronização continua restrita ao GitHub e os dados financeiros do cofre não são enviados para o scanner.
-
-A dívida técnica de empacotar ZXing localmente permanece aberta. O Service Worker é invalidado para que a correção textual chegue também à PWA já instalada.
+Esta revisão histórica corrigiu a descrição da rede enquanto ZXing ainda era remoto. Foi posteriormente substituída por `76-local-zxing1`, que empacota ZXing localmente, retira `unpkg.com` da CSP e mantém o scanner dentro da própria origem.
 
 ## Segurança — dívida aberta
 
-- corrigir o texto de rede da página Segurança enquanto existir dependência remota do scanner;
-- empacotar ZXing localmente com licença preservada;
-- só depois retirar a origem remota da CSP;
+- [resolvido em `76-local-zxing1`] descrição da rede alinhada com o scanner local;
+- [resolvido em `76-local-zxing1`] ZXing empacotado com licença preservada;
+- [resolvido em `76-local-zxing1`] `unpkg.com` removido de `script-src`;
 - reduzir `style-src 'unsafe-inline'` quando a arquitetura permitir;
 - criar E2E WebKit/Chromium para os fluxos críticos.
 
@@ -223,7 +240,7 @@ A dívida técnica de empacotar ZXing localmente permanece aberta. O Service Wor
 1. validar `76-dashboard-priority1` no iPhone/Safari/PWA com seis faturas, nomes longos e largura real do dispositivo;
 2. validar `76-date-calculator-prototype-inputs5` e `76-auth-spacing3` nos mesmos ambientes;
 3. corrigir a descrição factual de rede em Segurança;
-4. empacotar ZXing local e endurecer CSP;
+4. concluir validação física do ZXing local/offline e continuar o endurecimento de CSP sobre estilos inline;
 5. continuar a consolidação por componente e a migração TypeScript sem alterar invariantes.
 
 
@@ -247,7 +264,7 @@ Pendente: validação física em iPhone/Safari/PWA das permissões da câmara, c
 
 Revisão técnica: `76-invoice-capture-warmup1`.
 
-Foi confirmado que a publicação anterior já estava concluída no GitHub Pages. A latência sentida no primeiro uso do leitor pode ocorrer porque o ZXing ainda é carregado remotamente quando necessário.
+Foi confirmado que a publicação anterior já estava concluída no GitHub Pages. Na altura, a latência do primeiro uso podia ocorrer porque ZXing ainda era carregado remotamente; `76-local-zxing1` elimina essa dependência de rede.
 
 Para reduzir a espera sem alterar o fluxo funcional:
 
@@ -257,7 +274,7 @@ Para reduzir a espera sem alterar o fluxo funcional:
 - nenhum cálculo, dado financeiro, cofre, IndexedDB ou sincronização é alterado;
 - o Service Worker recebe `invoice-capture-warmup1` para distribuir a revisão.
 
-Dívida técnica mantida: empacotar ZXing localmente e retirar a dependência remota, conforme o plano de segurança existente.
+Dívida técnica posteriormente resolvida em `76-local-zxing1`: ZXing passa a ser local e `unpkg.com` sai da CSP.
 
 
 ## Despesas — regressão física dos modos de registo (24/09/2026)

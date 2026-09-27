@@ -7,10 +7,11 @@
  */
 (function marketBarcodeScanner(){
   const DIALOG_SELECTOR='#formDialog[data-mode="market-browser"]';
-  const ZXING_URL='https://unpkg.com/@zxing/browser@0.2.0/umd/zxing-browser.min.js';
+
   const OFF_PRODUCT_URL='https://world.openfoodfacts.org/api/v2/product/';
   const LOOKUP_TIMEOUT_MS=9000;
   const LIBRARY_TIMEOUT_MS=12000;
+  const LOCAL_ZXING_FILE='zxing-browser.min.js';
   const ACCEPTED_LENGTHS=new Set([8,12,13,14]);
 
   let observer=null;
@@ -151,11 +152,24 @@
     document.querySelector(`${DIALOG_SELECTOR} #marketCatalogSearch`)?.focus({preventScroll:true});
   }
 
+  function readerSource(){
+    const value=document.querySelector('meta[name="barcode-reader-src"]')?.content?.trim()||'';
+    try{
+      const base=window.location?.href||document.baseURI||'';
+      if(!base)return '';
+      const url=new URL(value,base);
+      if(window.location?.origin&&url.origin!==window.location.origin)return '';
+      if(!url.pathname.endsWith('/'+LOCAL_ZXING_FILE))return '';
+      if(url.search&&!/^\?v=[0-9A-Za-z.-]+$/.test(url.search))return '';
+      return url.href;
+    }catch(_error){return '';}
+  }
+
   function loadZxing(){
     if(window.ZXingBrowser?.BrowserMultiFormatReader)return Promise.resolve(window.ZXingBrowser);
     if(zxingPromise)return zxingPromise;
     zxingPromise=new Promise((resolve,reject)=>{
-      const existing=document.querySelector('script[data-market-zxing]');
+      const existing=document.querySelector('script[data-market-zxing],script[data-invoice-zxing]');
       if(existing){
         const finish=()=>window.ZXingBrowser?.BrowserMultiFormatReader?resolve(window.ZXingBrowser):reject(new Error('zxing-unavailable'));
         existing.addEventListener('load',finish,{once:true});
@@ -163,11 +177,12 @@
         setTimeout(finish,250);
         return;
       }
+      const src=readerSource();
+      if(!src){reject(new Error('zxing-source-invalid'));return;}
       const script=document.createElement('script');
-      script.src=ZXING_URL;
+      script.src=src;
       script.async=true;
       script.dataset.marketZxing='';
-      script.referrerPolicy='no-referrer';
       const timer=setTimeout(()=>reject(new Error('zxing-timeout')),LIBRARY_TIMEOUT_MS);
       script.addEventListener('load',()=>{
         clearTimeout(timer);

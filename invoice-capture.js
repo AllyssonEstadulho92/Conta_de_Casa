@@ -13,6 +13,7 @@
 (function installInvoiceCapture(root){
   const MAX_IMAGE_BYTES=15*1024*1024;
   const ZXING_LOAD_TIMEOUT_MS=12000;
+  const LOCAL_ZXING_FILE='zxing-browser.min.js';
   const MODE_COPY=Object.freeze({
     image:Object.freeze({
       title:'Ler fatura por imagem',
@@ -138,8 +139,9 @@
     const value=document.querySelector('meta[name="barcode-reader-src"]')?.content?.trim()||'';
     try{
       const url=new URL(value,location.href);
-      if(url.protocol!=='https:'||url.hostname!=='unpkg.com')return '';
-      if(!/@zxing\/browser@0\.2\.0\/umd\/zxing-browser\.min\.js$/.test(url.pathname))return '';
+      if(url.origin!==location.origin)return '';
+      if(!url.pathname.endsWith('/'+LOCAL_ZXING_FILE))return '';
+      if(url.search&&!/^\?v=[0-9A-Za-z.-]+$/.test(url.search))return '';
       return url.href;
     }catch(_error){return '';}
   }

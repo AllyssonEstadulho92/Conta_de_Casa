@@ -11,7 +11,9 @@ const BUILD_TYPESCRIPT_RUNTIME = path.join(ROOT, 'scripts', 'build-typescript-ru
 const GENERATED_PUBLIC_FILES = Object.freeze({
   'market-branding.js': path.join(GENERATED, 'market-branding.js'),
   'sync-conflict-policy.js': path.join(GENERATED, 'sync-conflict-policy.js'),
-  'date-calculator.js': path.join(GENERATED, 'date-calculator.js')
+  'date-calculator.js': path.join(GENERATED, 'date-calculator.js'),
+  'zxing-browser.min.js': path.join(GENERATED, 'zxing-browser.min.js'),
+  'ZXING_BROWSER_LICENSE.txt': path.join(GENERATED, 'ZXING_BROWSER_LICENSE.txt')
 });
 const PACKAGE = JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
 const APP_VERSION = String(PACKAGE.version||'').trim();
@@ -45,7 +47,8 @@ const PD_PHOTO_REV = '75-pd-photo1';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
-const SERVICE_WORKER_REV = '76-budget-cash-separation3';
+const ZXING_REV = '76-local-zxing1';
+const SERVICE_WORKER_REV = '76-local-zxing1';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
   throw new Error(`Invalid package application version: ${APP_VERSION||'(empty)'}`);
@@ -131,6 +134,8 @@ const PUBLIC_FILES = Object.freeze([
   'market-shopping-focus.js',
   'v75-architecture.js',
   'date-calculator.js',
+  'zxing-browser.min.js',
+  'ZXING_BROWSER_LICENSE.txt',
   'v75-stability.js',
   'v75-startup-guard.js',
   'v75-market-flow.js',
@@ -175,6 +180,7 @@ index=index.replace(/invoice-capture\.css\?v=[^"']+/,`invoice-capture.css?v=${IN
 index=index.replace(/invoice-capture\.js\?v=[^"']+/,`invoice-capture.js?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/render\.js\?v=[^"']+/,`render.js?v=${DASHBOARD_REV}`);
 index=index.replace(/finance\.js\?v=[^"']+/,`finance.js?v=${FINANCE_REV}`);
+index=index.replace(/<meta name="barcode-reader-src" content="[^"]+"\s*\/>/,`<meta name="barcode-reader-src" content="./zxing-browser.min.js?v=${ZXING_REV}" />`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${APP_VERSION} · ${BUILD}</strong>`);
 
 /* Remove referências históricas/retiradas caso um source HTML antigo volte a introduzi-las. */
