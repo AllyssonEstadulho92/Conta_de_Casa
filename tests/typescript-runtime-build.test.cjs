@@ -9,6 +9,9 @@ const {execFileSync}=require('node:child_process');
 const ROOT=path.resolve(__dirname,'..');
 const GENERATED=path.join(ROOT,'.generated');
 const DIST=path.join(ROOT,'dist');
+const PACKAGE=JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
+assert.equal(PACKAGE.devDependencies['@zxing/browser'],'0.2.0','ZXing browser build dependency must stay exactly pinned');
+assert.equal(PACKAGE.devDependencies['@zxing/library'],'0.22.0','ZXing peer dependency must stay exactly pinned');
 
 const runtimes=Object.freeze([
   {
