@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 25 de setembro de 2026
+Atualizado: 27 de setembro de 2026
 
 ## P0 — Invariantes
 
@@ -70,6 +70,15 @@ Atualizado: 25 de setembro de 2026
 
 ## P0 — Planeamento + Calendário
 
+- [x] `76-budget-cash-separation3`: separar explicitamente fluxo de caixa real de consumo do orçamento.
+- [x] Introduzir `cashSpent = paymentTotal + marketSpent` sem alterar `budgetUsed`.
+- [x] Fazer o resumo do Calendário usar `cashSpent`, coerente com dias e histórico.
+- [x] Fazer cartões, tendência e categorias dos Relatórios usar a mesma base de caixa.
+- [x] Manter `categoryTotals()` como distribuição orçamental e criar `cashCategoryTotals()` para Relatórios.
+- [x] Renomear no Planeamento a métrica para **Orçamento utilizado**.
+- [x] Adicionar invariantes para `cashSpent` e categorias de caixa.
+- [ ] Validar fisicamente o cenário de fatura de outubro paga em setembro: saída em setembro, orçamento utilizado em outubro.
+
 - [x] `76-budget-bill-month2`: corrigir orçamento que permanecia em 0 após pagar uma fatura de outro mês civil.
 - [x] Separar `paymentTotal` (caixa) de `budgetPaymentTotal` (orçamento da fatura).
 - [x] Alinhar categorias e Planeamento com `budgetUsed`.
@@ -86,9 +95,9 @@ Atualizado: 25 de setembro de 2026
 - [x] `76-planning-budget-card2`: seletor mensal, resumo e CTA sem duplicar gravação.
 - [x] `76-planning-ring-shape1`: neutralizar altura legada e garantir proporção 1:1.
 - [x] Anel móvel usa 136/128/116 px conforme breakpoint.
-- [x] `76-planning-commitment1`: separar Gasto este mês, Comprometido, Orçamento e Disponível real.
+- [x] `76-planning-commitment1`: separar Orçamento utilizado, Comprometido, Orçamento e Disponível real.
 - [x] Comprometido reutiliza `monthNumbers().outstanding` sem criar nova persistência.
-- [x] Disponível real = orçamento menos gasto efetivo menos comprometido, preservando valores negativos.
+- [x] Disponível real = orçamento menos `budgetUsed` menos comprometido, preservando valores negativos.
 - [x] Chave de recomposição inclui comprometido para evitar resumo desatualizado.
 - [ ] Confirmar fisicamente o anel no mesmo iPhone/Safari/PWA.
 - [ ] Validar estado sem orçamento e com orçamento definido.
