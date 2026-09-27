@@ -155,7 +155,9 @@
   function readerSource(){
     const value=document.querySelector('meta[name="barcode-reader-src"]')?.content?.trim()||'';
     try{
-      const url=new URL(value,window.location?.href||document.baseURI||'https://local.invalid/');
+      const base=window.location?.href||document.baseURI||'';
+      if(!base)return '';
+      const url=new URL(value,base);
       if(window.location?.origin&&url.origin!==window.location.origin)return '';
       if(!url.pathname.endsWith('/'+LOCAL_ZXING_FILE))return '';
       if(url.search&&!/^\?v=[0-9A-Za-z.-]+$/.test(url.search))return '';
