@@ -33,6 +33,7 @@ assert.match(index,/id="calendarHistory"/,'calendar must expose persisted month 
 assert.match(render,/function renderCalendar\(\)[\s\S]*monthNumbers\(selectedMonth\)/,'calendar must derive the selected month financial totals');
 assert.match(render,/spendingForDate\(dayKey\)/,'calendar day cells must show actual spend by payment date');
 assert.match(render,/monthlySpendHistory\(selectedMonth,6\)/,'calendar must expose recent monthly spend history');
+assert.match(render,/\['Gasto no mês',numbers\.cashSpent/,'calendar monthly headline must reconcile with daily and historical cash movements');
 assert.match(events,/function syncMonthRollover\(\)/,'runtime must detect local month rollover');
 assert.match(events,/function selectMonthContext\(value,[\s\S]*selectedMonth=next[\s\S]*monthProfile\(next\)[\s\S]*cdc:month-change/,'selected month changes must use one shared context and notify dependent views');
 assert.match(events,/selectMonthContext\(nowMonth\)/,'month rollover must use the shared month context');
@@ -84,8 +85,8 @@ try {
   assert.match(builtIndex, /<meta name="app-build-id" content="(?:[0-9a-f]{7}|local)"\s*\/>/);
   assert.match(builtIndex, /v76-modern-ui\.css\?v=76-modern-ui2/);
   assert.match(builtIndex, /v76-product-pages\.css\?v=76-dashboard-priority1/);
-  assert.match(builtIndex, /render\.js\?v=76-full-audit-fixes1/);
-  assert.match(builtIndex, /finance\.js\?v=76-budget-bill-month2/);
+  assert.match(builtIndex, /render\.js\?v=76-budget-cash-separation3/);
+  assert.match(builtIndex, /finance\.js\?v=76-budget-cash-separation3/);
   assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-mobile-shell3/);
   assert.match(builtIndex, /v75-usability\.css\?v=76-auth1/);
 
