@@ -1,5 +1,15 @@
 # Changelog
 
+## v76: scanner ZXing local e funcionamento offline
+
+- `@zxing/browser@0.2.0` passa a ser empacotado no build em vez de carregado por CDN;
+- licença da dependência é preservada no bundle público;
+- CSP do JavaScript fica limitada a `self`, removendo `unpkg.com`;
+- leitores de faturas e códigos de barras usam apenas o asset local e podem reutilizar o mesmo carregamento;
+- Service Worker inclui o scanner no precache para fallback offline;
+- sem alteração do estado financeiro, cofre, IndexedDB ou sincronização.
+
+
 ## v76: separação completa entre fluxo de caixa e orçamento
 
 - adicionada a métrica derivada `cashSpent`, baseada na data real dos pagamentos e nas compras concluídas;
