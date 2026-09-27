@@ -11,8 +11,8 @@ class StorageMock {
   clear() { this.data.clear(); }
 }
 
-const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','market-experience.js','market-barcode.js','styles.css','sw.js','manifest.webmanifest'];
-const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','market-barcode.js','sw.js'];
+const appFiles = ['index.html','core.js','finance.js','render.js','forms.js','sync.js','events.js','market-experience.js','market-barcode.js','invoice-capture.js','styles.css','sw.js','manifest.webmanifest'];
+const executableFiles = ['core.js','finance.js','render.js','forms.js','sync.js','events.js','market-barcode.js','invoice-capture.js','sw.js'];
 const context = vm.createContext({
   crypto: webcrypto,
   TextEncoder,
@@ -73,15 +73,13 @@ const approvedExternalOrigins = new Set([
   'https://api.github.com',
   'https://cesta.pt',
   'https://world.openfoodfacts.org',
-  'https://images.openfoodfacts.org',
-  'https://unpkg.com'
+  'https://images.openfoodfacts.org'
 ]);
 const approvedOriginFiles = new Map([
   ['https://api.github.com',new Set(['index.html','sync.js'])],
   ['https://cesta.pt',new Set(['index.html','market-experience.js'])],
   ['https://world.openfoodfacts.org',new Set(['index.html','market-experience.js','market-barcode.js'])],
-  ['https://images.openfoodfacts.org',new Set(['index.html'])],
-  ['https://unpkg.com',new Set(['index.html','market-barcode.js'])]
+  ['https://images.openfoodfacts.org',new Set(['index.html'])]
 ]);
 for (const file of appFiles) {
   const content = fs.readFileSync(file, 'utf8');
@@ -102,9 +100,10 @@ for (const file of executableFiles) {
 const render = fs.readFileSync('render.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 assert.match(index, /Content-Security-Policy/);
-assert.match(index, /script-src 'self' https:\/\/unpkg\.com/);
-assert.doesNotMatch(render,/Sem CDNs/,'Security copy must not claim there are no CDNs while ZXing is loaded from unpkg');
-assert.match(render,/ZXing 0\.2\.0 de unpkg\.com/,'Security copy must disclose the pinned external QR scanner dependency');
+assert.match(index, /script-src 'self';/);
+assert.doesNotMatch(index,/unpkg\.com/,'CSP and static HTML must not depend on the removed ZXing CDN');
+assert.match(render,/ZXing 0\.2\.0 empacotado localmente/,'Security copy must disclose the local pinned scanner runtime');
+assert.match(render,/sem dependência de CDN/,'Security copy must state that scanner decoding no longer depends on a CDN');
 assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
 assert.match(index, /https:\/\/cesta\.pt/);
 assert.match(index, /https:\/\/world\.openfoodfacts\.org/);
@@ -113,8 +112,13 @@ assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline even
 assert.doesNotMatch(index, /target_name=|Destino automático/);
 
 const barcode = fs.readFileSync('market-barcode.js','utf8');
-assert.match(barcode, /https:\/\/unpkg\.com\/@zxing\/browser@0\.2\.0\/umd\/zxing-browser\.min\.js/);
-assert.doesNotMatch(barcode, /@latest|unpkg\.com\/@zxing\/browser\/umd/i, 'ZXing CDN dependency must stay pinned to an exact version');
+const invoiceCapture = fs.readFileSync('invoice-capture.js','utf8');
+assert.doesNotMatch(barcode,/unpkg\.com|@latest/,'Market barcode runtime must not load ZXing from a CDN');
+assert.doesNotMatch(invoiceCapture,/unpkg\.com|@latest/,'Invoice capture runtime must not load ZXing from a CDN');
+assert.match(barcode,/zxing-browser\.min\.js/,'Market scanner must resolve the local ZXing bundle');
+assert.match(invoiceCapture,/zxing-browser\.min\.js/,'Invoice scanner must resolve the local ZXing bundle');
+assert.match(barcode,/url\.origin!==window\.location\.origin/,'Market scanner must reject cross-origin reader sources');
+assert.match(invoiceCapture,/url\.origin!==location\.origin/,'Invoice scanner must reject cross-origin reader sources');
 assert.match(barcode, /credentials:'omit'/);
 assert.match(barcode, /referrerPolicy:'no-referrer'/);
 assert.doesNotMatch(barcode, /localStorage|sessionStorage|idbPut|appState\.market\.push/);
@@ -125,6 +129,8 @@ assert.match(sw, /if \(url\.hash\) return null/);
 assert.match(sw, /url\.searchParams\.size===1 && \(url\.searchParams\.has\('v'\)\|\|url\.searchParams\.has\('ts'\)\)/, 'service worker may only accept one controlled cache-busting query: v for assets or ts for the same-origin release manifest');
 assert.match(sw, /if \(!key \|\| !PUBLIC_ASSET_SET\.has\(key\)\) return/,'query cache-busting must remain constrained to the explicit public asset allowlist');
 assert.doesNotMatch(sw, /cache\.put\(event\.request|cache\.put\(request/i, 'service worker must not cache arbitrary request URLs');
+assert.match(sw,/\.\/zxing-browser\.min\.js/,'service worker must precache the local ZXing runtime');
+assert.match(sw,/\.\/ZXING_BROWSER_LICENSE\.txt/,'service worker must preserve the distributed ZXing license');
 
 (async () => {
   const wrongPasswordRejected = await vm.runInContext(`(async()=>{
