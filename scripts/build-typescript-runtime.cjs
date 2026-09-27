@@ -7,6 +7,9 @@ const ts=require('typescript');
 const ROOT=path.resolve(__dirname,'..');
 const GENERATED=path.join(ROOT,'.generated');
 
+const ZXING_BROWSER_VERSION='0.2.0';
+const ZXING_BROWSER_PACKAGE=path.join(ROOT,'node_modules','@zxing','browser');
+
 const RUNTIMES=Object.freeze([
   {
     source:'src/ui/market-branding.ts',
@@ -88,6 +91,41 @@ function buildRuntime(entry){
   console.log(`Generated TypeScript runtime: .generated/${entry.output}`);
 }
 
+function buildLocalZxing(){
+  const packagePath=path.join(ZXING_BROWSER_PACKAGE,'package.json');
+  if(!fs.existsSync(packagePath)){
+    throw new Error('Local ZXing package missing. Run npm install before building runtime assets.');
+  }
+  const packageJson=JSON.parse(fs.readFileSync(packagePath,'utf8'));
+  if(packageJson.version!==ZXING_BROWSER_VERSION){
+    throw new Error(`Unexpected @zxing/browser version: ${packageJson.version||'(unknown)'}; expected ${ZXING_BROWSER_VERSION}.`);
+  }
+
+  const runtimeCandidates=[
+    path.join(ZXING_BROWSER_PACKAGE,'umd','zxing-browser.min.js'),
+    path.join(ZXING_BROWSER_PACKAGE,'dist','umd','zxing-browser.min.js')
+  ];
+  const runtimePath=runtimeCandidates.find(candidate=>fs.existsSync(candidate));
+  if(!runtimePath)throw new Error('Pinned ZXing UMD runtime not found in installed package.');
+
+  const licenseCandidates=[
+    path.join(ZXING_BROWSER_PACKAGE,'LICENSE'),
+    path.join(ZXING_BROWSER_PACKAGE,'LICENSE.txt'),
+    path.join(ZXING_BROWSER_PACKAGE,'LICENSE.md'),
+    path.join(ZXING_BROWSER_PACKAGE,'dist','LICENSE')
+  ];
+  const licensePath=licenseCandidates.find(candidate=>fs.existsSync(candidate));
+  if(!licensePath)throw new Error('ZXing license file missing from installed package.');
+
+  fs.copyFileSync(runtimePath,path.join(GENERATED,'zxing-browser.min.js'));
+  fs.writeFileSync(
+    path.join(GENERATED,'ZXING_BROWSER_LICENSE.txt'),
+    `@zxing/browser ${ZXING_BROWSER_VERSION}\nSource: https://github.com/zxing-js/browser\n\n${fs.readFileSync(licensePath,'utf8').trim()}\n`
+  );
+  console.log(`Generated local ZXing runtime: .generated/zxing-browser.min.js (@zxing/browser ${ZXING_BROWSER_VERSION})`);
+}
+
 fs.rmSync(GENERATED,{recursive:true,force:true});
 fs.mkdirSync(GENERATED,{recursive:true});
 RUNTIMES.forEach(buildRuntime);
+buildLocalZxing();
