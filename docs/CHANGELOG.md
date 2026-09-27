@@ -2,6 +2,22 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-27: `76-local-zxing1`: scanner local, offline e CSP mais restritiva
+
+### Segurança e distribuição
+
+- ZXing Browser 0.2.0 deixa de ser carregado de `unpkg.com` em execução;
+- a dependência passa a ser instalada no build, validada por versão e copiada para o bundle público;
+- a licença da biblioteca é preservada e publicada com o Pages;
+- `script-src` passa a aceitar apenas `self`;
+- os dois consumidores do scanner rejeitam origens externas e reutilizam o mesmo script local;
+- Service Worker passa a precachear o runtime ZXing, permitindo o fallback também offline depois da instalação.
+
+### Regressão
+
+Foram reforçados testes de segurança, build, Pages, PWA, captura de fatura e scanner do Mercado. A alteração não toca no schema financeiro, IndexedDB, cofre/PIN, pagamentos, sync ou release pública.
+
+
 ## 2026-09-27: `76-budget-cash-separation3`: caixa e orçamento deixam de se cruzar na apresentação
 
 ### Problema confirmado
