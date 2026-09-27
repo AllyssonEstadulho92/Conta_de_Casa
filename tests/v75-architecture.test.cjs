@@ -22,7 +22,7 @@ assert.match(js,/76-expense-mode-stability1/);
 assert.match(js,/76-prototype-planning1/);
 assert.match(js,/76-drawer-hierarchy1/);
 assert.match(js,/76-planning-budget-card2/,'planning prototype refinement must remain explicit');
-assert.match(js,/76-local-zxing1/,'planning month-context hierarchy must remain explicit');
+assert.match(js,/76-budget-cash-separation3/,'planning month-context hierarchy must remain explicit');
 assert.match(js,/bills:\['Despesas','Movimentos'\]/);
 assert.match(js,/market:\['Mercado','Compras'\]/);
 assert.match(js,/security:\['Segurança e sincronização','Conta e dados'\]/);
@@ -174,7 +174,7 @@ assert.match(invoiceCss,/@media\(forced-colors:active\)[\s\S]*\.v75-bill-tabs \[
 assert.match(invoiceCss,/\.v75-bill-native-tab>\[data-v75-native-invoice\]\{[\s\S]*position:absolute!important[\s\S]*opacity:\.001!important/,'native file inputs must cover the visual tab without relying on programmatic input.click()');
 
 assert.match(prepare,/const BUILD = 'v76'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '76-local-zxing1'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '76-budget-cash-separation3'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
 assert.ok(prepare.includes("'invoice-capture.css'"));
