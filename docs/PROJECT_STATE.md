@@ -1,11 +1,29 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 27 de setembro de 2026  
+Atualizado: 30 de setembro de 2026  
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
-Baseline funcional em `main` antes deste bloco: `bc1f0bced58a0141435e85bfa9822fabbc8e7735` (`76-budget-cash-separation3`)
-Branch de implementação: `76-local-zxing1`; base funcional: `main`
+Baseline funcional em `main` antes deste bloco: `3999f74bf25396484ce2f8550c9c3d7c60bb313c` (`security: empacotar ZXing localmente e remover CDN`)
+Branch de implementação: `76-dialog-controls1`; base funcional: `main`
+
+## Controlos Voltar e Fechar do diálogo: 76-dialog-controls1
+
+A captura física enviada em 30 de setembro mostrou, em **Detalhes da fatura**, a seta de voltar e o X desenhados sobre o mesmo botão no canto esquerdo. A causa foi confirmada na cascade: `v75-architecture.css` transformava `.dialog-close` visualmente numa seta através de `::before`, enquanto `ui-icons.js` continuava a inserir o ícone Lucide `close` no mesmo elemento.
+
+Correção:
+
+- `#formDialog` passa a ter `data-dialog-back` e `data-close-dialog` como controlos independentes;
+- **Voltar** aparece no modo `detail`, ocupa a posição esquerda e regressa pelo caminho canónico `closeDialog()`, restaurando o foco no elemento que abriu o detalhe;
+- **Fechar** mantém o X Lucide e passa a ocupar a posição direita no cabeçalho móvel;
+- a camada de despesas deixa de substituir o X por uma máscara de seta;
+- a iconografia continua local, sem rede adicional;
+- `SERVICE_WORKER_REV` e a chave de cache recebem `76-dialog-controls1` para entrega automática em Safari/PWA;
+- testes de navegação, acessibilidade, iconografia, arquitetura móvel e distribuição passam a proteger a separação.
+
+Preservado: `STATE_VERSION`, IndexedDB, PIN/cofre, PBKDF2/AES-GCM, faturas, pagamentos, cálculos, Mercado, sincronização e scanner.
+
+Pendente: validação visual final no mesmo iPhone/Safari/PWA após publicação, confirmando seta isolada à esquerda, título centrado e X isolado à direita.
 
 ## Segurança e offline do scanner: 76-local-zxing1
 

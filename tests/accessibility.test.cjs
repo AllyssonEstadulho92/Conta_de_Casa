@@ -69,6 +69,8 @@ assert.match(index,/aria-label="Apagar último dígito"/);
 assert.match(index,/id="monthPicker" type="month" aria-label="Mês em análise"/);
 assert.match(index,/id="syncHeaderStatus"[\s\S]*aria-label="Estado da sincronização"/);
 assert.match(index,/id="quickAddBtn"[\s\S]*aria-label="Adicionar registo"/);
+assert.match(index,/class="icon-btn dialog-back"[^>]*data-dialog-back[^>]*aria-label="Voltar"[^>]*hidden/,'invoice detail back control must have an explicit accessible name');
+assert.match(index,/class="icon-btn dialog-close"[^>]*data-close-dialog[^>]*aria-label="Fechar janela"/,'dialog close control must remain a distinct accessible action');
 assert.match(index,/id="notificationsBtn"[\s\S]*aria-label="Ver alertas no Início"/);
 assert.match(index,/id="billSummary"[\s\S]*aria-live="polite"/);
 assert.match(index,/id="billsList"[\s\S]*aria-live="polite"/);
