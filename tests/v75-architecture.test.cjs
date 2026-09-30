@@ -149,6 +149,11 @@ assert.match(css,/--v75-header:#004653/,'prototype teal header must remain canon
 assert.match(css,/--v75-bg:#f3f7f7/,'prototype light shell must remain canonical');
 assert.match(css,/url\('\.\/icon\.svg'\)/,'the local PWA identity must be reused instead of a foreign visual asset');
 assert.match(css,/#formDialog\.dialog\{width:100vw!important/,'mobile expense flow must be full screen');
+assert.match(css,/#formDialog \.dialog-back\{grid-column:1!important;justify-self:start!important\}/,'mobile back control must own the left header slot');
+assert.match(css,/#formDialog \.dialog-close\{grid-column:3!important;justify-self:end!important\}/,'mobile close control must own the right header slot');
+assert.doesNotMatch(css,/#formDialog \.dialog-close::before\{content:"‹"/,'close control must never synthesize a second back glyph');
+assert.match(invoiceCss,/#formDialog\[data-v75-kind="expense"\] \.dialog-close\{[\s\S]*right:10px!important;left:auto!important/,'expense close control must stay on the right');
+assert.match(invoiceCss,/#formDialog\[data-v75-kind="expense"\] \.dialog-close::before\{[\s\S]*content:none!important/,'expense close control must not render the historical back mask');
 assert.match(css,/\.invoice-scan-overlay[\s\S]*inset:0!important/,'invoice QR scanner must use the full-screen prototype composition');
 assert.match(css,/\.vault-keypad\{display:grid!important;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/,'PIN keypad must use a conventional three-column layout');
 assert.match(css,/#page-planning>\.section-tabs \.section-tab\.active/,'Planning tabs must have an explicit active state');

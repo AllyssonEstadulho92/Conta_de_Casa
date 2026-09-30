@@ -27,7 +27,7 @@ assert.match(js,/globalThis\.CDCIcons/,'shared icon renderer must remain availab
 assert.match(js,/source:'Lucide'/);
 assert.match(js,/revision:ICON_SEMANTICS_REVISION/);
 assert.match(js,/stroke-width="2"/,'Lucide stroke weight must remain consistent');
-for(const name of ['home','bill','calendar','plan','market','report','goal','shield','settings','search','eye','eyeOff','sun','moon','camera','qr','receipt','close','plus','edit','trash','filter','scan','cloudCheck','cloudOff'])assert.match(js,new RegExp(`\\b${name}:`),`missing Lucide semantic icon ${name}`);
+for(const name of ['home','bill','calendar','plan','market','report','goal','shield','settings','search','eye','eyeOff','sun','moon','camera','qr','receipt','back','close','plus','edit','trash','filter','scan','cloudCheck','cloudOff'])assert.match(js,new RegExp(`\\b${name}:`),`missing Lucide semantic icon ${name}`);
 
 const semanticIconBody=name=>new RegExp(`\\n    ${name}:'([^']+)'`).exec(js)?.[1]||'';
 const planningIcon=semanticIconBody('plan');
@@ -44,6 +44,8 @@ assert.match(settingsIcon,/<circle cx="12" cy="12" r="3"\/>/,'Definições gear 
 assert.doesNotMatch(settingsIcon,/M14 17H5|M19 7h-9/,'Definições must not regress to the sliders glyph');
 
 assert.match(js,/input\[type="search"\]/);
+assert.match(js,/\.dialog-back'\)\.forEach\(button=>fillIcon\(button,'back',20\)\)/,'dialog back must use the local semantic back icon');
+assert.match(js,/\.dialog-close'\)\.forEach\(button=>fillIcon\(button,'close',20\)\)/,'dialog close must keep the local semantic close icon');
 assert.match(js,/function decorateSelect/);
 assert.match(js,/\.ui-select-control/);
 assert.match(js,/TEXT_BUTTON_RULES/);

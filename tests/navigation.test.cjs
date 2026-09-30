@@ -50,6 +50,9 @@ assert.match(index, /aria-controls="mobileDrawer"/);
 assert.doesNotMatch(forms, /function openMoreMenu\(/);
 assert.doesNotMatch(events, /data-mobile==='more'/);
 assert.doesNotMatch(events, /data-mobile==='add'/);
+assert.match(index,/data-dialog-back aria-label="Voltar" hidden/,'form dialog must expose a dedicated back control');
+assert.match(forms,/backButton\.hidden = mode !== 'detail'/,'back control must only be exposed for detail navigation');
+assert.match(events,/const back=e\.target\.closest\('\[data-dialog-back\]'\);[\s\S]*closeDialog\(\)/,'back control must return through the canonical dialog close path');
 
 /* Auditoria estrutural v76: nenhuma rota declarada pode ficar sem página ou renderer. */
 const metaMatch = core.match(/const PAGE_META = Object\.freeze\(\{([\s\S]*?)\n\}\);/);
