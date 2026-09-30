@@ -335,6 +335,8 @@ function wireEvents(){
     if(go) showPage(go.dataset.go);
     const tab=e.target.closest('.section-tab[data-page]');
     if(tab)showPage(tab.dataset.page);
+    const back=e.target.closest('[data-dialog-back]');
+    if(back){e.preventDefault();closeDialog();return;}
     const close=e.target.closest('[data-close-dialog]');
     if(close){e.preventDefault();closeDialog();return;}
     const closeQuick=e.target.closest('[data-close-quick-dialog]');
@@ -394,7 +396,7 @@ function wireEvents(){
   const formDialog=$('#formDialog');
   formDialog.addEventListener('click',e=>{if(e.target===formDialog)closeDialog();});
   formDialog.addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
-  formDialog.addEventListener('close',()=>{formDialog.classList.remove('detail-dialog');delete formDialog.dataset.mode;});
+  formDialog.addEventListener('close',()=>{formDialog.classList.remove('detail-dialog');delete formDialog.dataset.mode;const back=formDialog.querySelector('[data-dialog-back]');if(back)back.hidden=true;});
   $('#upcomingBills').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#calendarAgenda').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#calendarHistory')?.addEventListener('click',e=>{

@@ -27,10 +27,10 @@
   -webkit-tap-highlight-color:transparent;
 }
 .icon-btn .ui-icon-svg,.market-search-clear .ui-icon-svg,.market-barcode-open .ui-icon-svg,.market-barcode-close .ui-icon-svg{margin:auto}
-.topbar .icon-btn,.drawer-head .icon-btn,.dialog-close{
+.topbar .icon-btn,.drawer-head .icon-btn,.dialog-back,.dialog-close{
   border-color:color-mix(in srgb,var(--border) 88%,transparent);
 }
-.topbar .icon-btn:not(.mobile-menu-btn),.drawer-head .icon-btn,.dialog-close{
+.topbar .icon-btn:not(.mobile-menu-btn),.drawer-head .icon-btn,.dialog-back,.dialog-close{
   background:color-mix(in srgb,var(--surface) 94%,var(--surface-2));
 }
 

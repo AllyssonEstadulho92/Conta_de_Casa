@@ -7,14 +7,18 @@ function openDialog(title, html, mode='form') {
   setHTML('#dialogBody', html);
   dialog.dataset.mode = mode;
   dialog.classList.toggle('detail-dialog', mode === 'detail');
+  const backButton = dialog.querySelector('[data-dialog-back]');
+  if (backButton) backButton.hidden = mode !== 'detail';
   if (!dialog.open) dialog.showModal();
-  requestAnimationFrame(() => dialog.querySelector('[data-close-dialog], input, select, textarea, button')?.focus({preventScroll:true}));
+  requestAnimationFrame(() => dialog.querySelector('[data-dialog-back]:not([hidden]), [data-close-dialog], input, select, textarea, button')?.focus({preventScroll:true}));
 }
 
 function closeDialog() {
   const dialog = $('#formDialog');
   if (dialog?.open) dialog.close();
   dialog?.classList.remove('detail-dialog');
+  const backButton = dialog?.querySelector('[data-dialog-back]');
+  if (backButton) backButton.hidden = true;
   if (dialog) delete dialog.dataset.mode;
   const target = lastDialogOpener;
   lastDialogOpener = null;

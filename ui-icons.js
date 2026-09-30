@@ -262,6 +262,7 @@
     preserveBadgeIcon(document.querySelector('#notificationsBtn'),'alert',20);
     const quickAdd=document.querySelector('#quickAddBtn > span:first-child');
     if(quickAdd)fillIcon(quickAdd,'plus',20);
+    root.querySelectorAll?.('.dialog-back').forEach(button=>fillIcon(button,'back',20));
     root.querySelectorAll?.('.dialog-close').forEach(button=>fillIcon(button,'close',20));
     const quickMap={bill:'receipt',income:'banknote',market:'market',goal:'goal'};
     root.querySelectorAll?.('.quick-grid [data-quick]').forEach(button=>iconizeTextButton(button,quickMap[button.dataset.quick]||'plus',21));

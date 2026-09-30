@@ -296,8 +296,11 @@ html.cdc-v75 .panel,html.cdc-v75 .kpi,html.cdc-v75 .detail-item{border-color:var
   html.cdc-v75 #formDialog .dialog-head>div{grid-column:2!important;align-self:center!important;text-align:center!important;min-width:0!important}
   html.cdc-v75 #formDialog .dialog-head .eyebrow{display:none!important}
   html.cdc-v75 #formDialog .dialog-head h2{margin:0!important;color:#fff!important;font-size:.88rem!important;line-height:1.2!important;font-weight:680!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-  html.cdc-v75 #formDialog .dialog-close{grid-column:1!important;grid-row:1!important;width:40px!important;height:40px!important;align-self:center!important;justify-self:start!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#fff!important;font-size:0!important}
-  html.cdc-v75 #formDialog .dialog-close::before{content:"‹"!important;font-size:28px!important;line-height:1!important}
+  html.cdc-v75 #formDialog :is(.dialog-back,.dialog-close){grid-row:1!important;width:40px!important;height:40px!important;align-self:center!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#fff!important;font-size:0!important}
+  html.cdc-v75 #formDialog .dialog-back{grid-column:1!important;justify-self:start!important}
+  html.cdc-v75 #formDialog .dialog-close{grid-column:3!important;justify-self:end!important}
+  html.cdc-v75 #formDialog .dialog-back[hidden]{display:none!important}
+  html.cdc-v75 #formDialog .dialog-back:not([hidden]){display:inline-flex!important;align-items:center!important;justify-content:center!important}
   html.cdc-v75 #formDialog #dialogBody{flex:1 1 auto!important;min-height:0!important;overflow:auto!important;padding:10px 12px calc(18px + env(safe-area-inset-bottom,0px))!important}
   html.cdc-v75 #formDialog .form-grid{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
   html.cdc-v75 #formDialog .form-grid.two>*{grid-column:1!important}

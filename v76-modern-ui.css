@@ -584,7 +584,7 @@ html.cdc-v75 .dialog-head{
   border-color:var(--v76-border)!important;
   background:linear-gradient(180deg,color-mix(in srgb,var(--v76-primary) 3%,var(--v76-surface)),var(--v76-surface))!important;
 }
-html.cdc-v75 .dialog-close{border-radius:12px!important;background:var(--v76-surface-soft)!important;color:var(--v76-text)!important}
+html.cdc-v75 :is(.dialog-back,.dialog-close){border-radius:12px!important;background:var(--v76-surface-soft)!important;color:var(--v76-text)!important}
 
 /* Drawer completo */
 @media(max-width:820px){
