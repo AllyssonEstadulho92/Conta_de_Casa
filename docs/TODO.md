@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 27 de setembro de 2026
+Atualizado: 30 de setembro de 2026
 
 ## P0 — Invariantes
 
@@ -54,6 +54,13 @@ Atualizado: 27 de setembro de 2026
 - [ ] Confirmar que empates de data/hora mantêm ordem estável e previsível no dispositivo real.
 
 ## P0 — Despesas/Faturas
+
+- [x] `76-dialog-controls1`: separar a seta Voltar do X no cabeçalho de **Detalhes da fatura**.
+- [x] Voltar usa `data-dialog-back` e ícone local `back`; Fechar mantém `data-close-dialog` e ícone local `close`.
+- [x] Remover a seta sintética de `.dialog-close::before` e a máscara equivalente do fluxo de despesa.
+- [x] Posicionar Voltar à esquerda e Fechar à direita no cabeçalho móvel, com título centrado.
+- [x] Invalidar Service Worker/cache e acrescentar testes de navegação, acessibilidade, iconografia e arquitetura.
+- [ ] Validar fisicamente o cabeçalho no mesmo iPhone/Safari/PWA após deploy.
 
 - [x] Pesquisa, filtros, resumo e lista canónicos restaurados.
 - [x] Fluxo Adicionar despesa profissionalizado.

@@ -2,6 +2,27 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-09-30: `76-dialog-controls1`: Voltar e Fechar separados no detalhe da fatura
+
+### Problema confirmado
+
+No cabeçalho móvel de **Detalhes da fatura**, a seta de voltar e o X eram desenhados sobre o mesmo `.dialog-close`. A camada Lucide fornecia o X e CSS legado acrescentava a seta através de `::before`, reproduzindo a sobreposição observada na captura física.
+
+### Correção
+
+- foi criado um controlo próprio `data-dialog-back` para Voltar;
+- o X permanece exclusivamente em `data-close-dialog`;
+- no detalhe, Voltar fica à esquerda, o título permanece centrado e Fechar fica à direita;
+- `closeDialog()` continua o caminho canónico e restaura o foco na origem;
+- o CSS de despesas deixa de mascarar o X como seta;
+- iconografia continua Lucide local, sem nova dependência;
+- Service Worker, cache e tokens de distribuição recebem `76-dialog-controls1`;
+- contratos automatizados cobrem navegação, acessibilidade, iconografia, CSS móvel e build Pages.
+
+### Preservado
+
+Sem alteração de `STATE_VERSION`, IndexedDB, PIN/cofre, cifragem, pagamentos, cálculos financeiros, Mercado, sync ou scanner.
+
 ## 2026-09-27: `76-local-zxing1`: scanner local, offline e CSP mais restritiva
 
 ### Segurança e distribuição

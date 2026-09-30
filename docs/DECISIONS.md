@@ -1,6 +1,6 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 27 de setembro de 2026
+Atualizado: 30 de setembro de 2026
 
 ## D-064 — migração TypeScript incremental
 
@@ -621,3 +621,19 @@ Decisão:
 - qualquer alteração de versão do ZXing exige revisão explícita, testes dos dois scanners e nova revisão de cache/PWA.
 
 Esta decisão não altera dados financeiros, persistência, cifragem, permissões da câmara ou regras de negócio.
+
+
+## D-137: Voltar e Fechar são controlos distintos no diálogo
+
+A interface móvel reutilizava `.dialog-close` para duas representações incompatíveis: a camada de ícones inseria o X Lucide, enquanto CSS legado acrescentava uma seta de voltar no mesmo botão. O resultado podia mostrar os dois glifos juntos e deixava a semântica do controlo ambígua.
+
+Decisão:
+
+- `data-dialog-back` e `data-close-dialog` são elementos independentes;
+- Voltar é exposto no modo de detalhe e usa a posição esquerda do cabeçalho;
+- Fechar mantém o X e usa a posição direita;
+- ambos convergem em `closeDialog()` no detalhe atual, preservando restauração de foco e a origem da navegação;
+- a camada CSS não pode fabricar uma seta sobre `.dialog-close`;
+- os ícones continuam a usar o subset Lucide local;
+- a correção visual deve invalidar Service Worker e cache para chegar a clientes Safari/PWA já abertos;
+- a alteração é exclusivamente de navegação e apresentação, sem impacto em dados, cálculos ou segurança do cofre.

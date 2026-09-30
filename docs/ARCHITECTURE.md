@@ -1,6 +1,6 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 27 de setembro de 2026  
+Atualizado: 30 de setembro de 2026  
 Versão: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
@@ -50,6 +50,16 @@ Rotas canónicas:
 - settings.
 
 `renderPage()` continua a ser o dispatcher funcional.
+
+### 3.1 Controlos do diálogo
+
+O `#formDialog` separa navegação contextual de encerramento:
+
+- `[data-dialog-back]` é a ação **Voltar** e só fica disponível em `mode='detail'`; usa o ícone local `back` e regressa através de `closeDialog()`, que restaura o foco no elemento de origem;
+- `[data-close-dialog]` é a ação **Fechar** e mantém o ícone local `close`;
+- em mobile, Voltar ocupa a coluna esquerda, o título a coluna central e Fechar a coluna direita;
+- CSS não pode converter `.dialog-close` numa seta através de pseudo-elementos ou máscaras;
+- nenhuma destas ações altera domínio financeiro, persistência ou histórico.
 
 Autoridades móveis:
 
