@@ -16,7 +16,7 @@ No cabeçalho móvel de **Detalhes da fatura**, a seta de voltar e o X eram dese
 - `closeDialog()` continua o caminho canónico e restaura o foco na origem;
 - o CSS de despesas deixa de mascarar o X como seta;
 - iconografia continua Lucide local, sem nova dependência;
-- Service Worker, cache e tokens de distribuição recebem `76-dialog-controls1`;
+- Service Worker e chave de cache recebem `76-dialog-controls1`, preservando os restantes contratos de revisão de assets;
 - contratos automatizados cobrem navegação, acessibilidade, iconografia, CSS móvel e build Pages.
 
 ### Preservado

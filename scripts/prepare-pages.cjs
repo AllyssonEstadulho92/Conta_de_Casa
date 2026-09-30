@@ -29,7 +29,7 @@ const PRODUCT_PAGES_REV = '76-dashboard-priority1';
 const DASHBOARD_REV = '76-budget-cash-separation3';
 const FINANCE_REV = '76-budget-cash-separation3';
 const MOBILE_SHELL_REV = '76-mobile-shell3';
-const ARCHITECTURE_REV = '76-dialog-controls1';
+const ARCHITECTURE_REV = '76-budget-cash-separation3';
 const PLANNING_MORE_REV = '76-planning-more1';
 const HEADER_REV = '75-header2';
 const STABILITY_REV = '75-stability1';
@@ -46,7 +46,7 @@ const CATALOG_REV = '75-catalog4';
 const PD_PHOTO_REV = '75-pd-photo1';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
-const INVOICE_CAPTURE_REV = '76-dialog-controls1';
+const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
 const ZXING_REV = '76-local-zxing1';
 const SERVICE_WORKER_REV = '76-dialog-controls1';
 
