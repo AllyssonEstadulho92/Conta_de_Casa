@@ -166,6 +166,7 @@ Atualizado: 30 de setembro de 2026
 - [ ] Validar fisicamente QR/fatura e código de barras com rede e offline após instalação PWA.
 - [ ] Reduzir `style-src 'unsafe-inline'` quando a arquitetura permitir.
 - [ ] Rever feedback/destructive actions/dark mode/forced-colors fisicamente.
+- [x] Cache PWA passa a usar chave curta e determinística por release + build id, sem acumular a linhagem histórica de revisões.
 - [ ] Confirmar offline/update da PWA após cada invalidação relevante de cache.
 
 ## P0 — Navegação e shell
