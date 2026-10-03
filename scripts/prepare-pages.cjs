@@ -167,6 +167,15 @@ for(const name of PUBLIC_FILES){
   fs.copyFileSync(source,path.join(DIST,name));
 }
 
+const distServiceWorker=path.join(DIST,'sw.js');
+let serviceWorker=fs.readFileSync(distServiceWorker,'utf8');
+const serviceWorkerCacheKey=`conta-de-casa-public-${BUILD}-${BUILD_ID}`;
+serviceWorker=serviceWorker.replace(/const CACHE = '[^']+';/,`const CACHE = '${serviceWorkerCacheKey}';`);
+if(!serviceWorker.includes(`const CACHE = '${serviceWorkerCacheKey}';`)){
+  throw new Error('Service Worker cache key injection failed.');
+}
+fs.writeFileSync(distServiceWorker,serviceWorker);
+
 const distIndex=path.join(DIST,'index.html');
 let index=fs.readFileSync(distIndex,'utf8');
 index=index.replace(/<meta name="app-build" content="[^"]+"\s*\/>/,`<meta name="app-build" content="${BUILD}" />`);
