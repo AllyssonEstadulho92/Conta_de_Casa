@@ -413,3 +413,13 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [ ] Confirmar visualmente o novo item no drawer no iPhone físico.
 - [ ] Confirmar persistência após fechar/reabrir Safari/PWA.
 - [ ] Confirmar sincronização do Walli entre dois cofres/dispositivos reais.
+
+
+### Edição e idas à rua do Walli
+
+- [x] Permitir editar registos existentes da Partilha do Walli.
+- [x] Adicionar quantidade manual de idas à rua.
+- [x] Validar idas à rua entre 0 e 200.
+- [x] Manter prevenção de sobreposição durante edição.
+- [x] Sincronizar idas à rua no cofre cifrado.
+- [ ] Validar o fluxo completo no iPhone físico.

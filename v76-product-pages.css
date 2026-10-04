@@ -993,3 +993,15 @@ html.cdc-v75 .walli-record-row .btn{
     grid-template-columns:minmax(0,1fr);
   }
 }
+
+html.cdc-v75 .walli-record-row .list-side{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+html.cdc-v75 #walliCareForm .button-row{
+  align-items:center;
+  flex-wrap:wrap;
+}

@@ -756,3 +756,16 @@ Próximo passo: ligar o subprojeto a uma conta/projeto Expo autorizado e gerar a
 - `walli-share.js` passa a integrar o bundle público e precache;
 - nova revisão de arquitetura/cache `76-walli-share-drawer1`;
 - sem alteração de `STATE_VERSION` ou das fórmulas existentes de faturas, orçamento, Mercado e relatórios.
+
+
+## 2026-10-04: edição e idas à rua na Partilha do Walli
+
+- adicionada ação **Editar** em cada registo;
+- formulário reutilizado para alterar datas, observação e idas à rua;
+- novo botão **Cancelar edição**;
+- novo campo manual **Idas à rua** com limite 0 a 200;
+- registos antigos permanecem compatíveis com valor 0;
+- sobreposição continua bloqueada, excluindo apenas o registo que está a ser editado;
+- idas à rua passam a integrar o estado cifrado e a política de conflitos da sincronização;
+- revisão pública atualizada para `76-walli-edit-walks2`;
+- cálculo financeiro da partilha não foi alterado.
