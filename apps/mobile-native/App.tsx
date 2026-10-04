@@ -28,18 +28,19 @@ import {
   HandoverScreen,
   RecordsScreen,
   SettingsScreen,
+  WalliShareScreen,
 } from './src/screens';
 import { Icon, icons } from './src/ui';
 import { colors } from './src/theme';
 
-type ScreenName = 'animals' | 'handover' | 'calendar' | 'records' | 'settings' | 'edit';
+type ScreenName = 'animals' | 'share' | 'handover' | 'calendar' | 'records' | 'settings' | 'edit';
 
 function currentMonthKey(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
-const titles: Record<Exclude<ScreenName, 'animals'>, string> = {
+const titles: Record<'handover' | 'calendar' | 'records' | 'settings' | 'edit', string> = {
   handover: 'Entregar o Walli ao Nuno',
   calendar: 'Dias com o Nuno',
   records: 'Registos com o Nuno',
@@ -82,7 +83,7 @@ export default function App() {
   const createRecord = async (start: string, end: string, note: string) => {
     await createCareRecord(start, end, note);
     await refresh();
-    setScreen('animals');
+    setScreen('share');
   };
 
   const updateRecord = async (id: string, start: string, end: string, note: string) => {
@@ -145,6 +146,9 @@ export default function App() {
 
   let content;
   switch (screen) {
+    case 'share':
+      content = <WalliShareScreen {...common} markReceived={receiveOutstanding} />;
+      break;
     case 'handover':
       content = <HandoverScreen {...common} createRecord={createRecord} />;
       break;
@@ -163,15 +167,15 @@ export default function App() {
         : <RecordsScreen {...common} />;
       break;
     default:
-      content = <AnimalsScreen {...common} markReceived={receiveOutstanding} />;
+      content = <AnimalsScreen {...common} />;
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle={screen === 'animals' ? 'light-content' : 'light-content'} backgroundColor={colors.brandDark} />
-      {screen !== 'animals' ? (
+      <StatusBar barStyle="light-content" backgroundColor={colors.brandDark} />
+      {screen !== 'animals' && screen !== 'share' ? (
         <View style={styles.header}>
-          <Pressable onPress={() => setScreen(screen === 'edit' ? 'records' : 'animals')} style={styles.headerButton} accessibilityLabel="Voltar">
+          <Pressable onPress={() => setScreen(screen === 'edit' ? 'records' : 'share')} style={styles.headerButton} accessibilityLabel="Voltar">
             <Icon name={icons.back} size={23} color="#fff" />
           </Pressable>
           <Text style={styles.headerTitle} numberOfLines={1}>{titles[screen]}</Text>
@@ -179,18 +183,19 @@ export default function App() {
         </View>
       ) : null}
       <View style={styles.content}>{content}</View>
-      {screen === 'animals' ? <BottomNav /> : null}
+      {screen === 'animals' || screen === 'share' ? <BottomNav screen={screen} navigate={navigate} /> : null}
     </SafeAreaView>
   );
 }
 
-function BottomNav() {
-  const unavailable = () => Alert.alert('Migração nativa', 'Nesta entrega fica ativa a área Animais. Os restantes módulos serão migrados sem reaproveitar a interface web.');
+function BottomNav({ screen, navigate }: { screen: 'animals' | 'share'; navigate: (next: ScreenName, recordId?: string) => void }) {
+  const unavailable = () => Alert.alert('Migração nativa', 'Nesta entrega ficam ativas as áreas Animais e Partilha do Walli. Os restantes módulos serão migrados sem reaproveitar a interface web.');
   return (
     <View style={styles.bottomNav}>
       <NavItem label="Início" icon={icons.home} onPress={unavailable} />
       <NavItem label="Despesas" icon={icons.receipt} onPress={unavailable} />
-      <NavItem label="Animais" icon={icons.paw} active onPress={() => undefined} />
+      <NavItem label="Animais" icon={icons.paw} active={screen === 'animals'} onPress={() => navigate('animals')} />
+      <NavItem label="Partilha" icon={icons.people} active={screen === 'share'} onPress={() => navigate('share')} />
       <NavItem label="Mais" icon={icons.more} onPress={unavailable} />
     </View>
   );

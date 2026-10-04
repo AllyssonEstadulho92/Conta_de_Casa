@@ -730,3 +730,14 @@ A PWA v76 não foi alterada funcionalmente por esta entrega.
 - a PWA existente permanece funcionalmente inalterada.
 
 Próximo passo: ligar o subprojeto a uma conta/projeto Expo autorizado e gerar as primeiras builds de dispositivo real.
+
+
+## 2026-10-04: secção dedicada da partilha do Walli
+
+- adicionada a secção móvel de topo `Partilha`;
+- criada `WalliShareScreen` como área própria para a partilha com o Nuno;
+- Animais passa a apresentar um resumo e um CTA para abrir a partilha;
+- calendário, registos, configuração, entrega e reembolso ficam agrupados na nova secção;
+- registos novos regressam à Partilha depois de guardados;
+- adicionados testes de contrato da navegação;
+- sem alterações às fórmulas financeiras nem ao modelo de persistência.

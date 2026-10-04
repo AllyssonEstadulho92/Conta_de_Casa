@@ -584,3 +584,14 @@ Perfis definidos:
 - `production`: build de produção com incremento de versão remoto.
 
 Credenciais Apple/Google, certificados, provisioning profiles, tokens e segredos não pertencem ao repositório. A associação ao EAS deve ser feita por `eas init` com uma conta autorizada.
+
+
+### Navegação dedicada da partilha do Walli
+
+Na aplicação nativa, `Partilha` é um destino de topo independente de `Animais`.
+
+Fluxo:
+
+`Animais → Partilha → Entrega | Calendário | Registos | Configurações`
+
+`Animais` contém o perfil e um resumo da partilha. `Partilha` é a autoridade visual e operacional para dias de guarda, valores, reembolsos e histórico. Os dados continuam a vir do mesmo repositório local cifrado e não são duplicados entre ecrãs.
