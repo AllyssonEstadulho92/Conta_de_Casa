@@ -40,8 +40,8 @@ const context = vm.createContext({
       caregiverName:'Nuno',
       months:{'2026-10':{baseCents:12000,calculationMode:'proportional',dailyRateCents:0}},
       records:[
-        {id:'r1',startDate:'2026-10-01',endDate:'2026-10-04',note:''},
-        {id:'r2',startDate:'2026-10-05',endDate:'2026-10-08',note:''}
+        {id:'r1',startDate:'2026-10-01',endDate:'2026-10-04',walksCount:6,note:''},
+        {id:'r2',startDate:'2026-10-05',endDate:'2026-10-08',walksCount:4,note:''}
       ],
       payments:[]
     }
@@ -86,10 +86,15 @@ assert.match(index,/id="page-petshare"/);
 assert.match(index,/id="walliShareSettingsForm"/);
 assert.match(index,/id="walliCareForm"/);
 assert.match(source,/existing\.has\(day\)/,'overlapping care days must be rejected');
+assert.match(source,/data-walli-edit/,'existing Walli care records must expose edit actions');
+assert.match(source,/walksCount/,'care records must persist the manual outings count');
+assert.match(source,/record\.id!==editingId/,'editing must exclude the current record from overlap detection');
+assert.match(index,/id="walliCareWalks"/,'care form must expose manual outings input');
+assert.match(index,/id="walliCareCancelEditBtn"/,'care form must allow cancelling edit mode');
 assert.match(source,/appState\.petShare\.payments\.push/,'reimbursements must be separate records');
 assert.doesNotMatch(source,/localStorage|sessionStorage/,'Walli financial data must stay inside the encrypted application state');
 assert.match(sw,/\.\/walli-share\.js/);
 assert.match(prepare,/'walli-share\.js'/);
-assert.match(prepare,/WALLI_SHARE_REV = '76-walli-share-drawer1'/);
+assert.match(prepare,/WALLI_SHARE_REV = '76-walli-edit-walks2'/);
 
 console.log('Walli share drawer/domain tests: OK');
