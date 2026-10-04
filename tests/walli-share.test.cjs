@@ -91,6 +91,17 @@ assert.equal(twiceDaily.walkCount,16);
 assert.equal(twiceDaily.walksCostCents,12800);
 assert.equal(twiceDaily.totalPayableCents,15897);
 
+context.appState.petShare.payments.push({id:'legacy',monthKey:'2026-10',amountCents:1000,paidAt:'2026-10-10T12:00:00Z'});
+const withLegacyReceived=context.window.walliShareSnapshot('2026-10');
+assert.equal(withLegacyReceived.legacyReceivedCents,1000);
+assert.equal(withLegacyReceived.paidCents,0);
+assert.equal(withLegacyReceived.outstandingCents,15897);
+
+context.appState.petShare.payments.push({id:'outbound',monthKey:'2026-10',direction:'outbound',amountCents:5000,paidAt:'2026-10-11T12:00:00Z'});
+const partiallyPaid=context.window.walliShareSnapshot('2026-10');
+assert.equal(partiallyPaid.paidCents,5000);
+assert.equal(partiallyPaid.outstandingCents,10897);
+
 assert.match(core,/petshare: \{ label:'Partilha do Walli', context:'Animais', icon:'paw'/);
 assert.match(core,/petShare: normalizePetShare\(s\?\.petShare\)/);
 assert.match(architecture,/label:'Animais'[\s\S]*petshare','Partilha do Walli','paw'/);
