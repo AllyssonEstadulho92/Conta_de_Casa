@@ -528,3 +528,21 @@ Estado implementado:
 Preservado: `STATE_VERSION = 5`, faturas, pagamentos, Mercado, Planeamento, PIN/cofre, PBKDF2/AES-GCM e navegação compacta inferior existente.
 
 Pendente: validação física no mesmo iPhone/Safari/PWA após publicação, confirmando que o grupo Animais aparece no drawer, abre a página correta e mantém persistência após fechar/reabrir.
+
+
+## PWA: edição dos registos e idas à rua do Walli
+
+Em 4 de outubro de 2026 foi acrescentada edição aos registos da Partilha do Walli.
+
+Implementado:
+
+- cada registo passa a ter ação **Editar**, além de Eliminar;
+- o formulário entra em modo de edição, preenchendo datas, observação e quantidade de idas à rua;
+- botão **Cancelar edição** regressa ao modo de novo registo sem gravar alterações;
+- novo campo manual **Idas à rua**, inteiro entre 0 e 200 por período;
+- registos antigos são normalizados com `walksCount = 0`;
+- a verificação de sobreposição ignora o próprio registo durante a edição, continuando a bloquear colisões com os restantes;
+- `walksCount` entra no cofre cifrado, backup e revisão de conflitos da sincronização;
+- Service Worker e asset Walli recebem revisão `76-walli-edit-walks2`.
+
+Pendente: validação física no iPhone, incluindo criar, editar, cancelar edição, fechar/reabrir a PWA e confirmar persistência.
