@@ -913,7 +913,7 @@ async function parseBackupText(text) {
 }
 function backupContainsPlaintextFinancialData(text) {
   const body = String(text);
-  return ['"bills"','"payments"','"incomes"','"market"','"goals"','"provider"','"reference"','"notes"','"totalCents"','"amountCents"','"savedCents"','"targetCents"'].some(token => body.includes(token));
+  return ['"bills"','"payments"','"incomes"','"market"','"goals"','"petShare"','"caregiverName"','"provider"','"reference"','"notes"','"totalCents"','"amountCents"','"savedCents"','"targetCents"','"baseCents"','"dailyRateCents"'].some(token => body.includes(token));
 }
 
 async function decryptBackupState(normalized, passphrase) {
@@ -930,7 +930,7 @@ async function decryptBackupState(normalized, passphrase) {
   }
 }
 
-const SENSITIVE_STORAGE_PATTERN = /(bill|fatura|invoice|payment|pagamento|income|rendimento|amount|valor|provider|fornecedor|reference|referencia|notes|observa|market|mercado|goal|objetivo|finance|audit|history|hist[oó]rico|vault|cofre|cipher|backup|pass|senha|pin|key|chave)/i;
+const SENSITIVE_STORAGE_PATTERN = /(bill|fatura|invoice|payment|pagamento|income|rendimento|amount|valor|provider|fornecedor|reference|referencia|notes|observa|market|mercado|goal|objetivo|pet|animal|caregiver|walli|nuno|finance|audit|history|hist[oó]rico|vault|cofre|cipher|backup|pass|senha|pin|key|chave)/i;
 function installStorageGuards() {
   if (typeof Storage === 'undefined' || Storage.prototype.__contaDeCasaGuarded) return;
   const originalSetItem = Storage.prototype.setItem;
