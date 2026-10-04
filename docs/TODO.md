@@ -375,3 +375,15 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [ ] Rever estratégia de backup/restauro da base SQLCipher e da chave.
 - [ ] Definir migração segura de dados da PWA para a aplicação nativa.
 - [ ] Migrar Início, Despesas e Mais apenas depois de estabilizar Animais.
+
+
+### Build e validação nativa
+
+- [x] Preparar development client e perfis EAS.
+- [ ] Associar o subprojeto móvel a um projeto Expo real com `eas init`.
+- [ ] Gerar development build para iPhone físico.
+- [ ] Gerar development build para Android físico.
+- [ ] Validar UI/UX do fluxo Walli/Nuno em iPhone.
+- [ ] Validar UI/UX do fluxo Walli/Nuno em Android.
+- [ ] Confirmar persistência SQLCipher após fechar e reabrir a aplicação.
+- [ ] Confirmar comportamento de SecureStore após atualização da aplicação.
