@@ -1120,7 +1120,7 @@ html.cdc-v75 .walli-care-grid textarea{
 
 html.cdc-v75 .walli-rate-field,
 html.cdc-v75 #walliShareDailyRateLabel,
-html.cdc-v75 .walli-save-settings,
+html.cdc-v75 .walli-config-actions,
 html.cdc-v75 .walli-auto-walks,
 html.cdc-v75 .walli-note-field,
 html.cdc-v75 .walli-form-actions{
@@ -1131,9 +1131,19 @@ html.cdc-v75 #walliShareDailyRateLabel[hidden]{
   display:none!important;
 }
 
-html.cdc-v75 .walli-save-settings,
+html.cdc-v75 .walli-config-actions{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  flex-wrap:wrap;
+}
+html.cdc-v75 .walli-config-actions .btn,
 html.cdc-v75 .walli-form-actions .btn{
   min-height:48px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
 }
 
 html.cdc-v75 .walli-form-actions{
@@ -1494,6 +1504,234 @@ html.cdc-v75 .walli-partial-action{
   gap:7px;
 }
 
+
+html.cdc-v75 .walli-payments-panel{
+  border-radius:19px;
+  box-shadow:0 7px 20px color-mix(in srgb,var(--v76-text) 3%,transparent);
+}
+
+html.cdc-v75 #walliPaymentTimeline{
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+  gap:16px;
+}
+
+html.cdc-v75 .walli-payment-plan-section,
+html.cdc-v75 .walli-payment-history-section{
+  min-width:0;
+  display:grid;
+  gap:10px;
+}
+
+html.cdc-v75 .walli-panel-subhead{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}
+
+html.cdc-v75 .walli-panel-subhead>strong{
+  color:var(--v76-text);
+  font-size:.86rem;
+}
+
+html.cdc-v75 .walli-panel-subhead>small{
+  color:var(--v76-muted);
+  font-size:.68rem;
+}
+
+html.cdc-v75 .walli-plan-card,
+html.cdc-v75 .walli-plan-empty{
+  border:1px solid var(--v76-border);
+  border-radius:15px;
+  background:color-mix(in srgb,var(--v76-surface-soft) 48%,var(--v76-surface));
+}
+
+html.cdc-v75 .walli-plan-card{
+  display:grid;
+  gap:10px;
+  padding:12px;
+}
+
+html.cdc-v75 .walli-plan-empty{
+  min-height:110px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:14px;
+  color:var(--v76-muted);
+}
+
+html.cdc-v75 .walli-plan-empty>svg{
+  flex:0 0 auto;
+  color:var(--v76-primary);
+}
+
+html.cdc-v75 .walli-plan-empty strong,
+html.cdc-v75 .walli-plan-head strong{
+  display:block;
+  color:var(--v76-text);
+  font-size:.82rem;
+}
+
+html.cdc-v75 .walli-plan-empty small,
+html.cdc-v75 .walli-plan-head small{
+  display:block;
+  margin-top:3px;
+  color:var(--v76-muted);
+  font-size:.68rem;
+  line-height:1.4;
+}
+
+html.cdc-v75 .walli-plan-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+}
+
+html.cdc-v75 .walli-plan-head .btn{
+  flex:0 0 auto;
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+
+html.cdc-v75 .walli-plan-warning{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  padding:9px 10px;
+  border-radius:11px;
+  color:#8a5a00;
+  background:color-mix(in srgb,#fff0c2 70%,var(--v76-surface));
+  font-size:.69rem;
+  line-height:1.4;
+}
+
+html.cdc-v75 .walli-plan-list,
+html.cdc-v75 .walli-payment-history{
+  display:grid;
+  gap:7px;
+}
+
+html.cdc-v75 .walli-plan-row,
+html.cdc-v75 .walli-payment-row{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  gap:10px;
+  align-items:center;
+  padding:10px;
+  border:1px solid var(--v76-border);
+  border-radius:12px;
+  background:var(--v76-surface);
+}
+
+html.cdc-v75 .walli-plan-row.is-paid{
+  opacity:.72;
+}
+
+html.cdc-v75 .walli-plan-row.is-overdue{
+  border-color:color-mix(in srgb,#c46b00 35%,var(--v76-border));
+}
+
+html.cdc-v75 .walli-plan-index,
+html.cdc-v75 .walli-payment-icon{
+  width:32px;
+  height:32px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  color:var(--v76-primary);
+  background:color-mix(in srgb,var(--v76-primary) 9%,var(--v76-surface));
+  font-size:.76rem;
+  font-weight:850;
+}
+
+html.cdc-v75 .walli-plan-copy,
+html.cdc-v75 .walli-payment-copy,
+html.cdc-v75 .walli-payment-row>div{
+  min-width:0;
+}
+
+html.cdc-v75 .walli-plan-copy>strong,
+html.cdc-v75 .walli-payment-row strong{
+  display:block;
+  color:var(--v76-text);
+  font-size:.78rem;
+}
+
+html.cdc-v75 .walli-plan-copy>small,
+html.cdc-v75 .walli-payment-row small{
+  display:block;
+  margin-top:3px;
+  color:var(--v76-muted);
+  font-size:.66rem;
+  line-height:1.35;
+}
+
+html.cdc-v75 .walli-plan-row .btn,
+html.cdc-v75 .walli-payment-row .btn{
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+
+html.cdc-v75 .walli-payment-row.is-reversal,
+html.cdc-v75 .walli-payment-row.is-reversed{
+  background:color-mix(in srgb,#fff0ee 55%,var(--v76-surface));
+}
+
+html.cdc-v75 .walli-payment-row.is-legacy{
+  background:color-mix(in srgb,var(--v76-surface-soft) 70%,var(--v76-surface));
+}
+
+html.cdc-v75 .walli-split-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+
+html.cdc-v75 .walli-plan-save{
+  width:100%;
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+}
+
+html.cdc-v75 .walli-split-dates{
+  grid-column:1/-1;
+  display:grid;
+  gap:7px;
+}
+
+html.cdc-v75 .walli-split-date{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(132px,.75fr)!important;
+  align-items:center!important;
+  gap:10px!important;
+  color:var(--v76-muted)!important;
+  font-size:.68rem!important;
+  font-weight:700!important;
+}
+
+html.cdc-v75 .walli-split-date input{
+  min-height:42px;
+  width:100%;
+  margin:0;
+  font-size:16px;
+}
+
+@media(max-width:900px){
+  html.cdc-v75 #walliPaymentTimeline{
+    grid-template-columns:minmax(0,1fr);
+  }
+}
+
 @media(hover:hover) and (pointer:fine){
   html.cdc-v75 .walli-summary-card,
   html.cdc-v75 .walli-work-card,
@@ -1604,7 +1842,7 @@ html.cdc-v75 .walli-partial-action{
 
   html.cdc-v75 .walli-rate-field,
   html.cdc-v75 #walliShareDailyRateLabel,
-  html.cdc-v75 .walli-save-settings,
+  html.cdc-v75 .walli-config-actions,
   html.cdc-v75 .walli-auto-walks,
   html.cdc-v75 .walli-note-field,
   html.cdc-v75 .walli-form-actions{
@@ -1624,10 +1862,38 @@ html.cdc-v75 .walli-partial-action{
     min-height:48px;
   }
 
-  html.cdc-v75 .walli-save-settings,
+  html.cdc-v75 .walli-config-actions,
+  html.cdc-v75 .walli-config-actions .btn,
   html.cdc-v75 .walli-form-actions,
   html.cdc-v75 .walli-form-actions .btn{
     width:100%;
+  }
+
+  html.cdc-v75 .walli-split-actions{
+    grid-template-columns:minmax(0,1fr);
+  }
+
+  html.cdc-v75 .walli-split-date{
+    grid-template-columns:minmax(0,1fr)!important;
+    align-items:stretch!important;
+  }
+
+  html.cdc-v75 .walli-plan-head,
+  html.cdc-v75 .walli-panel-subhead{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  html.cdc-v75 .walli-plan-row,
+  html.cdc-v75 .walli-payment-row{
+    grid-template-columns:auto minmax(0,1fr);
+  }
+
+  html.cdc-v75 .walli-plan-row .btn,
+  html.cdc-v75 .walli-payment-row .btn{
+    grid-column:1/-1;
+    width:100%;
+    justify-content:center;
   }
 
   html.cdc-v75 .walli-calendar-head,
