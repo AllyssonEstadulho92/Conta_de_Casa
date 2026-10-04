@@ -43,3 +43,37 @@ npm run android
 ## Estado
 
 A área Animais está funcional nesta fundação. Início, Despesas e Mais continuam no projeto legado e ainda não foram migrados para a aplicação nativa. O código Web existente foi preservado sem alterações nesta entrega.
+
+
+## Development build em dispositivo real
+
+A aplicação usa `expo-dev-client` e perfis EAS em `eas.json`.
+
+Primeira configuração da conta/projeto Expo, feita localmente pelo responsável do projeto:
+
+```bash
+cd apps/mobile-native
+npm install
+npx eas-cli@latest login
+npx eas-cli@latest init
+```
+
+Build de desenvolvimento para iPhone físico:
+
+```bash
+npx eas-cli@latest build --profile development --platform ios
+```
+
+Build de desenvolvimento para Android físico:
+
+```bash
+npx eas-cli@latest build --profile development --platform android
+```
+
+Para simulador iOS:
+
+```bash
+npx eas-cli@latest build --profile development-simulator --platform ios
+```
+
+O `projectId` gerado pelo EAS deve ser associado ao projeto Expo pelo comando oficial de inicialização. Não deve ser inventado nem substituído manualmente por identificadores fictícios.
