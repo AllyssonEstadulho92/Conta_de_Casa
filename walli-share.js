@@ -126,8 +126,8 @@
     const fallback=today.startsWith(selectedMonth)?today:selectedMonth+'-01';
     const start=$('#walliCareStart');
     const end=$('#walliCareEnd');
-    if(start&&!start.value)start.value=fallback;
-    if(end&&!end.value)end.value=fallback;
+    if(start&&start.dataset.monthKey!==selectedMonth){start.value=fallback;start.dataset.monthKey=selectedMonth;}
+    if(end&&end.dataset.monthKey!==selectedMonth){end.value=fallback;end.dataset.monthKey=selectedMonth;}
 
     renderCalendar(data);
 
@@ -176,6 +176,7 @@
     const duplicate=days.find(day=>existing.has(day));
     if(duplicate){toast('Já existe um registo para '+fmtDate(duplicate)+'.');return;}
     const now=new Date().toISOString();
+    appState.petShare.records ||= [];
     appState.petShare.records.push({
       id:uid(),
       startDate:start,
@@ -209,6 +210,7 @@
     if(data.outstandingCents<=0){render();return;}
     if(!confirm('Registar '+money(data.outstandingCents)+' como reembolso recebido do Nuno?')){if(button)button.disabled=false;return;}
     const now=new Date().toISOString();
+    appState.petShare.payments ||= [];
     appState.petShare.payments.push({
       id:uid(),
       monthKey:selectedMonth,
