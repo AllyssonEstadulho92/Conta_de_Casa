@@ -985,7 +985,8 @@ function syncConflictRecordName(conflict) {
   const item=conflict?.local||conflict?.remote||{};
   if(conflict?.entity==='month'||conflict?.entity==='pet-share-month') return conflict.id;
   if(conflict?.entity==='pet-care') return cleanString(`Walli · ${item.startDate||conflict.id}`,100);
-  if(conflict?.entity==='pet-share-payment') return cleanString(`Reembolso · ${item.monthKey||conflict.id}`,100);
+  if(conflict?.entity==='pet-share-payment') return cleanString(`Pagamento Walli · ${item.monthKey||conflict.id}`,100);
+  if(conflict?.entity==='pet-share-plan') return cleanString(`Plano Walli · ${item.monthKey||conflict.id}`,100);
   return cleanString(item.title||item.description||item.name||item.provider||conflict?.id||'Registo',100);
 }
 
@@ -1015,7 +1016,7 @@ function renderSyncConflictList() {
     root.innerHTML='<p class="muted">Atualize a comparação para receber os detalhes mais recentes do cofre.</p>';
     return;
   }
-  const entityLabels={bill:'Fatura',payment:'Pagamento',income:'Rendimento',market:'Mercado',goal:'Objetivo',month:'Planeamento','pet-care':'Dias do Walli','pet-share-payment':'Reembolso do Walli','pet-share-month':'Configuração do Walli'};
+  const entityLabels={bill:'Fatura',payment:'Pagamento',income:'Rendimento',market:'Mercado',goal:'Objetivo',month:'Planeamento','pet-care':'Dias do Walli','pet-share-payment':'Pagamento do Walli','pet-share-month':'Configuração do Walli','pet-share-plan':'Plano do Walli'};
   root.innerHTML=syncActiveConflicts.map((conflict,index)=>{
     const fields=syncConflictDifferences(conflict);
     const rows=fields.map(field=>`<div class="sync-conflict-row" role="row">
@@ -1048,7 +1049,7 @@ function applySyncConflictChoice(conflict,choice) {
     return;
   }
   if(conflict.entity==='pet-share-month'){
-    appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[]};
+    appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[],plans:[]};
     appState.petShare.months ||= {};
     appState.petShare.months[conflict.id]=selected;
     return;
