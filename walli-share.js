@@ -732,9 +732,9 @@
     if(data.outstandingCents<=0){render();return;}
     const select=$('[data-walli-split-count]');
     const parts=Number(select?.value||2);
-    const plan=splitPaymentCents(data.outstandingCents,parts);
-    if(plan.length<2||plan[0]<=0){toast('Não foi possível dividir este valor.');return;}
-    const amountCents=plan[0];
+    const paymentParts=splitPaymentCents(data.outstandingCents,parts);
+    if(paymentParts.length<2||paymentParts[0]<=0){toast('Não foi possível dividir este valor.');return;}
+    const amountCents=paymentParts[0];
     const remainingCents=Math.max(0,data.outstandingCents-amountCents);
     if(button)button.disabled=true;
     const caregiver=appState.petShare.caregiverName||'Nuno';
