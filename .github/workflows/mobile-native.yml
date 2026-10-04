@@ -1,0 +1,31 @@
+name: Mobile Native
+
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile-native/**'
+      - '.github/workflows/mobile-native.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile-native/**'
+      - '.github/workflows/mobile-native.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/mobile-native
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm test

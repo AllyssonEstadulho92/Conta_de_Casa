@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Conta de Casa",
+    "slug": "conta-de-casa-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.allysson.contadecasa.mobile"
+    },
+    "android": {
+      "package": "com.allysson.contadecasa.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#063B3B"
+      }
+    },
+    "plugins": [
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true,
+          "enableFTS": false
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true
+        }
+      ]
+    ]
+  }
+}

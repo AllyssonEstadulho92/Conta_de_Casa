@@ -1,6 +1,6 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 30 de setembro de 2026  
+Atualizado: 4 de outubro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
@@ -451,3 +451,24 @@ Alterações executadas:
 Impacto esperado: menos rede, menos timers ativos, menos recomposição DOM, menor consumo de bateria e menor probabilidade de sensação de bloqueio em Safari/PWA.
 
 Pendente: validação física no mesmo iPhone/Safari/PWA de arranque, desbloqueio, registo de fatura, retorno de background e atualização automática.
+
+
+## Aplicação móvel nativa: fundação Animais / Walli / Partilha com Nuno
+
+Em 4 de outubro de 2026 foi criada uma fundação separada em `apps/mobile-native/` para iniciar a migração da Conta de Casa para uma aplicação móvel nativa, sem reutilizar a shell Web/PWA como interface móvel.
+
+Estado deste bloco:
+
+- React Native + Expo SDK 57, TypeScript strict;
+- primeiro fluxo funcional: **Animais → Walli → Partilha com Nuno**;
+- registo de períodos/dias, calendário mensal, histórico, edição e eliminação;
+- cálculo proporcional pelos dias reais do mês ou valor diário fixo;
+- valores financeiros em cêntimos inteiros;
+- outubro de 2026: 120,00 € × 8 / 31 = 30,97 € para o Nuno e 89,03 € para o proprietário;
+- reembolso recebido é registado separadamente e não reescreve a base mensal;
+- persistência local nativa em SQLite com SQLCipher;
+- chave aleatória de 256 bits guardada no SecureStore do sistema;
+- operações SQL parametrizadas e transações para impedir dias duplicados;
+- a aplicação Web/PWA existente permanece intacta.
+
+Pendente antes de considerar esta base pronta para produção: instalar dependências, gerar a build nativa, executar os testes/typecheck no CI, validar iOS/Android físicos, rever backup/restauro e definir a migração segura dos restantes módulos.
