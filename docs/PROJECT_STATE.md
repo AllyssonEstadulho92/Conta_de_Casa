@@ -489,3 +489,19 @@ Incluído:
 A configuração não cria certificados, provisioning profiles, contas Expo ou credenciais Apple/Google no repositório. Esses elementos permanecem fora do código e dependem de autenticação explícita do titular.
 
 Pendente: executar `eas init` com a conta Expo autorizada, gerar as primeiras builds iOS/Android e validar visualmente o fluxo Animais/Walli em dispositivos físicos.
+
+
+## Secção dedicada: Partilha do Walli
+
+Em 4 de outubro de 2026 a aplicação móvel nativa passou a ter uma secção de navegação própria para a partilha do Walli com o Nuno.
+
+Alterações:
+
+- novo destino de topo `Partilha` na navegação inferior da aplicação móvel;
+- ecrã dedicado `WalliShareScreen`;
+- Animais mantém o perfil do Walli e apresenta apenas um resumo com acesso à partilha;
+- a secção Partilha concentra base mensal, dias com o Nuno, valor do Nuno, parte do proprietário, estado do reembolso, calendário, registos e configurações;
+- após guardar uma entrega, o utilizador regressa à secção Partilha;
+- subecrãs de calendário, registos e configurações regressam à Partilha em vez de regressarem ao perfil Animais.
+
+A lógica financeira, SQLite/SQLCipher, SecureStore, reembolsos e prevenção de dias duplicados foram preservados.
