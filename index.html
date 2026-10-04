@@ -165,19 +165,43 @@
         <div id="marketList" class="market-results" aria-live="polite"></div>
       </section>
       <section id="page-petshare" class="page">
-        <div class="walli-share-hero">
-          <div>
-            <p class="eyebrow">Walli</p>
-            <h2>Partilha com o Nuno</h2>
-            <p>Dias de guarda, valor proporcional e reembolsos num único local.</p>
+        <section class="walli-share-hero" aria-labelledby="walliShareTitle">
+          <div class="walli-hero-identity" aria-hidden="true">
+            <span class="walli-hero-paw">🐾</span>
           </div>
-          <span class="walli-share-badge">Dados no cofre cifrado</span>
-        </div>
-        <div id="walliShareSummary" class="walli-share-summary" aria-live="polite"></div>
-        <div class="two-col walli-share-forms">
-          <article class="panel">
-            <div class="panel-head"><div><h2>Configuração do mês</h2><p>Define a base usada no cálculo da partilha.</p></div></div>
-            <form id="walliShareSettingsForm" class="form-grid">
+          <div class="walli-hero-copy">
+            <p class="eyebrow">Cuidados do Walli</p>
+            <h2 id="walliShareTitle">Partilha com o Nuno</h2>
+            <p>Registe os dias, acompanhe os passeios e veja imediatamente quanto falta pagar.</p>
+          </div>
+          <div class="walli-hero-security">
+            <span class="walli-share-badge">Cofre cifrado</span>
+            <small>Os cálculos ficam associados ao mês selecionado.</small>
+          </div>
+        </section>
+
+        <section class="walli-overview" aria-labelledby="walliOverviewTitle">
+          <div class="walli-section-heading">
+            <div>
+              <p class="eyebrow">Resumo</p>
+              <h2 id="walliOverviewTitle">Visão do mês</h2>
+            </div>
+            <p>Valores, dias e passeios atualizados automaticamente.</p>
+          </div>
+          <div id="walliShareSummary" class="walli-share-summary" aria-live="polite"></div>
+        </section>
+
+        <div class="walli-share-forms">
+          <article class="panel walli-work-card walli-config-panel">
+            <div class="walli-work-head">
+              <span class="walli-step">1</span>
+              <div>
+                <p class="eyebrow">Regras do mês</p>
+                <h2>Configurar cálculo</h2>
+                <p>Defina apenas o necessário. Os restantes valores são calculados automaticamente.</p>
+              </div>
+            </div>
+            <form id="walliShareSettingsForm" class="form-grid walli-settings-grid">
               <label>Modo de cálculo
                 <select id="walliShareMode">
                   <option value="proportional">Proporcional aos dias reais do mês</option>
@@ -196,39 +220,63 @@
                   <option value="2">2 vezes por dia</option>
                 </select>
               </label>
-              <label>Preço por passeio
+              <label class="walli-rate-field">Preço por passeio
                 <input id="walliWalkRate" inputmode="decimal" autocomplete="off" placeholder="8,00" />
-                <small>Referência inicial configurada: 8,00 € por passeio. Pode ajustar ao acordo com o Nuno.</small>
+                <small>Referência inicial: 8,00 €. Pode ajustar ao valor combinado com o Nuno.</small>
               </label>
-              <button class="btn primary" type="submit">Guardar configuração</button>
+              <button class="btn primary walli-save-settings" type="submit">Guardar configuração</button>
             </form>
           </article>
-          <article class="panel">
-            <div class="panel-head"><div><h2>Registar entrega</h2><p>Indique o período em que o Walli fica com o Nuno.</p></div></div>
-            <form id="walliCareForm" class="form-grid">
+
+          <article class="panel walli-work-card walli-care-panel">
+            <div class="walli-work-head">
+              <span class="walli-step">2</span>
+              <div>
+                <p class="eyebrow">Novo período</p>
+                <h2>Registar dias com o Nuno</h2>
+                <p>Escolha o início e o fim. Passeios e custo são calculados sem contas manuais.</p>
+              </div>
+            </div>
+            <form id="walliCareForm" class="form-grid walli-care-grid">
               <label>Data de início<input id="walliCareStart" type="date" required /></label>
               <label>Data de fim<input id="walliCareEnd" type="date" required /></label>
               <div id="walliCareAutoWalks" class="walli-auto-walks" aria-live="polite">
-                <span>Passeios calculados automaticamente</span>
+                <span>Cálculo automático</span>
                 <strong>1 passeio</strong>
-                <small>A contagem usa os dias selecionados e a configuração de passeios por dia.</small>
+                <small>A contagem usa os dias selecionados e a frequência configurada.</small>
               </div>
-              <label>Observação<textarea id="walliCareNote" maxlength="500" rows="3" placeholder="Opcional"></textarea></label>
-              <div class="button-row">
+              <label class="walli-note-field">Observação<textarea id="walliCareNote" maxlength="500" rows="3" placeholder="Opcional"></textarea></label>
+              <div class="button-row walli-form-actions">
                 <button id="walliCareSubmitBtn" class="btn primary" type="submit">Guardar entrega</button>
                 <button id="walliCareCancelEditBtn" class="btn secondary" type="button" hidden>Cancelar edição</button>
               </div>
             </form>
           </article>
         </div>
-        <article class="panel">
-          <div class="panel-head"><div><h2>Calendário do mês</h2><p>Dias registados com o Nuno.</p></div></div>
-          <div id="walliShareCalendar" class="walli-share-calendar" aria-live="polite"></div>
-        </article>
-        <article class="panel">
-          <div class="panel-head"><div><h2>Registos</h2><p>Histórico do mês selecionado.</p></div></div>
-          <div id="walliShareRecords" class="stack-list" aria-live="polite"></div>
-        </article>
+
+        <div class="walli-lower-grid">
+          <article class="panel walli-calendar-panel">
+            <div class="walli-panel-heading">
+              <div>
+                <p class="eyebrow">Planeamento</p>
+                <h2>Calendário do mês</h2>
+              </div>
+              <p>Dias assinalados correspondem aos períodos registados com o Nuno.</p>
+            </div>
+            <div id="walliShareCalendar" class="walli-share-calendar" aria-live="polite"></div>
+          </article>
+
+          <article class="panel walli-records-panel">
+            <div class="walli-panel-heading">
+              <div>
+                <p class="eyebrow">Histórico</p>
+                <h2>Registos</h2>
+              </div>
+              <p>Consulte ou edite os períodos do mês selecionado.</p>
+            </div>
+            <div id="walliShareRecords" class="stack-list" aria-live="polite"></div>
+          </article>
+        </div>
       </section>
       <section id="page-reports" class="page"><div id="reportCards" class="kpi-grid"></div><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Por categoria</h2><p>Distribuição do mês.</p></div></div><div id="reportCategoryBars" class="bar-list"></div></article><article class="panel"><div class="panel-head"><div><h2>Últimos 6 meses</h2><p>Pagamentos e compras efetivas.</p></div></div><div id="monthlyTrend" class="trend-chart"></div></article></div></section>
       <section id="page-goals" class="page"><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav><div class="section-toolbar"><div><h2>Metas de poupança</h2><p class="muted">Objetivos acompanhados separadamente do orçamento mensal.</p></div><button id="newGoalBtn" class="btn primary">+ Novo objetivo</button></div><div id="goalList" class="goal-grid"></div></section>
