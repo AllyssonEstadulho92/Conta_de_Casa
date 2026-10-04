@@ -472,3 +472,20 @@ Estado deste bloco:
 - a aplicação Web/PWA existente permanece intacta.
 
 Pendente antes de considerar esta base pronta para produção: instalar dependências, gerar a build nativa, executar os testes/typecheck no CI, validar iOS/Android físicos, rever backup/restauro e definir a migração segura dos restantes módulos.
+
+
+## Build nativa de desenvolvimento preparada
+
+Em 4 de outubro de 2026 foi acrescentada a configuração necessária para instalar e validar a nova aplicação em dispositivos reais.
+
+Incluído:
+
+- `expo-dev-client` compatível com Expo SDK 57;
+- `apps/mobile-native/eas.json` com perfis `development`, `development-simulator`, `preview` e `production`;
+- build de desenvolvimento interna para iOS físico e Android;
+- perfil separado para simulador iOS;
+- documentação de inicialização EAS sem guardar credenciais ou inventar `projectId`.
+
+A configuração não cria certificados, provisioning profiles, contas Expo ou credenciais Apple/Google no repositório. Esses elementos permanecem fora do código e dependem de autenticação explícita do titular.
+
+Pendente: executar `eas init` com a conta Expo autorizada, gerar as primeiras builds iOS/Android e validar visualmente o fluxo Animais/Walli em dispositivos físicos.
