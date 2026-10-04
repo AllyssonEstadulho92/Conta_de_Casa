@@ -198,8 +198,15 @@
             <form id="walliCareForm" class="form-grid">
               <label>Data de início<input id="walliCareStart" type="date" required /></label>
               <label>Data de fim<input id="walliCareEnd" type="date" required /></label>
+              <label>Idas à rua
+                <input id="walliCareWalks" type="number" inputmode="numeric" min="0" max="200" step="1" placeholder="Ex.: 6" />
+                <small>Introduza manualmente quantas saídas/passeios ocorreram neste período.</small>
+              </label>
               <label>Observação<textarea id="walliCareNote" maxlength="500" rows="3" placeholder="Opcional"></textarea></label>
-              <button class="btn primary" type="submit">Guardar entrega</button>
+              <div class="button-row">
+                <button id="walliCareSubmitBtn" class="btn primary" type="submit">Guardar entrega</button>
+                <button id="walliCareCancelEditBtn" class="btn secondary" type="button" hidden>Cancelar edição</button>
+              </div>
             </form>
           </article>
         </div>
