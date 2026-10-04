@@ -498,7 +498,9 @@ function mergePetShareMonths(localMonths={},remoteMonths={},conflicts=[]) {
     if(canonicalize(localMonth)===canonicalize(remoteMonth))continue;
     const sameBusiness=Number(localMonth.baseCents||0)===Number(remoteMonth.baseCents||0)
       && String(localMonth.calculationMode||'proportional')===String(remoteMonth.calculationMode||'proportional')
-      && Number(localMonth.dailyRateCents||0)===Number(remoteMonth.dailyRateCents||0);
+      && Number(localMonth.dailyRateCents||0)===Number(remoteMonth.dailyRateCents||0)
+      && Number(localMonth.walksPerDay||1)===Number(remoteMonth.walksPerDay||1)
+      && Number(localMonth.walkRateCents||800)===Number(remoteMonth.walkRateCents||800);
     if(sameBusiness){out[month]=chooseCompatibleRecord('pet-share-month',localMonth,remoteMonth);continue;}
     const lt=new Date(localMonth.updatedAt||0).getTime()||0;
     const rt=new Date(remoteMonth.updatedAt||0).getTime()||0;
