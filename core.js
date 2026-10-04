@@ -472,10 +472,17 @@ function normalizeGoal(g = {}) {
 
 function normalizePetShareMonth(value = {}) {
   const now = new Date().toISOString();
+  const walksPerDayValue = Number(value.walksPerDay);
+  const walksPerDay = walksPerDayValue === 2 ? 2 : 1;
+  const walkRateCents = Object.prototype.hasOwnProperty.call(value, 'walkRateCents')
+    ? cleanCents(value.walkRateCents)
+    : 800;
   return {
     baseCents: cleanCents(value.baseCents),
     calculationMode: value.calculationMode === 'daily-fixed' ? 'daily-fixed' : 'proportional',
     dailyRateCents: cleanCents(value.dailyRateCents),
+    walksPerDay,
+    walkRateCents,
     updatedAt: cleanIso(value.updatedAt, now)
   };
 }
