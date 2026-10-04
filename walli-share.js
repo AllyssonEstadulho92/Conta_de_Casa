@@ -90,7 +90,7 @@
     const monthPayments=(appState?.petShare?.payments||[]).filter(payment=>payment.monthKey===monthKey);
     const reversalIds=new Set(monthPayments.filter(payment=>payment.direction==='outbound-reversal'&&payment.reversalOfId).map(payment=>payment.reversalOfId));
     const paidCents=sumCents(monthPayments.filter(payment=>payment.direction==='outbound'&&!reversalIds.has(payment.id)).map(payment=>payment.amountCents));
-    const legacyReceivedCents=sumCents(monthPayments.filter(payment=>payment.direction==='inbound').map(payment=>payment.amountCents));
+    const legacyReceivedCents=sumCents(monthPayments.filter(payment=>payment.direction!=='outbound'&&payment.direction!=='outbound-reversal').map(payment=>payment.amountCents));
     const plan=(appState?.petShare?.plans||[])
       .filter(item=>item.monthKey===monthKey&&!item.cancelledAt)
       .sort((a,b)=>new Date(b.updatedAt||b.createdAt||0)-new Date(a.updatedAt||a.createdAt||0))[0]||null;
