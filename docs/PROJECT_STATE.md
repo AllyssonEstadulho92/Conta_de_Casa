@@ -505,3 +505,26 @@ Alterações:
 - subecrãs de calendário, registos e configurações regressam à Partilha em vez de regressarem ao perfil Animais.
 
 A lógica financeira, SQLite/SQLCipher, SecureStore, reembolsos e prevenção de dias duplicados foram preservados.
+
+
+## PWA: Partilha do Walli no menu móvel
+
+Em 4 de outubro de 2026, a área de partilha do Walli passou a ser integrada também na Conta de Casa PWA utilizada no iPhone, diretamente no drawer móvel mostrado na validação física.
+
+Estado implementado:
+
+- novo grupo `Animais` no menu completo, entre Compras e Análise;
+- novo destino `Partilha do Walli` com ícone local de pata;
+- nova rota interna `petshare` e página `#page-petshare`;
+- configuração mensal com cálculo proporcional pelos dias civis reais do mês ou valor diário fixo;
+- registo de períodos com o Nuno, bloqueando dias sobrepostos;
+- calendário mensal, histórico e eliminação de registos;
+- reembolsos guardados separadamente da base mensal;
+- valores em cêntimos inteiros, arredondamento proporcional half-up uma vez no total mensal;
+- dados incluídos no mesmo `appState` cifrado do cofre existente;
+- integração com backup e sincronização cifrada, incluindo tombstones e revisão de conflitos;
+- novo asset público `walli-share.js`, incluído no build do Pages e no Service Worker.
+
+Preservado: `STATE_VERSION = 5`, faturas, pagamentos, Mercado, Planeamento, PIN/cofre, PBKDF2/AES-GCM e navegação compacta inferior existente.
+
+Pendente: validação física no mesmo iPhone/Safari/PWA após publicação, confirmando que o grupo Animais aparece no drawer, abre a página correta e mantém persistência após fechar/reabrir.
