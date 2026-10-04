@@ -1054,9 +1054,11 @@ function applySyncConflictChoice(conflict,choice) {
     appState.petShare.months[conflict.id]=selected;
     return;
   }
-  if(conflict.entity==='pet-care'||conflict.entity==='pet-share-payment'){
-    appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[]};
-    const collection=conflict.entity==='pet-care'?appState.petShare.records:appState.petShare.payments;
+  if(conflict.entity==='pet-care'||conflict.entity==='pet-share-payment'||conflict.entity==='pet-share-plan'){
+    appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[],plans:[]};
+    const collection=conflict.entity==='pet-care'
+      ? appState.petShare.records
+      : conflict.entity==='pet-share-payment' ? appState.petShare.payments : appState.petShare.plans;
     if(!selected?.id) throw new Error('Registo de conflito inválido.');
     const index=collection.findIndex(item=>item.id===conflict.id);
     if(index>=0)collection[index]=selected;else collection.push(selected);
