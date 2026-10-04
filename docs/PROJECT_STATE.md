@@ -597,3 +597,25 @@ Melhorias:
 Preservado: cálculos em cêntimos, datas civis, prevenção de sobreposição, pagamentos inbound/outbound, cofre cifrado, sincronização e dados existentes.
 
 Pendente: validação visual física no iPhone em 390/430 px, dark mode e com registos longos.
+
+
+## PWA: pagamentos parciais ao Nuno
+
+Em 4 de outubro de 2026, a Partilha do Walli passou a permitir liquidar o valor em aberto por partes, sem obrigar a pagar tudo de uma vez.
+
+Implementado:
+
+- botão **Pagar tudo** mantém a liquidação integral;
+- nova área **Dividir pagamento** dentro do estado por pagar;
+- divisão automática em **2, 3 ou 4 partes**;
+- valores são distribuídos em cêntimos inteiros e a soma das partes é sempre exatamente igual ao valor em aberto;
+- a primeira parte recebe o eventual cêntimo de resto antes das seguintes;
+- a interface mostra **Pagar agora** e **Fica por pagar** antes de confirmar;
+- cada pagamento parcial é um novo movimento `outbound` no histórico existente;
+- após cada pagamento, `paidCents` e `outstandingCents` são recalculados;
+- não há juros, crédito ou calendário de dívida: é apenas divisão interna do valor em aberto;
+- revisão pública atualizada para `76-walli-partial-pay5`.
+
+Exemplo matemático: 94,97 € em 2 partes resulta em 47,49 € + 47,48 €, sem perder nem criar cêntimos.
+
+Preservado: total da partilha, cálculo dos passeios, pagamentos anteriores, cofre cifrado, sync e prevenção de sobreposição de dias.
