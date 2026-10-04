@@ -30,14 +30,17 @@ const SYNC_CONFLICT_FIELDS = Object.freeze({
   income:['description','amountCents','receivedAt'],
   market:['name','category','quantity','unit','estimatedCents','actualCents','purchased','purchasedAt'],
   goal:['name','targetCents','savedCents','deadline','archived'],
-  month:['accountBalanceCents','openingBalanceCents','budgetCents']
+  month:['accountBalanceCents','openingBalanceCents','budgetCents'],
+  'pet-care':['startDate','endDate','note'],
+  'pet-share-payment':['monthKey','amountCents','paidAt','note'],
+  'pet-share-month':['baseCents','calculationMode','dailyRateCents']
 });
 const SYNC_CONFLICT_FIELD_LABELS = Object.freeze({
   title:'Descrição',provider:'Fornecedor',category:'Categoria',totalCents:'Valor total',dueDate:'Vencimento',dueTime:'Hora limite',issueAt:'Emissão',method:'Método',recurrence:'Recorrência',reference:'Referência',notes:'Observações',cancelled:'Cancelada',archived:'Arquivada',
-  billId:'Fatura associada',amountCents:'Valor do pagamento',paidAt:'Data do pagamento',description:'Descrição',receivedAt:'Data do rendimento',name:'Nome',quantity:'Quantidade',unit:'Unidade',estimatedCents:'Valor estimado',actualCents:'Valor real',purchased:'Comprado',purchasedAt:'Data da compra',targetCents:'Meta',savedCents:'Poupado',deadline:'Prazo',accountBalanceCents:'Saldo atual da conta',openingBalanceCents:'Saldo inicial',budgetCents:'Orçamento'
+  billId:'Fatura associada',amountCents:'Valor do pagamento',paidAt:'Data do pagamento',description:'Descrição',receivedAt:'Data do rendimento',name:'Nome',quantity:'Quantidade',unit:'Unidade',estimatedCents:'Valor estimado',actualCents:'Valor real',purchased:'Comprado',purchasedAt:'Data da compra',targetCents:'Meta',savedCents:'Poupado',deadline:'Prazo',accountBalanceCents:'Saldo atual da conta',openingBalanceCents:'Saldo inicial',budgetCents:'Orçamento',startDate:'Data inicial',endDate:'Data final',monthKey:'Mês',baseCents:'Base mensal',calculationMode:'Modo de cálculo',dailyRateCents:'Valor diário',note:'Observação'
 });
-const SYNC_CONFLICT_MONEY_FIELDS = new Set(['totalCents','amountCents','estimatedCents','actualCents','targetCents','savedCents','accountBalanceCents','openingBalanceCents','budgetCents']);
-const SYNC_CONFLICT_DATE_FIELDS = new Set(['dueDate','deadline']);
+const SYNC_CONFLICT_MONEY_FIELDS = new Set(['totalCents','amountCents','estimatedCents','actualCents','targetCents','savedCents','accountBalanceCents','openingBalanceCents','budgetCents','baseCents','dailyRateCents']);
+const SYNC_CONFLICT_DATE_FIELDS = new Set(['dueDate','deadline','startDate','endDate']);
 const SYNC_CONFLICT_DATETIME_FIELDS = new Set(['issueAt','paidAt','receivedAt','purchasedAt']);
 
 function syncConfig() {
@@ -442,9 +445,17 @@ function applyTombstones(state) {
   const tombstones=state.syncTombstones||[];
   const entityMap={income:'incomes',market:'market',bill:'bills',payment:'payments',goal:'goals'};
   for(const tomb of tombstones){
+    const deletedAt=new Date(tomb.deletedAt||0).getTime();
+    if(tomb.entity==='pet-care'){
+      state.petShare.records=state.petShare.records.filter(item=>item.id!==tomb.id || syncItemTime(item)>deletedAt);
+      continue;
+    }
+    if(tomb.entity==='pet-share-payment'){
+      state.petShare.payments=state.petShare.payments.filter(item=>item.id!==tomb.id || syncItemTime(item)>deletedAt);
+      continue;
+    }
     const field=entityMap[tomb.entity];
     if(!field||!Array.isArray(state[field])) continue;
-    const deletedAt=new Date(tomb.deletedAt||0).getTime();
     state[field]=state[field].filter(item=>item.id!==tomb.id || syncItemTime(item)>deletedAt);
   }
 }
@@ -474,6 +485,36 @@ function mergeMonths(localMonths={},remoteMonths={},conflicts=[]) {
   return out;
 }
 
+function mergePetShareMonths(localMonths={},remoteMonths={},conflicts=[]) {
+  const out={...syncClone(remoteMonths||{})};
+  for(const [month,localMonth] of Object.entries(localMonths||{})){
+    const remoteMonth=out[month];
+    if(!remoteMonth){out[month]=syncClone(localMonth);continue;}
+    if(canonicalize(localMonth)===canonicalize(remoteMonth))continue;
+    const sameBusiness=Number(localMonth.baseCents||0)===Number(remoteMonth.baseCents||0)
+      && String(localMonth.calculationMode||'proportional')===String(remoteMonth.calculationMode||'proportional')
+      && Number(localMonth.dailyRateCents||0)===Number(remoteMonth.dailyRateCents||0);
+    if(sameBusiness){out[month]=chooseCompatibleRecord('pet-share-month',localMonth,remoteMonth);continue;}
+    const lt=new Date(localMonth.updatedAt||0).getTime()||0;
+    const rt=new Date(remoteMonth.updatedAt||0).getTime()||0;
+    if(lt>rt){out[month]=syncClone(localMonth);continue;}
+    if(rt>lt)continue;
+    conflicts.push({entity:'pet-share-month',id:month,at:new Date().toISOString(),local:syncClone(localMonth),remote:syncClone(remoteMonth)});
+    out[month]=syncClone(localMonth);
+  }
+  return out;
+}
+
+function mergePetShare(localPetShare={},remotePetShare={},conflicts=[]) {
+  return {
+    petName:cleanString(localPetShare.petName||remotePetShare.petName||'Walli',80)||'Walli',
+    caregiverName:cleanString(localPetShare.caregiverName||remotePetShare.caregiverName||'Nuno',80)||'Nuno',
+    months:mergePetShareMonths(localPetShare.months,remotePetShare.months,conflicts),
+    records:mergeById('pet-care',localPetShare.records,remotePetShare.records,conflicts),
+    payments:mergeById('pet-share-payment',localPetShare.payments,remotePetShare.payments,conflicts)
+  };
+}
+
 function mergeAppStates(localState,remoteState) {
   const local=ensureStateShape(syncClone(localState));
   const remote=ensureStateShape(syncClone(remoteState));
@@ -484,6 +525,7 @@ function mergeAppStates(localState,remoteState) {
   merged.incomes=mergeById('income',local.incomes,remote.incomes,conflicts);
   merged.market=mergeById('market',local.market,remote.market,conflicts);
   merged.goals=mergeById('goal',local.goals,remote.goals,conflicts);
+  merged.petShare=mergePetShare(local.petShare,remote.petShare,conflicts);
   merged.activity=mergeById('activity',local.activity,remote.activity,conflicts).sort((a,b)=>new Date(b.at)-new Date(a.at)).slice(0,300);
   merged.auditTrail=mergeById('audit',local.auditTrail,remote.auditTrail,conflicts).sort((a,b)=>new Date(a.at)-new Date(b.at)).slice(-2000);
   merged.months=mergeMonths(local.months,remote.months,conflicts);
