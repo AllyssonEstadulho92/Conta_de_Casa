@@ -764,3 +764,22 @@ Decisão:
 - recalcular a divisão a partir do saldo realmente em aberto depois de cada pagamento.
 
 Isto mantém o fluxo simples e evita divergência entre um plano paralelo e os pagamentos realmente efetuados.
+
+
+## D-147 — pagamentos do Walli integram Despesas por evento pago e correções usam reversão
+
+Decisões:
+
+- não criar uma fatura global antecipada para o total do mês;
+- criar uma Despesa apenas quando existe pagamento real ao Nuno;
+- manter uma relação 1:1 entre cada pagamento Walli e o respetivo movimento de Despesas;
+- usar IDs derivados do pagamento de origem para impedir duplicados;
+- não apagar pagamentos incorretos da história Walli;
+- corrigir por reversão imutável e permitir novo pagamento correto;
+- remover apenas o espelho em Despesas, pois a auditoria de origem permanece na Partilha do Walli;
+- planos com datas são organizacionais, sem juros, crédito ou dívida externa;
+- se o valor base mudar, exigir recriação explícita do plano em vez de alterar parcelas silenciosamente;
+- a configuração do mês anterior pode ser reutilizada, mas não dados operacionais ou financeiros do mês anterior;
+- a secção Walli deve usar o sistema de ícones canónico do projeto e não SVGs exclusivos.
+
+Esta abordagem evita dupla contabilização, mantém rastreabilidade e separa claramente valor planeado de dinheiro efetivamente pago.
