@@ -546,3 +546,32 @@ Implementado:
 - Service Worker e asset Walli recebem revisão `76-walli-edit-walks2`.
 
 Pendente: validação física no iPhone, incluindo criar, editar, cancelar edição, fechar/reabrir a PWA e confirmar persistência.
+
+
+## PWA: cálculo automático de passeios e total a pagar
+
+Em 4 de outubro de 2026, a Partilha do Walli deixou de exigir a introdução manual do número de idas à rua.
+
+Implementado:
+
+- configuração mensal de **1 ou 2 passeios por dia**;
+- preço por passeio configurável, com referência inicial de **8,00 €**;
+- ao selecionar as datas em que o Walli fica com o Nuno, a aplicação calcula automaticamente:
+  - dias do período;
+  - número de passeios;
+  - custo dos passeios;
+  - parte base proporcional ou diária;
+  - **total a pagar ao Nuno**;
+  - valor já pago;
+  - valor ainda por pagar;
+- fórmula dos passeios: `walkCount = careDays × walksPerDay`;
+- custo: `walksCostCents = walkCount × walkRateCents`;
+- total: `totalPayableCents = shareCents + walksCostCents`;
+- o campo manual `walliCareWalks` foi removido da interface;
+- a prévia do formulário reage imediatamente às datas, frequência e preço;
+- pagamentos novos ficam marcados como `direction = outbound`;
+- pagamentos criados pela versão anterior, que significavam valores recebidos, são preservados como `inbound` e não são abatidos ao total a pagar.
+
+Pesquisa de referência em 4 de outubro de 2026: Zaask indica média de 8 € por 30 minutos, Fixando mostra intervalo de 7 € a 20 € por serviço em Lisboa, e SeePet apresenta referências de 10 € a 12 € por passeio em pacotes recorrentes. O valor de 8 € é apenas uma referência inicial editável, não uma obrigação contratual.
+
+Pendente: validação física no iPhone, incluindo 1 e 2 passeios por dia, alteração do preço, edição de períodos e marcação como pago.
