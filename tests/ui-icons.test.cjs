@@ -21,13 +21,13 @@ for(const retiredSource of ['v74-experience.css','v75-market-featured.css','v75-
 
 assert.match(js,/Conta de Casa — sistema de ícones Lucide local \(v76\)/);
 assert.match(js,/LUCIDE_SOURCE_COMMIT='94e4cb9d9db5907053ebf3636a97c45529cf776b'/,'Lucide source snapshot must be pinned and auditable');
-assert.match(js,/ICON_SEMANTICS_REVISION='76-icon-semantics1'/,'semantic icon revision must remain explicit and auditable');
+assert.match(js,/ICON_SEMANTICS_REVISION='76-icons-unified7'/,'semantic icon revision must remain explicit and auditable');
 assert.match(js,/Object\.assign\(ICONS,LUCIDE_ICONS\)/,'Lucide registry must extend the existing application registry without changing callers');
 assert.match(js,/globalThis\.CDCIcons/,'shared icon renderer must remain available to contextual modules');
 assert.match(js,/source:'Lucide'/);
 assert.match(js,/revision:ICON_SEMANTICS_REVISION/);
 assert.match(js,/stroke-width="2"/,'Lucide stroke weight must remain consistent');
-for(const name of ['home','bill','calendar','plan','market','report','goal','shield','settings','search','eye','eyeOff','sun','moon','camera','qr','receipt','back','close','plus','edit','trash','filter','scan','cloudCheck','cloudOff'])assert.match(js,new RegExp(`\\b${name}:`),`missing Lucide semantic icon ${name}`);
+for(const name of ['home','bill','calendar','plan','market','report','goal','shield','settings','search','eye','eyeOff','sun','moon','camera','qr','receipt','back','close','plus','edit','trash','filter','scan','cloudCheck','cloudOff','clock'])assert.match(js,new RegExp(`\\b${name}:`),`missing Lucide semantic icon ${name}`);
 
 const semanticIconBody=name=>new RegExp(`\\n    ${name}:'([^']+)'`).exec(js)?.[1]||'';
 const planningIcon=semanticIconBody('plan');
@@ -128,3 +128,9 @@ assert.match(sw,/planning-more1/);
 assert.match(sw,/retire-assets1/);
 
 console.log('Conta de Casa brand mark and Lucide UI icon authority keep semantic Planeamento/Definições geometry with retired sources absent: OK');
+
+assert.match(js,/function hydrateDashboard\(root=document\)/,'Dashboard icons must be normalized by the canonical Lucide hydrator');
+assert.match(js,/dashboard-priority-panel \.dashboard-feature-icon[\s\S]*fillIcon\(slot,'calendar',22\)/,'priority header must use the canonical calendar icon');
+assert.match(js,/dashboard-budget-panel \.dashboard-feature-icon[\s\S]*fillIcon\(slot,'report',22\)/,'budget header must use the canonical report icon');
+assert.match(js,/dashboard-budget-open[\s\S]*fillIcon\(button,'chevron',19\)/,'budget navigation must use the canonical chevron');
+assert.match(js,/querySelectorAll\?\.\(':scope > svg:not\(\.ui-icon-svg\)'\)/,'navigation hydration must remove bespoke direct SVGs before adding the canonical icon');
