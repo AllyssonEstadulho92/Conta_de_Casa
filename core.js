@@ -508,10 +508,16 @@ function normalizePetSharePayment(value = {}) {
   const now = new Date().toISOString();
   const monthKey = /^\d{4}-\d{2}$/.test(String(value.monthKey || '')) ? String(value.monthKey) : '';
   if (!monthKey) return null;
+  const direction = value.direction === 'outbound-reversal'
+    ? 'outbound-reversal'
+    : value.direction === 'outbound' ? 'outbound' : 'inbound';
   return {
     id: cleanString(value.id || uid(), 80),
     monthKey,
-    direction: value.direction === 'outbound' ? 'outbound' : 'inbound',
+    direction,
+    reversalOfId: value.reversalOfId ? cleanString(value.reversalOfId, 80) : undefined,
+    linkedBillId: value.linkedBillId ? cleanString(value.linkedBillId, 80) : undefined,
+    linkedPaymentId: value.linkedPaymentId ? cleanString(value.linkedPaymentId, 80) : undefined,
     amountCents: cleanCents(value.amountCents),
     paidAt: cleanIso(value.paidAt, now),
     note: cleanMultiline(value.note, 300),
@@ -520,6 +526,39 @@ function normalizePetSharePayment(value = {}) {
     syncResolvedAt: optionalIso(value.syncResolvedAt)
   };
 }
+function normalizePetSharePlan(value = {}) {
+  const now = new Date().toISOString();
+  const monthKey = /^\d{4}-\d{2}$/.test(String(value.monthKey || '')) ? String(value.monthKey) : '';
+  if (!monthKey) return null;
+  const partsValue = Number(value.parts);
+  const parts = [2,3,4].includes(partsValue) ? partsValue : 2;
+  const installments = Array.isArray(value.installments)
+    ? value.installments.slice(0, 4).map((item, index) => {
+        const dueDate = cleanDateKey(item?.dueDate);
+        if (!dueDate) return null;
+        return {
+          id: cleanString(item?.id || `${value.id || 'plan'}_${index + 1}`, 80),
+          amountCents: cleanCents(item?.amountCents),
+          dueDate,
+          paidAt: optionalIso(item?.paidAt),
+          paymentId: item?.paymentId ? cleanString(item.paymentId, 80) : undefined
+        };
+      }).filter(Boolean)
+    : [];
+  if (installments.length !== parts) return null;
+  return {
+    id: cleanString(value.id || uid(), 80),
+    monthKey,
+    totalCents: cleanCents(value.totalCents),
+    parts,
+    installments,
+    cancelledAt: optionalIso(value.cancelledAt),
+    createdAt: cleanIso(value.createdAt, now),
+    updatedAt: cleanIso(value.updatedAt || value.createdAt, now),
+    syncResolvedAt: optionalIso(value.syncResolvedAt)
+  };
+}
+
 function normalizePetShare(value = {}) {
   const months = {};
   const monthEntries = isPlainObject(value.months) ? Object.entries(value.months).slice(-240) : [];
@@ -534,7 +573,8 @@ function normalizePetShare(value = {}) {
     caregiverName: cleanString(value.caregiverName || 'Nuno', 80) || 'Nuno',
     months,
     records: Array.isArray(value.records) ? value.records.slice(-2000).map(normalizePetCareRecord).filter(Boolean) : [],
-    payments: Array.isArray(value.payments) ? value.payments.slice(-4000).map(normalizePetSharePayment).filter(Boolean) : []
+    payments: Array.isArray(value.payments) ? value.payments.slice(-4000).map(normalizePetSharePayment).filter(Boolean) : [],
+    plans: Array.isArray(value.plans) ? value.plans.slice(-500).map(normalizePetSharePlan).filter(Boolean) : []
   };
 }
 
@@ -555,7 +595,7 @@ function defaultState() {
     incomes: [],
     market: [],
     goals: [],
-    petShare: { petName:'Walli', caregiverName:'Nuno', months:{}, records:[], payments:[] },
+    petShare: { petName:'Walli', caregiverName:'Nuno', months:{}, records:[], payments:[], plans:[] },
     activity: [],
     auditTrail: [],
     security: { lastBackupAt: null, lastRestoreAt: null },

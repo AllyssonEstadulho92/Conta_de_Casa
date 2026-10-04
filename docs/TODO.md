@@ -464,3 +464,21 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [x] Manter opção Pagar tudo.
 - [ ] Validar fluxo 2x, 3x e 4x no iPhone físico.
 - [ ] Confirmar comportamento após vários pagamentos parciais no mesmo mês.
+
+
+### Consolidação financeira da Partilha do Walli
+
+- [x] Criar plano de pagamento do Walli com datas.
+- [x] Permitir 2, 3 ou 4 parcelas com soma exata.
+- [x] Mostrar parcelas pagas, pendentes e em atraso.
+- [x] Bloquear plano desatualizado quando o total muda.
+- [x] Integrar pagamentos reais em Despesas sem dupla contabilização.
+- [x] Ligar pagamento Walli à fatura/pagamento espelhados.
+- [x] Corrigir pagamentos por reversão sem apagar histórico.
+- [x] Remover a Despesa espelhada quando o pagamento é anulado.
+- [x] Reabrir parcela do plano após anulação.
+- [x] Copiar apenas a configuração do mês anterior.
+- [x] Retirar SVG próprio do hero Walli e usar iconografia canónica.
+- [ ] Validar plano 2x/3x/4x no iPhone físico.
+- [ ] Validar Despesas e Relatórios depois de pagamento parcial e reversão.
+- [ ] Validar conflito de plano entre dois dispositivos sincronizados.

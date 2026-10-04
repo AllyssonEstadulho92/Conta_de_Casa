@@ -619,3 +619,27 @@ Implementado:
 Exemplo matemático: 94,97 € em 2 partes resulta em 47,49 € + 47,48 €, sem perder nem criar cêntimos.
 
 Preservado: total da partilha, cálculo dos passeios, pagamentos anteriores, cofre cifrado, sync e prevenção de sobreposição de dias.
+
+
+## PWA: plano com datas, Despesas e correções do Walli
+
+Em 4 de outubro de 2026, a Partilha do Walli foi consolidada com melhorias de pagamento, integração financeira, reutilização mensal e auditoria.
+
+Implementado:
+
+- planos de pagamento persistentes em 2, 3 ou 4 partes, com data definida para cada parcela;
+- painel próprio **Plano e movimentos**, com estado pago, por pagar e em atraso;
+- pagamento individual de cada parcela;
+- se o total do mês mudar depois de criar o plano, o plano é sinalizado como desatualizado e o pagamento é bloqueado até recriação;
+- pagamentos efetivamente feitos ao Nuno passam automaticamente a criar um movimento correspondente em **Despesas**, categoria `Animais`;
+- cada pagamento Walli tem IDs determinísticos de ligação para impedir duplicação contabilística;
+- anulação de pagamento mantém o lançamento original no histórico e acrescenta uma reversão, em vez de apagar o registo Walli;
+- ao anular, a Despesa ligada é retirada e recebe tombstones de sincronização;
+- parcelas anuladas voltam ao estado por pagar no plano;
+- configuração do mês anterior pode ser copiada sem copiar dias, pagamentos ou planos;
+- markup da área Walli deixa de usar SVG próprio no hero e passa a usar o sistema de ícones canónico do projeto;
+- revisão pública `76-walli-enhancements6`.
+
+Preservado: cálculo de dias, passeios, base, preços, cêntimos inteiros, cofre cifrado, sincronização, pagamentos legados inbound e restantes módulos financeiros.
+
+Pendente: validação física no iPhone para plano 2x/3x/4x, criação automática da Despesa, anulação e sincronização entre dois dispositivos.
