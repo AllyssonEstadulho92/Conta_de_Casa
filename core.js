@@ -924,7 +924,7 @@ async function parseBackupText(text) {
 }
 function backupContainsPlaintextFinancialData(text) {
   const body = String(text);
-  return ['"bills"','"payments"','"incomes"','"market"','"goals"','"petShare"','"caregiverName"','"provider"','"reference"','"notes"','"totalCents"','"amountCents"','"savedCents"','"targetCents"','"baseCents"','"dailyRateCents"'].some(token => body.includes(token));
+  return ['"bills"','"payments"','"incomes"','"market"','"goals"','"petShare"','"caregiverName"','"provider"','"reference"','"notes"','"totalCents"','"amountCents"','"savedCents"','"targetCents"','"baseCents"','"dailyRateCents"','"walksPerDay"','"walkRateCents"'].some(token => body.includes(token));
 }
 
 async function decryptBackupState(normalized, passphrase) {
