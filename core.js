@@ -61,13 +61,15 @@ const PAGE_META = Object.freeze({
   reports: { label:'Relatórios', context:'Análise', icon:'report', navParent:'reports' },
   security: { label:'Segurança e sincronização', context:'Sistema', icon:'shield', navParent:'security' },
   diagnostics: { label:'Integridade da aplicação', context:'Sistema · Definições', icon:'report', navParent:'settings' },
-  settings: { label:'Definições', context:'Sistema', icon:'settings', navParent:'settings' }
+  settings: { label:'Definições', context:'Sistema', icon:'settings', navParent:'settings' },
+  petshare: { label:'Partilha do Walli', context:'Animais', icon:'calendar', navParent:'petshare' }
 });
 
 const NAV_GROUPS = Object.freeze([
   { label:'Principal', items:['dashboard'] },
   { label:'Finanças', items:['bills','planning'] },
   { label:'Compras', items:['market'] },
+  { label:'Animais', items:['petshare'] },
   { label:'Análise', items:['reports'] },
   { label:'Sistema', items:['security','settings'] }
 ]);
@@ -466,6 +468,64 @@ function normalizeGoal(g = {}) {
   };
 }
 
+
+function normalizePetShareMonth(value = {}) {
+  const now = new Date().toISOString();
+  return {
+    baseCents: cleanCents(value.baseCents),
+    calculationMode: value.calculationMode === 'daily-fixed' ? 'daily-fixed' : 'proportional',
+    dailyRateCents: cleanCents(value.dailyRateCents),
+    updatedAt: cleanIso(value.updatedAt, now)
+  };
+}
+function normalizePetCareRecord(value = {}) {
+  const now = new Date().toISOString();
+  const startDate = cleanDateKey(value.startDate);
+  const endDate = cleanDateKey(value.endDate);
+  if (!startDate || !endDate || civilDayDiff(startDate, endDate) < 0 || civilDayDiff(startDate, endDate) > 370) return null;
+  return {
+    id: cleanString(value.id || uid(), 80),
+    startDate,
+    endDate,
+    note: cleanMultiline(value.note, 500),
+    createdAt: cleanIso(value.createdAt, now),
+    updatedAt: cleanIso(value.updatedAt || value.createdAt, now),
+    syncResolvedAt: optionalIso(value.syncResolvedAt)
+  };
+}
+function normalizePetSharePayment(value = {}) {
+  const now = new Date().toISOString();
+  const monthKey = /^\d{4}-\d{2}$/.test(String(value.monthKey || '')) ? String(value.monthKey) : '';
+  if (!monthKey) return null;
+  return {
+    id: cleanString(value.id || uid(), 80),
+    monthKey,
+    amountCents: cleanCents(value.amountCents),
+    paidAt: cleanIso(value.paidAt, now),
+    note: cleanMultiline(value.note, 300),
+    createdAt: cleanIso(value.createdAt, now),
+    updatedAt: cleanIso(value.updatedAt || value.createdAt, now),
+    syncResolvedAt: optionalIso(value.syncResolvedAt)
+  };
+}
+function normalizePetShare(value = {}) {
+  const months = {};
+  const monthEntries = isPlainObject(value.months) ? Object.entries(value.months).slice(-240) : [];
+  for (const [monthKey, monthValue] of monthEntries) {
+    if (!/^\d{4}-\d{2}$/.test(monthKey)) continue;
+    const monthNumber = Number(monthKey.slice(5,7));
+    if (monthNumber < 1 || monthNumber > 12) continue;
+    months[monthKey] = normalizePetShareMonth(monthValue);
+  }
+  return {
+    petName: cleanString(value.petName || 'Walli', 80) || 'Walli',
+    caregiverName: cleanString(value.caregiverName || 'Nuno', 80) || 'Nuno',
+    months,
+    records: Array.isArray(value.records) ? value.records.slice(-2000).map(normalizePetCareRecord).filter(Boolean) : [],
+    payments: Array.isArray(value.payments) ? value.payments.slice(-4000).map(normalizePetSharePayment).filter(Boolean) : []
+  };
+}
+
 function defaultState() {
   return {
     version: STATE_VERSION,
@@ -483,6 +543,7 @@ function defaultState() {
     incomes: [],
     market: [],
     goals: [],
+    petShare: { petName:'Walli', caregiverName:'Nuno', months:{}, records:[], payments:[] },
     activity: [],
     auditTrail: [],
     security: { lastBackupAt: null, lastRestoreAt: null },
@@ -517,6 +578,7 @@ function ensureStateShape(s) {
     incomes: Array.isArray(s?.incomes) ? s.incomes.slice(0, 5000).map(normalizeIncome) : [],
     market: Array.isArray(s?.market) ? s.market.slice(0, 5000).map(normalizeMarketItem) : [],
     goals: Array.isArray(s?.goals) ? s.goals.slice(0, 1000).map(normalizeGoal) : [],
+    petShare: normalizePetShare(s?.petShare),
     activity: Array.isArray(s?.activity) ? s.activity.slice(0, 300).map(normalizeActivityEntry) : [],
     auditTrail: Array.isArray(s?.auditTrail) ? s.auditTrail.slice(-2000).map(normalizeAuditEntry).filter(entry => entry.billId) : [],
     security: {
