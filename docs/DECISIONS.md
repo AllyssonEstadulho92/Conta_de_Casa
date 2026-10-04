@@ -783,3 +783,17 @@ Decisões:
 - a secção Walli deve usar o sistema de ícones canónico do projeto e não SVGs exclusivos.
 
 Esta abordagem evita dupla contabilização, mantém rastreabilidade e separa claramente valor planeado de dinheiro efetivamente pago.
+
+
+## D-148 — `ui-icons.js` é a autoridade única dos ícones funcionais
+
+Decisão:
+
+- manter o snapshot Lucide local/licenciado como fonte única da iconografia funcional;
+- não introduzir emojis, icon fonts ou SVGs exclusivos para ações que já tenham equivalente no sistema;
+- permitir SVG estático histórico apenas como fallback transitório quando o hydrator o substitui de forma determinística;
+- componentes novos devem usar `icon()` ou `CDCIcons.markup`;
+- remover ícones diretos duplicados antes de acrescentar ícones de navegação;
+- preservar `icon.svg` exclusivamente como identidade da aplicação.
+
+O objetivo é que navegação, ações, indicadores financeiros, Walli e diálogos tenham o mesmo peso visual e comportamento offline.

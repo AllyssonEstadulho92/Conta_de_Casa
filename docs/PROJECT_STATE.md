@@ -643,3 +643,23 @@ Implementado:
 Preservado: cálculo de dias, passeios, base, preços, cêntimos inteiros, cofre cifrado, sincronização, pagamentos legados inbound e restantes módulos financeiros.
 
 Pendente: validação física no iPhone para plano 2x/3x/4x, criação automática da Despesa, anulação e sincronização entre dois dispositivos.
+
+
+## PWA: iconografia funcional unificada
+
+Em 4 de outubro de 2026 foi consolidada a iconografia funcional visível para reduzir diferenças entre ícones históricos, SVGs estáticos e o sistema Lucide local.
+
+Implementado:
+
+- `ui-icons.js` continua a autoridade canónica e passa à revisão `76-icons-unified7`;
+- adicionado o ícone canónico `clock`;
+- ícones do cabeçalho de Prioridade de pagamentos, Orçamento e respetiva navegação são normalizados pelo mesmo hydrator;
+- o indicador de prazo das despesas deixa de gerar SVG próprio em `render.js` e usa `icon('clock')`;
+- ações de navegação removem SVG direto legado antes de inserir o ícone canónico, evitando duplicação visual;
+- navegação criada por `v75-architecture.js` já delegava em `CDCIcons.markup` e permanece assim;
+- Walli, menus, cofre, filtros, Mercado, diálogos e ações continuam no mesmo sistema local;
+- Service Worker recebe revisão `76-icons-unified7`.
+
+Preservado: IDs, handlers, navegação, fórmulas, dados, cofre, CSP e licença Lucide local.
+
+Pendente: validação visual física no iPhone para confirmar alinhamento ótico em light/dark mode.

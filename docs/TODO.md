@@ -482,3 +482,15 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [ ] Validar plano 2x/3x/4x no iPhone físico.
 - [ ] Validar Despesas e Relatórios depois de pagamento parcial e reversão.
 - [ ] Validar conflito de plano entre dois dispositivos sincronizados.
+
+
+### Iconografia
+
+- [x] Unificar os ícones funcionais pelo sistema Lucide local.
+- [x] Adicionar relógio canónico para prazos.
+- [x] Normalizar ícones estáticos do Dashboard.
+- [x] Evitar ícone de navegação duplicado.
+- [x] Manter Walli no mesmo sistema canónico.
+- [x] Atualizar revisão/cache da PWA.
+- [ ] Validar alinhamento de ícones no iPhone físico em light mode.
+- [ ] Validar alinhamento de ícones no iPhone físico em dark mode.

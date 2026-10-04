@@ -48,7 +48,7 @@ const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
 const ZXING_REV = '76-local-zxing1';
-const SERVICE_WORKER_REV = '76-walli-enhancements6';
+const SERVICE_WORKER_REV = '76-icons-unified7';
 const WALLI_SHARE_REV = '76-walli-enhancements6';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
