@@ -102,6 +102,11 @@ const partiallyPaid=context.window.walliShareSnapshot('2026-10');
 assert.equal(partiallyPaid.paidCents,5000);
 assert.equal(partiallyPaid.outstandingCents,10897);
 
+assert.deepEqual(Array.from(context.window.walliShareSplitPaymentCents(9497,2)),[4749,4748]);
+assert.deepEqual(Array.from(context.window.walliShareSplitPaymentCents(9497,3)),[3166,3166,3165]);
+assert.deepEqual(Array.from(context.window.walliShareSplitPaymentCents(9497,4)),[2375,2374,2374,2374]);
+assert.equal(Array.from(context.window.walliShareSplitPaymentCents(9497,3)).reduce((sum,value)=>sum+value,0),9497);
+
 assert.match(core,/petshare: \{ label:'Partilha do Walli', context:'Animais', icon:'paw'/);
 assert.match(core,/petShare: normalizePetShare\(s\?\.petShare\)/);
 assert.match(architecture,/label:'Animais'[\s\S]*petshare','Partilha do Walli','paw'/);
@@ -113,6 +118,10 @@ assert.match(source,/data-walli-edit/,'existing Walli care records must expose e
 assert.match(source,/record\.id!==editingId/,'editing must exclude the current record from overlap detection');
 assert.match(source,/totalPayableCents/,'the final payable amount must combine the base share and automatic walks');
 assert.match(source,/Por pagar ao/,'the payment direction must be explicit');
+assert.match(source,/data-walli-split-count/,'outstanding payments must expose automatic split options');
+assert.match(source,/data-walli-partial/,'the user must be able to register only the current part');
+assert.match(source,/function splitPaymentCents/,'partial payments must use one integer-cent split function');
+assert.match(source,/Pagamento parcial da partilha e passeios do Walli/,'partial payments must remain auditable in payment history');
 assert.match(source,/walli-total-card/,'the final payable amount must be the primary visual metric');
 assert.match(source,/walli-record-meta/,'records must expose scannable day and walk metadata');
 assert.match(source,/walli-auto-values/,'automatic walk preview must separate count and cost');
@@ -129,6 +138,6 @@ assert.match(source,/appState\.petShare\.payments\.push/,'reimbursements must be
 assert.doesNotMatch(source,/localStorage|sessionStorage/,'Walli financial data must stay inside the encrypted application state');
 assert.match(sw,/\.\/walli-share\.js/);
 assert.match(prepare,/'walli-share\.js'/);
-assert.match(prepare,/WALLI_SHARE_REV = '76-walli-ux-polish4'/);
+assert.match(prepare,/WALLI_SHARE_REV = '76-walli-partial-pay5'/);
 
 console.log('Walli share drawer/domain tests: OK');
