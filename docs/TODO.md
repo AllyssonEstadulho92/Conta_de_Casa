@@ -387,3 +387,13 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [ ] Validar UI/UX do fluxo Walli/Nuno em Android.
 - [ ] Confirmar persistência SQLCipher após fechar e reabrir a aplicação.
 - [ ] Confirmar comportamento de SecureStore após atualização da aplicação.
+
+
+### Navegação da partilha
+
+- [x] Criar destino de topo Partilha para Walli/Nuno.
+- [x] Separar perfil Animais da área operacional de partilha.
+- [x] Fazer subecrãs regressarem à Partilha.
+- [x] Adicionar teste de contrato de navegação da secção.
+- [ ] Validar a barra inferior com 5 destinos em iPhone físico.
+- [ ] Validar labels e targets em Android físico.
