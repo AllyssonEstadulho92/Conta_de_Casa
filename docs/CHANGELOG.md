@@ -769,3 +769,18 @@ Próximo passo: ligar o subprojeto a uma conta/projeto Expo autorizado e gerar a
 - idas à rua passam a integrar o estado cifrado e a política de conflitos da sincronização;
 - revisão pública atualizada para `76-walli-edit-walks2`;
 - cálculo financeiro da partilha não foi alterado.
+
+
+## 2026-10-04: passeios automáticos e total a pagar ao Nuno
+
+- removida a introdução manual da quantidade de idas à rua;
+- adicionada configuração de 1 ou 2 passeios por dia;
+- adicionado preço por passeio, com referência inicial de 8,00 €;
+- datas do período passam a determinar automaticamente a quantidade de passeios;
+- resumo mostra custo dos passeios e total final a pagar ao Nuno;
+- pagamentos novos são registados como `outbound`;
+- movimentos antigos sem direção são preservados como `inbound`;
+- recebimentos legados deixam de reduzir incorretamente o novo total a pagar;
+- configuração de frequência e preço entra na sincronização cifrada;
+- revisão de Walli/Service Worker atualizada para `76-walli-auto-walk-cost3`;
+- fórmulas gerais de Faturas, Mercado, Planeamento e Relatórios permanecem inalteradas.
