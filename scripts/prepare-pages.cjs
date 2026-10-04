@@ -25,7 +25,7 @@ const RUNTIME_REV = '64-runtime1';
 const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const MODERN_UI_REV = '76-modern-ui2';
-const PRODUCT_PAGES_REV = '76-walli-ux-polish4';
+const PRODUCT_PAGES_REV = '76-walli-partial-pay5';
 const DASHBOARD_REV = '76-budget-cash-separation3';
 const FINANCE_REV = '76-budget-cash-separation3';
 const MOBILE_SHELL_REV = '76-mobile-shell3';
@@ -48,8 +48,8 @@ const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
 const ZXING_REV = '76-local-zxing1';
-const SERVICE_WORKER_REV = '76-walli-ux-polish4';
-const WALLI_SHARE_REV = '76-walli-ux-polish4';
+const SERVICE_WORKER_REV = '76-walli-partial-pay5';
+const WALLI_SHARE_REV = '76-walli-partial-pay5';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
   throw new Error(`Invalid package application version: ${APP_VERSION||'(empty)'}`);
