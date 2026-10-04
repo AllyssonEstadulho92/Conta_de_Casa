@@ -32,12 +32,13 @@ const SYNC_CONFLICT_FIELDS = Object.freeze({
   goal:['name','targetCents','savedCents','deadline','archived'],
   month:['accountBalanceCents','openingBalanceCents','budgetCents'],
   'pet-care':['startDate','endDate','walksCount','note'],
-  'pet-share-payment':['monthKey','direction','amountCents','paidAt','note'],
-  'pet-share-month':['baseCents','calculationMode','dailyRateCents','walksPerDay','walkRateCents']
+  'pet-share-payment':['monthKey','direction','reversalOfId','linkedBillId','linkedPaymentId','amountCents','paidAt','note'],
+  'pet-share-month':['baseCents','calculationMode','dailyRateCents','walksPerDay','walkRateCents'],
+  'pet-share-plan':['monthKey','totalCents','parts','installments','cancelledAt']
 });
 const SYNC_CONFLICT_FIELD_LABELS = Object.freeze({
   title:'Descrição',provider:'Fornecedor',category:'Categoria',totalCents:'Valor total',dueDate:'Vencimento',dueTime:'Hora limite',issueAt:'Emissão',method:'Método',recurrence:'Recorrência',reference:'Referência',notes:'Observações',cancelled:'Cancelada',archived:'Arquivada',
-  billId:'Fatura associada',amountCents:'Valor do pagamento',paidAt:'Data do pagamento',description:'Descrição',receivedAt:'Data do rendimento',name:'Nome',quantity:'Quantidade',unit:'Unidade',estimatedCents:'Valor estimado',actualCents:'Valor real',purchased:'Comprado',purchasedAt:'Data da compra',targetCents:'Meta',savedCents:'Poupado',deadline:'Prazo',accountBalanceCents:'Saldo atual da conta',openingBalanceCents:'Saldo inicial',budgetCents:'Orçamento',startDate:'Data inicial',endDate:'Data final',walksCount:'Idas à rua',monthKey:'Mês',direction:'Direção',baseCents:'Base mensal',calculationMode:'Modo de cálculo',dailyRateCents:'Valor diário',walksPerDay:'Passeios por dia',walkRateCents:'Preço por passeio',note:'Observação'
+  billId:'Fatura associada',amountCents:'Valor do pagamento',paidAt:'Data do pagamento',description:'Descrição',receivedAt:'Data do rendimento',name:'Nome',quantity:'Quantidade',unit:'Unidade',estimatedCents:'Valor estimado',actualCents:'Valor real',purchased:'Comprado',purchasedAt:'Data da compra',targetCents:'Meta',savedCents:'Poupado',deadline:'Prazo',accountBalanceCents:'Saldo atual da conta',openingBalanceCents:'Saldo inicial',budgetCents:'Orçamento',startDate:'Data inicial',endDate:'Data final',walksCount:'Idas à rua',monthKey:'Mês',direction:'Direção',reversalOfId:'Anulação de',linkedBillId:'Despesa ligada',linkedPaymentId:'Pagamento ligado',baseCents:'Base mensal',calculationMode:'Modo de cálculo',dailyRateCents:'Valor diário',walksPerDay:'Passeios por dia',walkRateCents:'Preço por passeio',parts:'Partes',installments:'Parcelas',cancelledAt:'Plano cancelado',note:'Observação'
 });
 const SYNC_CONFLICT_MONEY_FIELDS = new Set(['totalCents','amountCents','estimatedCents','actualCents','targetCents','savedCents','accountBalanceCents','openingBalanceCents','budgetCents','baseCents','dailyRateCents','walkRateCents']);
 const SYNC_CONFLICT_DATE_FIELDS = new Set(['dueDate','deadline','startDate','endDate']);
@@ -454,6 +455,10 @@ function applyTombstones(state) {
       state.petShare.payments=state.petShare.payments.filter(item=>item.id!==tomb.id || syncItemTime(item)>deletedAt);
       continue;
     }
+    if(tomb.entity==='pet-share-plan'){
+      state.petShare.plans=state.petShare.plans.filter(item=>item.id!==tomb.id || syncItemTime(item)>deletedAt);
+      continue;
+    }
     const field=entityMap[tomb.entity];
     if(!field||!Array.isArray(state[field])) continue;
     state[field]=state[field].filter(item=>item.id!==tomb.id || syncItemTime(item)>deletedAt);
@@ -493,7 +498,9 @@ function mergePetShareMonths(localMonths={},remoteMonths={},conflicts=[]) {
     if(canonicalize(localMonth)===canonicalize(remoteMonth))continue;
     const sameBusiness=Number(localMonth.baseCents||0)===Number(remoteMonth.baseCents||0)
       && String(localMonth.calculationMode||'proportional')===String(remoteMonth.calculationMode||'proportional')
-      && Number(localMonth.dailyRateCents||0)===Number(remoteMonth.dailyRateCents||0);
+      && Number(localMonth.dailyRateCents||0)===Number(remoteMonth.dailyRateCents||0)
+      && Number(localMonth.walksPerDay||1)===Number(remoteMonth.walksPerDay||1)
+      && Number(localMonth.walkRateCents||800)===Number(remoteMonth.walkRateCents||800);
     if(sameBusiness){out[month]=chooseCompatibleRecord('pet-share-month',localMonth,remoteMonth);continue;}
     const lt=new Date(localMonth.updatedAt||0).getTime()||0;
     const rt=new Date(remoteMonth.updatedAt||0).getTime()||0;
@@ -511,7 +518,8 @@ function mergePetShare(localPetShare={},remotePetShare={},conflicts=[]) {
     caregiverName:cleanString(localPetShare.caregiverName||remotePetShare.caregiverName||'Nuno',80)||'Nuno',
     months:mergePetShareMonths(localPetShare.months,remotePetShare.months,conflicts),
     records:mergeById('pet-care',localPetShare.records,remotePetShare.records,conflicts),
-    payments:mergeById('pet-share-payment',localPetShare.payments,remotePetShare.payments,conflicts)
+    payments:mergeById('pet-share-payment',localPetShare.payments,remotePetShare.payments,conflicts),
+    plans:mergeById('pet-share-plan',localPetShare.plans,remotePetShare.plans,conflicts)
   };
 }
 
@@ -560,7 +568,8 @@ async function mergeEncryptedBackupFile(file,passphrase) {
     market:appState.market.length,
     goals:appState.goals.length,
     petCare:appState.petShare.records.length,
-    petPayments:appState.petShare.payments.length
+    petPayments:appState.petShare.payments.length,
+    petPlans:appState.petShare.plans.length
   };
   const merged=mergeAppStates(appState,sourceState);
   appState=merged.state;
@@ -575,7 +584,8 @@ async function mergeEncryptedBackupFile(file,passphrase) {
     market:appState.market.length,
     goals:appState.goals.length,
     petCare:appState.petShare.records.length,
-    petPayments:appState.petShare.payments.length
+    petPayments:appState.petShare.payments.length,
+    petPlans:appState.petShare.plans.length
   };
   return {
     addedBills:Math.max(0,after.bills-before.bills),
@@ -583,7 +593,7 @@ async function mergeEncryptedBackupFile(file,passphrase) {
     addedIncomes:Math.max(0,after.incomes-before.incomes),
     addedMarket:Math.max(0,after.market-before.market),
     addedGoals:Math.max(0,after.goals-before.goals),
-    addedPetShare:Math.max(0,after.petCare-before.petCare)+Math.max(0,after.petPayments-before.petPayments),
+    addedPetShare:Math.max(0,after.petCare-before.petCare)+Math.max(0,after.petPayments-before.petPayments)+Math.max(0,after.petPlans-before.petPlans),
     conflicts:merged.conflicts.length
   };
 }
@@ -977,7 +987,8 @@ function syncConflictRecordName(conflict) {
   const item=conflict?.local||conflict?.remote||{};
   if(conflict?.entity==='month'||conflict?.entity==='pet-share-month') return conflict.id;
   if(conflict?.entity==='pet-care') return cleanString(`Walli · ${item.startDate||conflict.id}`,100);
-  if(conflict?.entity==='pet-share-payment') return cleanString(`Reembolso · ${item.monthKey||conflict.id}`,100);
+  if(conflict?.entity==='pet-share-payment') return cleanString(`Pagamento Walli · ${item.monthKey||conflict.id}`,100);
+  if(conflict?.entity==='pet-share-plan') return cleanString(`Plano Walli · ${item.monthKey||conflict.id}`,100);
   return cleanString(item.title||item.description||item.name||item.provider||conflict?.id||'Registo',100);
 }
 
@@ -1007,7 +1018,7 @@ function renderSyncConflictList() {
     root.innerHTML='<p class="muted">Atualize a comparação para receber os detalhes mais recentes do cofre.</p>';
     return;
   }
-  const entityLabels={bill:'Fatura',payment:'Pagamento',income:'Rendimento',market:'Mercado',goal:'Objetivo',month:'Planeamento','pet-care':'Dias do Walli','pet-share-payment':'Reembolso do Walli','pet-share-month':'Configuração do Walli'};
+  const entityLabels={bill:'Fatura',payment:'Pagamento',income:'Rendimento',market:'Mercado',goal:'Objetivo',month:'Planeamento','pet-care':'Dias do Walli','pet-share-payment':'Pagamento do Walli','pet-share-month':'Configuração do Walli','pet-share-plan':'Plano do Walli'};
   root.innerHTML=syncActiveConflicts.map((conflict,index)=>{
     const fields=syncConflictDifferences(conflict);
     const rows=fields.map(field=>`<div class="sync-conflict-row" role="row">
@@ -1040,14 +1051,16 @@ function applySyncConflictChoice(conflict,choice) {
     return;
   }
   if(conflict.entity==='pet-share-month'){
-    appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[]};
+    appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[],plans:[]};
     appState.petShare.months ||= {};
     appState.petShare.months[conflict.id]=selected;
     return;
   }
-  if(conflict.entity==='pet-care'||conflict.entity==='pet-share-payment'){
-    appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[]};
-    const collection=conflict.entity==='pet-care'?appState.petShare.records:appState.petShare.payments;
+  if(conflict.entity==='pet-care'||conflict.entity==='pet-share-payment'||conflict.entity==='pet-share-plan'){
+    appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[],plans:[]};
+    const collection=conflict.entity==='pet-care'
+      ? appState.petShare.records
+      : conflict.entity==='pet-share-payment' ? appState.petShare.payments : appState.petShare.plans;
     if(!selected?.id) throw new Error('Registo de conflito inválido.');
     const index=collection.findIndex(item=>item.id===conflict.id);
     if(index>=0)collection[index]=selected;else collection.push(selected);

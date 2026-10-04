@@ -45,7 +45,7 @@ for(const field of ['bills','payments','incomes','market','goals','activity','au
   assert.deepEqual(JSON.parse(JSON.stringify(empty[field])),[],field);
 }
 assert.deepEqual(JSON.parse(JSON.stringify(empty.months)),{});
-assert.deepEqual(JSON.parse(JSON.stringify(empty.petShare)),{petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[]});
+assert.deepEqual(JSON.parse(JSON.stringify(empty.petShare)),{petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[],plans:[]});
 
 const explicit = vm.runInContext(`ensureStateShape({
   settings:{sync:{enabled:true,disabledByUser:false,owner:'example-user',repo:'private-vault',path:'sync/vault.json'}},

@@ -106,6 +106,8 @@ assert.deepEqual(Array.from(context.window.walliShareSplitPaymentCents(9497,2)),
 assert.deepEqual(Array.from(context.window.walliShareSplitPaymentCents(9497,3)),[3166,3166,3165]);
 assert.deepEqual(Array.from(context.window.walliShareSplitPaymentCents(9497,4)),[2375,2374,2374,2374]);
 assert.equal(Array.from(context.window.walliShareSplitPaymentCents(9497,3)).reduce((sum,value)=>sum+value,0),9497);
+assert.equal(context.window.walliSharePreviousMonthKey('2026-01'),'2025-12');
+assert.equal(context.window.walliSharePreviousMonthKey('2026-10'),'2026-09');
 
 assert.match(core,/petshare: \{ label:'Partilha do Walli', context:'Animais', icon:'paw'/);
 assert.match(core,/petShare: normalizePetShare\(s\?\.petShare\)/);
@@ -122,6 +124,15 @@ assert.match(source,/data-walli-split-count/,'outstanding payments must expose a
 assert.match(source,/data-walli-partial/,'the user must be able to register only the current part');
 assert.match(source,/function splitPaymentCents/,'partial payments must use one integer-cent split function');
 assert.match(source,/Pagamento parcial da partilha e passeios do Walli/,'partial payments must remain auditable in payment history');
+assert.match(source,/function mirrorWalliPaymentToExpenses/,'paid Walli amounts must have one canonical Expenses bridge');
+assert.match(source,/category:'Animais'/,'mirrored Walli expenses must use the Animals category');
+assert.match(source,/reference:'Walli\/'\+petPayment\.id/,'mirrored Walli expenses must carry a unique source reference');
+assert.match(source,/function removeMirroredWalliExpense/,'reversing a Walli payment must remove its linked cash expense');
+assert.match(source,/direction:'outbound-reversal'/,'corrections must append a reversal instead of deleting Walli history');
+assert.match(source,/data-walli-reverse-payment/,'active Walli payments must expose a reversal action');
+assert.match(source,/function savePaymentPlan/,'split payments must support a persisted dated plan');
+assert.match(source,/data-walli-plan-pay/,'dated plan installments must be individually payable');
+assert.match(source,/function copyPreviousConfig/,'monthly setup must be reusable from the previous month');
 assert.match(source,/walli-total-card/,'the final payable amount must be the primary visual metric');
 assert.match(source,/walli-record-meta/,'records must expose scannable day and walk metadata');
 assert.match(source,/walli-auto-values/,'automatic walk preview must separate count and cost');
@@ -130,6 +141,10 @@ assert.match(index,/id="walliCareAutoWalks"/,'care form must show the automatic 
 assert.match(index,/class="walli-share-hero"/,'Walli page must expose a dedicated visual hero');
 assert.match(index,/class="walli-overview"/,'monthly summary must have an explicit overview hierarchy');
 assert.match(index,/class="walli-lower-grid"/,'calendar and records must share an organized responsive region');
+assert.match(index,/id="walliPaymentTimeline"/,'Walli must expose a dedicated plan and payment history region');
+assert.match(index,/data-walli-copy-previous/,'configuration must expose a previous-month reuse action');
+const petPage=/id="page-petshare"[\s\S]*?<section id="page-reports"/.exec(index)?.[0]||'';
+assert.doesNotMatch(petPage,/<svg\b/,'Walli markup must rely on the canonical project icon helper instead of bespoke inline SVG');
 assert.match(index,/id="walliWalksPerDay"/,'settings must allow one or two walks per day');
 assert.match(index,/id="walliWalkRate"/,'settings must expose an editable price per walk');
 assert.match(index,/id="walliCareCancelEditBtn"/,'care form must allow cancelling edit mode');
@@ -138,6 +153,6 @@ assert.match(source,/appState\.petShare\.payments\.push/,'reimbursements must be
 assert.doesNotMatch(source,/localStorage|sessionStorage/,'Walli financial data must stay inside the encrypted application state');
 assert.match(sw,/\.\/walli-share\.js/);
 assert.match(prepare,/'walli-share\.js'/);
-assert.match(prepare,/WALLI_SHARE_REV = '76-walli-partial-pay5'/);
+assert.match(prepare,/WALLI_SHARE_REV = '76-walli-enhancements6'/);
 
 console.log('Walli share drawer/domain tests: OK');

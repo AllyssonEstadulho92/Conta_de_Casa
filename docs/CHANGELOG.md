@@ -813,3 +813,20 @@ Próximo passo: ligar o subprojeto a uma conta/projeto Expo autorizado e gerar a
 - não foi criado sistema de crédito, juros ou calendário de prestações;
 - revisão pública atualizada para `76-walli-partial-pay5`;
 - cálculos de dias, passeios, base e total não foram alterados.
+
+
+## 2026-10-04: plano datado, Despesas e correções da Partilha do Walli
+
+- planos de pagamento passam a aceitar datas por parcela;
+- criado painel Plano e movimentos;
+- parcelas podem ser pagas individualmente;
+- planos divergentes do total atual são bloqueados até recriação;
+- cada pagamento ao Nuno cria automaticamente uma Despesa paga na categoria Animais;
+- ligações determinísticas evitam criar o mesmo movimento duas vezes;
+- pagamentos incorretos passam a ser anulados por reversão auditável;
+- anulação remove a Despesa ligada e reabre a parcela correspondente;
+- botão Usar mês anterior copia apenas regras de cálculo;
+- estrutura de sync inclui planos, ligações e reversões;
+- comparação de configuração sincronizada passa a considerar também frequência e preço dos passeios;
+- hero Walli deixa de conter SVG próprio e usa o sistema de ícones do projeto;
+- revisão PWA atualizada para `76-walli-enhancements6`.

@@ -722,3 +722,66 @@ Invariantes:
 - o valor restante é sempre `max(0, outstandingCents - paidNowCents)`;
 - o sistema não guarda um plano de crédito, datas futuras ou juros;
 - novos pagamentos continuam a usar `petShare.payments[]`, pelo que backup, cifra e sincronização existentes permanecem a autoridade.
+
+
+#### Plano datado, ponte para Despesas e reversões
+
+A estrutura `petShare` passa a incluir também `plans[]`.
+
+Cada plano contém:
+
+```text
+id
+monthKey
+totalCents
+parts
+installments[]
+  id
+  amountCents
+  dueDate
+  paidAt?
+  paymentId?
+cancelledAt?
+createdAt
+updatedAt
+```
+
+Existe no máximo um plano ativo por mês. A soma das parcelas usa a mesma divisão inteira já existente e reconcilia exatamente com `outstandingCents`.
+
+Um plano é considerado coerente quando:
+
+`sum(unpaid installments.amountCents) === outstandingCents`
+
+Se o valor da partilha mudar por alteração de dias, passeios ou preços, o plano é mostrado como desatualizado e não permite novas liquidações até ser cancelado e recriado.
+
+### Ponte para Despesas
+
+Cada pagamento `petShare.payments[]` com `direction = outbound` cria, no mesmo commit lógico:
+
+- uma fatura em `bills[]`, categoria `Animais`;
+- um pagamento em `payments[]`;
+- ligação de retorno por `linkedBillId` e `linkedPaymentId`.
+
+Os IDs são derivados do ID do pagamento Walli para tornar a operação idempotente e impedir dupla contabilização.
+
+A data do movimento em Despesas é a data real do pagamento ao Nuno. Assim, o `cashSpent` global passa a refletir apenas dinheiro efetivamente pago, não o valor simplesmente planeado.
+
+### Correções
+
+Uma correção não elimina o pagamento Walli original. É acrescentado um registo:
+
+`direction = outbound-reversal`
+
+com `reversalOfId`. O cálculo de `paidCents` considera apenas pagamentos outbound que não tenham reversão. A Despesa espelhada é removida com tombstones e o plano volta a considerar a respetiva parcela como não paga.
+
+### Reutilização mensal
+
+`Usar mês anterior` copia apenas:
+
+- base mensal;
+- modo de cálculo;
+- valor diário;
+- passeios por dia;
+- preço por passeio.
+
+Dias de guarda, pagamentos, planos e histórico nunca são copiados.
