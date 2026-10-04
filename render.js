@@ -91,6 +91,7 @@ function renderPage(page) {
   if (page==='security') renderSecurity();
   if (page==='diagnostics') renderDiagnostics();
   if (page==='settings') renderSettings();
+  if (page==='petshare') renderPetShare();
   updateAlertBadge();
 }
 

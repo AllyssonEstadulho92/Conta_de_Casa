@@ -42,6 +42,7 @@ const ICONS = {
   goal: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
   shield: '<path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-5"/>',
   settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1L7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3h4a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9A1.7 1.7 0 0 0 21 10v4a1.7 1.7 0 0 0-1.6 1z"/>',
+  paw: '<circle cx="12" cy="16" r="4"/><circle cx="5.5" cy="10.5" r="2"/><circle cx="9.5" cy="6.5" r="2"/><circle cx="14.5" cy="6.5" r="2"/><circle cx="18.5" cy="10.5" r="2"/>',
   more: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
   alert: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
   lock: '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
@@ -61,13 +62,15 @@ const PAGE_META = Object.freeze({
   reports: { label:'Relatórios', context:'Análise', icon:'report', navParent:'reports' },
   security: { label:'Segurança e sincronização', context:'Sistema', icon:'shield', navParent:'security' },
   diagnostics: { label:'Integridade da aplicação', context:'Sistema · Definições', icon:'report', navParent:'settings' },
-  settings: { label:'Definições', context:'Sistema', icon:'settings', navParent:'settings' }
+  settings: { label:'Definições', context:'Sistema', icon:'settings', navParent:'settings' },
+  petshare: { label:'Partilha do Walli', context:'Animais', icon:'paw', navParent:'petshare' }
 });
 
 const NAV_GROUPS = Object.freeze([
   { label:'Principal', items:['dashboard'] },
   { label:'Finanças', items:['bills','planning'] },
   { label:'Compras', items:['market'] },
+  { label:'Animais', items:['petshare'] },
   { label:'Análise', items:['reports'] },
   { label:'Sistema', items:['security','settings'] }
 ]);
@@ -466,6 +469,64 @@ function normalizeGoal(g = {}) {
   };
 }
 
+
+function normalizePetShareMonth(value = {}) {
+  const now = new Date().toISOString();
+  return {
+    baseCents: cleanCents(value.baseCents),
+    calculationMode: value.calculationMode === 'daily-fixed' ? 'daily-fixed' : 'proportional',
+    dailyRateCents: cleanCents(value.dailyRateCents),
+    updatedAt: cleanIso(value.updatedAt, now)
+  };
+}
+function normalizePetCareRecord(value = {}) {
+  const now = new Date().toISOString();
+  const startDate = cleanDateKey(value.startDate);
+  const endDate = cleanDateKey(value.endDate);
+  if (!startDate || !endDate || civilDayDiff(startDate, endDate) < 0 || civilDayDiff(startDate, endDate) > 370) return null;
+  return {
+    id: cleanString(value.id || uid(), 80),
+    startDate,
+    endDate,
+    note: cleanMultiline(value.note, 500),
+    createdAt: cleanIso(value.createdAt, now),
+    updatedAt: cleanIso(value.updatedAt || value.createdAt, now),
+    syncResolvedAt: optionalIso(value.syncResolvedAt)
+  };
+}
+function normalizePetSharePayment(value = {}) {
+  const now = new Date().toISOString();
+  const monthKey = /^\d{4}-\d{2}$/.test(String(value.monthKey || '')) ? String(value.monthKey) : '';
+  if (!monthKey) return null;
+  return {
+    id: cleanString(value.id || uid(), 80),
+    monthKey,
+    amountCents: cleanCents(value.amountCents),
+    paidAt: cleanIso(value.paidAt, now),
+    note: cleanMultiline(value.note, 300),
+    createdAt: cleanIso(value.createdAt, now),
+    updatedAt: cleanIso(value.updatedAt || value.createdAt, now),
+    syncResolvedAt: optionalIso(value.syncResolvedAt)
+  };
+}
+function normalizePetShare(value = {}) {
+  const months = {};
+  const monthEntries = isPlainObject(value.months) ? Object.entries(value.months).slice(-240) : [];
+  for (const [monthKey, monthValue] of monthEntries) {
+    if (!/^\d{4}-\d{2}$/.test(monthKey)) continue;
+    const monthNumber = Number(monthKey.slice(5,7));
+    if (monthNumber < 1 || monthNumber > 12) continue;
+    months[monthKey] = normalizePetShareMonth(monthValue);
+  }
+  return {
+    petName: cleanString(value.petName || 'Walli', 80) || 'Walli',
+    caregiverName: cleanString(value.caregiverName || 'Nuno', 80) || 'Nuno',
+    months,
+    records: Array.isArray(value.records) ? value.records.slice(-2000).map(normalizePetCareRecord).filter(Boolean) : [],
+    payments: Array.isArray(value.payments) ? value.payments.slice(-4000).map(normalizePetSharePayment).filter(Boolean) : []
+  };
+}
+
 function defaultState() {
   return {
     version: STATE_VERSION,
@@ -483,6 +544,7 @@ function defaultState() {
     incomes: [],
     market: [],
     goals: [],
+    petShare: { petName:'Walli', caregiverName:'Nuno', months:{}, records:[], payments:[] },
     activity: [],
     auditTrail: [],
     security: { lastBackupAt: null, lastRestoreAt: null },
@@ -517,6 +579,7 @@ function ensureStateShape(s) {
     incomes: Array.isArray(s?.incomes) ? s.incomes.slice(0, 5000).map(normalizeIncome) : [],
     market: Array.isArray(s?.market) ? s.market.slice(0, 5000).map(normalizeMarketItem) : [],
     goals: Array.isArray(s?.goals) ? s.goals.slice(0, 1000).map(normalizeGoal) : [],
+    petShare: normalizePetShare(s?.petShare),
     activity: Array.isArray(s?.activity) ? s.activity.slice(0, 300).map(normalizeActivityEntry) : [],
     auditTrail: Array.isArray(s?.auditTrail) ? s.auditTrail.slice(-2000).map(normalizeAuditEntry).filter(entry => entry.billId) : [],
     security: {
@@ -850,7 +913,7 @@ async function parseBackupText(text) {
 }
 function backupContainsPlaintextFinancialData(text) {
   const body = String(text);
-  return ['"bills"','"payments"','"incomes"','"market"','"goals"','"provider"','"reference"','"notes"','"totalCents"','"amountCents"','"savedCents"','"targetCents"'].some(token => body.includes(token));
+  return ['"bills"','"payments"','"incomes"','"market"','"goals"','"petShare"','"caregiverName"','"provider"','"reference"','"notes"','"totalCents"','"amountCents"','"savedCents"','"targetCents"','"baseCents"','"dailyRateCents"'].some(token => body.includes(token));
 }
 
 async function decryptBackupState(normalized, passphrase) {
@@ -867,7 +930,7 @@ async function decryptBackupState(normalized, passphrase) {
   }
 }
 
-const SENSITIVE_STORAGE_PATTERN = /(bill|fatura|invoice|payment|pagamento|income|rendimento|amount|valor|provider|fornecedor|reference|referencia|notes|observa|market|mercado|goal|objetivo|finance|audit|history|hist[oó]rico|vault|cofre|cipher|backup|pass|senha|pin|key|chave)/i;
+const SENSITIVE_STORAGE_PATTERN = /(bill|fatura|invoice|payment|pagamento|income|rendimento|amount|valor|provider|fornecedor|reference|referencia|notes|observa|market|mercado|goal|objetivo|pet|animal|caregiver|walli|nuno|finance|audit|history|hist[oó]rico|vault|cofre|cipher|backup|pass|senha|pin|key|chave)/i;
 function installStorageGuards() {
   if (typeof Storage === 'undefined' || Storage.prototype.__contaDeCasaGuarded) return;
   const originalSetItem = Storage.prototype.setItem;

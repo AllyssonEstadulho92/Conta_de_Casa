@@ -804,3 +804,192 @@ html.cdc-v75 #formDialog[data-mode="market-browser"] .market-browser{display:blo
     min-width:0!important;
   }
 }
+
+
+/* 76-walli-share-drawer1: área dedicada à partilha do Walli na PWA. */
+html.cdc-v75 #page-petshare{
+  gap:16px;
+}
+html.cdc-v75 .walli-share-hero{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:20px;
+  border:1px solid var(--v76-border);
+  border-radius:18px;
+  background:linear-gradient(135deg,var(--v76-surface-accent,#ecf8f5),var(--v76-surface,#fff));
+}
+html.cdc-v75 .walli-share-hero h2{
+  margin:3px 0 6px;
+  color:var(--v76-text);
+  font-size:clamp(1.3rem,3vw,1.7rem);
+  letter-spacing:-.03em;
+}
+html.cdc-v75 .walli-share-hero p{
+  margin:0;
+  color:var(--v76-muted);
+}
+html.cdc-v75 .walli-share-badge{
+  flex:0 0 auto;
+  min-height:34px;
+  display:inline-flex;
+  align-items:center;
+  padding:6px 11px;
+  border-radius:999px;
+  color:var(--v76-primary);
+  background:color-mix(in srgb,var(--v76-primary) 9%,transparent);
+  font-size:.74rem;
+  font-weight:700;
+}
+html.cdc-v75 .walli-share-summary{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+}
+html.cdc-v75 .walli-summary-card{
+  min-width:0;
+  min-height:112px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:5px;
+  padding:15px;
+  border:1px solid var(--v76-border);
+  border-radius:15px;
+  background:var(--v76-surface);
+}
+html.cdc-v75 .walli-summary-card>span,
+html.cdc-v75 .walli-summary-card>small{
+  color:var(--v76-muted);
+  font-size:.75rem;
+  line-height:1.35;
+}
+html.cdc-v75 .walli-summary-card>strong{
+  color:var(--v76-text);
+  font-size:1.25rem;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+html.cdc-v75 .walli-summary-card.primary{
+  border-color:color-mix(in srgb,var(--v76-primary) 24%,var(--v76-border));
+  background:color-mix(in srgb,var(--v76-primary) 7%,var(--v76-surface));
+}
+html.cdc-v75 .walli-summary-card.warning{
+  border-color:color-mix(in srgb,#d99b26 34%,var(--v76-border));
+  background:color-mix(in srgb,#fff3d8 65%,var(--v76-surface));
+}
+html.cdc-v75 .walli-summary-card.success{
+  border-color:color-mix(in srgb,#188a63 28%,var(--v76-border));
+  background:color-mix(in srgb,#e7f7ef 68%,var(--v76-surface));
+}
+html.cdc-v75 .walli-status-card .btn{
+  width:max-content;
+  min-height:40px;
+  margin-top:5px;
+}
+html.cdc-v75 .walli-share-forms{
+  align-items:start;
+}
+html.cdc-v75 #walliShareDailyRateLabel[hidden]{
+  display:none!important;
+}
+html.cdc-v75 .walli-share-calendar{
+  width:100%;
+  max-width:640px;
+}
+html.cdc-v75 .walli-calendar-head,
+html.cdc-v75 .walli-calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:6px;
+}
+html.cdc-v75 .walli-calendar-head{
+  margin-bottom:7px;
+}
+html.cdc-v75 .walli-calendar-head span{
+  text-align:center;
+  color:var(--v76-muted);
+  font-size:.7rem;
+  font-weight:700;
+}
+html.cdc-v75 .walli-day{
+  min-width:0;
+  min-height:44px;
+  display:grid;
+  place-items:center;
+  border-radius:11px;
+  color:var(--v76-text);
+  background:var(--v76-surface-soft);
+  font-size:.8rem;
+}
+html.cdc-v75 .walli-day.active{
+  color:var(--v76-primary);
+  background:color-mix(in srgb,var(--v76-primary) 16%,var(--v76-surface));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--v76-primary) 22%,transparent);
+}
+html.cdc-v75 .walli-day.blank{
+  background:transparent;
+  box-shadow:none;
+}
+html.cdc-v75 .walli-calendar-legend{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-top:12px;
+  color:var(--v76-muted);
+  font-size:.75rem;
+}
+html.cdc-v75 .walli-calendar-legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+html.cdc-v75 .walli-legend-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:var(--v76-primary);
+}
+html.cdc-v75 .walli-record-row{
+  gap:12px;
+}
+html.cdc-v75 .walli-record-row .btn{
+  min-height:44px;
+}
+
+@media(max-width:560px){
+  html.cdc-v75 .walli-share-hero{
+    align-items:flex-start;
+    flex-direction:column;
+    padding:16px;
+  }
+  html.cdc-v75 .walli-share-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  html.cdc-v75 .walli-summary-card{
+    min-height:104px;
+    padding:13px;
+  }
+  html.cdc-v75 .walli-calendar-head,
+  html.cdc-v75 .walli-calendar-grid{
+    gap:4px;
+  }
+  html.cdc-v75 .walli-day{
+    min-height:42px;
+  }
+  html.cdc-v75 .walli-calendar-legend{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  html.cdc-v75 .walli-record-row{
+    align-items:flex-start;
+  }
+}
+
+@media(max-width:350px){
+  html.cdc-v75 .walli-share-summary{
+    grid-template-columns:minmax(0,1fr);
+  }
+}

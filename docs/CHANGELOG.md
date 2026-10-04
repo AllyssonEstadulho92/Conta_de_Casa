@@ -741,3 +741,18 @@ Próximo passo: ligar o subprojeto a uma conta/projeto Expo autorizado e gerar a
 - registos novos regressam à Partilha depois de guardados;
 - adicionados testes de contrato da navegação;
 - sem alterações às fórmulas financeiras nem ao modelo de persistência.
+
+
+## 2026-10-04: Partilha do Walli no menu da PWA
+
+- novo grupo `Animais` no drawer móvel da Conta de Casa;
+- novo item `Partilha do Walli` com ícone de pata local;
+- nova página PWA para configurar a base mensal, registar dias com o Nuno, consultar calendário e histórico e registar reembolsos;
+- cálculo financeiro em cêntimos inteiros, com dias reais do mês;
+- prevenção de dias sobrepostos;
+- estado guardado no cofre cifrado existente, sem Web Storage em claro;
+- backup e sincronização passam a incluir o domínio `petShare`;
+- conflitos de configuração, registos e reembolsos podem ser revistos no fluxo de sincronização;
+- `walli-share.js` passa a integrar o bundle público e precache;
+- nova revisão de arquitetura/cache `76-walli-share-drawer1`;
+- sem alteração de `STATE_VERSION` ou das fórmulas existentes de faturas, orçamento, Mercado e relatórios.

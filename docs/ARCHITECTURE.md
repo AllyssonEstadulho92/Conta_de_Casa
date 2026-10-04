@@ -595,3 +595,42 @@ Fluxo:
 `Animais → Partilha → Entrega | Calendário | Registos | Configurações`
 
 `Animais` contém o perfil e um resumo da partilha. `Partilha` é a autoridade visual e operacional para dias de guarda, valores, reembolsos e histórico. Os dados continuam a vir do mesmo repositório local cifrado e não são duplicados entre ecrãs.
+
+
+### PWA: domínio e rota da partilha do Walli
+
+A PWA passa a expor `petshare` como rota interna de primeiro nível no drawer completo. A navegação compacta inferior não é aumentada, para preservar os cinco destinos móveis atuais.
+
+Estrutura no estado cifrado:
+
+```text
+petShare
+├── petName
+├── caregiverName
+├── months[YYYY-MM]
+│   ├── baseCents
+│   ├── calculationMode
+│   ├── dailyRateCents
+│   └── updatedAt
+├── records[]
+│   ├── id
+│   ├── startDate
+│   ├── endDate
+│   ├── note
+│   └── timestamps
+└── payments[]
+    ├── id
+    ├── monthKey
+    ├── amountCents
+    ├── paidAt
+    ├── note
+    └── timestamps
+```
+
+Regra proporcional:
+
+`shareCents = roundHalfUp(baseCents × careDays ÷ daysInCivilMonth)`
+
+Os dias são materializados logicamente a partir de intervalos civis `YYYY-MM-DD`; o cálculo mensal usa união de datas, evitando dupla contagem. A criação de um novo registo rejeita qualquer dia já coberto por outro intervalo.
+
+Os reembolsos são eventos financeiros próprios em `petShare.payments` e não alteram retroativamente `baseCents`. A sincronização usa merge por ID para registos/reembolsos, merge por mês para configuração e tombstones para eliminações.

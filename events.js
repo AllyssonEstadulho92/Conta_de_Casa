@@ -317,6 +317,7 @@ function wireEvents(){
   $('#desktopNav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)showPage(b.dataset.page);});
   $('#drawerNav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)showPage(b.dataset.page);});
   $('#mobileNav').addEventListener('click',e=>{const b=e.target.closest('[data-mobile]');if(b)showPage(b.dataset.mobile);});
+  if (typeof wireWalliShareEvents === 'function') wireWalliShareEvents();
   $('#sidebarToggle').addEventListener('click',()=>{
     sidebarPreference=!document.documentElement.classList.contains('sidebar-collapsed');
     setSidebarCollapsed(sidebarPreference);

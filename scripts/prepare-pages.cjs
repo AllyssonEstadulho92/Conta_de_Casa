@@ -29,7 +29,7 @@ const PRODUCT_PAGES_REV = '76-dashboard-priority1';
 const DASHBOARD_REV = '76-budget-cash-separation3';
 const FINANCE_REV = '76-budget-cash-separation3';
 const MOBILE_SHELL_REV = '76-mobile-shell3';
-const ARCHITECTURE_REV = '76-budget-cash-separation3';
+const ARCHITECTURE_REV = '76-walli-share-drawer1';
 const PLANNING_MORE_REV = '76-planning-more1';
 const HEADER_REV = '75-header2';
 const STABILITY_REV = '75-stability1';
@@ -48,7 +48,8 @@ const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
 const ZXING_REV = '76-local-zxing1';
-const SERVICE_WORKER_REV = '76-dialog-controls1';
+const SERVICE_WORKER_REV = '76-walli-share-drawer1';
+const WALLI_SHARE_REV = '76-walli-share-drawer1';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
   throw new Error(`Invalid package application version: ${APP_VERSION||'(empty)'}`);
@@ -107,6 +108,7 @@ const PUBLIC_FILES = Object.freeze([
   'date-calculator.css',
   'core.js',
   'finance.js',
+  'walli-share.js',
   'render.js',
   'forms.js',
   'sync.js',
@@ -180,6 +182,7 @@ index=index.replace(/invoice-capture\.css\?v=[^"']+/,`invoice-capture.css?v=${IN
 index=index.replace(/invoice-capture\.js\?v=[^"']+/,`invoice-capture.js?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/render\.js\?v=[^"']+/,`render.js?v=${DASHBOARD_REV}`);
 index=index.replace(/finance\.js\?v=[^"']+/,`finance.js?v=${FINANCE_REV}`);
+index=index.replace(/walli-share\.js\?v=[^"']+/,`walli-share.js?v=${WALLI_SHARE_REV}`);
 index=index.replace(/<meta name="barcode-reader-src" content="[^"]+"\s*\/>/,`<meta name="barcode-reader-src" content="./zxing-browser.min.js?v=${ZXING_REV}" />`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${APP_VERSION} · ${BUILD}</strong>`);
 

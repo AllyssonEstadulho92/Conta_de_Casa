@@ -82,7 +82,7 @@
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
-  const REVISION='76-budget-cash-separation3';
+  const REVISION='76-walli-share-drawer1';
   const LABELS=Object.freeze({
     dashboard:['Início','Visão geral'],
     bills:['Despesas','Movimentos'],
@@ -93,10 +93,12 @@
     reports:['Relatórios','Análise'],
     security:['Segurança e sincronização','Conta e dados'],
     diagnostics:['Diagnóstico e integridade','Sistema'],
-    settings:['Definições','Aplicação']
+    settings:['Definições','Aplicação'],
+    petshare:['Partilha do Walli','Animais']
   });
   const DRAWER_GROUPS=Object.freeze([
     {label:'Principal',items:[['dashboard','Início','home'],['bills','Despesas','bill'],['planning','Planeamento','plan'],['market','Mercado','market']]},
+    {label:'Animais',items:[['petshare','Partilha do Walli','paw']]},
     {label:'Análise',items:[['reports','Relatórios','report']]},
     {label:'Sistema',items:[['security','Segurança e sincronização','shield'],['settings','Definições','settings']]}
   ]);
