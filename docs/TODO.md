@@ -397,3 +397,19 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [x] Adicionar teste de contrato de navegação da secção.
 - [ ] Validar a barra inferior com 5 destinos em iPhone físico.
 - [ ] Validar labels e targets em Android físico.
+
+
+### Partilha do Walli na PWA
+
+- [x] Colocar Partilha do Walli no drawer da PWA.
+- [x] Criar grupo Animais e rota petshare.
+- [x] Guardar dados dentro do cofre cifrado existente.
+- [x] Implementar cálculo proporcional pelos dias reais do mês e valor diário fixo.
+- [x] Impedir sobreposição de dias.
+- [x] Separar reembolso da base mensal.
+- [x] Integrar registos, pagamentos e configuração mensal no sync cifrado.
+- [x] Adicionar asset ao build Pages e Service Worker.
+- [x] Adicionar testes de domínio, navegação, segurança e isolamento.
+- [ ] Confirmar visualmente o novo item no drawer no iPhone físico.
+- [ ] Confirmar persistência após fechar/reabrir Safari/PWA.
+- [ ] Confirmar sincronização do Walli entre dois cofres/dispositivos reais.
