@@ -124,20 +124,25 @@
 
     const today=currentLocalDateKey();
     const fallback=today.startsWith(selectedMonth)?today:selectedMonth+'-01';
+    const careForm=$('#walliCareForm');
     const start=$('#walliCareStart');
     const end=$('#walliCareEnd');
-    if(start&&start.dataset.monthKey!==selectedMonth){start.value=fallback;start.dataset.monthKey=selectedMonth;}
-    if(end&&end.dataset.monthKey!==selectedMonth){end.value=fallback;end.dataset.monthKey=selectedMonth;}
+    if(!careForm?.dataset.editingId){
+      if(start&&start.dataset.monthKey!==selectedMonth){start.value=fallback;start.dataset.monthKey=selectedMonth;}
+      if(end&&end.dataset.monthKey!==selectedMonth){end.value=fallback;end.dataset.monthKey=selectedMonth;}
+    }
 
     renderCalendar(data);
 
     const records=data.records.slice().sort((a,b)=>a.startDate.localeCompare(b.startDate)).map(record=>{
       const days=recordDaysInMonth(record,data.monthKey).length;
+      const walks=Number.isSafeInteger(Number(record.walksCount))?Number(record.walksCount):0;
       const note=record.note?' · '+esc(record.note):'';
       const period=esc(fmtDate(record.startDate))+(record.startDate!==record.endDate?' a '+esc(fmtDate(record.endDate)):'');
+      const walksText=walks+' ida'+(walks===1?'':'s')+' à rua';
       return '<div class="list-row walli-record-row">'+
-        '<div class="list-main"><strong>'+period+'</strong><small>'+days+' dia'+(days===1?'':'s')+' neste mês'+note+'</small></div>'+
-        '<div class="list-side"><button class="btn secondary" type="button" data-walli-delete="'+attr(record.id)+'">Eliminar</button></div>'+
+        '<div class="list-main"><strong>'+period+'</strong><small>'+days+' dia'+(days===1?'':'s')+' neste mês · '+walksText+note+'</small></div>'+
+        '<div class="list-side"><button class="btn secondary" type="button" data-walli-edit="'+attr(record.id)+'">Editar</button><button class="btn secondary" type="button" data-walli-delete="'+attr(record.id)+'">Eliminar</button></div>'+
       '</div>';
     }).join('');
     setHTML('#walliShareRecords',records||empty('Ainda não há dias de '+petName+' com '+caregiver+' neste mês.'));
@@ -165,30 +170,101 @@
     toast('Configuração da partilha guardada.');
   }
 
+  function readWalksCount(){
+    const raw=String($('#walliCareWalks')?.value||'').trim();
+    if(!raw)return 0;
+    const value=Number(raw);
+    return Number.isSafeInteger(value)&&value>=0&&value<=200?value:NaN;
+  }
+
+  function resetCareForm(){
+    const form=$('#walliCareForm');
+    if(!form)return;
+    delete form.dataset.editingId;
+    const submit=$('#walliCareSubmitBtn');
+    const cancel=$('#walliCareCancelEditBtn');
+    if(submit)submit.textContent='Guardar entrega';
+    if(cancel)cancel.hidden=true;
+    const today=currentLocalDateKey();
+    const fallback=today.startsWith(selectedMonth)?today:selectedMonth+'-01';
+    const start=$('#walliCareStart');
+    const end=$('#walliCareEnd');
+    if(start){start.value=fallback;start.dataset.monthKey=selectedMonth;}
+    if(end){end.value=fallback;end.dataset.monthKey=selectedMonth;}
+    const walks=$('#walliCareWalks');
+    const note=$('#walliCareNote');
+    if(walks)walks.value='';
+    if(note)note.value='';
+  }
+
+  function editCare(id){
+    const record=(appState.petShare.records||[]).find(item=>item.id===id);
+    const form=$('#walliCareForm');
+    if(!record||!form)return;
+    form.dataset.editingId=id;
+    const start=$('#walliCareStart');
+    const end=$('#walliCareEnd');
+    const walks=$('#walliCareWalks');
+    const note=$('#walliCareNote');
+    if(start){start.value=record.startDate;start.dataset.monthKey=record.startDate.slice(0,7);}
+    if(end){end.value=record.endDate;end.dataset.monthKey=record.endDate.slice(0,7);}
+    if(walks)walks.value=String(Number.isSafeInteger(Number(record.walksCount))?Number(record.walksCount):0);
+    if(note)note.value=record.note||'';
+    const submit=$('#walliCareSubmitBtn');
+    const cancel=$('#walliCareCancelEditBtn');
+    if(submit)submit.textContent='Guardar alterações';
+    if(cancel)cancel.hidden=false;
+    form.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+
   async function saveCare(event){
     event.preventDefault();
+    const form=$('#walliCareForm');
+    const editingId=form?.dataset.editingId||'';
     const start=cleanDateKey($('#walliCareStart')?.value);
     const end=cleanDateKey($('#walliCareEnd')?.value);
+    const walksCount=readWalksCount();
     const days=rangeDays(start,end);
     if(!days.length){toast('Período inválido.');return;}
+    if(!Number.isSafeInteger(walksCount)){toast('Indique um número de idas à rua entre 0 e 200.');return;}
     const existing=new Set();
-    (appState.petShare.records||[]).forEach(record=>rangeDays(record.startDate,record.endDate).forEach(day=>existing.add(day)));
+    (appState.petShare.records||[])
+      .filter(record=>record.id!==editingId)
+      .forEach(record=>rangeDays(record.startDate,record.endDate).forEach(day=>existing.add(day)));
     const duplicate=days.find(day=>existing.has(day));
     if(duplicate){toast('Já existe um registo para '+fmtDate(duplicate)+'.');return;}
     const now=new Date().toISOString();
     appState.petShare.records ||= [];
+    if(editingId){
+      const index=appState.petShare.records.findIndex(record=>record.id===editingId);
+      if(index<0){resetCareForm();toast('O registo já não existe.');return;}
+      const current=appState.petShare.records[index];
+      appState.petShare.records[index]={
+        ...current,
+        startDate:start,
+        endDate:end,
+        walksCount,
+        note:cleanMultiline($('#walliCareNote')?.value||'',500),
+        updatedAt:now,
+        syncResolvedAt:null
+      };
+      await commit('updated','general');
+      resetCareForm();
+      toast('Registo do Walli atualizado.');
+      return;
+    }
     appState.petShare.records.push({
       id:uid(),
       startDate:start,
       endDate:end,
+      walksCount,
       note:cleanMultiline($('#walliCareNote')?.value||'',500),
       createdAt:now,
       updatedAt:now,
       syncResolvedAt:null
     });
     await commit('created','general');
-    const note=$('#walliCareNote');
-    if(note)note.value='';
+    resetCareForm();
     toast('Entrega ao Nuno registada.');
   }
 
@@ -199,6 +275,7 @@
     if(button)button.disabled=true;
     if(typeof recordSyncDeletion==='function')recordSyncDeletion('pet-care',id);
     appState.petShare.records=appState.petShare.records.filter(item=>item.id!==id);
+    if($('#walliCareForm')?.dataset.editingId===id)resetCareForm();
     await commit('deleted','general');
     toast('Registo eliminado.');
   }
@@ -233,11 +310,14 @@
     wired=true;
     $('#walliShareSettingsForm')?.addEventListener('submit',saveSettings);
     $('#walliCareForm')?.addEventListener('submit',saveCare);
+    $('#walliCareCancelEditBtn')?.addEventListener('click',resetCareForm);
     $('#walliShareMode')?.addEventListener('change',event=>{
       const label=$('#walliShareDailyRateLabel');
       if(label)label.hidden=event.target.value!=='daily-fixed';
     });
     page.addEventListener('click',event=>{
+      const edit=event.target.closest('[data-walli-edit]');
+      if(edit){editCare(edit.dataset.walliEdit);return;}
       const del=event.target.closest('[data-walli-delete]');
       if(del){void deleteCare(del.dataset.walliDelete,del);return;}
       const receiveButton=event.target.closest('[data-walli-receive]');
