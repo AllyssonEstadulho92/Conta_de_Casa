@@ -647,3 +647,33 @@ walksCount: inteiro de 0 a 200
 O valor é introduzido manualmente e representa a quantidade de idas à rua/passeios associada ao período. Não participa no cálculo financeiro da partilha, que continua a depender exclusivamente dos dias civis e da configuração mensal.
 
 A edição conserva o mesmo `id` e `createdAt`, atualiza `updatedAt` e volta a validar sobreposição de datas, excluindo o próprio registo da comparação. Alterações a `walksCount` são tratadas como campo de negócio no mecanismo de conflitos cifrados.
+
+
+#### Cálculo automático de passeios e total
+
+A configuração mensal de `petShare.months[YYYY-MM]` inclui:
+
+```text
+walksPerDay: 1 | 2
+walkRateCents: inteiro em cêntimos
+```
+
+O valor inicial de `walkRateCents` é 800 cêntimos para meses que ainda não tenham configuração explícita. O utilizador pode alterá-lo.
+
+Para um mês:
+
+```text
+walkCount = uniqueCareDays × walksPerDay
+walksCostCents = walkCount × walkRateCents
+totalPayableCents = shareCents + walksCostCents
+outstandingCents = max(0, totalPayableCents - outboundPaidCents)
+```
+
+A contagem usa a união de dias civis já usada pela partilha, pelo que intervalos sobrepostos continuam proibidos e não existe dupla contagem.
+
+`petShare.payments[].direction` distingue:
+
+- `outbound`: pagamento efetuado ao Nuno, reduz o valor por pagar;
+- `inbound`: significado legado da versão anterior, quando a interface registava um valor recebido. Não reduz o novo total a pagar.
+
+Registos antigos sem `direction` são normalizados como `inbound`, evitando reinterpretar historicamente movimentos já guardados.
