@@ -113,8 +113,14 @@ assert.match(source,/data-walli-edit/,'existing Walli care records must expose e
 assert.match(source,/record\.id!==editingId/,'editing must exclude the current record from overlap detection');
 assert.match(source,/totalPayableCents/,'the final payable amount must combine the base share and automatic walks');
 assert.match(source,/Por pagar ao/,'the payment direction must be explicit');
+assert.match(source,/walli-total-card/,'the final payable amount must be the primary visual metric');
+assert.match(source,/walli-record-meta/,'records must expose scannable day and walk metadata');
+assert.match(source,/walli-auto-values/,'automatic walk preview must separate count and cost');
 assert.doesNotMatch(index,/id="walliCareWalks"/,'care form must not require manual outing counts');
 assert.match(index,/id="walliCareAutoWalks"/,'care form must show the automatic walk preview');
+assert.match(index,/class="walli-share-hero"/,'Walli page must expose a dedicated visual hero');
+assert.match(index,/class="walli-overview"/,'monthly summary must have an explicit overview hierarchy');
+assert.match(index,/class="walli-lower-grid"/,'calendar and records must share an organized responsive region');
 assert.match(index,/id="walliWalksPerDay"/,'settings must allow one or two walks per day');
 assert.match(index,/id="walliWalkRate"/,'settings must expose an editable price per walk');
 assert.match(index,/id="walliCareCancelEditBtn"/,'care form must allow cancelling edit mode');
@@ -123,6 +129,6 @@ assert.match(source,/appState\.petShare\.payments\.push/,'reimbursements must be
 assert.doesNotMatch(source,/localStorage|sessionStorage/,'Walli financial data must stay inside the encrypted application state');
 assert.match(sw,/\.\/walli-share\.js/);
 assert.match(prepare,/'walli-share\.js'/);
-assert.match(prepare,/WALLI_SHARE_REV = '76-walli-auto-walk-cost3'/);
+assert.match(prepare,/WALLI_SHARE_REV = '76-walli-ux-polish4'/);
 
 console.log('Walli share drawer/domain tests: OK');
