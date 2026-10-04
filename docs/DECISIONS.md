@@ -696,3 +696,17 @@ Decisão:
 - manter reembolsos separados da base/despesa original;
 - preservar `STATE_VERSION = 5`, porque a nova propriedade é normalizada de forma retrocompatível;
 - incluir o novo domínio no mecanismo de backup/sync e na política de conflitos antes de o considerar pronto para dados reais.
+
+
+## D-143 — Idas à rua são um campo manual e não alteram a contabilidade
+
+A quantidade de idas à rua do Walli é informação operacional do cuidado e não uma unidade financeira.
+
+Decisão:
+
+- guardar `walksCount` por período;
+- aceitar apenas inteiros entre 0 e 200;
+- permitir edição posterior do valor;
+- não usar `walksCount` para calcular a parte do Nuno;
+- manter o cálculo financeiro baseado nos dias civis do mês ou no valor diário fixo escolhido;
+- incluir o campo na sincronização e na revisão de conflitos.
