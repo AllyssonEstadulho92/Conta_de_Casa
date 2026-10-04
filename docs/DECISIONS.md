@@ -710,3 +710,24 @@ Decisão:
 - não usar `walksCount` para calcular a parte do Nuno;
 - manter o cálculo financeiro baseado nos dias civis do mês ou no valor diário fixo escolhido;
 - incluir o campo na sincronização e na revisão de conflitos.
+
+
+## D-144 — Passeios são calculados automaticamente e o preço é editável
+
+Pesquisa efetuada em 4 de outubro de 2026:
+
+- Zaask: média nacional de 8 € por 30 minutos, intervalo indicativo de 5 € a 15 €;
+- Fixando Lisboa: Dog Walking entre 7 € e 20 € por preço fixo;
+- SeePet: 10 € por passeio de 45 minutos em pacote diário mensal e 12 € por passeio recorrente durante a semana.
+
+Decisão:
+
+- usar **8,00 € por passeio** apenas como referência inicial conservadora;
+- permitir alterar o preço por mês;
+- permitir escolher 1 ou 2 passeios por dia;
+- nunca pedir ao utilizador a contagem manual de passeios;
+- derivar a quantidade exclusivamente dos dias registados;
+- mostrar separadamente parte base, custo dos passeios e total a pagar;
+- o preço de mercado é informativo e não substitui um acordo real com o cuidador.
+
+A direção contabilística também é explicitada: novos movimentos desta área representam pagamentos ao cuidador. Dados antigos criados quando a interface falava em valores recebidos permanecem `inbound` e não são reinterpretados retroativamente.
