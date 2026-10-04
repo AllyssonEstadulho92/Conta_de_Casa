@@ -800,3 +800,16 @@ Próximo passo: ligar o subprojeto a uma conta/projeto Expo autorizado e gerar a
 - acessibilidade forced-colors e reduced-motion preservada;
 - revisão de CSS, módulo Walli e Service Worker atualizada para `76-walli-ux-polish4`;
 - sem alterações às fórmulas financeiras, persistência ou sincronização.
+
+
+## 2026-10-04: pagamentos parciais na Partilha do Walli
+
+- adicionado pagamento faseado do valor em aberto;
+- opções automáticas de 2, 3 e 4 partes;
+- prévia mostra o valor a pagar agora e o restante;
+- divisão feita em cêntimos inteiros com reconciliação exata;
+- botão de pagamento total mantido;
+- pagamentos parciais usam os mesmos registos outbound já cifrados e sincronizados;
+- não foi criado sistema de crédito, juros ou calendário de prestações;
+- revisão pública atualizada para `76-walli-partial-pay5`;
+- cálculos de dias, passeios, base e total não foram alterados.
