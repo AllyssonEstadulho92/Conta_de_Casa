@@ -558,7 +558,9 @@ async function mergeEncryptedBackupFile(file,passphrase) {
     payments:appState.payments.length,
     incomes:appState.incomes.length,
     market:appState.market.length,
-    goals:appState.goals.length
+    goals:appState.goals.length,
+    petCare:appState.petShare.records.length,
+    petPayments:appState.petShare.payments.length
   };
   const merged=mergeAppStates(appState,sourceState);
   appState=merged.state;
@@ -571,7 +573,9 @@ async function mergeEncryptedBackupFile(file,passphrase) {
     payments:appState.payments.length,
     incomes:appState.incomes.length,
     market:appState.market.length,
-    goals:appState.goals.length
+    goals:appState.goals.length,
+    petCare:appState.petShare.records.length,
+    petPayments:appState.petShare.payments.length
   };
   return {
     addedBills:Math.max(0,after.bills-before.bills),
@@ -579,6 +583,7 @@ async function mergeEncryptedBackupFile(file,passphrase) {
     addedIncomes:Math.max(0,after.incomes-before.incomes),
     addedMarket:Math.max(0,after.market-before.market),
     addedGoals:Math.max(0,after.goals-before.goals),
+    addedPetShare:Math.max(0,after.petCare-before.petCare)+Math.max(0,after.petPayments-before.petPayments),
     conflicts:merged.conflicts.length
   };
 }
@@ -957,7 +962,7 @@ async function renderSyncUi() {
     const active=syncLastStatus.state==='conflict';
     conflictBox.hidden=!active;
     if(active){
-      const labels={bill:'fatura',payment:'pagamento',income:'rendimento',market:'mercado',goal:'objetivo',month:'planeamento'};
+      const labels={bill:'fatura',payment:'pagamento',income:'rendimento',market:'mercado',goal:'objetivo',month:'planeamento','pet-care':'partilha do Walli','pet-share-payment':'reembolso do Walli','pet-share-month':'configuração do Walli'};
       const names=[...new Set(syncActiveConflicts.map(c=>labels[c.entity]||'registo'))];
       const summary=$('#syncConflictSummary');
       if(summary) summary.textContent=syncActiveConflicts.length
@@ -970,7 +975,9 @@ async function renderSyncUi() {
 
 function syncConflictRecordName(conflict) {
   const item=conflict?.local||conflict?.remote||{};
-  if(conflict?.entity==='month') return conflict.id;
+  if(conflict?.entity==='month'||conflict?.entity==='pet-share-month') return conflict.id;
+  if(conflict?.entity==='pet-care') return cleanString(`Walli · ${item.startDate||conflict.id}`,100);
+  if(conflict?.entity==='pet-share-payment') return cleanString(`Reembolso · ${item.monthKey||conflict.id}`,100);
   return cleanString(item.title||item.description||item.name||item.provider||conflict?.id||'Registo',100);
 }
 
@@ -1000,7 +1007,7 @@ function renderSyncConflictList() {
     root.innerHTML='<p class="muted">Atualize a comparação para receber os detalhes mais recentes do cofre.</p>';
     return;
   }
-  const entityLabels={bill:'Fatura',payment:'Pagamento',income:'Rendimento',market:'Mercado',goal:'Objetivo',month:'Planeamento'};
+  const entityLabels={bill:'Fatura',payment:'Pagamento',income:'Rendimento',market:'Mercado',goal:'Objetivo',month:'Planeamento','pet-care':'Dias do Walli','pet-share-payment':'Reembolso do Walli','pet-share-month':'Configuração do Walli'};
   root.innerHTML=syncActiveConflicts.map((conflict,index)=>{
     const fields=syncConflictDifferences(conflict);
     const rows=fields.map(field=>`<div class="sync-conflict-row" role="row">
@@ -1030,6 +1037,20 @@ function applySyncConflictChoice(conflict,choice) {
   if(conflict.entity==='month'){
     appState.months ||= {};
     appState.months[conflict.id]=selected;
+    return;
+  }
+  if(conflict.entity==='pet-share-month'){
+    appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[]};
+    appState.petShare.months ||= {};
+    appState.petShare.months[conflict.id]=selected;
+    return;
+  }
+  if(conflict.entity==='pet-care'||conflict.entity==='pet-share-payment'){
+    appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[]};
+    const collection=conflict.entity==='pet-care'?appState.petShare.records:appState.petShare.payments;
+    if(!selected?.id) throw new Error('Registo de conflito inválido.');
+    const index=collection.findIndex(item=>item.id===conflict.id);
+    if(index>=0)collection[index]=selected;else collection.push(selected);
     return;
   }
   const collections={bill:'bills',payment:'payments',income:'incomes',market:'market',goal:'goals'};
@@ -1284,7 +1305,7 @@ function wireSyncControls() {
       const result=await mergeEncryptedBackupFile(input.files[0],pin.value);
       pin.value='';
       input.value='';
-      const added=result.addedBills+result.addedPayments+result.addedIncomes+result.addedMarket+result.addedGoals;
+      const added=result.addedBills+result.addedPayments+result.addedIncomes+result.addedMarket+result.addedGoals+(result.addedPetShare||0);
       if(msg){
         msg.textContent=result.conflicts
           ? `Dados unidos: ${added} registo(s) acrescentado(s), com ${result.conflicts} conflito(s) preservado(s) para revisão.`
