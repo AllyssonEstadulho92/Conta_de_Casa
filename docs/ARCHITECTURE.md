@@ -698,3 +698,27 @@ Responsividade:
 - <=380 px: resumo passa a uma única coluna.
 
 Acessibilidade mantém forced-colors, prefers-reduced-motion e targets tácteis mínimos de 44 px.
+
+
+#### Pagamentos parciais da Partilha do Walli
+
+A divisão é derivada apenas de `outstandingCents` e não cria uma nova entidade de financiamento.
+
+Para `N` partes, com `N ∈ {2,3,4}`:
+
+```text
+quotient = floor(outstandingCents / N)
+remainder = outstandingCents mod N
+
+part[i] = quotient + 1, enquanto i < remainder
+part[i] = quotient, nos restantes casos
+```
+
+Invariantes:
+
+- todas as partes são inteiros em cêntimos;
+- a soma das partes é exatamente `outstandingCents`;
+- o pagamento registado usa `direction = outbound`;
+- o valor restante é sempre `max(0, outstandingCents - paidNowCents)`;
+- o sistema não guarda um plano de crédito, datas futuras ou juros;
+- novos pagamentos continuam a usar `petShare.payments[]`, pelo que backup, cifra e sincronização existentes permanecem a autoridade.

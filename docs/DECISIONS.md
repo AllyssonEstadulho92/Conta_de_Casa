@@ -747,3 +747,20 @@ Decisão de UI/UX:
 - manter o mesmo domínio, IDs funcionais e handlers existentes.
 
 O objetivo é reduzir procura visual e evitar que o utilizador tenha de interpretar cartões com igual peso.
+
+
+## D-146 — dividir o valor em aberto sem criar crédito ou nova contabilidade
+
+Quando o total da Partilha do Walli for pesado, o utilizador deve conseguir pagar uma parte agora e o restante depois.
+
+Decisão:
+
+- disponibilizar divisões rápidas em 2, 3 ou 4 partes;
+- fazer a divisão em cêntimos inteiros, sem arredondamentos monetários independentes;
+- mostrar antecipadamente quanto sai agora e quanto fica por pagar;
+- cada parcela paga é registada como um pagamento `outbound` normal;
+- não criar empréstimo, juros, vencimentos futuros automáticos ou uma segunda tabela financeira;
+- permitir sempre a opção **Pagar tudo**;
+- recalcular a divisão a partir do saldo realmente em aberto depois de cada pagamento.
+
+Isto mantém o fluxo simples e evita divergência entre um plano paralelo e os pagamentos realmente efetuados.

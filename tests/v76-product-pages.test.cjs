@@ -86,6 +86,8 @@ for(const legacyId of ['cdcMobileGreeting','cdcMobileMonthWrap','cdcMonthHero','
 assert.match(css,/v76-dashboard-clean1/);
 assert.match(css,/76-dashboard-priority1/,'dashboard priority hierarchy must remain explicit');
 assert.match(css,/76-walli-ux-polish4/,'Walli UI hierarchy must remain explicit');
+assert.match(css,/\.walli-payment-split\{/,'Walli payment status must expose a dedicated split-payment region');
+assert.match(css,/\.walli-split-preview\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,'partial payment preview must separate pay-now and remaining values');
 assert.match(css,/\.walli-share-summary\{[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/,'desktop Walli summary must use a four-column hierarchy');
 assert.match(css,/\.walli-summary-card\.walli-total-card,[\s\S]*\.walli-summary-card\.walli-status-card\{[\s\S]*grid-column:span 2/,'total and payment status must receive stronger hierarchy');
 assert.match(css,/@media\(max-width:620px\)[\s\S]*\.walli-settings-grid,[\s\S]*\.walli-care-grid\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/,'Walli forms must stack before narrow mobile compression');
@@ -112,7 +114,7 @@ assert.match(render,/function renderBills\(/);
 assert.match(render,/function renderMarket\(/);
 
 // A nova camada tem propriedade de composição de página, carrega antes do shell e entra no PWA.
-assert.match(prepare,/const PRODUCT_PAGES_REV = '76-walli-ux-polish4'/);
+assert.match(prepare,/const PRODUCT_PAGES_REV = '76-walli-partial-pay5'/);
 assert.match(prepare,/const DASHBOARD_REV = '76-budget-cash-separation3'/);
 assert.ok(prepare.includes('render.js?v=${DASHBOARD_REV}'),'render.js must receive a dedicated cache-busting revision');
 assert.ok(prepare.includes("'v76-product-pages.css'"));
