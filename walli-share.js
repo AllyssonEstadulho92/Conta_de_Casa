@@ -119,7 +119,7 @@
     const parts=String(monthKey).split('-').map(Number);
     if(!Number.isInteger(parts[0])||!Number.isInteger(parts[1])||parts[1]<1||parts[1]>12)return '';
     const date=new Date(parts[0],parts[1]-2,1);
-    return date.getFullYear()+'-'+pad2(date.getMonth()+1);
+    return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0');
   }
 
   function activePlan(monthKey=selectedMonth){
