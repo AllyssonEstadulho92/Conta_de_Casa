@@ -21,7 +21,7 @@ import type { CareRecord, PetShareSnapshot } from './repository';
 import { Card, Icon, InfoBox, Metric, PrimaryButton, SecondaryButton, icons } from './ui';
 import { colors, radius } from './theme';
 
-type ScreenName = 'animals' | 'handover' | 'calendar' | 'records' | 'settings' | 'edit';
+type ScreenName = 'animals' | 'share' | 'handover' | 'calendar' | 'records' | 'settings' | 'edit';
 type CommonProps = {
   snapshot: PetShareSnapshot;
   monthKey: string;
@@ -117,14 +117,13 @@ function CalendarGrid({ snapshot }: { snapshot: PetShareSnapshot }) {
   );
 }
 
-export function AnimalsScreen({ snapshot, monthKey, setMonthKey, navigate, markReceived }: CommonProps & { markReceived: () => Promise<void> }) {
-  const received = snapshot.paidCents > 0;
+export function AnimalsScreen({ snapshot, monthKey, navigate }: CommonProps) {
   return (
     <ScrollView contentContainerStyle={styles.page}>
       <View style={styles.hero}>
         <Text style={styles.eyebrow}>CONTA DE CASA</Text>
         <Text style={styles.heroTitle}>Animais</Text>
-        <Text style={styles.heroSubtitle}>Registo e partilha de despesas dos seus animais.</Text>
+        <Text style={styles.heroSubtitle}>Perfis, cuidados e gestão dos seus animais.</Text>
       </View>
 
       <View style={styles.tabs}>
@@ -137,8 +136,8 @@ export function AnimalsScreen({ snapshot, monthKey, setMonthKey, navigate, markR
       <Card>
         <View style={styles.petRow}>
           <View style={styles.avatar}><Icon name={icons.paw} size={34} color={colors.brandDark} /></View>
-          <View style={{ flex: 1 }}><Text style={styles.petName}>Walli</Text><Text style={styles.muted}>Cão</Text></View>
-          <SecondaryButton label="Editar" icon={icons.edit} onPress={() => Alert.alert('Perfil do Walli', 'A edição do perfil fica preparada para a próxima fase da aplicação nativa.')} />
+          <View style={{ flex: 1 }}><Text style={styles.petName}>{snapshot.pet.name}</Text><Text style={styles.muted}>{snapshot.pet.species}</Text></View>
+          <SecondaryButton label="Editar" icon={icons.edit} onPress={() => Alert.alert('Perfil do Walli', 'A edição do perfil fica preparada para uma fase seguinte da aplicação nativa.')} />
         </View>
         <View style={styles.metrics}>
           <Metric label="Idade" value="—" icon={icons.paw} />
@@ -147,28 +146,80 @@ export function AnimalsScreen({ snapshot, monthKey, setMonthKey, navigate, markR
         </View>
       </Card>
 
-      <View style={styles.segment}>
-        <Text style={styles.segmentText}>Despesas</Text>
-        <Text style={styles.segmentText}>Cuidados</Text>
-        <View style={styles.segmentActive}><Icon name={icons.people} size={16} color="#fff" /><Text style={styles.segmentActiveText}>Partilha</Text></View>
-        <Pressable onPress={() => navigate('records')}><Text style={styles.segmentText}>Histórico</Text></Pressable>
+      <Card>
+        <View style={styles.cardHeader}>
+          <View style={styles.titleWithIcon}><Icon name={icons.people} size={22} /><Text style={styles.cardTitle}>Partilha do Walli</Text></View>
+          <Text style={styles.listTotal}>{monthTitle(monthKey)}</Text>
+        </View>
+        <Text style={[styles.muted, { marginTop: 8 }]}>Secção dedicada aos dias em que o Walli fica com o Nuno, respetivos valores e reembolsos.</Text>
+        <View style={styles.twoCols}>
+          <View style={styles.smallBox}><Text style={styles.muted}>Dias com o Nuno</Text><Text style={styles.boxValue}>{snapshot.careDays.length} dias</Text></View>
+          <View style={styles.smallBox}><Text style={styles.muted}>Por receber</Text><Text style={styles.boxValue}>{euro(snapshot.outstandingCents)}</Text></View>
+        </View>
+        <View style={{ height: 14 }} />
+        <PrimaryButton label="Abrir partilha com o Nuno" icon={icons.people} onPress={() => navigate('share')} />
+      </Card>
+      <View style={{ height: 90 }} />
+    </ScrollView>
+  );
+}
+
+export function WalliShareScreen({ snapshot, monthKey, setMonthKey, navigate, markReceived }: CommonProps & { markReceived: () => Promise<void> }) {
+  const received = snapshot.paidCents > 0;
+  return (
+    <ScrollView contentContainerStyle={styles.page}>
+      <View style={styles.hero}>
+        <Text style={styles.eyebrow}>WALLI</Text>
+        <Text style={styles.heroTitle}>Partilha com o Nuno</Text>
+        <Text style={styles.heroSubtitle}>Dias de guarda, cálculo do valor e controlo de reembolsos.</Text>
       </View>
+
+      <MonthPicker monthKey={monthKey} onChange={setMonthKey} />
 
       <Card>
         <View style={styles.cardHeader}>
-          <View style={styles.titleWithIcon}><Icon name={icons.people} size={22} /><Text style={styles.cardTitle}>Partilha com {snapshot.caregiver.name}</Text></View>
+          <View style={styles.titleWithIcon}><Icon name={icons.wallet} size={22} /><Text style={styles.cardTitle}>Resumo da partilha</Text></View>
           <Pressable accessibilityLabel="Configurações" style={styles.iconButton} onPress={() => navigate('settings')}><Icon name={icons.gear} size={20} color={colors.ink} /></Pressable>
         </View>
-        <MonthPicker monthKey={monthKey} onChange={setMonthKey} />
-        <View style={styles.baseBox}><Text style={styles.muted}>Base mensal da partilha</Text><Text style={styles.bigMoney}>{euro(snapshot.month.baseCents)}</Text></View>
+
+        <View style={styles.baseBox}>
+          <Text style={styles.muted}>Base mensal da partilha</Text>
+          <Text style={styles.bigMoney}>{euro(snapshot.month.baseCents)}</Text>
+        </View>
+
         <View style={styles.twoCols}>
-          <View style={styles.smallBox}><Text style={styles.muted}>Dias com o Nuno</Text><Text style={styles.boxValue}>{snapshot.careDays.length} dias</Text></View>
-          <View style={styles.smallBox}><Text style={styles.muted}>Valor do Nuno</Text><Text style={styles.boxValue}>{euro(snapshot.caregiverShareCents)}</Text><Text style={styles.micro}>{snapshot.month.calculationMode === 'proportional' ? `${snapshot.careDays.length}/${snapshot.daysInMonth} dias` : 'Valor diário fixo'}</Text></View>
+          <View style={styles.smallBox}>
+            <Text style={styles.muted}>Dias com o Nuno</Text>
+            <Text style={styles.boxValue}>{snapshot.careDays.length} dias</Text>
+            <Text style={styles.micro}>de {snapshot.daysInMonth} dias</Text>
+          </View>
+          <View style={styles.smallBox}>
+            <Text style={styles.muted}>Valor do Nuno</Text>
+            <Text style={styles.boxValue}>{euro(snapshot.caregiverShareCents)}</Text>
+            <Text style={styles.micro}>{snapshot.month.calculationMode === 'proportional' ? 'Cálculo proporcional' : 'Valor diário fixo'}</Text>
+          </View>
         </View>
+
+        {snapshot.month.calculationMode === 'proportional' ? (
+          <View style={styles.previewRow}>
+            <Text style={styles.muted}>Parte do proprietário</Text>
+            <Text style={styles.previewStrong}>{euro(snapshot.ownerShareCents)}</Text>
+          </View>
+        ) : null}
+
         <View style={[styles.statusBox, received && snapshot.outstandingCents === 0 && styles.statusBoxPaid]}>
-          <View><Text style={styles.statusLabel}>{snapshot.outstandingCents > 0 ? 'Por receber' : 'Estado da partilha'}</Text><Text style={styles.statusAmount}>{snapshot.outstandingCents > 0 ? euro(snapshot.outstandingCents) : (received ? 'Liquidado' : 'Sem valor em falta')}</Text></View>
-          {snapshot.outstandingCents > 0 ? <Pressable style={styles.receivedButton} onPress={() => void markReceived()}><Icon name={icons.check} size={17} color="#fff" /><Text style={styles.receivedText}>Recebido</Text></Pressable> : null}
+          <View>
+            <Text style={styles.statusLabel}>{snapshot.outstandingCents > 0 ? 'Por receber' : 'Estado da partilha'}</Text>
+            <Text style={styles.statusAmount}>{snapshot.outstandingCents > 0 ? euro(snapshot.outstandingCents) : (received ? 'Liquidado' : 'Sem valor em falta')}</Text>
+          </View>
+          {snapshot.outstandingCents > 0 ? (
+            <Pressable style={styles.receivedButton} onPress={() => void markReceived()}>
+              <Icon name={icons.check} size={17} color="#fff" />
+              <Text style={styles.receivedText}>Recebido</Text>
+            </Pressable>
+          ) : null}
         </View>
+
         <View style={{ height: 14 }} />
         <PrimaryButton label="Registar entrega ao Nuno" icon={icons.calendar} onPress={() => navigate('handover')} />
         <View style={styles.quickActions}>
@@ -176,6 +227,10 @@ export function AnimalsScreen({ snapshot, monthKey, setMonthKey, navigate, markR
           <SecondaryButton label="Registos" icon={icons.history} onPress={() => navigate('records')} />
         </View>
       </Card>
+
+      <InfoBox>
+        <Text style={styles.infoText}>Os valores recebidos do Nuno ficam registados como reembolso. A base mensal original não é reescrita.</Text>
+      </InfoBox>
       <View style={{ height: 90 }} />
     </ScrollView>
   );
