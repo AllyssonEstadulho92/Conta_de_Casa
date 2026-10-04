@@ -677,3 +677,24 @@ A contagem usa a união de dias civis já usada pela partilha, pelo que interval
 - `inbound`: significado legado da versão anterior, quando a interface registava um valor recebido. Não reduz o novo total a pagar.
 
 Registos antigos sem `direction` são normalizados como `inbound`, evitando reinterpretar historicamente movimentos já guardados.
+
+
+#### Hierarquia visual da Partilha do Walli
+
+A composição da rota `petshare` segue quatro níveis:
+
+1. hero de contexto;
+2. resumo mensal com Total/Estado como métricas prioritárias;
+3. fluxo operacional Configuração → Registar período;
+4. consulta Calendário + Histórico.
+
+A lógica permanece em `walli-share.js`; `index.html` contém apenas a estrutura semântica e `v76-product-pages.css` é a autoridade visual. O redesign não cria uma segunda fonte de verdade nem replica cálculos no DOM.
+
+Responsividade:
+
+- desktop: resumo em quatro colunas, formulários lado a lado, calendário/histórico lado a lado;
+- <=900 px: formulários e área inferior passam a uma coluna;
+- <=620 px: campos e ações passam a uma coluna, inputs >=16 px;
+- <=380 px: resumo passa a uma única coluna.
+
+Acessibilidade mantém forced-colors, prefers-reduced-motion e targets tácteis mínimos de 44 px.

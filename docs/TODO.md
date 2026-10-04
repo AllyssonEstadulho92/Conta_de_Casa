@@ -438,3 +438,17 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [ ] Validar 2 passeios/dia no iPhone físico.
 - [ ] Confirmar com o Nuno o preço real acordado e substituir a referência de 8 € se necessário.
 - [ ] Avaliar integração futura do pagamento ao Nuno como despesa do fluxo financeiro global, evitando dupla contabilização.
+
+
+### UI/UX da Partilha do Walli
+
+- [x] Reorganizar visualmente a Partilha do Walli por prioridade.
+- [x] Destacar Total a pagar e Estado/Por pagar.
+- [x] Separar configuração e registo em passos claros.
+- [x] Melhorar prévia automática de passeios.
+- [x] Organizar calendário e histórico em grelha responsiva.
+- [x] Melhorar leitura dos registos com metadados compactos.
+- [x] Proteger forced-colors e reduced-motion.
+- [ ] Validar visualmente em iPhone 390 px e 430 px.
+- [ ] Validar dark mode em dispositivo físico.
+- [ ] Testar notas longas e meses com muitos registos.

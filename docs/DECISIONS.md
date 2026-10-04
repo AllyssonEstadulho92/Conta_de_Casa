@@ -731,3 +731,19 @@ Decisão:
 - o preço de mercado é informativo e não substitui um acordo real com o cuidador.
 
 A direção contabilística também é explicitada: novos movimentos desta área representam pagamentos ao cuidador. Dados antigos criados quando a interface falava em valores recebidos permanecem `inbound` e não são reinterpretados retroativamente.
+
+
+## D-145 — Total e estado são a prioridade visual da Partilha do Walli
+
+Decisão de UI/UX:
+
+- o primeiro valor que o utilizador deve encontrar é **Total a pagar ao Nuno**;
+- o segundo é **Por pagar / Estado do mês**;
+- dias, passeios, parte base e custo dos passeios são informação de suporte;
+- configuração e registo são apresentados como dois passos separados;
+- o calendário e o histórico ficam abaixo do fluxo operacional;
+- não usar animação como requisito para compreensão;
+- não ocultar informação financeira relevante apenas para reduzir altura;
+- manter o mesmo domínio, IDs funcionais e handlers existentes.
+
+O objetivo é reduzir procura visual e evitar que o utilizador tenha de interpretar cartões com igual peso.
