@@ -672,3 +672,12 @@ Decisão:
 - o repositório guarda apenas configuração declarativa;
 - `projectId`, credenciais Apple/Google, certificados, tokens e chaves de assinatura não são inventados nem incluídos no código;
 - a primeira associação ao EAS exige autenticação explícita do titular do projeto.
+
+
+## D-141 — Partilha do Walli é uma secção móvel de topo
+
+- `Partilha` deixa de ficar apenas embutida no perfil Animais;
+- passa a existir como destino explícito na navegação inferior;
+- `Animais` mantém contexto e resumo, sem duplicar a lógica financeira;
+- calendário, registos, configurações e entrega pertencem ao contexto da Partilha;
+- a persistência e os cálculos continuam centralizados no domínio/repositório existentes.
