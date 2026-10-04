@@ -98,7 +98,7 @@
   });
   const DRAWER_GROUPS=Object.freeze([
     {label:'Principal',items:[['dashboard','Início','home'],['bills','Despesas','bill'],['planning','Planeamento','plan'],['market','Mercado','market']]},
-    {label:'Animais',items:[['petshare','Partilha do Walli','calendar']]},
+    {label:'Animais',items:[['petshare','Partilha do Walli','paw']]},
     {label:'Análise',items:[['reports','Relatórios','report']]},
     {label:'Sistema',items:[['security','Segurança e sincronização','shield'],['settings','Definições','settings']]}
   ]);
