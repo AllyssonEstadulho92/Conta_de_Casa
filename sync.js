@@ -33,13 +33,13 @@ const SYNC_CONFLICT_FIELDS = Object.freeze({
   month:['accountBalanceCents','openingBalanceCents','budgetCents'],
   'pet-care':['startDate','endDate','walksCount','note'],
   'pet-share-payment':['monthKey','amountCents','paidAt','note'],
-  'pet-share-month':['baseCents','calculationMode','dailyRateCents']
+  'pet-share-month':['baseCents','calculationMode','dailyRateCents','walksPerDay','walkRateCents']
 });
 const SYNC_CONFLICT_FIELD_LABELS = Object.freeze({
   title:'Descrição',provider:'Fornecedor',category:'Categoria',totalCents:'Valor total',dueDate:'Vencimento',dueTime:'Hora limite',issueAt:'Emissão',method:'Método',recurrence:'Recorrência',reference:'Referência',notes:'Observações',cancelled:'Cancelada',archived:'Arquivada',
-  billId:'Fatura associada',amountCents:'Valor do pagamento',paidAt:'Data do pagamento',description:'Descrição',receivedAt:'Data do rendimento',name:'Nome',quantity:'Quantidade',unit:'Unidade',estimatedCents:'Valor estimado',actualCents:'Valor real',purchased:'Comprado',purchasedAt:'Data da compra',targetCents:'Meta',savedCents:'Poupado',deadline:'Prazo',accountBalanceCents:'Saldo atual da conta',openingBalanceCents:'Saldo inicial',budgetCents:'Orçamento',startDate:'Data inicial',endDate:'Data final',walksCount:'Idas à rua',monthKey:'Mês',baseCents:'Base mensal',calculationMode:'Modo de cálculo',dailyRateCents:'Valor diário',note:'Observação'
+  billId:'Fatura associada',amountCents:'Valor do pagamento',paidAt:'Data do pagamento',description:'Descrição',receivedAt:'Data do rendimento',name:'Nome',quantity:'Quantidade',unit:'Unidade',estimatedCents:'Valor estimado',actualCents:'Valor real',purchased:'Comprado',purchasedAt:'Data da compra',targetCents:'Meta',savedCents:'Poupado',deadline:'Prazo',accountBalanceCents:'Saldo atual da conta',openingBalanceCents:'Saldo inicial',budgetCents:'Orçamento',startDate:'Data inicial',endDate:'Data final',walksCount:'Idas à rua',monthKey:'Mês',baseCents:'Base mensal',calculationMode:'Modo de cálculo',dailyRateCents:'Valor diário',walksPerDay:'Passeios por dia',walkRateCents:'Preço por passeio',note:'Observação'
 });
-const SYNC_CONFLICT_MONEY_FIELDS = new Set(['totalCents','amountCents','estimatedCents','actualCents','targetCents','savedCents','accountBalanceCents','openingBalanceCents','budgetCents','baseCents','dailyRateCents']);
+const SYNC_CONFLICT_MONEY_FIELDS = new Set(['totalCents','amountCents','estimatedCents','actualCents','targetCents','savedCents','accountBalanceCents','openingBalanceCents','budgetCents','baseCents','dailyRateCents','walkRateCents']);
 const SYNC_CONFLICT_DATE_FIELDS = new Set(['dueDate','deadline','startDate','endDate']);
 const SYNC_CONFLICT_DATETIME_FIELDS = new Set(['issueAt','paidAt','receivedAt','purchasedAt']);
 
