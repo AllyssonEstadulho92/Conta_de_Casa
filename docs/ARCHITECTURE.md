@@ -570,3 +570,17 @@ Domínio inicial:
 - `pet_share_payments`: reembolsos recebidos.
 
 A PWA continua a autoridade dos módulos ainda não migrados. Não existe partilha automática de storage entre IndexedDB Web e SQLite nativo nesta fase.
+
+
+### Development build nativa
+
+O subprojeto `apps/mobile-native/` usa `expo-dev-client` para desenvolvimento em dispositivo real. A configuração de build vive em `apps/mobile-native/eas.json`.
+
+Perfis definidos:
+
+- `development`: development client, distribuição interna, iOS físico e Android;
+- `development-simulator`: development client para simulador iOS;
+- `preview`: distribuição interna para validação;
+- `production`: build de produção com incremento de versão remoto.
+
+Credenciais Apple/Google, certificados, provisioning profiles, tokens e segredos não pertencem ao repositório. A associação ao EAS deve ser feita por `eas init` com uma conta autorizada.

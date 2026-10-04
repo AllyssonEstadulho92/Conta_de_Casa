@@ -719,3 +719,14 @@ Foi adicionada uma nova aplicação em `apps/mobile-native/`, separada da PWA ex
 - workflow próprio para validar o subprojeto móvel.
 
 A PWA v76 não foi alterada funcionalmente por esta entrega.
+
+
+## 2026-10-04: development build nativa preparada
+
+- adicionado `expo-dev-client` à aplicação móvel nativa;
+- adicionados perfis EAS para desenvolvimento em iOS físico, Android, simulador iOS, preview e produção;
+- mantidos bundle identifiers existentes;
+- nenhuma credencial, certificado, token, chave de assinatura ou `projectId` fictício foi incluído no repositório;
+- a PWA existente permanece funcionalmente inalterada.
+
+Próximo passo: ligar o subprojeto a uma conta/projeto Expo autorizado e gerar as primeiras builds de dispositivo real.
