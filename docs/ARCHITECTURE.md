@@ -785,3 +785,20 @@ com `reversalOfId`. O cálculo de `paidCents` considera apenas pagamentos outbou
 - preço por passeio.
 
 Dias de guarda, pagamentos, planos e histórico nunca são copiados.
+
+
+#### Autoridade única para iconografia funcional
+
+`ui-icons.js` é a autoridade para ícones funcionais da PWA. A aplicação usa o snapshot Lucide local já incluído no repositório e não depende de icon fonts ou CDN.
+
+Regras:
+
+- componentes dinâmicos usam `icon(nome, tamanho)`;
+- elementos estáticos são normalizados pelo hydrator de `ui-icons.js`;
+- módulos de arquitetura devem preferir `CDCIcons.markup`;
+- SVG legado direto não pode coexistir com um ícone canónico na mesma ação;
+- tamanho e stroke são definidos pelo renderer canónico;
+- ícones são decorativos quando o texto/aria-label já comunica a ação;
+- a marca `icon.svg` permanece separada da iconografia funcional.
+
+O MutationObserver existente reexecuta a hidratação quando componentes dinâmicos são inseridos, mantendo consistência após rerenders.
