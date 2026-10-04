@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 30 de setembro de 2026
+Atualizado: 4 de outubro de 2026
 
 ## P0 — Invariantes
 
@@ -357,3 +357,21 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [ ] validar no iPhone/Safari/PWA que desbloqueio abre imediatamente sem ecrã vazio.
 - [ ] validar retorno do background e atualização automática sem interromper edição.
 - [ ] medir tempos de abertura e interação em dispositivo real antes do próximo bloco de consolidação.
+
+
+## P0 — Aplicação móvel nativa
+
+- [x] Criar fundação em `apps/mobile-native/` sem WebView.
+- [x] Implementar Animais → Walli → Partilha com Nuno.
+- [x] Trabalhar valores em cêntimos inteiros.
+- [x] Calcular proporcionalmente pelos dias reais do mês.
+- [x] Separar reembolso recebido da base mensal.
+- [x] Criar SQLite com SQLCipher e chave no SecureStore.
+- [x] Impedir dias duplicados por schema + transação.
+- [ ] Confirmar `npm ci`, TypeScript e testes no GitHub Actions.
+- [ ] Gerar development build iOS e Android.
+- [ ] Validar fluxo completo em iPhone físico.
+- [ ] Validar fluxo completo em Android físico.
+- [ ] Rever estratégia de backup/restauro da base SQLCipher e da chave.
+- [ ] Definir migração segura de dados da PWA para a aplicação nativa.
+- [ ] Migrar Início, Despesas e Mais apenas depois de estabilizar Animais.

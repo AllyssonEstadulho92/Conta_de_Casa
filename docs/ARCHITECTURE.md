@@ -1,6 +1,6 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 30 de setembro de 2026  
+Atualizado: 4 de outubro de 2026
 Versão: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
@@ -545,3 +545,28 @@ A aplicação verifica nova compilação ao entrar, regressar ao foreground, pag
 ### Recomposição da camada de arquitetura
 
 `v75-architecture.js` mantém `requestAnimationFrame` e MutationObservers específicos, mas deixa de agendar `apply()` para cliques sem relevância arquitetural. Isto reduz trabalho DOM em pesquisa, formulários, listas e outros controlos que já têm as suas próprias autoridades funcionais.
+
+
+## 8. Aplicação móvel nativa
+
+A migração nativa começa em `apps/mobile-native/` como projeto separado da PWA. Não existe WebView nem reaproveitamento da shell HTML/CSS.
+
+Base técnica inicial:
+
+- React Native + Expo SDK 57;
+- TypeScript strict;
+- `expo-sqlite` com `useSQLCipher=true`;
+- chave da base de dados gerada aleatoriamente e guardada em `expo-secure-store`;
+- dados financeiros continuam em cêntimos inteiros;
+- datas de guarda do animal são datas civis `YYYY-MM-DD`;
+- escrita de períodos usa transação exclusiva e uma tabela de dias com chave composta para impedir sobreposição;
+- pagamentos do cuidador são reembolsos separados da base mensal.
+
+Domínio inicial:
+
+- `pet_share_months`: configuração mensal e método de cálculo;
+- `pet_care_records`: períodos de guarda;
+- `pet_care_days`: dias civis materializados para integridade e deteção de duplicados;
+- `pet_share_payments`: reembolsos recebidos.
+
+A PWA continua a autoridade dos módulos ainda não migrados. Não existe partilha automática de storage entre IndexedDB Web e SQLite nativo nesta fase.

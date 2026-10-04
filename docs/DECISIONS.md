@@ -1,6 +1,6 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 30 de setembro de 2026
+Atualizado: 4 de outubro de 2026
 
 ## D-064 — migração TypeScript incremental
 
@@ -637,3 +637,29 @@ Decisão:
 - os ícones continuam a usar o subset Lucide local;
 - a correção visual deve invalidar Service Worker e cache para chegar a clientes Safari/PWA já abertos;
 - a alteração é exclusivamente de navegação e apresentação, sem impacto em dados, cálculos ou segurança do cofre.
+
+
+## D-137 — a nova experiência móvel é nativa e separada da PWA
+
+- a nova aplicação móvel vive em `apps/mobile-native/`;
+- não usa WebView nem transforma a PWA numa aplicação nativa por empacotamento;
+- os módulos são migrados por blocos funcionais, começando em Animais;
+- a PWA existente permanece preservada até existir paridade comprovada.
+
+## D-138 — a partilha do Walli não altera retroativamente a despesa original
+
+- a base mensal é guardada por mês;
+- a parte do Nuno é calculada em cêntimos inteiros;
+- no modo proporcional, usa os dias reais do mês civil;
+- arredondamento ocorre uma única vez no total mensal;
+- pagamentos recebidos do Nuno são reembolsos separados;
+- um reembolso não reduz nem reescreve a base original, evitando dupla contagem.
+
+## D-139 — dados nativos sensíveis usam SQLCipher + SecureStore
+
+- SQLite nativo usa SQLCipher;
+- a chave é aleatória, 256 bits, e não é escrita no repositório;
+- a chave fica no SecureStore/Keychain/Keystore do dispositivo;
+- SQL é parametrizado;
+- períodos de guarda são gravados em transações;
+- dias duplicados são bloqueados por chave primária composta.

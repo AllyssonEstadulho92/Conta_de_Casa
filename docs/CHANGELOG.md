@@ -699,3 +699,23 @@ A apresentação inicial deste PR foi substituída visualmente por `76-date-calc
 - camada de arquitetura deixa de recompor depois de clicks sem relevância;
 - revisões públicas: `76-architecture-efficiency7`, `76-startup-canonical3`, `76-background-efficiency5`, cache `runtime-efficiency1`;
 - sem alteração de `STATE_VERSION`, cálculos em cêntimos, IndexedDB, PBKDF2/AES-GCM, QR, Mercado ou regras de conflito.
+
+## 2026-10-04: fundação da aplicação móvel nativa e partilha do Walli
+
+Foi adicionada uma nova aplicação em `apps/mobile-native/`, separada da PWA existente.
+
+### Incluído
+
+- React Native + Expo SDK 57 + TypeScript strict;
+- ecrãs móveis do protótipo de Animais/Walli;
+- registo de dias com o Nuno, calendário, histórico e edição;
+- cálculo proporcional pelos dias reais do mês ou valor diário fixo;
+- contabilidade em cêntimos inteiros;
+- reembolsos recebidos mantidos separados da base mensal;
+- SQLite + SQLCipher;
+- chave local aleatória protegida pelo SecureStore;
+- transações e prevenção de dias duplicados;
+- testes do domínio financeiro;
+- workflow próprio para validar o subprojeto móvel.
+
+A PWA v76 não foi alterada funcionalmente por esta entrega.
