@@ -634,3 +634,16 @@ Regra proporcional:
 Os dias são materializados logicamente a partir de intervalos civis `YYYY-MM-DD`; o cálculo mensal usa união de datas, evitando dupla contagem. A criação de um novo registo rejeita qualquer dia já coberto por outro intervalo.
 
 Os reembolsos são eventos financeiros próprios em `petShare.payments` e não alteram retroativamente `baseCents`. A sincronização usa merge por ID para registos/reembolsos, merge por mês para configuração e tombstones para eliminações.
+
+
+#### Edição e idas à rua
+
+Cada elemento de `petShare.records[]` inclui também:
+
+```text
+walksCount: inteiro de 0 a 200
+```
+
+O valor é introduzido manualmente e representa a quantidade de idas à rua/passeios associada ao período. Não participa no cálculo financeiro da partilha, que continua a depender exclusivamente dos dias civis e da configuração mensal.
+
+A edição conserva o mesmo `id` e `createdAt`, atualiza `updatedAt` e volta a validar sobreposição de datas, excluindo o próprio registo da comparação. Alterações a `walksCount` são tratadas como campo de negócio no mecanismo de conflitos cifrados.
