@@ -1,4 +1,4 @@
-/* Conta de Casa v76 — 76-modern-ui2.
+/* Conta de Casa v76 — 76-modern-ui3-neomorphic.
    Sistema visual transversal para todas as páginas.
    Camada exclusivamente de apresentação: não altera dados, cálculos, persistência,
    PIN, cifragem, sincronização, scanner, QR ou regras financeiras. */
@@ -17,9 +17,10 @@
   --v76-danger:#d94f60;
   --v76-warning:#d8872d;
   --v76-success:#168f69;
-  --v76-shadow-xs:0 1px 2px rgba(10,49,55,.035);
-  --v76-shadow-sm:0 4px 14px rgba(10,49,55,.055);
-  --v76-shadow-md:0 10px 30px rgba(7,57,63,.085);
+  --v76-shadow-xs:6px 6px 14px rgba(27,72,76,.10),-6px -6px 14px rgba(255,255,255,.82);
+  --v76-shadow-sm:10px 10px 24px rgba(27,72,76,.12),-10px -10px 24px rgba(255,255,255,.88);
+  --v76-shadow-md:16px 16px 36px rgba(27,72,76,.14),-14px -14px 32px rgba(255,255,255,.90);
+  --v76-shadow-inset:inset 3px 3px 8px rgba(27,72,76,.10),inset -3px -3px 8px rgba(255,255,255,.82);
   --v76-radius-sm:12px;
   --v76-radius:16px;
   --v76-radius-lg:20px;
@@ -42,9 +43,10 @@ html[data-theme="dark"]{
   --v76-primary:#4dd5c2;
   --v76-primary-strong:#31b9ae;
   --v76-accent:#4ce0b6;
-  --v76-shadow-xs:0 1px 2px rgba(0,0,0,.10);
-  --v76-shadow-sm:0 5px 16px rgba(0,0,0,.18);
-  --v76-shadow-md:0 12px 32px rgba(0,0,0,.24);
+  --v76-shadow-xs:6px 6px 14px rgba(0,0,0,.22),-5px -5px 12px rgba(42,75,80,.22);
+  --v76-shadow-sm:10px 10px 24px rgba(0,0,0,.28),-8px -8px 20px rgba(42,75,80,.22);
+  --v76-shadow-md:16px 16px 36px rgba(0,0,0,.34),-10px -10px 28px rgba(42,75,80,.20);
+  --v76-shadow-inset:inset 3px 3px 8px rgba(0,0,0,.24),inset -3px -3px 8px rgba(42,75,80,.18);
 }
 
 html.cdc-v75,
@@ -77,11 +79,11 @@ html.cdc-v75 :is(
   .dashboard-secondary-card,.cdc-month-hero,.cdc-quick-action,.cdc-category-row,.cdc-product-card,
   .cdc-store-card,.v75-budget-summary,.v75-budget-metrics>div,.v75-more-group>div
 ){
-  border:1px solid var(--v76-border)!important;
-  background:var(--v76-surface)!important;
+  border:1px solid color-mix(in srgb,var(--v76-border) 62%,transparent)!important;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--v76-surface) 96%,white),color-mix(in srgb,var(--v76-bg) 42%,var(--v76-surface)))!important;
   color:var(--v76-text)!important;
-  border-radius:var(--v76-radius)!important;
-  box-shadow:var(--v76-shadow-xs)!important;
+  border-radius:var(--v76-radius-lg)!important;
+  box-shadow:var(--v76-shadow-sm)!important;
 }
 
 html.cdc-v75 :is(.panel,.kpi,.goal-card){transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
@@ -118,9 +120,9 @@ html.cdc-v75 .btn.primary{
   box-shadow:0 6px 16px color-mix(in srgb,var(--v76-primary) 20%,transparent)!important;
 }
 html.cdc-v75 .btn.secondary{
-  border:1px solid var(--v76-border)!important;
+  border:1px solid color-mix(in srgb,var(--v76-border) 58%,transparent)!important;
   color:var(--v76-primary)!important;
-  background:var(--v76-surface)!important;
+  background:linear-gradient(145deg,var(--v76-surface),color-mix(in srgb,var(--v76-bg) 46%,var(--v76-surface)))!important;
   box-shadow:var(--v76-shadow-xs)!important;
 }
 html.cdc-v75 .btn.danger{
@@ -197,11 +199,11 @@ html.cdc-v75 :is(.panel-head,.section-toolbar)>div{min-width:0}
 
 /* Campos e formulários */
 html.cdc-v75 :is(input,select,textarea){
-  border:1px solid var(--v76-border)!important;
+  border:1px solid color-mix(in srgb,var(--v76-border) 60%,transparent)!important;
   border-radius:var(--v76-control-radius)!important;
-  background:var(--v76-surface)!important;
+  background:color-mix(in srgb,var(--v76-bg) 58%,var(--v76-surface))!important;
   color:var(--v76-text)!important;
-  box-shadow:inset 0 1px 1px rgba(9,49,54,.025)!important;
+  box-shadow:var(--v76-shadow-inset)!important;
   transition:border-color .16s ease,box-shadow .16s ease,background-color .16s ease!important;
 }
 html.cdc-v75 :is(input,select,textarea):focus{
@@ -737,4 +739,37 @@ html.cdc-v75 :is(.dialog-back,.dialog-close){border-radius:12px!important;backgr
 @media(forced-colors:active){
   html.cdc-v75 :is(.panel,.kpi,.goal-card,.bill-summary-item,.market-summary-item,.mobile-nav,.section-tabs,.market-visual-product-card){border:1px solid CanvasText!important}
   html.cdc-v75 .btn.primary{border:1px solid ButtonText!important}
+}
+
+
+/* 76-neomorphic-surfaces1
+   Direção visual inspirada em superfícies neomórficas, preservando a paleta teal
+   e a semântica funcional do Conta de Casa. Não altera layout, DOM ou domínio. */
+html.cdc-v75 :is(.vault-card,.dialog-shell,.mobile-drawer){
+  border:1px solid color-mix(in srgb,var(--v76-border) 58%,transparent)!important;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--v76-surface) 97%,white),color-mix(in srgb,var(--v76-bg) 48%,var(--v76-surface)))!important;
+  box-shadow:var(--v76-shadow-md)!important;
+}
+html.cdc-v75 :is(.vault-key,.sync-header-status,.month-picker,.section-tabs){
+  border-color:color-mix(in srgb,var(--v76-border) 56%,transparent)!important;
+  box-shadow:var(--v76-shadow-xs)!important;
+}
+html.cdc-v75 :is(.vault-key,.icon-btn,.cdc-quick-action):active{
+  box-shadow:var(--v76-shadow-inset)!important;
+  transform:scale(.985);
+}
+html.cdc-v75 .btn.primary{
+  box-shadow:8px 10px 22px color-mix(in srgb,var(--v76-primary) 20%,transparent),-5px -5px 14px color-mix(in srgb,#fff 68%,transparent)!important;
+}
+html[data-theme="dark"].cdc-v75 .btn.primary{
+  box-shadow:8px 10px 22px rgba(0,0,0,.28),-4px -4px 12px rgba(42,75,80,.16)!important;
+}
+@media(prefers-reduced-motion:reduce){
+  html.cdc-v75 :is(.vault-key,.icon-btn,.cdc-quick-action):active{transform:none}
+}
+@media(forced-colors:active){
+  html.cdc-v75 :is(.panel,.kpi,.vault-card,.dialog-shell,.mobile-drawer,.btn,.icon-btn,input,select,textarea){
+    box-shadow:none!important;
+    border:1px solid CanvasText!important;
+  }
 }
