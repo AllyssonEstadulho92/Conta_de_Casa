@@ -277,7 +277,7 @@
           return '<div class="walli-payment-row is-reversal"><span class="walli-payment-icon">'+icon('alert',16)+'</span><div><strong>Anulação</strong><small>'+fmtDateTime(item.paidAt)+' · '+money(item.amountCents)+'</small></div></div>';
         }
         if(item.direction==='inbound'){
-          return '<div class="walli-payment-row is-legacy"><span class="walli-payment-icon">'+icon('history',16)+'</span><div><strong>Histórico anterior recebido</strong><small>'+fmtDateTime(item.paidAt)+' · '+money(item.amountCents)+'</small></div></div>';
+          return '<div class="walli-payment-row is-legacy"><span class="walli-payment-icon">'+icon('receipt',16)+'</span><div><strong>Histórico anterior recebido</strong><small>'+fmtDateTime(item.paidAt)+' · '+money(item.amountCents)+'</small></div></div>';
         }
         const reversed=reversals.has(item.id);
         return '<div class="walli-payment-row'+(reversed?' is-reversed':'')+'"><span class="walli-payment-icon">'+icon(reversed?'alert':'wallet',16)+'</span><div class="walli-payment-copy"><strong>'+esc(reversed?'Pagamento anulado':'Pagamento ao '+caregiver)+'</strong><small>'+fmtDateTime(item.paidAt)+' · '+money(item.amountCents)+(item.linkedBillId?' · em Despesas':'')+'</small></div>'+
@@ -466,7 +466,7 @@
   }
 
   function ensureMonth(monthKey){
-    appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[]};
+    appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[],plans:[]};
     appState.petShare.months ||= {};
     appState.petShare.months[monthKey] ||= {baseCents:0,calculationMode:'proportional',dailyRateCents:0,walksPerDay:1,walkRateCents:800,updatedAt:new Date().toISOString()};
     return appState.petShare.months[monthKey];
