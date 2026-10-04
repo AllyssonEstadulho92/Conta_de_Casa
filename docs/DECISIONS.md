@@ -681,3 +681,18 @@ Decisão:
 - `Animais` mantém contexto e resumo, sem duplicar a lógica financeira;
 - calendário, registos, configurações e entrega pertencem ao contexto da Partilha;
 - a persistência e os cálculos continuam centralizados no domínio/repositório existentes.
+
+
+## D-142 — Partilha do Walli também vive no drawer da PWA
+
+A área do Walli deve estar acessível na Conta de Casa que o utilizador abre atualmente no iPhone, através do drawer completo.
+
+Decisão:
+
+- criar o grupo `Animais` e o item `Partilha do Walli` no drawer;
+- não adicionar um sexto botão à navegação inferior compacta;
+- reutilizar o cofre cifrado existente em vez de criar armazenamento paralelo;
+- manter dinheiro em cêntimos inteiros e datas civis;
+- manter reembolsos separados da base/despesa original;
+- preservar `STATE_VERSION = 5`, porque a nova propriedade é normalizada de forma retrocompatível;
+- incluir o novo domínio no mecanismo de backup/sync e na política de conflitos antes de o considerar pronto para dados reais.
