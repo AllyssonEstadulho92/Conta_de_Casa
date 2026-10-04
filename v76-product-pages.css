@@ -1399,6 +1399,101 @@ html.cdc-v75 .walli-delete-action{
   color:#a63d35;
 }
 
+
+html.cdc-v75 .walli-payment-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+html.cdc-v75 .walli-payment-split{
+  display:grid;
+  gap:10px;
+  margin-top:5px;
+  padding-top:12px;
+  border-top:1px solid color-mix(in srgb,currentColor 12%,var(--v76-border));
+}
+
+html.cdc-v75 .walli-split-head{
+  display:grid;
+  gap:3px;
+}
+
+html.cdc-v75 .walli-split-head>strong{
+  color:var(--v76-text);
+  font-size:.78rem;
+}
+
+html.cdc-v75 .walli-split-head>small{
+  color:var(--v76-muted);
+  font-size:.68rem;
+  line-height:1.35;
+}
+
+html.cdc-v75 .walli-payment-split label{
+  display:grid;
+  grid-template-columns:auto minmax(116px,1fr);
+  align-items:center;
+  gap:10px;
+  color:var(--v76-muted);
+  font-size:.72rem;
+  font-weight:750;
+}
+
+html.cdc-v75 .walli-payment-split select{
+  min-height:42px;
+  width:100%;
+  margin:0;
+  font-size:16px;
+}
+
+html.cdc-v75 .walli-split-preview{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+
+html.cdc-v75 .walli-split-preview>div{
+  min-width:0;
+  padding:9px 10px;
+  border-radius:11px;
+  background:color-mix(in srgb,var(--v76-surface) 72%,transparent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--v76-border) 88%,transparent);
+}
+
+html.cdc-v75 .walli-split-preview small{
+  display:block;
+  margin-bottom:3px;
+  color:var(--v76-muted);
+  font-size:.65rem;
+}
+
+html.cdc-v75 .walli-split-preview strong{
+  display:block;
+  color:var(--v76-text);
+  font-size:.96rem;
+  font-weight:850;
+  font-variant-numeric:tabular-nums;
+}
+
+html.cdc-v75 .walli-split-preview>p{
+  grid-column:1/-1;
+  margin:0;
+  color:var(--v76-muted);
+  font-size:.66rem;
+  line-height:1.35;
+}
+
+html.cdc-v75 .walli-partial-action{
+  width:100%;
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+}
+
 @media(hover:hover) and (pointer:fine){
   html.cdc-v75 .walli-summary-card,
   html.cdc-v75 .walli-work-card,
