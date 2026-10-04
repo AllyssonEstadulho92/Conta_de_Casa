@@ -575,3 +575,25 @@ Implementado:
 Pesquisa de referência em 4 de outubro de 2026: Zaask indica média de 8 € por 30 minutos, Fixando mostra intervalo de 7 € a 20 € por serviço em Lisboa, e SeePet apresenta referências de 10 € a 12 € por passeio em pacotes recorrentes. O valor de 8 € é apenas uma referência inicial editável, não uma obrigação contratual.
 
 Pendente: validação física no iPhone, incluindo 1 e 2 passeios por dia, alteração do preço, edição de períodos e marcação como pago.
+
+
+## PWA: refinamento UI/UX da Partilha do Walli
+
+Em 4 de outubro de 2026, a área **Partilha do Walli** foi reorganizada visualmente sem alterar o domínio financeiro.
+
+Melhorias:
+
+- hero próprio com identidade do Walli e indicação de cofre cifrado;
+- resumo mensal com hierarquia explícita, destacando primeiro **Total a pagar** e **Estado/Por pagar**;
+- métricas secundárias separadas em cartões menores;
+- configuração e registo de período apresentados como passos 1 e 2;
+- formulários em duas colunas no desktop e uma coluna no mobile;
+- prévia automática separa quantidade de passeios e custo estimado;
+- calendário e histórico passam a uma grelha organizada no desktop e empilham no mobile;
+- registos passam a mostrar chips de dias/passeios e ações mais claras;
+- touch targets, inputs móveis a 16 px, forced-colors e reduced-motion preservados;
+- nova revisão pública `76-walli-ux-polish4`.
+
+Preservado: cálculos em cêntimos, datas civis, prevenção de sobreposição, pagamentos inbound/outbound, cofre cifrado, sincronização e dados existentes.
+
+Pendente: validação visual física no iPhone em 390/430 px, dark mode e com registos longos.
