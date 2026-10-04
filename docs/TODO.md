@@ -452,3 +452,15 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [ ] Validar visualmente em iPhone 390 px e 430 px.
 - [ ] Validar dark mode em dispositivo físico.
 - [ ] Testar notas longas e meses com muitos registos.
+
+
+### Pagamentos parciais do Walli
+
+- [x] Permitir pagar a Partilha do Walli por partes.
+- [x] Dividir automaticamente em 2, 3 ou 4 partes.
+- [x] Garantir soma exata em cêntimos.
+- [x] Mostrar Pagar agora e Fica por pagar.
+- [x] Registar cada parte como pagamento outbound normal.
+- [x] Manter opção Pagar tudo.
+- [ ] Validar fluxo 2x, 3x e 4x no iPhone físico.
+- [ ] Confirmar comportamento após vários pagamentos parciais no mesmo mês.
