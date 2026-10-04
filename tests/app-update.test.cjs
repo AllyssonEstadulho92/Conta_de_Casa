@@ -151,7 +151,7 @@ assert.match(prepare, /const APP_VERSION = String\(PACKAGE\.version/);
 assert.match(prepare, /git'.*rev-parse.*--short=7.*HEAD/s);
 assert.match(prepare, /const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(prepare, /const BUILD = 'v76'/);
-assert.match(prepare, /const SERVICE_WORKER_REV = '76-walli-enhancements6'/);
+assert.match(prepare, /const SERVICE_WORKER_REV = '76-icons-unified7'/);
 assert.match(prepare, /name="app-version"/);
 assert.match(prepare, /name="app-build-id"/);
 assert.match(prepare, /name="app-build-date"/);
@@ -218,7 +218,7 @@ try {
   assert.doesNotMatch(index,/unpkg\.com/);
   assert.ok(fs.existsSync(path.join(dist,'zxing-browser.min.js')));
   assert.ok(fs.existsSync(path.join(dist,'ZXING_BROWSER_LICENSE.txt')));
-  assert.match(events, /\.\/sw\.js\?v=76-walli-enhancements6/);
+  assert.match(events, /\.\/sw\.js\?v=76-icons-unified7/);
   assert.equal(distManifest.latestVersion,'v76');
   assert.equal(distManifest.releases[0].version,'v76');
   assert.equal(distWebManifest.background_color,'#f4f8f8');
