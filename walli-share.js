@@ -112,30 +112,80 @@
     const data=snapshot(selectedMonth);
     const petName=appState.petShare.petName||'Walli';
     const caregiver=appState.petShare.caregiverName||'Nuno';
+    const metricHead=(iconName,label)=>'<div class="walli-card-head"><span class="walli-card-icon">'+icon(iconName,18)+'</span><span>'+label+'</span></div>';
     let status='';
     if(data.outstandingCents>0){
-      status='<article class="walli-summary-card walli-status-card warning"><span>Por pagar ao '+esc(caregiver)+'</span><strong data-money>'+money(data.outstandingCents)+'</strong><button class="btn primary" type="button" data-walli-receive>Marcar como pago</button></article>';
+      status='<article class="walli-summary-card walli-status-card warning">'+
+        metricHead('alert','Por pagar ao '+esc(caregiver))+
+        '<strong data-money>'+money(data.outstandingCents)+'</strong>'+
+        '<small>Valor ainda em aberto neste mês.</small>'+
+        '<button class="btn primary walli-pay-action" type="button" data-walli-receive>'+icon('check',17)+'<span>Marcar como pago</span></button>'+
+      '</article>';
     }else if(data.overpaidCents>0){
-      status='<article class="walli-summary-card walli-status-card warning"><span>Pago acima do valor atual</span><strong data-money>'+money(data.overpaidCents)+'</strong><small>Reveja a configuração ou os registos do mês.</small></article>';
+      status='<article class="walli-summary-card walli-status-card warning">'+
+        metricHead('alert','Pago acima do valor atual')+
+        '<strong data-money>'+money(data.overpaidCents)+'</strong>'+
+        '<small>Reveja a configuração ou os registos do mês.</small>'+
+      '</article>';
     }else{
-      status='<article class="walli-summary-card walli-status-card success"><span>Estado</span><strong>'+(data.paidCents>0?'Liquidado':'Sem valor em falta')+'</strong><small>O pagamento fica registado separadamente da base mensal.</small></article>';
+      status='<article class="walli-summary-card walli-status-card success">'+
+        metricHead('check','Estado do mês')+
+        '<strong>'+(data.paidCents>0?'Liquidado':'Sem valor em falta')+'</strong>'+
+        '<small>O pagamento fica separado da base mensal.</small>'+
+      '</article>';
     }
 
     let summary=
-      '<article class="walli-summary-card primary"><span>Base mensal</span><strong data-money>'+money(data.config.baseCents)+'</strong><small>'+esc(monthLabel(data.monthKey))+'</small></article>'+
-      '<article class="walli-summary-card"><span>Dias com '+esc(caregiver)+'</span><strong>'+data.careDays.length+'</strong><small>de '+data.daysInMonth+' dias</small></article>'+
-      '<article class="walli-summary-card"><span>Parte base de '+esc(caregiver)+'</span><strong data-money>'+money(data.shareCents)+'</strong><small>'+(data.config.calculationMode==='proportional'?'Proporcional ao mês':'Valor diário fixo')+'</small></article>'+
-      '<article class="walli-summary-card"><span>Passeios automáticos</span><strong>'+data.walkCount+'</strong><small>'+data.walksPerDay+' por dia × '+money(data.walkRateCents)+'</small></article>'+
-      '<article class="walli-summary-card"><span>Custo dos passeios</span><strong data-money>'+money(data.walksCostCents)+'</strong><small>'+data.walkCount+' passeio'+(data.walkCount===1?'':'s')+'</small></article>'+
-      '<article class="walli-summary-card primary"><span>Total a pagar a '+esc(caregiver)+'</span><strong data-money>'+money(data.totalPayableCents)+'</strong><small>Parte base + passeios</small></article>'+
-      '<article class="walli-summary-card"><span>Já pago</span><strong data-money>'+money(data.paidCents)+'</strong><small>Pagamentos registados nesta secção</small></article>';
+      '<article class="walli-summary-card walli-total-card primary">'+
+        metricHead('wallet','Total a pagar a '+esc(caregiver))+
+        '<strong data-money>'+money(data.totalPayableCents)+'</strong>'+
+        '<small>Parte base + custo dos passeios</small>'+
+      '</article>'+
+      status+
+      '<article class="walli-summary-card walli-metric-card">'+
+        metricHead('calendar','Dias com '+esc(caregiver))+
+        '<strong>'+data.careDays.length+'</strong>'+
+        '<small>de '+data.daysInMonth+' dias no mês</small>'+
+      '</article>'+
+      '<article class="walli-summary-card walli-metric-card">'+
+        metricHead('paw','Passeios automáticos')+
+        '<strong>'+data.walkCount+'</strong>'+
+        '<small>'+data.walksPerDay+' por dia × '+money(data.walkRateCents)+'</small>'+
+      '</article>'+
+      '<article class="walli-summary-card walli-metric-card">'+
+        metricHead('report','Parte base de '+esc(caregiver))+
+        '<strong data-money>'+money(data.shareCents)+'</strong>'+
+        '<small>'+(data.config.calculationMode==='proportional'?'Proporcional aos dias':'Valor diário fixo')+'</small>'+
+      '</article>'+
+      '<article class="walli-summary-card walli-metric-card">'+
+        metricHead('paw','Custo dos passeios')+
+        '<strong data-money>'+money(data.walksCostCents)+'</strong>'+
+        '<small>'+data.walkCount+' passeio'+(data.walkCount===1?'':'s')+'</small>'+
+      '</article>'+
+      '<article class="walli-summary-card walli-metric-card">'+
+        metricHead('wallet','Base mensal')+
+        '<strong data-money>'+money(data.config.baseCents)+'</strong>'+
+        '<small>'+esc(monthLabel(data.monthKey))+'</small>'+
+      '</article>'+
+      '<article class="walli-summary-card walli-metric-card">'+
+        metricHead('check','Já pago')+
+        '<strong data-money>'+money(data.paidCents)+'</strong>'+
+        '<small>Pagamentos registados nesta secção</small>'+
+      '</article>';
     if(data.config.calculationMode==='proportional'){
-      summary+='<article class="walli-summary-card"><span>Parte do proprietário</span><strong data-money>'+money(data.ownerShareCents)+'</strong><small>Base menos a parte de '+esc(caregiver)+'</small></article>';
+      summary+='<article class="walli-summary-card walli-metric-card walli-muted-card">'+
+        metricHead('report','Parte do proprietário')+
+        '<strong data-money>'+money(data.ownerShareCents)+'</strong>'+
+        '<small>Base menos a parte de '+esc(caregiver)+'</small>'+
+      '</article>';
     }
     if(data.legacyReceivedCents>0){
-      summary+='<article class="walli-summary-card warning"><span>Histórico anterior recebido</span><strong data-money>'+money(data.legacyReceivedCents)+'</strong><small>Não é abatido ao total a pagar ao '+esc(caregiver)+'.</small></article>';
+      summary+='<article class="walli-summary-card walli-metric-card warning">'+
+        metricHead('alert','Histórico anterior recebido')+
+        '<strong data-money>'+money(data.legacyReceivedCents)+'</strong>'+
+        '<small>Não é abatido ao total a pagar ao '+esc(caregiver)+'.</small>'+
+      '</article>';
     }
-    summary+=status;
     setHTML('#walliShareSummary',summary);
 
     const mode=$('#walliShareMode');
@@ -167,12 +217,24 @@
     const records=data.records.slice().sort((a,b)=>a.startDate.localeCompare(b.startDate)).map(record=>{
       const days=recordDaysInMonth(record,data.monthKey).length;
       const walks=days*data.walksPerDay;
-      const note=record.note?' · '+esc(record.note):'';
       const period=esc(fmtDate(record.startDate))+(record.startDate!==record.endDate?' a '+esc(fmtDate(record.endDate)):'');
-      const walksText=walks+' passeio'+(walks===1?'':'s')+' automático'+(walks===1?'':'s');
-      return '<div class="list-row walli-record-row">'+
-        '<div class="list-main"><strong>'+period+'</strong><small>'+days+' dia'+(days===1?'':'s')+' neste mês · '+walksText+note+'</small></div>'+
-        '<div class="list-side"><button class="btn secondary" type="button" data-walli-edit="'+attr(record.id)+'">Editar</button><button class="btn secondary" type="button" data-walli-delete="'+attr(record.id)+'">Eliminar</button></div>'+
+      const note=record.note?'<p class="walli-record-note">'+esc(record.note)+'</p>':'';
+      return '<div class="walli-record-row">'+
+        '<div class="walli-record-main">'+
+          '<span class="walli-record-icon" aria-hidden="true">'+icon('calendar',18)+'</span>'+
+          '<div class="walli-record-copy">'+
+            '<strong>'+period+'</strong>'+
+            '<div class="walli-record-meta">'+
+              '<span>'+days+' dia'+(days===1?'':'s')+'</span>'+
+              '<span>'+walks+' passeio'+(walks===1?'':'s')+'</span>'+
+            '</div>'+
+            note+
+          '</div>'+
+        '</div>'+
+        '<div class="walli-record-actions">'+
+          '<button class="btn secondary" type="button" data-walli-edit="'+attr(record.id)+'">'+icon('edit',16)+'<span>Editar</span></button>'+
+          '<button class="btn secondary walli-delete-action" type="button" data-walli-delete="'+attr(record.id)+'"><span>Eliminar</span></button>'+
+        '</div>'+
       '</div>';
     }).join('');
     setHTML('#walliShareRecords',records||empty('Ainda não há dias de '+petName+' com '+caregiver+' neste mês.'));
@@ -219,9 +281,12 @@
     const count=days.length*perDay;
     const cost=walkCostCents(rate,count);
     setHTML('#walliCareAutoWalks',
-      '<span>Passeios calculados automaticamente</span>'+
-      '<strong>'+count+' passeio'+(count===1?'':'s')+'</strong>'+
-      '<small>'+days.length+' dia'+(days.length===1?'':'s')+' × '+perDay+' por dia = '+count+' · '+money(cost)+'</small>'
+      '<div class="walli-auto-head"><span class="walli-auto-icon">'+icon('paw',18)+'</span><span>Cálculo automático</span></div>'+
+      '<div class="walli-auto-values">'+
+        '<div><small>Passeios</small><strong>'+count+'</strong></div>'+
+        '<div><small>Custo estimado</small><strong data-money>'+money(cost)+'</strong></div>'+
+      '</div>'+
+      '<small class="walli-auto-rule">'+days.length+' dia'+(days.length===1?'':'s')+' × '+perDay+' passeio'+(perDay===1?'':'s')+' por dia</small>'
     );
   }
 
