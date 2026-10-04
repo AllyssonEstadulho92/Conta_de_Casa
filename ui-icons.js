@@ -21,7 +21,7 @@
   if(typeof ICONS==='undefined'||typeof icon!=='function') return;
 
   const LUCIDE_SOURCE_COMMIT='94e4cb9d9db5907053ebf3636a97c45529cf776b';
-  const ICON_SEMANTICS_REVISION='76-icon-semantics1';
+  const ICON_SEMANTICS_REVISION='76-icons-unified7';
   const LUCIDE_ICONS=Object.freeze({
     home:'<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
     bill:'<path d="M13 16H8"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>',
@@ -36,6 +36,7 @@
     paw:'<circle cx="12" cy="16" r="4"/><circle cx="5.5" cy="10.5" r="2"/><circle cx="9.5" cy="6.5" r="2"/><circle cx="14.5" cy="6.5" r="2"/><circle cx="18.5" cy="10.5" r="2"/>',
     more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
     alert:'<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
     lock:'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
     menu:'<path d="M4 12h16"/><path d="M4 18h16"/><path d="M4 6h16"/>',
     close:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
@@ -135,7 +136,11 @@
   }
 
   function appendNavigationIcon(button,name='arrowRight',size=16){
-    if(!button||button.dataset.uiTrailingIcon===name)return;
+    if(!button)return;
+    button.querySelectorAll?.(':scope > svg:not(.ui-icon-svg)').forEach(svg=>svg.remove());
+    const existing=button.querySelector(':scope > svg.ui-icon-trailing');
+    if(button.dataset.uiTrailingIcon===name&&existing)return;
+    existing?.remove();
     const trailing=svgNode(name,size);
     trailing.classList.add('ui-icon-trailing');
     button.appendChild(trailing);
@@ -247,6 +252,13 @@
     }
   }
 
+  function hydrateDashboard(root=document){
+    root.querySelectorAll?.('.dashboard-priority-panel .dashboard-feature-icon').forEach(slot=>fillIcon(slot,'calendar',22));
+    root.querySelectorAll?.('.dashboard-budget-panel .dashboard-feature-icon').forEach(slot=>fillIcon(slot,'report',22));
+    root.querySelectorAll?.('.dashboard-budget-open').forEach(button=>fillIcon(button,'chevron',19));
+    root.querySelectorAll?.('.dashboard-priority-due > svg').forEach(svg=>replaceSvg(svg,'clock',15));
+  }
+
   function hydrate(root=document){
     root.querySelectorAll?.('.brand-mark').forEach(slot=>fillIcon(slot,'home',22));
     root.querySelectorAll?.('.vault-lock-badge').forEach(slot=>fillIcon(slot,'lock',20));
@@ -271,6 +283,7 @@
     root.querySelectorAll?.('select').forEach(decorateSelect);
     hydrateActionButtons(root);
     hydrateMarket(root);
+    hydrateDashboard(root);
   }
 
   globalThis.CDCIcons=Object.freeze({
