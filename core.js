@@ -483,11 +483,14 @@ function normalizePetCareRecord(value = {}) {
   const now = new Date().toISOString();
   const startDate = cleanDateKey(value.startDate);
   const endDate = cleanDateKey(value.endDate);
+  const walksValue = Number(value.walksCount);
+  const walksCount = Number.isSafeInteger(walksValue) ? clamp(walksValue, 0, 200) : 0;
   if (!startDate || !endDate || civilDayDiff(startDate, endDate) < 0 || civilDayDiff(startDate, endDate) > 370) return null;
   return {
     id: cleanString(value.id || uid(), 80),
     startDate,
     endDate,
+    walksCount,
     note: cleanMultiline(value.note, 500),
     createdAt: cleanIso(value.createdAt, now),
     updatedAt: cleanIso(value.updatedAt || value.createdAt, now),
