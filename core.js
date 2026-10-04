@@ -511,6 +511,7 @@ function normalizePetSharePayment(value = {}) {
   return {
     id: cleanString(value.id || uid(), 80),
     monthKey,
+    direction: value.direction === 'outbound' ? 'outbound' : 'inbound',
     amountCents: cleanCents(value.amountCents),
     paidAt: cleanIso(value.paidAt, now),
     note: cleanMultiline(value.note, 300),
