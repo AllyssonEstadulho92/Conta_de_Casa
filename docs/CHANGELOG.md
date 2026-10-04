@@ -784,3 +784,19 @@ Próximo passo: ligar o subprojeto a uma conta/projeto Expo autorizado e gerar a
 - configuração de frequência e preço entra na sincronização cifrada;
 - revisão de Walli/Service Worker atualizada para `76-walli-auto-walk-cost3`;
 - fórmulas gerais de Faturas, Mercado, Planeamento e Relatórios permanecem inalteradas.
+
+
+## 2026-10-04: refinamento UI/UX da Partilha do Walli
+
+- nova hierarquia visual da página;
+- hero dedicado com contexto e segurança;
+- Total a pagar e Estado ganham maior peso visual;
+- métricas secundárias passam a cartões compactos;
+- configuração e registo tornam-se passos 1 e 2;
+- prévia automática de passeios mostra quantidade e custo em blocos separados;
+- calendário e histórico passam a composição responsiva;
+- registos recebem ícone, chips de dias/passeios e ações mais claras;
+- melhorias mobile para 900, 620 e 380 px;
+- acessibilidade forced-colors e reduced-motion preservada;
+- revisão de CSS, módulo Walli e Service Worker atualizada para `76-walli-ux-polish4`;
+- sem alterações às fórmulas financeiras, persistência ou sincronização.
