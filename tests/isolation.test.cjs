@@ -45,6 +45,7 @@ for(const field of ['bills','payments','incomes','market','goals','activity','au
   assert.deepEqual(JSON.parse(JSON.stringify(empty[field])),[],field);
 }
 assert.deepEqual(JSON.parse(JSON.stringify(empty.months)),{});
+assert.deepEqual(JSON.parse(JSON.stringify(empty.petShare)),{petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[]});
 
 const explicit = vm.runInContext(`ensureStateShape({
   settings:{sync:{enabled:true,disabledByUser:false,owner:'example-user',repo:'private-vault',path:'sync/vault.json'}},
@@ -59,7 +60,7 @@ assert.equal(explicitCfg.enabled,true);
 assert.equal(explicitCfg.owner,'example-user');
 assert.equal(explicitCfg.repo,'private-vault');
 
-const runtimeFiles=['index.html','core.js','sync.js','events.js','render.js','forms.js','finance.js','styles.css','design-system.css','sw.js','manifest.webmanifest'];
+const runtimeFiles=['index.html','core.js','sync.js','events.js','render.js','forms.js','finance.js','walli-share.js','styles.css','design-system.css','sw.js','manifest.webmanifest'];
 for(const file of runtimeFiles){
   const source=fs.readFileSync(file,'utf8');
   assert.doesNotMatch(source,/SYNC_DEFAULT_OWNER|SYNC_DEFAULT_REPO/,`${file} must not ship a fixed sync identity`);
