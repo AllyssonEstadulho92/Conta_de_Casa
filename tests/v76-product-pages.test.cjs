@@ -41,6 +41,7 @@ assert.match(css,/\.dashboard-priority-row\{[\s\S]*grid-template-areas:[\s\S]*"r
 assert.match(css,/\.dashboard-priority-rank\{/);
 assert.match(css,/\.dashboard-bill-brand\.tone-5/,'bill identity badge palette must remain local and deterministic');
 assert.match(css,/\.dashboard-priority-due\{/);
+assert.match(render,/dashboard-priority-due">\$\{icon\('clock',15\)\}/,'Dashboard due metadata must render the canonical clock icon');
 assert.match(css,/\.dashboard-budget-card\{/);
 assert.match(css,/\.dashboard-budget-track>span\{/);
 assert.match(css,/@media\(max-width:390px\)[\s\S]*\.dashboard-feature-action span\{display:none!important\}/,'narrow iPhones must keep the header action accessible without crowding');
