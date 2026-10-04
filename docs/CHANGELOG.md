@@ -830,3 +830,14 @@ Próximo passo: ligar o subprojeto a uma conta/projeto Expo autorizado e gerar a
 - comparação de configuração sincronizada passa a considerar também frequência e preço dos passeios;
 - hero Walli deixa de conter SVG próprio e usa o sistema de ícones do projeto;
 - revisão PWA atualizada para `76-walli-enhancements6`.
+
+
+## 2026-10-04: iconografia funcional unificada
+
+- `ui-icons.js` passa à revisão `76-icons-unified7`;
+- adicionado ícone canónico de relógio;
+- Dashboard passa a normalizar calendário, relatório, chevron e prazo pelo mesmo sistema Lucide;
+- `render.js` deixa de emitir geometria própria para o ícone de prazo;
+- ações de navegação eliminam SVG direto legado antes de inserir o ícone canónico;
+- sistema mantém funcionamento offline e licença local;
+- sem alterações a domínio financeiro, persistência ou segurança.
