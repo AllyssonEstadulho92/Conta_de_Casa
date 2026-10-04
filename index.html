@@ -167,7 +167,7 @@
       <section id="page-petshare" class="page">
         <section class="walli-share-hero" aria-labelledby="walliShareTitle">
           <div class="walli-hero-identity" aria-hidden="true">
-            <span class="walli-hero-paw"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="16" r="4"/><circle cx="5.5" cy="10.5" r="2"/><circle cx="9.5" cy="6.5" r="2"/><circle cx="14.5" cy="6.5" r="2"/><circle cx="18.5" cy="10.5" r="2"/></svg></span>
+            <span id="walliHeroIcon" class="walli-hero-paw"></span>
           </div>
           <div class="walli-hero-copy">
             <p class="eyebrow">Cuidados do Walli</p>
@@ -190,6 +190,17 @@
           </div>
           <div id="walliShareSummary" class="walli-share-summary" aria-live="polite"></div>
         </section>
+
+        <article class="panel walli-payments-panel">
+          <div class="walli-panel-heading">
+            <div>
+              <p class="eyebrow">Pagamentos</p>
+              <h2>Plano e movimentos</h2>
+            </div>
+            <p>Organize datas futuras, acompanhe o que já foi pago e corrija lançamentos sem apagar o histórico.</p>
+          </div>
+          <div id="walliPaymentTimeline" aria-live="polite"></div>
+        </article>
 
         <div class="walli-share-forms">
           <article class="panel walli-work-card walli-config-panel">
@@ -224,7 +235,10 @@
                 <input id="walliWalkRate" inputmode="decimal" autocomplete="off" placeholder="8,00" />
                 <small>Referência inicial: 8,00 €. Pode ajustar ao valor combinado com o Nuno.</small>
               </label>
-              <button class="btn primary walli-save-settings" type="submit">Guardar configuração</button>
+              <div class="walli-config-actions">
+                <button class="btn secondary" type="button" data-walli-copy-previous><span data-walli-copy-icon aria-hidden="true"></span><span>Usar mês anterior</span></button>
+                <button class="btn primary walli-save-settings" type="submit">Guardar configuração</button>
+              </div>
             </form>
           </article>
 
