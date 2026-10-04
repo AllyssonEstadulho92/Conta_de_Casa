@@ -41,6 +41,31 @@
     return total>BigInt(MAX_MONEY_CENTS)?MAX_MONEY_CENTS:Number(total);
   }
 
+  function splitPaymentCents(totalCents,parts){
+    if(!Number.isSafeInteger(totalCents)||totalCents<=0)return [];
+    if(!Number.isSafeInteger(parts)||parts<2||parts>4)return [totalCents];
+    const quotient=Math.floor(totalCents/parts);
+    const remainder=totalCents%parts;
+    return Array.from({length:parts},(_value,index)=>quotient+(index<remainder?1:0));
+  }
+
+  function renderPaymentSplitPreview(){
+    const data=snapshot(selectedMonth);
+    const select=$('[data-walli-split-count]');
+    const target=$('[data-walli-split-preview]');
+    if(!select||!target||data.outstandingCents<=0)return;
+    const parts=Number(select.value);
+    const plan=splitPaymentCents(data.outstandingCents,parts);
+    if(plan.length<2)return;
+    const nowCents=plan[0];
+    const laterCents=Math.max(0,data.outstandingCents-nowCents);
+    setHTML('[data-walli-split-preview]',
+      '<div><small>Pagar agora</small><strong data-money>'+money(nowCents)+'</strong></div>'+
+      '<div><small>Fica por pagar</small><strong data-money>'+money(laterCents)+'</strong></div>'+
+      '<p>'+plan.map(value=>money(value)).join(' + ')+'</p>'
+    );
+  }
+
   function snapshot(monthKey=selectedMonth){
     const parts=String(monthKey).split('-').map(Number);
     const year=parts[0],month=parts[1];
@@ -118,8 +143,16 @@
       status='<article class="walli-summary-card walli-status-card warning">'+
         metricHead('alert','Por pagar ao '+esc(caregiver))+
         '<strong data-money>'+money(data.outstandingCents)+'</strong>'+
-        '<small>Valor ainda em aberto neste mês.</small>'+
-        '<button class="btn primary walli-pay-action" type="button" data-walli-receive>'+icon('check',17)+'<span>Marcar como pago</span></button>'+
+        '<small>Não precisa pagar tudo de uma vez. Pode liquidar por partes.</small>'+
+        '<div class="walli-payment-actions">'+
+          '<button class="btn primary walli-pay-action" type="button" data-walli-receive>'+icon('check',17)+'<span>Pagar tudo</span></button>'+
+        '</div>'+
+        '<div class="walli-payment-split">'+
+          '<div class="walli-split-head"><strong>Dividir pagamento</strong><small>Escolha 2, 3 ou 4 partes. Sem juros, apenas organização do valor em aberto.</small></div>'+
+          '<label>Dividir em<select data-walli-split-count aria-label="Número de partes do pagamento"><option value="2">2 partes</option><option value="3">3 partes</option><option value="4">4 partes</option></select></label>'+
+          '<div class="walli-split-preview" data-walli-split-preview aria-live="polite"></div>'+
+          '<button class="btn secondary walli-partial-action" type="button" data-walli-partial>'+icon('wallet',17)+'<span>Registar esta parte</span></button>'+
+        '</div>'+
       '</article>';
     }else if(data.overpaidCents>0){
       status='<article class="walli-summary-card walli-status-card warning">'+
@@ -187,6 +220,7 @@
       '</article>';
     }
     setHTML('#walliShareSummary',summary);
+    renderPaymentSplitPreview();
 
     const mode=$('#walliShareMode');
     const base=$('#walliShareBase');
@@ -401,13 +435,44 @@
       direction:'outbound',
       amountCents:data.outstandingCents,
       paidAt:now,
-      note:'Pagamento da partilha e passeios do Walli',
+      note:'Pagamento total da partilha e passeios do Walli',
       createdAt:now,
       updatedAt:now,
       syncResolvedAt:null
     });
     await commit('created','general');
-    toast('Pagamento ao Nuno registado.');
+    toast('Pagamento total ao Nuno registado.');
+  }
+
+  async function payPartial(button){
+    if(button?.disabled)return;
+    const data=snapshot(selectedMonth);
+    if(data.outstandingCents<=0){render();return;}
+    const select=$('[data-walli-split-count]');
+    const parts=Number(select?.value||2);
+    const plan=splitPaymentCents(data.outstandingCents,parts);
+    if(plan.length<2||plan[0]<=0){toast('Não foi possível dividir este valor.');return;}
+    const amountCents=plan[0];
+    const remainingCents=Math.max(0,data.outstandingCents-amountCents);
+    if(button)button.disabled=true;
+    const caregiver=appState.petShare.caregiverName||'Nuno';
+    const message='Registar '+money(amountCents)+' como pagamento parcial ao '+caregiver+'? Depois ficam '+money(remainingCents)+' por pagar.';
+    if(!confirm(message)){if(button)button.disabled=false;return;}
+    const now=new Date().toISOString();
+    appState.petShare.payments ||= [];
+    appState.petShare.payments.push({
+      id:uid(),
+      monthKey:selectedMonth,
+      direction:'outbound',
+      amountCents,
+      paidAt:now,
+      note:'Pagamento parcial da partilha e passeios do Walli · divisão em '+parts+' partes',
+      createdAt:now,
+      updatedAt:now,
+      syncResolvedAt:null
+    });
+    await commit('created','general');
+    toast('Pagamento parcial registado. O restante continua por pagar.');
   }
 
   let wired=false;
@@ -427,11 +492,16 @@
       const label=$('#walliShareDailyRateLabel');
       if(label)label.hidden=event.target.value!=='daily-fixed';
     });
+    page.addEventListener('change',event=>{
+      if(event.target.closest('[data-walli-split-count]'))renderPaymentSplitPreview();
+    });
     page.addEventListener('click',event=>{
       const edit=event.target.closest('[data-walli-edit]');
       if(edit){editCare(edit.dataset.walliEdit);return;}
       const del=event.target.closest('[data-walli-delete]');
       if(del){void deleteCare(del.dataset.walliDelete,del);return;}
+      const partialButton=event.target.closest('[data-walli-partial]');
+      if(partialButton){void payPartial(partialButton);return;}
       const receiveButton=event.target.closest('[data-walli-receive]');
       if(receiveButton)void receive(receiveButton);
     });
@@ -443,4 +513,5 @@
   window.walliShareRangeDays=rangeDays;
   window.walliShareTargetCents=targetCents;
   window.walliShareWalkCostCents=walkCostCents;
+  window.walliShareSplitPaymentCents=splitPaymentCents;
 })(window);
