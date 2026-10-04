@@ -56,7 +56,9 @@
     const walkCount=careDays.length*walksPerDay;
     const walksCostCents=walkCostCents(walkRateCents,walkCount);
     const totalPayableCents=Math.min(MAX_MONEY_CENTS,shareCents+walksCostCents);
-    const paidCents=sumCents((appState?.petShare?.payments||[]).filter(payment=>payment.monthKey===monthKey).map(payment=>payment.amountCents));
+    const monthPayments=(appState?.petShare?.payments||[]).filter(payment=>payment.monthKey===monthKey);
+    const paidCents=sumCents(monthPayments.filter(payment=>payment.direction==='outbound').map(payment=>payment.amountCents));
+    const legacyReceivedCents=sumCents(monthPayments.filter(payment=>payment.direction!=='outbound').map(payment=>payment.amountCents));
     return {
       monthKey,
       daysInMonth,
@@ -70,6 +72,7 @@
       walksCostCents,
       totalPayableCents,
       paidCents,
+      legacyReceivedCents,
       outstandingCents:Math.max(0,totalPayableCents-paidCents),
       overpaidCents:Math.max(0,paidCents-totalPayableCents),
       ownerShareCents:config.calculationMode==='proportional'?Math.max(0,config.baseCents-shareCents):0
@@ -128,6 +131,9 @@
       '<article class="walli-summary-card"><span>Já pago</span><strong data-money>'+money(data.paidCents)+'</strong><small>Pagamentos registados nesta secção</small></article>';
     if(data.config.calculationMode==='proportional'){
       summary+='<article class="walli-summary-card"><span>Parte do proprietário</span><strong data-money>'+money(data.ownerShareCents)+'</strong><small>Base menos a parte de '+esc(caregiver)+'</small></article>';
+    }
+    if(data.legacyReceivedCents>0){
+      summary+='<article class="walli-summary-card warning"><span>Histórico anterior recebido</span><strong data-money>'+money(data.legacyReceivedCents)+'</strong><small>Não é abatido ao total a pagar ao '+esc(caregiver)+'.</small></article>';
     }
     summary+=status;
     setHTML('#walliShareSummary',summary);
@@ -327,6 +333,7 @@
     appState.petShare.payments.push({
       id:uid(),
       monthKey:selectedMonth,
+      direction:'outbound',
       amountCents:data.outstandingCents,
       paidAt:now,
       note:'Pagamento da partilha e passeios do Walli',
