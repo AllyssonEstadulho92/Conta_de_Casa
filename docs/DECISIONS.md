@@ -663,3 +663,12 @@ Decisão:
 - SQL é parametrizado;
 - períodos de guarda são gravados em transações;
 - dias duplicados são bloqueados por chave primária composta.
+
+
+## D-140 — development builds usam Expo Dev Client e EAS sem credenciais no Git
+
+- Expo Dev Client é a base de validação em dispositivo real;
+- EAS Build fornece perfis separados para desenvolvimento, simulador, preview e produção;
+- o repositório guarda apenas configuração declarativa;
+- `projectId`, credenciais Apple/Google, certificados, tokens e chaves de assinatura não são inventados nem incluídos no código;
+- a primeira associação ao EAS exige autenticação explícita do titular do projeto.
