@@ -206,8 +206,10 @@
     const end=cleanDateKey($('#walliCareEnd')?.value);
     const days=rangeDays(start,end);
     const config=monthConfig(selectedMonth);
-    const perDay=config.walksPerDay===2?2:1;
-    const rate=Number.isSafeInteger(config.walkRateCents)?config.walkRateCents:800;
+    const selectedPerDay=Number($('#walliWalksPerDay')?.value);
+    const perDay=selectedPerDay===2?2:(selectedPerDay===1?1:(config.walksPerDay===2?2:1));
+    const enteredRate=parseCents($('#walliWalkRate')?.value||'');
+    const rate=validCents(enteredRate,0)?enteredRate:(Number.isSafeInteger(config.walkRateCents)?config.walkRateCents:800);
     const count=days.length*perDay;
     const cost=walkCostCents(rate,count);
     setHTML('#walliCareAutoWalks',
@@ -292,7 +294,6 @@
       id:uid(),
       startDate:start,
       endDate:end,
-      walksCount,
       note:cleanMultiline($('#walliCareNote')?.value||'',500),
       createdAt:now,
       updatedAt:now,
