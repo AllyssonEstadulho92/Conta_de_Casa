@@ -190,6 +190,16 @@
               <label id="walliShareDailyRateLabel">Valor diário
                 <input id="walliShareDailyRate" inputmode="decimal" autocomplete="off" placeholder="0,00" />
               </label>
+              <label>Passeios por dia
+                <select id="walliWalksPerDay">
+                  <option value="1">1 vez por dia</option>
+                  <option value="2">2 vezes por dia</option>
+                </select>
+              </label>
+              <label>Preço por passeio
+                <input id="walliWalkRate" inputmode="decimal" autocomplete="off" placeholder="8,00" />
+                <small>Referência inicial configurada: 8,00 € por passeio. Pode ajustar ao acordo com o Nuno.</small>
+              </label>
               <button class="btn primary" type="submit">Guardar configuração</button>
             </form>
           </article>
@@ -198,10 +208,11 @@
             <form id="walliCareForm" class="form-grid">
               <label>Data de início<input id="walliCareStart" type="date" required /></label>
               <label>Data de fim<input id="walliCareEnd" type="date" required /></label>
-              <label>Idas à rua
-                <input id="walliCareWalks" type="number" inputmode="numeric" min="0" max="200" step="1" placeholder="Ex.: 6" />
-                <small>Introduza manualmente quantas saídas/passeios ocorreram neste período.</small>
-              </label>
+              <div id="walliCareAutoWalks" class="walli-auto-walks" aria-live="polite">
+                <span>Passeios calculados automaticamente</span>
+                <strong>1 passeio</strong>
+                <small>A contagem usa os dias selecionados e a configuração de passeios por dia.</small>
+              </div>
               <label>Observação<textarea id="walliCareNote" maxlength="500" rows="3" placeholder="Opcional"></textarea></label>
               <div class="button-row">
                 <button id="walliCareSubmitBtn" class="btn primary" type="submit">Guardar entrega</button>

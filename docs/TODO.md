@@ -423,3 +423,18 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [x] Manter prevenção de sobreposição durante edição.
 - [x] Sincronizar idas à rua no cofre cifrado.
 - [ ] Validar o fluxo completo no iPhone físico.
+
+
+### Passeios automáticos e total a pagar
+
+- [x] Calcular automaticamente os passeios a partir dos dias.
+- [x] Permitir escolher 1 ou 2 passeios por dia.
+- [x] Configurar 8,00 € como referência inicial editável por passeio.
+- [x] Calcular custo dos passeios em cêntimos inteiros.
+- [x] Mostrar total a pagar ao Nuno.
+- [x] Separar pagamentos outbound de recebimentos legados inbound.
+- [x] Remover contagem manual de passeios da interface.
+- [ ] Validar 1 passeio/dia no iPhone físico.
+- [ ] Validar 2 passeios/dia no iPhone físico.
+- [ ] Confirmar com o Nuno o preço real acordado e substituir a referência de 8 € se necessário.
+- [ ] Avaliar integração futura do pagamento ao Nuno como despesa do fluxo financeiro global, evitando dupla contabilização.

@@ -1005,3 +1005,25 @@ html.cdc-v75 #walliCareForm .button-row{
   align-items:center;
   flex-wrap:wrap;
 }
+
+html.cdc-v75 .walli-auto-walks{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  padding:13px 14px;
+  border:1px solid color-mix(in srgb,var(--v76-primary) 22%,var(--v76-border));
+  border-radius:13px;
+  background:color-mix(in srgb,var(--v76-primary) 6%,var(--v76-surface));
+}
+html.cdc-v75 .walli-auto-walks>span,
+html.cdc-v75 .walli-auto-walks>small{
+  color:var(--v76-muted);
+  font-size:.76rem;
+  line-height:1.4;
+}
+html.cdc-v75 .walli-auto-walks>strong{
+  color:var(--v76-text);
+  font-size:1.08rem;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}

@@ -39,10 +39,10 @@ const context = vm.createContext({
     petShare:{
       petName:'Walli',
       caregiverName:'Nuno',
-      months:{'2026-10':{baseCents:12000,calculationMode:'proportional',dailyRateCents:0}},
+      months:{'2026-10':{baseCents:12000,calculationMode:'proportional',dailyRateCents:0,walksPerDay:1,walkRateCents:800}},
       records:[
-        {id:'r1',startDate:'2026-10-01',endDate:'2026-10-04',walksCount:6,note:''},
-        {id:'r2',startDate:'2026-10-05',endDate:'2026-10-08',walksCount:4,note:''}
+        {id:'r1',startDate:'2026-10-01',endDate:'2026-10-04',note:''},
+        {id:'r2',startDate:'2026-10-05',endDate:'2026-10-08',note:''}
       ],
       payments:[]
     }
@@ -78,7 +78,29 @@ assert.equal(snapshot.daysInMonth,31);
 assert.equal(snapshot.careDays.length,8);
 assert.equal(snapshot.shareCents,3097);
 assert.equal(snapshot.ownerShareCents,8903);
-assert.equal(snapshot.outstandingCents,3097);
+assert.equal(snapshot.walkCount,8);
+assert.equal(snapshot.walksCostCents,6400);
+assert.equal(snapshot.totalPayableCents,9497);
+assert.equal(snapshot.outstandingCents,9497);
+assert.equal(context.window.walliShareWalkCostCents(800,8),6400);
+assert.equal(context.window.walliShareWalkCostCents(800,16),12800);
+
+context.appState.petShare.months['2026-10'].walksPerDay=2;
+const twiceDaily=context.window.walliShareSnapshot('2026-10');
+assert.equal(twiceDaily.walkCount,16);
+assert.equal(twiceDaily.walksCostCents,12800);
+assert.equal(twiceDaily.totalPayableCents,15897);
+
+context.appState.petShare.payments.push({id:'legacy',monthKey:'2026-10',amountCents:1000,paidAt:'2026-10-10T12:00:00Z'});
+const withLegacyReceived=context.window.walliShareSnapshot('2026-10');
+assert.equal(withLegacyReceived.legacyReceivedCents,1000);
+assert.equal(withLegacyReceived.paidCents,0);
+assert.equal(withLegacyReceived.outstandingCents,15897);
+
+context.appState.petShare.payments.push({id:'outbound',monthKey:'2026-10',direction:'outbound',amountCents:5000,paidAt:'2026-10-11T12:00:00Z'});
+const partiallyPaid=context.window.walliShareSnapshot('2026-10');
+assert.equal(partiallyPaid.paidCents,5000);
+assert.equal(partiallyPaid.outstandingCents,10897);
 
 assert.match(core,/petshare: \{ label:'Partilha do Walli', context:'Animais', icon:'paw'/);
 assert.match(core,/petShare: normalizePetShare\(s\?\.petShare\)/);
@@ -88,15 +110,19 @@ assert.match(index,/id="walliShareSettingsForm"/);
 assert.match(index,/id="walliCareForm"/);
 assert.match(source,/existing\.has\(day\)/,'overlapping care days must be rejected');
 assert.match(source,/data-walli-edit/,'existing Walli care records must expose edit actions');
-assert.match(source,/walksCount/,'care records must persist the manual outings count');
 assert.match(source,/record\.id!==editingId/,'editing must exclude the current record from overlap detection');
-assert.match(index,/id="walliCareWalks"/,'care form must expose manual outings input');
+assert.match(source,/totalPayableCents/,'the final payable amount must combine the base share and automatic walks');
+assert.match(source,/Por pagar ao/,'the payment direction must be explicit');
+assert.doesNotMatch(index,/id="walliCareWalks"/,'care form must not require manual outing counts');
+assert.match(index,/id="walliCareAutoWalks"/,'care form must show the automatic walk preview');
+assert.match(index,/id="walliWalksPerDay"/,'settings must allow one or two walks per day');
+assert.match(index,/id="walliWalkRate"/,'settings must expose an editable price per walk');
 assert.match(index,/id="walliCareCancelEditBtn"/,'care form must allow cancelling edit mode');
-assert.match(sync,/'pet-care':\['startDate','endDate','walksCount','note'\]/,'outings count must participate in encrypted sync conflict review');
+assert.match(sync,/'pet-share-month':\['baseCents','calculationMode','dailyRateCents','walksPerDay','walkRateCents'\]/,'walk frequency and rate must participate in encrypted sync conflict review');
 assert.match(source,/appState\.petShare\.payments\.push/,'reimbursements must be separate records');
 assert.doesNotMatch(source,/localStorage|sessionStorage/,'Walli financial data must stay inside the encrypted application state');
 assert.match(sw,/\.\/walli-share\.js/);
 assert.match(prepare,/'walli-share\.js'/);
-assert.match(prepare,/WALLI_SHARE_REV = '76-walli-edit-walks2'/);
+assert.match(prepare,/WALLI_SHARE_REV = '76-walli-auto-walk-cost3'/);
 
 console.log('Walli share drawer/domain tests: OK');

@@ -472,10 +472,17 @@ function normalizeGoal(g = {}) {
 
 function normalizePetShareMonth(value = {}) {
   const now = new Date().toISOString();
+  const walksPerDayValue = Number(value.walksPerDay);
+  const walksPerDay = walksPerDayValue === 2 ? 2 : 1;
+  const walkRateCents = Object.prototype.hasOwnProperty.call(value, 'walkRateCents')
+    ? cleanCents(value.walkRateCents)
+    : 800;
   return {
     baseCents: cleanCents(value.baseCents),
     calculationMode: value.calculationMode === 'daily-fixed' ? 'daily-fixed' : 'proportional',
     dailyRateCents: cleanCents(value.dailyRateCents),
+    walksPerDay,
+    walkRateCents,
     updatedAt: cleanIso(value.updatedAt, now)
   };
 }
@@ -504,6 +511,7 @@ function normalizePetSharePayment(value = {}) {
   return {
     id: cleanString(value.id || uid(), 80),
     monthKey,
+    direction: value.direction === 'outbound' ? 'outbound' : 'inbound',
     amountCents: cleanCents(value.amountCents),
     paidAt: cleanIso(value.paidAt, now),
     note: cleanMultiline(value.note, 300),
@@ -916,7 +924,7 @@ async function parseBackupText(text) {
 }
 function backupContainsPlaintextFinancialData(text) {
   const body = String(text);
-  return ['"bills"','"payments"','"incomes"','"market"','"goals"','"petShare"','"caregiverName"','"provider"','"reference"','"notes"','"totalCents"','"amountCents"','"savedCents"','"targetCents"','"baseCents"','"dailyRateCents"'].some(token => body.includes(token));
+  return ['"bills"','"payments"','"incomes"','"market"','"goals"','"petShare"','"caregiverName"','"provider"','"reference"','"notes"','"totalCents"','"amountCents"','"savedCents"','"targetCents"','"baseCents"','"dailyRateCents"','"walksPerDay"','"walkRateCents"'].some(token => body.includes(token));
 }
 
 async function decryptBackupState(normalized, passphrase) {

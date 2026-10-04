@@ -3,7 +3,7 @@
 (function installWalliShare(){
   function monthConfig(monthKey){
     const source=appState?.petShare?.months?.[monthKey];
-    return source || {baseCents:0,calculationMode:'proportional',dailyRateCents:0,updatedAt:null};
+    return source || {baseCents:0,calculationMode:'proportional',dailyRateCents:0,walksPerDay:1,walkRateCents:800,updatedAt:null};
   }
 
   function rangeDays(startDate,endDate){
@@ -35,6 +35,12 @@
     return rounded>BigInt(MAX_MONEY_CENTS)?MAX_MONEY_CENTS:Number(rounded);
   }
 
+  function walkCostCents(walkRateCents,walkCount){
+    if(!Number.isSafeInteger(walkRateCents)||walkRateCents<0||!Number.isSafeInteger(walkCount)||walkCount<0)return 0;
+    const total=BigInt(walkRateCents)*BigInt(walkCount);
+    return total>BigInt(MAX_MONEY_CENTS)?MAX_MONEY_CENTS:Number(total);
+  }
+
   function snapshot(monthKey=selectedMonth){
     const parts=String(monthKey).split('-').map(Number);
     const year=parts[0],month=parts[1];
@@ -45,7 +51,14 @@
     records.forEach(record=>recordDaysInMonth(record,monthKey).forEach(day=>careSet.add(day)));
     const careDays=[...careSet].sort();
     const shareCents=targetCents(config,careDays.length,daysInMonth);
-    const paidCents=sumCents((appState?.petShare?.payments||[]).filter(payment=>payment.monthKey===monthKey).map(payment=>payment.amountCents));
+    const walksPerDay=config.walksPerDay===2?2:1;
+    const walkRateCents=Number.isSafeInteger(config.walkRateCents)?config.walkRateCents:800;
+    const walkCount=careDays.length*walksPerDay;
+    const walksCostCents=walkCostCents(walkRateCents,walkCount);
+    const totalPayableCents=Math.min(MAX_MONEY_CENTS,shareCents+walksCostCents);
+    const monthPayments=(appState?.petShare?.payments||[]).filter(payment=>payment.monthKey===monthKey);
+    const paidCents=sumCents(monthPayments.filter(payment=>payment.direction==='outbound').map(payment=>payment.amountCents));
+    const legacyReceivedCents=sumCents(monthPayments.filter(payment=>payment.direction!=='outbound').map(payment=>payment.amountCents));
     return {
       monthKey,
       daysInMonth,
@@ -53,9 +66,15 @@
       records,
       careDays,
       shareCents,
+      walksPerDay,
+      walkRateCents,
+      walkCount,
+      walksCostCents,
+      totalPayableCents,
       paidCents,
-      outstandingCents:Math.max(0,shareCents-paidCents),
-      overpaidCents:Math.max(0,paidCents-shareCents),
+      legacyReceivedCents,
+      outstandingCents:Math.max(0,totalPayableCents-paidCents),
+      overpaidCents:Math.max(0,paidCents-totalPayableCents),
       ownerShareCents:config.calculationMode==='proportional'?Math.max(0,config.baseCents-shareCents):0
     };
   }
@@ -95,20 +114,26 @@
     const caregiver=appState.petShare.caregiverName||'Nuno';
     let status='';
     if(data.outstandingCents>0){
-      status='<article class="walli-summary-card walli-status-card warning"><span>Por receber</span><strong data-money>'+money(data.outstandingCents)+'</strong><button class="btn primary" type="button" data-walli-receive>Marcar como recebido</button></article>';
+      status='<article class="walli-summary-card walli-status-card warning"><span>Por pagar ao '+esc(caregiver)+'</span><strong data-money>'+money(data.outstandingCents)+'</strong><button class="btn primary" type="button" data-walli-receive>Marcar como pago</button></article>';
     }else if(data.overpaidCents>0){
-      status='<article class="walli-summary-card walli-status-card warning"><span>Recebido acima do valor atual</span><strong data-money>'+money(data.overpaidCents)+'</strong><small>Reveja a configuração ou os registos do mês.</small></article>';
+      status='<article class="walli-summary-card walli-status-card warning"><span>Pago acima do valor atual</span><strong data-money>'+money(data.overpaidCents)+'</strong><small>Reveja a configuração ou os registos do mês.</small></article>';
     }else{
-      status='<article class="walli-summary-card walli-status-card success"><span>Estado</span><strong>'+(data.paidCents>0?'Liquidado':'Sem valor em falta')+'</strong><small>Reembolsos ficam separados da base mensal.</small></article>';
+      status='<article class="walli-summary-card walli-status-card success"><span>Estado</span><strong>'+(data.paidCents>0?'Liquidado':'Sem valor em falta')+'</strong><small>O pagamento fica registado separadamente da base mensal.</small></article>';
     }
 
     let summary=
       '<article class="walli-summary-card primary"><span>Base mensal</span><strong data-money>'+money(data.config.baseCents)+'</strong><small>'+esc(monthLabel(data.monthKey))+'</small></article>'+
       '<article class="walli-summary-card"><span>Dias com '+esc(caregiver)+'</span><strong>'+data.careDays.length+'</strong><small>de '+data.daysInMonth+' dias</small></article>'+
-      '<article class="walli-summary-card"><span>Valor de '+esc(caregiver)+'</span><strong data-money>'+money(data.shareCents)+'</strong><small>'+(data.config.calculationMode==='proportional'?'Proporcional ao mês':'Valor diário fixo')+'</small></article>'+
-      '<article class="walli-summary-card"><span>Recebido</span><strong data-money>'+money(data.paidCents)+'</strong><small>Reembolso registado separadamente</small></article>';
+      '<article class="walli-summary-card"><span>Parte base de '+esc(caregiver)+'</span><strong data-money>'+money(data.shareCents)+'</strong><small>'+(data.config.calculationMode==='proportional'?'Proporcional ao mês':'Valor diário fixo')+'</small></article>'+
+      '<article class="walli-summary-card"><span>Passeios automáticos</span><strong>'+data.walkCount+'</strong><small>'+data.walksPerDay+' por dia × '+money(data.walkRateCents)+'</small></article>'+
+      '<article class="walli-summary-card"><span>Custo dos passeios</span><strong data-money>'+money(data.walksCostCents)+'</strong><small>'+data.walkCount+' passeio'+(data.walkCount===1?'':'s')+'</small></article>'+
+      '<article class="walli-summary-card primary"><span>Total a pagar a '+esc(caregiver)+'</span><strong data-money>'+money(data.totalPayableCents)+'</strong><small>Parte base + passeios</small></article>'+
+      '<article class="walli-summary-card"><span>Já pago</span><strong data-money>'+money(data.paidCents)+'</strong><small>Pagamentos registados nesta secção</small></article>';
     if(data.config.calculationMode==='proportional'){
       summary+='<article class="walli-summary-card"><span>Parte do proprietário</span><strong data-money>'+money(data.ownerShareCents)+'</strong><small>Base menos a parte de '+esc(caregiver)+'</small></article>';
+    }
+    if(data.legacyReceivedCents>0){
+      summary+='<article class="walli-summary-card warning"><span>Histórico anterior recebido</span><strong data-money>'+money(data.legacyReceivedCents)+'</strong><small>Não é abatido ao total a pagar ao '+esc(caregiver)+'.</small></article>';
     }
     summary+=status;
     setHTML('#walliShareSummary',summary);
@@ -117,9 +142,13 @@
     const base=$('#walliShareBase');
     const daily=$('#walliShareDailyRate');
     const dailyLabel=$('#walliShareDailyRateLabel');
+    const walksPerDay=$('#walliWalksPerDay');
+    const walkRate=$('#walliWalkRate');
     if(mode)mode.value=data.config.calculationMode;
     if(base)base.value=data.config.baseCents?(data.config.baseCents/100).toFixed(2).replace('.',','):'';
     if(daily)daily.value=data.config.dailyRateCents?(data.config.dailyRateCents/100).toFixed(2).replace('.',','):'';
+    if(walksPerDay)walksPerDay.value=String(data.walksPerDay);
+    if(walkRate)walkRate.value=(data.walkRateCents/100).toFixed(2).replace('.',',');
     if(dailyLabel)dailyLabel.hidden=data.config.calculationMode!=='daily-fixed';
 
     const today=currentLocalDateKey();
@@ -132,14 +161,15 @@
       if(end&&end.dataset.monthKey!==selectedMonth){end.value=fallback;end.dataset.monthKey=selectedMonth;}
     }
 
+    renderCarePreview();
     renderCalendar(data);
 
     const records=data.records.slice().sort((a,b)=>a.startDate.localeCompare(b.startDate)).map(record=>{
       const days=recordDaysInMonth(record,data.monthKey).length;
-      const walks=Number.isSafeInteger(Number(record.walksCount))?Number(record.walksCount):0;
+      const walks=days*data.walksPerDay;
       const note=record.note?' · '+esc(record.note):'';
       const period=esc(fmtDate(record.startDate))+(record.startDate!==record.endDate?' a '+esc(fmtDate(record.endDate)):'');
-      const walksText=walks+' ida'+(walks===1?'':'s')+' à rua';
+      const walksText=walks+' passeio'+(walks===1?'':'s')+' automático'+(walks===1?'':'s');
       return '<div class="list-row walli-record-row">'+
         '<div class="list-main"><strong>'+period+'</strong><small>'+days+' dia'+(days===1?'':'s')+' neste mês · '+walksText+note+'</small></div>'+
         '<div class="list-side"><button class="btn secondary" type="button" data-walli-edit="'+attr(record.id)+'">Editar</button><button class="btn secondary" type="button" data-walli-delete="'+attr(record.id)+'">Eliminar</button></div>'+
@@ -151,7 +181,7 @@
   function ensureMonth(monthKey){
     appState.petShare ||= {petName:'Walli',caregiverName:'Nuno',months:{},records:[],payments:[]};
     appState.petShare.months ||= {};
-    appState.petShare.months[monthKey] ||= {baseCents:0,calculationMode:'proportional',dailyRateCents:0,updatedAt:new Date().toISOString()};
+    appState.petShare.months[monthKey] ||= {baseCents:0,calculationMode:'proportional',dailyRateCents:0,walksPerDay:1,walkRateCents:800,updatedAt:new Date().toISOString()};
     return appState.petShare.months[monthKey];
   }
 
@@ -160,21 +190,39 @@
     const mode=$('#walliShareMode')?.value==='daily-fixed'?'daily-fixed':'proportional';
     const base=parseCents($('#walliShareBase')?.value||'');
     const daily=parseCents($('#walliShareDailyRate')?.value||'');
-    if(!validCents(base,0)||!validCents(daily,0)){toast('Valores da partilha inválidos.');return;}
+    const walksPerDay=Number($('#walliWalksPerDay')?.value||1);
+    const walkRate=parseCents($('#walliWalkRate')?.value||'8,00');
+    if(!validCents(base,0)||!validCents(daily,0)||!validCents(walkRate,0)){toast('Valores da partilha inválidos.');return;}
+    if(walksPerDay!==1&&walksPerDay!==2){toast('Escolha 1 ou 2 passeios por dia.');return;}
     const config=ensureMonth(selectedMonth);
     config.baseCents=base;
     config.calculationMode=mode;
     config.dailyRateCents=daily;
+    config.walksPerDay=walksPerDay;
+    config.walkRateCents=walkRate;
     config.updatedAt=new Date().toISOString();
     await commit('updated','general');
     toast('Configuração da partilha guardada.');
   }
 
-  function readWalksCount(){
-    const raw=String($('#walliCareWalks')?.value||'').trim();
-    if(!raw)return 0;
-    const value=Number(raw);
-    return Number.isSafeInteger(value)&&value>=0&&value<=200?value:NaN;
+  function renderCarePreview(){
+    const target=$('#walliCareAutoWalks');
+    if(!target)return;
+    const start=cleanDateKey($('#walliCareStart')?.value);
+    const end=cleanDateKey($('#walliCareEnd')?.value);
+    const days=rangeDays(start,end);
+    const config=monthConfig(selectedMonth);
+    const selectedPerDay=Number($('#walliWalksPerDay')?.value);
+    const perDay=selectedPerDay===2?2:(selectedPerDay===1?1:(config.walksPerDay===2?2:1));
+    const enteredRate=parseCents($('#walliWalkRate')?.value||'');
+    const rate=validCents(enteredRate,0)?enteredRate:(Number.isSafeInteger(config.walkRateCents)?config.walkRateCents:800);
+    const count=days.length*perDay;
+    const cost=walkCostCents(rate,count);
+    setHTML('#walliCareAutoWalks',
+      '<span>Passeios calculados automaticamente</span>'+
+      '<strong>'+count+' passeio'+(count===1?'':'s')+'</strong>'+
+      '<small>'+days.length+' dia'+(days.length===1?'':'s')+' × '+perDay+' por dia = '+count+' · '+money(cost)+'</small>'
+    );
   }
 
   function resetCareForm(){
@@ -191,10 +239,9 @@
     const end=$('#walliCareEnd');
     if(start){start.value=fallback;start.dataset.monthKey=selectedMonth;}
     if(end){end.value=fallback;end.dataset.monthKey=selectedMonth;}
-    const walks=$('#walliCareWalks');
     const note=$('#walliCareNote');
-    if(walks)walks.value='';
     if(note)note.value='';
+    renderCarePreview();
   }
 
   function editCare(id){
@@ -204,12 +251,11 @@
     form.dataset.editingId=id;
     const start=$('#walliCareStart');
     const end=$('#walliCareEnd');
-    const walks=$('#walliCareWalks');
     const note=$('#walliCareNote');
     if(start){start.value=record.startDate;start.dataset.monthKey=record.startDate.slice(0,7);}
     if(end){end.value=record.endDate;end.dataset.monthKey=record.endDate.slice(0,7);}
-    if(walks)walks.value=String(Number.isSafeInteger(Number(record.walksCount))?Number(record.walksCount):0);
     if(note)note.value=record.note||'';
+    renderCarePreview();
     const submit=$('#walliCareSubmitBtn');
     const cancel=$('#walliCareCancelEditBtn');
     if(submit)submit.textContent='Guardar alterações';
@@ -223,10 +269,8 @@
     const editingId=form?.dataset.editingId||'';
     const start=cleanDateKey($('#walliCareStart')?.value);
     const end=cleanDateKey($('#walliCareEnd')?.value);
-    const walksCount=readWalksCount();
     const days=rangeDays(start,end);
     if(!days.length){toast('Período inválido.');return;}
-    if(!Number.isSafeInteger(walksCount)){toast('Indique um número de idas à rua entre 0 e 200.');return;}
     const existing=new Set();
     (appState.petShare.records||[])
       .filter(record=>record.id!==editingId)
@@ -243,7 +287,6 @@
         ...current,
         startDate:start,
         endDate:end,
-        walksCount,
         note:cleanMultiline($('#walliCareNote')?.value||'',500),
         updatedAt:now,
         syncResolvedAt:null
@@ -257,7 +300,6 @@
       id:uid(),
       startDate:start,
       endDate:end,
-      walksCount,
       note:cleanMultiline($('#walliCareNote')?.value||'',500),
       createdAt:now,
       updatedAt:now,
@@ -285,21 +327,22 @@
     if(button)button.disabled=true;
     const data=snapshot(selectedMonth);
     if(data.outstandingCents<=0){render();return;}
-    if(!confirm('Registar '+money(data.outstandingCents)+' como reembolso recebido do Nuno?')){if(button)button.disabled=false;return;}
+    if(!confirm('Registar '+money(data.outstandingCents)+' como pago ao '+(appState.petShare.caregiverName||'Nuno')+'?')){if(button)button.disabled=false;return;}
     const now=new Date().toISOString();
     appState.petShare.payments ||= [];
     appState.petShare.payments.push({
       id:uid(),
       monthKey:selectedMonth,
+      direction:'outbound',
       amountCents:data.outstandingCents,
       paidAt:now,
-      note:'Reembolso da partilha do Walli',
+      note:'Pagamento da partilha e passeios do Walli',
       createdAt:now,
       updatedAt:now,
       syncResolvedAt:null
     });
     await commit('created','general');
-    toast('Reembolso registado.');
+    toast('Pagamento ao Nuno registado.');
   }
 
   let wired=false;
@@ -311,6 +354,10 @@
     $('#walliShareSettingsForm')?.addEventListener('submit',saveSettings);
     $('#walliCareForm')?.addEventListener('submit',saveCare);
     $('#walliCareCancelEditBtn')?.addEventListener('click',resetCareForm);
+    $('#walliCareStart')?.addEventListener('change',renderCarePreview);
+    $('#walliCareEnd')?.addEventListener('change',renderCarePreview);
+    $('#walliWalksPerDay')?.addEventListener('change',renderCarePreview);
+    $('#walliWalkRate')?.addEventListener('input',renderCarePreview);
     $('#walliShareMode')?.addEventListener('change',event=>{
       const label=$('#walliShareDailyRateLabel');
       if(label)label.hidden=event.target.value!=='daily-fixed';
@@ -330,4 +377,5 @@
   window.walliShareSnapshot=snapshot;
   window.walliShareRangeDays=rangeDays;
   window.walliShareTargetCents=targetCents;
+  window.walliShareWalkCostCents=walkCostCents;
 })(window);
