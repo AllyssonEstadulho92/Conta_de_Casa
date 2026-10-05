@@ -108,15 +108,8 @@ assert.match(drawerCss,/flex-direction:column!important/,'current drawer must ke
 assert.doesNotMatch(drawerCss,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/,'current drawer must not regress to the dense two-column card wall');
 assert.doesNotMatch(drawerCss,/linear-gradient\(/);
 
-assert.match(sw, /v76-version-alignment1/);
-assert.match(sw, /conta-de-casa-public-v76-version-alignment1-76-architecture-efficiency7/);
-assert.match(sw, /stability1-layout1-drawer2/);
-assert.match(sw, /ui-audit1/);
-assert.match(sw, /architecture-consolidation1-retire-v74-runtime1/);
-assert.match(sw, /planning-more1/);
-assert.match(sw, /retire-assets1/);
-assert.match(sw, /menu-morph1/,'the PWA cache must retain the menu morph lineage');
-assert.match(sw, /menu-visible-close1/,'the PWA cache must invalidate for the stable visible drawer close controller');
+assert.match(sw, /const CACHE = 'conta-de-casa-public-v76-build';/,'source Service Worker must keep a short build placeholder');
+assert.doesNotMatch(sw, /conta-de-casa-public-v76-version-alignment1-/,'source cache key must not accumulate historical revision lineage');
 for(const asset of ['./app-update.css','./app-update.js','./v76-version-about.css','./design-system.css','./v64-runtime.js','./market-shopping-focus.css','./market-shopping-focus.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.css','./v76-planning-more.css','./v75-architecture.js','./v75-stability.css','./v75-stability.js','./v75-layout-polish.css','./v75-drawer-theme.css','./release-manifest.json'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be cached`);
 for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be cached`);
 assert.ok(!sw.includes("'./v75-drawer-blue.css'"));
@@ -127,9 +120,8 @@ assert.match(sw, /SKIP_WAITING/);
 assert.match(sw, /applyRequested=true/);
 assert.match(sw, /client\.navigate\(client\.url\)/);
 assert.match(sw, /install[\s\S]{0,320}skipWaiting\(\)/,'new public builds must activate immediately after their assets are cached');
-assert.match(sw,/auto-refresh2/,'PWA cache key must identify the automatic refresh policy');
-assert.match(sw,/dashboard-priority-delivery1/,'PWA cache key must invalidate when the Dashboard presentation changes');
-assert.match(sw,/dialog-controls1/,'PWA cache key must invalidate when dialog navigation controls change');
+assert.match(prepare,/const serviceWorkerCacheKey=\`conta-de-casa-public-\${BUILD}-\${BUILD_ID}\`/,'Pages build must derive the PWA cache from release and exact build id');
+assert.match(prepare,/Service Worker cache key injection failed/,'Pages build must fail closed if cache-key injection stops matching');
 assert.match(events,/__swAutoUpdateTimer/,'runtime must keep a low-frequency fallback update check while the app is open');
 assert.match(events,/__swUpdateCheck/,'update triggers must converge on one guarded check function');
 assert.match(events,/document\.hidden\|\|navigator\.onLine===false/,'background update checks must pause while hidden or offline');
@@ -184,6 +176,7 @@ try {
   execFileSync(process.execPath, ['scripts/prepare-pages.cjs'], { cwd: ROOT, stdio: 'pipe' });
   const index = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
   const events = fs.readFileSync(path.join(dist, 'events.js'), 'utf8');
+  const builtSw = fs.readFileSync(path.join(dist,'sw.js'),'utf8');
   const distManifest = JSON.parse(fs.readFileSync(path.join(dist,'release-manifest.json'),'utf8'));
   const distWebManifest = JSON.parse(fs.readFileSync(path.join(dist,'manifest.webmanifest'),'utf8'));
   const meta=(name)=>new RegExp(`<meta name="${name}" content="([^"]+)"`).exec(index)?.[1]||'';
@@ -219,6 +212,8 @@ try {
   assert.ok(fs.existsSync(path.join(dist,'zxing-browser.min.js')));
   assert.ok(fs.existsSync(path.join(dist,'ZXING_BROWSER_LICENSE.txt')));
   assert.match(events, /\.\/sw\.js\?v=76-icons-unified7/);
+  assert.match(builtSw,/const CACHE = 'conta-de-casa-public-v76-(?:[0-9a-f]{7}|local)';/,'built Service Worker must use the exact deterministic build cache key');
+  assert.doesNotMatch(builtSw,/conta-de-casa-public-v76-version-alignment1-/,'built cache key must remain compact');
   assert.equal(distManifest.latestVersion,'v76');
   assert.equal(distManifest.releases[0].version,'v76');
   assert.equal(distWebManifest.background_color,'#f4f8f8');

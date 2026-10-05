@@ -35,11 +35,8 @@ assert.match(index,/market-experience\.css\?v=53/);
 assert.match(index,/market-experience\.js\?v=53/);
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
-assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
-assert.match(sw,/retire-assets1/);
-assert.match(sw,/v76-version-alignment1/);
-assert.match(sw,/ts-runtime2-market-branding1/,'Service Worker cache must change when the generated Market branding runtime changes');
-assert.match(sw,/prototype-product-browser1/,'PWA cache must refresh the prototype-aligned product browser');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
+assert.match(pages,/const serviceWorkerCacheKey=\`conta-de-casa-public-\${BUILD}-\${BUILD_ID}\`/,'Pages build must derive the PWA cache from the build identity.');
 for(const asset of ['market-experience.css','market-experience.js','market-brand.css','market-branding.js','market-retailer-image-policy.js','market-official-images.js','v64-runtime.js','v75-architecture.css','v76-planning-more.css','v75-architecture.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be cached by the service worker`);
   assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be included in the Pages bundle`);

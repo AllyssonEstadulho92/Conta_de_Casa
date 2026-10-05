@@ -58,9 +58,8 @@ assert.doesNotMatch(css,/https?:\/\//,'O CSS da calculadora não deve introduzir
 assert.match(prep,/'date-calculator\.css'/);
 assert.match(prep,/'date-calculator\.js': path\.join\(GENERATED, 'date-calculator\.js'\)/);
 assert.match(prep,/date-calculator\.js\?v=\$\{DATE_CALCULATOR_REV\}/);
-assert.match(sw,/date-calculator-layout2/,'O cache PWA deve preservar o token da autoridade visual base.');
-assert.match(sw,/date-calculator-mobile-spacing3/,'O cache PWA deve preservar o token do agrupamento móvel compacto.');
-assert.match(sw,/date-calculator-prototype-inputs4/,'O Service Worker continua compatível; esta correção CSS é obtida diretamente pela estratégia network-first/no-store sem exigir ecrã de atualização.');
+assert.match(prep,/const DATE_CALCULATOR_REV = '76-date-calculator1'/,'O build deve manter a revisão funcional da calculadora.');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'A invalidação PWA é determinada pelo build, não por tokens históricos de features.');
 assert.match(sw,/'\.\/date-calculator\.css'/);
 assert.match(sw,/'\.\/date-calculator\.js'/);
 assert.doesNotThrow(()=>new vm.Script(generated),'O runtime gerado deve ser JavaScript clássico válido.');

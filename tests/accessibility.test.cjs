@@ -12,6 +12,7 @@ const planningMore=fs.readFileSync('v76-planning-more.css','utf8');
 const menu=fs.readFileSync('mobile-menu-toggle.css','utf8');
 const usability=fs.readFileSync('v75-usability.css','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const css=`${base}\n${design}\n${architecture}\n${planningMore}\n${menu}\n${usability}`;
 const render=fs.readFileSync('render.js','utf8');
 const events=fs.readFileSync('events.js','utf8');
@@ -113,7 +114,5 @@ const authCss=usability.slice(usability.indexOf('76-auth-prototype-final1'));
 const keypadSizes=[...authCss.matchAll(/grid-template-columns:repeat\(3,(\d+)px\)!important/g)].map(match=>Number(match[1]));
 assert.deepEqual(keypadSizes,[64,56,52,50],'auth keypad sizes must remain ordered from desktop/base to mobile/compact contracts');
 assert.ok(keypadSizes.every(size=>size>=44),`PIN targets must remain >=44 px; got ${keypadSizes.join(', ')}`);
-assert.match(sw,/auth-prototype-final1/,'PWA cache must retain the canonical auth layout token');
-assert.match(sw,/auth-spacing3/,'PWA cache must invalidate the previous auth spacing');
 
 console.log('Accessibility contrast, focus, touch targets, semantic state, safe areas and compact exclusive PIN layout contracts for v76: OK');

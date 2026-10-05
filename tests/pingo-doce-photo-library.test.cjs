@@ -12,6 +12,7 @@ const source=read('pingo-doce-photo-library.js');
 const css=read('pingo-doce-photo-library.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
 assert.match(source,/75-pd-photo1/);
 assert.match(source,/conta-de-casa-pingo-doce-photo-library/);
@@ -73,7 +74,6 @@ assert.equal(sandbox.CDCPingoDocePhotoLibrary.identity({pid:'739490'}).key,'ping
 
 assert.match(prepare,/const PD_PHOTO_REV = '75-pd-photo1'/);
 for(const asset of ['pingo-doce-photo-library.css','pingo-doce-photo-library.js'])assert.ok(prepare.includes(`'${asset}'`));
-assert.match(sw,/catalog4-pd-photo1/);
 for(const asset of ['./pingo-doce-photo-library.css','./pingo-doce-photo-library.js'])assert.ok(sw.includes(`'${asset}'`));
 
 const dist=path.join(ROOT,'dist');

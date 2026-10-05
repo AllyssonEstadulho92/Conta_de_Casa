@@ -10,6 +10,7 @@ const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const guard=read('v75-startup-guard.js');
 const events=read('events.js');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const prepare=read('scripts/prepare-pages.cjs');
 const core=read('core.js');
 
@@ -28,8 +29,6 @@ assert.doesNotMatch(events,/mayShowFinancialData/,'sync state must not gate visi
 assert.match(core,/PBKDF2_ITERATIONS = 250000/,'PIN KDF strength must remain unchanged');
 
 // Nova revisão invalida PWA antiga; estratégia network-first/fallback permanece intacta.
-assert.match(sw,/auth-canonical2/);
-assert.match(sw,/runtime-efficiency1/);
 assert.match(sw,/const NAVIGATION_TIMEOUT_MS = 4000/);
 assert.match(sw,/async function navigationResponse\(request\)/);
 assert.match(sw,/new AbortController\(\)/);

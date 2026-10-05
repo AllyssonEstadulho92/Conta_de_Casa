@@ -12,6 +12,7 @@ const forms = fs.readFileSync(path.join(ROOT, 'forms.js'),'utf8');
 const events = fs.readFileSync(path.join(ROOT, 'events.js'),'utf8');
 const index = fs.readFileSync(path.join(ROOT, 'index.html'),'utf8');
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'),'utf8');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
 for (const group of ['Principal','Finanças','Compras','Análise','Sistema']) {
   assert.match(core,new RegExp(`label:'${group}'`),`navigation group ${group} must exist`);
@@ -41,7 +42,6 @@ assert.match(events,/#monthPicker'[\s\S]*selectMonthContext\(next\)/,'month pick
 assert.match(events,/data-calendar-month/,'calendar history must allow switching back to saved months');
 assert.match(render,/openingBalanceCents===0\?'':/,'a fresh month must show an empty opening-balance field');
 assert.match(render,/budgetCents===0\?'':/,'a fresh month must show an empty monthly-budget field');
-assert.match(sw,/monthly-spend-calendar1/,'PWA cache must invalidate the previous calendar runtime');
 assert.match(index, /aria-label="Vistas de planeamento"/);
 assert.match(index, /aria-label="Vistas de definições"/);
 assert.match(index, /aria-label="Navegação completa"/);

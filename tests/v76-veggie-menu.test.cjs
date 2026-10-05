@@ -9,6 +9,7 @@ const retiredCss = fs.readFileSync('v76-veggie-menu.css','utf8');
 const buildRuntime = fs.readFileSync('scripts/build-typescript-runtime.cjs','utf8');
 const prepare = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
 assert.doesNotThrow(()=>new vm.Script(legacyController),'single mobile-menu controller must parse');
 assert.match(legacyController,/installAnimatedMobileMenu/);
@@ -38,7 +39,6 @@ assert.doesNotMatch(prepare,/v76-veggie-menu\.css\?v=/);
 assert.doesNotMatch(prepare,/v76-veggie-menu\.js\?v=/);
 assert.match(prepare,/forbidden=\[[^\]]*v76-veggie-menu\.js[^\]]*v76-veggie-menu\.css/,'retired duplicate menu assets must be forbidden from dist');
 
-assert.match(sw,/single-menu-authority1/);
 assert.ok(!sw.includes("'./v76-veggie-menu.css'"),'duplicate menu CSS must not be cached');
 assert.ok(!sw.includes("'./v76-veggie-menu.js'"),'duplicate menu runtime must not be cached');
 assert.ok(sw.includes("'./mobile-menu-toggle.css'"));

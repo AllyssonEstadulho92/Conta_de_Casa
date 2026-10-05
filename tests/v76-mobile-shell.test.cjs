@@ -11,6 +11,7 @@ const shell=read('v76-mobile-shell.css');
 const architecture=read('v75-architecture.js');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const pkg=JSON.parse(read('package.json'));
 
 function luminance(hex){
@@ -108,9 +109,6 @@ assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui2'/);
 assert.match(prepare,/const MOBILE_SHELL_REV = '76-mobile-shell3'/);
 assert.match(prepare,/v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/);
-assert.match(sw,/mobile-shell3/);
-assert.match(sw,/shell-coherence1/,'PWA cache must invalidate the previous shell CSS');
-assert.match(sw,/bills-filters-collapse1/,'PWA cache must invalidate the previous always-open mobile filters');
 assert.ok(sw.includes("'./v76-mobile-shell.css'"));
 
 const dist=path.join(ROOT,'dist');

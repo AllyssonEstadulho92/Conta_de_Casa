@@ -11,6 +11,7 @@ const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const planningMore=read('v76-planning-more.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const publicFilesStart=prepare.indexOf('const PUBLIC_FILES');
 const publicFilesEnd=prepare.indexOf(']);',publicFilesStart);
 const publicFilesBlock=prepare.slice(publicFilesStart,publicFilesEnd+3);
@@ -39,7 +40,6 @@ assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
 assert.ok(publicFilesBlock.includes("'v76-planning-more.css'"));
 for(const retired of ['v74-experience.css','v75-market-featured.css','v75-market-featured.js'])assert.ok(!publicFilesBlock.includes(`'${retired}'`),`${retired} must not be public`);
 assert.match(sw,/'\.\/v76-planning-more\.css'/);
-assert.match(sw,/retire-assets1/);
 for(const retired of ['./v74-experience.css','./v75-market-featured.css','./v75-market-featured.js'])assert.doesNotMatch(sw,new RegExp(retired.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
 
 const dist=path.join(ROOT,'dist');

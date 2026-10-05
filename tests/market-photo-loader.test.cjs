@@ -12,6 +12,7 @@ const source=read('market-photo-loader.js');
 const css=read('market-photo-loader.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
 assert.match(source,/75-photo-loader3/);
 assert.match(source,/POLL_MS=500/);
@@ -63,7 +64,6 @@ assert.equal(typeof sandbox.CDCMarketPhotoLoader.warmVisible,'function');
 
 assert.match(prepare,/const PHOTO_LOADER_REV = '75-photo-loader3'/);
 for(const asset of ['market-photo-loader.css','market-photo-loader.js'])assert.ok(prepare.includes(`'${asset}'`));
-assert.match(sw,/pd-photo1-photo-loader3/);
 for(const asset of ['./market-photo-loader.css','./market-photo-loader.js'])assert.ok(sw.includes(`'${asset}'`));
 
 const dist=path.join(ROOT,'dist');
