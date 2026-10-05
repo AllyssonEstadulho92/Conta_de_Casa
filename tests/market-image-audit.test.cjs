@@ -44,6 +44,8 @@ assert.match(js,/referrerPolicy:'no-referrer'/);
 assert.doesNotMatch(js,/microlink|allorigins|corsproxy/i);
 assert.doesNotMatch(js,/Authorization|api[_-]?key/i);
 assert.match(js,/data-market-image-open/);
+assert.match(js,/marketProductName/,'image audit must read stable prototype product metadata');
+assert.match(js,/market-prototype-result-copy/,'image audit must support current prototype result cards');
 assert.match(js,/showModal\(\)/);
 assert.match(js,/marketProductImageViewer/);
 assert.match(js,/schedulePersist/);
