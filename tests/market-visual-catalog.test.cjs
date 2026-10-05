@@ -30,7 +30,7 @@ assert.doesNotMatch(catalog,/toISOString\(\)\.slice\(0,10\)/,'daily catalog budg
 assert.match(catalog,/stores:\['pingodoce','continente'\],limit:20/);
 assert.match(catalog,/\$\{marketId\}\|\$\{pid\}/);
 assert.match(catalog,/createIndex\('categories','categories',\{unique:false,multiEntry:true\}\)/);
-assert.match(catalog,/Ver preço atual/);
+assert.match(catalog,/market-visual-product-add/,'prototype catalog cards must expose the circular add/search action');
 assert.match(catalog,/dispatchEvent\(new Event\('input'/);
 assert.match(catalog,/browser\.querySelector\('#marketVisualCatalog'\)\)return/);
 assert.doesNotMatch(catalog,/grid\.replaceChildren\(\);/,'catalog refresh must not clear the visible grid before rebuilding cards');
