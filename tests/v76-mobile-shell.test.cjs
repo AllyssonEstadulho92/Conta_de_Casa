@@ -106,7 +106,7 @@ assert.match(shell,/prefers-reduced-motion:reduce/);
 assert.match(shell,/forced-colors:active/);
 assert.equal(pkg.version,'0.76.0');
 assert.match(prepare,/const BUILD = 'v76'/);
-assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui2'/);
+assert.match(prepare,/const MODERN_UI_REV = '76-visual-audit1'/);
 assert.match(prepare,/const MOBILE_SHELL_REV = '76-visual-audit1'/);
 assert.match(prepare,/v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/);
 assert.ok(sw.includes("'./v76-mobile-shell.css'"));
@@ -117,7 +117,7 @@ try{
   const builtIndex=read('dist/index.html');
   assert.match(builtIndex,/name="app-version" content="0\.76\.0"/);
   assert.match(builtIndex,/name="app-build" content="v76"/);
-  assert.match(builtIndex,/v76-modern-ui\.css\?v=76-modern-ui2/);
+  assert.match(builtIndex,/v76-modern-ui\.css\?v=76-visual-audit1/);
   assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-visual-audit1/);
   assert.ok(builtIndex.indexOf('v76-modern-ui.css')<builtIndex.indexOf('v76-mobile-shell.css'),'mobile shell must remain the final mobile shell authority');
   const builtShell=read('dist/v76-mobile-shell.css');
