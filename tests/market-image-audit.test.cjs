@@ -13,6 +13,7 @@ const policy=read('market-retailer-image-policy.js');
 const css=read('market-image-audit.css');
 const planningMore=read('v76-planning-more.css');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const prepare=read('scripts/prepare-pages.cjs');
 const publicFilesStart=prepare.indexOf('const PUBLIC_FILES');
 const publicFilesEnd=prepare.indexOf(']);',publicFilesStart);
@@ -89,9 +90,6 @@ assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://world.openbeautyfacts
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://example.com/images/products/123/front.jpg'),'');
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('http://static.pingodoce.pt/images/large/739490_test.jpg'),'');
 
-assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
-assert.match(sw,/retire-assets1/);
-assert.match(sw,/v76-version-alignment1/);
 for(const asset of ['market-image-audit.css','market-retailer-image-policy.js','market-image-audit.js','market-official-images.js','design-system.css','v64-runtime.js','v75-architecture.css','v76-planning-more.css','v75-architecture.js']){
   assert.ok(sw.includes(`'./${asset}'`),`${asset} must be in the offline cache allowlist`);
   assert.ok(publicFilesBlock.includes(`'${asset}'`),`${asset} must be in the Pages bundle allowlist`);
