@@ -1119,6 +1119,7 @@ function lockApp(_reason = 'manual') {
   document.documentElement.classList.remove('app-active');
   $('#app').hidden = true;
   $('#vaultScreen').hidden = false;
+  $('#vaultScreen')?.classList.add('vault-unlock-active');
   $('#vaultCreate').hidden = true;
   $('#vaultUnlock').hidden = false;
   const unlock = $('#unlockPassphrase');
