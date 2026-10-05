@@ -17,6 +17,7 @@ const events=read('events.js');
 const index=read('index.html');
 const render=read('render.js');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const prepare=read('scripts/prepare-pages.cjs');
 
 for(const retiredSource of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(ROOT,retiredSource)),`${retiredSource} must be physically deleted`);
@@ -99,10 +100,6 @@ assert.match(index,/manifest\.webmanifest\?v=53/);
 for(const asset of ['core','finance','render','forms','sync','events'])assert.match(index,new RegExp(`${asset}\\.js\\?v=53`));
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
-assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
-assert.match(sw,/retire-assets1/);
-assert.match(sw,/v76-version-alignment1/);
-assert.match(sw,/prototype-system1/);
 for(const asset of ['./design-system.css','./v76-planning-more.css','./v75-architecture.css','./market-experience.css','./market-experience.js','./v64-runtime.js','./app-update.css','./app-update.js','./mobile-menu-toggle.css','./mobile-menu-toggle.js','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`),`${asset} must be available offline`);
 for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be available offline`);
 assert.ok(!sw.includes("'./ui-consistency.css'"));
