@@ -5,6 +5,7 @@ const mobileCss = fs.readFileSync('mobile-layout.css','utf8');
 const shellCss = fs.readFileSync('v76-mobile-shell.css','utf8');
 const index = fs.readFileSync('index.html','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const preparePages = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 
 // mobile-layout.css is feature-level only; it must never recreate the application viewport.
@@ -39,7 +40,6 @@ assert.match(mobileCss,/\.bill-filter-field:nth-child\(5\)\{[\s\S]*grid-column:1
 assert.match(mobileCss,/#billClearFilters\{[\s\S]*grid-column:1\/-1!important;[\s\S]*min-height:44px!important;/);
 assert.match(mobileCss,/@media\(max-width:360px\)[\s\S]*grid-template-columns:minmax\(0,1fr\)!important/);
 assert.doesNotMatch(mobileCss,/scroll-snap-type:x proximity/,'Despesas mobile must no longer depend on a horizontal filter rail.');
-assert.match(sw,/expenses-mobile-alignment2/,'PWA cache must invalidate when the mobile Expenses layout changes.');
 
 const designPosition = index.indexOf('./design-system.css?v=53');
 const mobilePosition = index.indexOf('./mobile-layout.css?v=53');
