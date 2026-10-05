@@ -11,6 +11,7 @@ const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const library=read('market-image-library.js');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
 assert.match(library,/75-image-library1/);
 assert.match(library,/conta-de-casa-market-image-library/);
@@ -60,9 +61,6 @@ assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoImage,'ping
 
   assert.match(prepare,/const IMAGE_LIBRARY_REV = '75-image-library1'/);
   assert.match(prepare,/market-image-library\.js/);
-  assert.match(sw,/image-library1/);
-  assert.match(sw,/planning-more1/);
-  assert.match(sw,/retire-assets1/);
   assert.match(sw,/\.\/market-image-library\.js/);
   assert.doesNotMatch(sw,/\.\/v75-market-featured\.(?:css|js)/);
 
