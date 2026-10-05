@@ -60,6 +60,13 @@
     return `<svg class="market-visual-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
   }
   const clean=(value,max=180)=>String(value??'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,max);
+  const parseEuroCents=value=>{
+    const match=String(value||'').match(/(\d{1,7}(?:[.,]\d{1,2})?)\s*€/);
+    if(!match)return 0;
+    const cents=Math.round(Number(match[1].replace(',','.'))*100);
+    return Number.isSafeInteger(cents)&&cents>0?cents:0;
+  };
+  const formatEuro=cents=>new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR',minimumFractionDigits:2}).format((Number(cents)||0)/100);
   const memoryProducts=new Map();
   const memoryMeta=new Map();
   const imageQueue=[];
@@ -113,20 +120,25 @@
     const records=[];
     for(let index=0;index<lines.length;index+=1){
       const line=lines[index].trim();
-      const match=/^-\s*(Pingo Doce|Continente)\s*·\s*(.*?)\s*·\s*(.*?)\s*·.*?\bpid\s+(\d{4,32})\s*$/i.exec(line);
-      if(!match)continue;
-      const marketId=/continente/i.test(match[1])?'continente':'pingo-doce';
-      const pid=match[4];
+      if(!line.startsWith('- '))continue;
+      const parts=line.slice(2).split(' · ').map(part=>part.trim()).filter(Boolean);
+      if(parts.length<4)continue;
+      const marketId=/continente/i.test(parts[0])?'continente':/pingo doce/i.test(parts[0])?'pingo-doce':'';
+      if(!marketId)continue;
+      const name=clean(parts[1],140);
+      const pack=clean(parts[2],100);
+      const priceCents=parseEuroCents(parts[3]);
+      const pid=line.match(/\bpid\s+(\d{4,32})\s*$/i)?.[1]||'';
+      if(!pid||!name)continue;
       const sourceUrl=safeProductUrl(clean(lines[index+1]||'',900),marketId,pid);
       if(!sourceUrl)continue;
       records.push({
-        key:`${marketId}|${pid}`,marketId,pid,
-        name:clean(match[2],140),pack:clean(match[3],100),
+        key:`${marketId}|${pid}`,marketId,pid,name,pack,priceCents,
         categories:[category],sourceUrl,lastSeenAt:Date.now()
       });
       index+=1;
     }
-    return records.filter(record=>record.name);
+    return records;
   }
 
   function openDb(){
@@ -203,6 +215,7 @@
       key:id.key,marketId:id.marketId,pid:id.pid,
       name:clean(value.name||previous?.name,140),
       pack:clean(value.pack||previous?.pack,100),
+      priceCents:Number(value.priceCents||previous?.priceCents)||0,
       categories,
       sourceUrl:safeProductUrl(value.sourceUrl||previous?.sourceUrl,id.marketId,id.pid),
       firstSeenAt:Number(previous?.firstSeenAt)||Date.now(),
@@ -461,6 +474,7 @@
     const copy=el('span','market-visual-product-copy');
     copy.append(el('strong','market-visual-product-name',record.name));
     if(record.pack)copy.append(el('small','market-visual-product-pack',record.pack));
+    if(record.priceCents)copy.append(el('b','market-visual-product-price',formatEuro(record.priceCents)));
     copy.append(el('span','market-visual-product-store',STORE_LABELS[record.marketId]||record.marketId));
 
     const action=el('button','market-visual-product-add','+');
@@ -485,6 +499,7 @@
     if(name)name.textContent=record.name;
     const copy=card.querySelector('.market-visual-product-copy');
     let pack=card.querySelector('.market-visual-product-pack');
+    let price=card.querySelector('.market-visual-product-price');
     if(record.pack){
       if(!pack&&copy){
         pack=el('small','market-visual-product-pack');
@@ -493,6 +508,14 @@
       }
       if(pack)pack.textContent=record.pack;
     }else if(pack)pack.remove();
+    if(record.priceCents){
+      if(!price&&copy){
+        price=el('b','market-visual-product-price');
+        const storeNode=copy.querySelector('.market-visual-product-store');
+        if(storeNode)copy.insertBefore(price,storeNode);else copy.append(price);
+      }
+      if(price)price.textContent=formatEuro(record.priceCents);
+    }else if(price)price.remove();
     const fallbackMark=card.querySelector('.market-visual-catalog-fallback-mark');
     if(fallbackMark)fallbackMark.textContent=category.label.slice(0,1);
   }
