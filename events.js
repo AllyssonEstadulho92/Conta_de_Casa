@@ -52,7 +52,9 @@ function setVaultEntryMode(mode = 'pin') {
   box.classList.toggle('text-entry-mode',!pinMode);
   input.readOnly=pinMode;
   input.setAttribute('inputmode',pinMode?'none':'text');
-  toggle.textContent=pinMode?'Usar palavra-passe':'Usar teclado PIN';
+  const label=toggle.querySelector('.vault-keyboard-label');
+  if(label)label.textContent=pinMode?'Usar palavra-passe':'Usar teclado PIN';
+  else toggle.textContent=pinMode?'Usar palavra-passe':'Usar teclado PIN';
   toggle.setAttribute('aria-pressed',String(!pinMode));
   if(!pinMode) requestAnimationFrame(()=>input.focus({preventScroll:true}));
 }
@@ -96,9 +98,10 @@ function installPinRecoveryUi() {
   if (unlockBox && !$('#pinHelpToggle')) {
     const actions = document.createElement('div');
     actions.className = 'pin-recovery-actions';
+    const iconMarkup=(name,size=16)=>globalThis.CDCIcons?.markup?.(name,size)||'';
     setHTML(actions, `<div class="vault-action-row">
-        <button id="togglePinVisibility" class="link-btn pin-help-link" type="button">Mostrar PIN</button>
-        <button id="changePinLockedToggle" class="link-btn pin-help-link" type="button">Alterar PIN</button>
+        <button id="togglePinVisibility" class="link-btn pin-help-link" type="button">${iconMarkup('eye',17)}<span>Mostrar PIN</span></button>
+        <button id="changePinLockedToggle" class="link-btn pin-help-link" type="button">${iconMarkup('edit',17)}<span>Alterar PIN</span></button>
       </div>
       <div id="changePinLockedBox" class="device-transfer-box pin-recovery-box" hidden>
         <strong>Alterar PIN deste cofre</strong>
@@ -687,7 +690,10 @@ async function initVaultUi() {
   installPinRecoveryUi();
   wireVaultPinPad();
   await openDb();
-  const meta=await idbGet('meta','vault'); $('#vaultCreate').hidden=!!meta; $('#vaultUnlock').hidden=!meta;
+  const meta=await idbGet('meta','vault');
+  $('#vaultCreate').hidden=!!meta;
+  $('#vaultUnlock').hidden=!meta;
+  $('#vaultScreen')?.classList.toggle('vault-unlock-active',Boolean(meta));
 
   const vaultTransferToggle=$('#vaultTransferToggle');
   if(vaultTransferToggle){
@@ -706,7 +712,9 @@ async function initVaultUi() {
       const input=$('#unlockPassphrase');
       const show=input.type==='password';
       input.type=show?'text':'password';
-      togglePin.textContent=show?'Ocultar PIN':'Mostrar PIN';
+      const label=togglePin.querySelector('span:last-child');
+      if(label)label.textContent=show?'Ocultar PIN':'Mostrar PIN';
+      else togglePin.textContent=show?'Ocultar PIN':'Mostrar PIN';
     });
   }
   const changePinLockedToggle=$('#changePinLockedToggle');
@@ -715,7 +723,9 @@ async function initVaultUi() {
       const box=$('#changePinLockedBox');
       const open=box.hidden;
       box.hidden=!open;
-      changePinLockedToggle.textContent=open?'Fechar alteração':'Alterar PIN';
+      const label=changePinLockedToggle.querySelector('span:last-child');
+      if(label)label.textContent=open?'Fechar alteração':'Alterar PIN';
+      else changePinLockedToggle.textContent=open?'Fechar alteração':'Alterar PIN';
       changePinLockedToggle.setAttribute('aria-expanded',String(open));
       if(open){
         const help=$('#pinRecoveryBox');

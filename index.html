@@ -36,9 +36,7 @@
       </div>
       <div id="vaultUnlock" hidden>
         <div class="vault-unlock-intro">
-          <span class="vault-lock-badge" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-          </span>
+          <span class="vault-lock-badge" aria-hidden="true"></span>
           <p class="vault-eyebrow">Acesso seguro</p>
           <h1>Introduza o seu PIN</h1>
           <p id="vaultUnlockHint">Cofre local encriptado. A chave permanece apenas durante esta sessão.</p>
@@ -59,13 +57,11 @@
             <button class="vault-key" type="button" data-pin-key="9"><strong>9</strong><small>WXYZ</small></button>
             <span class="vault-key-spacer" aria-hidden="true"></span>
             <button class="vault-key" type="button" data-pin-key="0"><strong>0</strong><small></small></button>
-            <button class="vault-key vault-key-delete" type="button" data-pin-delete aria-label="Apagar último dígito">
-              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 4-7 16H4l-3-8 3-8z"/><path d="m9 9 6 6m0-6-6 6"/></svg>
-            </button>
+            <button class="vault-key vault-key-delete" type="button" data-pin-delete aria-label="Apagar último dígito"></button>
           </div>
         </div>
-        <button id="unlockVaultBtn" class="btn primary full vault-enter-btn">Entrar</button>
-        <button id="vaultKeyboardModeToggle" class="btn secondary full vault-keyboard-toggle" type="button">Usar palavra-passe</button>
+        <button id="unlockVaultBtn" class="btn primary full vault-enter-btn"><span class="vault-enter-label">Entrar</span><span class="vault-enter-arrow" aria-hidden="true"></span></button>
+        <button id="vaultKeyboardModeToggle" class="btn secondary full vault-keyboard-toggle" type="button"><span class="vault-keyboard-icon" aria-hidden="true"></span><span class="vault-keyboard-label">Usar palavra-passe</span></button>
       </div>
 
       <div class="vault-transfer">

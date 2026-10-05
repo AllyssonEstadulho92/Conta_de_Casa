@@ -802,3 +802,16 @@ Regras:
 - a marca `icon.svg` permanece separada da iconografia funcional.
 
 O MutationObserver existente reexecuta a hidratação quando componentes dinâmicos são inseridos, mantendo consistência após rerenders.
+
+
+#### Ecrã de desbloqueio do cofre
+
+O desbloqueio mantém a mesma arquitetura funcional:
+
+`index.html → events.js → unlockVault() → IndexedDB cifrado → enterApp()`
+
+O redesign é estritamente visual e de composição. `#vaultUnlock`, `#unlockPassphrase`, `#vaultPinPad`, `#unlockVaultBtn` e os controlos de recuperação conservam os IDs existentes.
+
+`events.js` aplica a classe `vault-unlock-active` ao `#vaultScreen` quando existe um cofre local. Isto permite que o protótipo visual seja aplicado apenas ao desbloqueio, sem afetar o fluxo de criação inicial do cofre.
+
+A iconografia do PIN continua centralizada em `ui-icons.js`: Lock, Backspace, Key, Eye/Edit e ArrowRight usam o snapshot Lucide local. O CSS principal do protótipo vive em `v75-usability.css`, revisão `76-pin-prototype1`.

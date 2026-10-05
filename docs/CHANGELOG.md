@@ -860,3 +860,18 @@ Próximo passo: ligar o subprojeto a uma conta/projeto Expo autorizado e gerar a
 - ações de navegação eliminam SVG direto legado antes de inserir o ícone canónico;
 - sistema mantém funcionamento offline e licença local;
 - sem alterações a domínio financeiro, persistência ou segurança.
+
+
+## 2026-10-05: redesign moderno do ecrã de PIN
+
+- ecrã de desbloqueio redesenhado segundo o protótipo aprovado;
+- novo fundo verde-petróleo com composição ambiental;
+- cartão de autenticação frosted;
+- teclado numérico e campo PIN ampliados;
+- ação Entrar recebe gradiente e ícone ArrowRight;
+- alternância Palavra-passe/PIN recebe ícone Key;
+- controlos Mostrar PIN e Alterar PIN recebem ícones canónicos;
+- SVGs locais de cadeado/backspace removidos do HTML;
+- classe `vault-unlock-active` isola o novo visual do fluxo Criar cofre;
+- cache/asset revision atualizada para `76-pin-prototype1`;
+- nenhuma alteração à cifra, PBKDF2, IndexedDB ou dados financeiros.

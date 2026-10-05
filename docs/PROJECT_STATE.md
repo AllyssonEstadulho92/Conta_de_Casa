@@ -1,6 +1,6 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 4 de outubro de 2026
+Atualizado: 5 de outubro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
@@ -663,3 +663,25 @@ Implementado:
 Preservado: IDs, handlers, navegação, fórmulas, dados, cofre, CSP e licença Lucide local.
 
 Pendente: validação visual física no iPhone para confirmar alinhamento ótico em light/dark mode.
+
+
+## PWA: ecrã de PIN alinhado ao protótipo
+
+Em 5 de outubro de 2026, o ecrã de desbloqueio do cofre foi redesenhado para seguir o protótipo visual aprovado, sem alterar a criptografia, o fluxo de autenticação ou a persistência.
+
+Alterações:
+
+- fundo de autenticação em gradiente verde-petróleo, com formas ambientais discretas;
+- marca Conta de Casa deslocada visualmente para o cabeçalho do fundo;
+- conteúdo de desbloqueio passa a um cartão translúcido/frosted de alto contraste;
+- badge de cadeado maior, título e subtítulo com hierarquia mais forte;
+- campo PIN maior e centrado;
+- teclado numérico aumentado, com alvos tácteis circulares de 70–74 px;
+- botão Entrar em gradiente com affordance circular e ícone ArrowRight canónico;
+- alternância Palavra-passe/PIN usa ícone Key canónico;
+- Mostrar PIN e Alterar PIN mantêm os mesmos IDs/handlers, agora com iconografia Lucide;
+- SVGs locais de cadeado e apagar foram retirados do HTML e continuam a ser fornecidos pelo sistema de ícones;
+- dark/forced-colors/reduced-motion e safe areas permanecem suportados;
+- revisão pública `76-pin-prototype1`.
+
+Não houve alteração ao PBKDF2, AES-GCM, IndexedDB, política de bloqueio automático ou requisitos mínimos do PIN.

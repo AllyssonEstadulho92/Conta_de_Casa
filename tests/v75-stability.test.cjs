@@ -100,7 +100,7 @@ assert.match(finance,/function sumCents/);
 /* Distribuição mantém a revisão pública atual; o conteúdo passa a ter autoridade única. */
 assert.match(prepare,/const STABILITY_REV = '75-stability1'/);
 assert.match(prepare,/const PAGES_REV = '75-pages1'/);
-assert.match(prepare,/const USABILITY_REV = '76-auth1'/);
+assert.match(prepare,/const USABILITY_REV = '76-pin-prototype1'/);
 for(const asset of ['v75-stability.css','v75-stability.js','v75-pages.css','v75-usability.css'])assert.ok(prepare.includes(`'${asset}'`));
 assert.match(prepare,/v75-stability\.css\?v=\$\{STABILITY_REV\}/);
 assert.match(prepare,/v75-stability\.js\?v=\$\{STABILITY_REV\}/);
@@ -116,7 +116,7 @@ try{
   assert.match(builtIndex,/v75-header-refinement\.css\?v=75-header2/);
   assert.match(builtIndex,/v75-stability\.css\?v=75-stability1/);
   assert.match(builtIndex,/v75-pages\.css\?v=75-pages1/);
-  assert.match(builtIndex,/v75-usability\.css\?v=76-auth1/);
+  assert.match(builtIndex,/v75-usability\.css\?v=76-pin-prototype1/);
   assert.match(builtIndex,/v75-architecture\.js\?v=76-walli-share-drawer1/);
   assert.match(builtIndex,/v75-stability\.js\?v=75-stability1/);
   assert.ok(builtIndex.indexOf('v75-stability.css')>builtIndex.indexOf('v75-header-refinement.css'));
