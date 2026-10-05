@@ -21,6 +21,7 @@ const syncPolicy=read('src/sync/sync-conflict-policy.ts');
 const indexSource=read('index.html');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
 new Function(js);
 assert.match(js,/REVISION='75-market1'/);
@@ -112,11 +113,6 @@ assert.match(prepare,/v75-market-flow\.css\?v=\$\{MARKET_FLOW_REV\}/);
 assert.match(prepare,/v75-market-flow\.js\?v=\$\{MARKET_FLOW_REV\}/);
 assert.ok(sw.includes("'./v75-market-flow.css'"));
 assert.ok(sw.includes("'./v75-market-flow.js'"));
-assert.match(sw,/assets1-market1/,'market1 must remain in the cache lineage');
-assert.match(sw,/canonical-expense-market1/,'PWA must invalidate for canonical Despesas/Mercado presentation');
-assert.match(sw,/single-search-surface1/,'PWA must invalidate the duplicate-search-surface cache');
-assert.match(sw,/market-identity1/,'PWA must invalidate when canonical Mercado identity persistence changes');
-assert.match(sw,/market-identity-stale1/,'PWA must invalidate when stale pending identities are hardened');
 
 const dist=path.join(ROOT,'dist');
 try{
