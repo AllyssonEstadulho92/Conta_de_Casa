@@ -22,6 +22,8 @@ assert.match(library,/Sites-pingo-doce-master/);
 assert.match(library,/marketImageLibrary='hit'/);
 assert.match(library,/marketImageLibrary='stored'/);
 assert.match(library,/MutationObserver/);
+assert.match(library,/marketProductName/,'persistent library must read product metadata from prototype cards');
+assert.match(library,/marketProductUrl/,'persistent library must retain the exact retailer URL from prototype cards');
 assert.match(library,/attributeFilter:\['src'\]/);
 assert.match(library,/async function auditAll\(options=\{\}\)/,'image library must expose a full audit path');
 assert.match(library,/async function listRecords\(options=\{\}\)/,'prototype library view must enumerate all stored records');
