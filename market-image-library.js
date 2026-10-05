@@ -8,7 +8,7 @@
  * não lê/escreve o estado financeiro e não altera preços.
  */
 (function installMarketImageLibrary(root){
-  const REVISION='76-add-product-prototype1';
+  const REVISION='76-pingo-images2';
   const DB_NAME='conta-de-casa-market-image-library';
   const DB_VERSION=1;
   const STORE='images';
@@ -74,8 +74,11 @@
         return url.href.slice(0,1100);
       }
       if(marketId==='pingo-doce'){
-        if(host!=='static.pingodoce.pt'||!path.includes('/Sites-pingo-doce-master/'))return '';
-        if(!/\/images\/(?:large|medium|small)\//i.test(path)||!/\.(?:jpe?g|png|webp)$/i.test(path))return '';
+        if(!['pingodoce.pt','www.pingodoce.pt','static.pingodoce.pt'].includes(host))return '';
+        if(!path.includes('/Sites-pingo-doce-master/'))return '';
+        if(!/\/images\/(?:large|medium|small)\//i.test(path))return '';
+        if(!/\.(?:jpe?g|png|webp)$/i.test(path)||/noimage|fallback/i.test(path))return '';
+        if((host==='pingodoce.pt'||host==='www.pingodoce.pt')&&!path.includes('/dw/image/v2/BLJJ_PRD/on/demandware.static/-/'))return '';
         if(id&&!path.split('/').some(segment=>segment.startsWith(`${id}_`)||segment.startsWith(`${id}-`)||segment.startsWith(`${id}.`)))return '';
         return url.href.slice(0,1100);
       }
