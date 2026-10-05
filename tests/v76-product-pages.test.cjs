@@ -107,7 +107,13 @@ assert.match(css,/76-market-page-polish1/,'Mercado must expose one final visual 
 assert.match(css,/#page-market \.market-command-bar\{[\s\S]*grid-template-columns:minmax\(0,1fr\) auto!important/,'desktop Mercado command bar must keep search and primary action aligned');
 assert.match(css,/#formDialog\[data-mode="market-browser"\] \.market-catalog-card\{[\s\S]*grid-template-columns:92px minmax\(0,1fr\) auto!important/,'market search results must use a stable image-copy-action grid');
 assert.match(css,/@media\(max-width:520px\)[\s\S]*\.market-catalog-card\{[\s\S]*grid-template-columns:72px minmax\(0,1fr\)!important/,'phone search results must not crowd the product action');
-assert.match(market,/class="market-source-notice" role="note"><summary/,'market source explanation must be progressively disclosed instead of permanently occupying the dialog');
+assert.match(css,/76-add-product-prototype1/,'Adicionar produto must reproduce the approved six-view prototype');
+assert.match(market,/class="market-prototype-store-tabs"/,'prototype must expose compact Todos, Pingo Doce and Continente filters');
+assert.match(market,/data-market-open-catalog/,'initial view must expose Explorar catálogo');
+assert.match(market,/data-market-open-library/,'initial view must expose Biblioteca de fotografias');
+assert.match(market,/data-market-detail-add/,'product detail must expose the full Add to list action');
+assert.match(market,/data-market-library-audit/,'library view must expose Validate all');
+assert.doesNotMatch(market,/market-browser-tabs/,'legacy Mercados, Produtos and Categorias tabs must not return');
 assert.match(css,/#page-bills \.bill-command-bar,[\s\S]*#page-market \.market-command-bar[\s\S]*display:grid!important[\s\S]*visibility:visible!important/);
 assert.match(css,/#page-bills #newBillBtn,[\s\S]*#page-market #newMarketBtn[\s\S]*display:inline-flex!important[\s\S]*pointer-events:auto!important/);
 assert.match(css,/#page-bills #billsList,[\s\S]*#page-market #marketList[\s\S]*visibility:visible!important[\s\S]*opacity:1!important/);
@@ -121,7 +127,7 @@ assert.match(render,/function renderBills\(/);
 assert.match(render,/function renderMarket\(/);
 
 // A nova camada tem propriedade de composição de página, carrega antes do shell e entra no PWA.
-assert.match(prepare,/const PRODUCT_PAGES_REV = '76-market-polish1'/);
+assert.match(prepare,/const PRODUCT_PAGES_REV = '76-add-product-prototype1'/);
 assert.match(prepare,/const DASHBOARD_REV = '76-budget-cash-separation3'/);
 assert.ok(prepare.includes('render.js?v=${DASHBOARD_REV}'),'render.js must receive a dedicated cache-busting revision');
 assert.ok(prepare.includes("'v76-product-pages.css'"));
