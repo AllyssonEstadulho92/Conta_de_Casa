@@ -107,7 +107,7 @@ assert.match(index,/id="vaultUnlockHint"/);
 assert.match(index,/aria-describedby="vaultUnlockHint"/);
 assert.match(index,/class="vault-enter-label">Entrar<\/span><span class="vault-enter-arrow"/,'PIN submit action must expose the prototype trailing icon slot');
 assert.match(index,/class="vault-keyboard-icon"/,'password/PIN mode switch must expose the canonical key icon slot');
-assert.doesNotMatch(index,/<span class="vault-lock-badge"[^>]*>[\s\S]*?<svg/,'vault lock badge must not ship bespoke inline SVG');
+assert.match(index,/<span class="vault-lock-badge" aria-hidden="true"><\/span>/,'vault lock badge must be an empty canonical-icon slot');
 assert.match(js,/function hydrateVaultPrototype\(root=document\)/,'PIN prototype icons must be hydrated by the canonical Lucide authority');
 assert.match(js,/vault-enter-arrow'\),'arrowRight',21/,'Enter action must use the canonical ArrowRight icon');
 assert.match(js,/vault-keyboard-icon'\),'key',18/,'password mode switch must use the canonical Key icon');
