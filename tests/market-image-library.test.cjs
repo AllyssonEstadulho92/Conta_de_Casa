@@ -13,7 +13,7 @@ const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
-assert.match(library,/76-add-product-prototype1/);
+assert.match(library,/76-pingo-images2/);
 assert.match(library,/conta-de-casa-market-image-library/);
 assert.match(library,/indexedDB/);
 assert.match(library,/45\*24\*60\*60\*1000/);
@@ -40,12 +40,13 @@ sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(library,sandbox,{filename:'market-image-library.js'});
 assert.ok(sandbox.CDCMarketImageLibrary,'library API must be installed');
-assert.equal(sandbox.CDCMarketImageLibrary.revision,'76-add-product-prototype1');
+assert.equal(sandbox.CDCMarketImageLibrary.revision,'76-pingo-images2');
 
 const continenteProduct='https://www.continente.pt/produto/compressas-gaze-20-x-20-cm-continente-8167440.html';
 const continenteImage='https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dwa5dd802e/images/col/816/8167440-frente.jpg?sw=2000&sh=2000';
 const pingoProduct='https://www.pingodoce.pt/home/produtos/mercearia/arroz-massa-e-leguminosas/arroz/arroz-carolino-cigala-739490.html';
 const pingoImage='https://static.pingodoce.pt/dw/image/v2/BLJJ_PRD/on/demandware.static/-/Sites-pingo-doce-master/default/dw8cff88d2/images/large/739490_93c013c8bbf2545978b1e875cb8563de.jpg';
+const pingoCurrentImage='https://www.pingodoce.pt/dw/image/v2/BLJJ_PRD/on/demandware.static/-/Sites-pingo-doce-master/default/dwa8c02627/images/medium/544184_b35a81450dae22cf2c57f83fa6d0d563.jpg?sw=198';
 assert.deepEqual(JSON.parse(JSON.stringify(sandbox.CDCMarketImageLibrary.identity({marketId:'continente',pid:'8167440'}))),{marketId:'continente',pid:'8167440',key:'continente|8167440'});
 assert.equal(sandbox.CDCMarketImageLibrary.safeProductUrl(continenteProduct,'continente','8167440'),continenteProduct);
 assert.equal(sandbox.CDCMarketImageLibrary.safeProductUrl(pingoProduct,'pingo-doce','739490'),pingoProduct);
@@ -54,6 +55,9 @@ assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(continenteImage,
 assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(continenteImage,'continente','111111'),'');
 assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoImage,'pingo-doce','739490'),pingoImage);
 assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoImage,'pingo-doce','111111'),'');
+assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoCurrentImage,'pingo-doce','544184'),pingoCurrentImage);
+assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoCurrentImage,'pingo-doce','739490'),'');
+assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoCurrentImage.replace('www.pingodoce.pt','evil.example'),'pingo-doce','544184'),'');
 
 (async()=>{
   const stored=await sandbox.CDCMarketImageLibrary.remember({marketId:'continente',pid:'8167440',name:'Compressas Gaze',imageUrl:continenteImage,sourceUrl:continenteProduct});
@@ -72,7 +76,15 @@ assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoImage,'ping
   assert.equal(await sandbox.CDCMarketImageLibrary.forget({marketId:'continente',pid:'8167440'}),true);
   assert.equal(await sandbox.CDCMarketImageLibrary.get({marketId:'continente',pid:'8167440'}),null);
 
-  assert.match(prepare,/const IMAGE_LIBRARY_REV = '76-add-product-prototype1'/);
+  const pingoStored=await sandbox.CDCMarketImageLibrary.remember({
+    marketId:'pingo-doce',pid:'544184',name:'Bife de frango',imageUrl:pingoCurrentImage,
+    sourceUrl:'https://www.pingodoce.pt/home/produtos/talho/aves/frango/bife%2Fpeito-de-frango-embalado-nosso-talho-544184.html'
+  });
+  assert.ok(pingoStored);
+  assert.equal(pingoStored.imageUrl,pingoCurrentImage);
+  assert.equal((await sandbox.CDCMarketImageLibrary.get({marketId:'pingo-doce',pid:'544184'})).imageUrl,pingoCurrentImage);
+
+  assert.match(prepare,/const IMAGE_LIBRARY_REV = '76-pingo-images2'/);
   assert.match(prepare,/market-image-library\.js/);
   assert.match(sw,/\.\/market-image-library\.js/);
   assert.doesNotMatch(sw,/\.\/v75-market-featured\.(?:css|js)/);
@@ -81,7 +93,7 @@ assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoImage,'ping
   try{
     execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
     const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-    assert.match(index,/market-image-library\.js\?v=76-add-product-prototype1/);
+    assert.match(index,/market-image-library\.js\?v=76-pingo-images2/);
     assert.ok(index.indexOf('market-image-library.js')<index.indexOf('market-retailer-image-policy.js'));
     assert.ok(index.indexOf('market-image-library.js')<index.indexOf('market-official-images.js'));
     assert.ok(fs.existsSync(path.join(dist,'market-image-library.js')));
