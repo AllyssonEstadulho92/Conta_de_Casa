@@ -21,7 +21,7 @@
   if(typeof ICONS==='undefined'||typeof icon!=='function') return;
 
   const LUCIDE_SOURCE_COMMIT='94e4cb9d9db5907053ebf3636a97c45529cf776b';
-  const ICON_SEMANTICS_REVISION='76-icons-unified7';
+  const ICON_SEMANTICS_REVISION='76-pin-prototype1';
   const LUCIDE_ICONS=Object.freeze({
     home:'<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
     bill:'<path d="M13 16H8"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>',
@@ -252,6 +252,13 @@
     }
   }
 
+  function hydrateVaultPrototype(root=document){
+    fillIcon(root.querySelector?.('.vault-enter-arrow'),'arrowRight',21);
+    fillIcon(root.querySelector?.('.vault-keyboard-icon'),'key',18);
+    root.querySelectorAll?.('#togglePinVisibility > svg').forEach(svg=>svg.classList.add('ui-icon-svg'));
+    root.querySelectorAll?.('#changePinLockedToggle > svg').forEach(svg=>svg.classList.add('ui-icon-svg'));
+  }
+
   function hydrateDashboard(root=document){
     root.querySelectorAll?.('.dashboard-priority-panel .dashboard-feature-icon').forEach(slot=>fillIcon(slot,'calendar',22));
     root.querySelectorAll?.('.dashboard-budget-panel .dashboard-feature-icon').forEach(slot=>fillIcon(slot,'report',22));
@@ -284,6 +291,7 @@
     hydrateActionButtons(root);
     hydrateMarket(root);
     hydrateDashboard(root);
+    hydrateVaultPrototype(root);
   }
 
   globalThis.CDCIcons=Object.freeze({
