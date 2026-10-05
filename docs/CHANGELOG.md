@@ -2,6 +2,20 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-05: Centro de Alertas operacional
+
+- o sino do cabeçalho deixa de ser um simples atalho para o Início e passa a abrir um modal dedicado;
+- o painel reutiliza `dashboardNumbers()` e uma única função `dashboardAlertItems()`, evitando uma segunda regra financeira;
+- são apresentados saldo por confirmar, diferença de conciliação, faturas em atraso, vencimentos críticos nas próximas 24 horas e saldo projetado negativo;
+- cada alerta tem ação direta para **Faturas** ou **Planeamento**;
+- o badge passa de ponto decorativo para contador numérico de grupos de alertas ativos;
+- quando não existem alertas, o centro mostra um estado vazio explícito;
+- o modal suporta Escape, toque no backdrop, safe areas do iPhone, dark mode, forced-colors e valores ocultos por privacidade;
+- bloquear o cofre fecha também o Centro de Alertas;
+- não existe histórico ou estado lido/não lido: o centro representa apenas condições financeiras atualmente ativas.
+
+Sem alteração de fórmulas financeiras, IndexedDB, cifragem, sincronização ou `STATE_VERSION`.
+
 ## 2026-10-05: identidade dedicada Conta de Casa
 
 ### Alteração
