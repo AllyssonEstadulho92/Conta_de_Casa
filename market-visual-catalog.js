@@ -535,12 +535,16 @@
       ? `${count} fotografia${count===1?'':'s'} guardada${count===1?'':'s'}`
       : 'Sem fotografias guardadas';
     const healthy=Number(report.available||0);
+    const valid=Number(report.valid||0);
     const unavailable=Number(report.unavailable||0);
     const unchecked=Number(report.unchecked||0);
     const cleaned=Number(report.removed||0);
-    const parts=[`${healthy} válida${healthy===1?'':'s'}`];
+    const networkChecked=healthy+unavailable>0;
+    const parts=[networkChecked
+      ? `${healthy} disponível${healthy===1?'':'eis'}`
+      : `${valid} registo${valid===1?'':'s'} válido${valid===1?'':'s'}`];
     if(unavailable)parts.push(`${unavailable} indisponíve${unavailable===1?'l':'is'}`);
-    if(unchecked)parts.push(`${unchecked} sem teste de rede`);
+    if(!networkChecked&&unchecked)parts.push('por verificar online');
     if(cleaned)parts.push(`${cleaned} removida${cleaned===1?'':'s'}`);
     return parts.join(' · ');
   }
@@ -665,7 +669,10 @@
       updateSelection();
       await renderProducts();
       await renderStats();
-      await renderLibraryHealth();
+      try{
+        const metadataAudit=await root.CDCMarketImageLibrary?.auditAll?.({verifyNetwork:false,pruneInvalid:true});
+        await renderLibraryHealth(metadataAudit||null);
+      }catch(_error){await renderLibraryHealth();}
       const current=await listCategory(activeCategory,activeStore,4);
       if(current.length<4)void refreshCategory(activeCategory,{seeds:2});
       scheduleBackground(3000);
