@@ -12,6 +12,7 @@ const loaderSource=read('asset-loader.js');
 const loaderCss=read('asset-loader.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const index=read('index.html');
 const core=read('core.js');
 
@@ -67,7 +68,6 @@ for(const file of ['asset-loader.css','design-asset-library.js','asset-loader.js
 assert.match(prepare,/asset-loader\.css\?v=\$\{ASSETS_REV\}/);
 assert.match(prepare,/design-asset-library\.js\?v=\$\{ASSETS_REV\}/);
 assert.match(prepare,/asset-loader\.js\?v=\$\{ASSETS_REV\}/);
-assert.match(sw,/usability1-pages1-assets1/);
 for(const file of ['./asset-loader.css','./design-asset-library.js','./asset-loader.js']) assert.ok(sw.includes(`'${file}'`),`service worker must cache ${file}`);
 
 /* API do registo funciona sem DOM e bloqueia providers explicitamente não aprovados. */
