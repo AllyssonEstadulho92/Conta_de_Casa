@@ -3459,3 +3459,10 @@ html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototyp
     box-shadow:none!important;
   }
 }
+
+
+/* 76-add-product-prototype2 — sanitizer compatibility.
+   A nota de estimativa pertence ao fluxo legado e não faz parte do protótipo aprovado. */
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-prototype-browser>.market-flow-estimate-note{
+  display:none!important;
+}
