@@ -3417,20 +3417,20 @@ html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototyp
   }
   html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .dialog-head{
     min-height:88px!important;
-    padding:calc(12px + env(safe-area-inset-top)) 14px 12px!important;
+    padding:12px 14px!important;
   }
   html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype #dialogBody{
-    max-height:calc(100dvh - 88px - env(safe-area-inset-top))!important;
+    max-height:calc(100dvh - 88px)!important;
   }
   html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-prototype-view{
-    padding:16px 14px calc(18px + env(safe-area-inset-bottom))!important;
+    padding:16px 14px 18px!important;
   }
   html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-prototype-empty{
     min-height:220px!important;
   }
   html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail{
     min-height:100dvh!important;
-    padding:calc(18px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom))!important;
+    padding:18px 16px 20px!important;
   }
   html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-visual-catalog-grid{
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
