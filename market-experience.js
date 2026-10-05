@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Conta de Casa — pesquisa de preços reais (v53)
+ * Conta de Casa — Adicionar produto segundo o protótipo UX aprovado (76-add-product-prototype1)
  * Continente/Pingo Doce: consulta atual através de cesta.pt, com URL oficial do produto.
  * Mercados ativos: Pingo Doce e Continente.
  * Nenhum preço fictício é usado; fotografias reais de referência são opcionais e validadas separadamente.
@@ -23,15 +23,34 @@
     ['Lacticínios e ovos','leite'],['Mercearia / Despensa','arroz'],['Bebidas','água'],['Limpeza','detergente'],
     ['Higiene pessoal','champô'],['Frutas e legumes','banana'],['Carne e peixe','frango'],['Snacks e doces','chocolate']
   ]);
+  const UI_CATEGORIES=Object.freeze([
+    {id:'all',label:'Todas'},
+    {id:'Bebidas',label:'Bebidas'},
+    {id:'Lacticínios e ovos',label:'Lacticínios e ovos'},
+    {id:'Frutas e legumes',label:'Frutas e legumes'},
+    {id:'Carne e peixe',label:'Carnes e peixes'},
+    {id:'Mercearia / Despensa',label:'Mercearia'},
+    {id:'Congelados',label:'Congelados'},
+    {id:'Higiene pessoal',label:'Higiene e limpeza'},
+    {id:'Limpeza',label:'Beleza e cuidados'},
+    {id:'Animais',label:'Animais'}
+  ]);
 
   let selectedMarkets=new Set(MARKET_IDS);
-  let activeTab='markets';
   let query='';
   let observer=null;
   let searchTimer=0;
   let searchGeneration=0;
   let activeSearchController=null;
   let resultById=new Map();
+  let lastResults=[];
+  let lastWarnings=[];
+  let selectedCategory='all';
+  let categoryOpen=false;
+  let resultSort='relevance';
+  let detailQuantity=1;
+  let libraryFilter='all';
+  let currentLibraryAudit=null;
 
   const marketById=id=>MARKET_DEFINITIONS.find(m=>m.id===id)||MARKET_DEFINITIONS[0];
   const normalized=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-PT').trim();
@@ -46,7 +65,14 @@
       plus:'<path d="M12 5v14M5 12h14"/>',
       check:'<path d="m5 12 4 4L19 6"/>',
       external:'<path d="M14 5h5v5M19 5l-8 8"/><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
-      refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/>'
+      refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/>',
+      image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/>',
+      basket:'<path d="M4 9h16l-1.4 11H5.4L4 9Z"/><path d="m8 9 4-6 4 6M9 13v3m6-3v3"/>',
+      chevron:'<path d="m9 18 6-6-6-6"/>',
+      down:'<path d="m6 9 6 6 6-6"/>',
+      more:'<circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none"/>',
+      minus:'<path d="M5 12h14"/>',
+      cart:'<circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M3 4h2l2.4 10.4a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 8H6"/>'
     };
     return `<svg class="svg-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.search}</svg>`;
   }
@@ -103,57 +129,81 @@
     return 'Outros';
   }
 
-  function marketSelectorHtml(){
-    return `<div class="market-source-grid" role="group" aria-label="Mercados a pesquisar">${MARKET_DEFINITIONS.map(m=>{
-      const selected=selectedMarkets.has(m.id);
-      return `<button class="market-source-card${selected?' selected':''}" type="button" data-market-source="${attr(m.id)}" aria-pressed="${selected}">
-        ${marketMark(m)}
-        <span class="market-source-name">${esc(m.name)}</span>
-        <span class="market-source-check" aria-hidden="true">${selected?svgIcon('check',14):''}</span>
-      </button>`;
-    }).join('')}</div>`;
+  function activeMarketScope(){
+    if(selectedMarkets.size===MARKET_IDS.length)return 'all';
+    return selectedMarkets.has('pingo-doce')?'pingo-doce':'continente';
   }
 
-  function tabsHtml(){
-    return `<div class="market-browser-tabs" role="tablist" aria-label="Pesquisa do mercado">
-      ${[['markets','Mercados'],['products','Produtos'],['categories','Categorias']].map(([id,label])=>`<button class="market-browser-tab${activeTab===id?' active':''}" type="button" role="tab" aria-selected="${activeTab===id}" data-market-browser-tab="${id}">${label}</button>`).join('')}
+  function marketScopeHtml(){
+    const active=activeMarketScope();
+    return `<div class="market-prototype-store-tabs" role="group" aria-label="Mercado">
+      ${[['all','Todos'],['pingo-doce','Pingo Doce'],['continente','Continente']].map(([id,label])=>`<button type="button" class="${active===id?'active':''}" data-market-scope="${id}" aria-pressed="${active===id}">${label}</button>`).join('')}
+    </div>`;
+  }
+
+  function categoryLabel(){
+    return UI_CATEGORIES.find(category=>category.id===selectedCategory)?.label||'Categoria (opcional)';
+  }
+
+  function categoryIcon(name,size=20){
+    const paths={
+      all:'<circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8"/>',
+      Bebidas:'<path d="M8 3h8l-1 18H9L8 3Z"/><path d="M9 7h6"/>',
+      'Lacticínios e ovos':'<path d="M9 3h6l2 4v14H7V7l2-4Z"/><path d="M8 9h8"/>',
+      'Frutas e legumes':'<path d="M12 7c-5-4-9 1-7 6 2 6 6 8 7 8s5-2 7-8c2-5-2-10-7-6Z"/><path d="M12 7c0-3 2-5 5-5"/>',
+      'Carne e peixe':'<path d="M5 12c3-5 7-7 14-4-2 5-5 8-10 8l-4 3 1-5-1-2Z"/>',
+      'Mercearia / Despensa':'<path d="M6 7h12l-1 14H7L6 7Z"/><path d="M9 7V4h6v3"/>',
+      Congelados:'<path d="M12 2v20M4 6l16 12M20 6 4 18"/>',
+      'Higiene pessoal':'<path d="M10 3h4v4h-4z"/><path d="M8 7h8l1 14H7L8 7Z"/>',
+      Limpeza:'<path d="M9 3h6v4h2l2 4v10H5V11l2-4h2V3Z"/>',
+      Animais:'<circle cx="7" cy="8" r="2"/><circle cx="17" cy="8" r="2"/><circle cx="10" cy="5" r="2"/><circle cx="14" cy="5" r="2"/><path d="M12 11c-4 0-7 3-7 6 0 2 2 4 4 3l3-1 3 1c2 1 4-1 4-3 0-3-3-6-7-6Z"/>'
+    };
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.all}</svg>`;
+  }
+
+  function categoryPanelHtml(){
+    return `<div id="marketPrototypeCategoryPanel" class="market-prototype-category-panel"${categoryOpen?'':' hidden'}>
+      <div class="market-prototype-category-search">${svgIcon('search',18)}<input id="marketCategorySearch" type="search" placeholder="Pesquisar categoria..." autocomplete="off" aria-label="Pesquisar categoria"></div>
+      <div id="marketCategoryOptions" class="market-prototype-category-options">
+        ${UI_CATEGORIES.map(category=>`<button type="button" class="${selectedCategory===category.id?'selected':''}" data-market-category="${attr(category.id)}">${categoryIcon(category.id)}<span>${esc(category.label)}</span>${svgIcon('chevron',17)}</button>`).join('')}
+      </div>
     </div>`;
   }
 
   function browserShellHtml(){
-    return `<div class="market-browser" data-market-price-mode="live">
-      <div class="market-browser-search-row">
-        <div class="market-browser-search">${svgIcon('search',24)}<input id="marketCatalogSearch" type="search" value="" placeholder="Pesquisar produto real" autocomplete="off" aria-label="Pesquisar produto nos mercados"><button class="market-search-clear" type="button" data-market-search-clear aria-label="Limpar pesquisa">${svgIcon('close',22)}</button></div>
-      </div>
-      ${tabsHtml()}
-      <div id="marketBrowserTabPanel" class="market-browser-tab-panel" role="tabpanel"></div>
-      <details class="market-source-notice" role="note"><summary>${svgIcon('info',20)}<span>Como funciona a pesquisa</span></summary><p>Pingo Doce e Continente são consultados no momento através de cesta.pt. As fotografias só são apresentadas quando existe uma correspondência validada com uma origem permitida; não são inventadas imagens nem preços.</p></details>
-      <div class="market-browser-results-head"><h3>Resultados</h3><span id="marketResultsMeta">Escreva pelo menos 2 caracteres</span></div>
-      <div id="marketCatalogResults" class="market-catalog-results" aria-live="polite"></div>
+    return `<div class="market-browser market-prototype-browser" data-market-price-mode="live">
+      <section id="marketPrototypeSearchView" class="market-prototype-view" data-market-prototype-view="search">
+        <div class="market-browser-search-row">
+          <div class="market-browser-search">${svgIcon('search',22)}<input id="marketCatalogSearch" type="search" value="" placeholder="Pesquisar produto..." autocomplete="off" aria-label="Pesquisar produto"><button class="market-search-clear" type="button" data-market-search-clear aria-label="Limpar pesquisa" hidden>${svgIcon('close',19)}</button></div>
+        </div>
+        <div id="marketPrototypeStoreTabs">${marketScopeHtml()}</div>
+        <div class="market-prototype-category-wrap">
+          <button class="market-prototype-category-trigger" type="button" data-market-category-toggle aria-expanded="false" aria-controls="marketPrototypeCategoryPanel">
+            <span class="market-prototype-category-trigger-copy">${categoryIcon(selectedCategory==='all'?'all':selectedCategory)}<span id="marketPrototypeCategoryLabel">${esc(selectedCategory==='all'?'Categoria (opcional)':categoryLabel())}</span></span>
+            <span class="market-prototype-category-trigger-chevron">${svgIcon('down',18)}</span>
+          </button>
+          ${categoryPanelHtml()}
+        </div>
+        <div id="marketBarcodeStatus" class="market-barcode-status" role="status" aria-live="polite" hidden></div>
+        <div id="marketPrototypeResultsHead" class="market-prototype-results-head" hidden>
+          <strong id="marketResultsMeta">0 resultados</strong>
+          <label class="market-prototype-sort"><span class="sr-only">Ordenar resultados</span><select id="marketResultSort" aria-label="Ordenar resultados"><option value="relevance">↕ Mais relevantes</option><option value="price-asc">Preço menor</option><option value="price-desc">Preço maior</option></select></label>
+        </div>
+        <div id="marketCatalogResults" class="market-catalog-results" aria-live="polite"></div>
+      </section>
+      <section id="marketPrototypeSubview" class="market-prototype-view market-prototype-subview" data-market-prototype-view="subview" hidden></section>
     </div>`;
   }
 
-  function updateTabPanel(){
-    const root=$('#marketBrowserTabPanel');
-    if(!root)return;
-    if(activeTab==='markets'){
-      setHTML(root,marketSelectorHtml());
-      return;
-    }
-    if(activeTab==='products'){
-      setHTML(root,`<div class="market-browser-chip-grid" aria-label="Sugestões de pesquisa">${PRODUCT_SUGGESTIONS.map(name=>`<button type="button" class="market-browser-chip" data-market-chip-query="${attr(name)}"><span>${esc(name)}</span></button>`).join('')}</div>`);
-      return;
-    }
-    setHTML(root,`<div class="market-browser-chip-grid" aria-label="Categorias de pesquisa">${CATEGORY_SUGGESTIONS.map(([label,term])=>`<button type="button" class="market-browser-chip" data-market-chip-query="${attr(term)}"><span>${esc(label)}</span></button>`).join('')}</div>`);
-  }
-
-  function updateTabs(){
-    $$('.market-browser-tab').forEach(button=>{
-      const selected=button.dataset.marketBrowserTab===activeTab;
-      button.classList.toggle('active',selected);
-      button.setAttribute('aria-selected',String(selected));
-    });
-    updateTabPanel();
+  function refreshSearchControls(){
+    const tabs=document.querySelector('#marketPrototypeStoreTabs');
+    if(tabs)setHTML(tabs,marketScopeHtml());
+    const label=document.querySelector('#marketPrototypeCategoryLabel');
+    if(label)label.textContent=selectedCategory==='all'?'Categoria (opcional)':categoryLabel();
+    const trigger=document.querySelector('[data-market-category-toggle]');
+    if(trigger)trigger.setAttribute('aria-expanded',String(categoryOpen));
+    const panel=document.querySelector('#marketPrototypeCategoryPanel');
+    if(panel)panel.hidden=!categoryOpen;
   }
 
   function parseSseEvents(text){
