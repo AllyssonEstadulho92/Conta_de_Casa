@@ -31,8 +31,8 @@ const events=fs.readFileSync('events.js','utf8');
 assert.ok(!fs.existsSync('market-branding.js'),'Market branding manual JS source must stay removed');
 for(const retiredSource of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(retiredSource),`${retiredSource} must stay physically deleted`);
 assert.match(index,/<meta name="app-build" content="v53"/);
-assert.match(index,/market-experience\.css\?v=76-add-product-prototype1/);
-assert.match(index,/market-experience\.js\?v=76-add-product-prototype1/);
+assert.match(index,/market-experience\.css\?v=76-add-product-prototype2/);
+assert.match(index,/market-experience\.js\?v=76-add-product-prototype2/);
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');

@@ -167,6 +167,7 @@
   function enhanceBrowser(){
     const browser=document.querySelector('.market-browser');
     if(!browser)return;
+    if(browser.classList.contains('market-prototype-browser'))return;
 
     let note=browser.querySelector('.market-flow-estimate-note');
     if(!note){

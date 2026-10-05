@@ -43,7 +43,7 @@ assert.doesNotMatch(mobileCss,/scroll-snap-type:x proximity/,'Despesas mobile mu
 
 const designPosition = index.indexOf('./design-system.css?v=53');
 const mobilePosition = index.indexOf('./mobile-layout.css?v=53');
-const marketPosition = index.indexOf('./market-experience.css?v=76-add-product-prototype1');
+const marketPosition = index.indexOf('./market-experience.css?v=76-add-product-prototype2');
 assert.ok(designPosition >= 0, 'design-system.css must remain loaded');
 assert.ok(mobilePosition > designPosition, 'mobile feature compatibility must load after the base design system');
 assert.ok(marketPosition > mobilePosition, 'market experience must remain after mobile feature compatibility');
