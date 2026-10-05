@@ -242,7 +242,7 @@ if(!index.includes('app-update.js'))index=index.replace('</body>',`  <script src
 if(!index.includes('market-image-library.js'))index=index.replace('</body>',`  <script src="./market-image-library.js?v=${IMAGE_LIBRARY_REV}" defer></script>\n</body>`);
 if(!index.includes('market-retailer-image-policy.js'))index=index.replace('</body>',`  <script src="./market-retailer-image-policy.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
 if(!index.includes('market-image-audit.js'))index=index.replace('</body>',`  <script src="./market-image-audit.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
-if(!index.includes('market-official-images.js'))index=index.replace('</body>',`  <script src="./market-official-images.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
+if(!index.includes('market-official-images.js'))index=index.replace('</body>',`  <script src="./market-official-images.js?v=${IMAGE_LIBRARY_REV}" defer></script>\n</body>`);
 if(!index.includes('market-catalog-image-resolver.js'))index=index.replace('</body>',`  <script src="./market-catalog-image-resolver.js?v=${CATALOG_REV}" defer></script>\n</body>`);
 if(!index.includes('market-visual-catalog.js'))index=index.replace('</body>',`  <script src="./market-visual-catalog.js?v=${CATALOG_REV}" defer></script>\n</body>`);
 if(!index.includes('pingo-doce-photo-library.js'))index=index.replace('</body>',`  <script src="./pingo-doce-photo-library.js?v=${PD_PHOTO_REV}" defer></script>\n</body>`);
