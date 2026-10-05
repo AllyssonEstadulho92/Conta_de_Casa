@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const css = fs.readFileSync('v76-modern-ui.css','utf8');
 const prepare = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
 assert.match(css,/76-modern-ui2/);
 assert.match(css,/--v76-bg:/);
@@ -57,7 +58,5 @@ assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui2'/);
 assert.ok(prepare.includes("'v76-modern-ui.css'"));
 assert.match(prepare,/v75-usability\.css\?v=\$\{USABILITY_REV\}[\s\S]*v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}/);
 assert.ok(sw.includes("'./v76-modern-ui.css'"));
-assert.match(sw,/modern-ui2/);
-assert.match(sw,/ui-components1/);
 
 console.log('v76 modern-ui2 standardizes action hierarchy, grids, icons and market photo presentation while staying presentation-only and delegating shell geometry.');
