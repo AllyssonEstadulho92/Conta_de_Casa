@@ -492,8 +492,17 @@
   function markResolvedPhoto(photo,target,result){if(photo?.isConnected&&result?.imageUrl)makePhotoButton(photo,{url:result.imageUrl,name:target.name,source:result.source});}
 
   function browserCardTarget(card){
-    const name=clean(card.querySelector('.market-product-copy h3')?.textContent||'',130);
-    const rawPack=clean(card.querySelector('.market-product-copy>p')?.textContent||'',100);
+    const prototypeCopy=card.querySelector('.market-prototype-result-copy');
+    const name=clean(
+      card?.dataset?.marketProductName||
+      prototypeCopy?.querySelector('strong')?.textContent||
+      card.querySelector('.market-product-copy h3')?.textContent||'',130
+    );
+    const rawPack=clean(
+      card?.dataset?.marketProductPack||
+      prototypeCopy?.querySelector('small')?.textContent||
+      card.querySelector('.market-product-copy>p')?.textContent||'',100
+    );
     const pack=rawPack.replace(/\s*·\s*(Pingo Doce|Continente)\s*$/i,'').trim();
     const id=clean(card.dataset.marketProductCard||'',100),idMatch=/^cesta-(continente|pingo-doce)-(.+)$/.exec(id);
     const sourceUrl=safeRetailerProductUrl(card.querySelector('.market-product-source[href]')?.href||'');
