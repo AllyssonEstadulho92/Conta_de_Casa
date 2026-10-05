@@ -314,6 +314,7 @@ function safeProductImageUrl(value) {
       if (!path.includes('/Sites-pingo-doce-master/')) return '';
       if (!/\/images\/(?:large|medium|small)\//i.test(path)) return '';
       if (!/\.(?:jpe?g|png|webp)$/i.test(path) || /noimage|fallback/i.test(path)) return '';
+      if ((host === 'pingodoce.pt' || host === 'www.pingodoce.pt') && !path.includes('/dw/image/v2/BLJJ_PRD/on/demandware.static/-/')) return '';
       return url.href.slice(0, 1100);
     }
     return '';
