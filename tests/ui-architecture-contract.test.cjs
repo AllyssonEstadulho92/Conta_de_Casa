@@ -25,7 +25,11 @@ assert.doesNotMatch(legacyMobile,/height\s*:\s*100dvh|overflow\s*:\s*hidden/i,'f
 // The visual design system may style shell elements, but must not duplicate mobile viewport geometry.
 assert.match(modern,/A geometria do shell móvel pertence a v76-mobile-shell\.css/);
 assert.doesNotMatch(modern,/\.main>\.page\{[\s\S]*padding:14px 14px calc\(102px/,'v76-modern-ui.css must not reserve mobile page/dock geometry');
-assert.doesNotMatch(modern,/\.mobile-nav\{[\s\S]*position:fixed!important;[\s\S]*safe-area-inset-bottom/,'v76-modern-ui.css must not position the persistent mobile dock');
+const modernMobileNavBlocks=[...modern.matchAll(/\.mobile-nav\s*\{([^}]*)\}/g)].map(match=>match[1]);
+assert.ok(modernMobileNavBlocks.length>0,'v76-modern-ui.css must expose visual mobile-nav styling');
+for(const block of modernMobileNavBlocks){
+  assert.doesNotMatch(block,/position:fixed!important|safe-area-inset-bottom/,'v76-modern-ui.css mobile-nav blocks must not position the persistent mobile dock');
+}
 assert.doesNotMatch(modern,/\.topbar,[\s\S]*min-height:76px!important;[\s\S]*padding:12px 14px!important/,'v76-modern-ui.css must not own mobile topbar dimensions');
 assert.doesNotMatch(modern,/@media\(max-width:390px\)\{[\s\S]*\.main>\.page\{padding-inline:11px!important\}/,'narrow viewport page gutters belong to the mobile shell');
 assert.doesNotMatch(modern,/@media\(max-width:390px\)\{[\s\S]*\.mobile-nav\{left:7px!important;right:7px!important\}/,'narrow viewport dock offsets belong to the mobile shell');
