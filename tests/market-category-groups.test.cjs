@@ -11,6 +11,7 @@ const js=read('market-category-groups.js');
 const css=read('market-category-groups.css');
 const planningMore=read('v76-planning-more.css');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const prepare=read('scripts/prepare-pages.cjs');
 const publicFilesStart=prepare.indexOf('const PUBLIC_FILES');
 const publicFilesEnd=prepare.indexOf(']);',publicFilesStart);
@@ -39,8 +40,6 @@ assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(planningMore,/76-planning-more1/);
 assert.match(planningMore,/\.cdc-category-dot/);
 
-assert.match(sw,/retire-assets1/);
-assert.match(sw,/v76-version-alignment1/);
 assert.ok(sw.includes("'./market-category-groups.css'"));
 assert.ok(sw.includes("'./market-category-groups.js'"));
 assert.ok(sw.includes("'./design-system.css'"));
