@@ -117,9 +117,8 @@ assert.match(mobileTouchBlock,/\.dialog-close::before\{[\s\S]*content:none!impor
 assert.doesNotMatch(mobileTouchBlock,/\.dialog-shell\{[\s\S]{0,260}overflow:auto!important/,'dialog shell must never become the mobile scroll owner again');
 
 const sw=fs.readFileSync('sw.js','utf8');
-assert.match(sw,/expense-form-professional1-expense-ios-touch1/,'PWA cache must invalidate the frozen iOS expense dialog revision');
-assert.match(sw,/invoice-mode-action1/,'PWA cache must invalidate the previous inert invoice-mode runtime');
-assert.match(sw,/invoice-capture-warmup1/,'PWA cache must invalidate the slower first-use reader runtime');
-assert.match(sw,/invoice-autofill7/,'PWA cache must invalidate the previous manual-apply invoice runtime');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA invalidation must follow the deterministic build identity instead of feature tokens.');
+assert.match(sw,/'\.\/invoice-capture\.css'/,'invoice capture styles must remain part of the offline PWA bundle.');
+assert.match(sw,/'\.\/invoice-capture\.js'/,'invoice capture runtime must remain part of the offline PWA bundle.');
 
 console.log('Invoice capture tests: exact AT QR parser plus deterministic modes, professional expense UI and iOS touch stability: OK');
