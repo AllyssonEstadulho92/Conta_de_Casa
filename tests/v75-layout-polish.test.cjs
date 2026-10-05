@@ -33,7 +33,7 @@ assert.doesNotMatch(css,/\bappState\b|amountCents|estimatedCents|actualCents|Ind
 assert.match(prepare,/const LAYOUT_REV = '75-layout1'/);
 assert.ok(prepare.includes("'v75-layout-polish.css'"));
 assert.match(prepare,/v75-layout-polish\.css\?v=\$\{LAYOUT_REV\}/);
-assert.match(sw,/stability1-layout1/);
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 assert.ok(sw.includes("'./v75-layout-polish.css'"));
 
 const dist=path.join(ROOT,'dist');
