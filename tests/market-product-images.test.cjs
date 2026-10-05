@@ -12,6 +12,7 @@ const architectureJs=fs.readFileSync('v75-architecture.js','utf8');
 const planningMore=fs.readFileSync('v76-planning-more.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const runtime=fs.readFileSync('v64-runtime.js','utf8');
 const imageAudit=fs.readFileSync('market-image-audit.js','utf8');
 const officialBridge=fs.readFileSync('market-official-images.js','utf8');
@@ -74,8 +75,6 @@ assert.match(architectureCss,/\.cdc-product-image img[\s\S]*object-fit:contain!i
 assert.doesNotMatch(architectureJs,/root\.CDCV74/,'current architecture must remain independent from retired v74 runtime');
 
 assert.match(index,/img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org;/);
-assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
-assert.match(sw,/retire-assets1/);
 assert.match(sw,/\.\/market-retailer-image-policy\.js/);
 assert.match(sw,/\.\/market-official-images\.js/);
 assert.match(sw,/\.\/v75-architecture\.css/);
