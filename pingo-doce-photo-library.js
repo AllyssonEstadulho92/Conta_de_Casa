@@ -11,7 +11,7 @@
  * - não ler/escrever preços, quantidades, faturas, cofre ou estado financeiro.
  */
 (function installPingoDocePhotoLibrary(root){
-  const REVISION='76-pd-photo-polish1';
+  const REVISION='76-add-product-prototype1';
   const DB_NAME='conta-de-casa-pingo-doce-photo-library';
   const DB_VERSION=1;
   const PRODUCT_STORE='products';
@@ -435,10 +435,8 @@
 
   function mountStatus(){
     if(typeof document==='undefined'||document.querySelector('#pingoDocePhotoLibraryStatus'))return;
-    const catalog=document.querySelector('#marketVisualCatalog');
-    if(!catalog)return;
-    const controls=catalog.querySelector('.market-visual-catalog-controls')||catalog;
-    const retailerSlot=catalog.querySelector('#marketImageRetailerStatus');
+    const retailerSlot=document.querySelector('#marketImageRetailerStatus');
+    if(!retailerSlot)return;
     const status=el('div','pingo-doce-photo-library-status');
     status.id='pingoDocePhotoLibraryStatus';
     const copy=el('div','pingo-doce-photo-library-copy');
@@ -450,8 +448,7 @@
     button.type='button';button.dataset.pingoDocePhotoSync='1';
     button.setAttribute('aria-label','Atualizar biblioteca de fotografias Pingo Doce');
     status.append(copy,button);
-    if(retailerSlot)retailerSlot.appendChild(status);
-    else controls.insertAdjacentElement('afterend',status);
+    retailerSlot.appendChild(status);
     void renderStatus();
   }
 
@@ -489,7 +486,7 @@
     if(document.body&&!observer){
       observer=new MutationObserver(mutations=>{
         if(document.querySelector('#pingoDocePhotoLibraryStatus'))return;
-        if(mutations.some(mutation=>mutation.type==='childList'&&mutation.addedNodes.length))mountStatus();
+        if(mutations.some(mutation=>mutation.type==='childList'&&mutation.addedNodes.length)&&document.querySelector('#marketImageRetailerStatus'))mountStatus();
       });
       observer.observe(document.body,{subtree:true,childList:true});
     }
