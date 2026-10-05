@@ -32,7 +32,7 @@ assert.ok(!fs.existsSync('market-branding.js'),'Market branding manual JS source
 for(const retiredSource of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(retiredSource),`${retiredSource} must stay physically deleted`);
 assert.match(index,/<meta name="app-build" content="v53"/);
 assert.match(index,/market-experience\.css\?v=76-add-product-prototype2/);
-assert.match(index,/market-experience\.js\?v=76-add-product-prototype2/);
+assert.match(index,/market-experience\.js\?v=76-pingo-images2/);
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
@@ -64,6 +64,8 @@ assert.ok(js.includes("name:'search_products'"));
 assert.ok(js.includes('data-market-price-mode="live"'));
 assert.match(js,/estimatedCents:product\.priceCents/);
 assert.match(js,/market-prototype-store-tabs/,'approved prototype must use compact store filters');
+assert.match(js,/data-market-product-name/,'prototype result cards must expose a stable product identity for image resolvers');
+assert.match(js,/data-market-product-pack/,'prototype result cards must expose pack data independently of visual layout');
 assert.match(js,/Pesquise um produto/,'approved prototype must keep the simple first view');
 assert.match(js,/Explorar catálogo/);
 assert.match(js,/Biblioteca de fotografias/);
