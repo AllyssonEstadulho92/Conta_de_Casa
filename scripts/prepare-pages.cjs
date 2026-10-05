@@ -38,7 +38,7 @@ const LAYOUT_REV = '75-layout1';
 const PAGES_REV = '75-pages1';
 const EXPENSES_REV = '75-expenses1';
 const DRAWER_REV = '75-drawer2';
-const USABILITY_REV = '76-auth1';
+const USABILITY_REV = '76-pin-prototype1';
 const ASSETS_REV = '75-assets1';
 const MARKET_FLOW_REV = '75-market1';
 const IMAGE_LIBRARY_REV = '75-image-library1';
@@ -48,7 +48,7 @@ const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
 const ZXING_REV = '76-local-zxing1';
-const SERVICE_WORKER_REV = '76-icons-unified7';
+const SERVICE_WORKER_REV = '76-pin-prototype1';
 const WALLI_SHARE_REV = '76-walli-enhancements6';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
