@@ -108,7 +108,7 @@
           <button id="syncHeaderStatus" class="sync-header-status normal" type="button" aria-label="Estado da sincronização" title="Sincronização não configurada"><span class="sync-dot" aria-hidden="true"></span><span class="sync-header-text">Local</span></button>
           <button id="quickAddBtn" class="btn primary topbar-create" type="button" aria-label="Adicionar registo"><span aria-hidden="true">+</span><span class="topbar-create-label">Adicionar</span></button>
           <button id="themeToggle" class="icon-btn" type="button" aria-label="Alternar tema">☼</button>
-          <button id="notificationsBtn" class="icon-btn" type="button" aria-label="Ver alertas no Início" title="Ver alertas no Início"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span id="alertBadge" class="badge-dot" hidden></span></button>
+          <button id="notificationsBtn" class="icon-btn" type="button" aria-label="Centro de Alertas, sem alertas ativos" title="Centro de Alertas" aria-controls="alertCenterDialog" aria-haspopup="dialog" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span id="alertBadge" class="badge-dot" aria-hidden="true" hidden></span></button>
         </div>
       </header>
 
@@ -409,6 +409,24 @@
       </div>
       <div class="quick-grid"><button type="button" data-quick="bill">Fatura</button><button type="button" data-quick="income">Rendimento</button><button type="button" data-quick="market">Mercado</button><button type="button" data-quick="goal">Objetivo</button></div>
     </div>
+  </dialog>
+
+  <dialog id="alertCenterDialog" class="alert-center-dialog" aria-labelledby="alertCenterTitle" aria-describedby="alertCenterSummary">
+    <section class="alert-center-shell">
+      <header class="alert-center-head">
+        <div>
+          <p class="eyebrow">Conta de Casa</p>
+          <h2 id="alertCenterTitle">Centro de Alertas</h2>
+          <p id="alertCenterSummary" class="alert-center-summary" aria-live="polite">Sem alertas ativos neste momento</p>
+        </div>
+        <button class="icon-btn dialog-close alert-center-close" type="button" data-close-alert-center aria-label="Fechar Centro de Alertas">×</button>
+      </header>
+      <div id="alertCenterList" class="alert-center-list" role="list" aria-live="polite"></div>
+      <footer class="alert-center-footer">
+        <span>Atualizado com os dados do mês selecionado.</span>
+        <button class="link-btn" type="button" data-go="dashboard">Ver Início</button>
+      </footer>
+    </section>
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
