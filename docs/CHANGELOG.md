@@ -2,6 +2,30 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-05: auditoria visual transversal `76-visual-audit1`
+
+### Problemas confirmados
+
+- múltiplas camadas CSS ainda estilizam os mesmos componentes com elevada especificidade;
+- topbar e drawer móveis tinham linguagens visuais contraditórias entre `v76-modern-ui.css` e `v76-mobile-shell.css`;
+- cartões, controlos, inputs e diálogos usavam níveis de sombra e raio pouco consistentes;
+- o Centro de Alertas, apesar de funcional, ainda não partilhava integralmente a mesma profundidade visual do restante produto.
+
+### Correção
+
+- `v76-modern-ui.css` passa a concentrar a autoridade visual final dos componentes;
+- `v76-mobile-shell.css` preserva a autoridade geométrica e alinha apenas o enquadramento móvel com o mesmo sistema visual;
+- superfícies, cartões, KPIs, tabelas, command bars, formulários, tabs, botões, sidebar, dialogs e Centro de Alertas passam a usar tokens comuns;
+- inputs recebem tratamento inset suave e ações secundárias recebem relevo discreto;
+- teal continua reservado a hierarquia, estados ativos e ação primária;
+- topbar, drawer e dock móvel passam a uma linguagem neutra e coerente em vez de gradientes concorrentes;
+- dark mode, forced-colors e reduced-motion permanecem cobertos;
+- revisões públicas `MODERN_UI_REV` e `MOBILE_SHELL_REV` passam para `76-visual-audit1`.
+
+### Preservado
+
+Sem alteração de fórmulas financeiras, IndexedDB, cofre/PIN, cifragem, sincronização, scanner, Mercado, rotas ou `STATE_VERSION`.
+
 ## 2026-10-05: Centro de Alertas operacional
 
 - o sino do cabeçalho deixa de ser um simples atalho para o Início e passa a abrir um modal dedicado;
