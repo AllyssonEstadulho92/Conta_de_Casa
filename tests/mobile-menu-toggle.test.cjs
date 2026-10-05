@@ -9,6 +9,7 @@ const architecture = fs.readFileSync('v75-architecture.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 const prepare = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const manifest = JSON.parse(fs.readFileSync('release-manifest.json','utf8'));
 
 assert.doesNotThrow(()=>new vm.Script(js), 'mobile menu runtime must parse');
@@ -75,9 +76,6 @@ assert.doesNotMatch(css,/\.drawer-head>#drawerCloseBtn\{display:none!important\}
 
 assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
-assert.match(sw,/v73-menu8/);
-assert.match(sw,/menu-morph1/);
-assert.match(sw,/menu-visible-close1/,'service worker cache must refresh the fixed mobile menu controller');
 assert.ok(sw.includes("'./mobile-menu-toggle.css'"));
 assert.ok(sw.includes("'./mobile-menu-toggle.js'"));
 assert.match(architecture,/DRAWER_GROUPS/);
