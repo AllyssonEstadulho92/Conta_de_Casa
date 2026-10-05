@@ -2,6 +2,25 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-05: `76-deterministic-cache1`: cache PWA identificada pelo build
+
+### Problema confirmado
+
+A chave de cache do Service Worker acumulava manualmente tokens históricos de alterações. Este modelo era difícil de manter e permitia que uma futura alteração esquecesse de atualizar a linhagem, deixando uma PWA instalada com assets antigos.
+
+### Correção
+
+- `sw.js` mantém apenas um placeholder curto no código fonte;
+- o build Pages substitui esse placeholder por `conta-de-casa-public-v76-<build-id>`;
+- o identificador usa o commit curto do build, com fallback local explícito;
+- o build falha se a injeção da chave deixar de corresponder ao Service Worker;
+- testes verificam a chave do source e a chave efetivamente publicada em `dist/sw.js`;
+- testes da Calculadora e captura de faturas deixam de depender de tokens históricos de features e passam a verificar os assets offline relevantes.
+
+### Preservado
+
+Sem alteração de UI/UX, `STATE_VERSION`, IndexedDB, cofre/PIN, cifragem, sincronização, pagamentos ou cálculos financeiros.
+
 ## 2026-09-30: `76-dialog-controls1`: Voltar e Fechar separados no detalhe da fatura
 
 ### Problema confirmado
