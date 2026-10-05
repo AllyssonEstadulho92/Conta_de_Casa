@@ -357,7 +357,7 @@
 
   function productCardHtml(product){
     const market=marketById(product.marketId);
-    return `<article class="market-prototype-result-card" data-market-product-card="${attr(product.id)}">
+    return `<article class="market-prototype-result-card" data-market-product-card="${attr(product.id)}" data-market-product-name="${attr(product.name)}" data-market-product-pack="${attr(product.pack||'')}">
       <button class="market-prototype-result-open" type="button" data-market-detail-product="${attr(product.id)}" aria-label="Ver detalhes de ${attr(product.name)}">
         ${productImageHtml(product)}
         <span class="market-prototype-result-copy">
