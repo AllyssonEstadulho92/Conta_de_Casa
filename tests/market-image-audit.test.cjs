@@ -46,6 +46,7 @@ assert.doesNotMatch(js,/Authorization|api[_-]?key/i);
 assert.match(js,/data-market-image-open/);
 assert.match(js,/marketProductName/,'image audit must read stable prototype product metadata');
 assert.match(js,/market-prototype-result-copy/,'image audit must support current prototype result cards');
+assert.match(js,/marketProductUrl/,'image audit must reuse the exact retailer URL carried by current cards');
 assert.match(js,/showModal\(\)/);
 assert.match(js,/marketProductImageViewer/);
 assert.match(js,/schedulePersist/);
