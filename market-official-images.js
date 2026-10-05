@@ -249,8 +249,17 @@
   function targetFromCard(card){
     const identity=parseCardId(card?.dataset?.marketProductCard||'');
     if(!identity)return null;
-    const name=clean(card.querySelector('.market-product-copy h3')?.textContent||'',130);
-    const rawPack=clean(card.querySelector('.market-product-copy>p')?.textContent||'',100);
+    const prototypeCopy=card.querySelector('.market-prototype-result-copy');
+    const name=clean(
+      card?.dataset?.marketProductName||
+      prototypeCopy?.querySelector('strong')?.textContent||
+      card.querySelector('.market-product-copy h3')?.textContent||'',130
+    );
+    const rawPack=clean(
+      card?.dataset?.marketProductPack||
+      prototypeCopy?.querySelector('small')?.textContent||
+      card.querySelector('.market-product-copy>p')?.textContent||'',100
+    );
     const pack=rawPack.replace(/\s*·\s*(Pingo Doce|Continente)\s*$/i,'').trim();
     if(!name)return null;
     return {...identity,name,pack,label:identity.marketId==='continente'?'Continente':'Pingo Doce',cardId:clean(card.dataset.marketProductCard,100)};
