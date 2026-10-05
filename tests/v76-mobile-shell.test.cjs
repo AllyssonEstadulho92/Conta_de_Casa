@@ -131,6 +131,9 @@ try{
 
 assert.match(shell,/76-visual-audit1 — enquadramento móvel alinhado/,'mobile shell must expose the final visual audit contract');
 assert.match(shell,/76-add-product-prototype1 — safe areas da vista Adicionar produto/,'prototype safe areas must remain owned by the mobile shell');
+assert.match(shell,/76-market-mobile-visual-fix1/,'mobile shell must preserve the screenshot-driven add-product correction');
+assert.match(shell,/market-add-product-prototype \.dialog-head\{[\s\S]*min-height:calc\(88px \+ env\(safe-area-inset-top,0px\)\)!important[\s\S]*padding:calc\(12px \+ env\(safe-area-inset-top,0px\)\) 14px 12px!important/,'safe-area must increase header geometry instead of clipping its controls');
+assert.match(shell,/@media\(max-width:620px\) and \(display-mode:browser\)[\s\S]*padding-bottom:calc\(88px \+ env\(safe-area-inset-bottom,0px\)\)!important/,'Safari browser mode must reserve scroll clearance above the bottom toolbar');
 assert.match(shell,/market-add-product-prototype[\s\S]*safe-area-inset-top/);
 assert.match(shell,/market-add-product-prototype[\s\S]*safe-area-inset-bottom/);
 assert.match(shell,/body \.mobile-nav\{[\s\S]*backdrop-filter:blur\(18px\)/,'mobile dock must share the final restrained surface treatment');
