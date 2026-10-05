@@ -8,7 +8,7 @@
  * não lê/escreve o estado financeiro e não altera preços.
  */
 (function installMarketImageLibrary(root){
-  const REVISION='76-image-library-audit1';
+  const REVISION='76-add-product-prototype1';
   const DB_NAME='conta-de-casa-market-image-library';
   const DB_VERSION=1;
   const STORE='images';
@@ -201,7 +201,7 @@
     const report={
       revision:REVISION,total:rawRecords.length,valid:0,available:0,unavailable:0,
       unchecked:0,expired:0,rejected:0,removed:0,persistent:Boolean(await openDb()),
-      checkedAt:new Date(now).toISOString()
+      checkedAt:new Date(now).toISOString(),items:[]
     };
     const networkQueue=[];
 
@@ -210,24 +210,29 @@
       const key=clean(raw?.key,80);
       if(!id){
         report.rejected+=1;
+        report.items.push({key,status:'rejected',name:clean(raw?.name,140),marketId:clean(raw?.marketId,24),pid:clean(raw?.pid,48),imageUrl:''});
         if(pruneInvalid&&key){memory.delete(key);if(await idbDelete(key))report.removed+=1;}
         continue;
       }
       const normalized=normalizeRecord(raw,id);
       if(!normalized){
         report.rejected+=1;
+        report.items.push({key:id.key,status:'rejected',name:clean(raw?.name,140),marketId:id.marketId,pid:id.pid,imageUrl:''});
         if(pruneInvalid){memory.delete(id.key);if(await idbDelete(id.key))report.removed+=1;}
         continue;
       }
       if(normalized.expiresAt<=now){
         report.expired+=1;
+        report.items.push({...normalized,status:'expired'});
         memory.delete(id.key);
         if(pruneInvalid&&await idbDelete(id.key))report.removed+=1;
         continue;
       }
       report.valid+=1;
       memory.set(id.key,normalized);
-      if(verifyNetwork&&typeof root.Image==='function')networkQueue.push({id,record:normalized});
+      const item={...normalized,status:verifyNetwork&&typeof root.Image==='function'?'checking':'valid'};
+      report.items.push(item);
+      if(verifyNetwork&&typeof root.Image==='function')networkQueue.push({id,record:normalized,item});
       else report.unchecked+=1;
     }
 
@@ -237,9 +242,9 @@
       while(cursor<networkQueue.length){
         const current=networkQueue[cursor++];
         const ok=await probeImage(current.record.imageUrl,timeoutMs);
-        if(ok===true)report.available+=1;
-        else if(ok===false)report.unavailable+=1;
-        else report.unchecked+=1;
+        if(ok===true){report.available+=1;current.item.status='available';}
+        else if(ok===false){report.unavailable+=1;current.item.status='unavailable';}
+        else {report.unchecked+=1;current.item.status='valid';}
         completed+=1;
         emitAuditProgress({
           completed,total:networkQueue.length,
@@ -248,8 +253,26 @@
       }
     };
     await Promise.all(Array.from({length:Math.min(concurrency,networkQueue.length||1)},()=>worker()));
-    lastAuditReport=Object.freeze({...report});
-    return {...report};
+    lastAuditReport=Object.freeze({...report,items:Object.freeze(report.items.map(item=>Object.freeze({...item})))});
+    return {...report,items:report.items.map(item=>({...item}))};
+  }
+
+  async function listRecords(options={}){
+    const includeExpired=options.includeExpired!==false;
+    const rawRecords=await idbGetAll();
+    const now=Date.now();
+    const records=[];
+    for(const raw of rawRecords){
+      const id=identity(raw||{});
+      if(!id)continue;
+      const normalized=normalizeRecord(raw,id);
+      if(!normalized)continue;
+      const expired=normalized.expiresAt<=now;
+      if(expired&&!includeExpired)continue;
+      records.push({...normalized,status:expired?'expired':'valid'});
+    }
+    records.sort((a,b)=>Number(b.storedAt||0)-Number(a.storedAt||0)||String(a.name||'').localeCompare(String(b.name||''),'pt-PT'));
+    return records;
   }
 
   async function get(target={}){
@@ -412,6 +435,6 @@
   if(root.addEventListener)root.addEventListener('pageshow',()=>{void prune();});
 
   root.CDCMarketImageLibrary=Object.freeze({
-    revision:REVISION,get,remember,forget,stats,prune,auditAll,identity,safeProductUrl,safeOfficialImageUrl,audit:scheduleScan
+    revision:REVISION,get,remember,forget,stats,prune,listRecords,auditAll,identity,safeProductUrl,safeOfficialImageUrl,audit:scheduleScan
   });
 })(globalThis);

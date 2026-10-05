@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Conta de Casa — pesquisa de preços reais (v53)
+ * Conta de Casa — Adicionar produto segundo o protótipo UX aprovado (76-add-product-prototype1)
  * Continente/Pingo Doce: consulta atual através de cesta.pt, com URL oficial do produto.
  * Mercados ativos: Pingo Doce e Continente.
  * Nenhum preço fictício é usado; fotografias reais de referência são opcionais e validadas separadamente.
@@ -23,15 +23,34 @@
     ['Lacticínios e ovos','leite'],['Mercearia / Despensa','arroz'],['Bebidas','água'],['Limpeza','detergente'],
     ['Higiene pessoal','champô'],['Frutas e legumes','banana'],['Carne e peixe','frango'],['Snacks e doces','chocolate']
   ]);
+  const UI_CATEGORIES=Object.freeze([
+    {id:'all',label:'Todas'},
+    {id:'Bebidas',label:'Bebidas'},
+    {id:'Lacticínios e ovos',label:'Lacticínios e ovos'},
+    {id:'Frutas e legumes',label:'Frutas e legumes'},
+    {id:'Carne e peixe',label:'Carnes e peixes'},
+    {id:'Mercearia / Despensa',label:'Mercearia'},
+    {id:'Congelados',label:'Congelados'},
+    {id:'Higiene pessoal',label:'Higiene e limpeza'},
+    {id:'Limpeza',label:'Beleza e cuidados'},
+    {id:'Animais',label:'Animais'}
+  ]);
 
   let selectedMarkets=new Set(MARKET_IDS);
-  let activeTab='markets';
   let query='';
   let observer=null;
   let searchTimer=0;
   let searchGeneration=0;
   let activeSearchController=null;
   let resultById=new Map();
+  let lastResults=[];
+  let lastWarnings=[];
+  let selectedCategory='all';
+  let categoryOpen=false;
+  let resultSort='relevance';
+  let detailQuantity=1;
+  let libraryFilter='all';
+  let currentLibraryAudit=null;
 
   const marketById=id=>MARKET_DEFINITIONS.find(m=>m.id===id)||MARKET_DEFINITIONS[0];
   const normalized=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-PT').trim();
@@ -46,7 +65,14 @@
       plus:'<path d="M12 5v14M5 12h14"/>',
       check:'<path d="m5 12 4 4L19 6"/>',
       external:'<path d="M14 5h5v5M19 5l-8 8"/><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
-      refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/>'
+      refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/>',
+      image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/>',
+      basket:'<path d="M4 9h16l-1.4 11H5.4L4 9Z"/><path d="m8 9 4-6 4 6M9 13v3m6-3v3"/>',
+      chevron:'<path d="m9 18 6-6-6-6"/>',
+      down:'<path d="m6 9 6 6 6-6"/>',
+      more:'<circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none"/>',
+      minus:'<path d="M5 12h14"/>',
+      cart:'<circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M3 4h2l2.4 10.4a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 8H6"/>'
     };
     return `<svg class="svg-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.search}</svg>`;
   }
@@ -103,57 +129,81 @@
     return 'Outros';
   }
 
-  function marketSelectorHtml(){
-    return `<div class="market-source-grid" role="group" aria-label="Mercados a pesquisar">${MARKET_DEFINITIONS.map(m=>{
-      const selected=selectedMarkets.has(m.id);
-      return `<button class="market-source-card${selected?' selected':''}" type="button" data-market-source="${attr(m.id)}" aria-pressed="${selected}">
-        ${marketMark(m)}
-        <span class="market-source-name">${esc(m.name)}</span>
-        <span class="market-source-check" aria-hidden="true">${selected?svgIcon('check',14):''}</span>
-      </button>`;
-    }).join('')}</div>`;
+  function activeMarketScope(){
+    if(selectedMarkets.size===MARKET_IDS.length)return 'all';
+    return selectedMarkets.has('pingo-doce')?'pingo-doce':'continente';
   }
 
-  function tabsHtml(){
-    return `<div class="market-browser-tabs" role="tablist" aria-label="Pesquisa do mercado">
-      ${[['markets','Mercados'],['products','Produtos'],['categories','Categorias']].map(([id,label])=>`<button class="market-browser-tab${activeTab===id?' active':''}" type="button" role="tab" aria-selected="${activeTab===id}" data-market-browser-tab="${id}">${label}</button>`).join('')}
+  function marketScopeHtml(){
+    const active=activeMarketScope();
+    return `<div class="market-prototype-store-tabs" role="group" aria-label="Mercado">
+      ${[['all','Todos'],['pingo-doce','Pingo Doce'],['continente','Continente']].map(([id,label])=>`<button type="button" class="${active===id?'active':''}" data-market-scope="${id}" aria-pressed="${active===id}">${label}</button>`).join('')}
+    </div>`;
+  }
+
+  function categoryLabel(){
+    return UI_CATEGORIES.find(category=>category.id===selectedCategory)?.label||'Categoria (opcional)';
+  }
+
+  function categoryIcon(name,size=20){
+    const paths={
+      all:'<circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8"/>',
+      Bebidas:'<path d="M8 3h8l-1 18H9L8 3Z"/><path d="M9 7h6"/>',
+      'Lacticínios e ovos':'<path d="M9 3h6l2 4v14H7V7l2-4Z"/><path d="M8 9h8"/>',
+      'Frutas e legumes':'<path d="M12 7c-5-4-9 1-7 6 2 6 6 8 7 8s5-2 7-8c2-5-2-10-7-6Z"/><path d="M12 7c0-3 2-5 5-5"/>',
+      'Carne e peixe':'<path d="M5 12c3-5 7-7 14-4-2 5-5 8-10 8l-4 3 1-5-1-2Z"/>',
+      'Mercearia / Despensa':'<path d="M6 7h12l-1 14H7L6 7Z"/><path d="M9 7V4h6v3"/>',
+      Congelados:'<path d="M12 2v20M4 6l16 12M20 6 4 18"/>',
+      'Higiene pessoal':'<path d="M10 3h4v4h-4z"/><path d="M8 7h8l1 14H7L8 7Z"/>',
+      Limpeza:'<path d="M9 3h6v4h2l2 4v10H5V11l2-4h2V3Z"/>',
+      Animais:'<circle cx="7" cy="8" r="2"/><circle cx="17" cy="8" r="2"/><circle cx="10" cy="5" r="2"/><circle cx="14" cy="5" r="2"/><path d="M12 11c-4 0-7 3-7 6 0 2 2 4 4 3l3-1 3 1c2 1 4-1 4-3 0-3-3-6-7-6Z"/>'
+    };
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.all}</svg>`;
+  }
+
+  function categoryPanelHtml(){
+    return `<div id="marketPrototypeCategoryPanel" class="market-prototype-category-panel"${categoryOpen?'':' hidden'}>
+      <div class="market-prototype-category-search">${svgIcon('search',18)}<input id="marketCategorySearch" type="search" placeholder="Pesquisar categoria..." autocomplete="off" aria-label="Pesquisar categoria"></div>
+      <div id="marketCategoryOptions" class="market-prototype-category-options">
+        ${UI_CATEGORIES.map(category=>`<button type="button" class="${selectedCategory===category.id?'selected':''}" data-market-category="${attr(category.id)}">${categoryIcon(category.id)}<span>${esc(category.label)}</span>${svgIcon('chevron',17)}</button>`).join('')}
+      </div>
     </div>`;
   }
 
   function browserShellHtml(){
-    return `<div class="market-browser" data-market-price-mode="live">
-      <div class="market-browser-search-row">
-        <div class="market-browser-search">${svgIcon('search',24)}<input id="marketCatalogSearch" type="search" value="" placeholder="Pesquisar produto real" autocomplete="off" aria-label="Pesquisar produto nos mercados"><button class="market-search-clear" type="button" data-market-search-clear aria-label="Limpar pesquisa">${svgIcon('close',22)}</button></div>
-      </div>
-      ${tabsHtml()}
-      <div id="marketBrowserTabPanel" class="market-browser-tab-panel" role="tabpanel"></div>
-      <details class="market-source-notice" role="note"><summary>${svgIcon('info',20)}<span>Como funciona a pesquisa</span></summary><p>Pingo Doce e Continente são consultados no momento através de cesta.pt. As fotografias só são apresentadas quando existe uma correspondência validada com uma origem permitida; não são inventadas imagens nem preços.</p></details>
-      <div class="market-browser-results-head"><h3>Resultados</h3><span id="marketResultsMeta">Escreva pelo menos 2 caracteres</span></div>
-      <div id="marketCatalogResults" class="market-catalog-results" aria-live="polite"></div>
+    return `<div class="market-browser market-prototype-browser" data-market-price-mode="live">
+      <section id="marketPrototypeSearchView" class="market-prototype-view" data-market-prototype-view="search">
+        <div class="market-browser-search-row">
+          <div class="market-browser-search">${svgIcon('search',22)}<input id="marketCatalogSearch" type="search" value="" placeholder="Pesquisar produto..." autocomplete="off" aria-label="Pesquisar produto"><button class="market-search-clear" type="button" data-market-search-clear aria-label="Limpar pesquisa" hidden>${svgIcon('close',19)}</button></div>
+        </div>
+        <div id="marketPrototypeStoreTabs">${marketScopeHtml()}</div>
+        <div class="market-prototype-category-wrap">
+          <button class="market-prototype-category-trigger" type="button" data-market-category-toggle aria-expanded="false" aria-controls="marketPrototypeCategoryPanel">
+            <span class="market-prototype-category-trigger-copy">${categoryIcon(selectedCategory==='all'?'all':selectedCategory)}<span id="marketPrototypeCategoryLabel">${esc(selectedCategory==='all'?'Categoria (opcional)':categoryLabel())}</span></span>
+            <span class="market-prototype-category-trigger-chevron">${svgIcon('down',18)}</span>
+          </button>
+          ${categoryPanelHtml()}
+        </div>
+        <div id="marketBarcodeStatus" class="market-barcode-status" role="status" aria-live="polite" hidden></div>
+        <div id="marketPrototypeResultsHead" class="market-prototype-results-head" hidden>
+          <strong id="marketResultsMeta">0 resultados</strong>
+          <label class="market-prototype-sort"><span class="sr-only">Ordenar resultados</span><select id="marketResultSort" aria-label="Ordenar resultados"><option value="relevance">↕ Mais relevantes</option><option value="price-asc">Preço menor</option><option value="price-desc">Preço maior</option></select></label>
+        </div>
+        <div id="marketCatalogResults" class="market-catalog-results" aria-live="polite"></div>
+      </section>
+      <section id="marketPrototypeSubview" class="market-prototype-view market-prototype-subview" data-market-prototype-view="subview" hidden></section>
     </div>`;
   }
 
-  function updateTabPanel(){
-    const root=$('#marketBrowserTabPanel');
-    if(!root)return;
-    if(activeTab==='markets'){
-      setHTML(root,marketSelectorHtml());
-      return;
-    }
-    if(activeTab==='products'){
-      setHTML(root,`<div class="market-browser-chip-grid" aria-label="Sugestões de pesquisa">${PRODUCT_SUGGESTIONS.map(name=>`<button type="button" class="market-browser-chip" data-market-chip-query="${attr(name)}"><span>${esc(name)}</span></button>`).join('')}</div>`);
-      return;
-    }
-    setHTML(root,`<div class="market-browser-chip-grid" aria-label="Categorias de pesquisa">${CATEGORY_SUGGESTIONS.map(([label,term])=>`<button type="button" class="market-browser-chip" data-market-chip-query="${attr(term)}"><span>${esc(label)}</span></button>`).join('')}</div>`);
-  }
-
-  function updateTabs(){
-    $$('.market-browser-tab').forEach(button=>{
-      const selected=button.dataset.marketBrowserTab===activeTab;
-      button.classList.toggle('active',selected);
-      button.setAttribute('aria-selected',String(selected));
-    });
-    updateTabPanel();
+  function refreshSearchControls(){
+    const tabs=document.querySelector('#marketPrototypeStoreTabs');
+    if(tabs)setHTML(tabs,marketScopeHtml());
+    const label=document.querySelector('#marketPrototypeCategoryLabel');
+    if(label)label.textContent=selectedCategory==='all'?'Categoria (opcional)':categoryLabel();
+    const trigger=document.querySelector('[data-market-category-toggle]');
+    if(trigger)trigger.setAttribute('aria-expanded',String(categoryOpen));
+    const panel=document.querySelector('#marketPrototypeCategoryPanel');
+    if(panel)panel.hidden=!categoryOpen;
   }
 
   function parseSseEvents(text){
@@ -223,7 +273,7 @@
       const pid=cleanRemoteText(pidMatch?.[1]||'',40);
       results.push({
         id:`cesta-${marketId}-${pid||results.length}`,
-        provider:'cesta',marketId,name,pack,priceCents,oldPriceCents,
+        provider:'cesta',marketId,pid,name,pack,priceCents,oldPriceCents,
         discount:cleanRemoteText(discountMatch?.[1]||'',12),promotionUntil:promoMatch?.[1]||'',unitPrice,
         sourceUrl,sourceLabel:'Produto oficial',freshness:'current',observedDate:''
       });
@@ -307,50 +357,85 @@
 
   function productCardHtml(product){
     const market=marketById(product.marketId);
-    const subtitle=[product.pack,market.name].filter(Boolean).join(' · ');
-    const oldPrice=product.oldPriceCents>product.priceCents?`<span class="market-result-old-price">antes ${money(product.oldPriceCents)}</span>`:'';
-    const sourceLink=product.sourceUrl?`<button class="market-result-source" type="button" data-market-source-url="${attr(product.id)}" aria-label="Abrir produto oficial">${svgIcon('external',15)}<span>${esc(product.sourceLabel)}</span></button>`:`<span class="market-result-source text-only">${esc(product.sourceLabel)}</span>`;
-    return `<article class="market-catalog-card" data-market-product-card="${attr(product.id)}">
-      <div class="market-catalog-main">
+    return `<article class="market-prototype-result-card" data-market-product-card="${attr(product.id)}">
+      <button class="market-prototype-result-open" type="button" data-market-detail-product="${attr(product.id)}" aria-label="Ver detalhes de ${attr(product.name)}">
         ${productImageHtml(product)}
-        <div class="market-product-copy">
-          <h3>${esc(product.name)}</h3>
-          <p>${esc(subtitle||market.name)}</p>
-          <div class="market-result-meta">${resultStatusHtml(product)}${sourceLink}</div>
-          <div class="market-result-price-row"><strong class="market-product-price" data-money>${money(product.priceCents)}</strong>${oldPrice}${product.unitPrice?`<small>${esc(product.unitPrice)}</small>`:''}</div>
-        </div>
-        <button class="market-add-product" type="button" data-market-add-product="${attr(product.id)}" aria-label="Adicionar ${attr(product.name)} à lista">${svgIcon('plus',24)}</button>
-      </div>
+        <span class="market-prototype-result-copy">
+          <strong>${esc(product.name)}</strong>
+          <small>${esc(product.pack||'')}</small>
+          <b class="market-prototype-result-price" data-money>${money(product.priceCents)}</b>
+          <span class="market-prototype-result-store">${marketMark(market,'tiny')}<span>${esc(market.name)}</span></span>
+        </span>
+      </button>
+      <button class="market-add-product market-prototype-result-add" type="button" data-market-add-product="${attr(product.id)}" aria-label="Adicionar ${attr(product.name)} à lista">${svgIcon('plus',22)}</button>
     </article>`;
   }
 
+  function prototypeInitialHtml(){
+    return `<div class="market-prototype-empty">
+      <span class="market-prototype-empty-icon">${svgIcon('basket',34)}</span>
+      <strong>Pesquise um produto</strong>
+      <p>Digite o nome, marca ou utilize a câmara para adicionar pelo código de barras.</p>
+    </div>
+    <div class="market-prototype-entry-list">
+      <button type="button" class="market-prototype-entry" data-market-open-catalog>
+        <span class="market-prototype-entry-icon">${svgIcon('basket',21)}</span>
+        <span><strong>Explorar catálogo</strong><small>Veja produtos por categoria e mercado.</small></span>
+        ${svgIcon('chevron',19)}
+      </button>
+      <button type="button" class="market-prototype-entry" data-market-open-library>
+        <span class="market-prototype-entry-icon">${svgIcon('image',21)}</span>
+        <span><strong>Biblioteca de fotografias</strong><small>Consulte e valide as fotografias dos produtos.</small></span>
+        ${svgIcon('chevron',19)}
+      </button>
+    </div>`;
+  }
+
   function renderSearchIntro(){
+    lastResults=[];
+    lastWarnings=[];
     resultById=new Map();
-    const meta=$('#marketResultsMeta');
-    if(meta)meta.textContent='Escreva pelo menos 2 caracteres';
+    const head=$('#marketPrototypeResultsHead');
+    if(head)head.hidden=true;
+    const clear=$('[data-market-search-clear]');
+    if(clear)clear.hidden=true;
     const root=$('#marketCatalogResults');
-    if(root)setHTML(root,`<div class="market-browser-empty"><span class="market-browser-empty-icon">${svgIcon('search',26)}</span><strong>Pesquise um produto</strong><p>A pesquisa consulta produtos reais nas fontes selecionadas. Pode escrever, por exemplo, “leite meio gordo”, “arroz” ou “detergente”.</p></div>`);
+    if(root)setHTML(root,prototypeInitialHtml());
   }
 
   function renderLoading(){
+    const head=$('#marketPrototypeResultsHead');
+    if(head)head.hidden=false;
     const meta=$('#marketResultsMeta');
-    if(meta)meta.textContent='A consultar fontes…';
+    if(meta)meta.textContent='A pesquisar…';
     const root=$('#marketCatalogResults');
-    if(root)setHTML(root,`<div class="market-browser-loading" role="status"><span class="market-loading-spinner" aria-hidden="true"></span><div><strong>A pesquisar preços</strong><p>A consultar apenas as fontes selecionadas.</p></div></div>`);
+    if(root)setHTML(root,`<div class="market-browser-loading" role="status"><span class="market-loading-spinner" aria-hidden="true"></span><div><strong>A pesquisar produtos</strong><p>A consultar Pingo Doce e Continente.</p></div></div>`);
   }
 
-  function renderRemoteResults(results,warnings=[]){
-    const root=$('#marketCatalogResults');
-    if(!root)return;
-    resultById=new Map(results.map(item=>[item.id,item]));
+  function visibleResults(results){
+    let filtered=[...results];
+    if(selectedCategory!=='all')filtered=filtered.filter(product=>inferCategory(product.name)===selectedCategory);
+    if(resultSort==='price-asc')filtered.sort((a,b)=>a.priceCents-b.priceCents);
+    else if(resultSort==='price-desc')filtered.sort((a,b)=>b.priceCents-a.priceCents);
+    return filtered.slice(0,MAX_REMOTE_RESULTS);
+  }
+
+  function renderRemoteResults(results=lastResults,warnings=lastWarnings){
+    const root=$('#marketCatalogResults');if(!root)return;
+    lastResults=[...results];
+    lastWarnings=[...warnings];
+    const visible=visibleResults(lastResults);
+    resultById=new Map(lastResults.map(item=>[item.id,item]));
+    const head=$('#marketPrototypeResultsHead');
+    if(head)head.hidden=false;
     const meta=$('#marketResultsMeta');
-    if(meta)meta.textContent=`${results.length} resultado${results.length===1?'':'s'}`;
-    const warningHtml=warnings.length?`<div class="market-provider-warning" role="status">${svgIcon('info',19)}<p>${warnings.map(esc).join(' ')}</p></div>`:'';
-    if(!results.length){
-      setHTML(root,`${warningHtml}<div class="market-browser-empty"><span class="market-browser-empty-icon">${svgIcon('search',26)}</span><strong>Sem preço verificado para esta pesquisa</strong><p>Não foi encontrado um resultado verificável nas fontes selecionadas. Pode alterar a pesquisa ou adicionar o produto manualmente.</p><button class="btn secondary" type="button" data-market-manual>Adicionar manualmente</button></div>`);
+    if(meta)meta.textContent=`${visible.length} resultado${visible.length===1?'':'s'}`;
+    const warningHtml=warnings.length?`<div class="market-provider-warning" role="status">${svgIcon('info',18)}<p>${warnings.map(esc).join(' ')}</p></div>`:'';
+    if(!visible.length){
+      setHTML(root,`${warningHtml}<div class="market-browser-empty"><span class="market-browser-empty-icon">${svgIcon('search',25)}</span><strong>Sem resultados</strong><p>Altere a pesquisa, o mercado ou a categoria.</p><button class="btn secondary" type="button" data-market-manual>Adicionar manualmente</button></div>`);
       return;
     }
-    setHTML(root,`${warningHtml}${results.map(productCardHtml).join('')}`);
+    setHTML(root,`${warningHtml}${visible.map(productCardHtml).join('')}`);
   }
 
   async function executeSearch(){
@@ -377,8 +462,8 @@
     const imageCandidates=imageSettled[0]?.status==='fulfilled'?imageSettled[0].value:[];
     const enriched=enrichResultsWithImages(results,imageCandidates);
     const order=new Map(MARKET_IDS.map((id,index)=>[id,index]));
-    enriched.sort((a,b)=>(order.get(a.marketId)??9)-(order.get(b.marketId)??9)||(a.provider==='open-prices'?String(b.observedDate).localeCompare(String(a.observedDate)):a.priceCents-b.priceCents));
-    renderRemoteResults(enriched.slice(0,MAX_REMOTE_RESULTS),warnings);
+    enriched.sort((a,b)=>(order.get(a.marketId)??9)-(order.get(b.marketId)??9)||a.priceCents-b.priceCents);
+    renderRemoteResults(enriched,warnings);
   }
 
   function scheduleSearch(delay=SEARCH_DEBOUNCE_MS){
@@ -389,40 +474,248 @@
     }),delay);
   }
 
+  function ensureHeaderAction(){
+    const dialog=$('#formDialog');
+    const head=dialog?.querySelector('.dialog-head');
+    if(!head)return null;
+    let action=head.querySelector('.market-prototype-header-action');
+    if(!action){
+      action=document.createElement('button');
+      action.type='button';
+      action.className='icon-btn market-prototype-header-action';
+      head.appendChild(action);
+    }
+    return action;
+  }
+
+  function setBrowserHeader(view='search'){
+    const dialog=$('#formDialog');if(!dialog)return;
+    const head=dialog.querySelector('.dialog-head');
+    const title=$('#dialogTitle');
+    const close=head?.querySelector('.dialog-close');
+    const action=ensureHeaderAction();
+    head?.classList.toggle('market-prototype-detail-head-hidden',view==='detail');
+    if(view==='detail')return;
+    const titles={search:'Adicionar produto',catalog:'Explorar catálogo',library:'Biblioteca de fotografias'};
+    if(title)title.textContent=titles[view]||titles.search;
+    const eyebrow=head?.querySelector('.eyebrow');if(eyebrow)eyebrow.hidden=true;
+    if(close){
+      close.removeAttribute('data-close-dialog');
+      close.removeAttribute('data-market-view-back');
+      close.innerHTML=svgIcon('back',23);
+      close.setAttribute('aria-label','Voltar');
+      if(view==='search')close.setAttribute('data-close-dialog','');
+      else close.setAttribute('data-market-view-back','');
+    }
+    if(action){
+      action.hidden=false;
+      action.removeAttribute('data-market-open-library');
+      action.removeAttribute('data-market-library-more');
+      if(view==='search'){
+        action.innerHTML=svgIcon('image',20);
+        action.setAttribute('data-market-open-library','');
+        action.setAttribute('aria-label','Abrir biblioteca de fotografias');
+      }else if(view==='library'){
+        action.innerHTML=svgIcon('more',21);
+        action.setAttribute('data-market-library-more','');
+        action.setAttribute('aria-label','Mais opções da biblioteca');
+      }else action.hidden=true;
+    }
+  }
+
+  function showSearchView({focus=false}={}){
+    const search=$('#marketPrototypeSearchView');
+    const sub=$('#marketPrototypeSubview');
+    if(search)search.hidden=false;
+    if(sub){sub.hidden=true;setHTML(sub,'');}
+    setBrowserHeader('search');
+    refreshSearchControls();
+    if(query.length>=2&&lastResults.length)renderRemoteResults(lastResults,lastWarnings);
+    else if(query.length<2)renderSearchIntro();
+    const input=$('#marketCatalogSearch');
+    if(input){
+      input.value=query;
+      const clear=$('[data-market-search-clear]');if(clear)clear.hidden=!query;
+      if(focus)requestAnimationFrame(()=>input.focus({preventScroll:true}));
+    }
+  }
+
+  async function showCatalogView(){
+    const search=$('#marketPrototypeSearchView');
+    const sub=$('#marketPrototypeSubview');
+    if(search)search.hidden=true;
+    if(!sub)return;
+    sub.hidden=false;
+    setHTML(sub,'<div id="marketCatalogViewHost" class="market-prototype-catalog-host"></div>');
+    setBrowserHeader('catalog');
+    await globalThis.CDCMarketVisualCatalog?.mount?.();
+  }
+
+  function formatAuditDate(value){
+    const date=new Date(value);
+    if(!value||Number.isNaN(date.getTime()))return 'Ainda não validada';
+    return date.toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  }
+
+  function libraryStatusMeta(status){
+    if(status==='unavailable')return {label:'Fotografia indisponível',tone:'problem',symbol:'!'};
+    if(status==='expired')return {label:'Fotografia expirada',tone:'expired',symbol:'○'};
+    if(status==='rejected')return {label:'Fotografia rejeitada',tone:'problem',symbol:'!'};
+    return {label:'Fotografia válida',tone:'valid',symbol:'✓'};
+  }
+
+  async function renderLibraryView(report=currentLibraryAudit){
+    const root=$('#marketPrototypeSubview');if(!root)return;
+    const library=globalThis.CDCMarketImageLibrary;
+    let records=[];
+    let stats={count:0,lastAudit:null};
+    try{
+      records=await library?.listRecords?.({includeExpired:true})||[];
+      stats=await library?.stats?.()||stats;
+    }catch(_error){}
+    const effective=report||stats.lastAudit||null;
+    currentLibraryAudit=effective;
+    const statusByKey=new Map((effective?.items||[]).map(item=>[item.key,item.status]));
+    const items=records.map(record=>({...record,status:statusByKey.get(record.key)||record.status||'valid'}));
+    const validCount=effective?(Number(effective.available)||Number(effective.valid)||0):items.filter(item=>item.status==='valid'||item.status==='available').length;
+    const problemCount=effective?Number(effective.unavailable||0)+Number(effective.rejected||0):items.filter(item=>item.status==='unavailable'||item.status==='rejected').length;
+    const expiredCount=effective?Number(effective.expired||0):items.filter(item=>item.status==='expired').length;
+    const filtered=items.filter(item=>{
+      if(libraryFilter==='problem')return item.status==='unavailable'||item.status==='rejected';
+      if(libraryFilter==='expired')return item.status==='expired';
+      return true;
+    });
+    const listHtml=filtered.length?filtered.map(item=>{
+      const meta=libraryStatusMeta(item.status);
+      const market=marketById(item.marketId);
+      const image=item.imageUrl?`<img src="${attr(item.imageUrl)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">`:`<span>${svgIcon('image',19)}</span>`;
+      return `<article class="market-library-row">
+        <span class="market-library-thumb">${image}</span>
+        <span class="market-library-copy"><strong>${esc(item.name||'Produto')}</strong><small>${esc(market.name)} · PID ${esc(item.pid||'—')}</small><span class="market-library-status ${meta.tone}"><b>${meta.symbol}</b>${meta.label}</span></span>
+        ${svgIcon('chevron',18)}
+      </article>`;
+    }).join(''):`<div class="market-library-empty"><strong>Sem fotografias nesta vista</strong><p>A biblioteca não tem registos com este estado.</p></div>`;
+
+    setHTML(root,`<div class="market-library-view">
+      <section class="market-library-summary">
+        <div class="market-library-summary-title"><span class="market-library-summary-icon">${svgIcon('image',23)}</span><span><strong>${Number(stats.count)||records.length} fotografias guardadas</strong><small>Última validação: ${esc(formatAuditDate(effective?.checkedAt))}</small></span></div>
+        <div class="market-library-metrics">
+          <article class="valid"><strong>${validCount}</strong><span>válidas</span></article>
+          <article class="problem"><strong>${problemCount}</strong><span>com problema</span></article>
+          <article class="expired"><strong>${expiredCount}</strong><span>expiradas</span></article>
+        </div>
+        <button class="market-library-validate" type="button" data-market-library-audit>${svgIcon('refresh',19)}<span>Validar todas</span></button>
+      </section>
+      <div class="market-library-filters" role="group" aria-label="Filtrar biblioteca">
+        ${[['all','Todas'],['problem','Com problema'],['expired','Expiradas']].map(([id,label])=>`<button type="button" class="${libraryFilter===id?'active':''}" data-market-library-filter="${id}" aria-pressed="${libraryFilter===id}">${label}</button>`).join('')}
+      </div>
+      <div id="marketLibraryList" class="market-library-list">${listHtml}</div>
+      <div id="marketImageRetailerStatus" hidden></div>
+    </div>`);
+  }
+
+  async function showLibraryView(){
+    const search=$('#marketPrototypeSearchView');
+    const sub=$('#marketPrototypeSubview');
+    if(search)search.hidden=true;
+    if(!sub)return;
+    sub.hidden=false;
+    libraryFilter='all';
+    setBrowserHeader('library');
+    setHTML(sub,'<div class="market-library-loading" role="status">A preparar biblioteca…</div>');
+    await renderLibraryView();
+  }
+
+  async function auditLibraryView(){
+    const library=globalThis.CDCMarketImageLibrary;
+    const button=$('[data-market-library-audit]');
+    if(typeof library?.auditAll!=='function')return;
+    if(button){button.disabled=true;button.setAttribute('aria-busy','true');button.querySelector('span')?.replaceChildren('A validar…');}
+    try{
+      currentLibraryAudit=await library.auditAll({verifyNetwork:true,pruneInvalid:true,concurrency:4,timeoutMs:6500});
+      await renderLibraryView(currentLibraryAudit);
+    }catch(_error){
+      toast('Não foi possível concluir a validação da biblioteca.');
+      await renderLibraryView(currentLibraryAudit);
+    }
+  }
+
+  function detailViewHtml(product){
+    const market=marketById(product.marketId);
+    const category=inferCategory(product.name);
+    const image=productImageHtml(product);
+    const imageOrigin=product.imageUrl?(product.imageSource||'Fotografia validada'):'Sem fotografia validada';
+    return `<div class="market-product-detail">
+      <button class="market-product-detail-close" type="button" data-market-detail-close aria-label="Fechar detalhe">${svgIcon('close',20)}</button>
+      <div class="market-product-detail-media">${image}</div>
+      <div class="market-product-detail-copy">
+        <h3>${esc(product.name)}</h3>
+        <p>${esc(product.pack||'')} · ${esc(market.name)}</p>
+        <strong class="market-product-detail-price" data-money>${money(product.priceCents)}</strong>
+      </div>
+      <div class="market-product-detail-quantity">
+        <span>Quantidade</span>
+        <div class="market-product-stepper"><button type="button" data-market-detail-quantity="-1" aria-label="Diminuir quantidade">${svgIcon('minus',18)}</button><strong id="marketDetailQuantity">${detailQuantity}</strong><button type="button" data-market-detail-quantity="1" aria-label="Aumentar quantidade">${svgIcon('plus',18)}</button></div>
+      </div>
+      <button class="market-product-detail-add" type="button" data-market-detail-add="${attr(product.id)}">${svgIcon('cart',19)}<span>Adicionar à lista</span></button>
+      <section class="market-product-detail-info">
+        <h4>Informações</h4>
+        <dl>
+          <div><dt>Mercado</dt><dd>${esc(market.name)}</dd></div>
+          <div><dt>Categoria</dt><dd>${esc(category)}</dd></div>
+          <div><dt>Origem da imagem</dt><dd class="${product.imageUrl?'valid':''}">${product.imageUrl?'✓ ':''}${esc(imageOrigin)}</dd></div>
+          <div><dt>PID</dt><dd>${esc(product.pid||product.productCode||'—')}</dd></div>
+        </dl>
+      </section>
+    </div>`;
+  }
+
+  function showProductDetail(resultId){
+    const product=resultById.get(resultId);if(!product)return;
+    const search=$('#marketPrototypeSearchView');
+    const sub=$('#marketPrototypeSubview');
+    if(search)search.hidden=true;
+    if(!sub)return;
+    detailQuantity=1;
+    sub.hidden=false;
+    setHTML(sub,detailViewHtml(product));
+    setBrowserHeader('detail');
+  }
+
   function openMarketBrowser(){
     selectedMarkets=new Set(MARKET_IDS);
-    activeTab='markets';
     query='';
+    lastResults=[];
+    lastWarnings=[];
     resultById=new Map();
+    selectedCategory='all';
+    categoryOpen=false;
+    resultSort='relevance';
+    currentLibraryAudit=null;
     openDialog('Adicionar produto',browserShellHtml(),MARKET_BROWSER_MODE);
     const dialog=$('#formDialog');
-    dialog?.classList.add('market-browser-dialog');
-    const title=$('#dialogTitle');
-    if(title)title.textContent='Adicionar produto';
-    const eyebrow=dialog?.querySelector('.dialog-head .eyebrow');
-    if(eyebrow)eyebrow.hidden=true;
-    const close=dialog?.querySelector('[data-close-dialog]');
-    if(close){close.innerHTML=svgIcon('back',25);close.setAttribute('aria-label','Voltar');}
-    updateTabPanel();
+    dialog?.classList.add('market-browser-dialog','market-add-product-prototype');
+    setBrowserHeader('search');
     renderSearchIntro();
     requestAnimationFrame(()=>$('#marketCatalogSearch')?.focus({preventScroll:true}));
   }
 
-  async function addProduct(resultId){
+  async function addProduct(resultId,quantity=1){
     const product=resultById.get(resultId);
     if(!product||!appState)return;
+    const safeQuantity=Math.max(1,Math.min(Number(quantity)||1,99));
     const now=new Date().toISOString();
     appState.market.push({
-      id:uid(),name:cleanRemoteText(product.name,80),category:inferCategory(product.name),quantity:'1',unit:'un',
+      id:uid(),name:cleanRemoteText(product.name,80),category:inferCategory(product.name),quantity:String(safeQuantity),unit:'un',
       estimatedCents:product.priceCents,actualCents:0,purchased:false,
       productCode:cleanRemoteText(product.productCode||'',32),imageUrl:safeProductImageUrl(product.imageUrl),
-      imageSource:product.imageUrl?'Open Food Facts':'',imageMatchedAt:product.imageUrl?(product.imageMatchedAt||now):null,
+      imageSource:product.imageUrl?(product.imageSource||'Open Food Facts'):'',imageMatchedAt:product.imageUrl?(product.imageMatchedAt||now):null,
       createdAt:now,updatedAt:now,purchasedAt:null
     });
     await commit('created','market');
     closeDialog();
     showPage('market');
-    toast(`${product.name} adicionado com ${money(product.priceCents)} por unidade (${marketById(product.marketId).name}). O subtotal será atualizado automaticamente pela quantidade.`);
+    toast(`${product.name} adicionado à lista.`);
   }
 
   function restoreDialogHeader(){
@@ -430,11 +723,18 @@
     clearTimeout(searchTimer);
     const dialog=$('#formDialog');
     if(!dialog)return;
-    dialog.classList.remove('market-browser-dialog');
-    const eyebrow=dialog.querySelector('.dialog-head .eyebrow');
-    if(eyebrow)eyebrow.hidden=false;
-    const close=dialog.querySelector('[data-close-dialog]');
-    if(close){close.textContent='×';close.setAttribute('aria-label','Fechar janela');}
+    dialog.classList.remove('market-browser-dialog','market-add-product-prototype');
+    const head=dialog.querySelector('.dialog-head');
+    head?.classList.remove('market-prototype-detail-head-hidden');
+    head?.querySelector('.market-prototype-header-action')?.remove();
+    const eyebrow=head?.querySelector('.eyebrow');if(eyebrow)eyebrow.hidden=false;
+    const close=head?.querySelector('.dialog-close');
+    if(close){
+      close.removeAttribute('data-market-view-back');
+      close.setAttribute('data-close-dialog','');
+      close.textContent='×';
+      close.setAttribute('aria-label','Fechar janela');
+    }
   }
 
   function isMarketEntryTarget(target){
@@ -455,45 +755,107 @@
     query=cleanRemoteText(value,80);
     const input=$('#marketCatalogSearch');
     if(input&&input.value!==query)input.value=query;
+    const clear=$('[data-market-search-clear]');if(clear)clear.hidden=!query;
     scheduleSearch(0);
   }
 
   function handleBrowserClick(event){
     const dialog=event.target.closest?.('#formDialog[data-mode="market-browser"]');
     if(!dialog)return;
-    const source=event.target.closest('[data-market-source]');
-    if(source){
-      const id=source.dataset.marketSource;
-      if(selectedMarkets.has(id)){
-        if(selectedMarkets.size===1){toast('Mantenha pelo menos um mercado selecionado.');return;}
-        selectedMarkets.delete(id);
-      }else selectedMarkets.add(id);
-      updateTabPanel();scheduleSearch(0);return;
-    }
-    const tab=event.target.closest('[data-market-browser-tab]');
-    if(tab){activeTab=tab.dataset.marketBrowserTab;updateTabs();return;}
-    const clear=event.target.closest('[data-market-search-clear]');
-    if(clear){applyQuery('');$('#marketCatalogSearch')?.focus();return;}
-    const chip=event.target.closest('[data-market-chip-query]');
-    if(chip){applyQuery(chip.dataset.marketChipQuery||'');$('#marketCatalogSearch')?.focus();return;}
-    const sourceButton=event.target.closest('[data-market-source-url]');
-    if(sourceButton){
-      const product=resultById.get(sourceButton.dataset.marketSourceUrl);
-      const url=product?.sourceUrl?safeRetailerUrl(product.sourceUrl,product.marketId):'';
-      if(url)window.open(url,'_blank','noopener,noreferrer');
+
+    const scope=event.target.closest('[data-market-scope]');
+    if(scope){
+      const id=scope.dataset.marketScope;
+      selectedMarkets=id==='all'?new Set(MARKET_IDS):new Set([id]);
+      refreshSearchControls();
+      if(query.length>=2)scheduleSearch(0);
       return;
     }
+
+    const categoryToggle=event.target.closest('[data-market-category-toggle]');
+    if(categoryToggle){
+      categoryOpen=!categoryOpen;
+      refreshSearchControls();
+      return;
+    }
+
+    const category=event.target.closest('[data-market-category]');
+    if(category){
+      selectedCategory=category.dataset.marketCategory||'all';
+      categoryOpen=false;
+      refreshSearchControls();
+      if(lastResults.length)renderRemoteResults(lastResults,lastWarnings);
+      return;
+    }
+
+    const clear=event.target.closest('[data-market-search-clear]');
+    if(clear){applyQuery('');$('#marketCatalogSearch')?.focus();return;}
+
+    if(event.target.closest('[data-market-open-catalog]')){void showCatalogView();return;}
+    if(event.target.closest('[data-market-open-library]')){void showLibraryView();return;}
+    if(event.target.closest('[data-market-view-back]')){showSearchView();return;}
+    if(event.target.closest('[data-market-detail-close]')){showSearchView();return;}
+    if(event.target.closest('[data-market-library-more]')){toast('A biblioteca é atualizada e validada a partir deste ecrã.');return;}
+
+    const detail=event.target.closest('[data-market-detail-product]');
+    if(detail){showProductDetail(detail.dataset.marketDetailProduct);return;}
+
     const add=event.target.closest('[data-market-add-product]');
-    if(add){addProduct(add.dataset.marketAddProduct).catch(()=>toast('Não foi possível adicionar o produto.'));return;}
+    if(add){addProduct(add.dataset.marketAddProduct,1).catch(()=>toast('Não foi possível adicionar o produto.'));return;}
+
+    const qty=event.target.closest('[data-market-detail-quantity]');
+    if(qty){
+      detailQuantity=Math.max(1,Math.min(99,detailQuantity+Number(qty.dataset.marketDetailQuantity||0)));
+      const out=$('#marketDetailQuantity');if(out)out.textContent=String(detailQuantity);
+      return;
+    }
+
+    const detailAdd=event.target.closest('[data-market-detail-add]');
+    if(detailAdd){addProduct(detailAdd.dataset.marketDetailAdd,detailQuantity).catch(()=>toast('Não foi possível adicionar o produto.'));return;}
+
+    if(event.target.closest('[data-market-library-audit]')){void auditLibraryView();return;}
+
+    const libraryFilterButton=event.target.closest('[data-market-library-filter]');
+    if(libraryFilterButton){
+      libraryFilter=['all','problem','expired'].includes(libraryFilterButton.dataset.marketLibraryFilter)?libraryFilterButton.dataset.marketLibraryFilter:'all';
+      void renderLibraryView(currentLibraryAudit);
+      return;
+    }
+
     const manual=event.target.closest('[data-market-manual]');
     if(manual){closeDialog();requestAnimationFrame(()=>openMarketForm());}
   }
 
   function handleBrowserInput(event){
-    if(!event.target.matches?.('#formDialog[data-mode="market-browser"] #marketCatalogSearch'))return;
-    query=cleanRemoteText(event.target.value,80);
-    scheduleSearch();
+    if(event.target.matches?.('#formDialog[data-mode="market-browser"] #marketCatalogSearch')){
+      query=cleanRemoteText(event.target.value,80);
+      const clear=$('[data-market-search-clear]');if(clear)clear.hidden=!query;
+      scheduleSearch();
+      return;
+    }
+    if(event.target.matches?.('#marketCategorySearch')){
+      const needle=normalized(event.target.value);
+      document.querySelectorAll('#marketCategoryOptions [data-market-category]').forEach(button=>{
+        button.hidden=Boolean(needle)&&!normalized(button.textContent).includes(needle);
+      });
+    }
   }
+
+  function handleBrowserChange(event){
+    if(!event.target.matches?.('#marketResultSort'))return;
+    resultSort=['relevance','price-asc','price-desc'].includes(event.target.value)?event.target.value:'relevance';
+    if(lastResults.length)renderRemoteResults(lastResults,lastWarnings);
+  }
+
+  globalThis.addEventListener?.('cdc:market-catalog-picked',()=>showSearchView({focus:false}));
+  globalThis.addEventListener?.('cdc:market-image-library-audit-progress',event=>{
+    const button=$('[data-market-library-audit]');
+    if(!button)return;
+    const completed=Number(event?.detail?.completed)||0;
+    const total=Number(event?.detail?.total)||0;
+    const label=button.querySelector('span');
+    if(label)label.textContent=`A validar ${completed}/${total}`;
+  });
 
   function syncMarketShellClass(){
     const active=$('#page-market')?.classList.contains('active');
@@ -511,6 +873,7 @@
   window.addEventListener('click',interceptMarketEntry,true);
   document.addEventListener('click',handleBrowserClick);
   document.addEventListener('input',handleBrowserInput);
+  document.addEventListener('change',handleBrowserChange);
   $('#formDialog')?.addEventListener('close',restoreDialogHeader);
   installShellObserver();
 })();

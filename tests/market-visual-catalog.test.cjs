@@ -15,7 +15,7 @@ const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
-assert.match(catalog,/76-market-polish1/);
+assert.match(catalog,/76-add-product-prototype1/);
 assert.match(catalog,/conta-de-casa-market-visual-catalog/);
 assert.match(catalog,/SESSION_QUERY_BUDGET=18/);
 assert.match(catalog,/DAILY_QUERY_BUDGET=48/);
@@ -30,13 +30,17 @@ assert.doesNotMatch(catalog,/toISOString\(\)\.slice\(0,10\)/,'daily catalog budg
 assert.match(catalog,/stores:\['pingodoce','continente'\],limit:20/);
 assert.match(catalog,/\$\{marketId\}\|\$\{pid\}/);
 assert.match(catalog,/createIndex\('categories','categories',\{unique:false,multiEntry:true\}\)/);
-assert.match(catalog,/Ver preço atual/);
+assert.match(catalog,/market-visual-product-add/,'prototype catalog cards must expose the circular add/search action');
 assert.match(catalog,/dispatchEvent\(new Event\('input'/);
-assert.match(catalog,/browser\.querySelector\('#marketVisualCatalog'\)\)return/);
+assert.match(catalog,/document\.querySelector\('#marketCatalogViewHost'\)/,'catalog must only mount when its dedicated prototype host exists');
 assert.doesNotMatch(catalog,/grid\.replaceChildren\(\);/,'catalog refresh must not clear the visible grid before rebuilding cards');
 assert.match(catalog,/existingCards=new Map/);
 assert.match(catalog,/grid\.insertBefore\(card,cursor\)/);
 assert.match(catalog,/cdc:market-photo-ready/);
+assert.match(catalog,/id='marketCatalogViewHost'|#marketCatalogViewHost/,'visual catalog must mount only in the dedicated prototype view');
+assert.match(catalog,/data\.visualCatalogProduct|dataset\.visualCatalogProduct|data-visual-catalog-product/,'catalog cards must retain the add/search action');
+assert.match(catalog,/cdc:market-catalog-picked/,'catalog selection must return to the prototype search flow');
+assert.match(catalog,/priceCents/,'catalog records must retain current price when the provider supplies one');
 const imageWarmBlock=catalog.match(/function scheduleImageWarm[\s\S]*?\n  }\n\n  async function backgroundStep/)?.[0]||'';
 assert.ok(imageWarmBlock,'image warm scheduler block should remain testable');
 assert.doesNotMatch(imageWarmBlock,/renderProducts\(\)/,'background image warm must not rebuild the product grid');
@@ -71,19 +75,15 @@ assert.match(css,/@media\(max-width:350px\)/);
 assert.match(css,/object-fit:contain/);
 assert.match(css,/focus-visible/);
 assert.match(css,/76-market-catalog-polish1/,'catalog must expose the final market visual authority');
-assert.match(css,/\.market-image-library-panel/,'catalog must expose the local image-library audit panel');
 assert.match(css,/@media\(max-width:430px\)[\s\S]*\.market-visual-catalog-grid\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/,'narrow iPhones must use one readable product column');
 assert.match(css,/\.market-visual-product-media img\{[\s\S]*object-fit:contain/,'product photography must stay inside a stable contain frame');
-assert.match(catalog,/marketImageLibraryPanel/);
-assert.match(catalog,/dataMarketLibraryAudit|dataset\.marketLibraryAudit|data-market-library-audit/);
-assert.match(catalog,/auditAll\(\{[\s\S]*verifyNetwork:true[\s\S]*concurrency:4/,'manual library audit must validate all stored official photos with bounded concurrency');
 
 const catalogSandbox={console,URL,Date,Map,Set,Promise,setTimeout,clearTimeout,AbortController};
 catalogSandbox.globalThis=catalogSandbox;
 vm.createContext(catalogSandbox);
 vm.runInContext(catalog,catalogSandbox,{filename:'market-visual-catalog.js'});
 assert.ok(catalogSandbox.CDCMarketVisualCatalog);
-assert.equal(catalogSandbox.CDCMarketVisualCatalog.revision,'76-market-polish1');
+assert.equal(catalogSandbox.CDCMarketVisualCatalog.revision,'76-add-product-prototype1');
 assert.equal(catalogSandbox.CDCMarketVisualCatalog.categories.length,12);
 assert.ok(catalogSandbox.CDCMarketVisualCatalog.categories.some(category=>category.label==='Bebidas'));
 assert.ok(catalogSandbox.CDCMarketVisualCatalog.categories.some(category=>category.label==='Lacticínios e ovos'));
@@ -152,7 +152,7 @@ assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-c
   assert.equal(missing,null);
   assert.equal(fallbackCalls,0,'failed exact catalog resolution must remain bounded and must not repeat the legacy resolver');
 
-  assert.match(prepare,/const CATALOG_REV = '76-market-polish1'/);
+  assert.match(prepare,/const CATALOG_REV = '76-add-product-prototype1'/);
   for(const asset of ['market-visual-catalog.css','market-catalog-image-resolver.js','market-visual-catalog.js'])assert.ok(prepare.includes(`'${asset}'`));
   for(const asset of ['./market-visual-catalog.css','./market-catalog-image-resolver.js','./market-visual-catalog.js'])assert.ok(sw.includes(`'${asset}'`));
 
@@ -160,9 +160,9 @@ assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-c
   try{
     execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
     const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-    assert.match(index,/market-visual-catalog\.css\?v=76-market-polish1/);
-    assert.match(index,/market-catalog-image-resolver\.js\?v=76-market-polish1/);
-    assert.match(index,/market-visual-catalog\.js\?v=76-market-polish1/);
+    assert.match(index,/market-visual-catalog\.css\?v=76-add-product-prototype1/);
+    assert.match(index,/market-catalog-image-resolver\.js\?v=76-add-product-prototype1/);
+    assert.match(index,/market-visual-catalog\.js\?v=76-add-product-prototype1/);
     assert.ok(index.indexOf('market-official-images.js')<index.indexOf('market-catalog-image-resolver.js'));
     assert.ok(index.indexOf('market-catalog-image-resolver.js')<index.indexOf('market-visual-catalog.js'));
     assert.ok(index.indexOf('market-visual-catalog.js')<index.indexOf('v64-runtime.js'));

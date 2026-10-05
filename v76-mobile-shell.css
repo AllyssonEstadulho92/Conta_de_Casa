@@ -1168,3 +1168,22 @@ html.cdc-v75 #page-bills #billFiltersToggle{
   html.cdc-v75.app-active .main>.topbar,
   html.cdc-v75.app-active body .mobile-nav{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 }
+
+
+/* 76-add-product-prototype1 — safe areas da vista Adicionar produto.
+   Geometria móvel permanece sob autoridade exclusiva do shell. */
+@media(max-width:620px){
+  html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .dialog-head{
+    padding-top:calc(12px + env(safe-area-inset-top,0px))!important;
+  }
+  html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype #dialogBody{
+    max-height:calc(100dvh - 88px - env(safe-area-inset-top,0px))!important;
+  }
+  html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-prototype-view{
+    padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))!important;
+  }
+  html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail{
+    padding-top:calc(18px + env(safe-area-inset-top,0px))!important;
+    padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))!important;
+  }
+}

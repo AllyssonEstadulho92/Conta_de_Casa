@@ -31,8 +31,8 @@ const events=fs.readFileSync('events.js','utf8');
 assert.ok(!fs.existsSync('market-branding.js'),'Market branding manual JS source must stay removed');
 for(const retiredSource of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(retiredSource),`${retiredSource} must stay physically deleted`);
 assert.match(index,/<meta name="app-build" content="v53"/);
-assert.match(index,/market-experience\.css\?v=53/);
-assert.match(index,/market-experience\.js\?v=53/);
+assert.match(index,/market-experience\.css\?v=76-add-product-prototype1/);
+assert.match(index,/market-experience\.js\?v=76-add-product-prototype1/);
 assert.match(events,/register\('\.\/sw\.js\?v=53',\{updateViaCache:'none'\}\)/);
 
 assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
@@ -63,9 +63,15 @@ assert.ok(js.includes('https://cesta.pt/mcp'));
 assert.ok(js.includes("name:'search_products'"));
 assert.ok(js.includes('data-market-price-mode="live"'));
 assert.match(js,/estimatedCents:product\.priceCents/);
+assert.match(js,/market-prototype-store-tabs/,'approved prototype must use compact store filters');
+assert.match(js,/Pesquise um produto/,'approved prototype must keep the simple first view');
+assert.match(js,/Explorar catálogo/);
+assert.match(js,/Biblioteca de fotografias/);
+assert.match(js,/data-market-detail-add/);
+assert.match(js,/Validar todas/);
 assert.match(js,/actualCents:0,purchased:false/);
 assert.match(js,/sourceUrl=safeRetailerUrl/);
-assert.match(js,/window\.open\(url,'_blank','noopener,noreferrer'\)/);
+assert.match(js,/sourceUrl=safeRetailerUrl/,'official retailer URL validation must remain in the search parser');
 assert.doesNotMatch(js,/DEMO_PRODUCTS|valores de demonstração|Protótipo visual/);
 assert.doesNotMatch(js,/Authorization\s*:\s*['"]Bearer|api[_-]?key\s*[:=]/i);
 

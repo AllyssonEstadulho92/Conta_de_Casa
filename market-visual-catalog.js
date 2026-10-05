@@ -11,7 +11,7 @@
  * - nunca escrever preços, quantidades, faturas ou estado financeiro.
  */
 (function installMarketVisualCatalog(root){
-  const REVISION='76-market-polish1';
+  const REVISION='76-add-product-prototype1';
   const DB_NAME='conta-de-casa-market-visual-catalog';
   const DB_VERSION=1;
   const PRODUCT_STORE='products';
@@ -43,7 +43,30 @@
   ]);
 
   const categoryById=id=>CATEGORIES.find(category=>category.id===id)||CATEGORIES[0];
+
+  function categoryIconSvg(id){
+    const paths={
+      'bebidas':'<path d="M8 3h8l-1 18H9L8 3Z"/><path d="M9 7h6"/>',
+      'lacticinios-ovos':'<path d="M9 3h6l2 4v14H7V7l2-4Z"/><path d="M8 9h8"/>',
+      'frutas-legumes':'<path d="M12 7c-5-4-9 1-7 6 2 6 6 8 7 8s5-2 7-8c2-5-2-10-7-6Z"/><path d="M12 7c0-3 2-5 5-5"/>',
+      'carne-peixe':'<path d="M5 12c3-5 7-7 14-4-2 5-5 8-10 8l-4 3 1-5-1-2Z"/><circle cx="16" cy="9" r=".7" fill="currentColor"/>',
+      'mercearia':'<path d="M6 7h12l-1 14H7L6 7Z"/><path d="M9 7V4h6v3"/>',
+      'congelados':'<path d="M12 2v20M4.2 6.5l15.6 11M19.8 6.5l-15.6 11"/><path d="m12 2-2 2m2-2 2 2m-9.8 2.5.3 2.8m-.3-2.8 2.8-.3m12.8.3-.3 2.8m.3-2.8-2.8-.3"/>',
+      'higiene':'<path d="M10 3h4v4h-4z"/><path d="M8 7h8l1 14H7L8 7Z"/>',
+      'limpeza':'<path d="M9 3h6v4h2l2 4v10H5V11l2-4h2V3Z"/><path d="M9 11h6"/>',
+      'animais':'<circle cx="7" cy="8" r="2"/><circle cx="17" cy="8" r="2"/><circle cx="10" cy="5" r="2"/><circle cx="14" cy="5" r="2"/><path d="M12 11c-4 0-7 3-7 6 0 2 2 4 4 3l3-1 3 1c2 1 4-1 4-3 0-3-3-6-7-6Z"/>'
+    };
+    const path=paths[id]||'<path d="M5 8h14l-1 13H6L5 8Z"/><path d="M9 8a3 3 0 0 1 6 0"/>';
+    return `<svg class="market-visual-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+  }
   const clean=(value,max=180)=>String(value??'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,max);
+  const parseEuroCents=value=>{
+    const match=String(value||'').match(/(\d{1,7}(?:[.,]\d{1,2})?)\s*€/);
+    if(!match)return 0;
+    const cents=Math.round(Number(match[1].replace(',','.'))*100);
+    return Number.isSafeInteger(cents)&&cents>0?cents:0;
+  };
+  const formatEuro=cents=>new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR',minimumFractionDigits:2}).format((Number(cents)||0)/100);
   const memoryProducts=new Map();
   const memoryMeta=new Map();
   const imageQueue=[];
@@ -97,20 +120,25 @@
     const records=[];
     for(let index=0;index<lines.length;index+=1){
       const line=lines[index].trim();
-      const match=/^-\s*(Pingo Doce|Continente)\s*·\s*(.*?)\s*·\s*(.*?)\s*·.*?\bpid\s+(\d{4,32})\s*$/i.exec(line);
-      if(!match)continue;
-      const marketId=/continente/i.test(match[1])?'continente':'pingo-doce';
-      const pid=match[4];
+      if(!line.startsWith('- '))continue;
+      const parts=line.slice(2).split(' · ').map(part=>part.trim()).filter(Boolean);
+      if(parts.length<4)continue;
+      const marketId=/continente/i.test(parts[0])?'continente':/pingo doce/i.test(parts[0])?'pingo-doce':'';
+      if(!marketId)continue;
+      const name=clean(parts[1],140);
+      const pack=clean(parts[2],100);
+      const priceCents=parseEuroCents(parts[3]);
+      const pid=line.match(/\bpid\s+(\d{4,32})\s*$/i)?.[1]||'';
+      if(!pid||!name)continue;
       const sourceUrl=safeProductUrl(clean(lines[index+1]||'',900),marketId,pid);
       if(!sourceUrl)continue;
       records.push({
-        key:`${marketId}|${pid}`,marketId,pid,
-        name:clean(match[2],140),pack:clean(match[3],100),
+        key:`${marketId}|${pid}`,marketId,pid,name,pack,priceCents,
         categories:[category],sourceUrl,lastSeenAt:Date.now()
       });
       index+=1;
     }
-    return records.filter(record=>record.name);
+    return records;
   }
 
   function openDb(){
@@ -187,6 +215,7 @@
       key:id.key,marketId:id.marketId,pid:id.pid,
       name:clean(value.name||previous?.name,140),
       pack:clean(value.pack||previous?.pack,100),
+      priceCents:Number(value.priceCents||previous?.priceCents)||0,
       categories,
       sourceUrl:safeProductUrl(value.sourceUrl||previous?.sourceUrl,id.marketId,id.pid),
       firstSeenAt:Number(previous?.firstSeenAt)||Date.now(),
@@ -429,10 +458,8 @@
   }
 
   async function productCard(record,category){
-    const button=el('button','market-visual-product-card');
-    button.type='button';
-    button.dataset.visualCatalogProduct=record.key;
-    button.setAttribute('aria-label',`Pesquisar preço atual de ${record.name}`);
+    const card=el('article','market-visual-product-card');
+    card.dataset.visualCatalogCard=record.key;
 
     const media=el('span','market-visual-product-media');
     let cached=null;
@@ -445,32 +472,50 @@
     }else imageFallback(media,category);
 
     const copy=el('span','market-visual-product-copy');
-    copy.append(el('span','market-visual-product-store',STORE_LABELS[record.marketId]||record.marketId));
     copy.append(el('strong','market-visual-product-name',record.name));
     if(record.pack)copy.append(el('small','market-visual-product-pack',record.pack));
-    copy.append(el('span','market-visual-product-action','Ver preço atual'));
-    button.append(media,copy);
-    return button;
+    if(record.priceCents)copy.append(el('b','market-visual-product-price',formatEuro(record.priceCents)));
+    copy.append(el('span','market-visual-product-store',STORE_LABELS[record.marketId]||record.marketId));
+
+    const action=el('button','market-visual-product-add','+');
+    action.type='button';
+    action.dataset.visualCatalogProduct=record.key;
+    action.setAttribute('aria-label',`Pesquisar e adicionar ${record.name}`);
+    card.append(media,copy,action);
+    return card;
   }
 
   function syncProductCard(card,record,category){
     if(!card)return;
-    card.dataset.visualCatalogProduct=record.key;
-    card.setAttribute('aria-label',`Pesquisar preço atual de ${record.name}`);
+    card.dataset.visualCatalogCard=record.key;
+    const action=card.querySelector('[data-visual-catalog-product]');
+    if(action){
+      action.dataset.visualCatalogProduct=record.key;
+      action.setAttribute('aria-label',`Pesquisar e adicionar ${record.name}`);
+    }
     const store=card.querySelector('.market-visual-product-store');
     if(store)store.textContent=STORE_LABELS[record.marketId]||record.marketId;
     const name=card.querySelector('.market-visual-product-name');
     if(name)name.textContent=record.name;
     const copy=card.querySelector('.market-visual-product-copy');
     let pack=card.querySelector('.market-visual-product-pack');
+    let price=card.querySelector('.market-visual-product-price');
     if(record.pack){
       if(!pack&&copy){
         pack=el('small','market-visual-product-pack');
-        const action=copy.querySelector('.market-visual-product-action');
-        if(action)copy.insertBefore(pack,action);else copy.append(pack);
+        const storeNode=copy.querySelector('.market-visual-product-store');
+        if(storeNode)copy.insertBefore(pack,storeNode);else copy.append(pack);
       }
       if(pack)pack.textContent=record.pack;
     }else if(pack)pack.remove();
+    if(record.priceCents){
+      if(!price&&copy){
+        price=el('b','market-visual-product-price');
+        const storeNode=copy.querySelector('.market-visual-product-store');
+        if(storeNode)copy.insertBefore(price,storeNode);else copy.append(price);
+      }
+      if(price)price.textContent=formatEuro(record.priceCents);
+    }else if(price)price.remove();
     const fallbackMark=card.querySelector('.market-visual-catalog-fallback-mark');
     if(fallbackMark)fallbackMark.textContent=category.label.slice(0,1);
   }
@@ -499,8 +544,8 @@
     grid.querySelector('.market-visual-catalog-empty')?.remove();
     const wantedKeys=new Set(records.map(record=>record.key));
     const existingCards=new Map(
-      [...grid.querySelectorAll('[data-visual-catalog-product]')]
-        .map(card=>[card.dataset.visualCatalogProduct,card])
+      [...grid.querySelectorAll('[data-visual-catalog-card]')]
+        .map(card=>[card.dataset.visualCatalogCard,card])
         .filter(([key])=>key)
     );
 
@@ -520,6 +565,10 @@
       cursor=card.nextElementSibling;
     }
 
+    const heading=document.querySelector('#marketVisualCategoryTitle');
+    const count=document.querySelector('#marketVisualCategoryCount');
+    if(heading)heading.textContent=category.label;
+    if(count)count.textContent=`${records.length} produto${records.length===1?'':'s'}`;
     enqueueImages(records.filter(record=>!imageQueued.has(record.key)).slice(0,4));
   }
 
@@ -604,75 +653,49 @@
     const input=document.querySelector('#marketCatalogSearch');if(!input)return;
     input.value=record.name;
     input.dispatchEvent(new Event('input',{bubbles:true}));
-    input.focus({preventScroll:true});
-    setTimeout(()=>document.querySelector('#marketCatalogResults')?.scrollIntoView?.({behavior:'smooth',block:'start'}),650);
+    try{root.dispatchEvent(new CustomEvent('cdc:market-catalog-picked',{detail:{name:record.name}}));}catch(_error){}
   }
 
-  function buildSection(browser){
+  function buildSection(host){
     const section=el('section','market-visual-catalog');section.id='marketVisualCatalog';
-    const head=el('div','market-visual-catalog-head');
-    const copy=el('div','market-visual-catalog-heading');
-    copy.append(el('span','market-visual-catalog-eyebrow','Mercado'));
-    const title=el('h3','market-visual-catalog-title','Produtos');title.id='marketVisualCatalogTitle';copy.append(title);
-    copy.append(el('p','market-visual-catalog-subtitle','Explore produtos reais por categoria. A fotografia só aparece quando a origem oficial é validada.'));
-    const refresh=el('button','market-visual-catalog-refresh','Atualizar produtos');refresh.type='button';refresh.dataset.visualCatalogRefresh='1';
-    head.append(copy,refresh);
 
     const controls=el('div','market-visual-catalog-controls');
     const stores=el('div','market-visual-store-filter');stores.setAttribute('aria-label','Filtrar produtos por mercado');
-    for(const [id,label] of [['all','Todos'],['continente','Continente'],['pingo-doce','Pingo Doce']]){
+    for(const [id,label] of [['all','Todos'],['pingo-doce','Pingo Doce'],['continente','Continente']]){
       const button=el('button','market-visual-store',label);button.type='button';button.dataset.visualCatalogStore=id;button.setAttribute('aria-pressed','false');stores.append(button);
     }
-    const statsNode=el('span','market-visual-catalog-stats','A preparar produtos…');statsNode.id='marketVisualCatalogStats';
-    controls.append(stores,statsNode);
+    controls.append(stores);
 
     const categories=el('div','market-visual-category-strip');categories.setAttribute('aria-label','Categorias de produtos');
     for(const category of CATEGORIES){
-      const button=el('button','market-visual-category',category.label);button.type='button';button.dataset.visualCatalogCategory=category.id;button.setAttribute('aria-pressed','false');categories.append(button);
+      const button=el('button','market-visual-category');
+      button.type='button';button.dataset.visualCatalogCategory=category.id;button.setAttribute('aria-pressed','false');
+      button.innerHTML=`${categoryIconSvg(category.id)}<span>${category.label}</span>`;
+      categories.append(button);
     }
+
+    const heading=el('div','market-visual-category-heading');
+    const title=el('h3','',categoryById(activeCategory).label);title.id='marketVisualCategoryTitle';
+    const count=el('span','','A preparar…');count.id='marketVisualCategoryCount';
+    heading.append(title,count);
 
     const grid=el('div','market-visual-catalog-grid');grid.id='marketVisualCatalogGrid';grid.setAttribute('aria-live','polite');
 
-    const libraryPanel=el('details','market-image-library-panel');libraryPanel.id='marketImageLibraryPanel';
-    const librarySummary=el('summary','market-image-library-summary');
-    const librarySummaryCopy=el('span','market-image-library-summary-copy');
-    librarySummaryCopy.append(el('strong','','Biblioteca de fotografias'));
-    const libraryMetrics=el('small','market-image-library-metrics','A verificar biblioteca…');libraryMetrics.id='marketImageLibraryMetrics';
-    librarySummaryCopy.append(libraryMetrics);
-    const libraryChevron=el('span','market-image-library-chevron','⌄');libraryChevron.setAttribute('aria-hidden','true');
-    librarySummary.append(librarySummaryCopy,libraryChevron);
-    const libraryBody=el('div','market-image-library-body');
-    const libraryNote=el('p','market-image-library-note','Valida todos os registos guardados neste dispositivo, remove entradas expiradas ou inválidas e testa a disponibilidade das fotografias oficiais.');
-    const libraryActions=el('div','market-image-library-actions');
-    const auditButton=el('button','market-image-library-audit','Validar biblioteca');auditButton.type='button';auditButton.dataset.marketLibraryAudit='1';
-    libraryActions.append(auditButton);
-    const retailerSlot=el('div','market-image-retailer-status');retailerSlot.id='marketImageRetailerStatus';
-    libraryBody.append(libraryNote,libraryActions,retailerSlot);
-    libraryPanel.append(librarySummary,libraryBody);
-
-    section.append(head,controls,categories,grid,libraryPanel);
-    section.setAttribute('aria-labelledby','marketVisualCatalogTitle');
-
-    const before=browser.querySelector('.market-browser-results-head');
-    if(before)browser.insertBefore(section,before);else browser.append(section);
+    section.append(controls,categories,heading,grid);
+    host.append(section);
     updateSelection();
-    void renderLibraryHealth();
     return section;
   }
 
   async function mount(){
     if(typeof document==='undefined'||mounting)return;
-    const browser=document.querySelector('.market-browser');if(!browser||browser.querySelector('#marketVisualCatalog'))return;
+    const host=document.querySelector('#marketCatalogViewHost');
+    if(!host||host.querySelector('#marketVisualCatalog'))return;
     mounting=true;
     try{
-      buildSection(browser);
+      buildSection(host);
       updateSelection();
       await renderProducts();
-      await renderStats();
-      try{
-        const metadataAudit=await root.CDCMarketImageLibrary?.auditAll?.({verifyNetwork:false,pruneInvalid:true});
-        await renderLibraryHealth(metadataAudit||null);
-      }catch(_error){await renderLibraryHealth();}
       const current=await listCategory(activeCategory,activeStore,4);
       if(current.length<4)void refreshCategory(activeCategory,{seeds:2});
       scheduleBackground(3000);
@@ -685,23 +708,17 @@
     const storeButton=event.target.closest?.('[data-visual-catalog-store]');
     if(storeButton){activeStore=['all','continente','pingo-doce'].includes(storeButton.dataset.visualCatalogStore)?storeButton.dataset.visualCatalogStore:'all';updateSelection();void renderProducts();return;}
     if(event.target.closest?.('[data-visual-catalog-refresh]')){void refreshCategory(activeCategory,{seeds:3});return;}
-    if(event.target.closest?.('[data-market-library-audit]')){void auditImageLibrary();return;}
     const productButton=event.target.closest?.('[data-visual-catalog-product]');
     if(productButton){void getProduct(productButton.dataset.visualCatalogProduct).then(record=>{if(record)activateLiveSearch(record);});}
   }
 
   function install(){
     document.addEventListener('click',onClick);
-    root.addEventListener?.('cdc:market-image-library-audit-progress',event=>{
-      const target=document.querySelector('#marketImageLibraryMetrics');
-      const detail=event?.detail||{};
-      if(target&&libraryAuditBusy)target.textContent=`A validar ${Number(detail.completed)||0}/${Number(detail.total)||0} fotografias…`;
-    });
     void mount();
     if(document.body&&!mutationObserver){
       mutationObserver=new MutationObserver(mutations=>{
-        if(document.querySelector('.market-browser #marketVisualCatalog'))return;
-        if(mutations.some(mutation=>mutation.type==='childList'&&mutation.addedNodes.length)&&document.querySelector('.market-browser'))void mount();
+        if(document.querySelector('#marketCatalogViewHost #marketVisualCatalog'))return;
+        if(mutations.some(mutation=>mutation.type==='childList'&&mutation.addedNodes.length)&&document.querySelector('#marketCatalogViewHost'))void mount();
       });
       mutationObserver.observe(document.body,{subtree:true,childList:true});
     }
@@ -714,6 +731,6 @@
 
   root.CDCMarketVisualCatalog=Object.freeze({
     revision:REVISION,categories:CATEGORIES,identity,parseCatalogRecords,listCategory,stats,
-    refreshCategory,warmNow:()=>backgroundStep()
+    refreshCategory,mount,warmNow:()=>backgroundStep()
   });
 })(globalThis);
