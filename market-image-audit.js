@@ -94,13 +94,14 @@
         if(id&&!new RegExp(`(?:/|_)${id}(?:[-_.]|$)`).test(path))return '';
         return url.href.slice(0,1000);
       }
-      if(marketId==='pingo-doce'||(!marketId&&host==='static.pingodoce.pt')){
-        if(host!=='static.pingodoce.pt')return '';
+      if(marketId==='pingo-doce'||(!marketId&&['pingodoce.pt','www.pingodoce.pt','static.pingodoce.pt'].includes(host))){
+        if(!['pingodoce.pt','www.pingodoce.pt','static.pingodoce.pt'].includes(host))return '';
         if(!path.includes('/Sites-pingo-doce-master/'))return '';
         if(!/\/images\/(?:large|medium|small)\//i.test(path))return '';
-        if(!/\.(?:jpe?g|png|webp)$/i.test(path))return '';
+        if(!/\.(?:jpe?g|png|webp)$/i.test(path)||/noimage|fallback/i.test(path))return '';
+        if((host==='pingodoce.pt'||host==='www.pingodoce.pt')&&!path.includes('/dw/image/v2/BLJJ_PRD/on/demandware.static/-/'))return '';
         if(id&&!path.split('/').some(segment=>segment.startsWith(`${id}_`)||segment.startsWith(`${id}-`)||segment.startsWith(`${id}.`)))return '';
-        return url.href.slice(0,1000);
+        return url.href.slice(0,1100);
       }
       return '';
     }catch(_error){return '';}
