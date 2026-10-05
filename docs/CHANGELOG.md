@@ -2,6 +2,24 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-05: protótipo aprovado de Adicionar produto
+
+### Implementação
+
+- o fluxo **Mercado → Adicionar produto** passa a reproduzir as seis vistas do protótipo aprovado, sem manter a antiga composição simultânea;
+- a vista inicial contém pesquisa, scanner, filtros compactos de mercado, categoria opcional, estado vazio, **Explorar catálogo** e **Biblioteca de fotografias**;
+- durante a pesquisa, os resultados usam cartões horizontais com fotografia, nome, embalagem, preço, mercado e ação circular de adicionar;
+- a seleção de categoria abre a lista pesquisável prevista no protótipo;
+- tocar num produto abre o detalhe com fotografia, preço, quantidade, **Adicionar à lista** e informação de mercado, categoria, origem da imagem e PID;
+- **Explorar catálogo** passa a ser uma vista própria com filtros de mercado, categorias visuais, contagem e grelha de produtos;
+- **Biblioteca de fotografias** passa a ser uma vista própria com total guardado, última validação, métricas de válidas/problemas/expiradas, **Validar todas**, filtros e lista por produto;
+- a biblioteca local expõe os registos e estados por fotografia para suportar a vista de validação;
+- safe areas do iPhone permanecem sob autoridade de `v76-mobile-shell.css`.
+
+### Preservado
+
+Sem alterações a cálculos financeiros, preços contabilizados, IndexedDB financeiro, cofre/PIN, cifragem, sincronização ou `STATE_VERSION`.
+
 ## 2026-10-05: Mercado reorganizado e biblioteca de fotografias auditável
 
 ### Interface
