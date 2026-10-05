@@ -1,14 +1,14 @@
 'use strict';
 
 /*
- * Conta de Casa — biblioteca persistente de imagens oficiais do Mercado (75-image-library1)
+ * Conta de Casa — biblioteca persistente e auditável de imagens oficiais do Mercado (76-image-library-audit1)
  *
  * Guarda apenas metadados de fotografias oficiais já validadas para o SKU exato
  * de Continente/Pingo Doce. Não copia binários dos retalhistas para o repositório,
  * não lê/escreve o estado financeiro e não altera preços.
  */
 (function installMarketImageLibrary(root){
-  const REVISION='75-image-library1';
+  const REVISION='76-image-library-audit1';
   const DB_NAME='conta-de-casa-market-image-library';
   const DB_VERSION=1;
   const STORE='images';
@@ -18,6 +18,7 @@
   let dbPromise=null;
   let observer=null;
   let scanQueued=false;
+  let lastAuditReport=null;
 
   const clean=(value,max=180)=>String(value??'')
     .replace(/[\u0000-\u001f\u007f]/g,' ')
@@ -152,6 +153,105 @@
     });
   }
 
+  async function idbGetAll(){
+    const db=await openDb();
+    if(!db)return [...memory.values()];
+    return new Promise(resolve=>{
+      let tx;try{tx=db.transaction(STORE,'readonly');}catch(_error){resolve([...memory.values()]);return;}
+      const request=tx.objectStore(STORE).getAll();
+      request.onsuccess=()=>resolve(Array.isArray(request.result)?request.result:[]);
+      request.onerror=()=>resolve([...memory.values()]);
+    });
+  }
+
+  function emitAuditProgress(detail){
+    if(typeof root.dispatchEvent!=='function'||typeof root.CustomEvent!=='function')return;
+    try{root.dispatchEvent(new root.CustomEvent('cdc:market-image-library-audit-progress',{detail}));}catch(_error){}
+  }
+
+  function probeImage(url,timeoutMs=6500){
+    if(typeof root.Image!=='function')return Promise.resolve(null);
+    return new Promise(resolve=>{
+      const image=new root.Image();
+      let settled=false;
+      const finish=value=>{
+        if(settled)return;
+        settled=true;
+        clearTimeout(timer);
+        image.onload=null;
+        image.onerror=null;
+        resolve(value);
+      };
+      const timer=setTimeout(()=>finish(false),Math.max(1500,Number(timeoutMs)||6500));
+      image.referrerPolicy='no-referrer';
+      image.decoding='async';
+      image.onload=()=>finish(true);
+      image.onerror=()=>finish(false);
+      image.src=url;
+    });
+  }
+
+  async function auditAll(options={}){
+    const verifyNetwork=options.verifyNetwork!==false;
+    const pruneInvalid=options.pruneInvalid!==false;
+    const concurrency=Math.max(1,Math.min(Number(options.concurrency)||4,6));
+    const timeoutMs=Math.max(1500,Math.min(Number(options.timeoutMs)||6500,15000));
+    const rawRecords=await idbGetAll();
+    const now=Date.now();
+    const report={
+      revision:REVISION,total:rawRecords.length,valid:0,available:0,unavailable:0,
+      unchecked:0,expired:0,rejected:0,removed:0,persistent:Boolean(await openDb()),
+      checkedAt:new Date(now).toISOString()
+    };
+    const networkQueue=[];
+
+    for(const raw of rawRecords){
+      const id=identity(raw||{});
+      const key=clean(raw?.key,80);
+      if(!id){
+        report.rejected+=1;
+        if(pruneInvalid&&key){memory.delete(key);if(await idbDelete(key))report.removed+=1;}
+        continue;
+      }
+      const normalized=normalizeRecord(raw,id);
+      if(!normalized){
+        report.rejected+=1;
+        if(pruneInvalid){memory.delete(id.key);if(await idbDelete(id.key))report.removed+=1;}
+        continue;
+      }
+      if(normalized.expiresAt<=now){
+        report.expired+=1;
+        memory.delete(id.key);
+        if(pruneInvalid&&await idbDelete(id.key))report.removed+=1;
+        continue;
+      }
+      report.valid+=1;
+      memory.set(id.key,normalized);
+      if(verifyNetwork&&typeof root.Image==='function')networkQueue.push({id,record:normalized});
+      else report.unchecked+=1;
+    }
+
+    let cursor=0;
+    let completed=0;
+    const worker=async()=>{
+      while(cursor<networkQueue.length){
+        const current=networkQueue[cursor++];
+        const ok=await probeImage(current.record.imageUrl,timeoutMs);
+        if(ok===true)report.available+=1;
+        else if(ok===false)report.unavailable+=1;
+        else report.unchecked+=1;
+        completed+=1;
+        emitAuditProgress({
+          completed,total:networkQueue.length,
+          available:report.available,unavailable:report.unavailable,valid:report.valid
+        });
+      }
+    };
+    await Promise.all(Array.from({length:Math.min(concurrency,networkQueue.length||1)},()=>worker()));
+    lastAuditReport=Object.freeze({...report});
+    return {...report};
+  }
+
   async function get(target={}){
     const id=identity(target);if(!id)return null;
     let record=memory.get(id.key)||null;
@@ -183,12 +283,12 @@
 
   async function stats(){
     const db=await openDb();
-    if(!db)return {revision:REVISION,count:memory.size,persistent:false};
+    if(!db)return {revision:REVISION,count:memory.size,persistent:false,lastAudit:lastAuditReport};
     return new Promise(resolve=>{
-      let tx;try{tx=db.transaction(STORE,'readonly');}catch(_error){resolve({revision:REVISION,count:memory.size,persistent:false});return;}
+      let tx;try{tx=db.transaction(STORE,'readonly');}catch(_error){resolve({revision:REVISION,count:memory.size,persistent:false,lastAudit:lastAuditReport});return;}
       const request=tx.objectStore(STORE).count();
-      request.onsuccess=()=>resolve({revision:REVISION,count:Number(request.result)||0,persistent:true});
-      request.onerror=()=>resolve({revision:REVISION,count:memory.size,persistent:false});
+      request.onsuccess=()=>resolve({revision:REVISION,count:Number(request.result)||0,persistent:true,lastAudit:lastAuditReport});
+      request.onerror=()=>resolve({revision:REVISION,count:memory.size,persistent:false,lastAudit:lastAuditReport});
     });
   }
 
@@ -312,6 +412,6 @@
   if(root.addEventListener)root.addEventListener('pageshow',()=>{void prune();});
 
   root.CDCMarketImageLibrary=Object.freeze({
-    revision:REVISION,get,remember,forget,stats,prune,identity,safeProductUrl,safeOfficialImageUrl,audit:scheduleScan
+    revision:REVISION,get,remember,forget,stats,prune,auditAll,identity,safeProductUrl,safeOfficialImageUrl,audit:scheduleScan
   });
 })(globalThis);
