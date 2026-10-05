@@ -1112,9 +1112,11 @@ function lockApp(_reason = 'manual') {
   if (typeof document === 'undefined') return;
   const formDialog = $('#formDialog');
   const quickDialog = $('#quickDialog');
+  const alertCenterDialog = $('#alertCenterDialog');
   const navDrawer = $('#mobileDrawer');
   if (formDialog?.open) formDialog.close();
   if (quickDialog?.open) quickDialog.close();
+  if (alertCenterDialog?.open) alertCenterDialog.close();
   if (navDrawer?.open) navDrawer.close();
   document.documentElement.classList.remove('app-active');
   $('#app').hidden = true;
