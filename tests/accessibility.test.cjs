@@ -72,7 +72,12 @@ assert.match(index,/id="syncHeaderStatus"[\s\S]*aria-label="Estado da sincroniza
 assert.match(index,/id="quickAddBtn"[\s\S]*aria-label="Adicionar registo"/);
 assert.match(index,/class="icon-btn dialog-back"[^>]*data-dialog-back[^>]*aria-label="Voltar"[^>]*hidden/,'invoice detail back control must have an explicit accessible name');
 assert.match(index,/class="icon-btn dialog-close"[^>]*data-close-dialog[^>]*aria-label="Fechar janela"/,'dialog close control must remain a distinct accessible action');
-assert.match(index,/id="notificationsBtn"[\s\S]*aria-label="Ver alertas no Início"/);
+assert.match(index,/id="notificationsBtn"[\s\S]*aria-label="Centro de Alertas, sem alertas ativos"[\s\S]*aria-controls="alertCenterDialog"[\s\S]*aria-haspopup="dialog"[\s\S]*aria-expanded="false"/);
+assert.match(index,/id="alertCenterDialog"[\s\S]*aria-labelledby="alertCenterTitle"[\s\S]*aria-describedby="alertCenterSummary"/);
+assert.match(index,/data-close-alert-center aria-label="Fechar Centro de Alertas"/);
+assert.match(index,/id="alertCenterSummary"[\s\S]*aria-live="polite"/);
+assert.match(index,/id="alertCenterList"[\s\S]*role="list"[\s\S]*aria-live="polite"/);
+assert.match(events,/alertCenterDialog\?\.addEventListener\('cancel',[\s\S]*closeAlertCenter\(\)/,'Escape must close the modal alert center through the canonical close path');
 assert.match(index,/id="billSummary"[\s\S]*aria-live="polite"/);
 assert.match(index,/id="billsList"[\s\S]*aria-live="polite"/);
 assert.match(index,/id="accountBalanceInfo"[\s\S]*aria-live="polite"/);

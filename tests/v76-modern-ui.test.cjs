@@ -2,6 +2,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const css = fs.readFileSync('v76-modern-ui.css','utf8');
+const index = fs.readFileSync('index.html','utf8');
+const render = fs.readFileSync('render.js','utf8');
+const events = fs.readFileSync('events.js','utf8');
+const core = fs.readFileSync('core.js','utf8');
 const prepare = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
 assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
@@ -51,6 +55,24 @@ assert.doesNotMatch(css,/\.mobile-nav\{[\s\S]*position:fixed!important;[\s\S]*bo
 assert.doesNotMatch(css,/\.topbar,[\s\S]*min-height:76px!important;[\s\S]*padding:12px 14px!important/,'master UI must not own mobile topbar dimensions');
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 assert.match(css,/@media\(forced-colors:active\)/);
+
+/* 76-alert-center1: o sino é um centro operacional, não um atalho inerte. */
+assert.match(css,/76-alert-center1/);
+assert.match(css,/#notificationsBtn \.badge-dot\{[\s\S]*min-width:18px!important;[\s\S]*font-variant-numeric:tabular-nums!important/,'alert badge must render a numeric count');
+assert.match(css,/\.alert-center-dialog\{[\s\S]*position:fixed!important/);
+assert.match(css,/\.alert-center-list\{[\s\S]*overflow:auto!important/,'alert center must scroll independently when the list is long');
+assert.match(css,/@media\(max-width:820px\)[\s\S]*\.alert-center-dialog\{[\s\S]*safe-area-inset-bottom/,'mobile alert center must respect the iPhone bottom safe area');
+assert.match(index,/id="notificationsBtn"[\s\S]*aria-controls="alertCenterDialog"[\s\S]*aria-haspopup="dialog"[\s\S]*aria-expanded="false"/);
+assert.match(index,/id="alertCenterDialog"[\s\S]*aria-labelledby="alertCenterTitle"[\s\S]*aria-describedby="alertCenterSummary"/);
+assert.match(index,/id="alertCenterList"[\s\S]*role="list"[\s\S]*aria-live="polite"/);
+assert.match(render,/function dashboardAlertItems\(n = dashboardNumbers\(\)\)/,'alert center must reuse canonical dashboard numbers');
+assert.match(render,/const alerts = dashboardAlertItems\(n\);[\s\S]*alerts\.map\(dashboardAlertPanelHtml\)/,'Dashboard and alert center must share one alert model');
+assert.match(render,/function renderAlertCenter\(/);
+assert.match(render,/const count=items\.length;[\s\S]*badge\.textContent=count>99\?'99\+':String\(count\)/,'badge must count active alert groups');
+assert.match(events,/function openAlertCenter\(\)/);
+assert.match(events,/function closeAlertCenter\(\)/);
+assert.match(events,/\$\('#notificationsBtn'\)\.addEventListener\('click',openAlertCenter\)/);
+assert.match(core,/alertCenterDialog[\s\S]*if \(alertCenterDialog\?\.open\) alertCenterDialog\.close\(\)/,'locking the vault must close the alert center');
 
 assert.doesNotMatch(css,/commit\(|saveState\(|appState|IndexedDB|PBKDF2|AES-GCM|estimatedCents|actualCents/,'master UI CSS must not contain application mutations or financial logic');
 
