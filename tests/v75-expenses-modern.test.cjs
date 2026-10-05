@@ -9,6 +9,7 @@ const mobileCss=fs.readFileSync('mobile-layout.css','utf8');
 const mobileShell=fs.readFileSync('v76-mobile-shell.css','utf8');
 const prep=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const index=fs.readFileSync('index.html','utf8');
 
 assert.match(css,/html\.cdc-v75 #page-bills/,'A camada deve ficar isolada a #page-bills.');
@@ -52,9 +53,6 @@ for(const canonical of ['billSearch','billFiltersToggle','billFilterGrid','newBi
 assert.match(prep,/const EXPENSES_REV = '75-expenses1';/,'A revisão base de Despesas continua versionada no build.');
 assert.match(prep,/'v75-expenses-modern\.css'/,'O CSS base deve entrar na allowlist pública.');
 assert.match(prep,/v75-expenses-modern\.css\?v=\$\{EXPENSES_REV\}/,'O CSS base deve ser injetado com revisão própria.');
-assert.match(sw,/expenses1/,'O cache deve preservar a revisão base de Despesas.');
-assert.match(sw,/canonical-expense-market1/,'A PWA deve preservar a composição canónica.');
-assert.match(sw,/expenses-mobile-alignment2/,'A PWA deve invalidar para a nova composição móvel.');
 assert.match(sw,/\.\/v75-expenses-modern\.css/,'O Service Worker deve precachear o CSS de Despesas.');
 assert.match(sw,/\.\/mobile-layout\.css/,'O Service Worker deve precachear a camada móvel final.');
 
