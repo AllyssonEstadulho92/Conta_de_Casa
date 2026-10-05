@@ -13,7 +13,7 @@ const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
-assert.match(library,/76-image-library-audit1/);
+assert.match(library,/76-add-product-prototype1/);
 assert.match(library,/conta-de-casa-market-image-library/);
 assert.match(library,/indexedDB/);
 assert.match(library,/45\*24\*60\*60\*1000/);
@@ -24,6 +24,8 @@ assert.match(library,/marketImageLibrary='stored'/);
 assert.match(library,/MutationObserver/);
 assert.match(library,/attributeFilter:\['src'\]/);
 assert.match(library,/async function auditAll\(options=\{\}\)/,'image library must expose a full audit path');
+assert.match(library,/async function listRecords\(options=\{\}\)/,'prototype library view must enumerate all stored records');
+assert.match(library,/items:\[\]/,'audit report must expose per-photo status for the dedicated library view');
 assert.match(library,/function probeImage\(/,'image library audit must support availability checks without fetch');
 assert.match(library,/cdc:market-image-library-audit-progress/,'image audit must expose bounded UI progress');
 assert.doesNotMatch(library,/\bfetch\s*\(/,'image-library validation must not add a second network fetch path');
@@ -38,7 +40,7 @@ sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(library,sandbox,{filename:'market-image-library.js'});
 assert.ok(sandbox.CDCMarketImageLibrary,'library API must be installed');
-assert.equal(sandbox.CDCMarketImageLibrary.revision,'76-image-library-audit1');
+assert.equal(sandbox.CDCMarketImageLibrary.revision,'76-add-product-prototype1');
 
 const continenteProduct='https://www.continente.pt/produto/compressas-gaze-20-x-20-cm-continente-8167440.html';
 const continenteImage='https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dwa5dd802e/images/col/816/8167440-frente.jpg?sw=2000&sh=2000';
@@ -70,7 +72,7 @@ assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoImage,'ping
   assert.equal(await sandbox.CDCMarketImageLibrary.forget({marketId:'continente',pid:'8167440'}),true);
   assert.equal(await sandbox.CDCMarketImageLibrary.get({marketId:'continente',pid:'8167440'}),null);
 
-  assert.match(prepare,/const IMAGE_LIBRARY_REV = '76-image-library-audit1'/);
+  assert.match(prepare,/const IMAGE_LIBRARY_REV = '76-add-product-prototype1'/);
   assert.match(prepare,/market-image-library\.js/);
   assert.match(sw,/\.\/market-image-library\.js/);
   assert.doesNotMatch(sw,/\.\/v75-market-featured\.(?:css|js)/);
@@ -79,7 +81,7 @@ assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoImage,'ping
   try{
     execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
     const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-    assert.match(index,/market-image-library\.js\?v=76-image-library-audit1/);
+    assert.match(index,/market-image-library\.js\?v=76-add-product-prototype1/);
     assert.ok(index.indexOf('market-image-library.js')<index.indexOf('market-retailer-image-policy.js'));
     assert.ok(index.indexOf('market-image-library.js')<index.indexOf('market-official-images.js'));
     assert.ok(fs.existsSync(path.join(dist,'market-image-library.js')));
