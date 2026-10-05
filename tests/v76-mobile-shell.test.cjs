@@ -129,7 +129,7 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
-assert.match(css,/76-visual-audit1 — enquadramento móvel alinhado/,'mobile shell must expose the final visual audit contract');
-assert.match(css,/body \.mobile-nav\{[\s\S]*backdrop-filter:blur\(18px\)/,'mobile dock must share the final restrained surface treatment');
-assert.match(css,/\.nav-drawer-shell\{[\s\S]*linear-gradient\(180deg/,'drawer must share the final surface language');
+assert.match(shell,/76-visual-audit1 — enquadramento móvel alinhado/,'mobile shell must expose the final visual audit contract');
+assert.match(shell,/body \.mobile-nav\{[\s\S]*backdrop-filter:blur\(18px\)/,'mobile dock must share the final restrained surface treatment');
+assert.match(shell,/\.nav-drawer-shell\{[\s\S]*linear-gradient\(180deg/,'drawer must share the final surface language');
 console.log('v76 mobile shell: compact safe-area-aware header, neutral drawer, readable five-destination dock and ten-route responsive contracts: OK');
