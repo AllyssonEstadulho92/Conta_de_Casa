@@ -66,6 +66,7 @@ assert.match(js,/estimatedCents:product\.priceCents/);
 assert.match(js,/market-prototype-store-tabs/,'approved prototype must use compact store filters');
 assert.match(js,/data-market-product-name/,'prototype result cards must expose a stable product identity for image resolvers');
 assert.match(js,/data-market-product-pack/,'prototype result cards must expose pack data independently of visual layout');
+assert.match(js,/data-market-product-url/,'prototype result cards must expose the validated retailer URL for image resolution');
 assert.match(js,/Pesquise um produto/,'approved prototype must keep the simple first view');
 assert.match(js,/Explorar catálogo/);
 assert.match(js,/Biblioteca de fotografias/);
