@@ -11,6 +11,7 @@ const architecture=fs.readFileSync('v75-architecture.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const iconSvg=fs.readFileSync('icon.svg','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const pages=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const publicFilesStart=pages.indexOf('const PUBLIC_FILES');
 const publicFilesEnd=pages.indexOf(']);',publicFilesStart);
@@ -124,8 +125,6 @@ assert.match(sw,/v75-architecture\.css/);
 for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be cached`);
 assert.doesNotMatch(sw,/['"]\.\/ui-consistency\.css['"]/);
 assert.doesNotMatch(sw,/['"]\.\/v64-runtime\.css['"]/);
-assert.match(sw,/planning-more1/);
-assert.match(sw,/retire-assets1/);
 
 console.log('Conta de Casa brand mark and Lucide UI icon authority keep semantic Planeamento/Definições geometry with retired sources absent: OK');
 
