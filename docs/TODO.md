@@ -494,3 +494,17 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [x] Atualizar revisão/cache da PWA.
 - [ ] Validar alinhamento de ícones no iPhone físico em light mode.
 - [ ] Validar alinhamento de ícones no iPhone físico em dark mode.
+
+
+### Ecrã de PIN
+
+- [x] Aplicar o protótipo moderno ao ecrã de PIN.
+- [x] Separar visualmente marca e cartão de autenticação.
+- [x] Aumentar teclado e campo PIN para uso móvel.
+- [x] Aplicar Entrar com affordance ArrowRight.
+- [x] Usar iconografia Lucide canónica no fluxo de desbloqueio.
+- [x] Preservar criação de cofre e lógica de autenticação.
+- [x] Preservar forced-colors, reduced-motion e safe areas.
+- [ ] Validar visualmente em iPhone 390 px e 430 px.
+- [ ] Validar modo de palavra-passe com teclado iOS aberto.
+- [ ] Validar dark mode e rotação do dispositivo físico.
