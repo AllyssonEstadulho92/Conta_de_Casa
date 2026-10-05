@@ -797,3 +797,20 @@ Decisão:
 - preservar `icon.svg` exclusivamente como identidade da aplicação.
 
 O objetivo é que navegação, ações, indicadores financeiros, Walli e diálogos tenham o mesmo peso visual e comportamento offline.
+
+
+## D-149 — desbloqueio usa composição frosted sobre fundo petróleo
+
+Decisão de UI/UX para o ecrã de PIN:
+
+- separar visualmente identidade da aplicação e superfície de autenticação;
+- usar fundo verde-petróleo de alto contraste e cartão translúcido claro;
+- manter o teclado PIN como controlo principal no iPhone;
+- aumentar os alvos numéricos para 70–74 px;
+- destacar Entrar como ação primária única;
+- manter Palavra-passe, Mostrar PIN, Alterar PIN e recuperação como ações secundárias;
+- não introduzir biometria, passkeys ou alterações criptográficas nesta mudança;
+- todos os ícones funcionais devem continuar a vir de `ui-icons.js`;
+- forced-colors e reduced-motion são requisitos de regressão.
+
+O objetivo é aproximar a implementação do protótipo aprovado sem comprometer segurança ou previsibilidade do fluxo existente.
