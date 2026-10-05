@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Conta de Casa — catálogo visual progressivo do Mercado (75-catalog3)
+ * Conta de Casa — catálogo visual progressivo e auditável do Mercado (76-market-polish1)
  *
  * Objetivo:
  * - apresentar categorias úteis antes de existir uma pesquisa manual;
@@ -11,7 +11,7 @@
  * - nunca escrever preços, quantidades, faturas ou estado financeiro.
  */
 (function installMarketVisualCatalog(root){
-  const REVISION='75-catalog3';
+  const REVISION='76-market-polish1';
   const DB_NAME='conta-de-casa-market-visual-catalog';
   const DB_VERSION=1;
   const PRODUCT_STORE='products';
@@ -60,6 +60,7 @@
   let backgroundTimer=0;
   let imageTimer=0;
   let mounting=false;
+  let libraryAuditBusy=false;
   let queryInFlight=false;
 
   function identity(value={}){
@@ -526,7 +527,66 @@
     if(typeof document==='undefined')return;
     const target=document.querySelector('#marketVisualCatalogStats');if(!target)return;
     const data=await stats();
-    target.textContent=`${data.count} produtos indexados · ${data.images} imagens validadas`;
+    target.textContent=`${data.count} produtos · ${data.images} com fotografia`;
+  }
+
+  function auditSummaryText(report,count=0){
+    if(!report)return count
+      ? `${count} fotografia${count===1?'':'s'} guardada${count===1?'':'s'}`
+      : 'Sem fotografias guardadas';
+    const healthy=Number(report.available||0);
+    const valid=Number(report.valid||0);
+    const unavailable=Number(report.unavailable||0);
+    const unchecked=Number(report.unchecked||0);
+    const cleaned=Number(report.removed||0);
+    const networkChecked=healthy+unavailable>0;
+    const parts=[networkChecked
+      ? `${healthy} disponível${healthy===1?'':'eis'}`
+      : `${valid} registo${valid===1?'':'s'} válido${valid===1?'':'s'}`];
+    if(unavailable)parts.push(`${unavailable} indisponíve${unavailable===1?'l':'is'}`);
+    if(!networkChecked&&unchecked)parts.push('por verificar online');
+    if(cleaned)parts.push(`${cleaned} removida${cleaned===1?'':'s'}`);
+    return parts.join(' · ');
+  }
+
+  async function renderLibraryHealth(report=null){
+    if(typeof document==='undefined')return;
+    const target=document.querySelector('#marketImageLibraryMetrics');
+    const panel=document.querySelector('#marketImageLibraryPanel');
+    if(!target||!panel)return;
+    let info=null;
+    try{info=await root.CDCMarketImageLibrary?.stats?.();}catch(_error){}
+    const effective=report||info?.lastAudit||null;
+    const count=Number(info?.count)||0;
+    target.textContent=auditSummaryText(effective,count);
+    panel.dataset.libraryHealth=effective&&Number(effective.unavailable||0)>0?'attention':'ok';
+    const button=panel.querySelector('[data-market-library-audit]');
+    if(button){
+      button.disabled=libraryAuditBusy;
+      button.setAttribute('aria-busy',String(libraryAuditBusy));
+      button.textContent=libraryAuditBusy?'A validar…':'Validar biblioteca';
+    }
+  }
+
+  async function auditImageLibrary(){
+    if(libraryAuditBusy)return;
+    const library=root.CDCMarketImageLibrary;
+    if(typeof library?.auditAll!=='function')return;
+    libraryAuditBusy=true;
+    await renderLibraryHealth();
+    try{
+      const report=await library.auditAll({
+        verifyNetwork:true,
+        pruneInvalid:true,
+        concurrency:4,
+        timeoutMs:6500
+      });
+      await renderLibraryHealth(report);
+      try{await root.CDCMarketPhotoLoader?.refresh?.();}catch(_error){}
+    }finally{
+      libraryAuditBusy=false;
+      await renderLibraryHealth();
+    }
   }
 
   function updateSelection(){
@@ -552,31 +612,51 @@
     const section=el('section','market-visual-catalog');section.id='marketVisualCatalog';
     const head=el('div','market-visual-catalog-head');
     const copy=el('div','market-visual-catalog-heading');
-    copy.append(el('span','market-visual-catalog-eyebrow','Catálogo visual'));
-    const title=el('h3','market-visual-catalog-title','Produtos por categoria');title.id='marketVisualCatalogTitle';copy.append(title);
-    copy.append(el('p','market-visual-catalog-subtitle','SKUs reais do Continente e Pingo Doce. Toque num produto para consultar o preço atual.'));
-    const refresh=el('button','market-visual-catalog-refresh','Atualizar');refresh.type='button';refresh.dataset.visualCatalogRefresh='1';
+    copy.append(el('span','market-visual-catalog-eyebrow','Mercado'));
+    const title=el('h3','market-visual-catalog-title','Produtos');title.id='marketVisualCatalogTitle';copy.append(title);
+    copy.append(el('p','market-visual-catalog-subtitle','Explore produtos reais por categoria. A fotografia só aparece quando a origem oficial é validada.'));
+    const refresh=el('button','market-visual-catalog-refresh','Atualizar produtos');refresh.type='button';refresh.dataset.visualCatalogRefresh='1';
     head.append(copy,refresh);
 
-    const categories=el('div','market-visual-category-strip');categories.setAttribute('aria-label','Categorias do catálogo visual');
+    const controls=el('div','market-visual-catalog-controls');
+    const stores=el('div','market-visual-store-filter');stores.setAttribute('aria-label','Filtrar produtos por mercado');
+    for(const [id,label] of [['all','Todos'],['continente','Continente'],['pingo-doce','Pingo Doce']]){
+      const button=el('button','market-visual-store',label);button.type='button';button.dataset.visualCatalogStore=id;button.setAttribute('aria-pressed','false');stores.append(button);
+    }
+    const statsNode=el('span','market-visual-catalog-stats','A preparar produtos…');statsNode.id='marketVisualCatalogStats';
+    controls.append(stores,statsNode);
+
+    const categories=el('div','market-visual-category-strip');categories.setAttribute('aria-label','Categorias de produtos');
     for(const category of CATEGORIES){
       const button=el('button','market-visual-category',category.label);button.type='button';button.dataset.visualCatalogCategory=category.id;button.setAttribute('aria-pressed','false');categories.append(button);
     }
 
-    const controls=el('div','market-visual-catalog-controls');
-    const stores=el('div','market-visual-store-filter');stores.setAttribute('aria-label','Filtrar catálogo por mercado');
-    for(const [id,label] of [['all','Todos'],['continente','Continente'],['pingo-doce','Pingo Doce']]){
-      const button=el('button','market-visual-store',label);button.type='button';button.dataset.visualCatalogStore=id;button.setAttribute('aria-pressed','false');stores.append(button);
-    }
-    const statsNode=el('span','market-visual-catalog-stats','A preparar catálogo…');statsNode.id='marketVisualCatalogStats';
-    controls.append(stores,statsNode);
     const grid=el('div','market-visual-catalog-grid');grid.id='marketVisualCatalogGrid';grid.setAttribute('aria-live','polite');
-    section.append(head,categories,controls,grid);
+
+    const libraryPanel=el('details','market-image-library-panel');libraryPanel.id='marketImageLibraryPanel';
+    const librarySummary=el('summary','market-image-library-summary');
+    const librarySummaryCopy=el('span','market-image-library-summary-copy');
+    librarySummaryCopy.append(el('strong','','Biblioteca de fotografias'));
+    const libraryMetrics=el('small','market-image-library-metrics','A verificar biblioteca…');libraryMetrics.id='marketImageLibraryMetrics';
+    librarySummaryCopy.append(libraryMetrics);
+    const libraryChevron=el('span','market-image-library-chevron','⌄');libraryChevron.setAttribute('aria-hidden','true');
+    librarySummary.append(librarySummaryCopy,libraryChevron);
+    const libraryBody=el('div','market-image-library-body');
+    const libraryNote=el('p','market-image-library-note','Valida todos os registos guardados neste dispositivo, remove entradas expiradas ou inválidas e testa a disponibilidade das fotografias oficiais.');
+    const libraryActions=el('div','market-image-library-actions');
+    const auditButton=el('button','market-image-library-audit','Validar biblioteca');auditButton.type='button';auditButton.dataset.marketLibraryAudit='1';
+    libraryActions.append(auditButton);
+    const retailerSlot=el('div','market-image-retailer-status');retailerSlot.id='marketImageRetailerStatus';
+    libraryBody.append(libraryNote,libraryActions,retailerSlot);
+    libraryPanel.append(librarySummary,libraryBody);
+
+    section.append(head,controls,categories,grid,libraryPanel);
     section.setAttribute('aria-labelledby','marketVisualCatalogTitle');
 
     const before=browser.querySelector('.market-browser-results-head');
     if(before)browser.insertBefore(section,before);else browser.append(section);
     updateSelection();
+    void renderLibraryHealth();
     return section;
   }
 
@@ -589,6 +669,10 @@
       updateSelection();
       await renderProducts();
       await renderStats();
+      try{
+        const metadataAudit=await root.CDCMarketImageLibrary?.auditAll?.({verifyNetwork:false,pruneInvalid:true});
+        await renderLibraryHealth(metadataAudit||null);
+      }catch(_error){await renderLibraryHealth();}
       const current=await listCategory(activeCategory,activeStore,4);
       if(current.length<4)void refreshCategory(activeCategory,{seeds:2});
       scheduleBackground(3000);
@@ -601,12 +685,18 @@
     const storeButton=event.target.closest?.('[data-visual-catalog-store]');
     if(storeButton){activeStore=['all','continente','pingo-doce'].includes(storeButton.dataset.visualCatalogStore)?storeButton.dataset.visualCatalogStore:'all';updateSelection();void renderProducts();return;}
     if(event.target.closest?.('[data-visual-catalog-refresh]')){void refreshCategory(activeCategory,{seeds:3});return;}
+    if(event.target.closest?.('[data-market-library-audit]')){void auditImageLibrary();return;}
     const productButton=event.target.closest?.('[data-visual-catalog-product]');
     if(productButton){void getProduct(productButton.dataset.visualCatalogProduct).then(record=>{if(record)activateLiveSearch(record);});}
   }
 
   function install(){
     document.addEventListener('click',onClick);
+    root.addEventListener?.('cdc:market-image-library-audit-progress',event=>{
+      const target=document.querySelector('#marketImageLibraryMetrics');
+      const detail=event?.detail||{};
+      if(target&&libraryAuditBusy)target.textContent=`A validar ${Number(detail.completed)||0}/${Number(detail.total)||0} fotografias…`;
+    });
     void mount();
     if(document.body&&!mutationObserver){
       mutationObserver=new MutationObserver(mutations=>{

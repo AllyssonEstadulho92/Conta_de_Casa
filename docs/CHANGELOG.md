@@ -2,6 +2,32 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-05: Mercado reorganizado e biblioteca de fotografias auditável
+
+### Interface
+
+- a área Mercado recebe uma autoridade visual final dedicada em `v76-product-pages.css`;
+- pesquisa, adicionar item, filtros, resumo, lista e grupos por categoria passam a usar espaçamento, raios e profundidade consistentes;
+- o modal **Adicionar produto** é reorganizado para separar pesquisa, origem, catálogo visual, resultados e informação auxiliar;
+- a explicação técnica da pesquisa passa a divulgação progressiva para não ocupar espaço permanentemente;
+- cartões de resultados mantêm fotografia, texto, preço e ação em posições previsíveis;
+- o catálogo visual passa para uma coluna horizontal legível em iPhones estreitos, evitando duas colunas comprimidas;
+- fotografia, loader, validação e estado **Sem fotografia** mantêm uma caixa estável para reduzir layout shift.
+
+### Biblioteca de fotografias
+
+- `market-image-library.js` passa para `76-image-library-audit1`;
+- todos os registos locais podem ser enumerados e auditados;
+- ao abrir o catálogo, a biblioteca faz validação estrutural integral e limpa entradas expiradas ou inválidas;
+- o painel **Biblioteca de fotografias** permite validar online todas as fotografias oficiais guardadas, com concorrência limitada e progresso visível;
+- o relatório distingue registos válidos, disponíveis, indisponíveis, não verificados, expirados, rejeitados e removidos;
+- fotografias indisponíveis não são eliminadas automaticamente por uma única falha de rede;
+- o estado específico da biblioteca Pingo Doce passa para o mesmo painel, reduzindo ruído visual.
+
+### Preservado
+
+Sem alterações a cálculos financeiros, valores estimados/reais, quantidade de itens, IndexedDB financeiro, PIN/cofre, cifragem, sincronização ou `STATE_VERSION`.
+
 ## 2026-10-05: auditoria visual transversal `76-visual-audit1`
 
 ### Problemas confirmados

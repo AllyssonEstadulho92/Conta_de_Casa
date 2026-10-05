@@ -87,7 +87,7 @@ try {
   assert.match(builtIndex, /<meta name="app-version" content="0\.76\.0"\s*\/>/);
   assert.match(builtIndex, /<meta name="app-build-id" content="(?:[0-9a-f]{7}|local)"\s*\/>/);
   assert.match(builtIndex, /v76-modern-ui\.css\?v=76-visual-audit1/);
-  assert.match(builtIndex, /v76-product-pages\.css\?v=76-walli-enhancements6/);
+  assert.match(builtIndex, /v76-product-pages\.css\?v=76-market-polish1/);
   assert.match(builtIndex, /render\.js\?v=76-budget-cash-separation3/);
   assert.match(builtIndex, /finance\.js\?v=76-budget-cash-separation3/);
   assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-visual-audit1/);

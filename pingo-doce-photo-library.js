@@ -11,7 +11,7 @@
  * - não ler/escrever preços, quantidades, faturas, cofre ou estado financeiro.
  */
 (function installPingoDocePhotoLibrary(root){
-  const REVISION='75-pd-photo1';
+  const REVISION='76-pd-photo-polish1';
   const DB_NAME='conta-de-casa-pingo-doce-photo-library';
   const DB_VERSION=1;
   const PRODUCT_STORE='products';
@@ -438,6 +438,7 @@
     const catalog=document.querySelector('#marketVisualCatalog');
     if(!catalog)return;
     const controls=catalog.querySelector('.market-visual-catalog-controls')||catalog;
+    const retailerSlot=catalog.querySelector('#marketImageRetailerStatus');
     const status=el('div','pingo-doce-photo-library-status');
     status.id='pingoDocePhotoLibraryStatus';
     const copy=el('div','pingo-doce-photo-library-copy');
@@ -449,7 +450,8 @@
     button.type='button';button.dataset.pingoDocePhotoSync='1';
     button.setAttribute('aria-label','Atualizar biblioteca de fotografias Pingo Doce');
     status.append(copy,button);
-    controls.insertAdjacentElement('afterend',status);
+    if(retailerSlot)retailerSlot.appendChild(status);
+    else controls.insertAdjacentElement('afterend',status);
     void renderStatus();
   }
 

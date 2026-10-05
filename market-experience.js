@@ -127,7 +127,7 @@
       </div>
       ${tabsHtml()}
       <div id="marketBrowserTabPanel" class="market-browser-tab-panel" role="tabpanel"></div>
-      <div class="market-source-notice" role="note">${svgIcon('info',21)}<p><strong>Pesquisa em dois mercados.</strong> Pingo Doce e Continente são consultados no momento através de cesta.pt. Para mostrar uma fotografia real de referência, o termo pesquisado pode também ser consultado no Open Food Facts. A fotografia só é usada quando existe correspondência forte; não são inventadas imagens nem preços.</p></div>
+      <details class="market-source-notice" role="note"><summary>${svgIcon('info',20)}<span>Como funciona a pesquisa</span></summary><p>Pingo Doce e Continente são consultados no momento através de cesta.pt. As fotografias só são apresentadas quando existe uma correspondência validada com uma origem permitida; não são inventadas imagens nem preços.</p></details>
       <div class="market-browser-results-head"><h3>Resultados</h3><span id="marketResultsMeta">Escreva pelo menos 2 caracteres</span></div>
       <div id="marketCatalogResults" class="market-catalog-results" aria-live="polite"></div>
     </div>`;
