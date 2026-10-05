@@ -340,11 +340,20 @@
 
   function targetFromCard(card){
     const id=identityFromCard(card);if(!id)return null;
-    const name=clean(card.querySelector('.market-product-copy h3')?.textContent||'',140);
-    const rawPack=clean(card.querySelector('.market-product-copy>p')?.textContent||'',100);
+    const prototypeCopy=card.querySelector('.market-prototype-result-copy');
+    const name=clean(
+      card?.dataset?.marketProductName||
+      prototypeCopy?.querySelector('strong')?.textContent||
+      card.querySelector('.market-product-copy h3')?.textContent||'',140
+    );
+    const rawPack=clean(
+      card?.dataset?.marketProductPack||
+      prototypeCopy?.querySelector('small')?.textContent||
+      card.querySelector('.market-product-copy>p')?.textContent||'',100
+    );
     const pack=rawPack.replace(/\s*·\s*(Pingo Doce|Continente)\s*$/i,'').trim();
     const sourceLink=card.querySelector('.market-result-source[href]');
-    const sourceUrl=safeProductUrl(sourceLink?.href||'',id.marketId,id.pid);
+    const sourceUrl=safeProductUrl(card?.dataset?.marketProductUrl||sourceLink?.href||'',id.marketId,id.pid);
     return {...id,name,pack,sourceUrl,label:id.marketId==='continente'?'Continente':'Pingo Doce'};
   }
 
