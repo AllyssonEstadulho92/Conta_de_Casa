@@ -15,7 +15,7 @@ const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
-assert.match(catalog,/75-catalog3/);
+assert.match(catalog,/76-market-polish1/);
 assert.match(catalog,/conta-de-casa-market-visual-catalog/);
 assert.match(catalog,/SESSION_QUERY_BUDGET=18/);
 assert.match(catalog,/DAILY_QUERY_BUDGET=48/);
@@ -70,13 +70,20 @@ assert.match(css,/@media\(max-width:430px\)/);
 assert.match(css,/@media\(max-width:350px\)/);
 assert.match(css,/object-fit:contain/);
 assert.match(css,/focus-visible/);
+assert.match(css,/76-market-catalog-polish1/,'catalog must expose the final market visual authority');
+assert.match(css,/\.market-image-library-panel/,'catalog must expose the local image-library audit panel');
+assert.match(css,/@media\(max-width:430px\)[\s\S]*\.market-visual-catalog-grid\{[\s\S]*grid-template-columns:minmax\(0,1fr\)/,'narrow iPhones must use one readable product column');
+assert.match(css,/\.market-visual-product-media img\{[\s\S]*object-fit:contain/,'product photography must stay inside a stable contain frame');
+assert.match(catalog,/marketImageLibraryPanel/);
+assert.match(catalog,/dataMarketLibraryAudit|dataset\.marketLibraryAudit|data-market-library-audit/);
+assert.match(catalog,/auditAll\(\{[\s\S]*verifyNetwork:true[\s\S]*concurrency:4/,'manual library audit must validate all stored official photos with bounded concurrency');
 
 const catalogSandbox={console,URL,Date,Map,Set,Promise,setTimeout,clearTimeout,AbortController};
 catalogSandbox.globalThis=catalogSandbox;
 vm.createContext(catalogSandbox);
 vm.runInContext(catalog,catalogSandbox,{filename:'market-visual-catalog.js'});
 assert.ok(catalogSandbox.CDCMarketVisualCatalog);
-assert.equal(catalogSandbox.CDCMarketVisualCatalog.revision,'75-catalog3');
+assert.equal(catalogSandbox.CDCMarketVisualCatalog.revision,'76-market-polish1');
 assert.equal(catalogSandbox.CDCMarketVisualCatalog.categories.length,12);
 assert.ok(catalogSandbox.CDCMarketVisualCatalog.categories.some(category=>category.label==='Bebidas'));
 assert.ok(catalogSandbox.CDCMarketVisualCatalog.categories.some(category=>category.label==='Lacticínios e ovos'));
@@ -145,7 +152,7 @@ assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-c
   assert.equal(missing,null);
   assert.equal(fallbackCalls,0,'failed exact catalog resolution must remain bounded and must not repeat the legacy resolver');
 
-  assert.match(prepare,/const CATALOG_REV = '75-catalog4'/);
+  assert.match(prepare,/const CATALOG_REV = '76-market-polish1'/);
   for(const asset of ['market-visual-catalog.css','market-catalog-image-resolver.js','market-visual-catalog.js'])assert.ok(prepare.includes(`'${asset}'`));
   for(const asset of ['./market-visual-catalog.css','./market-catalog-image-resolver.js','./market-visual-catalog.js'])assert.ok(sw.includes(`'${asset}'`));
 
@@ -153,9 +160,9 @@ assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-c
   try{
     execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
     const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-    assert.match(index,/market-visual-catalog\.css\?v=75-catalog4/);
-    assert.match(index,/market-catalog-image-resolver\.js\?v=75-catalog4/);
-    assert.match(index,/market-visual-catalog\.js\?v=75-catalog4/);
+    assert.match(index,/market-visual-catalog\.css\?v=76-market-polish1/);
+    assert.match(index,/market-catalog-image-resolver\.js\?v=76-market-polish1/);
+    assert.match(index,/market-visual-catalog\.js\?v=76-market-polish1/);
     assert.ok(index.indexOf('market-official-images.js')<index.indexOf('market-catalog-image-resolver.js'));
     assert.ok(index.indexOf('market-catalog-image-resolver.js')<index.indexOf('market-visual-catalog.js'));
     assert.ok(index.indexOf('market-visual-catalog.js')<index.indexOf('v64-runtime.js'));
@@ -164,5 +171,5 @@ assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-c
     fs.rmSync(dist,{recursive:true,force:true});
   }
 
-  console.log('Progressive visual market catalog, stable rendering and bounded official image resolver: OK');
+  console.log('Progressive visual market catalog, stable product cards, image-library audit and bounded official resolver: OK');
 })().catch(error=>{console.error(error);process.exitCode=1;});
