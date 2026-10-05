@@ -35,6 +35,7 @@ assert.match(js,/card\.insertBefore\(real,details\)/,'the existing real-price fi
 assert.match(js,/has-missing-real/);
 assert.match(js,/if\(hasMissing&&!group\.open\)group\.open=true/,'purchased items missing real price must not stay hidden in a collapsed group');
 assert.match(js,/Preço encontrado = estimativa/);
+assert.match(js,/if\(browser\.classList\.contains\('market-prototype-browser'\)\)return/,'legacy browser enhancements must not alter the approved prototype');
 assert.match(js,/Preço pesquisado/);
 assert.match(js,/market-flow-add-label/);
 assert.match(js,/CDCAssetLoader\?\.prepareImage/,'generic asset loader may be reused only for live-browser images');
