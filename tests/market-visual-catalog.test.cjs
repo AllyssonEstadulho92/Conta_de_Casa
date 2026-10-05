@@ -32,7 +32,7 @@ assert.match(catalog,/\$\{marketId\}\|\$\{pid\}/);
 assert.match(catalog,/createIndex\('categories','categories',\{unique:false,multiEntry:true\}\)/);
 assert.match(catalog,/market-visual-product-add/,'prototype catalog cards must expose the circular add/search action');
 assert.match(catalog,/dispatchEvent\(new Event\('input'/);
-assert.match(catalog,/browser\.querySelector\('#marketVisualCatalog'\)\)return/);
+assert.match(catalog,/document\.querySelector\('#marketCatalogViewHost'\)/,'catalog must only mount when its dedicated prototype host exists');
 assert.doesNotMatch(catalog,/grid\.replaceChildren\(\);/,'catalog refresh must not clear the visible grid before rebuilding cards');
 assert.match(catalog,/existingCards=new Map/);
 assert.match(catalog,/grid\.insertBefore\(card,cursor\)/);
