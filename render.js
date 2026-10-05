@@ -95,6 +95,84 @@ function renderPage(page) {
   updateAlertBadge();
 }
 
+function dashboardAlertItems(n = dashboardNumbers()) {
+  const items = [];
+  const add = (id,tone,title,description,actionLabel,page,amountCents=null,amountLead='',amountTrail='') => {
+    items.push({id,tone,title,description,actionLabel,page,amountCents,amountLead,amountTrail});
+  };
+  if (!n.hasAccountBalance) {
+    add('balance-unconfirmed','warning','Saldo bancário por confirmar','O saldo apresentado é uma estimativa baseada nos registos internos.','Atualizar saldo','planning');
+  }
+  if (n.hasAccountBalance && n.reconciliationDiff!==0) {
+    add('reconciliation','warning','Diferença de conciliação','O saldo da conta difere do saldo calculado pelos movimentos registados.','Rever saldo','planning',Math.abs(n.reconciliationDiff),'Diferença atual: ','.');
+  }
+  if (n.overdueCount) {
+    add('overdue','danger',`${n.overdueCount} fatura${n.overdueCount===1?'':'s'} em atraso`,'Reveja os pagamentos pendentes.','Ver faturas','bills',n.overdue,'Total em atraso: ','.');
+  }
+  if (n.criticalCount) {
+    add('critical-due','warning',`${n.criticalCount} vencimento${n.criticalCount===1?'':'s'} nas próximas 24 horas`,'Estes pagamentos exigem atenção imediata.','Ver vencimentos','bills');
+  }
+  if (n.projected < 0) {
+    add('negative-projection','danger','Saldo projetado negativo','As obrigações em aberto ultrapassam o saldo atual projetado.','Abrir planeamento','planning',Math.abs(n.projected),'Falta projetada: ','.');
+  }
+  return items;
+}
+
+function dashboardAlertDescriptionHtml(item) {
+  const amount = Number.isSafeInteger(item.amountCents)
+    ? `${esc(item.amountLead||'')}<strong data-money>${money(item.amountCents)}</strong>${esc(item.amountTrail||'')}`
+    : '';
+  const description = esc(item.description||'');
+  return [amount,description].filter(Boolean).join(' ');
+}
+
+function dashboardAlertPanelHtml(item) {
+  return `<div class="alert ${attr(item.tone)}"><span><strong>${esc(item.title)}</strong> ${dashboardAlertDescriptionHtml(item)}</span><button class="link-btn" type="button" data-go="${attr(item.page)}">${esc(item.actionLabel)}</button></div>`;
+}
+
+function alertCenterItemHtml(item) {
+  const severity=item.tone==='danger'?'Urgente':'Atenção';
+  return `<article class="alert-center-item ${attr(item.tone)}" role="listitem" data-alert-id="${attr(item.id)}">
+    <span class="alert-center-indicator" aria-hidden="true"></span>
+    <div class="alert-center-copy">
+      <div class="alert-center-item-head"><strong>${esc(item.title)}</strong><span class="alert-center-severity">${severity}</span></div>
+      <p>${dashboardAlertDescriptionHtml(item)}</p>
+    </div>
+    <button class="btn secondary alert-center-action" type="button" data-go="${attr(item.page)}">${esc(item.actionLabel)}</button>
+  </article>`;
+}
+
+function renderAlertCenter(items = dashboardAlertItems()) {
+  const list=$('#alertCenterList');
+  const summary=$('#alertCenterSummary');
+  if(!list||!summary)return;
+  const count=items.length;
+  summary.textContent=count
+    ? `${count} alerta${count===1?'':'s'} ativo${count===1?'':'s'} neste momento`
+    : 'Sem alertas ativos neste momento';
+  setHTML(list,count
+    ? items.map(alertCenterItemHtml).join('')
+    : '<div class="alert-center-empty"><strong>Está tudo em ordem</strong><p>Não existem alertas financeiros ativos para o mês selecionado.</p></div>');
+}
+
+function updateAlertBadge() {
+  const button=$('#notificationsBtn');
+  const badge=$('#alertBadge');
+  if(!button||!badge)return;
+  const items=dashboardAlertItems();
+  const count=items.length;
+  badge.hidden=count===0;
+  badge.textContent=count>99?'99+':String(count);
+  badge.dataset.count=String(count);
+  const label=count
+    ? `Centro de Alertas, ${count} alerta${count===1?'':'s'} ativo${count===1?'':'s'}`
+    : 'Centro de Alertas, sem alertas ativos';
+  button.setAttribute('aria-label',label);
+  button.title=label;
+  const dialog=$('#alertCenterDialog');
+  if(dialog?.open)renderAlertCenter(items);
+}
+
 function renderDashboard() {
   const n = dashboardNumbers();
   const paidBills = n.paymentTotal;
@@ -113,15 +191,8 @@ function renderDashboard() {
     ['Próximos 7 dias',n.next7,`${n.next7Count} vencimento${n.next7Count===1?'':'s'}`]
   ];
   setHTML('#dashboardSecondary', secondaryMetrics.map(([label,value,sub])=>`<article class="dashboard-secondary-card"><div><span>${esc(label)}</span><small>${esc(sub)}</small></div><strong data-money>${money(value)}</strong></article>`).join(''));
-  const alerts = [];
-  const overdueCount = n.overdueCount;
-  const critical = n.criticalCount;
-  if (!n.hasAccountBalance) alerts.push(`<div class="alert warning"><span><strong>Saldo bancário ainda não confirmado.</strong> O valor mostrado é apenas uma estimativa pelos registos internos.</span><button class="link-btn" data-go="planning">Atualizar</button></div>`);
-  if (n.hasAccountBalance && n.reconciliationDiff!==0) alerts.push(`<div class="alert warning"><span><strong>Diferença de conciliação: <span data-money>${money(Math.abs(n.reconciliationDiff))}</span>.</strong> O saldo da conta difere do saldo calculado pelos movimentos registados.</span><button class="link-btn" data-go="planning">Rever</button></div>`);
-  if (overdueCount) alerts.push(`<div class="alert danger"><span><strong>${overdueCount} fatura${overdueCount===1?'':'s'} em atraso</strong> — reveja os pagamentos pendentes.</span><button class="link-btn" data-go="bills">Abrir</button></div>`);
-  if (critical) alerts.push(`<div class="alert warning"><span><strong>${critical} vencimento${critical===1?'':'s'} nas próximas 24 horas.</strong></span><button class="link-btn" data-go="bills">Ver</button></div>`);
-  if (n.projected < 0) alerts.push(`<div class="alert danger"><span>O saldo projetado está negativo em <strong data-money>${money(Math.abs(n.projected))}</strong>.</span><button class="link-btn" data-go="planning">Planear</button></div>`);
-  setHTML('#alertsPanel', alerts.join(''));
+  const alerts = dashboardAlertItems(n);
+  setHTML('#alertsPanel', alerts.map(dashboardAlertPanelHtml).join(''));
   const priorityBills = n.bills.filter(b=>{const days=billDaysUntil(b);return remainingForBill(b)>0&&Number.isFinite(days);}).sort(compareBillsByDue).slice(0,6);
   setHTML('#upcomingBills', priorityBills.length ? priorityBills.map((bill,index)=>dashboardUpcomingBillHtml(bill,index,priorityBills.length)).join('') : empty('Sem faturas pendentes neste mês.'));
   renderCategoryBars('#categoryBars', categoryTotals());
@@ -520,4 +591,3 @@ async function renderDiagnostics() {
 function renderSettings() {
   $('#profileName').value=appState.settings.profileName||''; $('#currencySelect').value=appState.settings.currency||'EUR'; $('#themeSelect').value=appState.settings.theme||'light';
 }
-function updateAlertBadge(){ const n=dashboardNumbers(); const c=n.overdueCount+n.criticalCount; $('#alertBadge').hidden=!c; }
