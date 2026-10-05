@@ -80,8 +80,8 @@
   function marketMark(market,size='large'){
     const m=typeof market==='string'?marketById(market):market;
     const logo=m.id==='pingo-doce'
-      ? '<span class="market-logo-pingo"><b>Pingo</b><b>Doce</b></span>'
-      : '<span class="market-logo-continente"><i aria-hidden="true">C</i><b>CONTINENTE</b></span>';
+      ? '<span class="market-logo-pingo"><strong>Pingo</strong><strong>Doce</strong></span>'
+      : '<span class="market-logo-continente"><span aria-hidden="true">C</span><strong>CONTINENTE</strong></span>';
     return `<span class="market-brand-mark ${attr(m.tone)} ${attr(size)} market-brand-logo" aria-hidden="true">${logo}</span>`;
   }
 
@@ -172,7 +172,7 @@
 
   function browserShellHtml(){
     return `<div class="market-browser market-prototype-browser" data-market-price-mode="live">
-      <section id="marketPrototypeSearchView" class="market-prototype-view" data-market-prototype-view="search">
+      <div id="marketPrototypeSearchView" class="market-prototype-view" data-market-prototype-view="search">
         <div class="market-browser-search-row">
           <div class="market-browser-search">${svgIcon('search',22)}<input id="marketCatalogSearch" type="search" value="" placeholder="Pesquisar produto..." autocomplete="off" aria-label="Pesquisar produto"><button class="market-search-clear" type="button" data-market-search-clear aria-label="Limpar pesquisa" hidden>${svgIcon('close',19)}</button></div>
         </div>
@@ -190,8 +190,8 @@
           <label class="market-prototype-sort"><span class="sr-only">Ordenar resultados</span><select id="marketResultSort" aria-label="Ordenar resultados"><option value="relevance">↕ Mais relevantes</option><option value="price-asc">Preço menor</option><option value="price-desc">Preço maior</option></select></label>
         </div>
         <div id="marketCatalogResults" class="market-catalog-results" aria-live="polite"></div>
-      </section>
-      <section id="marketPrototypeSubview" class="market-prototype-view market-prototype-subview" data-market-prototype-view="subview" hidden></section>
+      </div>
+      <div id="marketPrototypeSubview" class="market-prototype-view market-prototype-subview" data-market-prototype-view="subview" hidden></div>
     </div>`;
   }
 
@@ -363,7 +363,7 @@
         <span class="market-prototype-result-copy">
           <strong>${esc(product.name)}</strong>
           <small>${esc(product.pack||'')}</small>
-          <b class="market-prototype-result-price" data-money>${money(product.priceCents)}</b>
+          <strong class="market-prototype-result-price" data-money>${money(product.priceCents)}</strong>
           <span class="market-prototype-result-store">${marketMark(market,'tiny')}<span>${esc(market.name)}</span></span>
         </span>
       </button>
@@ -591,13 +591,13 @@
       const image=item.imageUrl?`<img src="${attr(item.imageUrl)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">`:`<span>${svgIcon('image',19)}</span>`;
       return `<article class="market-library-row">
         <span class="market-library-thumb">${image}</span>
-        <span class="market-library-copy"><strong>${esc(item.name||'Produto')}</strong><small>${esc(market.name)} · PID ${esc(item.pid||'—')}</small><span class="market-library-status ${meta.tone}"><b>${meta.symbol}</b>${meta.label}</span></span>
+        <span class="market-library-copy"><strong>${esc(item.name||'Produto')}</strong><small>${esc(market.name)} · PID ${esc(item.pid||'—')}</small><span class="market-library-status ${meta.tone}"><strong>${meta.symbol}</strong>${meta.label}</span></span>
         ${svgIcon('chevron',18)}
       </article>`;
     }).join(''):`<div class="market-library-empty"><strong>Sem fotografias nesta vista</strong><p>A biblioteca não tem registos com este estado.</p></div>`;
 
     setHTML(root,`<div class="market-library-view">
-      <section class="market-library-summary">
+      <div class="market-library-summary">
         <div class="market-library-summary-title"><span class="market-library-summary-icon">${svgIcon('image',23)}</span><span><strong>${Number(stats.count)||records.length} fotografias guardadas</strong><small>Última validação: ${esc(formatAuditDate(effective?.checkedAt))}</small></span></div>
         <div class="market-library-metrics">
           <article class="valid"><strong>${validCount}</strong><span>válidas</span></article>
@@ -605,7 +605,7 @@
           <article class="expired"><strong>${expiredCount}</strong><span>expiradas</span></article>
         </div>
         <button class="market-library-validate" type="button" data-market-library-audit>${svgIcon('refresh',19)}<span>Validar todas</span></button>
-      </section>
+      </div>
       <div class="market-library-filters" role="group" aria-label="Filtrar biblioteca">
         ${[['all','Todas'],['problem','Com problema'],['expired','Expiradas']].map(([id,label])=>`<button type="button" class="${libraryFilter===id?'active':''}" data-market-library-filter="${id}" aria-pressed="${libraryFilter===id}">${label}</button>`).join('')}
       </div>
@@ -658,15 +658,15 @@
         <div class="market-product-stepper"><button type="button" data-market-detail-quantity="-1" aria-label="Diminuir quantidade">${svgIcon('minus',18)}</button><strong id="marketDetailQuantity">${detailQuantity}</strong><button type="button" data-market-detail-quantity="1" aria-label="Aumentar quantidade">${svgIcon('plus',18)}</button></div>
       </div>
       <button class="market-product-detail-add" type="button" data-market-detail-add="${attr(product.id)}">${svgIcon('cart',19)}<span>Adicionar à lista</span></button>
-      <section class="market-product-detail-info">
-        <h4>Informações</h4>
-        <dl>
-          <div><dt>Mercado</dt><dd>${esc(market.name)}</dd></div>
-          <div><dt>Categoria</dt><dd>${esc(category)}</dd></div>
-          <div><dt>Origem da imagem</dt><dd class="${product.imageUrl?'valid':''}">${product.imageUrl?'✓ ':''}${esc(imageOrigin)}</dd></div>
-          <div><dt>PID</dt><dd>${esc(product.pid||product.productCode||'—')}</dd></div>
-        </dl>
-      </section>
+      <div class="market-product-detail-info">
+        <h3>Informações</h3>
+        <div class="market-product-detail-data">
+          <div><span class="market-product-detail-label">Mercado</span><span class="market-product-detail-value">${esc(market.name)}</span></div>
+          <div><span class="market-product-detail-label">Categoria</span><span class="market-product-detail-value">${esc(category)}</span></div>
+          <div><span class="market-product-detail-label">Origem da imagem</span><span class="market-product-detail-value ${product.imageUrl?'valid':''}">${product.imageUrl?'✓ ':''}${esc(imageOrigin)}</span></div>
+          <div><span class="market-product-detail-label">PID</span><span class="market-product-detail-value">${esc(product.pid||product.productCode||'—')}</span></div>
+        </div>
+      </div>
     </div>`;
   }
 
