@@ -2462,7 +2462,10 @@ html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototyp
   grid-template-columns:44px minmax(0,1fr) 44px!important;
   align-items:center!important;
   gap:8px!important;
+  margin:0!important;
   padding:15px 18px!important;
+  box-sizing:border-box!important;
+  overflow:visible!important;
   border:0!important;
   background:linear-gradient(105deg,#07555d,#087b78)!important;
   color:#fff!important;
@@ -2489,6 +2492,10 @@ html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototyp
 html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .dialog-head>.dialog-close{
   grid-column:1!important;
   grid-row:1!important;
+  position:static!important;
+  inset:auto!important;
+  transform:none!important;
+  margin:0!important;
   width:42px!important;
   height:42px!important;
   min-width:42px!important;
@@ -2500,6 +2507,10 @@ html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototyp
 html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-prototype-header-action{
   grid-column:3!important;
   grid-row:1!important;
+  position:static!important;
+  inset:auto!important;
+  transform:none!important;
+  margin:0!important;
   width:42px!important;
   height:42px!important;
   min-width:42px!important;
@@ -2878,20 +2889,65 @@ html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototyp
   font-variant-numeric:tabular-nums!important;
 }
 html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-prototype-result-store{
+  min-width:0!important;
+  min-height:18px!important;
   display:flex!important;
   align-items:center!important;
   gap:5px!important;
+  overflow:hidden!important;
   color:var(--v76-muted)!important;
   font-size:.65rem!important;
+  line-height:1.2!important;
 }
 html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-brand-mark.tiny{
-  width:15px!important;
-  height:15px!important;
-  min-width:15px!important;
+  width:16px!important;
+  height:16px!important;
+  min-width:16px!important;
+  min-height:16px!important;
   padding:0!important;
-  border-radius:4px!important;
-  font-size:4px!important;
+  border-radius:50%!important;
+  font-size:0!important;
+  line-height:1!important;
+  overflow:hidden!important;
+  box-shadow:none!important;
 }
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-brand-mark.tiny :is(.market-logo-pingo,.market-logo-continente){
+  width:16px!important;
+  height:16px!important;
+  min-width:16px!important;
+  min-height:16px!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:50%!important;
+  box-shadow:none!important;
+  font-size:0!important;
+  line-height:1!important;
+  overflow:hidden!important;
+}
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-brand-mark.tiny .market-logo-pingo{
+  background:#087638!important;
+  color:#fff!important;
+}
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-brand-mark.tiny .market-logo-continente{
+  background:#e30613!important;
+  color:#fff!important;
+}
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-brand-mark.tiny :is(.market-logo-pingo,.market-logo-continente)>*{
+  display:none!important;
+}
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-brand-mark.tiny .market-logo-pingo::before,
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-brand-mark.tiny .market-logo-continente::before{
+  display:block!important;
+  color:#fff!important;
+  font-size:10px!important;
+  line-height:16px!important;
+  font-weight:850!important;
+  text-align:center!important;
+}
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-brand-mark.tiny .market-logo-pingo::before{content:"P"!important}
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-brand-mark.tiny .market-logo-continente::before{content:"C"!important}
 html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-prototype-result-add{
   width:38px!important;
   height:38px!important;
@@ -3466,3 +3522,7 @@ html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototyp
 html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-prototype-browser>.market-flow-estimate-note{
   display:none!important;
 }
+
+
+/* 76-market-mobile-visual-fix1 — correções observadas em Safari/iPhone:
+   cabeçalho dentro do viewport e marcas compactas sem extravasar os cartões. */
