@@ -13,6 +13,7 @@ const resolver=read('market-catalog-image-resolver.js');
 const css=read('market-visual-catalog.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
 assert.match(catalog,/75-catalog3/);
 assert.match(catalog,/conta-de-casa-market-visual-catalog/);
@@ -146,7 +147,6 @@ assert.equal(resolverSandbox.CDCOfficialMarketImages.catalogDirectResolver,'75-c
 
   assert.match(prepare,/const CATALOG_REV = '75-catalog4'/);
   for(const asset of ['market-visual-catalog.css','market-catalog-image-resolver.js','market-visual-catalog.js'])assert.ok(prepare.includes(`'${asset}'`));
-  assert.match(sw,/image-library1-catalog4/);
   for(const asset of ['./market-visual-catalog.css','./market-catalog-image-resolver.js','./market-visual-catalog.js'])assert.ok(sw.includes(`'${asset}'`));
 
   const dist=path.join(ROOT,'dist');
