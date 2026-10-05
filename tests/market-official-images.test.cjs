@@ -11,6 +11,7 @@ const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const js=read('market-official-images.js');
 const policy=read('market-retailer-image-policy.js');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 const prepare=read('scripts/prepare-pages.cjs');
 
 assert.match(js,/bridge de imagens oficiais do Mercado \(v61\)/);
@@ -71,8 +72,6 @@ assert.equal(parsed[0].sourceUrl,pingoProduct);
 assert.equal(parsed[1].pid,'8167440');
 assert.equal(parsed[1].sourceUrl,continenteProduct);
 
-assert.match(sw,/architecture-consolidation1-retire-v74-runtime1/);
-assert.match(sw,/retire-assets1/);
 for(const asset of ['./market-retailer-image-policy.js','./market-official-images.js','./v64-runtime.js','./market-shopping-focus.js','./mobile-menu-toggle.js','./v75-architecture.css','./v76-planning-more.css','./v75-architecture.js'])assert.ok(sw.includes(`'${asset}'`));
 for(const retired of ['./v74-experience.css','./v74-experience.js','./v75-market-featured.css','./v75-market-featured.js'])assert.ok(!sw.includes(`'${retired}'`),`${retired} must not be cached`);
 assert.ok(!sw.includes("'./v64-runtime.css'"));
