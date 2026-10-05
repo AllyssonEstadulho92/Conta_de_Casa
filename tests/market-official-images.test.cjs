@@ -20,6 +20,7 @@ assert.match(js,/\.market-result-source/);
 assert.match(js,/data-market-product-card/);
 assert.match(js,/marketProductName/,'official image bridge must read stable prototype product metadata');
 assert.match(js,/market-prototype-result-copy/,'official image bridge must remain compatible with the approved prototype cards');
+assert.match(js,/marketProductUrl/,'official image bridge must prefer the exact retailer URL carried by the current card');
 assert.match(js,/parseCardId/);
 assert.match(js,/safeProductUrl/);
 assert.match(js,/safeOfficialImageUrl/);
