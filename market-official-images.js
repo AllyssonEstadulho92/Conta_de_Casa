@@ -216,6 +216,8 @@
   }
 
   async function findRecord(target){
+    const direct=safeProductUrl(target?.sourceUrl||'',target.marketId,target.pid);
+    if(direct)return {marketId:target.marketId,pid:target.pid,sourceUrl:direct,label:target.label};
     const bulk=await catalogForCurrentQuery();
     const exact=bulk.get(`${target.marketId}|${target.pid}`);
     if(exact)return exact;
@@ -262,7 +264,8 @@
     );
     const pack=rawPack.replace(/\s*·\s*(Pingo Doce|Continente)\s*$/i,'').trim();
     if(!name)return null;
-    return {...identity,name,pack,label:identity.marketId==='continente'?'Continente':'Pingo Doce',cardId:clean(card.dataset.marketProductCard,100)};
+    const sourceUrl=safeProductUrl(card?.dataset?.marketProductUrl||'',identity.marketId,identity.pid);
+    return {...identity,name,pack,sourceUrl,label:identity.marketId==='continente'?'Continente':'Pingo Doce',cardId:clean(card.dataset.marketProductCard,100)};
   }
 
   function queued(task){return new Promise((resolve,reject)=>{queue.push({task,resolve,reject});runQueue();});}
