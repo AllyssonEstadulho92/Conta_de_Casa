@@ -505,7 +505,7 @@
     );
     const pack=rawPack.replace(/\s*·\s*(Pingo Doce|Continente)\s*$/i,'').trim();
     const id=clean(card.dataset.marketProductCard||'',100),idMatch=/^cesta-(continente|pingo-doce)-(.+)$/.exec(id);
-    const sourceUrl=safeRetailerProductUrl(card.querySelector('.market-product-source[href]')?.href||'');
+    const sourceUrl=safeRetailerProductUrl(card?.dataset?.marketProductUrl||card.querySelector('.market-product-source[href]')?.href||'');
     const desc=retailerDescriptor(sourceUrl);
     return {name,pack,category:'',code:'',marketId:desc?.marketId||idMatch?.[1]||'',retailerProductId:desc?.pid||clean(idMatch?.[2]||'',32),retailerUrl:sourceUrl,sourceUrl};
   }
