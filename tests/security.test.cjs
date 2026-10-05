@@ -32,6 +32,7 @@ const context = vm.createContext({
   RegExp,
   Error,
   Promise,
+  URL,
   atob,
   btoa,
   Storage: StorageMock,
