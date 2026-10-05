@@ -23,7 +23,7 @@ function contrast(a,b){
   return (Math.max(one,two)+.05)/(Math.min(one,two)+.05);
 }
 
-assert.match(shell,/Conta de Casa v76 — 76-mobile-shell3/);
+assert.match(shell,/Conta de Casa v76 — 76-visual-audit1/);
 assert.match(shell,/76-full-page-audit1/);
 assert.match(shell,/76-page-polish1/);
 assert.match(shell,/76-shell-coherence1/,'final mobile shell must contain the screenshot-driven shell consolidation');
@@ -106,8 +106,8 @@ assert.match(shell,/prefers-reduced-motion:reduce/);
 assert.match(shell,/forced-colors:active/);
 assert.equal(pkg.version,'0.76.0');
 assert.match(prepare,/const BUILD = 'v76'/);
-assert.match(prepare,/const MODERN_UI_REV = '76-modern-ui2'/);
-assert.match(prepare,/const MOBILE_SHELL_REV = '76-mobile-shell3'/);
+assert.match(prepare,/const MODERN_UI_REV = '76-visual-audit1'/);
+assert.match(prepare,/const MOBILE_SHELL_REV = '76-visual-audit1'/);
 assert.match(prepare,/v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/);
 assert.ok(sw.includes("'./v76-mobile-shell.css'"));
 
@@ -117,8 +117,8 @@ try{
   const builtIndex=read('dist/index.html');
   assert.match(builtIndex,/name="app-version" content="0\.76\.0"/);
   assert.match(builtIndex,/name="app-build" content="v76"/);
-  assert.match(builtIndex,/v76-modern-ui\.css\?v=76-modern-ui2/);
-  assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-mobile-shell3/);
+  assert.match(builtIndex,/v76-modern-ui\.css\?v=76-visual-audit1/);
+  assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-visual-audit1/);
   assert.ok(builtIndex.indexOf('v76-modern-ui.css')<builtIndex.indexOf('v76-mobile-shell.css'),'mobile shell must remain the final mobile shell authority');
   const builtShell=read('dist/v76-mobile-shell.css');
   assert.match(builtShell,/76-shell-coherence1/);
@@ -129,4 +129,7 @@ try{
   fs.rmSync(dist,{recursive:true,force:true});
 }
 
+assert.match(shell,/76-visual-audit1 — enquadramento móvel alinhado/,'mobile shell must expose the final visual audit contract');
+assert.match(shell,/body \.mobile-nav\{[\s\S]*backdrop-filter:blur\(18px\)/,'mobile dock must share the final restrained surface treatment');
+assert.match(shell,/\.nav-drawer-shell\{[\s\S]*linear-gradient\(180deg/,'drawer must share the final surface language');
 console.log('v76 mobile shell: compact safe-area-aware header, neutral drawer, readable five-destination dock and ten-route responsive contracts: OK');
