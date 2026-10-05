@@ -13,6 +13,7 @@ const shell=read('v76-mobile-shell.css');
 const modern=read('v76-modern-ui.css');
 const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
+assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
 // Architecture contract: feature CSS must not own the application viewport.
 assert.doesNotMatch(legacyMobile,/\.app-shell\s*\{/,'mobile-layout.css must not own .app-shell geometry');
@@ -58,9 +59,6 @@ const shellInjection=prepare.indexOf('v76-mobile-shell.css?v=${MOBILE_SHELL_REV}
 assert.ok(modernInjection>=0 && shellInjection>modernInjection,'mobile shell must load after the visual design system');
 
 // Component-system and shell architecture changes must invalidate the installed PWA cache.
-assert.match(sw,/modern-ui2/);
-assert.match(sw,/ui-components1/);
-assert.match(sw,/architecture-baseline1/);
 assert.ok(sw.includes("'./mobile-layout.css'"));
 assert.ok(sw.includes("'./v76-mobile-shell.css'"));
 
