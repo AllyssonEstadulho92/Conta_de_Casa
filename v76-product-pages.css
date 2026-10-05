@@ -3019,16 +3019,16 @@ html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototyp
 html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info{
   padding-top:4px!important;
 }
-html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info h4{
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info h3{
   margin:0 0 8px!important;
   font-size:.84rem!important;
   font-weight:780!important;
 }
-html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info dl{
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info .market-product-detail-data{
   margin:0!important;
   border-top:1px solid var(--v76-border)!important;
 }
-html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info dl>div{
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info .market-product-detail-data>div{
   min-height:38px!important;
   display:flex!important;
   align-items:center!important;
@@ -3036,14 +3036,14 @@ html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototyp
   gap:14px!important;
   border-bottom:1px solid var(--v76-border)!important;
 }
-html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info dt,
-html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info dd{
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info .market-product-detail-label,
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info .market-product-detail-value{
   margin:0!important;
   font-size:.7rem!important;
 }
-html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info dt{color:var(--v76-muted)!important}
-html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info dd{color:var(--v76-text)!important;text-align:right!important}
-html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info dd.valid{color:var(--v76-success)!important}
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info .market-product-detail-label{color:var(--v76-muted)!important}
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info .market-product-detail-value{color:var(--v76-text)!important;text-align:right!important}
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-product-detail-info .market-product-detail-value.valid{color:var(--v76-success)!important}
 
 /* Explorar catálogo. */
 html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-prototype-catalog-host{
@@ -3374,7 +3374,7 @@ html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototyp
   font-size:.64rem!important;
   font-weight:680!important;
 }
-html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-library-status b{
+html.cdc-v75 #formDialog[data-mode="market-browser"].market-add-product-prototype .market-library-status strong{
   width:15px!important;
   height:15px!important;
   display:grid!important;
