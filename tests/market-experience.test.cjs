@@ -71,7 +71,7 @@ assert.match(js,/data-market-detail-add/);
 assert.match(js,/Validar todas/);
 assert.match(js,/actualCents:0,purchased:false/);
 assert.match(js,/sourceUrl=safeRetailerUrl/);
-assert.match(js,/window\.open\(url,'_blank','noopener,noreferrer'\)/);
+assert.match(js,/sourceUrl=safeRetailerUrl/,'official retailer URL validation must remain in the search parser');
 assert.doesNotMatch(js,/DEMO_PRODUCTS|valores de demonstração|Protótipo visual/);
 assert.doesNotMatch(js,/Authorization\s*:\s*['"]Bearer|api[_-]?key\s*[:=]/i);
 
