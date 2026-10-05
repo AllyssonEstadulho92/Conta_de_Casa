@@ -2,6 +2,21 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-05: identidade dedicada Conta de Casa
+
+### Alteração
+
+- `icon.svg` passa a usar a nova marca dedicada da aplicação: casa em teal/verde, telhado mint e moeda central;
+- a marca adota profundidade neomórfica suave, mantendo a paleta já usada pelo produto;
+- cofre e sidebar reutilizam o mesmo `icon.svg`, preservando a regra de uma única identidade;
+- o glyph legado `⌂` deixa de existir no markup da marca;
+- o texto de apoio passa para **Suas finanças em casa**, alinhado com a identidade aprovada;
+- o manifesto PWA continua a usar o mesmo asset local e a cache determinística por build garante a entrega da nova marca.
+
+### Preservado
+
+Sem alteração de cálculos financeiros, `STATE_VERSION`, IndexedDB, PIN/cofre, cifragem, sincronização, scanner, Mercado ou lógica de navegação.
+
 ## 2026-10-05: `76-deterministic-cache1`: cache PWA identificada pelo build
 
 ### Problema confirmado

@@ -57,9 +57,14 @@ assert.match(js,/MutationObserver/);
 assert.doesNotMatch(js,/https?:\/\//);
 assert.doesNotMatch(js,/[⌂◉⌁☼☾×]/);
 
-assert.match(iconSvg,/fill="#087B78"/);
-assert.match(iconSvg,/stroke="#FFFFFF"/);
-assert.doesNotMatch(iconSvg,/linearGradient|radialGradient/);
+assert.match(iconSvg,/aria-label="Conta de Casa"/);
+assert.match(iconSvg,/linearGradient id="house"/,'brand mark must preserve the teal house gradient');
+assert.match(iconSvg,/linearGradient id="roof"/,'brand mark must preserve the mint roof gradient');
+assert.match(iconSvg,/radialGradient id="coin"/,'brand mark must preserve the raised finance coin');
+assert.match(iconSvg,/fill="#F4F8F8"/,'brand tile must stay aligned with the application background');
+assert.match(iconSvg,/>\$<\/text>/,'brand mark must retain the dedicated home-finance symbol');
+assert.match(iconSvg,/feDropShadow/,'brand mark must retain its soft neumorphic depth');
+assert.doesNotMatch(iconSvg,/(?:href|xlink:href)="https?:\/\//,'brand asset must not load external resources');
 assert.doesNotMatch(iconSvg,/leaf/i);
 
 assert.match(css,/Conta de Casa v56/);
@@ -104,6 +109,9 @@ assert.match(css,/@media\(max-width:820px\)[\s\S]*\.vault-key,.vault-key-spacer\
 assert.match(css,/\.vault-enter-btn\{[\s\S]*linear-gradient/);
 assert.match(architecture,/\.vault-keypad\{display:grid!important;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
 assert.match(index,/class="brand brand-large vault-brand"/);
+assert.doesNotMatch(index,/<span class="brand-mark">⌂<\/span>/,'legacy house glyph must not remain in the visible brand');
+assert.match(index,/Suas finanças em casa · cofre privado/,'vault brand must use the dedicated Conta de Casa tagline');
+assert.match(index,/Suas finanças em casa<\/small>/,'sidebar brand must use the dedicated Conta de Casa tagline');
 assert.match(index,/id="vaultUnlockHint"/);
 assert.match(index,/aria-describedby="vaultUnlockHint"/);
 assert.match(index,/class="vault-enter-label">Entrar<\/span><span class="vault-enter-arrow"/,'PIN submit action must expose the prototype trailing icon slot');
