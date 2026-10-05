@@ -314,6 +314,20 @@ async function deleteBillEnteredByMistake(id) {
   return true;
 }
 
+function openAlertCenter() {
+  const dialog=$('#alertCenterDialog');
+  if(!dialog)return;
+  renderAlertCenter();
+  if(!dialog.open)dialog.showModal();
+  $('#notificationsBtn')?.setAttribute('aria-expanded','true');
+}
+
+function closeAlertCenter() {
+  const dialog=$('#alertCenterDialog');
+  if(dialog?.open)dialog.close();
+  $('#notificationsBtn')?.setAttribute('aria-expanded','false');
+}
+
 function wireEvents(){
   if (eventsWired) return;
   eventsWired = true;
@@ -556,7 +570,15 @@ function wireEvents(){
   $('#lockBtn').addEventListener('click',()=>lockApp('manual')); $('#drawerLockBtn').addEventListener('click',()=>lockApp('manual')); $('#securityLockBtn').addEventListener('click',()=>lockApp('manual'));
   $('#exportBackupBtn').addEventListener('click',exportBackup); $('#importBackupInput').addEventListener('change',async e=>{try{if(e.target.files[0])await importBackup(e.target.files[0]);}catch(err){$('#backupMessage').textContent=safeUserError(err);$('#backupMessage').className='form-message error';}finally{e.target.value='';}});
   $('#resetDataBtn').addEventListener('click',async()=>{if(confirm('ATENÇÃO: isto apaga definitivamente o cofre e todos os dados deste dispositivo. Continuar?')){await idbClearAll();location.reload();}});
-  $('#notificationsBtn').addEventListener('click',()=>{showPage('dashboard');toast('Os alertas importantes aparecem no topo do Início.');});
+  $('#notificationsBtn').addEventListener('click',openAlertCenter);
+  const alertCenterDialog=$('#alertCenterDialog');
+  alertCenterDialog?.addEventListener('click',e=>{
+    if(e.target===alertCenterDialog){closeAlertCenter();return;}
+    if(e.target.closest('[data-close-alert-center]')){e.preventDefault();closeAlertCenter();return;}
+    if(e.target.closest('[data-go]'))closeAlertCenter();
+  });
+  alertCenterDialog?.addEventListener('cancel',e=>{e.preventDefault();closeAlertCenter();});
+  alertCenterDialog?.addEventListener('close',()=>$('#notificationsBtn')?.setAttribute('aria-expanded','false'));
   window.addEventListener('focus',syncMonthRollover);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncMonthRollover();});
   setInterval(syncMonthRollover,MONTH_ROLLOVER_INTERVAL_MS);
