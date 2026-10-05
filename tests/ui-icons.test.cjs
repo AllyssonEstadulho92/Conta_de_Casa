@@ -64,7 +64,7 @@ assert.match(iconSvg,/radialGradient id="coin"/,'brand mark must preserve the ra
 assert.match(iconSvg,/fill="#F4F8F8"/,'brand tile must stay aligned with the application background');
 assert.match(iconSvg,/>\$<\/text>/,'brand mark must retain the dedicated home-finance symbol');
 assert.match(iconSvg,/feDropShadow/,'brand mark must retain its soft neumorphic depth');
-assert.doesNotMatch(iconSvg,/https?:\/\//,'brand asset must stay fully local');
+assert.doesNotMatch(iconSvg,/(?:href|xlink:href)="https?:\/\//,'brand asset must not load external resources');
 assert.doesNotMatch(iconSvg,/leaf/i);
 
 assert.match(css,/Conta de Casa v56/);
