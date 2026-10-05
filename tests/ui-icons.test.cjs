@@ -8,6 +8,7 @@ const css=fs.readFileSync('ui-icons.css','utf8');
 const design=fs.readFileSync('design-system.css','utf8');
 const planningMore=fs.readFileSync('v76-planning-more.css','utf8');
 const architecture=fs.readFileSync('v75-architecture.css','utf8');
+const usability=fs.readFileSync('v75-usability.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const iconSvg=fs.readFileSync('icon.svg','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
@@ -22,7 +23,7 @@ for(const retiredSource of ['v74-experience.css','v75-market-featured.css','v75-
 
 assert.match(js,/Conta de Casa — sistema de ícones Lucide local \(v76\)/);
 assert.match(js,/LUCIDE_SOURCE_COMMIT='94e4cb9d9db5907053ebf3636a97c45529cf776b'/,'Lucide source snapshot must be pinned and auditable');
-assert.match(js,/ICON_SEMANTICS_REVISION='76-icons-unified7'/,'semantic icon revision must remain explicit and auditable');
+assert.match(js,/ICON_SEMANTICS_REVISION='76-pin-prototype1'/,'semantic icon revision must remain explicit and auditable');
 assert.match(js,/Object\.assign\(ICONS,LUCIDE_ICONS\)/,'Lucide registry must extend the existing application registry without changing callers');
 assert.match(js,/globalThis\.CDCIcons/,'shared icon renderer must remain available to contextual modules');
 assert.match(js,/source:'Lucide'/);
@@ -105,6 +106,18 @@ assert.match(architecture,/\.vault-keypad\{display:grid!important;grid-template-
 assert.match(index,/class="brand brand-large vault-brand"/);
 assert.match(index,/id="vaultUnlockHint"/);
 assert.match(index,/aria-describedby="vaultUnlockHint"/);
+assert.match(index,/class="vault-enter-label">Entrar<\/span><span class="vault-enter-arrow"/,'PIN submit action must expose the prototype trailing icon slot');
+assert.match(index,/class="vault-keyboard-icon"/,'password/PIN mode switch must expose the canonical key icon slot');
+assert.match(index,/<span class="vault-lock-badge" aria-hidden="true"><\/span>/,'vault lock badge must be an empty canonical-icon slot');
+assert.match(js,/function hydrateVaultPrototype\(root=document\)/,'PIN prototype icons must be hydrated by the canonical Lucide authority');
+assert.match(js,/vault-enter-arrow'\),'arrowRight',21/,'Enter action must use the canonical ArrowRight icon');
+assert.match(js,/vault-keyboard-icon'\),'key',18/,'password mode switch must use the canonical Key icon');
+assert.match(usability,/76-pin-prototype1/,'PIN prototype visual revision must remain explicit');
+assert.match(usability,/#vaultScreen\.vault-unlock-active[\s\S]*linear-gradient\(150deg/,'unlock background must keep the deep teal prototype treatment');
+assert.match(usability,/#vaultScreen\.vault-unlock-active #vaultUnlock[\s\S]*backdrop-filter:blur\(26px\)/,'unlock content must retain the frosted card treatment');
+assert.match(usability,/\.vault-keypad[\s\S]*grid-template-columns:repeat\(3,74px\)/,'prototype keypad must keep the larger three-column geometry');
+assert.match(usability,/\.vault-enter-arrow[\s\S]*border-radius:50%/,'Enter action must retain the circular trailing affordance');
+assert.match(usability,/@media\(forced-colors:active\)[\s\S]*#vaultScreen\.vault-unlock-active/,'PIN prototype must preserve forced-colors support');
 assert.doesNotMatch(index,/passkey|biometria/i);
 
 assert.match(license,/ISC License/);
