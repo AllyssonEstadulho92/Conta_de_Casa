@@ -41,9 +41,9 @@ const DRAWER_REV = '75-drawer2';
 const USABILITY_REV = '76-pin-prototype1';
 const ASSETS_REV = '75-assets1';
 const MARKET_FLOW_REV = '75-market1';
-const IMAGE_LIBRARY_REV = '76-add-product-prototype1';
+const IMAGE_LIBRARY_REV = '76-pingo-images2';
 const CATALOG_REV = '76-add-product-prototype1';
-const PD_PHOTO_REV = '76-add-product-prototype1';
+const PD_PHOTO_REV = '76-pingo-images2';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
@@ -204,7 +204,7 @@ index=index.replace(/\s*<script[^>]+v76-veggie-menu\.js[^>]*><\/script>\s*/gi,'\
 
 index=index.replace(
   "img-src 'self' data: blob: https://images.openfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://world.openfoodfacts.org;",
-  "img-src 'self' data: blob: https://www.continente.pt https://static.pingodoce.pt https://*.openfoodfacts.org https://*.openbeautyfacts.org https://*.openproductsfacts.org https://*.openpetfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://r.jina.ai https://world.openfoodfacts.org https://world.openbeautyfacts.org https://world.openproductsfacts.org https://world.openpetfoodfacts.org;"
+  "img-src 'self' data: blob: https://www.continente.pt https://pingodoce.pt https://www.pingodoce.pt https://static.pingodoce.pt https://*.openfoodfacts.org https://*.openbeautyfacts.org https://*.openproductsfacts.org https://*.openpetfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://r.jina.ai https://world.openfoodfacts.org https://world.openbeautyfacts.org https://world.openproductsfacts.org https://world.openpetfoodfacts.org;"
 );
 
 if(!index.includes('app-update.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./app-update.css?v=${APP_UPDATE_REV}" />\n</head>`);
