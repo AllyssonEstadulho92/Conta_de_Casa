@@ -2,7 +2,7 @@
 
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
-Versão preparada: v50. O schema de dados permanece na versão 5; esta fase mantém a aplicação em GitHub Pages e uniformiza os controlos de ação no mobile, com botões de adicionar compactos e estado de sincronização em formato pill, sem alterar dados, cálculos ou persistência.
+Versão técnica: 0.76.0 (release pública v76). O schema de dados permanece na versão 5. A PWA é distribuída em GitHub Pages, com melhorias graduais de interface e testes, sem alterar silenciosamente os dados, cálculos ou persistência. A revisão `76-auth-viewport-fit1` compacta a introdução do PIN no iPhone e aguarda validação física.
 
 ## Estado
 
