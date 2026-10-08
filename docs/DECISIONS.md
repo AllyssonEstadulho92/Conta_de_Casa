@@ -1,6 +1,12 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 4 de outubro de 2026
+Atualizado: 9 de outubro de 2026
+
+## D-096 — enquadramento do PIN prioritário em iPhone (proposta)
+
+A autoridade visual de desbloqueio mantém-se em `v75-usability.css`. A última camada `76-pin-prototype1` ampliava o teclado, anulando o ritmo compacto anterior. `76-auth-viewport-fit1` é a revisão final para largura até 620 px: 52 px nos controlos numéricos e 48 px em alturas pequenas, preservando área tátil superior a 44 px, o botão Entrar, recuperação, importação, `100svh`, safe areas e scroll acessível.
+
+Não esconder ações nem recorrer a zoom CSS; não alterar sessão, cifra, PIN ou persistência. Validar visualmente antes de integrar em `main`.
 
 ## D-064 — migração TypeScript incremental
 

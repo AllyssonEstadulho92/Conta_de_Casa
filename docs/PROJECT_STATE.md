@@ -1,11 +1,20 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 5 de outubro de 2026
+Atualizado: 9 de outubro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
 Baseline funcional em `main` antes deste bloco: `3999f74bf25396484ce2f8550c9c3d7c60bb313c` (`security: empacotar ZXing localmente e remover CDN`)
-Branch de implementação: `76-dialog-controls1`; base funcional: `main`
+Branch da melhoria de autenticação: `fix/v76-auth-viewport-fit1` (proposta); base funcional: `main`
+Histórico anterior: bloco `76-dialog-controls1` preservado abaixo.
+
+## Ecrã PIN compacto no Safari: 76-auth-viewport-fit1 (proposta, 09/10/2026)
+
+A regra visual final `76-pin-prototype1` aumentava de novo a dimensão do teclado e os espaços já compactados em `76-auth-spacing3`. A vista de desbloqueio podia ultrapassar a altura útil do iPhone.
+
+Correção proposta na mesma autoridade visual `v75-usability.css`: teclado de 52 px em iPhone, 48 px em ecrãs estreitos/baixos, espaçamentos reduzidos, campo de 16 px para evitar zoom iOS, `100svh`, safe areas e scroll caso o conteúdo não caiba (texto ampliado, rotação ou teclado virtual). Recuperação, importação e botão Entrar permanecem disponíveis. Não modifica `core.js`, PIN, PBKDF2, AES-GCM, IndexedDB, estado financeiro nem sincronização.
+
+Entrega: `USABILITY_REV` atualizado e regressões de CI concluídas. Validação automática da proposta: GitHub CI (quality) e TypeScript Foundation (typecheck) concluídos com sucesso no commit `d96cee9fb8f3fa0061ff90336e655353510741ca`. Falta ainda confirmação física em iPhone/Safari/PWA. Pendente: validação física Safari/PWA em 320/360/390/430 px, alturas curtas, dark mode e teclado virtual.
 
 ## Controlos Voltar e Fechar do diálogo: 76-dialog-controls1
 

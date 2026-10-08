@@ -1,6 +1,6 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 4 de outubro de 2026
+Atualizado: 9 de outubro de 2026
 Versão: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
@@ -30,7 +30,8 @@ Ritmo vertical móvel: `76-auth-spacing3` dentro da mesma folha canónica.
 - criação e desbloqueio são estados mutuamente exclusivos;
 - atributos `hidden` não podem ser anulados por regras decorativas;
 - `100svh`, safe areas e targets adequados permanecem requisitos móveis;
-- keypad padrão em mobile mantém 56 px com gaps 30/16 px;
+- o histórico `76-auth-spacing3` usa 56 px com gaps 30/16 px, mas o protótipo posterior voltava a ampliar controlos;
+- proposta `76-auth-viewport-fit1`: autoridade final para iPhone até 620 px, keypad 52 px (48 px em ecrãs estreitos/baixos), scroll acessível quando a altura útil não chega, campo com fonte 16 px e safe areas;
 - `#vaultMessage:empty` não reserva altura;
 - esta arquitetura é exclusivamente visual e não altera PIN, PBKDF2, AES-GCM, IndexedDB, importação ou sync.
 
