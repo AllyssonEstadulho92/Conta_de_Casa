@@ -2,6 +2,14 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-09: compactação responsiva do ecrã PIN (proposta)
+
+- `v75-usability.css`: revisão `76-auth-viewport-fit1` apenas para a vista de desbloqueio, com layout mobile compacto, tamanhos 52/48 px, safe areas e scroll de recurso;
+- `scripts/prepare-pages.cjs`: invalidação da URL da folha de autenticação para evitar retenção do CSS anterior em Safari/PWA;
+- `tests/accessibility.test.cjs` e `tests/v75-stability.test.cjs`: contratos para os tamanhos finais, integridade dos controlos e novo token do CSS;
+- sem alterações a dados, cálculos, PIN, derivações de chave ou sincronização;
+- aguarda teste de CI e inspeção no dispositivo real.
+
 ## 2026-10-05: protótipo aprovado de Adicionar produto
 
 ### Implementação
