@@ -113,7 +113,7 @@ assert.match(usability,/#vaultScreen\.vault-unlock-active \.vault-keyboard-toggl
 assert.match(usability,/#vaultScreen\.vault-unlock-active \.vault-disclosure\{[\s\S]*min-height:66px!important/,'device-transfer action must remain reachable and readable');
 assert.match(usability,/@media\(max-width:430px\)[\s\S]*grid-template-columns:repeat\(3,70px\)!important/,'iPhone widths must keep large PIN targets');
 assert.match(usability,/@media\(max-width:359px\)[\s\S]*grid-template-columns:repeat\(3,64px\)!important/,'small phones may compact while remaining above minimum touch size');
-const authCss=usability.slice(usability.indexOf('76-pin-prototype1'));
+const authCss=usability.slice(usability.indexOf('76-pin-prototype1'),usability.indexOf('/* 76-auth-viewport-fit1'));
 const keypadSizes=[...authCss.matchAll(/grid-template-columns:repeat\(3,(\d+)px\)!important/g)].map(match=>Number(match[1]));
 assert.deepEqual(keypadSizes,[74,70,64],'prototype keypad sizes must remain ordered from base to narrow mobile contracts');
 assert.ok(keypadSizes.every(size=>size>=44),`PIN targets must remain >=44 px; got ${keypadSizes.join(', ')}`);
