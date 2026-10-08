@@ -119,4 +119,22 @@ assert.deepEqual(keypadSizes,[74,70,64],'prototype keypad sizes must remain orde
 assert.ok(keypadSizes.every(size=>size>=44),`PIN targets must remain >=44 px; got ${keypadSizes.join(', ')}`);
 assert.match(usability,/@media\(forced-colors:active\)[\s\S]*#vaultScreen\.vault-unlock-active/,'high-contrast users must retain an explicit auth fallback');
 
+
+// 76-auth-viewport-fit1: os overrides finais não podem reintroduzir
+// teclado 70/74px em iPhone nem ocultar transferência/recuperação.
+const fit=usability.slice(usability.indexOf('/* 76-auth-viewport-fit1'));
+assert.ok(fit.startsWith('/* 76-auth-viewport-fit1'),'compact auth must be the final design block');
+assert.match(fit,/@media\(max-width:620px\)/);
+assert.match(fit,/#vaultScreen\.vault-unlock-active\{[\s\S]*min-height:100svh!important;[\s\S]*overflow-y:auto!important/);
+assert.match(fit,/#vaultScreen\.vault-unlock-active #unlockPassphrase\{[\s\S]*font-size:16px!important/,'iOS text entry must not zoom');
+assert.match(fit,/grid-template-columns:repeat\(3,52px\)!important/);
+assert.match(fit,/@media\(max-width:359px\)[\s\S]*grid-template-columns:repeat\(3,48px\)!important/);
+assert.match(fit,/@media\(max-width:620px\) and \(max-height:740px\)[\s\S]*grid-template-columns:repeat\(3,48px\)!important/);
+assert.match(fit,/@media\(max-width:620px\) and \(max-height:500px\)[\s\S]*overflow-y:auto!important/);
+assert.match(fit,/\.vault-disclosure\{[\s\S]*min-height:54px!important/);
+assert.doesNotMatch(fit,/\.vault-(?:disclosure|transfer|pin-recovery-actions)\s*\{[^}]*display:none/,'recovery and import must remain available');
+const finalSizes=[...fit.matchAll(/grid-template-columns:repeat\(3,(\d+)px\)!important/g)].map(match=>Number(match[1]));
+assert.deepEqual(finalSizes,[52,48,48]);
+assert.ok(finalSizes.every(size=>size>=44),'compact keypad must retain accessible touch targets');
+
 console.log('Accessibility contrast, focus, touch targets, semantic state, safe areas and compact exclusive PIN layout contracts for v76: OK');
