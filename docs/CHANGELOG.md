@@ -8,7 +8,7 @@ O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheir
 - `scripts/prepare-pages.cjs`: invalidação da URL da folha de autenticação para evitar retenção do CSS anterior em Safari/PWA;
 - `tests/accessibility.test.cjs` e `tests/v75-stability.test.cjs`: contratos para os tamanhos finais, integridade dos controlos e novo token do CSS;
 - sem alterações a dados, cálculos, PIN, derivações de chave ou sincronização;
-- aguarda teste de CI e inspeção no dispositivo real.
+- CI (quality e TypeScript Foundation) concluídos com sucesso na PR #214; inspeção no dispositivo real continua pendente.
 
 ## 2026-10-05: protótipo aprovado de Adicionar produto
 

@@ -14,7 +14,7 @@ A regra visual final `76-pin-prototype1` aumentava de novo a dimensão do teclad
 
 Correção proposta na mesma autoridade visual `v75-usability.css`: teclado de 52 px em iPhone, 48 px em ecrãs estreitos/baixos, espaçamentos reduzidos, campo de 16 px para evitar zoom iOS, `100svh`, safe areas e scroll caso o conteúdo não caiba (texto ampliado, rotação ou teclado virtual). Recuperação, importação e botão Entrar permanecem disponíveis. Não modifica `core.js`, PIN, PBKDF2, AES-GCM, IndexedDB, estado financeiro nem sincronização.
 
-Entrega: alterar `USABILITY_REV` no build Pages para invalidar a versão CSS anterior e atualizar regressões. Pendente: CI e validação física Safari/PWA em 320/360/390/430 px, alturas curtas, dark mode e teclado virtual.
+Entrega: `USABILITY_REV` atualizado e regressões de CI concluídas. Validação automática da proposta: GitHub CI (quality) e TypeScript Foundation (typecheck) concluídos com sucesso no commit `d96cee9fb8f3fa0061ff90336e655353510741ca`. Falta ainda confirmação física em iPhone/Safari/PWA. Pendente: validação física Safari/PWA em 320/360/390/430 px, alturas curtas, dark mode e teclado virtual.
 
 ## Controlos Voltar e Fechar do diálogo: 76-dialog-controls1
 

@@ -16,7 +16,7 @@ Atualizado: 9 de outubro de 2026
 
 - [x] Preparar `76-auth-viewport-fit1` no CSS canónico: teclado 52/48 px, formulário mais compacto e scroll de segurança.
 - [x] Atualizar versão do asset em `build:pages` e acrescentar contratos de regressão de acessibilidade.
-- [ ] Validar o novo bloco na CI antes de integrar em `main`.
+- [x] Validar o novo bloco na CI (quality e TypeScript Foundation verdes na PR #214, commit `d96cee9`).
 - [ ] Testar em iPhone Safari/PWA a 320/360/390/430 px e alturas úteis diferentes, com PIN normal, erro, recuperação e importação.
 - [ ] Confirmar texto ampliado, teclado virtual, rotação, dark mode e utilização sem cofre num perfil novo.
 - [ ] Rever PR #212 (fotografias Pingo Doce) e PR #213 (geometria Mercado) separadamente, sem duplicar correções na branch de autenticação.
