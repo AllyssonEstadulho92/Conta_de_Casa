@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 5 de outubro de 2026
+Atualizado: 9 de outubro de 2026
 
 ## P0 — Invariantes
 
@@ -13,6 +13,13 @@ Atualizado: 5 de outubro de 2026
 - [x] UI/UX e migração sem alteração silenciosa de domínio.
 
 ## P0 — Auth / Safari / iOS
+
+- [x] Preparar `76-auth-viewport-fit1` no CSS canónico: teclado 52/48 px, formulário mais compacto e scroll de segurança.
+- [x] Atualizar versão do asset em `build:pages` e acrescentar contratos de regressão de acessibilidade.
+- [ ] Validar o novo bloco na CI antes de integrar em `main`.
+- [ ] Testar em iPhone Safari/PWA a 320/360/390/430 px e alturas úteis diferentes, com PIN normal, erro, recuperação e importação.
+- [ ] Confirmar texto ampliado, teclado virtual, rotação, dark mode e utilização sem cofre num perfil novo.
+- [ ] Rever PR #212 (fotografias Pingo Doce) e PR #213 (geometria Mercado) separadamente, sem duplicar correções na branch de autenticação.
 
 - [x] PIN local abre aplicação sem depender de sync.
 - [x] `[hidden]` impede cofre e shell simultâneos.
