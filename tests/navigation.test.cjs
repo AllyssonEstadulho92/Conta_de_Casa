@@ -91,7 +91,7 @@ try {
   assert.match(builtIndex, /render\.js\?v=76-budget-cash-separation3/);
   assert.match(builtIndex, /finance\.js\?v=76-budget-cash-separation3/);
   assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-add-product-prototype1/);
-  assert.match(builtIndex, /v75-usability\.css\?v=76-pin-prototype1/);
+  assert.match(builtIndex, /v75-usability\.css\?v=76-auth-viewport-fit1/);
 
   const builtIds = [...builtIndex.matchAll(/\sid="([^"]+)"/g)].map(match=>match[1]);
   const builtDuplicateIds = [...new Set(builtIds.filter((id,indexOfId)=>builtIds.indexOf(id)!==indexOfId))];
