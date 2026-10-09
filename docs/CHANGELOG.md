@@ -2,6 +2,14 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-09: build determinístico da PWA
+
+- `package-lock.json` gerado a partir da instalação Node 24 em GitHub Actions, sem alterar versões diretas declaradas em `package.json`;
+- `ci.yml`, `pages.yml` e `typescript.yml` usam `npm ci` com cache npm e lockfile;
+- a etapa temporária de recolha foi retirada, sem resíduos;
+- README e os cinco documentos de continuidade atualizados;
+- aplicação móvel Expo, base de dados, cálculos, PIN e sincronização inalterados.
+
 ## 2026-10-09: transparência das estimativas contabilizadas
 
 - `finance.js` disponibiliza duas métricas derivadas dos artigos comprados sem preço real: quantidade e parcela monetária baseada em estimativa;

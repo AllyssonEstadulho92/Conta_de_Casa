@@ -8,6 +8,12 @@ Baseline funcional em `main` antes deste bloco: `3999f74bf25396484ce2f8550c9c3d7
 Branch de correção de fotografias: `fix/v76-pingo-official-images-rebased`; base: `main` com PR #213 e #214 integradas.
 Histórico anterior: bloco `76-dialog-controls1` preservado abaixo.
 
+## Instalações determinísticas da PWA (09/10/2026)
+
+Nova branch `chore/v76-reproducible-build-lock`, sobre `main` após #216. `package-lock.json` v3 foi gerado pelo runner Node 24 utilizado pela CI, com versões diretas preservadas. Os três workflows da PWA (`ci.yml`, `pages.yml`, `typescript.yml`) passam de `npm install` para `npm ci` e usam cache de npm baseada no lockfile. Removida a etapa temporária de auditoria do lockfile.
+
+A aplicação nativa Expo mantém dependências próprias e não deve receber `npm ci` sem lockfile nativo validado. Próximo passo: CI, TypeScript e verificação de publicação. Não envolve alterações ao domínio, dados, PIN ou sync.
+
 ## Clarificação de montantes provisórios do Mercado (09/10/2026)
 
 Branch `improve/v76-finance-estimate-clarity` criada após as integrações #213, #214 e #215. Uma compra marcada como realizada pode ainda não ter `actualCents>0`; a contabilização existente utiliza `estimatedCents`. Passa a existir `marketEstimatedCount` e `marketEstimatedCents` derivados em `monthNumbers` para distinguir esse caso, com aviso no Início, subtítulo no Calendário e etiqueta no cartão do Mercado.

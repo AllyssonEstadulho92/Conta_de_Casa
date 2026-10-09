@@ -2,6 +2,15 @@
 
 Atualizado: 9 de outubro de 2026
 
+## P1 — DevOps e dependências reproduzíveis
+
+- [x] Gerar lockfile npm v3 do projeto PWA num runner Node 24.
+- [x] Substituir `npm install` por `npm ci` em CI, Pages e TypeScript Foundation; ativar cache dependente do lockfile.
+- [x] Remover do workflow a etapa temporária de recolha de lockfile.
+- [ ] Confirmar CI e publicação automática com `npm ci`.
+- [ ] Gerar e validar, em tarefa separada, o lockfile do projeto Expo nativo.
+- [ ] Criar testes E2E em browser real WebKit e Chromium, mantendo a separação das suites atuais.
+
 ## P1 — Fiabilidade dos montantes exibidos
 
 - [x] Acrescentar `marketEstimatedCount` e `marketEstimatedCents` sem modificar as fórmulas do mês.

@@ -23,6 +23,10 @@ Projeto em fase inicial com hardening de segurança. Não é versão 1.0 e não 
 
 Leia `SECURITY.md` antes de usar dados reais. A recomendação atual é validar a app publicada, testar backup/restauro e concluir a cifragem de anexos antes de introduzir faturas reais ou comprovativos.
 
+## Dependências e builds reproduzíveis
+
+O projeto PWA mantém as dependências resolvidas em `package-lock.json`. Em instalações de desenvolvimento e CI, utilizar `npm ci --ignore-scripts --no-audit --no-fund` (Node 24) para instalar exatamente as versões bloqueadas; não regenerar o lockfile sem revisão. A aplicação nativa em `apps/mobile-native` ainda tem gestão própria e não está abrangida por este lockfile.
+
 ## Desenvolvimento
 
 Validação local:

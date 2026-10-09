@@ -2,6 +2,12 @@
 
 Atualizado: 9 de outubro de 2026
 
+## D-152 — bloqueio de dependências reproduzível sem alterar funcionalidades
+
+A PWA usa `package-lock.json` gerado na CI Node 24 e `npm ci` nos workflows de qualidade, TypeScript e distribuição. O lockfile é versionado no Git; mudanças de dependências exigem revisão específica. A cache npm é derivada do lockfile e não substitui a validação de testes.
+
+A aplicação móvel nativa tem dependências/risco de compatibilidade Expo próprios e fica fora desta migração até existir lockfile nativo gerado e verificado.
+
 ## D-151 — identificar estimativas sem reescrever a contabilidade
 
 `actualCents=0` representa preço real não registado no fluxo atual do Mercado. Se uma compra foi marcada como concluída, o cálculo existente ainda pode utilizar o preço estimado. Por transparência, adicionar apenas métricas derivadas do mês e rótulos visíveis no Início, Mercado e Calendário, mantendo invariantes, históricos, `STATE_VERSION` e sem migração de dados.
