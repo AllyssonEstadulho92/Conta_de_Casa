@@ -153,7 +153,7 @@ assert.match(prepare, /const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare, /const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare, /const MENU_REV = '73-menu8'/);
 assert.match(prepare, /const ARCHITECTURE_REV = '76-walli-share-drawer1'/);
-assert.match(prepare, /const FINANCE_REV = '76-budget-cash-separation3'/);
+assert.match(prepare, /const FINANCE_REV = '76-market-estimates1'/);
 assert.match(prepare, /const PLANNING_MORE_REV = '76-planning-more1'/);
 assert.match(prepare, /const HEADER_REV = '75-header2'/);
 assert.match(prepare, /const STABILITY_REV = '75-stability1'/);
@@ -200,7 +200,7 @@ try {
   assert.match(index, /v75-layout-polish\.css\?v=75-layout1/);
   assert.match(index, /v75-drawer-theme\.css\?v=75-drawer2/);
   assert.match(index, /v75-architecture\.js\?v=76-walli-share-drawer1/);
-  assert.match(index, /finance\.js\?v=76-budget-cash-separation3/);
+  assert.match(index, /finance\.js\?v=76-market-estimates1/);
   assert.match(index, /v75-stability\.js\?v=75-stability1/);
   for(const retired of [/v74-experience\.(?:css|js)/,/v75-market-featured\.(?:css|js)/,/v75-drawer-blue\.css/,/ui-consistency\.css/,/v64-runtime\.css/])assert.doesNotMatch(index,retired);
   assert.doesNotMatch(index, /\?v=53/);
