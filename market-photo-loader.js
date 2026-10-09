@@ -2,7 +2,7 @@
 
 /* Conta de Casa — carregamento visual prioritário das fotografias do Mercado (75-photo-loader3). */
 (function installMarketPhotoLoader(root){
-  const REVISION='75-photo-loader3';
+  const REVISION='76-photo-card3';
   const POLL_MS=500;
   const MAX_POLLS=28;
   const PRIORITY_VISIBLE_LIMIT=8;
