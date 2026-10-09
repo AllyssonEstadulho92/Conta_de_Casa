@@ -5,10 +5,17 @@ Versão técnica: `0.76.0`
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
 Baseline funcional em `main` antes deste bloco: `3999f74bf25396484ce2f8550c9c3d7c60bb313c` (`security: empacotar ZXing localmente e remover CDN`)
-Branch da melhoria de autenticação: `fix/v76-auth-viewport-fit1` (proposta); base funcional: `main`
+Branch de correção de fotografias: `fix/v76-pingo-official-images-rebased`; base: `main` com PR #213 e #214 integradas.
 Histórico anterior: bloco `76-dialog-controls1` preservado abaixo.
 
-## Ecrã PIN compacto no Safari: 76-auth-viewport-fit1 (proposta, 09/10/2026)
+## Auditoria e integração das correções do Mercado (09/10/2026)
+
+- PR #214 do PIN compacto integrada e publicada em `main`; continua pendente a confirmação visual no iPhone.
+- PR #213 do formulário Mercado/Safari integrada em `main`; validação física ainda pendente.
+- PR #212 de fotografias Pingo Doce com conflitos após #214: reaplicados os mesmos ficheiros na branch atual, preservando a revisão `76-auth-viewport-fit1`, a CSP e o histórico documental.
+- Próximo passo: CI, TypeScript, revisão de segurança, integração e publicação. O núcleo financeiro continua intacto.
+
+## Ecrã PIN compacto no Safari: 76-auth-viewport-fit1 (integrado na PR #214, 09/10/2026)
 
 A regra visual final `76-pin-prototype1` aumentava de novo a dimensão do teclado e os espaços já compactados em `76-auth-spacing3`. A vista de desbloqueio podia ultrapassar a altura útil do iPhone.
 

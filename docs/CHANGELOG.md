@@ -2,6 +2,12 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-09: integração controlada das melhorias do Mercado
+
+- PR #213 integrada em `main` para estabilizar o formulário Adicionar produto no Safari;
+- a PR #212 estava em conflito com alterações recentes; os seus 16 ficheiros foram reaplicados sobre a `main` atual, preservando explicitamente `76-auth-viewport-fit1` e o histórico do changelog;
+- a nova integração aguarda CI e testes antes de publicação; dados financeiros e cifra não foram alterados.
+
 ## 2026-10-09: compactação responsiva do ecrã PIN (proposta)
 
 - `v75-usability.css`: revisão `76-auth-viewport-fit1` apenas para a vista de desbloqueio, com layout mobile compacto, tamanhos 52/48 px, safe areas e scroll de recurso;
