@@ -455,7 +455,8 @@
     parseCatalogRecords,
     resolve:target=>resolveOfficial({
       marketId:clean(target?.marketId||'',20),pid:clean(target?.pid||'',32),name:clean(target?.name||'',130),pack:clean(target?.pack||'',80),
-      label:target?.marketId==='continente'?'Continente':'Pingo Doce'
+      label:target?.marketId==='continente'?'Continente':'Pingo Doce',
+      sourceUrl:safeProductUrl(target?.sourceUrl||'',clean(target?.marketId||'',20),clean(target?.pid||'',32))
     }),
     audit:scheduleScan
   });
