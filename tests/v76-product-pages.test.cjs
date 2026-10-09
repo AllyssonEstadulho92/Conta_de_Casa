@@ -134,7 +134,7 @@ assert.match(render,/function renderMarket\(/);
 
 // A nova camada tem propriedade de composição de página, carrega antes do shell e entra no PWA.
 assert.match(prepare,/const PRODUCT_PAGES_REV = '76-add-product-prototype2'/);
-assert.match(prepare,/const DASHBOARD_REV = '76-budget-cash-separation3'/);
+assert.match(prepare,/const DASHBOARD_REV = '76-market-estimates1'/);
 assert.ok(prepare.includes('render.js?v=${DASHBOARD_REV}'),'render.js must receive a dedicated cache-busting revision');
 assert.ok(prepare.includes("'v76-product-pages.css'"));
 const modern=prepare.indexOf('v76-modern-ui.css?v=${MODERN_UI_REV}');
