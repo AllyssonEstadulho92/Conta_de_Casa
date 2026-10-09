@@ -291,9 +291,33 @@ function cleanMultiline(value, max = 1200) {
 function safeProductImageUrl(value) {
   if (!value) return '';
   try {
-    const url = new URL(String(value));
-    if (url.protocol !== 'https:' || url.hostname.toLowerCase() !== 'images.openfoodfacts.org') return '';
-    return url.href.slice(0, 700);
+    const url = new URL(String(value).replace(/&amp;/g, '&'));
+    if (url.protocol !== 'https:') return '';
+    const host = url.hostname.toLowerCase();
+    const path = decodeURIComponent(url.pathname);
+    const openFactsHosts = new Set([
+      'images.openfoodfacts.org',
+      'images.openbeautyfacts.org',
+      'images.openproductsfacts.org',
+      'images.openpetfoodfacts.org'
+    ]);
+    if (openFactsHosts.has(host)) {
+      if (!/\.(?:jpe?g|png|webp)$/i.test(path)) return '';
+      return url.href.slice(0, 1100);
+    }
+    if (host === 'www.continente.pt') {
+      if (!path.includes('/Sites-col-master-catalog/')) return '';
+      if (!/\.(?:jpe?g|png|webp)$/i.test(path) || /noimage|fallback/i.test(path)) return '';
+      return url.href.slice(0, 1100);
+    }
+    if (['pingodoce.pt','www.pingodoce.pt','static.pingodoce.pt'].includes(host)) {
+      if (!path.includes('/Sites-pingo-doce-master/')) return '';
+      if (!/\/images\/(?:large|medium|small)\//i.test(path)) return '';
+      if (!/\.(?:jpe?g|png|webp)$/i.test(path) || /noimage|fallback/i.test(path)) return '';
+      if ((host === 'pingodoce.pt' || host === 'www.pingodoce.pt') && !path.includes('/dw/image/v2/BLJJ_PRD/on/demandware.static/-/')) return '';
+      return url.href.slice(0, 1100);
+    }
+    return '';
   } catch (_error) { return ''; }
 }
 function cleanCents(value, fallback = 0, min = 0) {

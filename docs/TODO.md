@@ -2,6 +2,22 @@
 
 Atualizado: 9 de outubro de 2026
 
+## P0 — Correções do Mercado
+
+- [x] Integrar a PR #213: geometria mobile de Adicionar produto.
+- [x] Reaplicar a PR #212 sobre o novo estado de `main`, sem perder o CSS do PIN ou o histórico.
+- [ ] Validar a nova PR em CI, TypeScript e testes de segurança antes de integrar.
+- [ ] Confirmar fotografias oficiais Pingo Doce/Continente no Safari, sem aceitações de PID divergente.
+- [ ] Confirmar visualmente o PIN e o formulário Mercado após a nova publicação.
+
+## P1 — Qualidade transversal
+
+- [ ] Criar testes E2E reais WebKit/Chromium com percurso do PIN, Despesas e Mercado, sem substituir os testes Node existentes.
+- [ ] Distinguir claramente preço estimado de confirmado no Mercado e no resumo financeiro, sem alterar silenciosamente fórmulas.
+- [ ] Rever lockfiles e `npm ci` nos pipelines apenas após validação de resolução de dependências.
+- [ ] Consolidar CSS v75/v76 por componente com testes visuais e segurança de regressão.
+- [ ] Testar backup, restauro e sincronização em dois dispositivos reais.
+
 ## P0 — Invariantes
 
 - [x] `STATE_VERSION = 5`.

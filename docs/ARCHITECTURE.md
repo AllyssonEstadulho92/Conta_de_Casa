@@ -5,6 +5,12 @@ Versão: `0.76.0`
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
 
+## 0. Biblioteca de imagens oficiais do Mercado
+
+A fonte monetária permanece separada das imagens. O catálogo identifica produtos por `marketId|pid`, e a resolução de fotografias aceita apenas origens oficiais conhecidas com PID idêntico ao produto. O Pingo Doce suporta o CDN atual `www.pingodoce.pt` e a origem histórica `static.pingodoce.pt`, com validação do caminho `Sites-pingo-doce-master`; o Continente mantém a verificação da sua origem/catálogo.
+
+A CSP do bundle autoriza só as origens de imagem necessárias, sem wildcard genérico de HTTPS. Quando uma imagem não valida, usa placeholder, nunca correspondência não verificada. A fotografia não altera preços, quantidades, cálculos, PIN, cifragem ou sincronização.
+
 ## 1. Modelo geral
 
 PWA estática/local-first. O browser recebe HTML/CSS/JavaScript; a fonte funcional está a migrar incrementalmente para TypeScript strict. Não existe framework UI.

@@ -41,9 +41,9 @@ const DRAWER_REV = '75-drawer2';
 const USABILITY_REV = '76-auth-viewport-fit1';
 const ASSETS_REV = '75-assets1';
 const MARKET_FLOW_REV = '75-market1';
-const IMAGE_LIBRARY_REV = '76-add-product-prototype1';
+const IMAGE_LIBRARY_REV = '76-pingo-images2';
 const CATALOG_REV = '76-add-product-prototype1';
-const PD_PHOTO_REV = '76-add-product-prototype1';
+const PD_PHOTO_REV = '76-pingo-images2';
 const PHOTO_LOADER_REV = '75-photo-loader3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
@@ -204,7 +204,7 @@ index=index.replace(/\s*<script[^>]+v76-veggie-menu\.js[^>]*><\/script>\s*/gi,'\
 
 index=index.replace(
   "img-src 'self' data: blob: https://images.openfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://world.openfoodfacts.org;",
-  "img-src 'self' data: blob: https://www.continente.pt https://static.pingodoce.pt https://*.openfoodfacts.org https://*.openbeautyfacts.org https://*.openproductsfacts.org https://*.openpetfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://r.jina.ai https://world.openfoodfacts.org https://world.openbeautyfacts.org https://world.openproductsfacts.org https://world.openpetfoodfacts.org;"
+  "img-src 'self' data: blob: https://www.continente.pt https://pingodoce.pt https://www.pingodoce.pt https://static.pingodoce.pt https://*.openfoodfacts.org https://*.openbeautyfacts.org https://*.openproductsfacts.org https://*.openpetfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://r.jina.ai https://world.openfoodfacts.org https://world.openbeautyfacts.org https://world.openproductsfacts.org https://world.openpetfoodfacts.org;"
 );
 
 if(!index.includes('app-update.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./app-update.css?v=${APP_UPDATE_REV}" />\n</head>`);
@@ -241,8 +241,8 @@ if(!index.includes('asset-loader.js'))index=index.replace('</body>',`  <script s
 if(!index.includes('app-update.js'))index=index.replace('</body>',`  <script src="./app-update.js?v=${APP_UPDATE_REV}" defer></script>\n</body>`);
 if(!index.includes('market-image-library.js'))index=index.replace('</body>',`  <script src="./market-image-library.js?v=${IMAGE_LIBRARY_REV}" defer></script>\n</body>`);
 if(!index.includes('market-retailer-image-policy.js'))index=index.replace('</body>',`  <script src="./market-retailer-image-policy.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
-if(!index.includes('market-image-audit.js'))index=index.replace('</body>',`  <script src="./market-image-audit.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
-if(!index.includes('market-official-images.js'))index=index.replace('</body>',`  <script src="./market-official-images.js?v=${BUILD.slice(1)}" defer></script>\n</body>`);
+if(!index.includes('market-image-audit.js'))index=index.replace('</body>',`  <script src="./market-image-audit.js?v=${IMAGE_LIBRARY_REV}" defer></script>\n</body>`);
+if(!index.includes('market-official-images.js'))index=index.replace('</body>',`  <script src="./market-official-images.js?v=${IMAGE_LIBRARY_REV}" defer></script>\n</body>`);
 if(!index.includes('market-catalog-image-resolver.js'))index=index.replace('</body>',`  <script src="./market-catalog-image-resolver.js?v=${CATALOG_REV}" defer></script>\n</body>`);
 if(!index.includes('market-visual-catalog.js'))index=index.replace('</body>',`  <script src="./market-visual-catalog.js?v=${CATALOG_REV}" defer></script>\n</body>`);
 if(!index.includes('pingo-doce-photo-library.js'))index=index.replace('</body>',`  <script src="./pingo-doce-photo-library.js?v=${PD_PHOTO_REV}" defer></script>\n</body>`);

@@ -44,6 +44,9 @@ assert.match(js,/referrerPolicy:'no-referrer'/);
 assert.doesNotMatch(js,/microlink|allorigins|corsproxy/i);
 assert.doesNotMatch(js,/Authorization|api[_-]?key/i);
 assert.match(js,/data-market-image-open/);
+assert.match(js,/marketProductName/,'image audit must read stable prototype product metadata');
+assert.match(js,/market-prototype-result-copy/,'image audit must support current prototype result cards');
+assert.match(js,/marketProductUrl/,'image audit must reuse the exact retailer URL carried by current cards');
 assert.match(js,/showModal\(\)/);
 assert.match(js,/marketProductImageViewer/);
 assert.match(js,/schedulePersist/);
@@ -76,6 +79,7 @@ const continenteProduct='https://www.continente.pt/produto/compressas-gaze-20-x-
 const continenteImage='https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dwa5dd802e/images/col/816/8167440-frente.jpg?sw=2000&sh=2000';
 const pingoProduct='https://www.pingodoce.pt/home/produtos/mercearia/arroz-massa-e-leguminosas/arroz/arroz-carolino-cigala-739490.html';
 const pingoImage='https://static.pingodoce.pt/dw/image/v2/BLJJ_PRD/on/demandware.static/-/Sites-pingo-doce-master/default/dw8cff88d2/images/large/739490_93c013c8bbf2545978b1e875cb8563de.jpg';
+const pingoCurrentImage='https://www.pingodoce.pt/dw/image/v2/BLJJ_PRD/on/demandware.static/-/Sites-pingo-doce-master/default/dwa8c02627/images/medium/544184_b35a81450dae22cf2c57f83fa6d0d563.jpg?sw=198';
 assert.equal(sandbox.CDCMarketImages.safeRetailerProductUrl(continenteProduct),continenteProduct);
 assert.equal(sandbox.CDCMarketImages.safeRetailerProductUrl(pingoProduct),pingoProduct);
 assert.equal(sandbox.CDCMarketImages.safeRetailerProductUrl('https://evil.example/produto/teste-8167440.html'),'');
@@ -83,6 +87,9 @@ assert.equal(sandbox.CDCMarketImages.safeRetailerImageUrl(continenteImage,'conti
 assert.equal(sandbox.CDCMarketImages.safeRetailerImageUrl(continenteImage,'continente','9999999'),'');
 assert.equal(sandbox.CDCMarketImages.safeRetailerImageUrl(pingoImage,'pingo-doce','739490'),pingoImage);
 assert.equal(sandbox.CDCMarketImages.safeRetailerImageUrl(pingoImage,'pingo-doce','123456'),'');
+assert.equal(sandbox.CDCMarketImages.safeRetailerImageUrl(pingoCurrentImage,'pingo-doce','544184'),pingoCurrentImage);
+assert.equal(sandbox.CDCMarketImages.safeRetailerImageUrl(pingoCurrentImage,'pingo-doce','739490'),'');
+assert.equal(sandbox.CDCMarketImages.safeImageUrl(pingoCurrentImage),pingoCurrentImage);
 assert.equal(sandbox.CDCMarketImages.safeImageUrl(continenteImage),continenteImage);
 assert.equal(sandbox.CDCMarketImages.safeImageUrl(pingoImage),pingoImage);
 assert.equal(sandbox.CDCMarketImages.safeImageUrl('https://images.openfoodfacts.org/images/products/123/front.jpg'),'https://images.openfoodfacts.org/images/products/123/front.jpg');
@@ -121,8 +128,8 @@ try{
   assert.match(index,/name="app-build" content="v76"/);
   assert.match(index,/market-image-audit\.css\?v=76/);
   assert.match(index,/market-retailer-image-policy\.js\?v=76/);
-  assert.match(index,/market-image-audit\.js\?v=76/);
-  assert.match(index,/market-official-images\.js\?v=76/);
+  assert.match(index,/market-image-audit\.js\?v=76-pingo-images2/);
+  assert.match(index,/market-official-images\.js\?v=76-pingo-images2/);
   assert.match(index,/design-system\.css\?v=76/);
   assert.doesNotMatch(index,/ui-consistency\.css/);
   assert.doesNotMatch(index,/v64-runtime\.css/);
@@ -136,6 +143,7 @@ try{
   assert.ok(index.indexOf('market-retailer-image-policy.js')<index.indexOf('market-image-audit.js'));
   assert.match(index,/https:\/\/www\.continente\.pt/);
   assert.match(index,/https:\/\/static\.pingodoce\.pt/);
+  assert.match(index,/https:\/\/www\.pingodoce\.pt/);
   assert.match(index,/https:\/\/r\.jina\.ai/);
   assert.match(index,/https:\/\/\*\.openbeautyfacts\.org/);
   assert.match(index,/https:\/\/world\.openproductsfacts\.org/);

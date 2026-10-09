@@ -2,6 +2,12 @@
 
 Atualizado: 9 de outubro de 2026
 
+## D-150 — reforço da origem oficial das fotografias do Mercado
+
+Reaplicar a correção da PR #212 sobre a `main` atual, em vez de forçar um merge com conflitos; preservar o PIN da PR #214 e o formulário Safari da PR #213. `safeOfficialImageUrl` deve validar a origem, a pasta oficial e o PID exato, e `safeProductImageUrl` mantém uma lista restrita de origens permitidas. Não confundir imagem com confirmação de preço ou de transação.
+
+A revisão da biblioteca de fotografias é independente da versão do cofre. Só integrar após os testes de segurança, finanças e TypeScript.
+
 ## D-096 — enquadramento do PIN prioritário em iPhone (proposta)
 
 A autoridade visual de desbloqueio mantém-se em `v75-usability.css`. A última camada `76-pin-prototype1` ampliava o teclado, anulando o ritmo compacto anterior. `76-auth-viewport-fit1` é a revisão final para largura até 620 px: 52 px nos controlos numéricos e 48 px em alturas pequenas, preservando área tátil superior a 44 px, o botão Entrar, recuperação, importação, `100svh`, safe areas e scroll acessível.

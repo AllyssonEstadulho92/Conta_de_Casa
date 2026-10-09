@@ -2,6 +2,12 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-09: integração controlada das melhorias do Mercado
+
+- PR #213 integrada em `main` para estabilizar o formulário Adicionar produto no Safari;
+- a PR #212 estava em conflito com alterações recentes; os seus 16 ficheiros foram reaplicados sobre a `main` atual, preservando explicitamente `76-auth-viewport-fit1` e o histórico do changelog;
+- a nova integração aguarda CI e testes antes de publicação; dados financeiros e cifra não foram alterados.
+
 ## 2026-10-09: compactação responsiva do ecrã PIN (proposta)
 
 - `v75-usability.css`: revisão `76-auth-viewport-fit1` apenas para a vista de desbloqueio, com layout mobile compacto, tamanhos 52/48 px, safe areas e scroll de recurso;
@@ -9,6 +15,21 @@ O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheir
 - `tests/accessibility.test.cjs` e `tests/v75-stability.test.cjs`: contratos para os tamanhos finais, integridade dos controlos e novo token do CSS;
 - sem alterações a dados, cálculos, PIN, derivações de chave ou sincronização;
 - CI (quality e TypeScript Foundation) concluídos com sucesso na PR #214; inspeção no dispositivo real continua pendente.
+
+## 2026-10-05: fotografias Pingo Doce e bibliotecas de imagem
+
+### Correção
+
+- o resolvedor oficial passa a aceitar o CDN atual do Pingo Doce em `www.pingodoce.pt/dw/image/v2/BLJJ_PRD/...`, mantendo compatibilidade com `static.pingodoce.pt`;
+- as fotografias oficiais Pingo Doce continuam restritas a `Sites-pingo-doce-master` e ao PID exato do produto;
+- a biblioteca persistente de imagens passa para `76-pingo-images2` e pode guardar o formato atual do Pingo Doce;
+- a CSP de produção passa a permitir `pingodoce.pt`, `www.pingodoce.pt` e `static.pingodoce.pt` apenas como origens de imagem;
+- o normalizador de imagens passa a reconhecer as famílias Open Food Facts, Open Beauty Facts, Open Products Facts e Open Pet Food Facts, além dos catálogos oficiais Pingo Doce e Continente;
+- domínios arbitrários, banners genéricos e fotografias oficiais com PID divergente continuam rejeitados.
+
+### Preservado
+
+Sem alterações a preços, quantidades, cálculos financeiros, cofre/PIN, cifragem, sincronização ou `STATE_VERSION`.
 
 ## 2026-10-05: protótipo aprovado de Adicionar produto
 
