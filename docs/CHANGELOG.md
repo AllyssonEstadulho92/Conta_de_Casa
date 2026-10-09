@@ -2,6 +2,14 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-09: correção de filtros sobrepostos no Mercado
+
+- `v76-mobile-shell.css` aplica o contrato `76-market-filter-visual-qa1` e neutraliza mínimos legados de filtros dentro da grelha móvel;
+- sem cruzamento entre `Ordenar` e `Limpar filtros` nas seis resoluções verificadas com Chromium e o artefacto publicado, incluindo 320/360/390/430 px;
+- `scripts/prepare-pages.cjs` altera a revisão do shell para atualizar a PWA; testes de regressão do layout/versionamento alinhados;
+- fonte de dados, filtros funcionais, fórmulas financeiras, PIN, cifra e sync inalterados;
+- continua pendente ensaio físico no Safari/WebKit e CI da proposta.
+
 ## 2026-10-09: fecho da auditoria técnica
 
 Os incrementos #213, #214, #215, #216 e #217 foram integrados em `main`, com testes GitHub Actions verdes antes da integração. A publicação e os ensaios físicos devem ser confirmados por versão/commit e dispositivo. Mantém-se a sequência futura de E2E reais, lockfile nativo, testes de backup/sync multi-dispositivo e consolidação de CSS.

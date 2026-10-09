@@ -2,6 +2,16 @@
 
 Atualizado: 9 de outubro de 2026
 
+## P0 — QA visual do Mercado (09/10/2026)
+
+- [x] Reproduzir controlos com HTML/CSS do artefacto publicado `f93b8fd` em Chromium.
+- [x] Identificar a interseção entre `Ordenar` e `Limpar filtros` a 360 e 390 px.
+- [x] Preparar a correção em `v76-mobile-shell.css` e validação geométrica de 320, 360, 390, 430, 768, 1440 px, sem overflow horizontal.
+- [x] Atualizar versão CSS do bundle e regressões de layout.
+- [ ] Validar CI/TypeScript da PR e publicação a partir de `main`.
+- [ ] Confirmar presencialmente Safari/PWA com navegação, listas reais, imagem de produto e filtros.
+- [ ] Validar a transferência e recuperação do cofre nas alturas úteis curtas, com o menu do Safari visível.
+
 ## P1 — DevOps e dependências reproduzíveis
 
 - [x] Gerar lockfile npm v3 do projeto PWA num runner Node 24.

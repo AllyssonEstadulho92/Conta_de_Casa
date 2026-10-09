@@ -2,6 +2,12 @@
 
 Atualizado: 9 de outubro de 2026
 
+## D-154 — corrigir colisões reais antes de redesenhar os filtros
+
+A revisão visual do artefacto publicado evidenciou que os mínimos CSS herdados de 164/190 px não eram compatíveis com as duas colunas de `v76-mobile-shell.css` nos ecrãs de 360–390 px. Restaurar largura mínima zero e `grid-column:auto` é menos arriscado do que trocar o filtro por outro componente. As seis larguras reproduzidas em Chromium mostram controlos sem sobreposição e sem scroll horizontal.
+
+Não modificar lógica de consulta, filtros ou qualquer estado. Invalidate cache CSS do shell e adicionar contratos de regressão. WebKit/iPhone continuam como verificação física.
+
 ## D-153 — entrega em incrementos reversíveis e prioridades após auditoria
 
 Primeiro consolidar bugs reproduzidos e regressões (`#213`, `#214`, `#215`), depois tornar visíveis os limites de precisão do domínio sem alterar saldos (`#216`) e estabilizar toolchain (`#217`). As alterações foram avaliadas separadamente, com testes e integração apenas após checks verdes.
