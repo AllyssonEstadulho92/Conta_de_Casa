@@ -128,8 +128,8 @@ try{
   assert.match(index,/name="app-build" content="v76"/);
   assert.match(index,/market-image-audit\.css\?v=76/);
   assert.match(index,/market-retailer-image-policy\.js\?v=76/);
-  assert.match(index,/market-image-audit\.js\?v=76-pingo-images2/);
-  assert.match(index,/market-official-images\.js\?v=76-pingo-images2/);
+  assert.match(index,/market-image-audit\.js\?v=76-pingo-url3/);
+  assert.match(index,/market-official-images\.js\?v=76-pingo-url3/);
   assert.match(index,/design-system\.css\?v=76/);
   assert.doesNotMatch(index,/ui-consistency\.css/);
   assert.doesNotMatch(index,/v64-runtime\.css/);

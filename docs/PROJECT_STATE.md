@@ -8,6 +8,14 @@ Baseline funcional em `main` antes deste bloco: `3999f74bf25396484ce2f8550c9c3d7
 Branch de fecho documental: `docs/v76-post-audit-closeout`. Baseline de produção revista: `b0dbddab7f443c8bac4e2f9d1bb1f017513928ad`.
 Histórico anterior: bloco `76-dialog-controls1` preservado abaixo.
 
+## Carregamento efetivo de fotografias Pingo Doce (09/10/2026)
+
+A auditoria ao código confirmou três defeitos concretos: o bridge `CDCOfficialMarketImages.resolve` descartava `sourceUrl` já validado e repetia a pesquisa do catálogo; `market-photo-loader.js` procurava o botão `data-visual-catalog-product` apesar de a fotografia viver no cartão `data-visual-catalog-card`; e a atualização manual `syncNow` só agendava imagens a cada 7 segundos, sem resolver as primeiras antes de apresentar o total.
+
+Branch `fix/v76-pingo-doce-image-loading3`: transportar `sourceUrl` validado por PID, carregar fotos no elemento correto, marcar `ready` apenas depois do evento `load` e priorizar até três imagens oficiais por atualização manual, respeitando os limites de rede. Foram acrescentados testes de integração com mocks de fetch, imagem e DOM, bem como revisão do cache dos três scripts.
+
+Pendente: CI, revisão da PR, publicação e inspeção real das fotografias no Safari/PWA. Sem alteração a preços, cofre, sincronização ou relaxamento do PID.
+
 ## QA visual do Mercado, resolução de sobreposição de filtros (09/10/2026)
 
 Na reprodução local do pacote público do GitHub Pages (`f93b8fd`) com o CSS real e HTML publicado, a grelha de filtros da secção Mercado apresentou sobreposição entre o seletor «Ordenar» e «Limpar filtros» a 360 e 390 px. Não existia transbordamento horizontal do documento, pelo que o problema não era detetado por testes globais de largura.

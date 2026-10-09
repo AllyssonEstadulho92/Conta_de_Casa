@@ -96,7 +96,7 @@ try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
   assert.match(index,/market-retailer-image-policy\.js\?v=76/);
-  assert.match(index,/market-official-images\.js\?v=76-pingo-images2/);
+  assert.match(index,/market-official-images\.js\?v=76-pingo-url3/);
   assert.doesNotMatch(index,/v64-runtime\.css/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
   assert.match(index,/market-shopping-focus\.js\?v=74-shopping2/);
@@ -117,5 +117,31 @@ try{
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
+
+// Uma URL exata recebida do catálogo deve resolver a foto SEM pesquisar
+// novamente cesta.pt: este contrato também protege a execução no Safari.
+const accesses=[];
+class FakeImage{set src(value){accesses.push(value);Promise.resolve().then(()=>this.onload?.());}}
+const resolvedSandbox={
+  console,URL,AbortController,setTimeout,clearTimeout,Promise,Image:FakeImage,
+  document:documentStub,requestAnimationFrame:fn=>fn(),
+  fetch:async url=>{
+    accesses.push(String(url));
+    if(!String(url).startsWith('https://r.jina.ai/'))throw new Error('unnecessary-catalog-query');
+    return {ok:true,text:async()=>`Imagem: ${pingoCurrentImage}`};
+  }
+};
+resolvedSandbox.globalThis=resolvedSandbox;
+vm.createContext(resolvedSandbox);
+vm.runInContext(js,resolvedSandbox);
+resolvedSandbox.CDCOfficialMarketImages.resolve({
+  marketId:'pingo-doce',pid:'544184',name:'Bife/Peito de Frango',
+  sourceUrl:'https://www.pingodoce.pt/home/produtos/talho/aves/frango/bife%2Fpeito-de-frango-embalado-nosso-talho-544184.html'
+}).then(result=>{
+  assert.equal(result?.imageUrl,pingoCurrentImage);
+  assert.equal(accesses.filter(url=>url.startsWith('https://r.jina.ai/')).length,1);
+  assert.equal(accesses.some(url=>url.startsWith('https://cesta.pt/')),false);
+  console.log('Pingo Doce exact-product URL resolves without redundant catalog fetch: OK');
+}).catch(error=>{console.error(error);process.exitCode=1;});
 
 console.log('Market official-image bridge remains safe under v76 with retired assets excluded from distribution: OK');

@@ -2,6 +2,14 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-09: correção do carregamento de fotografias Pingo Doce
+
+- resolvedor oficial mantém `sourceUrl` já validado para pesquisar a imagem correta sem repetir o catálogo;
+- carregador de fotografias atua em `article[data-visual-catalog-card]` e confirma o carregamento da imagem por evento do browser;
+- biblioteca Pingo Doce prioriza até três imagens no clique de atualização, mantendo carregamento gradual e limites;
+- revisões de assets JS em `prepare-pages.cjs` renovadas; testes de segurança/identidade e de DOM acrescentados;
+- não foram alterados preços, quantidades, `STATE_VERSION`, cofre ou sincronização.
+
 ## 2026-10-09: correção de filtros sobrepostos no Mercado
 
 - `v76-mobile-shell.css` aplica o contrato `76-market-filter-visual-qa1` e neutraliza mínimos legados de filtros dentro da grelha móvel;

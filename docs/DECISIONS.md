@@ -2,6 +2,12 @@
 
 Atualizado: 9 de outubro de 2026
 
+## D-155 — dar prioridade a imagens oficiais sem contornar identidade
+
+A apresentação prioritária das imagens Pingo Doce utiliza a página oficial já verificada em vez de repetir a pesquisa do catálogo e seleciona o cartão que realmente contém a fotografia. O botão «Atualizar biblioteca» resolve no máximo três primeiras imagens enquanto o utilizador aguarda; mantém os orçamentos de rede e a atualização progressiva restante. `ready` exige confirmação pelo browser (`load`).
+
+Não aceitar imagens de produtos com PID diferente, URLs arbitrários ou imagens genéricas. A ausência de fotografia oficial permanece visível, mesmo que o utilizador peça para «forçar» a apresentação.
+
 ## D-154 — corrigir colisões reais antes de redesenhar os filtros
 
 A revisão visual do artefacto publicado evidenciou que os mínimos CSS herdados de 164/190 px não eram compatíveis com as duas colunas de `v76-mobile-shell.css` nos ecrãs de 360–390 px. Restaurar largura mínima zero e `grid-column:auto` é menos arriscado do que trocar o filtro por outro componente. As seis larguras reproduzidas em Chromium mostram controlos sem sobreposição e sem scroll horizontal.

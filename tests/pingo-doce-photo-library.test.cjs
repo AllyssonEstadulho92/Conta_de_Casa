@@ -14,7 +14,7 @@ const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
-assert.match(source,/76-pingo-images2/);
+assert.match(source,/76-pingo-priority3/);
 assert.match(source,/conta-de-casa-pingo-doce-photo-library/);
 assert.match(source,/const MARKET_ID='pingo-doce'/);
 assert.match(source,/const STORE_ID='pingodoce'/);
@@ -51,7 +51,7 @@ sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:'pingo-doce-photo-library.js'});
 assert.ok(sandbox.CDCPingoDocePhotoLibrary);
-assert.equal(sandbox.CDCPingoDocePhotoLibrary.revision,'76-pingo-images2');
+assert.equal(sandbox.CDCPingoDocePhotoLibrary.revision,'76-pingo-priority3');
 assert.ok(sandbox.CDCPingoDocePhotoLibrary.categories.length>=15);
 assert.ok(sandbox.CDCPingoDocePhotoLibrary.seedCount>=200);
 
@@ -73,7 +73,7 @@ assert.equal(sandbox.CDCPingoDocePhotoLibrary.safeProductUrl('https://evil.examp
 assert.equal(sandbox.CDCPingoDocePhotoLibrary.safeProductUrl('https://www.pingodoce.pt/home/produtos/x-739491.html','739490'),'');
 assert.equal(sandbox.CDCPingoDocePhotoLibrary.identity({pid:'739490'}).key,'pingo-doce|739490');
 
-assert.match(prepare,/const PD_PHOTO_REV = '76-pingo-images2'/);
+assert.match(prepare,/const PD_PHOTO_REV = '76-pingo-priority3'/);
 for(const asset of ['pingo-doce-photo-library.css','pingo-doce-photo-library.js'])assert.ok(prepare.includes(`'${asset}'`));
 for(const asset of ['./pingo-doce-photo-library.css','./pingo-doce-photo-library.js'])assert.ok(sw.includes(`'${asset}'`));
 
@@ -81,8 +81,8 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/pingo-doce-photo-library\.css\?v=76-pingo-images2/);
-  assert.match(index,/pingo-doce-photo-library\.js\?v=76-pingo-images2/);
+  assert.match(index,/pingo-doce-photo-library\.css\?v=76-pingo-priority3/);
+  assert.match(index,/pingo-doce-photo-library\.js\?v=76-pingo-priority3/);
   assert.ok(index.indexOf('market-visual-catalog.css')<index.indexOf('pingo-doce-photo-library.css'));
   assert.ok(index.indexOf('market-visual-catalog.js')<index.indexOf('pingo-doce-photo-library.js'));
   assert.ok(index.indexOf('pingo-doce-photo-library.js')<index.indexOf('v64-runtime.js'));
@@ -90,5 +90,39 @@ try{
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
+
+assert.match(source,/const prioritarios=\[\.\.\.discovered,\.\.\.imageQueue\]/,'refresh must prioritize discovered photos');
+assert.match(source,/await warmOneImage\(record\)/,'refresh must actually load photos, not only queue them');
+assert.match(source,/warmed>=3/,'interactive refresh remains bounded');
+
+const observed=[];
+const sampleEvent=JSON.stringify({result:{content:[{type:'text',text:sample}]}});
+const runtime={
+  console,URL,Date,Map,Set,Promise,AbortController,
+  setTimeout:()=>1,clearTimeout:()=>{},
+  CDCMarketImageLibrary:{
+    get:async()=>null,
+    remember:async result=>({imageUrl:result.imageUrl})
+  },
+  CDCOfficialMarketImages:{
+    resolve:async target=>{observed.push(target);return {
+      imageUrl:'https://static.pingodoce.pt/dw/image/v2/BLJJ_PRD/on/demandware.static/-/Sites-pingo-doce-master/default/dw8cff88d2/images/large/739490_93c013c8bbf2545978b1e875cb8563de.jpg'
+    };}
+  },
+  fetch:async(_url,options)=>{
+    const method=JSON.parse(options.body).method;
+    return {ok:true,text:async()=>`data: ${method==='tools/call'?sampleEvent:JSON.stringify({result:{}})}\n\n`};
+  }
+};
+runtime.globalThis=runtime;
+vm.createContext(runtime);
+vm.runInContext(source,runtime);
+runtime.CDCPingoDocePhotoLibrary.syncNow({seeds:1}).then(result=>{
+  assert.equal(result.products,1);
+  assert.equal(result.photos,1,'manual refresh must finish with a loaded product photo');
+  assert.equal(observed[0]?.sourceUrl,parsed[0].sourceUrl);
+  assert.equal(observed[0]?.pid,'739490');
+  console.log('Pingo Doce interactive refresh warms exact SKU immediately: OK');
+}).catch(error=>{console.error(error);process.exitCode=1;});
 
 console.log('Pingo Doce progressive photo library remains exact-SKU, bounded, isolated and distributable: OK');

@@ -2,6 +2,16 @@
 
 Atualizado: 9 de outubro de 2026
 
+## P0 — Mostrar fotografias verificadas do Pingo Doce
+
+- [x] Identificar perda do `sourceUrl` no bridge, seletor de cartão incorreto e atualização manual sem imagens prioritárias.
+- [x] Corrigir o carregamento no artigo real e validação por evento `load`.
+- [x] Priorizar até três fotos exatas durante a atualização da biblioteca, sem alterar o limite de chamadas.
+- [x] Invalidar revisões PWA do bridge, biblioteca e photo-loader.
+- [ ] Validar CI + testes de integração e publicar a correção.
+- [ ] Confirmar no Safari/PWA que as fotografias oficiais abrem e o contador é coerente com os produtos reais.
+- [ ] Identificar falhas externas de rede, CSP ou imagens indisponíveis por produto, sem recorrer a fotos aproximadas.
+
 ## P0 — QA visual do Mercado (09/10/2026)
 
 - [x] Reproduzir controlos com HTML/CSS do artefacto publicado `f93b8fd` em Chromium.

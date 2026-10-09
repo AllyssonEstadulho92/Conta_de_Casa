@@ -5,6 +5,12 @@ Versão: `0.76.0`
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
 
+## 0.5. Pipeline visual de fotografias oficiais
+
+Os resultados oficiais transmitem `marketId`, `pid` e `sourceUrl` validado à `CDCOfficialMarketImages.resolve`. O bridge pode resolver diretamente a página oficial sem pesquisa repetida no cesta.pt, mas mantém a verificação da origem, pasta de imagens oficial e PID exato. `CDCPingoDocePhotoLibrary.syncNow` pode confirmar um máximo de três imagens prioritárias antes de responder ao clique; os limites de sessão/dia permanecem.
+
+O catálogo visual cria `article[data-visual-catalog-card]` com `.market-visual-product-media`. `market-photo-loader.js` seleciona esse cartão e usa o atributo do botão apenas para a ação de pesquisa. Uma imagem só é considerada `ready` depois de `load`, não depois de definir `src`. Sem fotografia oficial válida, apresenta placeholder.
+
 ## 0.4. Filtros do Mercado, layout móvel sem interseções
 
 `v76-mobile-shell.css` contém a autoridade final responsiva `76-market-filter-visual-qa1`. Em resoluções até 820 px, a grelha de filtros mantém duas colunas com largura mínima zero e redefine o seletor terceiro, que herdava mínimos de `v75-market-flow.css` (190 px). Até 359 px passa a uma coluna. O botão «Limpar filtros» é um item autónomo, não sobreposto. O catálogo, fontes de dados, preços, handlers e estado permanecem intocados.
