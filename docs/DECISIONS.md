@@ -2,6 +2,12 @@
 
 Atualizado: 9 de outubro de 2026
 
+## D-153 — entrega em incrementos reversíveis e prioridades após auditoria
+
+Primeiro consolidar bugs reproduzidos e regressões (`#213`, `#214`, `#215`), depois tornar visíveis os limites de precisão do domínio sem alterar saldos (`#216`) e estabilizar toolchain (`#217`). As alterações foram avaliadas separadamente, com testes e integração apenas após checks verdes.
+
+As prioridades seguintes são E2E real de WebKit/Chromium, ensaios multi-dispositivo de backup/sync, lockfile Expo e CSS progressivamente consolidado. Não retirar camadas nem alterar cálculos de forma transversal sem paridade verificada.
+
 ## D-152 — bloqueio de dependências reproduzível sem alterar funcionalidades
 
 A PWA usa `package-lock.json` gerado na CI Node 24 e `npm ci` nos workflows de qualidade, TypeScript e distribuição. O lockfile é versionado no Git; mudanças de dependências exigem revisão específica. A cache npm é derivada do lockfile e não substitui a validação de testes.
@@ -20,11 +26,11 @@ Reaplicar a correção da PR #212 sobre a `main` atual, em vez de forçar um mer
 
 A revisão da biblioteca de fotografias é independente da versão do cofre. Só integrar após os testes de segurança, finanças e TypeScript.
 
-## D-096 — enquadramento do PIN prioritário em iPhone (proposta)
+## D-096 — enquadramento do PIN prioritário em iPhone (integrado em #214)
 
 A autoridade visual de desbloqueio mantém-se em `v75-usability.css`. A última camada `76-pin-prototype1` ampliava o teclado, anulando o ritmo compacto anterior. `76-auth-viewport-fit1` é a revisão final para largura até 620 px: 52 px nos controlos numéricos e 48 px em alturas pequenas, preservando área tátil superior a 44 px, o botão Entrar, recuperação, importação, `100svh`, safe areas e scroll acessível.
 
-Não esconder ações nem recorrer a zoom CSS; não alterar sessão, cifra, PIN ou persistência. Validar visualmente antes de integrar em `main`.
+Não esconder ações nem recorrer a zoom CSS; não alterar sessão, cifra, PIN ou persistência. Integrado em `main`; a validação física no mesmo iPhone continua pendente.
 
 ## D-064 — migração TypeScript incremental
 

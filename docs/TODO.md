@@ -7,7 +7,8 @@ Atualizado: 9 de outubro de 2026
 - [x] Gerar lockfile npm v3 do projeto PWA num runner Node 24.
 - [x] Substituir `npm install` por `npm ci` em CI, Pages e TypeScript Foundation; ativar cache dependente do lockfile.
 - [x] Remover do workflow a etapa temporária de recolha de lockfile.
-- [ ] Confirmar CI e publicação automática com `npm ci`.
+- [x] CI de `main` com `npm ci` concluída com sucesso após #217.
+- [ ] Confirmar visualmente a publicação com o lockfile PWA.
 - [ ] Gerar e validar, em tarefa separada, o lockfile do projeto Expo nativo.
 - [ ] Criar testes E2E em browser real WebKit e Chromium, mantendo a separação das suites atuais.
 
@@ -16,22 +17,23 @@ Atualizado: 9 de outubro de 2026
 - [x] Acrescentar `marketEstimatedCount` e `marketEstimatedCents` sem modificar as fórmulas do mês.
 - [x] Distinguir no UI uma compra efetivada mas com preço estimado no Início, Calendário e Mercado.
 - [x] Proteger este caso com regressões em `tests/finance.test.cjs`.
-- [ ] CI de qualidade e teste visual em Safari/PWA.
+- [x] CI de qualidade e TypeScript verdes na PR #216.
+- [ ] Teste visual das novas indicações em Safari/PWA.
 - [ ] Definir formalmente se o indicador de caixa deve excluir valores não confirmados numa futura mudança de domínio.
 
 ## P0 — Correções do Mercado
 
 - [x] Integrar a PR #213: geometria mobile de Adicionar produto.
 - [x] Reaplicar a PR #212 sobre o novo estado de `main`, sem perder o CSS do PIN ou o histórico.
-- [ ] Validar a nova PR em CI, TypeScript e testes de segurança antes de integrar.
+- [x] PR #215 validada em CI, TypeScript e testes de segurança; integrada em `main`.
 - [ ] Confirmar fotografias oficiais Pingo Doce/Continente no Safari, sem aceitações de PID divergente.
 - [ ] Confirmar visualmente o PIN e o formulário Mercado após a nova publicação.
 
 ## P1 — Qualidade transversal
 
 - [ ] Criar testes E2E reais WebKit/Chromium com percurso do PIN, Despesas e Mercado, sem substituir os testes Node existentes.
-- [ ] Distinguir claramente preço estimado de confirmado no Mercado e no resumo financeiro, sem alterar silenciosamente fórmulas.
-- [ ] Rever lockfiles e `npm ci` nos pipelines apenas após validação de resolução de dependências.
+- [x] Distinguir preço estimado de confirmado no Mercado e no resumo financeiro, sem alterar fórmulas (#216).
+- [x] Implementar lockfile e `npm ci` nos três workflows da PWA (#217); lockfile Expo nativo continua pendente.
 - [ ] Consolidar CSS v75/v76 por componente com testes visuais e segurança de regressão.
 - [ ] Testar backup, restauro e sincronização em dois dispositivos reais.
 

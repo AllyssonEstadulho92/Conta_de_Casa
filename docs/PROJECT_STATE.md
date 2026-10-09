@@ -5,8 +5,20 @@ Versão técnica: `0.76.0`
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
 Baseline funcional em `main` antes deste bloco: `3999f74bf25396484ce2f8550c9c3d7c60bb313c` (`security: empacotar ZXing localmente e remover CDN`)
-Branch de correção de fotografias: `fix/v76-pingo-official-images-rebased`; base: `main` com PR #213 e #214 integradas.
+Branch de fecho documental: `docs/v76-post-audit-closeout`. Baseline de produção revista: `b0dbddab7f443c8bac4e2f9d1bb1f017513928ad`.
 Histórico anterior: bloco `76-dialog-controls1` preservado abaixo.
+
+## Estado consolidado após revisão multidisciplinar (09/10/2026)
+
+- **#213** corrigiu a apresentação de Adicionar produto no Safari;
+- **#214** reduziu o ecrã de PIN no iPhone;
+- **#215** restaurou origens atuais das fotografias oficiais do Pingo Doce (substitui #212);
+- **#216** passou a sinalizar preços estimados incluídos nos montantes contabilizados, sem reescrever fórmulas;
+- **#217** adicionou `package-lock.json` e `npm ci` aos workflows da PWA.
+
+CI e TypeScript das propostas passaram antes de integração. CI de `main` com `npm ci` passou. Publicação e inspeção física devem ser confirmadas por commit; os testes de browser reais e lockfile Expo nativo continuam pendentes.
+
+Próximo passo: ensaios físicos em Safari/PWA, cobertura E2E de WebKit/Chromium, lockfile nativo e consolidação gradual da cascade CSS. Não introduzir migrações de `STATE_VERSION` ou alterações de PIN, cifra, dados e valores contabilizados sem decisão e regressões.
 
 ## Instalações determinísticas da PWA (09/10/2026)
 
