@@ -13,7 +13,7 @@ const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
-assert.match(library,/76-pingo-url3/);
+assert.match(library,/76-pingo-images2/);
 assert.match(library,/conta-de-casa-market-image-library/);
 assert.match(library,/indexedDB/);
 assert.match(library,/45\*24\*60\*60\*1000/);
@@ -42,7 +42,7 @@ sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(library,sandbox,{filename:'market-image-library.js'});
 assert.ok(sandbox.CDCMarketImageLibrary,'library API must be installed');
-assert.equal(sandbox.CDCMarketImageLibrary.revision,'76-pingo-url3');
+assert.equal(sandbox.CDCMarketImageLibrary.revision,'76-pingo-images2');
 
 const continenteProduct='https://www.continente.pt/produto/compressas-gaze-20-x-20-cm-continente-8167440.html';
 const continenteImage='https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dwa5dd802e/images/col/816/8167440-frente.jpg?sw=2000&sh=2000';
