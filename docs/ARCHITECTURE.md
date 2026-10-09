@@ -5,6 +5,12 @@ Versão: `0.76.0`
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
 
+## 0.2. Toolchain e dependências da PWA
+
+O build GitHub Pages usa Node 24, `package.json` e `package-lock.json` (lockfileVersion 3) na raiz. Os workflows CI, Deploy Pages e TypeScript Foundation usam `npm ci --ignore-scripts --no-audit --no-fund` e cache npm, impedindo resolução transitiva divergente durante builds sem alteração do lockfile. A instalação não altera artefactos financeiros.
+
+A aplicação nativa `apps/mobile-native` é separada: o seu `package.json` e o workflow `mobile-native.yml` não foram migrados nesta intervenção porque ainda não há lockfile nativo verificado.
+
 ## 0.1. Transparência do valor estimado versus real
 
 `monthNumbers(month)` continua a usar o mesmo cálculo para `marketSpent`, `cashSpent` e `budgetUsed`. Quando uma compra concluída tem `actualCents<=0`, o valor `estimatedCents` ainda contribui para o total pelo contrato anterior, mas duas métricas derivadas distinguem essa condição: `marketEstimatedCount` e `marketEstimatedCents` (valor estimado dessa parcela). Estes campos são exclusivamente de leitura, sem persistência.
