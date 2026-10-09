@@ -222,7 +222,12 @@ function monthNumbers(month = selectedMonth, now = new Date()) {
   const incomes = sumCents(appState.incomes.filter(i=>inSelectedMonth(i.receivedAt, month)).map(i=>i.amountCents));
   const paymentTotal = sumCents(appState.payments.filter(p=>inSelectedMonth(p.paidAt, month)).map(p=>p.amountCents));
   const budgetPaymentTotal = sumCents(budgetPaymentsForMonth(month).map(p=>p.amountCents));
-  const marketSpent = sumCents(appState.market.filter(i=>i.purchased && inSelectedMonth(i.purchasedAt || i.updatedAt, month)).map(i=>marketLineCents(i.actualCents || i.estimatedCents || 0,i.quantity)));
+  const purchasedMarket = appState.market.filter(i=>i.purchased && inSelectedMonth(i.purchasedAt || i.updatedAt, month));
+  const withoutRealPrice = purchasedMarket.filter(i=>!(Number.isSafeInteger(i.actualCents) && i.actualCents>0));
+  const marketEstimatedCount = withoutRealPrice.length;
+  const marketEstimatedCents = sumCents(withoutRealPrice.map(i=>marketLineCents(i.estimatedCents || 0,i.quantity)));
+  // Mantém exatamente a regra monetária anterior; expõe a parcela não confirmada.
+  const marketSpent = sumCents(purchasedMarket.map(i=>marketLineCents(i.actualCents || i.estimatedCents || 0,i.quantity)));
   const cashSpent = sumCents([paymentTotal,marketSpent]);
   const bills = appState.bills.filter(b=>billInMonth(b, month) && !b.cancelled && !b.archived);
   let pending = 0;
@@ -240,7 +245,7 @@ function monthNumbers(month = selectedMonth, now = new Date()) {
   const reconciliationDiff = hasAccountBalance ? sumCents([current,-ledgerCurrent]) : 0;
   const projected = sumCents([current,-outstanding]);
   const budgetUsed = sumCents([budgetPaymentTotal,marketSpent]);
-  return { profile, incomes, paymentTotal, budgetPaymentTotal, marketSpent, cashSpent, pending, overdue, outstanding, ledgerCurrent, hasAccountBalance, reconciliationDiff, current, projected, budgetUsed, bills };
+  return { profile, incomes, paymentTotal, budgetPaymentTotal, marketSpent, marketEstimatedCount, marketEstimatedCents, cashSpent, pending, overdue, outstanding, ledgerCurrent, hasAccountBalance, reconciliationDiff, current, projected, budgetUsed, bills };
 }
 function spendingForDate(dateKey) {
   const key=cleanDateKey(dateKey);

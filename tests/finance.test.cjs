@@ -67,6 +67,28 @@ assert.equal(n.current,134200);
 assert.equal(n.projected,106500);
 assert.equal(n.reconciliationDiff,0);
 assert.equal(n.budgetUsed,15800);
+assert.equal(n.marketEstimatedCount,0);
+assert.equal(n.marketEstimatedCents,0);
+
+// Um artigo assinalado como comprado, mas sem preço real, continua a usar
+// a estimativa nos totais existentes e passa a ser identificado explicitamente.
+vm.runInContext(`appState.market.push({
+ id:'m-estimate',name:'Compra sem preço real',category:'Mercearia',
+ purchased:true,estimatedCents:425,actualCents:0,quantity:'2',
+ purchasedAt:'2026-09-07T12:00:00.000Z'
+})`,context);
+const withEstimate=vm.runInContext(`monthNumbers('2026-09',${now})`,context);
+assert.equal(withEstimate.marketEstimatedCount,1);
+assert.equal(withEstimate.marketEstimatedCents,850);
+assert.equal(withEstimate.marketSpent,10850);
+assert.equal(withEstimate.cashSpent,16650);
+assert.equal(withEstimate.budgetUsed,16650);
+vm.runInContext("appState.market=appState.market.filter(i=>i.id!=='m-estimate')",context);
+assert.equal(vm.runInContext("monthNumbers('2026-09').marketEstimatedCount",context),0);
+const render=fs.readFileSync('render.js','utf8');
+assert.match(render,/market-price-unconfirmed/,'dashboard must disclose unconfirmed market values');
+assert.match(render,/numbers.marketEstimatedCount/,'calendar must label provisional purchases');
+assert.match(render,/Estimado usado/,'market cards must identify estimated amounts used for accounting');
 
 const sep2=vm.runInContext("spendingForDate('2026-09-02')",context);
 assert.equal(sep2.paymentTotal,800);

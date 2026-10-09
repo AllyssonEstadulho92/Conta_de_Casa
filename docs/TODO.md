@@ -2,6 +2,14 @@
 
 Atualizado: 9 de outubro de 2026
 
+## P1 — Fiabilidade dos montantes exibidos
+
+- [x] Acrescentar `marketEstimatedCount` e `marketEstimatedCents` sem modificar as fórmulas do mês.
+- [x] Distinguir no UI uma compra efetivada mas com preço estimado no Início, Calendário e Mercado.
+- [x] Proteger este caso com regressões em `tests/finance.test.cjs`.
+- [ ] CI de qualidade e teste visual em Safari/PWA.
+- [ ] Definir formalmente se o indicador de caixa deve excluir valores não confirmados numa futura mudança de domínio.
+
 ## P0 — Correções do Mercado
 
 - [x] Integrar a PR #213: geometria mobile de Adicionar produto.

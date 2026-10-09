@@ -8,6 +8,12 @@ Baseline funcional em `main` antes deste bloco: `3999f74bf25396484ce2f8550c9c3d7
 Branch de correção de fotografias: `fix/v76-pingo-official-images-rebased`; base: `main` com PR #213 e #214 integradas.
 Histórico anterior: bloco `76-dialog-controls1` preservado abaixo.
 
+## Clarificação de montantes provisórios do Mercado (09/10/2026)
+
+Branch `improve/v76-finance-estimate-clarity` criada após as integrações #213, #214 e #215. Uma compra marcada como realizada pode ainda não ter `actualCents>0`; a contabilização existente utiliza `estimatedCents`. Passa a existir `marketEstimatedCount` e `marketEstimatedCents` derivados em `monthNumbers` para distinguir esse caso, com aviso no Início, subtítulo no Calendário e etiqueta no cartão do Mercado.
+
+Mantidas todas as fórmulas de `marketSpent`, `cashSpent`, `budgetUsed`, `STATE_VERSION`, IndexedDB e cofre. Necessário CI e confirmação da apresentação no Safari.
+
 ## Auditoria e integração das correções do Mercado (09/10/2026)
 
 - PR #214 do PIN compacto integrada e publicada em `main`; continua pendente a confirmação visual no iPhone.

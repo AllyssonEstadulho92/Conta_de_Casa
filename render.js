@@ -106,6 +106,13 @@ function dashboardAlertItems(n = dashboardNumbers()) {
   if (n.hasAccountBalance && n.reconciliationDiff!==0) {
     add('reconciliation','warning','Diferença de conciliação','O saldo da conta difere do saldo calculado pelos movimentos registados.','Rever saldo','planning',Math.abs(n.reconciliationDiff),'Diferença atual: ','.');
   }
+  if (n.marketEstimatedCount>0) {
+    const count=n.marketEstimatedCount;
+    add('market-price-unconfirmed','warning',
+      `${count} compra${count===1?'':'s'} com preço por confirmar`,
+      'O valor contabilizado no mês inclui estimativas até registar o preço realmente pago.',
+      'Rever preços','market',n.marketEstimatedCents,'Estimativa incluída: ','.');
+  }
   if (n.overdueCount) {
     add('overdue','danger',`${n.overdueCount} fatura${n.overdueCount===1?'':'s'} em atraso`,'Reveja os pagamentos pendentes.','Ver faturas','bills',n.overdue,'Total em atraso: ','.');
   }
@@ -364,7 +371,7 @@ function renderCalendar() {
   setHTML('#calendarMonthSummary',[
     ['Gasto no mês',numbers.cashSpent,'Pagamentos + compras','primary'],
     ['Faturas pagas',numbers.paymentTotal,'Pagamentos registados','success'],
-    ['Mercado',numbers.marketSpent,'Compras concluídas','normal'],
+    ['Mercado',numbers.marketSpent,numbers.marketEstimatedCount?`${numbers.marketEstimatedCount} compra${numbers.marketEstimatedCount===1?'':'s'} sem preço real`:'Compras concluídas','normal'],
     ['Por pagar',numbers.outstanding,'Faturas ainda pendentes',numbers.outstanding>0?'warning':'normal']
   ].map(([label,value,sub,kind])=>`<article class="calendar-summary-item ${kind}"><span>${esc(label)}</span><strong data-money>${money(value)}</strong><small>${esc(sub)}</small></article>`).join(''));
 
@@ -495,7 +502,7 @@ function marketMobileCardHtml(item) {
   const effective=marketItemEffectiveCents(item);
   return `<article class="market-mobile-card ${item.purchased?'purchased':''}">
     <div class="market-mobile-head"><label class="market-check"><input type="checkbox" data-market-toggle="${attr(item.id)}" ${item.purchased?'checked':''}><span class="sr-only">Marcar ${esc(item.name)} como comprado</span></label>${marketProductImageHtml(item)}<div><h3>${esc(item.name)}</h3><small>${esc(item.category||'Outros')} · ${esc(item.quantity||'1')} ${esc(item.unit||'un')}</small></div>${marketStatusHtml(item)}</div>
-    <div class="market-mobile-money"><div><span>Estimado</span><strong data-money>${money(marketItemEstimatedCents(item))}</strong></div><div><span>${item.purchased?'Contabilizado':'Previsto'}</span><strong data-money>${money(item.purchased?effective:marketItemEstimatedCents(item))}</strong></div><div><span>Diferença</span>${marketVarianceHtml(item)}</div></div>
+    <div class="market-mobile-money"><div><span>Estimado</span><strong data-money>${money(marketItemEstimatedCents(item))}</strong></div><div><span>${item.purchased?(item.actualCents>0?'Contabilizado':'Estimado usado'):'Previsto'}</span><strong data-money>${money(item.purchased?effective:marketItemEstimatedCents(item))}</strong></div><div><span>Diferença</span>${marketVarianceHtml(item)}</div></div>
     <div class="market-mobile-real"><span>Preço real / unidade</span>${marketActualInputHtml(item)}<small>${item.purchased&&!(item.actualCents>0)?'Enquanto faltar o preço real, os relatórios usam o valor estimado.':'Guardado automaticamente ao sair do campo.'}</small></div>
     <div class="market-mobile-actions"><button class="btn secondary" type="button" data-edit-market="${attr(item.id)}">Editar</button><button class="btn danger" type="button" data-delete-market="${attr(item.id)}">Eliminar</button></div>
   </article>`;
