@@ -5,6 +5,12 @@ Versão: `0.76.0`
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
 
+## 0.1. Transparência do valor estimado versus real
+
+`monthNumbers(month)` continua a usar o mesmo cálculo para `marketSpent`, `cashSpent` e `budgetUsed`. Quando uma compra concluída tem `actualCents<=0`, o valor `estimatedCents` ainda contribui para o total pelo contrato anterior, mas duas métricas derivadas distinguem essa condição: `marketEstimatedCount` e `marketEstimatedCents` (valor estimado dessa parcela). Estes campos são exclusivamente de leitura, sem persistência.
+
+O Início alerta quando há compras com preço real por confirmar, o Calendário informa no resumo mensal e o cartão do Mercado mostra `Estimado usado`. Não existe mudança silenciosa da contabilidade, do cofre ou da fonte de verdade.
+
 ## 0. Biblioteca de imagens oficiais do Mercado
 
 A fonte monetária permanece separada das imagens. O catálogo identifica produtos por `marketId|pid`, e a resolução de fotografias aceita apenas origens oficiais conhecidas com PID idêntico ao produto. O Pingo Doce suporta o CDN atual `www.pingodoce.pt` e a origem histórica `static.pingodoce.pt`, com validação do caminho `Sites-pingo-doce-master`; o Continente mantém a verificação da sua origem/catálogo.

@@ -2,6 +2,14 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-09: transparência das estimativas contabilizadas
+
+- `finance.js` disponibiliza duas métricas derivadas dos artigos comprados sem preço real: quantidade e parcela monetária baseada em estimativa;
+- `render.js` informa no Início, Calendário e cartão do Mercado quando há estimativas incluídas;
+- `tests/finance.test.cjs` protege a contabilização anterior e a nova indicação;
+- `DASHBOARD_REV` e `FINANCE_REV` são atualizados em `build:pages` para impedir que a PWA mantenha os ficheiros financeiros e visuais anteriores;
+- valores, fórmulas, `STATE_VERSION`, persistência, cifra e sincronização permanecem iguais.
+
 ## 2026-10-09: integração controlada das melhorias do Mercado
 
 - PR #213 integrada em `main` para estabilizar o formulário Adicionar produto no Safari;

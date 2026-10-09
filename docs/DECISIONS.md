@@ -2,6 +2,12 @@
 
 Atualizado: 9 de outubro de 2026
 
+## D-151 — identificar estimativas sem reescrever a contabilidade
+
+`actualCents=0` representa preço real não registado no fluxo atual do Mercado. Se uma compra foi marcada como concluída, o cálculo existente ainda pode utilizar o preço estimado. Por transparência, adicionar apenas métricas derivadas do mês e rótulos visíveis no Início, Mercado e Calendário, mantendo invariantes, históricos, `STATE_VERSION` e sem migração de dados.
+
+A separação entre cálculo efetivo e preço confirmado requer decisão de domínio posterior, com cenários de orçamento, caixa, relatório e restauro testados antes de qualquer mudança.
+
 ## D-150 — reforço da origem oficial das fotografias do Mercado
 
 Reaplicar a correção da PR #212 sobre a `main` atual, em vez de forçar um merge com conflitos; preservar o PIN da PR #214 e o formulário Safari da PR #213. `safeOfficialImageUrl` deve validar a origem, a pasta oficial e o PID exato, e `safeProductImageUrl` mantém uma lista restrita de origens permitidas. Não confundir imagem com confirmação de preço ou de transação.
