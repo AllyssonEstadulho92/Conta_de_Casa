@@ -5,6 +5,12 @@ Versão: `0.76.0`
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
 
+## 0.4. Filtros do Mercado, layout móvel sem interseções
+
+`v76-mobile-shell.css` contém a autoridade final responsiva `76-market-filter-visual-qa1`. Em resoluções até 820 px, a grelha de filtros mantém duas colunas com largura mínima zero e redefine o seletor terceiro, que herdava mínimos de `v75-market-flow.css` (190 px). Até 359 px passa a uma coluna. O botão «Limpar filtros» é um item autónomo, não sobreposto. O catálogo, fontes de dados, preços, handlers e estado permanecem intocados.
+
+Este é um contrato de layout. A verificação em Chromium a partir do artefacto de distribuição não substitui ensaios WebKit/Safari e navegação com cofre de teste.
+
 ## 0.3. Estado das autoridades após a auditoria
 
 Na PWA a camada visual de autenticação pertence a `v75-usability.css` e a geometria do Mercado mobile a `v76-mobile-shell.css` / `v76-product-pages.css`. O Mercado recupera fotografias com validação restrita ao retalhista e PID; a contabilidade apenas expõe métricas adicionais de valores ainda estimados. Os contratos de cifra, armazenamento e sincronização mantêm-se.

@@ -8,6 +8,14 @@ Baseline funcional em `main` antes deste bloco: `3999f74bf25396484ce2f8550c9c3d7
 Branch de fecho documental: `docs/v76-post-audit-closeout`. Baseline de produção revista: `b0dbddab7f443c8bac4e2f9d1bb1f017513928ad`.
 Histórico anterior: bloco `76-dialog-controls1` preservado abaixo.
 
+## QA visual do Mercado, resolução de sobreposição de filtros (09/10/2026)
+
+Na reprodução local do pacote público do GitHub Pages (`f93b8fd`) com o CSS real e HTML publicado, a grelha de filtros da secção Mercado apresentou sobreposição entre o seletor «Ordenar» e «Limpar filtros» a 360 e 390 px. Não existia transbordamento horizontal do documento, pelo que o problema não era detetado por testes globais de largura.
+
+Branch `fix/v76-market-filter-overlap-visual-qa`: autoridade final de layout móvel corrigida em `v76-mobile-shell.css`, removendo os mínimos legados de 164/190 px, mantendo dois campos por linha a 360–820 px e uma coluna até 359 px. Capturas offline em Chromium com largura de 320, 360, 390, 430, 768 e 1440 px passaram sem interseção geométrica ou overflow horizontal. Testes de contrato e versão de cache acrescentados.
+
+Limites: capturas reproduzem o HTML/CSS efetivamente distribuídos e controlos de recuperação gerados por JS simulados a partir de `events.js`. Não confirmam WebKit nativo, backend, imagens externas, dados privados ou o fluxo de desbloqueio. Validar no Safari/PWA antes de declarar o QA de ponta a ponta concluído.
+
 ## Estado consolidado após revisão multidisciplinar (09/10/2026)
 
 - **#213** corrigiu a apresentação de Adicionar produto no Safari;
