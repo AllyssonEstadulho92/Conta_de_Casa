@@ -2,7 +2,7 @@
 
 /* Conta de Casa — carregamento visual prioritário das fotografias do Mercado (75-photo-loader3). */
 (function installMarketPhotoLoader(root){
-  const REVISION='75-photo-loader3';
+  const REVISION='76-photo-card3';
   const POLL_MS=500;
   const MAX_POLLS=28;
   const PRIORITY_VISIBLE_LIMIT=8;
@@ -23,7 +23,8 @@
   const clean=(value,max=140)=>String(value??'').replace(/\s+/g,' ').trim().slice(0,max);
 
   function cardIdentity(card){
-    const key=clean(card?.dataset?.visualCatalogProduct||'',80);
+    // A área de fotografia pertence ao article, não ao botão "Adicionar".
+    const key=clean(card?.dataset?.visualCatalogCard||card?.dataset?.visualCatalogProduct||'',80);
     const match=/^(continente|pingo-doce)\|(\d{4,32})$/i.exec(key);
     return match?{marketId:match[1].toLowerCase(),pid:match[2],key:`${match[1].toLowerCase()}|${match[2]}`} : null;
   }
@@ -143,9 +144,22 @@
   async function hydrateCard(card){
     const id=cardIdentity(card);if(!id)return false;
     const media=card.querySelector('.market-visual-product-media');if(!media)return false;
-    if(media.querySelector('img')){
-      clearSettled(card);
-      if(id.marketId==='pingo-doce')void markPingoReady(id);
+    const existing=media.querySelector('img');
+    if(existing){
+      if(existing.complete&&existing.naturalWidth>0){
+        clearSettled(card);
+        if(id.marketId==='pingo-doce')void markPingoReady(id);
+      }else if(existing.dataset.cdcMarketPhotoObserved!=='1'){
+        existing.dataset.cdcMarketPhotoObserved='1';
+        existing.addEventListener('load',()=>{
+          clearSettled(card);
+          if(id.marketId==='pingo-doce')void markPingoReady(id);
+        },{once:true});
+        existing.addEventListener('error',()=>{
+          void root.CDCMarketImageLibrary?.forget?.(id);
+          settleUnavailable(card);
+        },{once:true});
+      }
       return true;
     }
     let record=null;
@@ -159,17 +173,17 @@
     },{once:true});
     image.addEventListener('error',()=>{
       void root.CDCMarketImageLibrary?.forget?.(id);
+      image.remove();
       settleUnavailable(card);
     },{once:true});
     image.src=record.imageUrl;
     media.replaceChildren(image);
-    if(id.marketId==='pingo-doce')void markPingoReady(id);
     return true;
   }
 
   async function refreshVisibleCards(){
     if(typeof document==='undefined'||!marketIsActive())return;
-    const cards=[...document.querySelectorAll('[data-visual-catalog-product]')];
+    const cards=[...document.querySelectorAll('[data-visual-catalog-card]')];
     if(!cards.length)return;
     await Promise.all(cards.slice(0,18).map(hydrateCard));
     cards.slice(0,18).forEach(ensureLoadingUi);
@@ -216,7 +230,7 @@
   }
 
   function priorityCards(){
-    const candidates=[...document.querySelectorAll('[data-visual-catalog-product]')].slice(0,16);
+    const candidates=[...document.querySelectorAll('[data-visual-catalog-card]')].slice(0,16);
     if(candidates.length<=PRIORITY_VISIBLE_LIMIT)return candidates;
     const selected=[];
     for(const marketId of ['pingo-doce','continente']){
@@ -300,7 +314,7 @@
   }
 
   function resetSettledCards(){
-    document.querySelectorAll('[data-visual-catalog-product]').forEach(card=>{
+    document.querySelectorAll('[data-visual-catalog-card]').forEach(card=>{
       const id=cardIdentity(card);
       delete card.dataset.photoLoaderSettledAt;
       delete card.dataset.photoLoaderStartedAt;
@@ -311,7 +325,7 @@
 
   function scan(){
     if(!marketIsActive())return;
-    document.querySelectorAll('[data-visual-catalog-product]').forEach(ensureLoadingUi);
+    document.querySelectorAll('[data-visual-catalog-card]').forEach(ensureLoadingUi);
     void refreshVisibleCards();
     void warmVisibleCards();
     void warmOnMarketEntry();

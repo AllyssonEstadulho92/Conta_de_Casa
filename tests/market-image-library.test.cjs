@@ -86,7 +86,7 @@ assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoCurrentImag
   assert.equal(pingoStored.imageUrl,pingoCurrentImage);
   assert.equal((await sandbox.CDCMarketImageLibrary.get({marketId:'pingo-doce',pid:'544184'})).imageUrl,pingoCurrentImage);
 
-  assert.match(prepare,/const IMAGE_LIBRARY_REV = '76-pingo-images2'/);
+  assert.match(prepare,/const IMAGE_LIBRARY_REV = '76-pingo-url3'/);
   assert.match(prepare,/market-image-library\.js/);
   assert.match(sw,/\.\/market-image-library\.js/);
   assert.doesNotMatch(sw,/\.\/v75-market-featured\.(?:css|js)/);
@@ -95,7 +95,7 @@ assert.equal(sandbox.CDCMarketImageLibrary.safeOfficialImageUrl(pingoCurrentImag
   try{
     execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
     const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-    assert.match(index,/market-image-library\.js\?v=76-pingo-images2/);
+    assert.match(index,/market-image-library\.js\?v=76-pingo-url3/);
     assert.ok(index.indexOf('market-image-library.js')<index.indexOf('market-retailer-image-policy.js'));
     assert.ok(index.indexOf('market-image-library.js')<index.indexOf('market-official-images.js'));
     assert.ok(fs.existsSync(path.join(dist,'market-image-library.js')));

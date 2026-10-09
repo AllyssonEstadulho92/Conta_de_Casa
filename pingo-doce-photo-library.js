@@ -11,7 +11,7 @@
  * - não ler/escrever preços, quantidades, faturas, cofre ou estado financeiro.
  */
 (function installPingoDocePhotoLibrary(root){
-  const REVISION='76-pingo-images2';
+  const REVISION='76-pingo-priority3';
   const DB_NAME='conta-de-casa-pingo-doce-photo-library';
   const DB_VERSION=1;
   const PRODUCT_STORE='products';
@@ -417,11 +417,27 @@
 
   async function syncNow({seeds=3}={}){
     const amount=Math.max(1,Math.min(Number(seeds)||3,6));
+    const discovered=[];
     for(let index=0;index<amount;index+=1){
       if(sessionQueries>=SESSION_QUERY_BUDGET)break;
-      try{await runSeed(await nextSeed(),{interactive:true});}catch(_error){}
+      try{discovered.push(...await runSeed(await nextSeed(),{interactive:true}));}catch(_error){}
     }
     await primeQueue();
+    // A atualização manual dá prioridade às fotos acabadas de descobrir.
+    // Não ultrapassa os orçamentos de rede nem aceita SKUs aproximados.
+    const prioritarios=[...discovered,...imageQueue];
+    const seen=new Set();
+    let warmed=0;
+    for(const record of prioritarios){
+      const id=identity(record);
+      if(!id||seen.has(id.key))continue;
+      seen.add(id.key);
+      if(record.imageState==='ready')continue;
+      if(warmed>=3||sessionImages>=SESSION_IMAGE_BUDGET)break;
+      await warmOneImage(record).catch(()=>null);
+      warmed+=1;
+    }
+    scheduleImageWarm(BACKGROUND_IMAGE_INTERVAL_MS);
     scheduleUi();
     return stats();
   }
