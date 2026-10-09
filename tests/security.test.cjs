@@ -32,6 +32,7 @@ const context = vm.createContext({
   RegExp,
   Error,
   Promise,
+  URL,
   atob,
   btoa,
   Storage: StorageMock,
@@ -108,6 +109,25 @@ assert.match(index, /connect-src 'self' https:\/\/api\.github\.com/);
 assert.match(index, /https:\/\/cesta\.pt/);
 assert.match(index, /https:\/\/world\.openfoodfacts\.org/);
 assert.match(index, /img-src 'self' data: blob: https:\/\/images\.openfoodfacts\.org;/);
+
+const imageAllowlistChecks = vm.runInContext(`(()=>({
+  food:safeProductImageUrl('https://images.openfoodfacts.org/images/products/123/456/789/front_en.12.400.jpg'),
+  beauty:safeProductImageUrl('https://images.openbeautyfacts.org/images/products/123/456/front_en.1.400.jpg'),
+  products:safeProductImageUrl('https://images.openproductsfacts.org/images/products/123/456/front_en.1.400.jpg'),
+  pets:safeProductImageUrl('https://images.openpetfoodfacts.org/images/products/123/456/front_en.1.400.jpg'),
+  continente:safeProductImageUrl('https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/images/col/816/8167440-frente.jpg'),
+  pingo:safeProductImageUrl('https://www.pingodoce.pt/dw/image/v2/BLJJ_PRD/on/demandware.static/-/Sites-pingo-doce-master/default/images/medium/544184_demo.jpg?sw=198'),
+  evil:safeProductImageUrl('https://evil.example/dw/image/v2/BLJJ_PRD/on/demandware.static/-/Sites-pingo-doce-master/default/images/medium/544184_demo.jpg'),
+  pingoMarketing:safeProductImageUrl('https://www.pingodoce.pt/media/banner.jpg')
+}))()`, context);
+assert.ok(imageAllowlistChecks.food);
+assert.ok(imageAllowlistChecks.beauty);
+assert.ok(imageAllowlistChecks.products);
+assert.ok(imageAllowlistChecks.pets);
+assert.ok(imageAllowlistChecks.continente);
+assert.ok(imageAllowlistChecks.pingo);
+assert.equal(imageAllowlistChecks.evil,'');
+assert.equal(imageAllowlistChecks.pingoMarketing,'');
 assert.doesNotMatch(index, /\son[a-z]+=/i, 'static HTML must not use inline event handlers');
 assert.doesNotMatch(index, /target_name=|Destino automático/);
 

@@ -94,10 +94,11 @@
         return url.href.slice(0,1100);
       }
       if(marketId==='pingo-doce'){
-        if(host!=='static.pingodoce.pt')return '';
+        if(!['pingodoce.pt','www.pingodoce.pt','static.pingodoce.pt'].includes(host))return '';
         if(!path.includes('/Sites-pingo-doce-master/'))return '';
         if(!/\/images\/(?:large|medium|small)\//i.test(path))return '';
-        if(!/\.(?:jpe?g|png|webp)$/i.test(path))return '';
+        if(!/\.(?:jpe?g|png|webp)$/i.test(path)||/noimage|fallback/i.test(path))return '';
+        if((host==='pingodoce.pt'||host==='www.pingodoce.pt')&&!path.includes('/dw/image/v2/BLJJ_PRD/on/demandware.static/-/'))return '';
         if(id&&!path.split('/').some(segment=>segment.startsWith(`${id}_`)||segment.startsWith(`${id}-`)||segment.startsWith(`${id}.`)))return '';
         return url.href.slice(0,1100);
       }
@@ -215,6 +216,8 @@
   }
 
   async function findRecord(target){
+    const direct=safeProductUrl(target?.sourceUrl||'',target.marketId,target.pid);
+    if(direct)return {marketId:target.marketId,pid:target.pid,sourceUrl:direct,label:target.label};
     const bulk=await catalogForCurrentQuery();
     const exact=bulk.get(`${target.marketId}|${target.pid}`);
     if(exact)return exact;
@@ -248,11 +251,21 @@
   function targetFromCard(card){
     const identity=parseCardId(card?.dataset?.marketProductCard||'');
     if(!identity)return null;
-    const name=clean(card.querySelector('.market-product-copy h3')?.textContent||'',130);
-    const rawPack=clean(card.querySelector('.market-product-copy>p')?.textContent||'',100);
+    const prototypeCopy=card.querySelector('.market-prototype-result-copy');
+    const name=clean(
+      card?.dataset?.marketProductName||
+      prototypeCopy?.querySelector('strong')?.textContent||
+      card.querySelector('.market-product-copy h3')?.textContent||'',130
+    );
+    const rawPack=clean(
+      card?.dataset?.marketProductPack||
+      prototypeCopy?.querySelector('small')?.textContent||
+      card.querySelector('.market-product-copy>p')?.textContent||'',100
+    );
     const pack=rawPack.replace(/\s*·\s*(Pingo Doce|Continente)\s*$/i,'').trim();
     if(!name)return null;
-    return {...identity,name,pack,label:identity.marketId==='continente'?'Continente':'Pingo Doce',cardId:clean(card.dataset.marketProductCard,100)};
+    const sourceUrl=safeProductUrl(card?.dataset?.marketProductUrl||'',identity.marketId,identity.pid);
+    return {...identity,name,pack,sourceUrl,label:identity.marketId==='continente'?'Continente':'Pingo Doce',cardId:clean(card.dataset.marketProductCard,100)};
   }
 
   function queued(task){return new Promise((resolve,reject)=>{queue.push({task,resolve,reject});runQueue();});}

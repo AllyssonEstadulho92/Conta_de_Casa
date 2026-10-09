@@ -18,6 +18,9 @@ assert.match(js,/bridge de imagens oficiais do Mercado \(v61\)/);
 assert.match(js,/\[data-market-add-product\]/);
 assert.match(js,/\.market-result-source/);
 assert.match(js,/data-market-product-card/);
+assert.match(js,/marketProductName/,'official image bridge must read stable prototype product metadata');
+assert.match(js,/market-prototype-result-copy/,'official image bridge must remain compatible with the approved prototype cards');
+assert.match(js,/marketProductUrl/,'official image bridge must prefer the exact retailer URL carried by the current card');
 assert.match(js,/parseCardId/);
 assert.match(js,/safeProductUrl/);
 assert.match(js,/safeOfficialImageUrl/);
@@ -55,6 +58,7 @@ const continenteProduct='https://www.continente.pt/produto/compressas-gaze-20-x-
 const continenteImage='https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dwa5dd802e/images/col/816/8167440-frente.jpg?sw=2000&sh=2000';
 const pingoProduct='https://www.pingodoce.pt/home/produtos/mercearia/arroz-massa-e-leguminosas/arroz/arroz-carolino-cigala-739490.html';
 const pingoImage='https://static.pingodoce.pt/dw/image/v2/BLJJ_PRD/on/demandware.static/-/Sites-pingo-doce-master/default/dw8cff88d2/images/large/739490_93c013c8bbf2545978b1e875cb8563de.jpg';
+const pingoCurrentImage='https://www.pingodoce.pt/dw/image/v2/BLJJ_PRD/on/demandware.static/-/Sites-pingo-doce-master/default/dwa8c02627/images/medium/544184_b35a81450dae22cf2c57f83fa6d0d563.jpg?sw=198';
 assert.equal(sandbox.CDCOfficialMarketImages.safeProductUrl(continenteProduct,'continente','8167440'),continenteProduct);
 assert.equal(sandbox.CDCOfficialMarketImages.safeProductUrl(pingoProduct,'pingo-doce','739490'),pingoProduct);
 assert.equal(sandbox.CDCOfficialMarketImages.safeProductUrl(pingoProduct,'pingo-doce','111111'),'');
@@ -63,6 +67,9 @@ assert.equal(sandbox.CDCOfficialMarketImages.safeOfficialImageUrl(continenteImag
 assert.equal(sandbox.CDCOfficialMarketImages.safeOfficialImageUrl(continenteImage,'continente','999999'),'');
 assert.equal(sandbox.CDCOfficialMarketImages.safeOfficialImageUrl(pingoImage,'pingo-doce','739490'),pingoImage);
 assert.equal(sandbox.CDCOfficialMarketImages.safeOfficialImageUrl(pingoImage,'pingo-doce','123456'),'');
+assert.equal(sandbox.CDCOfficialMarketImages.safeOfficialImageUrl(pingoCurrentImage,'pingo-doce','544184'),pingoCurrentImage);
+assert.equal(sandbox.CDCOfficialMarketImages.safeOfficialImageUrl(pingoCurrentImage,'pingo-doce','739490'),'');
+assert.equal(sandbox.CDCOfficialMarketImages.safeOfficialImageUrl(pingoCurrentImage.replace('www.pingodoce.pt','evil.example'),'pingo-doce','544184'),'');
 
 const catalogue=['- Pingo Doce · Arroz Carolino Cigala · 1 Kg · 1,49€ · pid 739490',pingoProduct,'- Continente · Compressas Gaze · 20 Un · 2,99€ · pid 8167440',continenteProduct].join('\n');
 const parsed=JSON.parse(JSON.stringify(sandbox.CDCOfficialMarketImages.parseCatalogRecords(catalogue)));
@@ -89,7 +96,7 @@ try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
   assert.match(index,/market-retailer-image-policy\.js\?v=76/);
-  assert.match(index,/market-official-images\.js\?v=76/);
+  assert.match(index,/market-official-images\.js\?v=76-pingo-images2/);
   assert.doesNotMatch(index,/v64-runtime\.css/);
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
   assert.match(index,/market-shopping-focus\.js\?v=74-shopping2/);

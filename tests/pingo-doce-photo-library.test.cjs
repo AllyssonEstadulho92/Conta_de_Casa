@@ -14,7 +14,7 @@ const prepare=read('scripts/prepare-pages.cjs');
 const sw=read('sw.js');
 assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
-assert.match(source,/76-add-product-prototype1/);
+assert.match(source,/76-pingo-images2/);
 assert.match(source,/conta-de-casa-pingo-doce-photo-library/);
 assert.match(source,/const MARKET_ID='pingo-doce'/);
 assert.match(source,/const STORE_ID='pingodoce'/);
@@ -51,7 +51,7 @@ sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:'pingo-doce-photo-library.js'});
 assert.ok(sandbox.CDCPingoDocePhotoLibrary);
-assert.equal(sandbox.CDCPingoDocePhotoLibrary.revision,'76-add-product-prototype1');
+assert.equal(sandbox.CDCPingoDocePhotoLibrary.revision,'76-pingo-images2');
 assert.ok(sandbox.CDCPingoDocePhotoLibrary.categories.length>=15);
 assert.ok(sandbox.CDCPingoDocePhotoLibrary.seedCount>=200);
 
@@ -73,7 +73,7 @@ assert.equal(sandbox.CDCPingoDocePhotoLibrary.safeProductUrl('https://evil.examp
 assert.equal(sandbox.CDCPingoDocePhotoLibrary.safeProductUrl('https://www.pingodoce.pt/home/produtos/x-739491.html','739490'),'');
 assert.equal(sandbox.CDCPingoDocePhotoLibrary.identity({pid:'739490'}).key,'pingo-doce|739490');
 
-assert.match(prepare,/const PD_PHOTO_REV = '76-add-product-prototype1'/);
+assert.match(prepare,/const PD_PHOTO_REV = '76-pingo-images2'/);
 for(const asset of ['pingo-doce-photo-library.css','pingo-doce-photo-library.js'])assert.ok(prepare.includes(`'${asset}'`));
 for(const asset of ['./pingo-doce-photo-library.css','./pingo-doce-photo-library.js'])assert.ok(sw.includes(`'${asset}'`));
 
@@ -81,8 +81,8 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
-  assert.match(index,/pingo-doce-photo-library\.css\?v=76-add-product-prototype1/);
-  assert.match(index,/pingo-doce-photo-library\.js\?v=76-add-product-prototype1/);
+  assert.match(index,/pingo-doce-photo-library\.css\?v=76-pingo-images2/);
+  assert.match(index,/pingo-doce-photo-library\.js\?v=76-pingo-images2/);
   assert.ok(index.indexOf('market-visual-catalog.css')<index.indexOf('pingo-doce-photo-library.css'));
   assert.ok(index.indexOf('market-visual-catalog.js')<index.indexOf('pingo-doce-photo-library.js'));
   assert.ok(index.indexOf('pingo-doce-photo-library.js')<index.indexOf('v64-runtime.js'));

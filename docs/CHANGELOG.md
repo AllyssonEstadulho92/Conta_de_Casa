@@ -10,6 +10,21 @@ O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheir
 - sem alterações a dados, cálculos, PIN, derivações de chave ou sincronização;
 - CI (quality e TypeScript Foundation) concluídos com sucesso na PR #214; inspeção no dispositivo real continua pendente.
 
+## 2026-10-05: fotografias Pingo Doce e bibliotecas de imagem
+
+### Correção
+
+- o resolvedor oficial passa a aceitar o CDN atual do Pingo Doce em `www.pingodoce.pt/dw/image/v2/BLJJ_PRD/...`, mantendo compatibilidade com `static.pingodoce.pt`;
+- as fotografias oficiais Pingo Doce continuam restritas a `Sites-pingo-doce-master` e ao PID exato do produto;
+- a biblioteca persistente de imagens passa para `76-pingo-images2` e pode guardar o formato atual do Pingo Doce;
+- a CSP de produção passa a permitir `pingodoce.pt`, `www.pingodoce.pt` e `static.pingodoce.pt` apenas como origens de imagem;
+- o normalizador de imagens passa a reconhecer as famílias Open Food Facts, Open Beauty Facts, Open Products Facts e Open Pet Food Facts, além dos catálogos oficiais Pingo Doce e Continente;
+- domínios arbitrários, banners genéricos e fotografias oficiais com PID divergente continuam rejeitados.
+
+### Preservado
+
+Sem alterações a preços, quantidades, cálculos financeiros, cofre/PIN, cifragem, sincronização ou `STATE_VERSION`.
+
 ## 2026-10-05: protótipo aprovado de Adicionar produto
 
 ### Implementação

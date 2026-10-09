@@ -11,7 +11,7 @@
  * - não ler/escrever preços, quantidades, faturas, cofre ou estado financeiro.
  */
 (function installPingoDocePhotoLibrary(root){
-  const REVISION='76-add-product-prototype1';
+  const REVISION='76-pingo-images2';
   const DB_NAME='conta-de-casa-pingo-doce-photo-library';
   const DB_VERSION=1;
   const PRODUCT_STORE='products';

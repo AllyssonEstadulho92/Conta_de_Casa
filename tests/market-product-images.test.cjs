@@ -23,7 +23,12 @@ assert.ok(!fs.existsSync('v75-market-featured.css'),'retired Featured CSS source
 assert.ok(!fs.existsSync('v75-market-featured.js'),'retired Featured runtime source must be deleted');
 
 assert.match(core,/function safeProductImageUrl/);
-assert.match(core,/url\.hostname\.toLowerCase\(\) !== 'images\.openfoodfacts\.org'/);
+assert.match(core,/images\.openfoodfacts\.org/);
+assert.match(core,/images\.openbeautyfacts\.org/);
+assert.match(core,/images\.openproductsfacts\.org/);
+assert.match(core,/images\.openpetfoodfacts\.org/);
+assert.match(core,/Sites-pingo-doce-master/);
+assert.match(core,/Sites-col-master-catalog/);
 assert.match(core,/productCode: cleanString\(i\.productCode, 32\)/);
 assert.match(core,/imageUrl: safeProductImageUrl\(i\.imageUrl\)/);
 assert.match(core,/imageSource: cleanString\(i\.imageSource, 60\)/);

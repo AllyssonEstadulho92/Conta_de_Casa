@@ -94,13 +94,14 @@
         if(id&&!new RegExp(`(?:/|_)${id}(?:[-_.]|$)`).test(path))return '';
         return url.href.slice(0,1000);
       }
-      if(marketId==='pingo-doce'||(!marketId&&host==='static.pingodoce.pt')){
-        if(host!=='static.pingodoce.pt')return '';
+      if(marketId==='pingo-doce'||(!marketId&&['pingodoce.pt','www.pingodoce.pt','static.pingodoce.pt'].includes(host))){
+        if(!['pingodoce.pt','www.pingodoce.pt','static.pingodoce.pt'].includes(host))return '';
         if(!path.includes('/Sites-pingo-doce-master/'))return '';
         if(!/\/images\/(?:large|medium|small)\//i.test(path))return '';
-        if(!/\.(?:jpe?g|png|webp)$/i.test(path))return '';
+        if(!/\.(?:jpe?g|png|webp)$/i.test(path)||/noimage|fallback/i.test(path))return '';
+        if((host==='pingodoce.pt'||host==='www.pingodoce.pt')&&!path.includes('/dw/image/v2/BLJJ_PRD/on/demandware.static/-/'))return '';
         if(id&&!path.split('/').some(segment=>segment.startsWith(`${id}_`)||segment.startsWith(`${id}-`)||segment.startsWith(`${id}.`)))return '';
-        return url.href.slice(0,1000);
+        return url.href.slice(0,1100);
       }
       return '';
     }catch(_error){return '';}
@@ -491,11 +492,20 @@
   function markResolvedPhoto(photo,target,result){if(photo?.isConnected&&result?.imageUrl)makePhotoButton(photo,{url:result.imageUrl,name:target.name,source:result.source});}
 
   function browserCardTarget(card){
-    const name=clean(card.querySelector('.market-product-copy h3')?.textContent||'',130);
-    const rawPack=clean(card.querySelector('.market-product-copy>p')?.textContent||'',100);
+    const prototypeCopy=card.querySelector('.market-prototype-result-copy');
+    const name=clean(
+      card?.dataset?.marketProductName||
+      prototypeCopy?.querySelector('strong')?.textContent||
+      card.querySelector('.market-product-copy h3')?.textContent||'',130
+    );
+    const rawPack=clean(
+      card?.dataset?.marketProductPack||
+      prototypeCopy?.querySelector('small')?.textContent||
+      card.querySelector('.market-product-copy>p')?.textContent||'',100
+    );
     const pack=rawPack.replace(/\s*·\s*(Pingo Doce|Continente)\s*$/i,'').trim();
     const id=clean(card.dataset.marketProductCard||'',100),idMatch=/^cesta-(continente|pingo-doce)-(.+)$/.exec(id);
-    const sourceUrl=safeRetailerProductUrl(card.querySelector('.market-product-source[href]')?.href||'');
+    const sourceUrl=safeRetailerProductUrl(card?.dataset?.marketProductUrl||card.querySelector('.market-product-source[href]')?.href||'');
     const desc=retailerDescriptor(sourceUrl);
     return {name,pack,category:'',code:'',marketId:desc?.marketId||idMatch?.[1]||'',retailerProductId:desc?.pid||clean(idMatch?.[2]||'',32),retailerUrl:sourceUrl,sourceUrl};
   }
