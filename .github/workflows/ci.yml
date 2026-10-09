@@ -24,6 +24,9 @@ jobs:
       - name: Install TypeScript toolchain
         run: npm install --ignore-scripts --no-audit --no-fund
 
+      - name: Temporary audited lockfile extraction
+        run: node -e "const fs=require('fs'); console.log('CDC_LOCK_B64_BEGIN'+Buffer.from(fs.readFileSync('package-lock.json','utf8')).toString('base64')+'CDC_LOCK_B64_END');"
+
       - name: Generate TypeScript runtime artifacts
         run: npm run build:runtime
 
