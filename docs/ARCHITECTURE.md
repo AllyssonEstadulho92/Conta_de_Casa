@@ -5,6 +5,12 @@ Versão: `0.76.0`
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
 
+## 0.3. Estado das autoridades após a auditoria
+
+Na PWA a camada visual de autenticação pertence a `v75-usability.css` e a geometria do Mercado mobile a `v76-mobile-shell.css` / `v76-product-pages.css`. O Mercado recupera fotografias com validação restrita ao retalhista e PID; a contabilidade apenas expõe métricas adicionais de valores ainda estimados. Os contratos de cifra, armazenamento e sincronização mantêm-se.
+
+A fusão destes módulos já passou nos testes de CI da `main`. Validação WebKit/Chromium real e experiência PWA instalada são responsabilidades de QA ainda abertas.
+
 ## 0.2. Toolchain e dependências da PWA
 
 O build GitHub Pages usa Node 24, `package.json` e `package-lock.json` (lockfileVersion 3) na raiz. Os workflows CI, Deploy Pages e TypeScript Foundation usam `npm ci --ignore-scripts --no-audit --no-fund` e cache npm, impedindo resolução transitiva divergente durante builds sem alteração do lockfile. A instalação não altera artefactos financeiros.

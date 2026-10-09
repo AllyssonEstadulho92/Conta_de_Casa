@@ -2,6 +2,10 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-09: fecho da auditoria técnica
+
+Os incrementos #213, #214, #215, #216 e #217 foram integrados em `main`, com testes GitHub Actions verdes antes da integração. A publicação e os ensaios físicos devem ser confirmados por versão/commit e dispositivo. Mantém-se a sequência futura de E2E reais, lockfile nativo, testes de backup/sync multi-dispositivo e consolidação de CSS.
+
 ## 2026-10-09: build determinístico da PWA
 
 - `package-lock.json` gerado a partir da instalação Node 24 em GitHub Actions, sem alterar versões diretas declaradas em `package.json`;
@@ -24,7 +28,7 @@ O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheir
 - a PR #212 estava em conflito com alterações recentes; os seus 16 ficheiros foram reaplicados sobre a `main` atual, preservando explicitamente `76-auth-viewport-fit1` e o histórico do changelog;
 - a nova integração aguarda CI e testes antes de publicação; dados financeiros e cifra não foram alterados.
 
-## 2026-10-09: compactação responsiva do ecrã PIN (proposta)
+## 2026-10-09: compactação responsiva do ecrã PIN (integrada em #214)
 
 - `v75-usability.css`: revisão `76-auth-viewport-fit1` apenas para a vista de desbloqueio, com layout mobile compacto, tamanhos 52/48 px, safe areas e scroll de recurso;
 - `scripts/prepare-pages.cjs`: invalidação da URL da folha de autenticação para evitar retenção do CSS anterior em Safari/PWA;
