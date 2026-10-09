@@ -108,6 +108,11 @@ assert.match(css,/#page-market \.market-command-bar\{[\s\S]*grid-template-column
 assert.match(css,/#formDialog\[data-mode="market-browser"\] \.market-catalog-card\{[\s\S]*grid-template-columns:92px minmax\(0,1fr\) auto!important/,'market search results must use a stable image-copy-action grid');
 assert.match(css,/@media\(max-width:520px\)[\s\S]*\.market-catalog-card\{[\s\S]*grid-template-columns:72px minmax\(0,1fr\)!important/,'phone search results must not crowd the product action');
 assert.match(css,/76-add-product-prototype2/,'Adicionar produto must reproduce the approved six-view prototype');
+assert.match(css,/76-market-mobile-visual-fix1/,'screenshot-driven mobile corrections must remain explicit');
+assert.match(css,/market-add-product-prototype \.dialog-head\{[\s\S]*margin:0!important[\s\S]*overflow:visible!important/,'prototype header must neutralize the inherited negative dialog margin');
+assert.match(css,/market-brand-mark\.tiny :is\(\.market-logo-pingo,\.market-logo-continente\)>\*\{[\s\S]*display:none!important/,'tiny retailer marks must not render the full wordmark inside a 16px badge');
+assert.match(css,/market-logo-pingo::before\{content:"P"!important\}/);
+assert.match(css,/market-logo-continente::before\{content:"C"!important\}/);
 assert.match(css,/market-prototype-browser>\.market-flow-estimate-note\{[\s\S]*display:none!important/,'legacy estimate note must stay out of the approved prototype');
 assert.match(market,/class="market-prototype-store-tabs"/,'prototype must expose compact Todos, Pingo Doce and Continente filters');
 assert.match(market,/data-market-open-catalog/,'initial view must expose Explorar catálogo');
