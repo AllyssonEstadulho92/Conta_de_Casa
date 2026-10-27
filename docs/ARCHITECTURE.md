@@ -9,7 +9,7 @@ Distribuição: GitHub Pages / PWA
 
 `invoice-capture.js` continua responsável por descodificar QR AT a partir de imagem ou câmara, preencher apenas campos compatíveis e apresentar o resumo local. Quando a leitura é válida, emite `cdc:bill-review-ready` com a origem (`image` ou `qr`). `v75-architecture.js` é a autoridade do estado `review` em `#formDialog`, que revela os controlos de `#billForm` anteriormente ocultos durante a captura. Ao trocar de modo, volta a utilizar `cdc:bill-mode-change` e remove o estado de revisão.
 
-O vencimento sugerido para uma nova despesa é removido no momento da leitura se não tiver sido editado, por não ser um dado presente no QR fiscal. Correções manuais têm prioridade sobre preenchimento automático numa segunda captura. A saída «Preencher manualmente» usa a ação existente do modo Manual, sem novo caminho de gravação. O submit canónico permanece em `handleBillSubmit()`, com validações e persistência existentes.
+O vencimento sugerido para uma nova despesa é removido no momento da leitura se não tiver sido editado, por não ser um dado presente no QR fiscal. Correções manuais têm prioridade sobre preenchimento automático numa segunda captura. Cada descodificação de imagem tem uma sessão; resultados tardios são ignorados se o modo ou o formulário mudarem. A saída «Preencher manualmente» usa a ação existente do modo Manual, sem novo caminho de gravação. O submit canónico permanece em `handleBillSubmit()`, com validações e persistência existentes.
 
 O modo fotográfico exige QR legível e não executa OCR. Nenhum ficheiro ou fotograma é guardado ou enviado por este módulo. Testes físicos Safari e regressão publicada permanecem por concluir.
 

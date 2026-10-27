@@ -7,6 +7,7 @@ O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheir
 - Uma leitura AT válida passa do modo fotografia/QR ao estado `review`, mostrando os campos editáveis antes de guardar.
 - O vencimento predefinido, quando não editado, deixa de se apresentar como se tivesse sido lido; correções manuais são preservadas numa segunda captura.
 - O modo de imagem chama-se «Foto com QR», descrevendo a capacidade atual sem prometer OCR. Existe a saída «Preencher manualmente» para falhas de leitura.
+- Resultados tardios de uma imagem são ignorados se o utilizador mudar de modo ou fechar o formulário durante o processamento.
 - Acrescentados testes de captura até revisão, mantendo o submit financeiro, o schema, a cifra e a sincronização intactos.
 - Pendente CI, publicação e validação física no iPhone/Safari/PWA.
 

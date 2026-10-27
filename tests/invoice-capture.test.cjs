@@ -114,6 +114,7 @@ assert.match(source,/event\.detail\?\.native/,'native file/camera selection must
 assert.match(source,/data-invoice-manual/,'failed QR or image capture must offer a visible manual recovery action');
 assert.match(source,/cdc:bill-review-ready/,'successful capture must request the editable review step');
 assert.match(source,/dueDate\.value===dueDate\.defaultValue/,'the default due date must not be mistaken for a scanned due date');
+assert.match(source,/function handleModeChange\(event\)\{\s*imageScanSession\+=1/,'switching modes must invalidate a pending asynchronous image decode');
 const architecture=fs.readFileSync('v75-architecture.js','utf8');
 assert.match(architecture,/function handleBillReviewReady\(event\)/,'the expense flow must handle a successful scan');
 assert.match(architecture,/<span>Foto com QR<\/span>/,'the image tab must not claim full invoice OCR');
@@ -176,5 +177,16 @@ context.CustomEvent=class{constructor(type,options){this.type=type;this.detail=o
   form.elements.amount.value='3,00';
   await context.CDCInvoiceCapture.scanImage({type:'image/jpeg',size:1024},'qr');
   assert.equal(form.elements.amount.value,'3,00','uma correção manual não pode ser substituída pelo leitor');
+  let resolveDelayedScan;
+  context.BarcodeDetector=class{detect(){return new Promise(resolve=>{resolveDelayedScan=resolve;});}};
+  dialog.dataset.v75BillMode='image';
+  const changeCount=changes.length;
+  const pending=context.CDCInvoiceCapture.scanImage({type:'image/jpeg',size:1024},'image');
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(typeof resolveDelayedScan,'function');
+  dialog.dataset.v75BillMode='manual';
+  resolveDelayedScan([{rawValue:officialExample}]);
+  await pending;
+  assert.equal(changes.length,changeCount,'a leitura atrasada não pode reabrir a revisão após sair do modo de captura');
   console.log('Invoice capture-to-review integration: OK');
 })().catch(error=>{console.error(error);process.exitCode=1;});

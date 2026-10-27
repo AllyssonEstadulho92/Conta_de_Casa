@@ -4,6 +4,7 @@
 
 - Reconhecimento de QR AT encaminha para a revisão editável, em vez de manter oculto o formulário.
 - Vencimento não confirmado é solicitado explicitamente; existe recuperação pelo modo manual.
+- Leituras de imagem atrasadas deixam de alterar o formulário quando o utilizador já escolheu outro modo.
 - Fotografia é identificada como «Foto com QR», já que OCR integral não existe nesta versão.
 - Sem alterações a dados financeiros, cofre ou sincronização. Validação real em iPhone ainda pendente.
 

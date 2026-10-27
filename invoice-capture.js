@@ -34,6 +34,7 @@
   let scannerControls=null;
   let scannerSession=0;
   let scannerBusy=false;
+  let imageScanSession=0;
   let pendingInvoice=null;
   const autoFilledValues=new WeakMap();
   let zxingPromise=null;
@@ -430,11 +431,15 @@
 
     ensureCaptureUi();
     syncCaptureMode(mode);
+    const scanSession=++imageScanSession;
+    const startingForm=document.querySelector('#billForm');
+    const stillActive=()=>scanSession===imageScanSession&&document.querySelector('#billForm')===startingForm&&currentCaptureMode()===mode;
     status(mode==='qr'?'A ler o QR captado pela câmara…':'A procurar o QR da AT na imagem local…');
 
     const objectUrl=URL.createObjectURL(file);
     try{
       const text=await decodeQrFromImage(file,objectUrl);
+      if(!stillActive())return;
       const data=parseAtInvoiceQr(text);
       if(!data){
         status(mode==='qr'
@@ -444,6 +449,7 @@
       }
       showPreview(data);
     }catch(_error){
+      if(!stillActive())return;
       status(mode==='qr'
         ?'Não foi possível ler o QR nesta fotografia. Tente novamente com o código mais próximo e bem iluminado.'
         :'Não foi possível encontrar um QR de faturação legível nesta imagem. Tente uma fotografia mais nítida.','warning');
@@ -515,6 +521,7 @@
   }
 
   function handleModeChange(event){
+    imageScanSession+=1;
     const mode=event.detail?.mode||currentCaptureMode();
     const normalized=mode==='image'||mode==='qr'?mode:'manual';
     const save=document.querySelector('#billForm button[type="submit"]');

@@ -8,7 +8,7 @@ Decisão: manter três entradas (Manual, Foto com QR e QR Code) e um único form
 
 Motivo: os modos `image`/`qr` ocultavam os campos de `#billForm` e o preenchimento automático não transitava para `review`. Essa discordância entre dados e UI prejudicava a conclusão do registo. O vencimento predefinido não pode ser tratado como extraído do QR; campos corrigidos manualmente não são substituídos por leituras posteriores. A opção «Foto com QR» descreve a capacidade real, sem prometer OCR.
 
-Limites: não introduzir OCR externo, APIs remotas, mudança de schema, cálculos financeiros, cofre, cifra ou sincronização nesta correção. Verificar a transição em Safari/iPhone real e os contratos de regressão antes de integrar.
+Limites: não introduzir OCR externo, APIs remotas, mudança de schema, cálculos financeiros, cofre, cifra ou sincronização nesta correção. Uma descodificação assíncrona não pode contrariar a decisão posterior do utilizador de voltar ao modo manual ou fechar o formulário. Verificar a transição em Safari/iPhone real e os contratos de regressão antes de integrar.
 
 ## D-156 — separar o fecho financeiro mensal da atenção aos vencimentos
 

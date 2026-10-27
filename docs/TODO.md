@@ -8,6 +8,7 @@ Atualizado: 27 de outubro de 2026
 - [x] Não aceitar o vencimento sugerido como informação lida do QR.
 - [x] Expor «Preencher manualmente» quando o código não é legível.
 - [x] Preservar correções manuais perante uma segunda leitura.
+- [x] Ignorar resultados de fotografias antigas depois de mudar de modo ou de formulário.
 - [x] Clarificar que «Foto com QR» não executa OCR integral.
 - [x] Acrescentar regressão de captura até à revisão.
 - [x] Executar a suite completa local, `npm run typecheck` e `npm run build:pages` sem erros.
