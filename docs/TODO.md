@@ -1,6 +1,6 @@
 # TODO — Conta de Casa
 
-Atualizado: 9 de outubro de 2026
+Atualizado: 27 de outubro de 2026
 
 ## P0 — Mostrar fotografias verificadas do Pingo Doce
 
@@ -571,3 +571,14 @@ Só concluir quando as rotas partilharem sistema visual e comportamento coerente
 - [ ] Validar visualmente em iPhone 390 px e 430 px.
 - [ ] Validar modo de palavra-passe com teclado iOS aberto.
 - [ ] Validar dark mode e rotação do dispositivo físico.
+
+
+## Orçamento mensal utilizável nas contas
+
+- [x] `76-budget-commitment4`: adicionar `budgetCommitted` e `budgetAvailable` ao domínio financeiro.
+- [x] usar compromissos pendentes na percentagem do orçamento.
+- [x] manter **Já utilizado** separado de **Por pagar**.
+- [x] alinhar o cartão do Início com o Planeamento.
+- [x] permitir percentagem textual acima de 100% e disponível negativo.
+- [x] acrescentar invariantes financeiros e testes de regressão.
+- [ ] validar no iPhone com um orçamento real e pelo menos uma fatura pendente.
