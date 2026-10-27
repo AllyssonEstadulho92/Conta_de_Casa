@@ -42,6 +42,9 @@ assert.match(events,/#monthPicker'[\s\S]*selectMonthContext\(next\)/,'month pick
 assert.match(events,/data-calendar-month/,'calendar history must allow switching back to saved months');
 assert.match(render,/openingBalanceCents===0\?'':/,'a fresh month must show an empty opening-balance field');
 assert.match(render,/budgetCents===0\?'':/,'a fresh month must show an empty monthly-budget field');
+assert.match(render,/const budgetCommitted = Number\.isSafeInteger\(n\.budgetCommitted\)/,'Dashboard must use the same committed-budget total as Planning');
+assert.match(render,/rawBudgetPct = budget \? Math\.max\(0,Math\.round\(budgetCommitted\/budget\*100\)\)/,'Dashboard budget percentage must include unpaid obligations');
+assert.match(render,/% comprometido/,'Dashboard budget copy must not call pending obligations paid spend');
 assert.match(index, /aria-label="Vistas de planeamento"/);
 assert.match(index, /aria-label="Vistas de definições"/);
 assert.match(index, /aria-label="Navegação completa"/);
