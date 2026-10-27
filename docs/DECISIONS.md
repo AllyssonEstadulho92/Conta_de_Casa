@@ -2,6 +2,14 @@
 
 Atualizado: 27 de outubro de 2026
 
+## D-157 — uma única revisão editável após captura de fatura
+
+Decisão: manter três entradas (Manual, Foto com QR e QR Code) e um único formulário financeiro. Um QR válido conduz ao modo visual `review`, onde os campos podem ser corrigidos antes do submit existente. A captura nunca cria pagamentos ou faturas diretamente. Sem leitura, o utilizador pode regressar ao modo manual sem perder o formulário.
+
+Motivo: os modos `image`/`qr` ocultavam os campos de `#billForm` e o preenchimento automático não transitava para `review`. Essa discordância entre dados e UI prejudicava a conclusão do registo. O vencimento predefinido não pode ser tratado como extraído do QR; campos corrigidos manualmente não são substituídos por leituras posteriores. A opção «Foto com QR» descreve a capacidade real, sem prometer OCR.
+
+Limites: não introduzir OCR externo, APIs remotas, mudança de schema, cálculos financeiros, cofre, cifra ou sincronização nesta correção. Verificar a transição em Safari/iPhone real e os contratos de regressão antes de integrar.
+
 ## D-156 — separar o fecho financeiro mensal da atenção aos vencimentos
 
 Decisão: preservar os cálculos e os perfis contabilísticos por mês, mas usar todas as faturas ativas quando a interface promete «Próximos 7 dias» e quando alerta para dívidas antigas. A seleção do mês não deve ocultar contas vencidas de outros meses nem vencimentos imediatos do mês seguinte.

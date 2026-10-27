@@ -399,8 +399,8 @@
     return `<div class="v75-bill-tabs full-row" role="tablist" aria-label="Modo de registo">
       <button id="expenseModeManual" type="button" class="active" role="tab" aria-selected="true" tabindex="0" data-v75-bill-mode="manual" data-v75-bill-action="expense-manual">Manual</button>
       <label id="expenseModeImage" class="v75-bill-native-tab" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="image" data-v75-bill-action="expense-image">
-        <span>Ler fatura</span>
-        <input id="expenseModeImageInput" type="file" accept="image/*" data-v75-native-invoice="image" tabindex="-1" aria-label="Selecionar fotografia da fatura">
+        <span>Foto com QR</span>
+        <input id="expenseModeImageInput" type="file" accept="image/*" data-v75-native-invoice="image" tabindex="-1" aria-label="Selecionar fotografia de fatura com QR da AT">
       </label>
       <label id="expenseModeQr" class="v75-bill-native-tab" role="tab" aria-selected="false" tabindex="-1" data-v75-bill-mode="qr" data-v75-bill-action="expense-qr">
         <span>QR Code</span>
@@ -471,7 +471,9 @@
   }
 
   function syncBillModeButtons(form,mode){
-    const effective=['manual','image','qr'].includes(mode)?mode:'manual';
+    const reviewSource=byId('formDialog')?.dataset.v75BillReviewSource;
+    const effective=mode==='review'&&['image','qr'].includes(reviewSource)
+      ?reviewSource:['manual','image','qr'].includes(mode)?mode:'manual';
     qa('.v75-bill-tabs [data-v75-bill-mode]',form).forEach(button=>{
       const on=button.dataset.v75BillMode===effective;
       button.classList.toggle('active',on);
@@ -490,8 +492,8 @@
     ensureBillTabs(form);
     const isNew=!String(form.elements.id?.value||'');
     const title=byId('dialogTitle');
-    if(title)title.textContent=isNew?'Adicionar despesa':'Editar despesa';
-    if(!['manual','image','qr'].includes(dialog.dataset.v75BillMode||''))dialog.dataset.v75BillMode='manual';
+    if(title)title.textContent=isNew&&dialog.dataset.v75BillMode==='review'?'Rever fatura':isNew?'Adicionar despesa':'Editar despesa';
+    if(!['manual','image','qr','review'].includes(dialog.dataset.v75BillMode||''))dialog.dataset.v75BillMode='manual';
     if(!dialog.dataset.v75BillAction)dialog.dataset.v75BillAction='expense-manual';
     syncBillModeButtons(form,dialog.dataset.v75BillMode);
   }
@@ -564,10 +566,22 @@
     const form=byId('billForm');
     if(!dialog||!form||!['manual','image','qr'].includes(mode))return;
     const action=clean(options.action||`expense-${mode==='image'?'image':mode==='qr'?'qr':'manual'}`);
+    delete dialog.dataset.v75BillReviewSource;
     dialog.dataset.v75BillMode=mode;
     dialog.dataset.v75BillAction=action;
     syncBillModeButtons(form,mode);
     dialog.dispatchEvent(new CustomEvent('cdc:bill-mode-change',{bubbles:true,detail:{mode,native:Boolean(options.native),action}}));
+  }
+
+  function handleBillReviewReady(event){
+    const dialog=byId('formDialog');
+    const form=byId('billForm');
+    if(!dialog?.open||!form||String(form.elements.id?.value||''))return;
+    const source=event.detail?.source==='qr'?'qr':'image';
+    dialog.dataset.v75BillReviewSource=source;
+    dialog.dataset.v75BillMode='review';
+    syncBillModeButtons(form,'review');
+    schedule();
   }
 
   function handleBillModeKeydown(event){
@@ -626,6 +640,7 @@
       if(target?.closest('[data-v75-preferences]')){event.preventDefault();handlePreferences();schedule();return;}
     },true);
     document.addEventListener('keydown',handleBillModeKeydown,true);
+    document.addEventListener('cdc:bill-review-ready',handleBillReviewReady);
     window.addEventListener('hashchange',schedule,{passive:true});
     document.addEventListener('cdc:month-change',schedule,{passive:true});
     root.matchMedia?.(MOBILE_QUERY)?.addEventListener?.('change',schedule);

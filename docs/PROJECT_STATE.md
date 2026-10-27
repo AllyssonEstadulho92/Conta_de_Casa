@@ -8,6 +8,14 @@ Baseline funcional em `main` antes deste bloco: `3999f74bf25396484ce2f8550c9c3d7
 Branch de fecho documental: `docs/v76-post-audit-closeout`. Baseline de produção revista: `b0dbddab7f443c8bac4e2f9d1bb1f017513928ad`.
 Histórico anterior: bloco `76-dialog-controls1` preservado abaixo.
 
+## Proposta de correção: leitura QR até revisão editável (27/10/2026)
+
+Na branch `fix/expense-qr-review-flow`, um QR da AT válido passa a sinalizar `cdc:bill-review-ready`. `v75-architecture.js` preserva o modo `review` e mostra os campos do formulário que os modos fotografia/QR ocultavam. O separador de origem continua identificado; o utilizador só guarda depois de rever os valores. O vencimento sugerido automaticamente pelo formulário é limpo quando ainda não foi alterado, porque essa data não consta do QR. Quando a leitura falha, existe uma ação explícita «Preencher manualmente». Valores corrigidos pelo utilizador não são substituídos por uma leitura posterior; valores anteriores gerados automaticamente podem ser atualizados por novo QR.
+
+A opção fotográfica é rotulada «Foto com QR», já que não existe OCR do texto integral nesta versão. O tratamento da imagem mantém-se local e a imagem não é persistida. Não foram alterados `STATE_VERSION`, cálculos, pagamentos, cofre, cifra, IndexedDB ou sincronização.
+
+Testes de captura e revisão acrescentados; suite local completa, TypeScript e build Pages concluídos sem erros. Pendente validação no mesmo iPhone/Safari/PWA com QR válido, imagem sem QR, regressão ao manual, vencimento, rotação e câmara negada, além de CI/publicação após revisão.
+
 ## Proposta de utilidade diária: vencimentos entre meses (27/10/2026)
 
 Objetivo: no Início, evitar que uma dívida de setembro ou um vencimento nos primeiros dias de novembro fique invisível ao consultar outubro. Fonte do comportamento anterior: `dashboardNumbers()` e `renderDashboard()` restringiam as prioridades ao mês escolhido, mesmo quando o cartão dizia «Próximos 7 dias».

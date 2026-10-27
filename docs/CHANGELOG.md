@@ -2,6 +2,14 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-27: registo de despesa com revisão após QR
+
+- Uma leitura AT válida passa do modo fotografia/QR ao estado `review`, mostrando os campos editáveis antes de guardar.
+- O vencimento predefinido, quando não editado, deixa de se apresentar como se tivesse sido lido; correções manuais são preservadas numa segunda captura.
+- O modo de imagem chama-se «Foto com QR», descrevendo a capacidade atual sem prometer OCR. Existe a saída «Preencher manualmente» para falhas de leitura.
+- Acrescentados testes de captura até revisão, mantendo o submit financeiro, o schema, a cifra e a sincronização intactos.
+- Pendente CI, publicação e validação física no iPhone/Safari/PWA.
+
 ## 2026-10-27: visão de vencimentos que atravessa meses
 
 - «Próximos 7 dias» e prioridade de pagamentos passam a considerar vencimentos próximos de qualquer mês e dívidas antigas ainda em aberto.

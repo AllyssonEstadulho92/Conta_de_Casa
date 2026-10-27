@@ -2,6 +2,19 @@
 
 Atualizado: 27 de outubro de 2026
 
+## P0 — Concluir registo após ler uma fatura (27/10/2026)
+
+- [x] Passar de fotografia/QR válido para o estado `review` com o formulário editável.
+- [x] Não aceitar o vencimento sugerido como informação lida do QR.
+- [x] Expor «Preencher manualmente» quando o código não é legível.
+- [x] Preservar correções manuais perante uma segunda leitura.
+- [x] Clarificar que «Foto com QR» não executa OCR integral.
+- [x] Acrescentar regressão de captura até à revisão.
+- [x] Executar a suite completa local, `npm run typecheck` e `npm run build:pages` sem erros.
+- [ ] Confirmar os workflows CI e Deploy Pages na proposta de alteração.
+- [ ] Confirmar fisicamente no iPhone/Safari/PWA: código válido, fotografia sem QR, câmara não autorizada, voltar ao manual e confirmação do vencimento.
+- [ ] Publicar apenas após revisão e validação; OCR integral permanece funcionalidade futura separada.
+
 ## P1 — Utilidade diária do Início entre meses (27/10/2026)
 
 - [x] Manter os KPI, orçamento e saldo projetado no mês selecionado, identificando-o nos rótulos.

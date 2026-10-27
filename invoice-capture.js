@@ -16,9 +16,9 @@
   const LOCAL_ZXING_FILE='zxing-browser.min.js';
   const MODE_COPY=Object.freeze({
     image:Object.freeze({
-      title:'Ler fatura por imagem',
+      title:'Ler QR na fotografia',
       subtitle:'Fotografia com QR da Autoridade Tributária',
-      description:'Selecione uma fotografia da fatura. A aplicação procura o código QR da AT na imagem; não faz OCR do texto completo. A imagem é processada neste dispositivo e não é guardada nem enviada.',
+      description:'Selecione uma fotografia que mostre o QR da AT. Esta versão lê o QR, mas não faz OCR do texto completo. A imagem é processada neste dispositivo e não é guardada nem enviada.',
       icon:'image',
       action:'Selecionar imagem'
     }),
@@ -35,6 +35,7 @@
   let scannerSession=0;
   let scannerBusy=false;
   let pendingInvoice=null;
+  const autoFilledValues=new WeakMap();
   let zxingPromise=null;
   let readerWarmupScheduled=false;
 
@@ -213,8 +214,14 @@
   }
 
   function setBlankField(field,value){
-    if(!field||String(field.value||'').trim()||value===null||value===undefined||value==='')return false;
+    if(!field||value===null||value===undefined||value==='')return false;
+    const current=String(field.value||'').trim();
+    // Só substituir campos vazios ou valores que o leitor anterior colocou.
+    // Uma correção feita pelo utilizador tem sempre prioridade.
+    if(current&&current!==autoFilledValues.get(field))return false;
+    if(current===String(value))return false;
     field.value=String(value);
+    autoFilledValues.set(field,String(value));
     field.dispatchEvent(new Event('input',{bubbles:true}));
     field.dispatchEvent(new Event('change',{bubbles:true}));
     return true;
@@ -257,11 +264,22 @@
 
   function showPreview(data){
     pendingInvoice=data;
+    const form=document.querySelector('#billForm');
+    const dueDate=form?.elements?.dueDate;
+    // O vencimento não vem no QR da AT. Não aceitar o valor sugerido pelo formulário
+    // como se tivesse sido identificado na fatura.
+    if(dueDate&&dueDate.value===dueDate.defaultValue)dueDate.value='';
     const applied=applyInvoiceToForm({announce:false,focus:false});
     const node=document.querySelector('#invoiceCapturePreview');
     if(!node)return;
     node.innerHTML=previewHtml(data);
     node.hidden=false;
+    const source=currentCaptureMode();
+    document.querySelector('#formDialog')?.dispatchEvent(new CustomEvent('cdc:bill-review-ready',{
+      bubbles:true,detail:{source}
+    }));
+    const save=form?.querySelector('button[type="submit"]');
+    if(save)save.textContent='Confirmar e guardar';
     status(applied.ready
       ?'QR reconhecido. Descrição, valor e restantes dados compatíveis foram preenchidos automaticamente. Confirme categoria, vencimento, método e fornecedor.'
       :'QR reconhecido e dados compatíveis preenchidos. Complete os campos obrigatórios em falta antes de guardar.',
@@ -278,6 +296,7 @@
       <div class="invoice-capture-actions">
         <button class="btn secondary" type="button" data-invoice-camera>${icon('qr',19)}<span data-invoice-camera-label>Abrir câmara</span></button>
         <label class="btn secondary file-btn invoice-image-button">${icon('image',19)}<span data-invoice-image-label>Selecionar imagem</span><input id="invoiceImageInput" type="file" accept="image/*" hidden></label>
+        <button class="btn secondary" type="button" data-invoice-manual>Preencher manualmente</button>
       </div>
       <p id="invoiceCaptureStatus" class="invoice-capture-status" role="status" aria-live="polite" hidden></p>
       <div id="invoiceCapturePreview" class="invoice-capture-preview" hidden></div>
@@ -441,6 +460,11 @@
   }
 
   function handleClick(event){
+    if(event.target.closest?.('[data-invoice-manual]')){
+      event.preventDefault();
+      document.querySelector('[data-v75-bill-action="expense-manual"]')?.click();
+      return;
+    }
     if(event.target.closest?.('[data-invoice-camera]')){
       event.preventDefault();
       if(currentCaptureMode()==='qr')openCamera().catch(()=>status('Não foi possível abrir a câmara.','warning'));
@@ -493,6 +517,8 @@
   function handleModeChange(event){
     const mode=event.detail?.mode||currentCaptureMode();
     const normalized=mode==='image'||mode==='qr'?mode:'manual';
+    const save=document.querySelector('#billForm button[type="submit"]');
+    if(save)save.textContent='Criar fatura';
     if(event.detail?.native){
       ensureCaptureUi();
       closeScanner(false);
