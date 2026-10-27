@@ -11,6 +11,7 @@ Atualizado: 27 de outubro de 2026
 - [x] Priorizar atrasos e vencimentos urgentes de vários meses, mantendo o detalhe canónico das faturas.
 - [x] Acrescentar teste específico de fronteira mensal e diagnóstico financeiro.
 - [x] Executar 52/52 testes locais, `npm run typecheck` e `npm run build:pages` sem erros.
+- [x] Incluir o teste de fronteira mensal nos workflows CI e Deploy Pages.
 - [ ] Confirmar visualmente em Safari/PWA no iPhone (alertas, mudança de mês, lista e prioridade).
 - [ ] Validar CI, revisão e publicação da proposta antes de considerar a melhoria distribuída.
 

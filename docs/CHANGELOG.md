@@ -11,6 +11,7 @@ O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheir
 - ajustado o teste de filtros móveis que ainda verificava uma revisão CSS já substituída, sem modificar o layout de produção.
 - sem migração de dados, alterações ao cofre ou sincronização. Ensaios físicos Safari/PWA e CI/publicação por confirmar.
 - validação local: 52 testes concluídos, TypeScript e build Pages sem erros.
+- o novo teste de fronteira mensal passa a fazer parte da CI e da validação da publicação Pages.
 
 ## 2026-10-09: correção do carregamento de fotografias Pingo Doce
 
