@@ -147,6 +147,14 @@ Preferências públicas não sensíveis podem usar Web Storage apenas com chaves
 
 ## 5.1 Início e fila de pagamentos
 
+### Alcance temporal operacional (27/10/2026)
+
+Os indicadores «Por pagar», «Em atraso» e «Saldo projetado» continuam circunscritos ao mês selecionado. A camada de orientação operacional usa `activeUnpaidBills(now)` em `finance.js`, exclui registos cancelados, arquivados, inválidos e integralmente pagos e não duplica valores. `dashboardNumbers()` calcula «Próximos 7 dias» de hoje até ao sétimo dia civil, inclusive, mesmo que atravesse o fim do mês. Também expõe atrasos noutros meses com primeira data de vencimento.
+
+`dashboardPriorityBills(month,now)` ordena até seis faturas por vencimento, com dívidas vencidas de todos os meses, faturas do mês selecionado e vencimentos dentro dos sete dias civis seguintes. Os cartões individuais abrem o detalhe canónico da fatura. `dashboardAlertItems()` serve o Início e o Centro de Alertas; ações com `data-month-target` chamam `selectMonthContext()` antes de `showPage('bills')`, garantindo que a lista apresentada corresponde ao aviso. Esta seleção não grava transações e preserva as regras de sincronização e privacidade.
+
+O cartão de saldo projetado não é uma visão consolidada de todas as dívidas do cofre. Os rótulos explicitam o mês para evitar essa inferência. Teste de regressão: `tests/cross-month-visibility.test.cjs`.
+
 `renderDashboard()` continua a obter todos os valores de `dashboardNumbers()`. A revisão `76-dashboard-priority1` altera apenas a leitura visual dos próximos vencimentos.
 
 Contratos:

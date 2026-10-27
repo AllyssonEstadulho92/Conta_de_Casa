@@ -2,6 +2,14 @@
 
 Atualizado: 27 de outubro de 2026
 
+## D-156 — separar o fecho financeiro mensal da atenção aos vencimentos
+
+Decisão: preservar os cálculos e os perfis contabilísticos por mês, mas usar todas as faturas ativas quando a interface promete «Próximos 7 dias» e quando alerta para dívidas antigas. A seleção do mês não deve ocultar contas vencidas de outros meses nem vencimentos imediatos do mês seguinte.
+
+Contratos: janela de sete dias civis (hoje até hoje+7, inclusive); pagamentos parciais contam apenas pelo remanescente; faturas canceladas/arquivadas/inválidas/pagas não aparecem na lista prioritária. O saldo projetado mantém-se mensal e é rotulado como tal. Uma ação sobre um alerta antigo muda explicitamente o mês em análise antes de abrir Faturas. Nenhuma mudança ao schema, cofre, sincronização, orçamento ou comportamento de pagamento.
+
+Critérios: testar fronteira outubro/novembro, atraso de setembro, valores pagos/parciais, cancelamento, ordenação, aviso e navegação; manter a distribuição PWA com revisão própria. Inspeção física iOS permanece pendente.
+
 ## D-155 — dar prioridade a imagens oficiais sem contornar identidade
 
 A apresentação prioritária das imagens Pingo Doce utiliza a página oficial já verificada em vez de repetir a pesquisa do catálogo e seleciona o cartão que realmente contém a fotografia. O botão «Atualizar biblioteca» resolve no máximo três primeiras imagens enquanto o utilizador aguarda; mantém os orçamentos de rede e a atualização progressiva restante. `ready` exige confirmação pelo browser (`load`).

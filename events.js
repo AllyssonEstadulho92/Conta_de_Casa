@@ -350,7 +350,11 @@ function wireEvents(){
   $('#quickAddBtn').addEventListener('click',()=>$('#quickDialog').showModal());
   document.addEventListener('click',e=>{
     const go=e.target.closest('[data-go]');
-    if(go) showPage(go.dataset.go);
+    if(go){
+      // Os alertas de outros meses abrem a lista certa sem alterar valores gravados.
+      if(go.dataset.monthTarget)selectMonthContext(go.dataset.monthTarget,{render:false});
+      showPage(go.dataset.go);
+    }
     const tab=e.target.closest('.section-tab[data-page]');
     if(tab)showPage(tab.dataset.page);
     const back=e.target.closest('[data-dialog-back]');

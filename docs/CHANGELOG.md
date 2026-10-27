@@ -2,6 +2,17 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-27: visão de vencimentos que atravessa meses
+
+- «Próximos 7 dias» e prioridade de pagamentos passam a considerar vencimentos próximos de qualquer mês e dívidas antigas ainda em aberto.
+- novos alertas indicam o valor por regularizar fora do mês selecionado e levam diretamente à lista do mês correto.
+- os cartões financeiros deixam explícito que «Por pagar», «Em atraso» e «Saldo projetado» dizem respeito ao mês escolhido.
+- testes de fronteira mensal, pagamentos parciais e exclusão de faturas pagas/canceladas; nova revisão PWA para a alteração chegar aos dispositivos.
+- ajustado o teste de filtros móveis que ainda verificava uma revisão CSS já substituída, sem modificar o layout de produção.
+- sem migração de dados, alterações ao cofre ou sincronização. Ensaios físicos Safari/PWA e CI/publicação por confirmar.
+- validação local: 52 testes concluídos, TypeScript e build Pages sem erros.
+- o novo teste de fronteira mensal passa a fazer parte da CI e da validação da publicação Pages.
+
 ## 2026-10-09: correção do carregamento de fotografias Pingo Doce
 
 - resolvedor oficial mantém `sourceUrl` já validado para pesquisar a imagem correta sem repetir o catálogo;

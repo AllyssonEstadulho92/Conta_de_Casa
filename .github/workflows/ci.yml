@@ -85,6 +85,9 @@ jobs:
       - name: Exact counting invariants
         run: node tests/counting-invariants.test.cjs
 
+      - name: Cross-month bill visibility and accounting
+        run: node tests/cross-month-visibility.test.cjs
+
       - name: User isolation and clean-vault tests
         run: node tests/isolation.test.cjs
 

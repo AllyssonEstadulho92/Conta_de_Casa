@@ -2,6 +2,19 @@
 
 Atualizado: 27 de outubro de 2026
 
+## P1 — Utilidade diária do Início entre meses (27/10/2026)
+
+- [x] Manter os KPI, orçamento e saldo projetado no mês selecionado, identificando-o nos rótulos.
+- [x] Calcular «Próximos 7 dias» com faturas válidas de todos os meses, incluindo o mês seguinte.
+- [x] Mostrar atrasos de meses anteriores sem misturar o montante nos totais do mês.
+- [x] Permitir abrir o mês correto diretamente a partir do alerta no Início e no Centro de Alertas.
+- [x] Priorizar atrasos e vencimentos urgentes de vários meses, mantendo o detalhe canónico das faturas.
+- [x] Acrescentar teste específico de fronteira mensal e diagnóstico financeiro.
+- [x] Executar 52/52 testes locais, `npm run typecheck` e `npm run build:pages` sem erros.
+- [x] Incluir o teste de fronteira mensal nos workflows CI e Deploy Pages.
+- [ ] Confirmar visualmente em Safari/PWA no iPhone (alertas, mudança de mês, lista e prioridade).
+- [ ] Validar CI, revisão e publicação da proposta antes de considerar a melhoria distribuída.
+
 ## P0 — Mostrar fotografias verificadas do Pingo Doce
 
 - [x] Identificar perda do `sourceUrl` no bridge, seletor de cartão incorreto e atualização manual sem imagens prioritárias.
