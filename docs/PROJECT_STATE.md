@@ -8,6 +8,14 @@ Baseline funcional em `main` antes deste bloco: `3999f74bf25396484ce2f8550c9c3d7
 Branch de fecho documental: `docs/v76-post-audit-closeout`. Baseline de produção revista: `b0dbddab7f443c8bac4e2f9d1bb1f017513928ad`.
 Histórico anterior: bloco `76-dialog-controls1` preservado abaixo.
 
+## Proposta de utilidade diária: vencimentos entre meses (27/10/2026)
+
+Objetivo: no Início, evitar que uma dívida de setembro ou um vencimento nos primeiros dias de novembro fique invisível ao consultar outubro. Fonte do comportamento anterior: `dashboardNumbers()` e `renderDashboard()` restringiam as prioridades ao mês escolhido, mesmo quando o cartão dizia «Próximos 7 dias».
+
+Alteração: `activeUnpaidBills()` fornece apenas faturas ativas, válidas e com valor em falta. `dashboardNumbers()` mantém os KPI financeiros, orçamento, saldo e reconciliação do mês selecionado, mas calcula os próximos sete dias civis sobre todos os meses e o total de atrasos externos ao mês. `dashboardPriorityBills()` reúne a fila do mês com atrasos anteriores e vencimentos a sete dias, até seis registos ordenados. Os alertas identificam dívidas de outros meses e abrem o mês correspondente através de `data-month-target`. Os KPI passam a explicitar «mês»; o centro de alertas partilha os mesmos sinais. O teste antigo dos filtros móveis foi atualizado para verificar a autoridade CSS final v76, pois ainda exigia rótulos e margens da composição anterior.
+
+Validação local: 52/52 testes Node, TypeScript (`npm run typecheck`) e build GitHub Pages (`npm run build:pages`) concluídos. Limites: não presume informação bancária nem pagamentos automáticos; não soma dívidas de outros meses ao saldo projetado do mês; não altera `STATE_VERSION`, IndexedDB, pagamentos, fórmulas monetárias, cifra, PIN ou sincronização. Pendente validação visual em Safari/iPhone e confirmação de CI/publicação da proposta.
+
 ## Carregamento efetivo de fotografias Pingo Doce (09/10/2026)
 
 A auditoria ao código confirmou três defeitos concretos: o bridge `CDCOfficialMarketImages.resolve` descartava `sourceUrl` já validado e repetia a pesquisa do catálogo; `market-photo-loader.js` procurava o botão `data-visual-catalog-product` apesar de a fotografia viver no cartão `data-visual-catalog-card`; e a atualização manual `syncNow` só agendava imagens a cada 7 segundos, sem resolver as primeiras antes de apresentar o total.

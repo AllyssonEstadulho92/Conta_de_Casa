@@ -276,21 +276,44 @@ function monthlySpendHistory(month = selectedMonth, count = 6) {
   return rows;
 }
 
+// Os avisos operacionais atravessam meses; os totais contabilísticos mantêm o mês selecionado.
+function activeUnpaidBills(now = new Date()) {
+  return (appState?.bills||[]).filter(b=>{
+    if(b.cancelled||b.archived||!(remainingForBill(b)>0))return false;
+    return ['overdue','due-today','partial','pending'].includes(billStatus(b,now));
+  });
+}
+
+function dashboardPriorityBills(month = selectedMonth, now = new Date()) {
+  return activeUnpaidBills(now).filter(b=>{
+    const days=billDaysUntil(b,now);
+    return Number.isFinite(days) && (billInMonth(b,month) || days>=0 && days<=7 || days<0);
+  }).sort(compareBillsByDue).slice(0,6);
+}
+
 function dashboardNumbers(month = selectedMonth, now = new Date()) {
   const n = monthNumbers(month, now);
   const pendingBills = n.bills.filter(b=>['pending','partial','due-today'].includes(billStatus(b,now)));
   const overdueBills = n.bills.filter(b=>billStatus(b,now)==='overdue');
-  const next7Bills = pendingBills.filter(b=>{
+  const allUnpaid = activeUnpaidBills(now);
+  const next7Bills = allUnpaid.filter(b=>{
     const days=billDaysUntil(b,now);
     return Number.isFinite(days) && days>=0 && days<=7;
-  });
+  }).sort(compareBillsByDue);
+  const otherOverdueBills = allUnpaid.filter(b=>!billInMonth(b,month)&&billStatus(b,now)==='overdue').sort(compareBillsByDue);
+  const criticalBills = next7Bills.filter(b=>billDaysUntil(b,now)===0);
   return {
     ...n,
     pendingCount:pendingBills.length,
     overdueCount:overdueBills.length,
     next7:sumCents(next7Bills.map(b=>remainingForBill(b))),
     next7Count:next7Bills.length,
-    criticalCount:pendingBills.filter(b=>billUrgency(b,now)==='critical').length
+    next7FirstMonth:next7Bills.length?billDueDateKey(next7Bills[0]).slice(0,7):'',
+    criticalCount:criticalBills.length,
+    criticalFirstMonth:criticalBills.length?billDueDateKey(criticalBills[0]).slice(0,7):'',
+    otherOverdueCount:otherOverdueBills.length,
+    otherOverdue:sumCents(otherOverdueBills.map(b=>remainingForBill(b))),
+    otherOverdueFirstMonth:otherOverdueBills.length?billDueDateKey(otherOverdueBills[0]).slice(0,7):''
   };
 }
 function categoryTotals(month = selectedMonth) {
@@ -384,7 +407,7 @@ function financialDiagnostics(month = selectedMonth, now = new Date()) {
   const dash=dashboardNumbers(month,now);
   const pendingBills=n.bills.filter(b=>['pending','partial','due-today'].includes(billStatus(b,now)));
   const overdueBills=n.bills.filter(b=>billStatus(b,now)==='overdue');
-  const next7Bills=pendingBills.filter(b=>{
+  const next7Bills=activeUnpaidBills(now).filter(b=>{
     const days=billDaysUntil(b,now);
     return Number.isFinite(days)&&days>=0&&days<=7;
   });
@@ -398,6 +421,8 @@ function financialDiagnostics(month = selectedMonth, now = new Date()) {
   const expectedLedgerCurrent=sumCents([n.profile.openingBalanceCents,n.incomes,-n.paymentTotal,-n.marketSpent]);
   const expectedCurrent=n.hasAccountBalance?n.profile.accountBalanceCents:expectedLedgerCurrent;
   const expectedNext7=sumCents(next7Bills.map(b=>remainingForBill(b)));
+  const otherOverdueBills=activeUnpaidBills(now).filter(b=>!billInMonth(b,month)&&billStatus(b,now)==='overdue');
+  const expectedOtherOverdue=sumCents(otherOverdueBills.map(b=>remainingForBill(b)));
   const categoryTotal=sumCents(categoryTotals(month).map(([,value])=>value));
   const cashCategoryTotal=sumCents(cashCategoryTotals(month).map(([,value])=>value));
   if(n.pending!==expectedPending) issues.push({code:'pending-invariant',severity:'critical',count:1,label:'Total por pagar não corresponde às faturas pendentes'});
@@ -412,6 +437,7 @@ function financialDiagnostics(month = selectedMonth, now = new Date()) {
   if(dash.pendingCount!==pendingBills.length) issues.push({code:'pending-count-invariant',severity:'critical',count:1,label:'Contagem por pagar não corresponde ao número de faturas pendentes'});
   if(dash.overdueCount!==overdueBills.length) issues.push({code:'overdue-count-invariant',severity:'critical',count:1,label:'Contagem em atraso não corresponde ao número de faturas vencidas'});
   if(dash.next7!==expectedNext7||dash.next7Count!==next7Bills.length) issues.push({code:'next7-invariant',severity:'critical',count:1,label:'Próximos 7 dias não correspondem aos vencimentos do período'});
+  if(dash.otherOverdue!==expectedOtherOverdue||dash.otherOverdueCount!==otherOverdueBills.length) issues.push({code:'other-overdue-invariant',severity:'critical',count:1,label:'Atrasos de outros meses não correspondem às faturas ainda em aberto'});
   if(categoryTotal!==expectedBudgetUsed) issues.push({code:'category-total-invariant',severity:'critical',count:1,label:'Total por categorias não corresponde ao orçamento utilizado do mês'});
   if(cashCategoryTotal!==expectedCashSpent) issues.push({code:'cash-category-total-invariant',severity:'critical',count:1,label:'Categorias do relatório não correspondem ao gasto real do mês'});
   return {

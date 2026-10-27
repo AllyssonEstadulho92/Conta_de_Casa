@@ -97,8 +97,8 @@ function renderPage(page) {
 
 function dashboardAlertItems(n = dashboardNumbers()) {
   const items = [];
-  const add = (id,tone,title,description,actionLabel,page,amountCents=null,amountLead='',amountTrail='') => {
-    items.push({id,tone,title,description,actionLabel,page,amountCents,amountLead,amountTrail});
+  const add = (id,tone,title,description,actionLabel,page,amountCents=null,amountLead='',amountTrail='',monthTarget='') => {
+    items.push({id,tone,title,description,actionLabel,page,amountCents,amountLead,amountTrail,monthTarget});
   };
   if (!n.hasAccountBalance) {
     add('balance-unconfirmed','warning','Saldo bancário por confirmar','O saldo apresentado é uma estimativa baseada nos registos internos.','Atualizar saldo','planning');
@@ -114,10 +114,16 @@ function dashboardAlertItems(n = dashboardNumbers()) {
       'Rever preços','market',n.marketEstimatedCents,'Estimativa incluída: ','.');
   }
   if (n.overdueCount) {
-    add('overdue','danger',`${n.overdueCount} fatura${n.overdueCount===1?'':'s'} em atraso`,'Reveja os pagamentos pendentes.','Ver faturas','bills',n.overdue,'Total em atraso: ','.');
+    add('overdue','danger',`${n.overdueCount} fatura${n.overdueCount===1?'':'s'} em atraso neste mês`,'Reveja os pagamentos pendentes.','Ver faturas','bills',n.overdue,'Total em atraso: ','.');
+  }
+  if (n.otherOverdueCount) {
+    add('overdue-other-months','danger',`${n.otherOverdueCount} fatura${n.otherOverdueCount===1?'':'s'} em atraso noutros meses`,
+      'Estes valores não estão incluídos no saldo projetado do mês selecionado.',
+      'Ver faturas','bills',n.otherOverdue,'Total por regularizar: ','.',n.otherOverdueFirstMonth);
   }
   if (n.criticalCount) {
-    add('critical-due','warning',`${n.criticalCount} vencimento${n.criticalCount===1?'':'s'} nas próximas 24 horas`,'Estes pagamentos exigem atenção imediata.','Ver vencimentos','bills');
+    add('critical-due','warning',`${n.criticalCount} vencimento${n.criticalCount===1?'':'s'} hoje`,
+      'Inclui faturas de outros meses, se existirem.','Ver vencimentos','bills',null,'','',n.criticalFirstMonth);
   }
   if (n.projected < 0) {
     add('negative-projection','danger','Saldo projetado negativo','As obrigações em aberto ultrapassam o saldo atual projetado.','Abrir planeamento','planning',Math.abs(n.projected),'Falta projetada: ','.');
@@ -134,18 +140,20 @@ function dashboardAlertDescriptionHtml(item) {
 }
 
 function dashboardAlertPanelHtml(item) {
-  return `<div class="alert ${attr(item.tone)}"><span><strong>${esc(item.title)}</strong> ${dashboardAlertDescriptionHtml(item)}</span><button class="link-btn" type="button" data-go="${attr(item.page)}">${esc(item.actionLabel)}</button></div>`;
+  const monthAttr=item.monthTarget?` data-month-target="${attr(item.monthTarget)}"`:'';
+  return `<div class="alert ${attr(item.tone)}"><span><strong>${esc(item.title)}</strong> ${dashboardAlertDescriptionHtml(item)}</span><button class="link-btn" type="button" data-go="${attr(item.page)}"${monthAttr}>${esc(item.actionLabel)}</button></div>`;
 }
 
 function alertCenterItemHtml(item) {
   const severity=item.tone==='danger'?'Urgente':'Atenção';
+  const monthAttr=item.monthTarget?` data-month-target="${attr(item.monthTarget)}"`:'';
   return `<article class="alert-center-item ${attr(item.tone)}" role="listitem" data-alert-id="${attr(item.id)}">
     <span class="alert-center-indicator" aria-hidden="true"></span>
     <div class="alert-center-copy">
       <div class="alert-center-item-head"><strong>${esc(item.title)}</strong><span class="alert-center-severity">${severity}</span></div>
       <p>${dashboardAlertDescriptionHtml(item)}</p>
     </div>
-    <button class="btn secondary alert-center-action" type="button" data-go="${attr(item.page)}">${esc(item.actionLabel)}</button>
+    <button class="btn secondary alert-center-action" type="button" data-go="${attr(item.page)}"${monthAttr}>${esc(item.actionLabel)}</button>
   </article>`;
 }
 
@@ -159,7 +167,7 @@ function renderAlertCenter(items = dashboardAlertItems()) {
     : 'Sem alertas ativos neste momento';
   setHTML(list,count
     ? items.map(alertCenterItemHtml).join('')
-    : '<div class="alert-center-empty"><strong>Está tudo em ordem</strong><p>Não existem alertas financeiros ativos para o mês selecionado.</p></div>');
+    : '<div class="alert-center-empty"><strong>Está tudo em ordem</strong><p>Não existem alertas financeiros ativos.</p></div>');
 }
 
 function updateAlertBadge() {
@@ -188,20 +196,20 @@ function renderDashboard() {
     : 'Estimativa pelos registos · atualize o saldo da conta';
   const balanceCard=`<article class="kpi success account-balance-kpi"><span class="label">Saldo atual</span><strong data-money>${money(n.current)}</strong><small>${esc(balanceSub)}</small><button class="link-btn kpi-action" type="button" data-update-balance>Atualizar saldo</button></article>`;
   const kpis = [
-    ['Por pagar',n.pending,'primary',`${n.pendingCount} conta${n.pendingCount===1?'':'s'}`],
-    ['Em atraso',n.overdue,'danger',`${n.overdueCount} conta${n.overdueCount===1?'':'s'}`],
-    ['Saldo projetado',n.projected,n.projected<0?'danger':'success','Saldo atual menos obrigações ainda por pagar']
+    ['Por pagar · mês',n.pending,'primary',`${n.pendingCount} conta${n.pendingCount===1?'':'s'}`],
+    ['Em atraso · mês',n.overdue,'danger',`${n.overdueCount} conta${n.overdueCount===1?'':'s'}`],
+    ['Saldo projetado · mês',n.projected,n.projected<0?'danger':'success','Saldo atual menos obrigações do mês selecionado']
   ];
   setHTML('#kpiGrid', balanceCard+kpis.map(([label,value,kind,sub])=>`<article class="kpi ${kind}"><span class="label">${esc(label)}</span><strong data-money>${money(value)}</strong><small>${esc(sub)}</small></article>`).join(''));
   const secondaryMetrics = [
     ['Pago no mês',paidBills,'Pagamentos confirmados'],
-    ['Próximos 7 dias',n.next7,`${n.next7Count} vencimento${n.next7Count===1?'':'s'}`]
+    ['Próximos 7 dias',n.next7,`${n.next7Count} vencimento${n.next7Count===1?'':'s'} · todos os meses`]
   ];
   setHTML('#dashboardSecondary', secondaryMetrics.map(([label,value,sub])=>`<article class="dashboard-secondary-card"><div><span>${esc(label)}</span><small>${esc(sub)}</small></div><strong data-money>${money(value)}</strong></article>`).join(''));
   const alerts = dashboardAlertItems(n);
   setHTML('#alertsPanel', alerts.map(dashboardAlertPanelHtml).join(''));
-  const priorityBills = n.bills.filter(b=>{const days=billDaysUntil(b);return remainingForBill(b)>0&&Number.isFinite(days);}).sort(compareBillsByDue).slice(0,6);
-  setHTML('#upcomingBills', priorityBills.length ? priorityBills.map((bill,index)=>dashboardUpcomingBillHtml(bill,index,priorityBills.length)).join('') : empty('Sem faturas pendentes neste mês.'));
+  const priorityBills = dashboardPriorityBills(selectedMonth);
+  setHTML('#upcomingBills', priorityBills.length ? priorityBills.map((bill,index)=>dashboardUpcomingBillHtml(bill,index,priorityBills.length)).join('') : empty('Sem faturas em atraso ou vencimentos prioritários.'));
   renderCategoryBars('#categoryBars', categoryTotals());
   const budget = n.profile.budgetCents || 0;
   const budgetCommitted = Number.isSafeInteger(n.budgetCommitted) ? n.budgetCommitted : sumCents([n.budgetUsed,n.outstanding]);
