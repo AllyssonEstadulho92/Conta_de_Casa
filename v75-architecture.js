@@ -68,6 +68,9 @@
  * - Segurança mantém seleção própria no menu completo, embora continue agrupada
  *   em “Mais” no dock móvel compacto.
  *
+ * 76-walli-share-drawer1:
+ * - Partilha do Walli permanece como destino dedicado no drawer sem alterar o domínio financeiro.
+ *
  * 76-planning-budget-card2:
  * - o resumo móvel de Planeamento passa a uma hierarquia única inspirada no protótipo;
  * - mês, intervalo, orçamento, gasto e disponível continuam derivados do domínio real;
