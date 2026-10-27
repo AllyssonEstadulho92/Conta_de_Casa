@@ -1037,3 +1037,14 @@ Próximo passo: ligar o subprojeto a uma conta/projeto Expo autorizado e gerar a
 - classe `vault-unlock-active` isola o novo visual do fluxo Criar cofre;
 - cache/asset revision atualizada para `76-pin-prototype1`;
 - nenhuma alteração à cifra, PBKDF2, IndexedDB ou dados financeiros.
+
+
+## 2026-10-27: orçamento passa a considerar compromissos pendentes
+
+- criado `budgetCommitted = budgetUsed + outstanding`;
+- criado `budgetAvailable = budgetCents - budgetCommitted`;
+- percentagem do orçamento passa a refletir valores já utilizados e faturas ainda por pagar;
+- Planeamento mostra **Já utilizado**, **Por pagar**, **Orçamento** e **Disponível**;
+- cartão do Início usa a mesma base de compromisso;
+- percentagem textual pode ultrapassar 100% para mostrar excesso de orçamento;
+- sem alteração a dados persistidos, cofre, pagamentos, IndexedDB ou sincronização.

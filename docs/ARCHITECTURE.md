@@ -852,3 +852,16 @@ O redesign é estritamente visual e de composição. `#vaultUnlock`, `#unlockPas
 `events.js` aplica a classe `vault-unlock-active` ao `#vaultScreen` quando existe um cofre local. Isto permite que o protótipo visual seja aplicado apenas ao desbloqueio, sem afetar o fluxo de criação inicial do cofre.
 
 A iconografia do PIN continua centralizada em `ui-icons.js`: Lock, Backspace, Key, Eye/Edit e ArrowRight usam o snapshot Lucide local. O CSS principal do protótipo vive em `v75-usability.css`, revisão `76-pin-prototype1`.
+
+
+## Orçamento comprometido como indicador principal
+
+A camada financeira expõe três métricas distintas:
+
+- `budgetUsed = budgetPaymentTotal + marketSpent`: parcela já utilizada;
+- `budgetCommitted = budgetUsed + outstanding`: parcela já utilizada mais faturas ainda por pagar do mês;
+- `budgetAvailable = profile.budgetCents - budgetCommitted`: valor efetivamente livre do orçamento.
+
+O Planeamento e o cartão de Orçamento no Início usam `budgetCommitted` para a percentagem de progresso. A interface apresenta separadamente **Já utilizado** e **Por pagar**, evitando transformar compromissos futuros em pagamentos já realizados.
+
+A percentagem textual usa o valor bruto e pode ultrapassar 100%. O preenchimento visual do anel/barra é limitado a 100% apenas por geometria, enquanto o disponível pode ficar negativo para evidenciar excesso de compromisso.

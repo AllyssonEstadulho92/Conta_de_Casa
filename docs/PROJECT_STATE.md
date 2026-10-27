@@ -1,6 +1,6 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 9 de outubro de 2026
+Atualizado: 27 de outubro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
@@ -741,3 +741,20 @@ Alterações:
 - revisão pública `76-pin-prototype1`.
 
 Não houve alteração ao PBKDF2, AES-GCM, IndexedDB, política de bloqueio automático ou requisitos mínimos do PIN.
+
+
+## Orçamento mensal — percentagem baseada no compromisso real (27/10/2026)
+
+Revisão técnica: `76-budget-commitment4` / `76-planning-commitment-progress2`.
+
+A captura física mostrou um estado enganador: orçamento definido, faturas já registadas, mas anel em **0%** e valor totalmente disponível enquanto nada tinha sido pago. O domínio já separava `budgetUsed` de `outstanding`, porém a percentagem visual considerava apenas `budgetUsed`.
+
+Correção:
+
+- `budgetUsed` continua a significar apenas orçamento já utilizado por pagamentos alocados ao mês + compras concluídas;
+- novo `budgetCommitted = budgetUsed + outstanding` representa tudo o que já consome/reserva orçamento;
+- novo `budgetAvailable = budgetCents - budgetCommitted` é a fonte canónica do disponível;
+- o anel e o cartão de Orçamento no Início passam a medir `budgetCommitted / budgetCents`;
+- **Já utilizado** e **Por pagar** permanecem separados, portanto uma fatura pendente reduz o disponível sem ser apresentada como paga;
+- percentagem textual pode ultrapassar 100% para mostrar sobrecompromisso; o desenho do anel continua limitado visualmente a 100%;
+- `STATE_VERSION`, pagamentos, valores em cêntimos, IndexedDB, cofre e sincronização não foram alterados.

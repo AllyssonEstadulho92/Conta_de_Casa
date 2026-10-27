@@ -245,7 +245,9 @@ function monthNumbers(month = selectedMonth, now = new Date()) {
   const reconciliationDiff = hasAccountBalance ? sumCents([current,-ledgerCurrent]) : 0;
   const projected = sumCents([current,-outstanding]);
   const budgetUsed = sumCents([budgetPaymentTotal,marketSpent]);
-  return { profile, incomes, paymentTotal, budgetPaymentTotal, marketSpent, marketEstimatedCount, marketEstimatedCents, cashSpent, pending, overdue, outstanding, ledgerCurrent, hasAccountBalance, reconciliationDiff, current, projected, budgetUsed, bills };
+  const budgetCommitted = sumCents([budgetUsed,outstanding]);
+  const budgetAvailable = sumCents([profile.budgetCents,-budgetCommitted]);
+  return { profile, incomes, paymentTotal, budgetPaymentTotal, marketSpent, marketEstimatedCount, marketEstimatedCents, cashSpent, pending, overdue, outstanding, ledgerCurrent, hasAccountBalance, reconciliationDiff, current, projected, budgetUsed, budgetCommitted, budgetAvailable, bills };
 }
 function spendingForDate(dateKey) {
   const key=cleanDateKey(dateKey);
@@ -377,7 +379,7 @@ function financialDiagnostics(month = selectedMonth, now = new Date()) {
   const duplicateRecurrences=[...recurrenceCounts.values()].filter(v=>v>1).reduce((sum,v)=>sum+(v-1),0);
   if(duplicateRecurrences) issues.push({code:'duplicate-recurrences',severity:'high',count:duplicateRecurrences,label:'Possíveis ocorrências recorrentes duplicadas'});
   const n=monthNumbers(month,now);
-  if(![n.incomes,n.paymentTotal,n.budgetPaymentTotal,n.marketSpent,n.cashSpent,n.pending,n.overdue,n.outstanding,n.ledgerCurrent,n.current,n.reconciliationDiff,n.projected,n.budgetUsed].every(Number.isSafeInteger)) issues.push({code:'unsafe-month-total',severity:'critical',count:1,label:'Total mensal fora do intervalo monetário seguro'});
+  if(![n.incomes,n.paymentTotal,n.budgetPaymentTotal,n.marketSpent,n.cashSpent,n.pending,n.overdue,n.outstanding,n.ledgerCurrent,n.current,n.reconciliationDiff,n.projected,n.budgetUsed,n.budgetCommitted,n.budgetAvailable].every(Number.isSafeInteger)) issues.push({code:'unsafe-month-total',severity:'critical',count:1,label:'Total mensal fora do intervalo monetário seguro'});
   if(n.projected!==sumCents([n.current,-n.outstanding])) issues.push({code:'projected-invariant',severity:'critical',count:1,label:'Saldo projetado não corresponde ao saldo atual menos obrigações'});
   const dash=dashboardNumbers(month,now);
   const pendingBills=n.bills.filter(b=>['pending','partial','due-today'].includes(billStatus(b,now)));
@@ -390,6 +392,8 @@ function financialDiagnostics(month = selectedMonth, now = new Date()) {
   const expectedOverdue=sumCents(overdueBills.map(b=>remainingForBill(b)));
   const expectedOutstanding=sumCents([expectedPending,expectedOverdue]);
   const expectedBudgetUsed=sumCents([n.budgetPaymentTotal,n.marketSpent]);
+  const expectedBudgetCommitted=sumCents([expectedBudgetUsed,n.outstanding]);
+  const expectedBudgetAvailable=sumCents([n.profile.budgetCents,-expectedBudgetCommitted]);
   const expectedCashSpent=sumCents([n.paymentTotal,n.marketSpent]);
   const expectedLedgerCurrent=sumCents([n.profile.openingBalanceCents,n.incomes,-n.paymentTotal,-n.marketSpent]);
   const expectedCurrent=n.hasAccountBalance?n.profile.accountBalanceCents:expectedLedgerCurrent;
@@ -400,6 +404,8 @@ function financialDiagnostics(month = selectedMonth, now = new Date()) {
   if(n.overdue!==expectedOverdue) issues.push({code:'overdue-invariant',severity:'critical',count:1,label:'Total em atraso não corresponde às faturas vencidas'});
   if(n.outstanding!==expectedOutstanding) issues.push({code:'outstanding-invariant',severity:'critical',count:1,label:'Total em aberto não corresponde a por pagar mais atrasos'});
   if(n.budgetUsed!==expectedBudgetUsed) issues.push({code:'budget-used-invariant',severity:'critical',count:1,label:'Orçamento utilizado não corresponde a pagamentos das faturas do mês mais compras'});
+  if(n.budgetCommitted!==expectedBudgetCommitted) issues.push({code:'budget-committed-invariant',severity:'critical',count:1,label:'Orçamento comprometido não corresponde ao utilizado mais faturas ainda por pagar'});
+  if(n.budgetAvailable!==expectedBudgetAvailable) issues.push({code:'budget-available-invariant',severity:'critical',count:1,label:'Disponível do orçamento não corresponde ao orçamento menos compromissos'});
   if(n.cashSpent!==expectedCashSpent) issues.push({code:'cash-spent-invariant',severity:'critical',count:1,label:'Gasto real do mês não corresponde a pagamentos registados mais compras'});
   if(n.ledgerCurrent!==expectedLedgerCurrent) issues.push({code:'ledger-current-invariant',severity:'critical',count:1,label:'Saldo calculado não corresponde aos movimentos registados'});
   if(n.current!==expectedCurrent) issues.push({code:'current-balance-invariant',severity:'critical',count:1,label:'Saldo atual não corresponde ao saldo bancário confirmado ou ao saldo calculado'});

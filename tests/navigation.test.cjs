@@ -42,6 +42,9 @@ assert.match(events,/#monthPicker'[\s\S]*selectMonthContext\(next\)/,'month pick
 assert.match(events,/data-calendar-month/,'calendar history must allow switching back to saved months');
 assert.match(render,/openingBalanceCents===0\?'':/,'a fresh month must show an empty opening-balance field');
 assert.match(render,/budgetCents===0\?'':/,'a fresh month must show an empty monthly-budget field');
+assert.match(render,/const budgetCommitted = Number\.isSafeInteger\(n\.budgetCommitted\)/,'Dashboard must use the same committed-budget total as Planning');
+assert.match(render,/rawBudgetPct = budget \? Math\.max\(0,Math\.round\(budgetCommitted\/budget\*100\)\)/,'Dashboard budget percentage must include unpaid obligations');
+assert.match(render,/% comprometido/,'Dashboard budget copy must not call pending obligations paid spend');
 assert.match(index, /aria-label="Vistas de planeamento"/);
 assert.match(index, /aria-label="Vistas de definições"/);
 assert.match(index, /aria-label="Navegação completa"/);
@@ -89,7 +92,7 @@ try {
   assert.match(builtIndex, /v76-modern-ui\.css\?v=76-visual-audit1/);
   assert.match(builtIndex, /v76-product-pages\.css\?v=76-add-product-prototype2/);
   assert.match(builtIndex, /render\.js\?v=76-market-estimates1/);
-  assert.match(builtIndex, /finance\.js\?v=76-market-estimates1/);
+  assert.match(builtIndex, /finance\.js\?v=76-budget-commitment4/);
   assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-market-filter-visual-qa1/);
   assert.match(builtIndex, /v75-usability\.css\?v=76-auth-viewport-fit1/);
 
