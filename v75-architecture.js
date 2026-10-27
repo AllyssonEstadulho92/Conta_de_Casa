@@ -79,10 +79,16 @@
  * - “Comprometido” usa o valor ainda por pagar das faturas ativas do mês;
  * - “Disponível real” desconta gasto efetivo e comprometido ao orçamento;
  * - a alteração é apenas de apresentação e reutiliza os cálculos financeiros canónicos.
+ *
+ * 76-planning-commitment-progress2:
+ * - o anel mede o orçamento comprometido, não apenas valores já pagos;
+ * - “Já utilizado” e “Por pagar” permanecem separados para não falsificar pagamentos;
+ * - a percentagem textual pode ultrapassar 100% para tornar excesso de orçamento visível;
+ * - o disponível deriva do orçamento menos o total comprometido.
  */
 (function installV75Prototype(root){
   const MOBILE_QUERY='(max-width: 820px)';
-  const REVISION='76-walli-share-drawer1';
+  const REVISION='76-budget-commitment4';
   const LABELS=Object.freeze({
     dashboard:['Início','Visão geral'],
     bills:['Despesas','Movimentos'],
