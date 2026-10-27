@@ -1,6 +1,6 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 9 de outubro de 2026
+Atualizado: 27 de outubro de 2026
 
 ## D-155 — dar prioridade a imagens oficiais sem contornar identidade
 
@@ -856,3 +856,19 @@ Decisão de UI/UX para o ecrã de PIN:
 - forced-colors e reduced-motion são requisitos de regressão.
 
 O objetivo é aproximar a implementação do protótipo aprovado sem comprometer segurança ou previsibilidade do fluxo existente.
+
+
+## D-156 — percentagem do orçamento representa compromisso total, não apenas pagamentos
+
+Um orçamento serve para saber quanto ainda pode ser assumido. Se uma fatura já está registada para o mês, o respetivo valor deve reduzir o orçamento disponível mesmo antes do pagamento.
+
+Decisão:
+
+- manter `budgetUsed` como valor já utilizado;
+- manter `outstanding` como remanescente ainda por pagar;
+- criar `budgetCommitted = budgetUsed + outstanding`;
+- criar `budgetAvailable = budgetCents - budgetCommitted`;
+- usar `budgetCommitted / budgetCents` na percentagem do cartão e do anel;
+- apresentar **Já utilizado** e **Por pagar** separadamente para preservar a diferença entre gasto realizado e obrigação pendente.
+
+Não há alteração de persistência nem migração de dados. As novas métricas são derivadas do estado atual.
