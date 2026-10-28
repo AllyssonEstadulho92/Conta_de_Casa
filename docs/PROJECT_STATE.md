@@ -1,12 +1,18 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 27 de outubro de 2026
+Atualizado: 28 de outubro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
 Baseline funcional em `main` antes deste bloco: `3999f74bf25396484ce2f8550c9c3d7c60bb313c` (`security: empacotar ZXing localmente e remover CDN`)
 Branch de fecho documental: `docs/v76-post-audit-closeout`. Baseline de produção revista: `b0dbddab7f443c8bac4e2f9d1bb1f017513928ad`.
 Histórico anterior: bloco `76-dialog-controls1` preservado abaixo.
+
+## Reforço da estabilidade ao fechar a captura (28/10/2026)
+
+Continuação da proposta #223, ainda sem integração na aplicação pública. O controlo de captura passa a terminar a câmara quando o diálogo de despesa fecha e invalida descodificações de fotografias pendentes. Resultados da câmara e da leitura assíncrona são aceites apenas enquanto o diálogo continua aberto. A pré-visualização e os metadados temporários de leitura são limpos no fecho, sem alterar campos financeiros ou criar gravações. A revisão de distribuição `76-invoice-lifecycle8` atualiza o script de captura e o registo do Service Worker.
+
+Teste automático adicional cobre uma fotografia que termina depois de o utilizador fechar a despesa. A suite Node completa, TypeScript e build Pages concluíram sem erros. Pendente: validação física no iPhone da câmara, fecho por X/Cancelar e reabertura, e confirmação da versão isolada de testes. OCR integral não faz parte desta correção.
 
 ## Proposta de correção: leitura QR até revisão editável (27/10/2026)
 

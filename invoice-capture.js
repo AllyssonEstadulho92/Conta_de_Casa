@@ -348,7 +348,7 @@
   }
 
   function handleDecodedPayload(text,session){
-    if(scannerBusy||session!==scannerSession)return false;
+    if(scannerBusy||session!==scannerSession||!document.querySelector('#formDialog')?.open)return false;
     const data=parseAtInvoiceQr(text);
     if(!data)return false;
     scannerBusy=true;
@@ -359,7 +359,7 @@
 
   async function openCamera(){
     ensureCaptureUi();
-    if(currentCaptureMode()!=='qr')return;
+    if(currentCaptureMode()!=='qr'||!document.querySelector('#formDialog')?.open)return;
     if(!root.isSecureContext||!navigator.mediaDevices?.getUserMedia){
       status('A leitura pela câmara exige HTTPS e um navegador com acesso à câmara.','warning');
       return;
@@ -371,13 +371,13 @@
     const state=document.querySelector('#invoiceScanState');
     try{
       const zxing=await loadZxing();
-      if(session!==scannerSession)return;
+      if(session!==scannerSession||!document.querySelector('#formDialog')?.open)return;
       const reader=new zxing.BrowserQRCodeReader(undefined,{delayBetweenScanAttempts:120,delayBetweenScanSuccess:800});
       const controls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}},video,(result)=>{
         const text=result?.getText?.()||result?.text||'';
         if(text&&handleDecodedPayload(text,session))try{controls.stop?.();}catch(_error){}
       });
-      if(session!==scannerSession){controls.stop?.();return;}
+      if(session!==scannerSession||!document.querySelector('#formDialog')?.open){controls.stop?.();return;}
       scannerControls=controls;
       const torch=document.querySelector('[data-invoice-torch]');
       if(torch&&typeof controls.switchTorch==='function')torch.hidden=false;
@@ -433,7 +433,8 @@
     syncCaptureMode(mode);
     const scanSession=++imageScanSession;
     const startingForm=document.querySelector('#billForm');
-    const stillActive=()=>scanSession===imageScanSession&&document.querySelector('#billForm')===startingForm&&currentCaptureMode()===mode;
+    const startingDialog=document.querySelector('#formDialog');
+    const stillActive=()=>scanSession===imageScanSession&&startingDialog?.open===true&&document.querySelector('#formDialog')===startingDialog&&document.querySelector('#billForm')===startingForm&&currentCaptureMode()===mode;
     status(mode==='qr'?'A ler o QR captado pela câmara…':'A procurar o QR da AT na imagem local…');
 
     const objectUrl=URL.createObjectURL(file);
@@ -536,16 +537,29 @@
     activateMode(normalized);
   }
 
+  function resetCaptureAfterDialogClose(){
+    // Fechar/Cancelar deve terminar a câmara e invalidar leituras assíncronas.
+    // Nunca alterar os valores financeiros nem guardar um rascunho implicitamente.
+    imageScanSession+=1;
+    closeScanner(false);
+    pendingInvoice=null;
+    const preview=document.querySelector('#invoiceCapturePreview');
+    if(preview){preview.hidden=true;preview.innerHTML='';}
+    const form=document.querySelector('#billForm');
+    if(form){delete form.dataset.invoiceQrVerified;delete form.dataset.invoiceReviewFields;}
+  }
+
   function installDom(){
     document.addEventListener('click',handleClick);
     document.addEventListener('change',handleChange);
     document.addEventListener('cdc:bill-mode-change',handleModeChange);
+    document.querySelector('#formDialog')?.addEventListener('close',resetCaptureAfterDialogClose);
     observer=new MutationObserver(()=>{ensureCaptureUi();syncCaptureMode();});
     const body=document.body;
     if(body)observer.observe(body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-v75-bill-mode','open']});
     ensureCaptureUi();
     document.addEventListener('visibilitychange',()=>{if(document.hidden)closeScanner(false);});
-    root.addEventListener('pagehide',()=>closeScanner(false));
+    root.addEventListener('pagehide',()=>{imageScanSession+=1;closeScanner(false);});
   }
 
   root.CDCInvoiceCapture=Object.freeze({parseAtInvoiceQr,parseMoneyCents,parseAtDate,syncCaptureMode,currentCaptureMode,scanImage});

@@ -115,6 +115,10 @@ assert.match(source,/data-invoice-manual/,'failed QR or image capture must offer
 assert.match(source,/cdc:bill-review-ready/,'successful capture must request the editable review step');
 assert.match(source,/dueDate\.value===dueDate\.defaultValue/,'the default due date must not be mistaken for a scanned due date');
 assert.match(source,/function handleModeChange\(event\)\{\s*imageScanSession\+=1/,'switching modes must invalidate a pending asynchronous image decode');
+assert.match(source,/function resetCaptureAfterDialogClose\(\)/,'closing the expense dialog must have one capture-cleanup path');
+assert.match(source,/addEventListener\('close',resetCaptureAfterDialogClose\)/,'dialog close must stop the camera and pending reads');
+assert.match(source,/startingDialog\?\.open===true/,'a delayed image scan must not reopen a closed form');
+assert.match(source,/session!==scannerSession\|\|!document\.querySelector\('#formDialog'\)\?\.open/,'camera results must be rejected after closing the form');
 const architecture=fs.readFileSync('v75-architecture.js','utf8');
 assert.match(architecture,/function handleBillReviewReady\(event\)/,'the expense flow must handle a successful scan');
 assert.match(architecture,/<span>Foto com QR<\/span>/,'the image tab must not claim full invoice OCR');
@@ -146,7 +150,7 @@ const form={
 const section={dataset:{},querySelector(){return null;}};
 const preview={hidden:true,innerHTML:''};
 const statusNode={hidden:true,textContent:'',className:''};
-const dialog={dataset:{v75BillMode:'image'},dispatchEvent(event){changes.push({type:event.type,detail:event.detail});}};
+const dialog={open:true,dataset:{v75BillMode:'image'},dispatchEvent(event){changes.push({type:event.type,detail:event.detail});}};
 context.document={querySelector(selector){
   return {'#billForm':form,'#formDialog':dialog,'[data-invoice-capture]':section,'#invoiceCapturePreview':preview,'#invoiceCaptureStatus':statusNode}[selector]||null;
 }};
@@ -188,5 +192,15 @@ context.CustomEvent=class{constructor(type,options){this.type=type;this.detail=o
   resolveDelayedScan([{rawValue:officialExample}]);
   await pending;
   assert.equal(changes.length,changeCount,'a leitura atrasada não pode reabrir a revisão após sair do modo de captura');
+  let resolveAfterClose;
+  context.BarcodeDetector=class{detect(){return new Promise(resolve=>{resolveAfterClose=resolve;});}};
+  dialog.dataset.v75BillMode='image';
+  const pendingClose=context.CDCInvoiceCapture.scanImage({type:'image/jpeg',size:1024},'image');
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(typeof resolveAfterClose,'function');
+  dialog.open=false;
+  resolveAfterClose([{rawValue:officialExample}]);
+  await pendingClose;
+  assert.equal(changes.length,changeCount,'a leitura atrasada não pode reabrir uma despesa depois de fechar');
   console.log('Invoice capture-to-review integration: OK');
 })().catch(error=>{console.error(error);process.exitCode=1;});

@@ -1,5 +1,12 @@
 # Changelog
 
+## v76: fecho seguro da leitura de faturas (28/10/2026)
+
+- Fechar ou cancelar a despesa termina a câmara e impede o aproveitamento de leituras atrasadas.
+- A pré-visualização temporária é limpa; os campos financeiros não são gravados automaticamente.
+- Nova revisão de cache de captura e Service Worker para testes antes de publicação.
+- Validação física no iPhone e integração da PR #223 ainda pendentes.
+
 ## v76: revisão editável após leitura de QR da fatura (27/10/2026)
 
 - Reconhecimento de QR AT encaminha para a revisão editável, em vez de manter oculto o formulário.

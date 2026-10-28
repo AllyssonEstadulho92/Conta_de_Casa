@@ -1,11 +1,13 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 27 de outubro de 2026
+Atualizado: 28 de outubro de 2026
 Versão: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
 
 ## 0.6. Registo linear após leitura do QR fiscal
+
+O ciclo de vida da captura está ligado ao evento `close` do diálogo canónico. No fecho, `invoice-capture.js` interrompe eventuais pistas de vídeo, remove o leitor, invalida leituras assíncronas, elimina os dados temporários do QR e oculta o resumo anterior. Câmara e fotografia validam também que o diálogo continua aberto antes de aceitar resultados. O fecho não grava, não altera o núcleo financeiro nem elimina diretamente registos do cofre.
 
 `invoice-capture.js` continua responsável por descodificar QR AT a partir de imagem ou câmara, preencher apenas campos compatíveis e apresentar o resumo local. Quando a leitura é válida, emite `cdc:bill-review-ready` com a origem (`image` ou `qr`). `v75-architecture.js` é a autoridade do estado `review` em `#formDialog`, que revela os controlos de `#billForm` anteriormente ocultos durante a captura. Ao trocar de modo, volta a utilizar `cdc:bill-mode-change` e remove o estado de revisão.
 

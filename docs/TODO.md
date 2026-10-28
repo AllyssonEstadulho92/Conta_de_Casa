@@ -1,6 +1,18 @@
 # TODO — Conta de Casa
 
-Atualizado: 27 de outubro de 2026
+Atualizado: 28 de outubro de 2026
+
+## P0 — Fecho seguro da câmara e fotografia (28/10/2026)
+
+- [x] Associar o fecho do diálogo à paragem do scanner de câmara.
+- [x] Impedir resultados da câmara ou de imagem depois de fechar a despesa.
+- [x] Limpar o resumo temporário e invalidar a sessão sem alterar o formulário financeiro.
+- [x] Atualizar revisão do script de captura e URL do Service Worker.
+- [x] Acrescentar teste para imagem assíncrona concluída após o fecho.
+- [x] Executar os testes Node completos, `npm run typecheck` e `npm run build:pages` com sucesso.
+- [ ] Atualizar o ambiente de testes privado com esta revisão.
+- [ ] Confirmar num iPhone real: abrir câmara, fechar/cancelar, reabrir, voltar ao Manual, leitura sem QR e conclusão do registo.
+- [ ] Publicar em `main` apenas depois da validação física e revisão da PR #223.
 
 ## P0 — Concluir registo após ler uma fatura (27/10/2026)
 

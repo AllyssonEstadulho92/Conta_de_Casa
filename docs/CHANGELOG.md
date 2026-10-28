@@ -2,6 +2,13 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-28: cancelamento da leitura ao fechar a despesa
+
+- O evento `close` interrompe a câmara e invalida leituras pendentes de fotografias.
+- O resultado só pode preencher o formulário se o diálogo ainda estiver aberto; o resumo temporário é limpo ao fechar.
+- Atualizados os identificadores da distribuição para `76-invoice-lifecycle8` e os testes de regressão.
+- A proposta #223 permanece em rascunho e depende de ensaio físico num iPhone antes da integração.
+
 ## 2026-10-27: registo de despesa com revisão após QR
 
 - Uma leitura AT válida passa do modo fotografia/QR ao estado `review`, mostrando os campos editáveis antes de guardar.

@@ -1,6 +1,14 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 27 de outubro de 2026
+Atualizado: 28 de outubro de 2026
+
+## D-158 — fecho da despesa é limite de vida da captura
+
+Decisão: associar a limpeza do scanner ao evento nativo `close` do diálogo e descartar qualquer resultado de câmara ou fotografia quando o diálogo já não estiver aberto. O pedido de fecho é a autoridade de cancelamento da captura; não pode manter uma stream ativa nem voltar a apresentar revisão de uma leitura antiga.
+
+Motivo: a proposta #223 já invalidava imagens ao mudar de modo, mas o módulo de captura não estava diretamente ligado ao fecho do diálogo. A janela poderia encerrar com um leitor de vídeo pendente e com callbacks posteriores. Manter uma revisão de distribuição própria para o runtime e Service Worker.
+
+Limites: sem alteração de pagamentos, dados cifrados, PIN, IndexedDB, sincronização ou dados guardados. O estado de edição não deve ser apagado implicitamente por esta limpeza técnica. Validar fisicamente Safari/iPhone antes de integrar.
 
 ## D-157 — uma única revisão editável após captura de fatura
 

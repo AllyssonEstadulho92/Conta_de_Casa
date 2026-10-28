@@ -43,7 +43,7 @@ assert.ok(sw.includes("'./v75-startup-guard.js'"));
 assert.match(prepare,/const STARTUP_REV = '76-startup-canonical3'/);
 assert.ok(prepare.includes("'v75-startup-guard.js'"));
 assert.match(prepare,/v75-startup-guard\.js\?v=\$\{STARTUP_REV\}/);
-assert.match(prepare,/const SERVICE_WORKER_REV = '76-cross-month-visibility1'/);
+assert.match(prepare,/const SERVICE_WORKER_REV = '76-invoice-lifecycle8'/);
 
 const dist=path.join(ROOT,'dist');
 try{
@@ -54,7 +54,7 @@ try{
   assert.ok(index.indexOf('v75-startup-guard.js')>index.indexOf('v75-stability.js'),'startup guard must load after stability');
   assert.ok(fs.existsSync(path.join(dist,'v75-startup-guard.js')));
   assert.match(fs.readFileSync(path.join(dist,'v75-startup-guard.js'),'utf8'),/76-auth-canonical2/);
-  assert.match(builtEvents,/\.\/sw\.js\?v=76-cross-month-visibility1/);
+  assert.match(builtEvents,/\.\/sw\.js\?v=76-invoice-lifecycle8/);
 }finally{
   fs.rmSync(dist,{recursive:true,force:true});
 }
