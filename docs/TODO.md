@@ -10,7 +10,8 @@ Atualizado: 28 de outubro de 2026
 - [x] Atualizar revisão do script de captura e URL do Service Worker.
 - [x] Acrescentar teste para imagem assíncrona concluída após o fecho.
 - [x] Executar os testes Node completos, `npm run typecheck` e `npm run build:pages` com sucesso.
-- [ ] Atualizar o ambiente de testes privado com esta revisão.
+- [x] Atualizar o ambiente de testes privado com a revisão da PR #223, sem alterar a publicação oficial.
+- [x] Confirmar a CI e TypeScript Foundation verdes no commit de código `24bd3dd`.
 - [ ] Confirmar num iPhone real: abrir câmara, fechar/cancelar, reabrir, voltar ao Manual, leitura sem QR e conclusão do registo.
 - [ ] Publicar em `main` apenas depois da validação física e revisão da PR #223.
 

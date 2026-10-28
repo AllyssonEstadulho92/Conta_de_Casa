@@ -12,7 +12,7 @@ Histórico anterior: bloco `76-dialog-controls1` preservado abaixo.
 
 Continuação da proposta #223, ainda sem integração na aplicação pública. O controlo de captura passa a terminar a câmara quando o diálogo de despesa fecha e invalida descodificações de fotografias pendentes. Resultados da câmara e da leitura assíncrona são aceites apenas enquanto o diálogo continua aberto. A pré-visualização e os metadados temporários de leitura são limpos no fecho, sem alterar campos financeiros ou criar gravações. A revisão de distribuição `76-invoice-lifecycle8` atualiza o script de captura e o registo do Service Worker.
 
-Teste automático adicional cobre uma fotografia que termina depois de o utilizador fechar a despesa. A suite Node completa, TypeScript e build Pages concluíram sem erros. Pendente: validação física no iPhone da câmara, fecho por X/Cancelar e reabertura, e confirmação da versão isolada de testes. OCR integral não faz parte desta correção.
+Teste automático adicional cobre uma fotografia que termina depois de o utilizador fechar a despesa. A suite Node completa, TypeScript e build Pages concluíram sem erros; CI e TypeScript Foundation da PR ficaram verdes no commit de código `24bd3dd`. O ambiente de testes privado já foi atualizado e confirmou publicação com acesso limitado ao proprietário. Pendente: validação física no iPhone da câmara, fecho por X/Cancelar e reabertura. OCR integral não faz parte desta correção.
 
 ## Proposta de correção: leitura QR até revisão editável (27/10/2026)
 
