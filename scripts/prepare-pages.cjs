@@ -46,9 +46,9 @@ const CATALOG_REV = '76-add-product-prototype1';
 const PD_PHOTO_REV = '76-pingo-priority3';
 const PHOTO_LOADER_REV = '76-photo-card3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
-const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
+const INVOICE_CAPTURE_REV = '76-invoice-lifecycle8';
 const ZXING_REV = '76-local-zxing1';
-const SERVICE_WORKER_REV = '76-cross-month-visibility1';
+const SERVICE_WORKER_REV = '76-invoice-lifecycle8';
 const WALLI_SHARE_REV = '76-walli-enhancements6';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){

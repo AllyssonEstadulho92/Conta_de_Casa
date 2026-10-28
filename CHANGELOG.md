@@ -1,5 +1,20 @@
 # Changelog
 
+## v76: fecho seguro da leitura de faturas (28/10/2026)
+
+- Fechar ou cancelar a despesa termina a câmara e impede o aproveitamento de leituras atrasadas.
+- A pré-visualização temporária é limpa; os campos financeiros não são gravados automaticamente.
+- Nova revisão de cache de captura e Service Worker para testes antes de publicação.
+- Validação física no iPhone e integração da PR #223 ainda pendentes.
+
+## v76: revisão editável após leitura de QR da fatura (27/10/2026)
+
+- Reconhecimento de QR AT encaminha para a revisão editável, em vez de manter oculto o formulário.
+- Vencimento não confirmado é solicitado explicitamente; existe recuperação pelo modo manual.
+- Leituras de imagem atrasadas deixam de alterar o formulário quando o utilizador já escolheu outro modo.
+- Fotografia é identificada como «Foto com QR», já que OCR integral não existe nesta versão.
+- Sem alterações a dados financeiros, cofre ou sincronização. Validação real em iPhone ainda pendente.
+
 ## v76: scanner ZXing local e funcionamento offline
 
 - `@zxing/browser@0.2.0` passa a ser empacotado no build em vez de carregado por CDN;

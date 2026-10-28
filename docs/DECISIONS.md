@@ -1,6 +1,22 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 27 de outubro de 2026
+Atualizado: 28 de outubro de 2026
+
+## D-158 — fecho da despesa é limite de vida da captura
+
+Decisão: associar a limpeza do scanner ao evento nativo `close` do diálogo e descartar qualquer resultado de câmara ou fotografia quando o diálogo já não estiver aberto. O pedido de fecho é a autoridade de cancelamento da captura; não pode manter uma stream ativa nem voltar a apresentar revisão de uma leitura antiga.
+
+Motivo: a proposta #223 já invalidava imagens ao mudar de modo, mas o módulo de captura não estava diretamente ligado ao fecho do diálogo. A janela poderia encerrar com um leitor de vídeo pendente e com callbacks posteriores. Manter uma revisão de distribuição própria para o runtime e Service Worker.
+
+Limites: sem alteração de pagamentos, dados cifrados, PIN, IndexedDB, sincronização ou dados guardados. O estado de edição não deve ser apagado implicitamente por esta limpeza técnica. Validar fisicamente Safari/iPhone antes de integrar.
+
+## D-157 — uma única revisão editável após captura de fatura
+
+Decisão: manter três entradas (Manual, Foto com QR e QR Code) e um único formulário financeiro. Um QR válido conduz ao modo visual `review`, onde os campos podem ser corrigidos antes do submit existente. A captura nunca cria pagamentos ou faturas diretamente. Sem leitura, o utilizador pode regressar ao modo manual sem perder o formulário.
+
+Motivo: os modos `image`/`qr` ocultavam os campos de `#billForm` e o preenchimento automático não transitava para `review`. Essa discordância entre dados e UI prejudicava a conclusão do registo. O vencimento predefinido não pode ser tratado como extraído do QR; campos corrigidos manualmente não são substituídos por leituras posteriores. A opção «Foto com QR» descreve a capacidade real, sem prometer OCR.
+
+Limites: não introduzir OCR externo, APIs remotas, mudança de schema, cálculos financeiros, cofre, cifra ou sincronização nesta correção. Uma descodificação assíncrona não pode contrariar a decisão posterior do utilizador de voltar ao modo manual ou fechar o formulário. Verificar a transição em Safari/iPhone real e os contratos de regressão antes de integrar.
 
 ## D-156 — separar o fecho financeiro mensal da atenção aos vencimentos
 

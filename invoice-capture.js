@@ -16,9 +16,9 @@
   const LOCAL_ZXING_FILE='zxing-browser.min.js';
   const MODE_COPY=Object.freeze({
     image:Object.freeze({
-      title:'Ler fatura por imagem',
+      title:'Ler QR na fotografia',
       subtitle:'Fotografia com QR da Autoridade Tributária',
-      description:'Selecione uma fotografia da fatura. A aplicação procura o código QR da AT na imagem; não faz OCR do texto completo. A imagem é processada neste dispositivo e não é guardada nem enviada.',
+      description:'Selecione uma fotografia que mostre o QR da AT. Esta versão lê o QR, mas não faz OCR do texto completo. A imagem é processada neste dispositivo e não é guardada nem enviada.',
       icon:'image',
       action:'Selecionar imagem'
     }),
@@ -34,7 +34,9 @@
   let scannerControls=null;
   let scannerSession=0;
   let scannerBusy=false;
+  let imageScanSession=0;
   let pendingInvoice=null;
+  const autoFilledValues=new WeakMap();
   let zxingPromise=null;
   let readerWarmupScheduled=false;
 
@@ -213,8 +215,14 @@
   }
 
   function setBlankField(field,value){
-    if(!field||String(field.value||'').trim()||value===null||value===undefined||value==='')return false;
+    if(!field||value===null||value===undefined||value==='')return false;
+    const current=String(field.value||'').trim();
+    // Só substituir campos vazios ou valores que o leitor anterior colocou.
+    // Uma correção feita pelo utilizador tem sempre prioridade.
+    if(current&&current!==autoFilledValues.get(field))return false;
+    if(current===String(value))return false;
     field.value=String(value);
+    autoFilledValues.set(field,String(value));
     field.dispatchEvent(new Event('input',{bubbles:true}));
     field.dispatchEvent(new Event('change',{bubbles:true}));
     return true;
@@ -257,11 +265,22 @@
 
   function showPreview(data){
     pendingInvoice=data;
+    const form=document.querySelector('#billForm');
+    const dueDate=form?.elements?.dueDate;
+    // O vencimento não vem no QR da AT. Não aceitar o valor sugerido pelo formulário
+    // como se tivesse sido identificado na fatura.
+    if(dueDate&&dueDate.value===dueDate.defaultValue)dueDate.value='';
     const applied=applyInvoiceToForm({announce:false,focus:false});
     const node=document.querySelector('#invoiceCapturePreview');
     if(!node)return;
     node.innerHTML=previewHtml(data);
     node.hidden=false;
+    const source=currentCaptureMode();
+    document.querySelector('#formDialog')?.dispatchEvent(new CustomEvent('cdc:bill-review-ready',{
+      bubbles:true,detail:{source}
+    }));
+    const save=form?.querySelector('button[type="submit"]');
+    if(save)save.textContent='Confirmar e guardar';
     status(applied.ready
       ?'QR reconhecido. Descrição, valor e restantes dados compatíveis foram preenchidos automaticamente. Confirme categoria, vencimento, método e fornecedor.'
       :'QR reconhecido e dados compatíveis preenchidos. Complete os campos obrigatórios em falta antes de guardar.',
@@ -278,6 +297,7 @@
       <div class="invoice-capture-actions">
         <button class="btn secondary" type="button" data-invoice-camera>${icon('qr',19)}<span data-invoice-camera-label>Abrir câmara</span></button>
         <label class="btn secondary file-btn invoice-image-button">${icon('image',19)}<span data-invoice-image-label>Selecionar imagem</span><input id="invoiceImageInput" type="file" accept="image/*" hidden></label>
+        <button class="btn secondary" type="button" data-invoice-manual>Preencher manualmente</button>
       </div>
       <p id="invoiceCaptureStatus" class="invoice-capture-status" role="status" aria-live="polite" hidden></p>
       <div id="invoiceCapturePreview" class="invoice-capture-preview" hidden></div>
@@ -328,7 +348,7 @@
   }
 
   function handleDecodedPayload(text,session){
-    if(scannerBusy||session!==scannerSession)return false;
+    if(scannerBusy||session!==scannerSession||!document.querySelector('#formDialog')?.open)return false;
     const data=parseAtInvoiceQr(text);
     if(!data)return false;
     scannerBusy=true;
@@ -339,7 +359,7 @@
 
   async function openCamera(){
     ensureCaptureUi();
-    if(currentCaptureMode()!=='qr')return;
+    if(currentCaptureMode()!=='qr'||!document.querySelector('#formDialog')?.open)return;
     if(!root.isSecureContext||!navigator.mediaDevices?.getUserMedia){
       status('A leitura pela câmara exige HTTPS e um navegador com acesso à câmara.','warning');
       return;
@@ -351,13 +371,13 @@
     const state=document.querySelector('#invoiceScanState');
     try{
       const zxing=await loadZxing();
-      if(session!==scannerSession)return;
+      if(session!==scannerSession||!document.querySelector('#formDialog')?.open)return;
       const reader=new zxing.BrowserQRCodeReader(undefined,{delayBetweenScanAttempts:120,delayBetweenScanSuccess:800});
       const controls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}},video,(result)=>{
         const text=result?.getText?.()||result?.text||'';
         if(text&&handleDecodedPayload(text,session))try{controls.stop?.();}catch(_error){}
       });
-      if(session!==scannerSession){controls.stop?.();return;}
+      if(session!==scannerSession||!document.querySelector('#formDialog')?.open){controls.stop?.();return;}
       scannerControls=controls;
       const torch=document.querySelector('[data-invoice-torch]');
       if(torch&&typeof controls.switchTorch==='function')torch.hidden=false;
@@ -411,11 +431,16 @@
 
     ensureCaptureUi();
     syncCaptureMode(mode);
+    const scanSession=++imageScanSession;
+    const startingForm=document.querySelector('#billForm');
+    const startingDialog=document.querySelector('#formDialog');
+    const stillActive=()=>scanSession===imageScanSession&&startingDialog?.open===true&&document.querySelector('#formDialog')===startingDialog&&document.querySelector('#billForm')===startingForm&&currentCaptureMode()===mode;
     status(mode==='qr'?'A ler o QR captado pela câmara…':'A procurar o QR da AT na imagem local…');
 
     const objectUrl=URL.createObjectURL(file);
     try{
       const text=await decodeQrFromImage(file,objectUrl);
+      if(!stillActive())return;
       const data=parseAtInvoiceQr(text);
       if(!data){
         status(mode==='qr'
@@ -425,6 +450,7 @@
       }
       showPreview(data);
     }catch(_error){
+      if(!stillActive())return;
       status(mode==='qr'
         ?'Não foi possível ler o QR nesta fotografia. Tente novamente com o código mais próximo e bem iluminado.'
         :'Não foi possível encontrar um QR de faturação legível nesta imagem. Tente uma fotografia mais nítida.','warning');
@@ -441,6 +467,11 @@
   }
 
   function handleClick(event){
+    if(event.target.closest?.('[data-invoice-manual]')){
+      event.preventDefault();
+      document.querySelector('[data-v75-bill-action="expense-manual"]')?.click();
+      return;
+    }
     if(event.target.closest?.('[data-invoice-camera]')){
       event.preventDefault();
       if(currentCaptureMode()==='qr')openCamera().catch(()=>status('Não foi possível abrir a câmara.','warning'));
@@ -491,8 +522,11 @@
   }
 
   function handleModeChange(event){
+    imageScanSession+=1;
     const mode=event.detail?.mode||currentCaptureMode();
     const normalized=mode==='image'||mode==='qr'?mode:'manual';
+    const save=document.querySelector('#billForm button[type="submit"]');
+    if(save)save.textContent='Criar fatura';
     if(event.detail?.native){
       ensureCaptureUi();
       closeScanner(false);
@@ -503,16 +537,29 @@
     activateMode(normalized);
   }
 
+  function resetCaptureAfterDialogClose(){
+    // Fechar/Cancelar deve terminar a câmara e invalidar leituras assíncronas.
+    // Nunca alterar os valores financeiros nem guardar um rascunho implicitamente.
+    imageScanSession+=1;
+    closeScanner(false);
+    pendingInvoice=null;
+    const preview=document.querySelector('#invoiceCapturePreview');
+    if(preview){preview.hidden=true;preview.innerHTML='';}
+    const form=document.querySelector('#billForm');
+    if(form){delete form.dataset.invoiceQrVerified;delete form.dataset.invoiceReviewFields;}
+  }
+
   function installDom(){
     document.addEventListener('click',handleClick);
     document.addEventListener('change',handleChange);
     document.addEventListener('cdc:bill-mode-change',handleModeChange);
+    document.querySelector('#formDialog')?.addEventListener('close',resetCaptureAfterDialogClose);
     observer=new MutationObserver(()=>{ensureCaptureUi();syncCaptureMode();});
     const body=document.body;
     if(body)observer.observe(body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-v75-bill-mode','open']});
     ensureCaptureUi();
     document.addEventListener('visibilitychange',()=>{if(document.hidden)closeScanner(false);});
-    root.addEventListener('pagehide',()=>closeScanner(false));
+    root.addEventListener('pagehide',()=>{imageScanSession+=1;closeScanner(false);});
   }
 
   root.CDCInvoiceCapture=Object.freeze({parseAtInvoiceQr,parseMoneyCents,parseAtDate,syncCaptureMode,currentCaptureMode,scanImage});

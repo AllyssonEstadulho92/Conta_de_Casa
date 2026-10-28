@@ -2,6 +2,22 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-28: cancelamento da leitura ao fechar a despesa
+
+- O evento `close` interrompe a câmara e invalida leituras pendentes de fotografias.
+- O resultado só pode preencher o formulário se o diálogo ainda estiver aberto; o resumo temporário é limpo ao fechar.
+- Atualizados os identificadores da distribuição para `76-invoice-lifecycle8` e os testes de regressão.
+- A proposta #223 permanece em rascunho e depende de ensaio físico num iPhone antes da integração.
+
+## 2026-10-27: registo de despesa com revisão após QR
+
+- Uma leitura AT válida passa do modo fotografia/QR ao estado `review`, mostrando os campos editáveis antes de guardar.
+- O vencimento predefinido, quando não editado, deixa de se apresentar como se tivesse sido lido; correções manuais são preservadas numa segunda captura.
+- O modo de imagem chama-se «Foto com QR», descrevendo a capacidade atual sem prometer OCR. Existe a saída «Preencher manualmente» para falhas de leitura.
+- Resultados tardios de uma imagem são ignorados se o utilizador mudar de modo ou fechar o formulário durante o processamento.
+- Acrescentados testes de captura até revisão, mantendo o submit financeiro, o schema, a cifra e a sincronização intactos.
+- Pendente CI, publicação e validação física no iPhone/Safari/PWA.
+
 ## 2026-10-27: visão de vencimentos que atravessa meses
 
 - «Próximos 7 dias» e prioridade de pagamentos passam a considerar vencimentos próximos de qualquer mês e dívidas antigas ainda em aberto.

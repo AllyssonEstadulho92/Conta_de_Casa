@@ -35,7 +35,7 @@ assert.match(source,/76-expense-mode-stability1/);
 assert.match(source,/76-expense-mode-action1/,'invoice registration modes must remain directly actionable');
 assert.match(source,/76-invoice-capture-warmup1/,'invoice reader warmup revision must remain explicit');
 assert.match(source,/MODE_COPY=Object\.freeze/);
-assert.match(source,/Ler fatura por imagem/);
+assert.match(source,/Ler QR na fotografia/);
 assert.match(source,/Fotografia com QR da Autoridade Tributária/);
 assert.match(source,/não faz OCR do texto completo/,'image mode must describe the real QR-in-image capability instead of promising OCR');
 assert.match(source,/Ler QR da fatura/);
@@ -111,6 +111,20 @@ assert.match(source,/Categoria, vencimento e método não constam do QR da AT/,'
 assert.match(source,/function decodeQrFromImage\(file,objectUrl\)/,'image decoding must have a single resilient path');
 assert.match(source,/BarcodeDetector/,'native QR decoding must be attempted when the browser provides it');
 assert.match(source,/event\.detail\?\.native/,'native file/camera selection must not recursively invoke programmatic pickers');
+assert.match(source,/data-invoice-manual/,'failed QR or image capture must offer a visible manual recovery action');
+assert.match(source,/cdc:bill-review-ready/,'successful capture must request the editable review step');
+assert.match(source,/dueDate\.value===dueDate\.defaultValue/,'the default due date must not be mistaken for a scanned due date');
+assert.match(source,/function handleModeChange\(event\)\{\s*imageScanSession\+=1/,'switching modes must invalidate a pending asynchronous image decode');
+assert.match(source,/function resetCaptureAfterDialogClose\(\)/,'closing the expense dialog must have one capture-cleanup path');
+assert.match(source,/addEventListener\('close',resetCaptureAfterDialogClose\)/,'dialog close must stop the camera and pending reads');
+assert.match(source,/startingDialog\?\.open===true/,'a delayed image scan must not reopen a closed form');
+assert.match(source,/session!==scannerSession\|\|!document\.querySelector\('#formDialog'\)\?\.open/,'camera results must be rejected after closing the form');
+const architecture=fs.readFileSync('v75-architecture.js','utf8');
+assert.match(architecture,/function handleBillReviewReady\(event\)/,'the expense flow must handle a successful scan');
+assert.match(architecture,/<span>Foto com QR<\/span>/,'the image tab must not claim full invoice OCR');
+assert.match(architecture,/dialog\.dataset\.v75BillMode='review'/,'a valid QR must reveal the editable review mode');
+assert.match(architecture,/\['manual','image','qr','review'\]/,'rendering must preserve the review state');
+assert.match(architecture,/cdc:bill-review-ready',handleBillReviewReady/,'review event must be connected');
 assert.match(css,/#billForm :is\(input,select,textarea\):not\(\[data-v75-native-invoice\]\)\{[\s\S]*pointer-events:auto!important[\s\S]*touch-action:manipulation!important/,'expense fields must remain interactive without resizing the native capture overlay');
 assert.match(mobileTouchBlock,/\.dialog-close\{[\s\S]*right:10px!important;left:auto!important[\s\S]*color:var\(--v76-text,var\(--text\)\)!important/,'mobile expense close control must expose the real X on the right');
 assert.match(mobileTouchBlock,/\.dialog-close::before\{[\s\S]*content:none!important;display:none!important/,'mobile expense close control must not synthesize the historical back chevron');
@@ -122,3 +136,71 @@ assert.match(sw,/'\.\/invoice-capture\.css'/,'invoice capture styles must remain
 assert.match(sw,/'\.\/invoice-capture\.js'/,'invoice capture runtime must remain part of the offline PWA bundle.');
 
 console.log('Invoice capture tests: exact AT QR parser plus deterministic modes, professional expense UI and iOS touch stability: OK');
+
+// Real parser + capture-to-review integration using a minimal, local DOM stub.
+// No network, camera hardware or personal invoices are involved.
+const changes=[];
+const field=(value='',defaultValue='')=>({value,defaultValue,dispatchEvent(){}});
+const save={textContent:'Criar fatura'};
+const form={
+  dataset:{},
+  elements:{id:field(),title:field(),provider:field(),category:field('Casa'),amount:field(),dueDate:field('2026-11-03','2026-11-03'),reference:field()},
+  querySelector(selector){return selector==='[data-invoice-capture]'?section:selector==='button[type="submit"]'?save:null;}
+};
+const section={dataset:{},querySelector(){return null;}};
+const preview={hidden:true,innerHTML:''};
+const statusNode={hidden:true,textContent:'',className:''};
+const dialog={open:true,dataset:{v75BillMode:'image'},dispatchEvent(event){changes.push({type:event.type,detail:event.detail});}};
+context.document={querySelector(selector){
+  return {'#billForm':form,'#formDialog':dialog,'[data-invoice-capture]':section,'#invoiceCapturePreview':preview,'#invoiceCaptureStatus':statusNode}[selector]||null;
+}};
+context.matchMedia=()=>({matches:true});
+context.BarcodeDetector=class{async detect(){return [{rawValue:officialExample}];}};
+context.createImageBitmap=async()=>({close(){}});
+context.URL={createObjectURL(){return 'blob:invoice-test';},revokeObjectURL(){}};
+context.Event=class{constructor(type){this.type=type;}};
+context.CustomEvent=class{constructor(type,options){this.type=type;this.detail=options.detail;}};
+
+(async()=>{
+  await context.CDCInvoiceCapture.scanImage({type:'image/jpeg',size:1024},'image');
+  assert.equal(changes.length,1,'valid QR must trigger exactly one review transition');
+  assert.equal(changes[0].type,'cdc:bill-review-ready');
+  assert.equal(changes[0].detail.source,'image');
+  assert.equal(form.elements.title.value,'Fatura FS CDVF/12345');
+  assert.equal(form.elements.amount.value,'0,80');
+  assert.equal(form.elements.dueDate.value,'','a prefilled default must be cleared for explicit confirmation');
+  assert.equal(save.textContent,'Confirmar e guardar');
+  assert.equal(preview.hidden,false);
+  assert.match(preview.innerHTML,/QR de fatura reconhecido/);
+  assert.match(statusNode.textContent,/Complete os campos obrigatórios/);
+  dialog.dataset.v75BillMode='qr';
+  context.BarcodeDetector=class{async detect(){return [{rawValue:officialExample.replace('O:0.80','O:2.40')}];}};
+  await context.CDCInvoiceCapture.scanImage({type:'image/jpeg',size:1024},'qr');
+  assert.equal(changes[1].detail.source,'qr');
+  assert.equal(form.elements.amount.value,'2,40','a segunda leitura deve atualizar o valor anterior gerado automaticamente');
+  form.elements.amount.value='3,00';
+  await context.CDCInvoiceCapture.scanImage({type:'image/jpeg',size:1024},'qr');
+  assert.equal(form.elements.amount.value,'3,00','uma correção manual não pode ser substituída pelo leitor');
+  let resolveDelayedScan;
+  context.BarcodeDetector=class{detect(){return new Promise(resolve=>{resolveDelayedScan=resolve;});}};
+  dialog.dataset.v75BillMode='image';
+  const changeCount=changes.length;
+  const pending=context.CDCInvoiceCapture.scanImage({type:'image/jpeg',size:1024},'image');
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(typeof resolveDelayedScan,'function');
+  dialog.dataset.v75BillMode='manual';
+  resolveDelayedScan([{rawValue:officialExample}]);
+  await pending;
+  assert.equal(changes.length,changeCount,'a leitura atrasada não pode reabrir a revisão após sair do modo de captura');
+  let resolveAfterClose;
+  context.BarcodeDetector=class{detect(){return new Promise(resolve=>{resolveAfterClose=resolve;});}};
+  dialog.dataset.v75BillMode='image';
+  const pendingClose=context.CDCInvoiceCapture.scanImage({type:'image/jpeg',size:1024},'image');
+  await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(typeof resolveAfterClose,'function');
+  dialog.open=false;
+  resolveAfterClose([{rawValue:officialExample}]);
+  await pendingClose;
+  assert.equal(changes.length,changeCount,'a leitura atrasada não pode reabrir uma despesa depois de fechar');
+  console.log('Invoice capture-to-review integration: OK');
+})().catch(error=>{console.error(error);process.exitCode=1;});
