@@ -1,5 +1,14 @@
 # Changelog Técnico — Conta de Casa
 
+## Ainda não publicado — privacidade pessoal (30/10/2026)
+
+- Cortina visual de privacidade quando a PWA perde foco ou passa a segundo plano.
+- Proteção adicional de ficheiros pessoais e credenciais no `.gitignore`.
+- Novo `npm run privacy:check` e bloqueio de CI/Pages se o Git rastrear padrões privados/credenciais.
+- Testes da proteção visual e documentação dos riscos de repositório público e consultas externas.
+- Sem alteração de `STATE_VERSION`, PIN, cifra, dados, cálculos, backups ou sincronização. Aguardar revisão, CI e teste físico no iPhone.
+
+
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
 ## 2026-10-27: visão de vencimentos que atravessa meses
