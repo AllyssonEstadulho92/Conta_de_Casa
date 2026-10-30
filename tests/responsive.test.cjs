@@ -94,7 +94,7 @@ assert.match(events,/openAccountBalanceForm\(\)/);
 assert.doesNotMatch(css,/\bzoom\s*:/i);
 
 assert.match(index,/name="app-build" content="v53"/);
-assert.match(index,/styles\.css\?v=53/);
+assert.match(index,/styles\.css\?v=76-private-background1/);
 assert.match(index,/design-system\.css\?v=53/);
 assert.match(index,/manifest\.webmanifest\?v=53/);
 for(const asset of ['core','finance','render','forms','sync','events'])assert.match(index,new RegExp(`${asset}\\.js\\?v=53`));
