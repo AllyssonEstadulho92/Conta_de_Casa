@@ -2,3 +2,27 @@
 /.generated/
 /node_modules/
 *.tsbuildinfo
+
+# Dados pessoais, backups e credenciais: nunca incluir no repositório.
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.key
+*.sqlite
+*.sqlite3
+*.db
+*.db3
+/backups/
+/private/
+/personal-data/
+/local-data/
+/receipts/
+/invoices/
+**/Conta_de_Casa_backup_*.json
+**/*backup_cifrado*.json
+**/*comprovativo_pessoal*
+**/*fatura_pessoal*
+**/*extrato_bancario*
