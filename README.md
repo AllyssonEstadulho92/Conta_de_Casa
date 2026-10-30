@@ -1,5 +1,12 @@
 # Conta de Casa
 
+## Uso exclusivamente pessoal e limites de privacidade
+
+O código desta aplicação encontra-se num repositório público. O conteúdo pessoal de um cofre não é publicado automaticamente pelo GitHub Pages e permanece cifrado no perfil do navegador, mas a página em si é acessível a terceiros. Para maior proteção, usar dispositivo próprio, palavra-passe forte, bloquear ao sair e não partilhar backups ou credenciais.
+
+A proposta de hardening de 30/10/2026 acrescenta proteção visual no segundo plano e `npm run privacy:check` para detetar ficheiros pessoais/credenciais rastreados no Git. O Mercado pode fazer pedidos a serviços externos de produtos/imagens, revelando IP e consultas; a sincronização cifrada continua opcional. Os testes de Safari/iPhone e a revisão de alojamento protegido permanecem pendentes.
+
+
 Aplicação local-first para controlo doméstico de faturas, pagamentos, rendimentos, mercado, objetivos e relatórios mensais.
 
 Versão técnica: 0.76.0 (release pública v76). O schema de dados permanece na versão 5. A PWA é distribuída em GitHub Pages, com melhorias graduais de interface e testes, sem alterar silenciosamente os dados, cálculos ou persistência. A revisão `76-auth-viewport-fit1` compacta a introdução do PIN no iPhone e aguarda validação física.
