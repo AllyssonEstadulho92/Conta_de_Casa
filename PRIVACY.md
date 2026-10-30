@@ -1,5 +1,8 @@
 # Privacidade - Conta de Casa
 
+
+A documentação oficial do GitHub confirma que o **GitHub Pages é publicamente acessível mesmo quando o repositório de origem é privado** (salvo controlo de acesso específico disponível em certos ambientes Enterprise). A privacidade do repositório e a privacidade do site são duas decisões distintas. Fonte: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site
+
 ## Proteção reforçada para utilização pessoal (proposta de 30/10/2026)
 
 O repositório de código é **público**. Isso permite ver o código-fonte e eventuais nomes ou exemplos que estejam escritos nele, mas não dá acesso automático ao IndexedDB cifrado de outro perfil de navegador. A GitHub Page também é acessível publicamente: **não existe autenticação do servidor**. A confidencialidade dos dados reais depende da cifra do cofre, da palavra-passe e da segurança do dispositivo.
