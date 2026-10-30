@@ -83,7 +83,7 @@ assert.match(index,/id="billsList"[\s\S]*aria-live="polite"/);
 assert.match(index,/id="accountBalanceInfo"[\s\S]*aria-live="polite"/);
 assert.match(index,/id="toast"[\s\S]*role="status" aria-live="polite"/);
 
-assert.match(planningMore,/76-planning-more1/);
+assert.match(planningMore,/76-planning-month-report1/);
 assert.match(planningMore,/\.cdc-planning-overview/);
 assert.match(planningMore,/\.cdc-more-menu/);
 assert.match(planningMore,/\.cdc-preferences-details/);

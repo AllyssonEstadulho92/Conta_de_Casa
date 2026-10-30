@@ -37,7 +37,7 @@ assert.match(css,/\.market-category-count\{[\s\S]*justify-self:start/);
 assert.match(css,/\.market-category-items \.status-chip\{[\s\S]*justify-self:start/);
 assert.match(css,/\.market-category-items \.market-mobile-actions\{[\s\S]*justify-content:flex-start/);
 assert.match(css,/prefers-reduced-motion:reduce/);
-assert.match(planningMore,/76-planning-more1/);
+assert.match(planningMore,/76-planning-month-report1/);
 assert.match(planningMore,/\.cdc-category-dot/);
 
 assert.ok(sw.includes("'./market-category-groups.css'"));
@@ -60,7 +60,7 @@ assert.match(prepare,/const CATEGORY_REV = '64-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '76-budget-commitment4'/);
-assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-more1'/);
+assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-month-report1'/);
 assert.match(prepare,/const HEADER_REV = '75-header2'/);
 assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
 assert.doesNotMatch(prepare,/const FEATURED_REV/);
@@ -88,7 +88,7 @@ try{
   assert.match(index,/market-shopping-focus\.css\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/v75-architecture\.css\?v=76-budget-commitment4/);
-  assert.match(index,/v76-planning-more\.css\?v=76-planning-more1/);
+  assert.match(index,/v76-planning-more\.css\?v=76-planning-month-report1/);
   assert.match(index,/v75-architecture\.js\?v=76-budget-commitment4/);
   assert.match(index,/v75-header-refinement\.css\?v=75-header2/);
   assert.doesNotMatch(index,/v74-experience\.(?:css|js)/);

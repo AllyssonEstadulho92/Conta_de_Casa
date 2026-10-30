@@ -1,9 +1,15 @@
 # Arquitetura — Conta de Casa
 
-Atualizado: 9 de outubro de 2026
+Atualizado: 30 de outubro de 2026
 Versão: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA
+
+## 0.6. Relatório mensal em Plano
+
+`monthlyPlanningRegister(month)` em `finance.js` normaliza, para leitura, os pagamentos registados pela data `paidAt` e as compras concluídas por `purchasedAt || updatedAt`. As contas ainda em falta são filtradas por mês de vencimento e usam `remainingForBill` e `paidForBill`, tal como a página Faturas. A função não escreve nem persiste novo estado.
+
+`renderPlanningMonthReport` em `render.js` apresenta os movimentos cronológicos e os indicadores derivados de `monthNumbers`, sem reconstruir totais paralelos. As ações em `events.js` abrem `openPaymentForm` e `openBillDetail` existentes. Os elementos vivem em `#page-planning` e os estilos em `v76-planning-more.css`. A navegação mensal já existente muda o relatório. O detalhe de compras sem preço real explicita a estimativa.
 
 ## 0.5. Pipeline visual de fotografias oficiais
 

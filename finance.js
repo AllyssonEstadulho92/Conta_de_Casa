@@ -276,6 +276,45 @@ function monthlySpendHistory(month = selectedMonth, count = 6) {
   return rows;
 }
 
+// Vista de leitura do Plano: reutiliza os movimentos existentes, sem criar outro livro de pagamentos.
+// A data efetiva determina o mês da saída; a data de vencimento determina o mês do valor em falta.
+function monthlyPlanningRegister(month = selectedMonth) {
+  const billsById=new Map((appState?.bills||[]).map(b=>[String(b.id),b]));
+  const payments=(appState?.payments||[])
+    .filter(p=>inSelectedMonth(p.paidAt,month))
+    .map(p=>{
+      const bill=billsById.get(String(p.billId));
+      return {
+        kind:'payment',id:String(p.id),billId:bill?.id||'',at:p.paidAt,
+        title:bill?.title||'Fatura não encontrada',provider:bill?.provider||'',
+        category:bill?.category||'Outros',method:p.method||'',amountCents:p.amountCents,
+        estimated:false,missingBill:!bill
+      };
+    });
+  const purchases=(appState?.market||[])
+    .filter(item=>item.purchased&&inSelectedMonth(item.purchasedAt||item.updatedAt,month))
+    .map(item=>({
+      kind:'market',id:String(item.id),billId:'',at:item.purchasedAt||item.updatedAt,
+      title:item.name||item.title||'Compra no Mercado',provider:item.market||item.retailer||'Mercado',
+      category:item.category||'Mercado',method:'',
+      amountCents:marketLineCents(item.actualCents||item.estimatedCents||0,item.quantity),
+      estimated:!(Number.isSafeInteger(item.actualCents)&&item.actualCents>0),missingBill:false
+    }));
+  const movements=[...payments,...purchases].sort((a,b)=>{
+    const dateOrder=String(b.at||'').localeCompare(String(a.at||''));
+    return dateOrder||a.kind.localeCompare(b.kind)||a.id.localeCompare(b.id);
+  });
+  const unpaidBills=(appState?.bills||[])
+    .filter(b=>!b.archived&&!b.cancelled&&billInMonth(b,month)&&remainingForBill(b)>0)
+    .sort(compareBillsByDue)
+    .map(b=>({
+      id:b.id,title:b.title,provider:b.provider||'',category:b.category||'Outros',
+      dueDate:billDueDateKey(b),totalCents:b.totalCents,paidCents:paidForBill(b.id),
+      remainingCents:remainingForBill(b),status:billStatus(b)
+    }));
+  return {movements,unpaidBills};
+}
+
 // Os avisos operacionais atravessam meses; os totais contabilísticos mantêm o mês selecionado.
 function activeUnpaidBills(now = new Date()) {
   return (appState?.bills||[]).filter(b=>{

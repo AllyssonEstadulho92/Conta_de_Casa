@@ -1,9 +1,17 @@
 # Estado do Projeto — Conta de Casa
 
-Atualizado: 27 de outubro de 2026
+Atualizado: 30 de outubro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
 Distribuição: GitHub Pages / PWA  
+
+## Proposta de melhoria do Plano: registo e relatório mensal (30/10/2026)
+
+Branch de teste `improve/plano-registo-relatorio-mensal-20261030`, separada das PR #223 e #224. O Plano passa a apresentar um relatório detalhado do mês selecionado com entradas, pagamentos de faturas, compras concluídas no Mercado, total de saídas, resultado dos movimentos e valores em falta nas faturas com vencimento nesse mês.
+
+O histórico cronológico mostra cada pagamento com data, entidade, categoria, método e valor; pagamentos parciais permanecem registos individuais. As compras sem preço real são assinaladas como estimadas. As faturas pendentes oferecem acesso ao formulário de pagamento existente e o histórico abre o detalhe canónico da fatura. A leitura usa os dados financeiros já guardados no cofre, sem novo estado ou duplicação de lançamentos. Pagamentos de faturas de meses diferentes são apresentados no mês da saída efetiva, enquanto o remanescente aparece no mês do vencimento.
+
+Preservados `STATE_VERSION`, cifra/PIN, IndexedDB, sincronização, regras monetárias, Mercado e faturas. Falta validar visualmente no iPhone/Safari/PWA e na CI antes de integrar, sem modificar a versão pública.
 Baseline funcional em `main` antes deste bloco: `3999f74bf25396484ce2f8550c9c3d7c60bb313c` (`security: empacotar ZXing localmente e remover CDN`)
 Branch de fecho documental: `docs/v76-post-audit-closeout`. Baseline de produção revista: `b0dbddab7f443c8bac4e2f9d1bb1f017513928ad`.
 Histórico anterior: bloco `76-dialog-controls1` preservado abaixo.

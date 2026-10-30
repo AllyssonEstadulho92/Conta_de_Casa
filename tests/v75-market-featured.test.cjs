@@ -22,7 +22,7 @@ for(const retired of ['v74-experience.css','v75-market-featured.css','v75-market
 }
 
 /* Planeamento/Mais têm agora uma camada canónica v76. */
-assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-more1/i);
+assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-month-report1/i);
 for(const selector of ['.cdc-empty-note','.cdc-avatar','.cdc-category-dot','.cdc-planning-overview','.cdc-budget-ring','.cdc-plan-track','.cdc-more-menu','.cdc-preferences-details']){
   assert.ok(planningMore.includes(selector),`v76 Planning/More layer must own ${selector}`);
 }
@@ -34,7 +34,7 @@ assert.match(planningMore,/prefers-reduced-motion:reduce/);
 assert.doesNotMatch(planningMore,/cdc-featured-carousel|cdc-featured-card|scroll-snap-type/,'retired Featured visual behavior must not return');
 
 /* Distribuição: só a camada v76 entra em Pages/cache. */
-assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-more1'/);
+assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-month-report1'/);
 assert.doesNotMatch(prepare,/const FEATURED_REV/);
 assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
 assert.ok(publicFilesBlock.includes("'v76-planning-more.css'"));
@@ -46,7 +46,7 @@ const dist=path.join(ROOT,'dist');
 try{
   execFileSync(process.execPath,['scripts/prepare-pages.cjs'],{cwd:ROOT,stdio:'pipe'});
   const index=read('dist/index.html');
-  assert.match(index,/v76-planning-more\.css\?v=76-planning-more1/);
+  assert.match(index,/v76-planning-more\.css\?v=76-planning-month-report1/);
   assert.doesNotMatch(index,/v74-experience\.css/);
   assert.doesNotMatch(index,/v75-market-featured\.(?:css|js)/);
   const built=read('dist/v76-planning-more.css');

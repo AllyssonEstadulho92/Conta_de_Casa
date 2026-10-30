@@ -39,7 +39,7 @@ assert.match(design,/prefers-reduced-motion:reduce/);
 
 for(const retiredSource of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(ROOT,retiredSource)),`${retiredSource} must be physically deleted`);
 
-assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-more1/i);
+assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-month-report1/i);
 for(const marker of ['.cdc-empty-note','.cdc-avatar','.cdc-category-dot','.cdc-planning-overview','.cdc-budget-ring','.cdc-plan-track','.cdc-more-menu','.cdc-preferences-details'])assert.ok(planningMore.includes(marker));
 assert.match(planningMore,/@media\(max-width:820px\)/);
 assert.match(planningMore,/@media\(min-width:821px\)/);
@@ -132,7 +132,7 @@ assert.match(prepare,/const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '76-budget-commitment4'/);
-assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-more1'/);
+assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-month-report1'/);
 assert.match(prepare,/const HEADER_REV = '75-header2'/);
 assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
 assert.doesNotMatch(prepare,/const FEATURED_REV/);
@@ -156,7 +156,7 @@ try{
   assert.match(index,/market-shopping-focus\.css\?v=74-shopping2/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/v75-architecture\.css\?v=76-budget-commitment4/);
-  assert.match(index,/v76-planning-more\.css\?v=76-planning-more1/);
+  assert.match(index,/v76-planning-more\.css\?v=76-planning-month-report1/);
   assert.match(index,/v75-header-refinement\.css\?v=75-header2/);
   assert.match(index,/v75-architecture\.js\?v=76-budget-commitment4/);
   assert.match(index,/<meta name="theme-color" content="#f4f8f8"/);

@@ -1,6 +1,16 @@
 # TODO — Conta de Casa
 
-Atualizado: 27 de outubro de 2026
+Atualizado: 30 de outubro de 2026
+
+## P1 — Plano mensal com histórico de pagamentos (30/10/2026)
+
+- [x] Reutilizar os movimentos financeiros já guardados, incluindo pagamentos parciais.
+- [x] Apresentar os pagamentos e compras pelo mês efetivo da saída, com entidade, data, método, categoria e valor.
+- [x] Identificar compras com montantes estimados e valores ainda por liquidar no mês de vencimento.
+- [x] Ligar ações ao detalhe e formulário de pagamento existentes, sem duplicar persistência.
+- [x] Acrescentar teste de meses cruzados, montantes parciais, estimativas e ausência de movimentos.
+- [ ] Confirmar os controlos no iPhone/Safari/PWA com cofre de teste, incluindo a troca de meses.
+- [ ] Validar CI, rever e integrar apenas após os testes físicos; não publicar a aplicação por esta proposta.
 
 ## P1 — Utilidade diária do Início entre meses (27/10/2026)
 

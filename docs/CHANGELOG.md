@@ -2,6 +2,14 @@
 
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
+## 2026-10-30: relatório mensal dentro do Plano (proposta)
+
+- Vista mensal com rendimentos, pagamentos registados, compras, total de saídas, resultado e faturas em falta.
+- Histórico detalhado com data, fornecedor, categoria, método e valor, incluindo parcelas de pagamento e compras estimadas.
+- Acesso ao pagamento e ao detalhe da fatura pelos controlos existentes, sem criar livro de movimentos duplicado.
+- Teste específico de fronteira de meses e atualização de revisões PWA para uma integração futura.
+- Nenhuma alteração ao esquema cifrado, valores persistidos, regras de contabilização ou aplicação pública. Validação em iPhone/CI por concluir.
+
 ## 2026-10-27: visão de vencimentos que atravessa meses
 
 - «Próximos 7 dias» e prioridade de pagamentos passam a considerar vencimentos próximos de qualquer mês e dívidas antigas ainda em aberto.
