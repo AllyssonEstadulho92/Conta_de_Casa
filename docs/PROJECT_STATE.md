@@ -1,5 +1,16 @@
 # Estado do Projeto — Conta de Casa
 
+## Segurança e privacidade para uso pessoal (30/10/2026)
+
+**Confirmado:** repositório `Conta_de_Casa` público; PWA local-first com cofre cifrado no IndexedDB, bloqueio por inatividade, botão «Ocultar valores» e sincronização opcional com repositório privado. O código público pode ser consultado por terceiros, mas isso não concede acesso ao estado cifrado do navegador. Os pedidos externos do Mercado podem expor IP e termos de pesquisa.
+
+**Intervenção proposta:** branch `hardening/personal-privacy-20261030`, separada de `main` e da PR #223. Adiciona cortina visual em `visibilitychange` / `blur` / `pagehide`; amplia exclusões em `.gitignore`; adiciona `scripts/check-private-artifacts.cjs` e `npm run privacy:check` aos workflows CI e Pages; estende teste de segurança e documenta limites.
+
+**Segurança:** não recolheu dados pessoais, não alterou estado financeiro, PIN, cifra, backups, IndexedDB, sincronização ou `STATE_VERSION=5`. O CI pode detetar fugas depois do push, mas não reverte informação já tornada pública.
+
+**Pendente:** CI da nova proposta, inspeção do comportamento em iPhone/Safari/PWA e revisão de compatibilidade com o ecrã de captura de fotografia; avaliar repositório privado e alojamento protegido sem interromper a aplicação pública.
+
+
 Atualizado: 27 de outubro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  
