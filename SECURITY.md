@@ -1,5 +1,17 @@
 # Segurança - Conta de Casa
 
+## Proteção adicional de uso pessoal (30/10/2026, proposta em revisão)
+
+- A branch `hardening/personal-privacy-20261030` adiciona uma cortina visual para ocultar toda a interface, incluindo diálogos, no segundo plano; o bloqueio por inatividade e o cofre continuam independentes.
+- `.gitignore` passa a excluir caminhos de backups pessoais, credenciais e dados locais.
+- O CI e o deploy passam a executar `npm run privacy:check`, impedindo a distribuição quando o Git rastreia ficheiros pessoais conhecidos ou certos formatos de credenciais.
+- A verificação de CI só atua **depois** do push. Não reverte exposição já ocorrida no Git, nem substitui revisão humana; não imprimir em logs os conteúdos identificados.
+- O repositório público permite ler o código e os textos que nele tenham sido incluídos. Não significa acesso ao cofre de outro dispositivo.
+- O carregamento de produtos e imagens externas pode revelar IP e termos de pesquisa, embora não deva transmitir dados financeiros.
+- A PWA continua a depender de permissões e segurança locais: dispositivos partilhados, extensões ou malware podem comprometer dados enquanto o cofre estiver desbloqueado.
+- Nenhuma alteração ao `STATE_VERSION`, PIN, AES-GCM, IndexedDB, regras monetárias ou sincronização. Falta CI, revisão e teste físico Safari/iPhone.
+
+
 Esta aplicação está em fase de hardening. Ela reduz riscos para uso local, mas não declara segurança absoluta e ainda não deve ser tratada como cofre definitivo para faturas reais sem a validação final indicada abaixo.
 
 ## Regra obrigatória de confidencialidade
