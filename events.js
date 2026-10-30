@@ -504,6 +504,14 @@ function wireEvents(){
     toast('Planeamento guardado.');
   });
   $('#incomeList').addEventListener('click',async e=>{const b=e.target.closest('[data-delete-income]');if(b&&confirm('Eliminar este rendimento?')){if(typeof recordSyncDeletion==='function')recordSyncDeletion('income',b.dataset.deleteIncome);appState.incomes=appState.incomes.filter(x=>x.id!==b.dataset.deleteIncome);await commit('deleted','income');}});
+  $('#planningPaidHistory').addEventListener('click',e=>{
+    const bill=e.target.closest('[data-plan-bill]');
+    if(bill)openBillDetail(bill.dataset.planBill);
+  });
+  $('#planningPendingBills').addEventListener('click',e=>{
+    const pay=e.target.closest('[data-plan-pay]');
+    if(pay)openPaymentForm(pay.dataset.planPay);
+  });
   $('#marketSearch')?.addEventListener('input',renderMarket);
   ['#marketStatusFilter','#marketCategoryFilter','#marketSort'].forEach(sel=>$(sel)?.addEventListener('change',renderMarket));
   const clearMarketFilters=()=>{

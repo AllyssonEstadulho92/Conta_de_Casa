@@ -38,7 +38,7 @@ assert.match(designCss,/\.mobile-nav\{grid-template-columns:repeat\(5,minmax\(0,
 assert.match(designCss,/\.mobile-nav \.nav-btn\.active::before\{background:var\(--primary\)!important\}/);
 assert.match(designCss,/prefers-reduced-motion:reduce/);
 
-assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-more1/i);
+assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-month-report1/i);
 assert.match(planningMore,/76-prototype-planning1/);
 assert.match(planningMore,/@media\(max-width:820px\)/);
 assert.match(planningMore,/@media\(min-width:821px\)/);
@@ -110,7 +110,7 @@ assert.match(sw,/url\.searchParams\.has\('ts'\)/);
 assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '76-budget-commitment4'/);
-assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-more1'/);
+assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-month-report1'/);
 assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
 assert.doesNotMatch(prepare,/const FEATURED_REV/);
 
@@ -121,7 +121,7 @@ try{
   assert.match(builtIndex,/name="app-build" content="v76"/);
   assert.match(builtIndex,/design-system\.css\?v=76/);
   assert.match(builtIndex,/v75-architecture\.css\?v=76-budget-commitment4/);
-  assert.match(builtIndex,/v76-planning-more\.css\?v=76-planning-more1/);
+  assert.match(builtIndex,/v76-planning-more\.css\?v=76-planning-month-report1/);
   assert.match(builtIndex,/v75-architecture\.js\?v=76-budget-commitment4/);
   assert.match(builtIndex,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.doesNotMatch(builtIndex,/v74-experience\.(?:css|js)/);

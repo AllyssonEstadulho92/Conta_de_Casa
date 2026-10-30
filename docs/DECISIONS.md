@@ -1,6 +1,12 @@
 # Decisões Técnicas — Conta de Casa
 
-Atualizado: 27 de outubro de 2026
+Atualizado: 30 de outubro de 2026
+
+## D-157 — relatório do Plano sem um segundo registo financeiro
+
+Decisão: ampliar a utilidade da página Plano com um relatório consultável por mês, obtido diretamente dos pagamentos, compras e faturas existentes. Um pagamento parcial ou de dívida antiga aparece na data real de saída; o remanescente mantém o vínculo ao vencimento da fatura. A compra com estimativa fica assinalada. Não criar um novo estado «pago» editável no Plano nem acrescentar dados ao schema.
+
+Os únicos atalhos de ação abrem os formulários já existentes. Os totais continuam a ser fornecidos por `monthNumbers`, sem somar duas vezes o que já foi pago. A proposta fica em rama/PR de teste, sem publicar até validação Safari/iPhone e decisão explícita de integração.
 
 ## D-156 — separar o fecho financeiro mensal da atenção aos vencimentos
 

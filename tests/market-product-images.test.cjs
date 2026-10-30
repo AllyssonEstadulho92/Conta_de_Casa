@@ -74,7 +74,7 @@ assert.match(css,/\.market-product-photo img/);
 assert.match(css,/object-fit:contain/);
 assert.match(brandCss,/fotografias[\s\S]*verificadas/);
 assert.match(brandCss,/\.market-product-photo[\s\S]*display:grid!important/);
-assert.match(planningMore,/76-planning-more1/);
+assert.match(planningMore,/76-planning-month-report1/);
 assert.match(architectureCss,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/);
 assert.match(architectureCss,/\.cdc-product-image img[\s\S]*object-fit:contain!important/,'current architecture must preserve uncropped verified product photos');
 assert.doesNotMatch(architectureJs,/root\.CDCV74/,'current architecture must remain independent from retired v74 runtime');

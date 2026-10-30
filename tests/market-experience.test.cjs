@@ -54,7 +54,7 @@ assert.ok(!sw.includes("'./v64-runtime.css'"),'obsolete v64 visual shell must no
 assert.match(pages,/const BUILD = 'v76'/);
 assert.match(pages,/const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(pages,/const ARCHITECTURE_REV = '76-budget-commitment4'/);
-assert.match(pages,/const PLANNING_MORE_REV = '76-planning-more1'/);
+assert.match(pages,/const PLANNING_MORE_REV = '76-planning-month-report1'/);
 assert.match(pages,/['"]market-branding\.js['"]:\s*path\.join\(GENERATED,\s*['"]market-branding\.js['"]\)/);
 
 for(const market of ['Pingo Doce','Continente'])assert.ok(js.includes(market));
@@ -89,7 +89,7 @@ assert.match(brandingJs,/installMarketBranding/);
 assert.match(brandingJs,/marketProductImages\s*=\s*'verified'/);
 assert.doesNotMatch(brandingJs,/appState|estimatedCents|actualCents|saveState|commit\(/,'branding must not mutate financial state');
 
-assert.match(planningMore,/76-planning-more1/);
+assert.match(planningMore,/76-planning-month-report1/);
 assert.match(architectureCss,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'Mercado must remain visible in the primary navigation');
 assert.match(architectureCss,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'current market grid must remain compact');
 assert.match(architectureJs,/market:\['Mercado','Compras'\]/);

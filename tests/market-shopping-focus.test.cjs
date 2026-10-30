@@ -44,7 +44,7 @@ assert.match(brand,/\.market-product-photo[\s\S]*display:grid!important/);
 assert.ok(!fs.existsSync(path.join(ROOT,'v74-experience.css')),'retired v74 CSS source must be deleted from repository');
 assert.match(architecture,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'v75 must keep Mercado visible in primary navigation');
 assert.match(architecture,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'v76 architecture must keep compact product cards where that component is used');
-assert.match(planningMore,/76-planning-more1/);
+assert.match(planningMore,/76-planning-month-report1/);
 
 assert.equal(manifest.latestVersion,'v76');
 assert.equal(manifest.releases[0]?.version,'v76');
@@ -64,7 +64,7 @@ assert.match(prepare,/const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(prepare,/const SHOPPING_REV = '74-shopping2'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '76-budget-commitment4'/);
-assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-more1'/);
+assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-month-report1'/);
 assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
 assert.doesNotMatch(prepare,/const FEATURED_REV/);
 
@@ -79,7 +79,7 @@ try{
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/mobile-menu-toggle\.js\?v=73-menu8/);
   assert.match(index,/v75-architecture\.css\?v=76-budget-commitment4/);
-  assert.match(index,/v76-planning-more\.css\?v=76-planning-more1/);
+  assert.match(index,/v76-planning-more\.css\?v=76-planning-month-report1/);
   assert.match(index,/v75-architecture\.js\?v=76-budget-commitment4/);
   assert.doesNotMatch(index,/v74-experience\.(?:css|js)/);
   assert.doesNotMatch(index,/v75-market-featured\.(?:css|js)/);

@@ -66,7 +66,7 @@ assert.match(css,/safe-area-inset-top/);
 assert.match(css,/safe-area-inset-bottom/);
 assert.match(css,/prefers-reduced-motion:reduce/);
 assert.match(css,/:focus-visible/);
-assert.match(planningMore,/76-planning-more1/);
+assert.match(planningMore,/76-planning-month-report1/);
 
 const documentStub={readyState:'loading',addEventListener(){},querySelector(){return null;},querySelectorAll(){return [];},body:null};
 const sandbox={console,URL,AbortController,setTimeout,clearTimeout,Promise,document:documentStub,requestAnimationFrame:fn=>fn(),fetch:async()=>{throw new Error('network-disabled-in-test');}};
@@ -117,7 +117,7 @@ assert.match(prepare,/const UI_REV = '74-ui1'/);
 assert.match(prepare,/const RUNTIME_REV = '64-runtime1'/);
 assert.match(prepare,/const MENU_REV = '73-menu8'/);
 assert.match(prepare,/const ARCHITECTURE_REV = '76-budget-commitment4'/);
-assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-more1'/);
+assert.match(prepare,/const PLANNING_MORE_REV = '76-planning-month-report1'/);
 assert.doesNotMatch(prepare,/const EXPERIENCE_REV/);
 assert.doesNotMatch(prepare,/const FEATURED_REV/);
 
@@ -136,7 +136,7 @@ try{
   assert.match(index,/v64-runtime\.js\?v=64-runtime1/);
   assert.match(index,/mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index,/v75-architecture\.css\?v=76-budget-commitment4/);
-  assert.match(index,/v76-planning-more\.css\?v=76-planning-more1/);
+  assert.match(index,/v76-planning-more\.css\?v=76-planning-month-report1/);
   assert.match(index,/v75-architecture\.js\?v=76-budget-commitment4/);
   assert.doesNotMatch(index,/v74-experience\.(?:css|js)/);
   assert.doesNotMatch(index,/v75-market-featured\.(?:css|js)/);

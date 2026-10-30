@@ -94,7 +94,7 @@ assert.match(design,/safe-area-inset-top/);
 assert.match(design,/position:fixed!important/);
 assert.match(design,/\.mobile-nav \.nav-btn\.active::before[\s\S]*background:var\(--primary\)!important/);
 assert.doesNotMatch(design,/\.mobile-nav \.nav-btn\.active::after[\s\S]*background:/);
-assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-more1/i);
+assert.match(planningMore,/Conta de Casa v76 — Planeamento e Mais, revisão 76-planning-month-report1/i);
 assert.match(architecture,/Conta de Casa v75/);
 assert.match(architecture,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/);
 assert.match(architecture,/\.v75-more-icon/);

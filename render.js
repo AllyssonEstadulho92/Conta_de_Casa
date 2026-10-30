@@ -424,6 +424,65 @@ function renderPlanning() {
     : '<p class="muted">Ainda não foi registado o saldo real da conta para este mês.</p>');
   const incomes=appState.incomes.filter(i=>inSelectedMonth(i.receivedAt)).sort((a,b)=>new Date(b.receivedAt)-new Date(a.receivedAt));
   setHTML('#incomeList', incomes.length?incomes.map(i=>`<div class="list-row"><div class="list-main"><strong>${esc(i.description)}</strong><small>${fmtDate(i.receivedAt)}</small></div><div class="list-side"><strong class="success-text" data-money>+${money(i.amountCents)}</strong><br><button class="link-btn danger-text" data-delete-income="${attr(i.id)}">Eliminar</button></div></div>`).join(''):empty('Sem rendimentos registados neste mês.'));
+  renderPlanningMonthReport(n);
+}
+
+function planningMovementHtml(item) {
+  const payment=item.kind==='payment';
+  const kind=payment?'Pagamento de fatura':'Compra no Mercado';
+  const method=payment?(item.method||'Método não indicado'):'Sem método de pagamento registado';
+  const note=item.missingBill?' · Fatura associada não encontrada':item.estimated?' · Valor estimado':'';
+  const action=payment&&item.billId
+    ? `<button class="link-btn" type="button" data-plan-bill="${attr(item.billId)}">Ver fatura</button>`
+    : '';
+  return `<div class="planning-register-row">
+    <div class="planning-register-main">
+      <span class="planning-register-type ${payment?'is-bill':'is-market'}">${kind}</span>
+      <strong>${esc(item.title)}</strong>
+      <small>${esc(item.provider||'Sem entidade')} · ${esc(item.category)}</small>
+      <small>${fmtDateTime(item.at)} · ${esc(method)}${esc(note)}</small>
+      ${action}
+    </div>
+    <strong class="planning-register-amount" data-money>${money(item.amountCents)}</strong>
+  </div>`;
+}
+
+function planningPendingHtml(bill) {
+  return `<div class="planning-register-row">
+    <div class="planning-register-main">
+      <span class="status-chip ${attr(bill.status)}">${esc(statusLabel(bill.status))}</span>
+      <strong>${esc(bill.title)}</strong>
+      <small>${esc(bill.provider||'Sem entidade')} · ${esc(bill.category)}</small>
+      <small>Vence ${fmtDate(bill.dueDate)} · Total ${money(bill.totalCents)} · Já pago ${money(bill.paidCents)}</small>
+      <button class="link-btn" type="button" data-plan-pay="${attr(bill.id)}">Registar pagamento</button>
+    </div>
+    <div class="planning-register-side"><small>Em falta</small><strong data-money>${money(bill.remainingCents)}</strong></div>
+  </div>`;
+}
+
+function renderPlanningMonthReport(n = monthNumbers()) {
+  const report=monthlyPlanningRegister(selectedMonth);
+  const [year,month]=selectedMonth.split('-').map(Number);
+  const label=new Intl.DateTimeFormat('pt-PT',{month:'long',year:'numeric'}).format(new Date(year,month-1,1,12));
+  $('#planningReportPeriod').textContent=`Movimentos de ${label}`;
+  const net=sumCents([n.incomes,-n.cashSpent]);
+  const totals=[
+    ['Rendimentos',n.incomes,'income'],
+    ['Faturas pagas no mês',n.paymentTotal,'paid'],
+    ['Compras do Mercado',n.marketSpent,'market'],
+    ['Total de saídas',n.cashSpent,'outflow'],
+    ['Resultado dos movimentos',net,net<0?'negative':'income'],
+    ['Em falta neste mês',n.outstanding,'pending']
+  ];
+  setHTML('#planningReportTotals',totals.map(([title,value,kind])=>`<div class="planning-report-total ${kind}"><span>${title}</span><strong data-money>${money(value)}</strong></div>`).join(''));
+  setHTML('#planningPaidHistory',report.movements.length
+    ? report.movements.map(planningMovementHtml).join('')
+    : empty('Ainda não há pagamentos ou compras registados neste mês.'));
+  setHTML('#planningPendingBills',report.unpaidBills.length
+    ? report.unpaidBills.map(planningPendingHtml).join('')
+    : empty('Não há valores em falta nas faturas com vencimento neste mês.'));
+  const provisional=n.marketEstimatedCount? ` ${n.marketEstimatedCount} compra${n.marketEstimatedCount===1?' tem':'s têm'} valor estimado, ainda não confirmado.` : '';
+  $('#planningReportExplanation').textContent=`Os pagamentos aparecem pela data em que foram efetuados. As contas em falta são as que vencem no mês selecionado. Não existe ligação automática ao banco.${provisional}`;
 }
 
 function marketItemEstimatedCents(item) {

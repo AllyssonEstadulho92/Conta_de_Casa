@@ -1,5 +1,12 @@
 # Changelog
 
+## v76: relatório mensal no Plano (proposta em teste, 30/10/2026)
+
+- Relatório detalhado por mês com cada pagamento de fatura e compra, incluindo data, entidade, categoria, método e valor;
+- identificação de pagamentos parciais, compras com valores estimados e valores em falta;
+- registo de pagamentos acessível a partir do Plano pelo formulário existente, sem duplicação de lançamentos;
+- preservados o cofre, a sincronização, `STATE_VERSION`, a contabilização e a aplicação pública até validação física no iPhone.
+
 ## v76: scanner ZXing local e funcionamento offline
 
 - `@zxing/browser@0.2.0` passa a ser empacotado no build em vez de carregado por CDN;
