@@ -1,5 +1,8 @@
 # Segurança - Conta de Casa
 
+
+O GitHub Pages não se torna privado só por tornar o repositório privado. Para limitar quem consegue abrir o site é preciso um mecanismo de distribuição/controlo de acesso separado; o PIN local apenas protege o cofre. Fonte: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site
+
 ## Proteção adicional de uso pessoal (30/10/2026, proposta em revisão)
 
 - A branch `hardening/personal-privacy-20261030` adiciona uma cortina visual para ocultar toda a interface, incluindo diálogos, no segundo plano; o bloqueio por inatividade e o cofre continuam independentes.
