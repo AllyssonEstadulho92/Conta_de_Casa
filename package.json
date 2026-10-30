@@ -8,6 +8,7 @@
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "privacy:check": "node scripts/check-private-artifacts.cjs",
     "build:runtime": "node scripts/build-typescript-runtime.cjs",
     "build:pages": "node scripts/prepare-pages.cjs"
   },

@@ -1,5 +1,21 @@
 # Privacidade - Conta de Casa
 
+
+A documentação oficial do GitHub confirma que o **GitHub Pages é publicamente acessível mesmo quando o repositório de origem é privado** (salvo controlo de acesso específico disponível em certos ambientes Enterprise). A privacidade do repositório e a privacidade do site são duas decisões distintas. Fonte: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site
+
+## Proteção reforçada para utilização pessoal (proposta de 30/10/2026)
+
+O repositório de código é **público**. Isso permite ver o código-fonte e eventuais nomes ou exemplos que estejam escritos nele, mas não dá acesso automático ao IndexedDB cifrado de outro perfil de navegador. A GitHub Page também é acessível publicamente: **não existe autenticação do servidor**. A confidencialidade dos dados reais depende da cifra do cofre, da palavra-passe e da segurança do dispositivo.
+
+A proposta `hardening/personal-privacy-20261030` acrescenta um ecrã de proteção visual quando o browser passa a segundo plano e uma barreira de desenvolvimento contra o envio acidental de backups e credenciais. A proteção visual não garante que o sistema operativo não faça uma captura antes do evento de ocultação. Nenhum software web consegue impedir todas as fotografias, capturas de ecrã, extensões maliciosas ou acesso por outra pessoa a um dispositivo já desbloqueado.
+
+O Mercado pode consultar os serviços externos `cesta.pt` e Open Food Facts e carregar imagens do catálogo. Esses pedidos técnicos podem revelar o endereço IP e os termos/produtos consultados aos respetivos serviços, mesmo sem transmitir os dados financeiros cifrados. Para evitar esses pedidos, não utilizar pesquisa/atualização online de produtos. A sincronização privada com GitHub permanece opcional e desativada por defeito.
+
+**Não adicionar** faturas, extratos, comprovativos, valores reais, PIN ou backups ao código GitHub nem a testes. O comando `npm run privacy:check` verifica nomes de ficheiros e alguns padrões de credenciais rastreados pelo Git, mas não deteta todos os dados pessoais nem elimina conteúdo já publicado no histórico.
+
+Antes de considerar a aplicação estritamente privada, avaliar com o proprietário a migração do código para um repositório privado e um alojamento com controlo de acesso. **Não alterar a visibilidade do repositório sem confirmar o impacto no GitHub Pages e preservar uma cópia de segurança**.
+
+
 A Conta de Casa é local-first: os dados financeiros ficam no navegador/dispositivo onde a aplicação é aberta ou instalada. Não existe conta online, backend próprio, publicidade, analytics ou telemetria financeira. A sincronização opcional usa apenas um envelope cifrado no repositório privado configurado.
 
 ## Dados que não devem sair do dispositivo

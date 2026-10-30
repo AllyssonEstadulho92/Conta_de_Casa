@@ -1,5 +1,20 @@
 # TODO — Conta de Casa
 
+## P0 — Privacidade de utilização pessoal (30/10/2026)
+
+- [x] Rever visibilidade do repositório: `Conta_de_Casa` é público.
+- [x] Implementar cortina visual em segundo plano sem alterar a palavra-passe nem a cifra.
+- [x] Excluir ficheiros de credenciais, backups e dados locais no `.gitignore`.
+- [x] Criar verificador `privacy:check` e integrá-lo em CI e Pages.
+- [x] Acrescentar regressões estáticas/de estado para ativação da cortina.
+- [ ] Confirmar CI e TypeScript da proposta e analisar falhas sem registar dados pessoais.
+- [ ] Validar Safari/iPhone: alternar de aplicação com formulário e diálogo abertos, regressar e bloquear após o período de inatividade.
+- [ ] Confirmar num dispositivo real que a cortina não interfere com o seletor de fotografias nem a câmara da PR #223.
+- [ ] Inspecionar externamente pedidos de Mercado, pesquisa, imagens e sincronização sem dados reais.
+- [ ] Avaliar alojamento protegido/repositório privado e impacto em Pages; não alterar a infraestrutura sem plano de migração.
+- [ ] Rever históricos/commits por informação pessoal já publicada, com cautela de privacidade e sem a reproduzir em relatórios públicos.
+
+
 Atualizado: 27 de outubro de 2026
 
 ## P1 — Utilidade diária do Início entre meses (27/10/2026)

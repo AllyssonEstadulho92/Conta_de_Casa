@@ -98,6 +98,31 @@ for (const file of executableFiles) {
   assert.doesNotMatch(fs.readFileSync(file, 'utf8'), /console\./, `${file} must not write app data to console`);
 }
 
+
+const privacyCss=fs.readFileSync('styles.css','utf8');
+assert.match(core,/function setBackgroundPrivacyShield\(hidden\)/);
+assert.match(core,/setBackgroundPrivacyShield\(document.hidden\)/);
+assert.match(core,/setBackgroundPrivacyShield\(true\)/);
+assert.match(privacyCss,/html\.cdc-private-background body > \*/);
+assert.match(privacyCss,/visibility:\s*hidden\s*!important/);
+assert.match(privacyCss,/html\.cdc-private-background body::after/);
+const backgroundClassNames=new Set();
+context.document={
+  documentElement:{classList:{toggle(name,on){
+    if(on) backgroundClassNames.add(name);
+    else backgroundClassNames.delete(name);
+  }}}
+};
+vm.runInContext('setBackgroundPrivacyShield(true)',context);
+assert.equal(backgroundClassNames.has('cdc-private-background'),true);
+vm.runInContext('setBackgroundPrivacyShield(false)',context);
+assert.equal(backgroundClassNames.has('cdc-private-background'),false);
+delete context.document;
+
+const ignoreRules=fs.readFileSync('.gitignore','utf8');
+assert.match(ignoreRules,/Conta_de_Casa_backup_/);
+assert.match(ignoreRules,/\.env/);
+
 const render = fs.readFileSync('render.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 assert.match(index, /Content-Security-Policy/);

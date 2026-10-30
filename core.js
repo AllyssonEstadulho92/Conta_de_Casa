@@ -1087,6 +1087,12 @@ function resetLockTimer() {
   const timeoutMs = Math.min(mins * 60000, ABSOLUTE_IDLE_MAX_MS);
   lockTimer = setTimeout(() => { if (vaultKey) lockApp('idle'); }, timeoutMs);
 }
+// Reduz a exposição de informação financeira no seletor de aplicações do dispositivo.
+// Não impede capturas de ecrã ou acesso por software comprometido.
+function setBackgroundPrivacyShield(hidden) {
+  if (typeof document === 'undefined') return;
+  document.documentElement.classList.toggle('cdc-private-background', Boolean(hidden));
+}
 function scheduleHiddenLock() {
   clearTimeout(hiddenLockTimer);
   if (!vaultKey || !appState || appState.settings?.lockOnHidden === false) return;
@@ -1103,12 +1109,23 @@ function installSessionLockGuards() {
   sessionLockGuardsInstalled = true;
   ['pointerdown','keydown','touchstart','input','scroll'].forEach(ev => document.addEventListener(ev, recordUserActivity, { passive:true }));
   document.addEventListener('visibilitychange', () => {
+    setBackgroundPrivacyShield(document.hidden);
     if (document.hidden) scheduleHiddenLock();
     else handleVisibilityReturn();
   });
-  window.addEventListener('blur', scheduleHiddenLock);
-  window.addEventListener('focus', handleVisibilityReturn);
-  window.addEventListener('pagehide', () => { if (vaultKey) lockApp('pagehide'); });
+  window.addEventListener('blur', () => {
+    setBackgroundPrivacyShield(true);
+    scheduleHiddenLock();
+  });
+  window.addEventListener('focus', () => {
+    handleVisibilityReturn();
+    if (!document.hidden) setBackgroundPrivacyShield(false);
+  });
+  window.addEventListener('pagehide', () => {
+    setBackgroundPrivacyShield(true);
+    if (vaultKey) lockApp('pagehide');
+  });
+  if (document.hidden) setBackgroundPrivacyShield(true);
 }
 function clearPassphraseInputs() {
   if (typeof document === 'undefined') return;

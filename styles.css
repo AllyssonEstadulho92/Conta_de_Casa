@@ -1081,3 +1081,25 @@ html.keyboard-open
   .sync-conflict-actions{display:grid;grid-template-columns:minmax(0,1fr)}
   .sync-conflict-actions .btn,.sync-conflict-review>.button-row .btn{width:100%}
 }
+
+
+/* Privacidade no seletor de aplicações: cobrir também diálogos em top layer.
+   Não é uma garantia contra capturas do SO nem substitui o bloqueio do cofre. */
+html.cdc-private-background body > * {
+  visibility: hidden !important;
+}
+html.cdc-private-background body::after {
+  content: "Conta de Casa · conteúdo privado";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #182230;
+  color: #fff;
+  font: 600 1rem/1.5 system-ui, sans-serif;
+  text-align: center;
+  visibility: visible !important;
+  pointer-events: auto;
+}
