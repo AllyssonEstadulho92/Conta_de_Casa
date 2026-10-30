@@ -1,5 +1,8 @@
 # Decisões Técnicas — Conta de Casa
 
+
+**Nota confirmada pela documentação GitHub:** um site Pages continua público mesmo com repositório privado, fora dos mecanismos Enterprise de controlo de acesso. Restringir o repositório não equivale a restringir a aplicação. https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site
+
 ## D-157 — segurança para utilização pessoal sem alterar o cofre (30/10/2026)
 
 Decisão: priorizar privacidade visual em segundo plano e prevenção de publicação de artefactos privados antes de funcionalidades novas. Implementar cortina por classe CSS ativada nos eventos de visibilidade/foco, preservando o bloqueio de sessão atual; adicionar exclusões Git e um verificador de caminhos/credenciais antes da compilação e publicação. Não prometer que uma PWA pública, um PIN local ou a cortina impedem todos os acessos indevidos.
