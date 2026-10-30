@@ -1,5 +1,12 @@
 # Decisões Técnicas — Conta de Casa
 
+## D-157 — segurança para utilização pessoal sem alterar o cofre (30/10/2026)
+
+Decisão: priorizar privacidade visual em segundo plano e prevenção de publicação de artefactos privados antes de funcionalidades novas. Implementar cortina por classe CSS ativada nos eventos de visibilidade/foco, preservando o bloqueio de sessão atual; adicionar exclusões Git e um verificador de caminhos/credenciais antes da compilação e publicação. Não prometer que uma PWA pública, um PIN local ou a cortina impedem todos os acessos indevidos.
+
+Motivo: o repositório é público e a aplicação contém dados financeiros local-first. A barreira Git reduz erros futuros de publicação; a cortina reduz visibilidade casual no seletor de aplicações. Limites: CI após push não apaga histórico; pedidos de Mercado a serviços externos podem expor IP/termos; a infraestrutura GitHub Pages não oferece controlo de acesso ao HTML por utilizador. Validação real do iPhone e uma decisão separada sobre alojamento/repositório privado são obrigatórias antes de afirmar confidencialidade reforçada.
+
+
 Atualizado: 27 de outubro de 2026
 
 ## D-156 — separar o fecho financeiro mensal da atenção aos vencimentos
