@@ -22,7 +22,10 @@ jobs:
           node-version: "24"
           cache: 'npm'
 
-      - name: Prevent private files and credentials in Git\n        run: npm run privacy:check\n\n      - name: Install TypeScript toolchain
+      - name: Prevent private files and credentials in Git
+        run: npm run privacy:check
+
+      - name: Install TypeScript toolchain
         run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Generate TypeScript runtime artifacts
