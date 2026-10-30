@@ -1,5 +1,12 @@
 # Arquitetura — Conta de Casa
 
+## Proteção de ecrã e barreira de dados privados (proposta de 30/10/2026)
+
+A camada `core.js` já instala guardas de sessão. Uma cortina visual temporária passa a ligar/desligar a classe `cdc-private-background` no documento quando o browser perde/recupera visibilidade/foco; `styles.css` oculta todos os elementos diretos do corpo, incluindo `dialog` no top layer, e apresenta apenas uma mensagem neutra. O bloqueio temporal do cofre permanece como estava, com tolerância de 60 segundos quando oculto. O funcionamento depende dos eventos reais de Safari/iOS, pelo que não oferece proteção absoluta contra capturas do sistema.
+
+O novo `scripts/check-private-artifacts.cjs` revê apenas ficheiros rastreados via `git ls-files`, proíbe nomes/caminhos pessoais conhecidos e procura assinaturas de credenciais de elevada confiança. Nunca mostra conteúdo sensível nos logs. Executa em CI e antes de Pages, mas não faz auditoria completa do histórico nem substitui verificação pré-push. A distribuição pública continua estritamente baseada na allowlist do build Pages. Não houve migração de dados nem acesso a cofres.
+
+
 Atualizado: 9 de outubro de 2026
 Versão: `0.76.0`  
 Release pública: `v76`  
