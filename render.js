@@ -555,7 +555,7 @@ function debtSummaryCounts(stats) {
     ['Vencem hoje',stats.dueTodayCount],
     ['Futuras',stats.futureCount]
   ];
-  return `<div class="debt-counts" role="group" aria-label="Quantidades de faturas">${counts.map(([label,value])=>`<div class="debt-count"><span>${esc(label)}</span><strong>${value}</strong></div>`).join('')}</div>`;
+  return `<div class="debt-counts" role="group" aria-label="Quantidades de faturas">${counts.map(([label,value])=>`<div class="debt-count"><span>${esc(label)}</span><strong data-money>${value}</strong></div>`).join('')}</div>`;
 }
 function debtScopeHtml(stats) {
   const cards=[
@@ -571,7 +571,7 @@ function debtScopeHtml(stats) {
   if(stats.unknownDueCount)note.push(`Sem vencimento válido: ${money(stats.unknownDueCents)} (${stats.unknownDueCount}).`);
   if(stats.invalidCount)note.push(`${stats.invalidCount} registo(s) com valores inválidos, excluídos dos totais.`);
   if(stats.overpaidCount)note.push(`${stats.overpaidCount} fatura(s) com pagamentos em excesso, no valor de ${money(stats.overpaidCents)}; não compensam dívidas diferentes.`);
-  return `<div class="debt-stats-grid">${cards.join('')}</div>${debtSummaryCounts(stats)}<p class="debt-stats-note">${esc(note.join(' '))}</p>`;
+  return `<div class="debt-stats-grid">${cards.join('')}</div>${debtSummaryCounts(stats)}<p class="debt-stats-note" data-money>${esc(note.join(' '))}</p>`;
 }
 function renderDebtStatistics() {
   const s=debtBalanceStatistics(selectedMonth);
