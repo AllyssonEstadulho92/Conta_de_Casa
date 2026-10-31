@@ -543,7 +543,58 @@ function renderMarket() {
   setHTML('#marketList',marketTableHtml(list)+`<div class="market-mobile-list">${list.map(marketMobileCardHtml).join('')}</div>`);
 }
 
+function debtSummaryCard(label,value,kind='primary',note='') {
+  return `<article class="debt-stat-card ${attr(kind)}"><span class="debt-stat-label">${esc(label)}</span><strong data-money>${money(value)}</strong>${note?`<small>${esc(note)}</small>`:''}</article>`;
+}
+function debtSummaryCounts(stats) {
+  const counts=[
+    ['Pagas integralmente',stats.fullyPaidCount],
+    ['Não pagas',stats.unpaidCount],
+    ['Pagas parcialmente',stats.partlyPaidCount],
+    ['Em atraso',stats.overdueCount],
+    ['Vencem hoje',stats.dueTodayCount],
+    ['Futuras',stats.futureCount]
+  ];
+  return `<div class="debt-counts" role="group" aria-label="Quantidades de faturas">${counts.map(([label,value])=>`<div class="debt-count"><span>${esc(label)}</span><strong>${value}</strong></div>`).join('')}</div>`;
+}
+function debtScopeHtml(stats) {
+  const cards=[
+    debtSummaryCard('Total das faturas',stats.totalCents,'primary',`${stats.billCount} faturas válidas`),
+    debtSummaryCard('Já liquidado nessas faturas',stats.paidAllocatedCents,'success','Inclui pagamentos parciais'),
+    debtSummaryCard('Ainda por pagar',stats.outstandingCents,'warning','Inclui vencidas e futuras'),
+    debtSummaryCard('Em atraso',stats.overdueCents,'danger',`${stats.overdueCount} vencida(s)`)
+  ];
+  const note=[
+    `Vencem hoje: ${money(stats.dueTodayCents)} (${stats.dueTodayCount}).`,
+    `Vencimentos futuros: ${money(stats.futureCents)} (${stats.futureCount}), dos quais ${money(stats.next7Cents)} nos próximos 7 dias.`
+  ];
+  if(stats.unknownDueCount)note.push(`Sem vencimento válido: ${money(stats.unknownDueCents)} (${stats.unknownDueCount}).`);
+  if(stats.invalidCount)note.push(`${stats.invalidCount} registo(s) com valores inválidos, excluídos dos totais.`);
+  if(stats.overpaidCount)note.push(`${stats.overpaidCount} fatura(s) com pagamentos em excesso, no valor de ${money(stats.overpaidCents)}; não compensam dívidas diferentes.`);
+  return `<div class="debt-stats-grid">${cards.join('')}</div>${debtSummaryCounts(stats)}<p class="debt-stats-note">${esc(note.join(' '))}</p>`;
+}
+function renderDebtStatistics() {
+  const s=debtBalanceStatistics(selectedMonth);
+  setHTML('#debtMonthSummary',debtScopeHtml(s.period));
+  setHTML('#debtAllSummary',debtScopeHtml(s.all));
+  const balanceLabel=s.hasAccountBalance
+    ? `Saldo introduzido manualmente${s.balanceUpdatedAt?' · '+fmtDateTime(s.balanceUpdatedAt):''}`
+    : 'Saldo calculado pelos movimentos registados, não confirmado com o banco';
+  const allText=s.canProjectAll
+    ? `<div class="debt-balance-line"><span>Saldo após liquidar todas as faturas registadas</span><strong data-money>${money(s.projectedAllCents)}</strong></div>`
+    : '<div class="debt-balance-line"><span>Saldo global</span><strong>Seleciona o mês atual para o calcular</strong></div>';
+  setHTML('#debtBalanceSummary',`
+    <div class="debt-balance-line"><span>Saldo de referência</span><strong data-money>${money(s.currentBalanceCents)}</strong></div>
+    <p class="debt-balance-note">${esc(balanceLabel)}</p>
+    <div class="debt-balance-line"><span>Saldo depois das faturas do mês selecionado</span><strong data-money>${money(s.projectedMonthCents)}</strong></div>
+    ${allText}
+    <div class="debt-balance-line"><span>Pagamentos efetivamente registados no mês</span><strong data-money>${money(s.paymentInMonthCents)}</strong></div>
+    <p class="debt-balance-note">Simulação, não saldo bancário garantido: não inclui receitas futuras, nem faturas recorrentes ainda não criadas. Os pagamentos feitos neste mês são apresentados à parte e não devem ser somados novamente ao valor já liquidado por fatura.</p>
+  `);
+}
+
 function renderReports() {
+  renderDebtStatistics();
   const n=monthNumbers();
   const expenses=n.cashSpent;
   const saved=sumCents([n.incomes,-expenses]);
