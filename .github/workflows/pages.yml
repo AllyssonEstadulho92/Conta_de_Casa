@@ -80,6 +80,7 @@ jobs:
           node tests/audit.test.cjs
           node tests/counting-invariants.test.cjs
           node tests/cross-month-visibility.test.cjs
+          node tests/debt-statistics.test.cjs
           node tests/isolation.test.cjs
           node tests/date-timezone.test.cjs
           node tests/form-regression.test.cjs
