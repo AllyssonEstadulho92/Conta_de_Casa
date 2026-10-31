@@ -187,7 +187,7 @@ if(!index.includes('name="app-version"')){
 }
 index=index.replace(/<meta name="theme-color" content="[^"]+"\s*\/>/,'<meta name="theme-color" content="#f4f8f8" />');
 index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
-index=index.replace(/styles\\.css\\?v=[^\"']+/, 'styles.css?v=76-debt-statistics1');
+index=index.replace(/styles\.css\?v=[^"']+/, 'styles.css?v=76-debt-statistics1');
 index=index.replace(/invoice-capture\.css\?v=[^"']+/,`invoice-capture.css?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/invoice-capture\.js\?v=[^"']+/,`invoice-capture.js?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/render\.js\?v=[^"']+/,`render.js?v=${DASHBOARD_REV}`);
