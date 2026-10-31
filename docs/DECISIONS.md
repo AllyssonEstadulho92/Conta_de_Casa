@@ -1,5 +1,12 @@
 # Decisões Técnicas — Conta de Casa
 
+## D-158 — estatísticas de faturas por vencimento e saldo real versus simulado (31/10/2026)
+
+Decisão: introduzir em Relatórios uma visão financeira dupla, mês de vencimento e todas as faturas registadas, preservando a contabilidade de caixa existente. Estados mutuamente exclusivos: paga integralmente, parcialmente paga ou sem pagamentos; a dívida remanescente reparte-se em atrasada, hoje, futura e sem vencimento válido. Vencimentos a sete dias são subconjunto dos futuros, não uma parcela adicional. Excluir canceladas/arquivadas e sinalizar faturas com valores inválidos e pagamentos excessivos sem compensação automática.
+
+O saldo após faturas do mês usa o saldo de referência do mês menos as obrigações ainda abertas desse mês. O saldo global apenas aparece ao selecionar o mês corrente, e é um cenário sem receitas futuras. Distinguir explicitamente saldo bancário introduzido manualmente de estimativa por movimentos. Toda a estatística é calculada localmente, sem alterar o cofre ou sincronização, e o modo discreto deve ocultar quantias, contagens e notas financeiras.
+
+
 Atualizado: 27 de outubro de 2026
 
 ## D-156 — separar o fecho financeiro mensal da atenção aos vencimentos
