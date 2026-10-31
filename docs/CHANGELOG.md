@@ -1,5 +1,15 @@
 # Changelog Técnico — Conta de Casa
 
+## Por publicar — estatísticas de dívidas e saldo (31/10/2026)
+
+- Nova vista em Relatórios: mês selecionado e todas as faturas, com somas de valores totais, pagos, em falta, atrasados, vencimentos atuais e futuros, e contagens por estado.
+- Pagamentos parciais e antecipados contabilizados por fatura, com gastos por data apresentados em separado.
+- Simulação de saldo após obrigações e aviso quando o saldo não corresponde a informação bancária confirmada.
+- Sinalização de pagamentos em excesso, registos inválidos e faturas sem vencimento.
+- Valores ocultáveis no modo discreto; cálculos locais sem enviar dados.
+- Testes automáticos, CI/Pages e cache. Sem alteração de `STATE_VERSION`, cofre, sincronização ou versão pública.
+
+
 O histórico integral permanece no Git e no `CHANGELOG.md` da raiz. Este ficheiro mantém as alterações relevantes para continuidade do programa v76.
 
 ## 2026-10-27: visão de vencimentos que atravessa meses
