@@ -1,5 +1,12 @@
 # Arquitetura — Conta de Casa
 
+## Coerência visual do cofre e retirada progressiva do Mercado (01/11/2026)
+
+`index.html` contém `#vaultOptionsToggle`, `#vaultOptionsPanel[hidden]` e `#vaultRecoverySlot`; `installPinRecoveryUi` em `events.js` monta as ações secundárias existentes nesse slot. `wireVaultPinPad` faz a divulgação acessível das opções e a abertura explícita de transferência cifrada; `setVaultEntryMode` mantém uma única credencial real em `#unlockPassphrase`. O CSS final está encapsulado em `html.cdc-v75 #vaultScreen.vault-unlock-active` na camada `v76-mobile-shell.css`, isolando a vista escura do resto do produto. Uma linha de oito pontos é decorativa e não limita o comprimento do PIN, exigido por validação existente. Não há biblioteca biométrica nem persistência de credenciais.
+
+As rotas `PAGE_META` e `NAV_GROUPS` de `core.js` e a segunda camada de navegação `v75-architecture.js` excluem Mercado. `renderPage` não chama `renderMarket`. A secção HTML antiga mantém-se oculta, sem rota, com os IDs preservados para não rebentar os listeners que ainda existem em `events.js`. Os valores históricos continuam em `appState.market`, as contas e a projeção em `finance.js` conservam os mesmos algoritmos, e o bundle mantém ficheiros legados até remoção testada independentemente.
+
+
 ## Resultado mensal automático e X único do menu (01/11/2026)
 
 A função pura `planningMonthlyResult(n)` apresenta o saldo líquido dos movimentos do mês através de `sumCents([n.incomes,-n.cashSpent])`, reaproveitando `monthNumbers` e não a referência bancária manual. Não altera persistência nem contabilização existente. O ecrã do Plano usa uma medida derivada de receitas e despesas registadas e identifica a natureza estimada de compras sem preço real. O saldo bancário informado e o saldo `ledgerCurrent` permanecem separados; quando não há dívida em aberto não se duplica `n.projected` como se fosse novo dinheiro.
