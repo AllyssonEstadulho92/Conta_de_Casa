@@ -1,5 +1,14 @@
 # Arquitetura — Conta de Casa
 
+## Linguagem visual por área e Plano Mensal (01/11/2026)
+
+A camada final `v76-mobile-shell.css` alberga o novo componente contextual `.cdc-page-overview`, a sequência informativa `.cdc-flow` e o desenho do Plano Mensal, inseridos antes da última autoridade CSS do Mercado. Os guias não têm listeners nem dados financeiros.
+
+No Plano, `renderPlanningOverview(n)` apenas lê a resposta canónica de `monthNumbers()` e apresenta `n.current`, `n.incomes`, `n.cashSpent`, `n.outstanding` e `n.projected`. `renderPlanningUpcoming()` lê `activeUnpaidBills()`, ordena por vencimento e mostra até cinco contas de diferentes meses. Os dados exibidos são escapados ou tratados pelo formatador existente, com `data-money` no modo discreto. `renderPlanning()` continua responsável pelos mesmos inputs e pela lista de rendimentos; `v75-architecture.js` continua a injetar o cartão do orçamento sem um segundo formulário. A ligação «Ver todas as faturas» reutiliza o encaminhamento `data-go` de `events.js`.
+
+Foi atualizada a revisão da cache do runtime de renderização e do service worker para não conservar o painel antigo no Safari. Sem migração de dados.
+
+
 **Atualização visual 01/11/2026:** `renderReports` agora apresenta KPIs de receitas, despesas efetivas, saldo de referência e dívidas globais, seguidos de carteira do mês e global. `renderDebtStatus` desenha um gráfico local, sem bibliotecas externas, com três grupos disjuntos (paga, parcial, sem pagamentos); atrasos são subconjunto destacado. `renderDebtAccounts` filtra e mostra até 24 linhas por página, com delegação em `events.js` para trocar filtros, expandir e abrir `openBillDetail`. Não cria endpoints nem altera a persistência. A marcação `data-money` continua a ocultar valores e contagens no modo discreto; os nomes e estados das contas são também desfocados nesse modo.\n\n
 ## Vista de estatísticas financeiras, sem persistência (31/10/2026)
 

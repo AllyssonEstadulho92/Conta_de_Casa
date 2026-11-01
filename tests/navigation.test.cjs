@@ -91,9 +91,9 @@ try {
   assert.match(builtIndex, /<meta name="app-build-id" content="(?:[0-9a-f]{7}|local)"\s*\/>/);
   assert.match(builtIndex, /v76-modern-ui\.css\?v=76-visual-audit1/);
   assert.match(builtIndex, /v76-product-pages\.css\?v=76-add-product-prototype2/);
-  assert.match(builtIndex, /render\.js\?v=76-debt-statistics1/);
+  assert.match(builtIndex, /render\.js\?v=76-linear-planning2/);
   assert.match(builtIndex, /finance\.js\?v=76-debt-statistics1/);
-  assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-market-filter-visual-qa1/);
+  assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-linear-page-flow1/);
   assert.match(builtIndex, /v75-usability\.css\?v=76-auth-viewport-fit1/);
 
   const builtIds = [...builtIndex.matchAll(/\sid="([^"]+)"/g)].map(match=>match[1]);

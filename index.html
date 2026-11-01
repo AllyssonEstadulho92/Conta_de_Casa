@@ -113,6 +113,18 @@
       </header>
 
       <section id="page-dashboard" class="page active">
+        <div class="cdc-page-overview" aria-label="Orientação da área">
+          <div class="cdc-page-overview-copy">
+            <p class="cdc-overview-eyebrow">Visão geral</p>
+            <h2>O essencial do mês</h2>
+            <p class="cdc-overview-summary">Saldo, valores pagos e contas por liquidar, organizados para decidires o próximo passo.</p>
+          </div>
+          <ol class="cdc-flow" aria-label="Sequência recomendada">
+            <li>Confirma o saldo</li>
+            <li>Revê os vencimentos</li>
+            <li>Consulta o orçamento</li>
+          </ol>
+        </div>
         <div id="alertsPanel" class="alerts-panel"></div>
         <div id="kpiGrid" class="kpi-grid dashboard-kpis"></div>
         <div id="dashboardSecondary" class="dashboard-secondary"></div>
@@ -125,6 +137,18 @@
       </section>
 
       <section id="page-bills" class="page">
+        <div class="cdc-page-overview" aria-label="Orientação da área">
+          <div class="cdc-page-overview-copy">
+            <p class="cdc-overview-eyebrow">Contas e faturas</p>
+            <h2>Tudo o que tens para pagar</h2>
+            <p class="cdc-overview-summary">Regista uma fatura e acompanha o seu estado até ficar totalmente liquidada.</p>
+          </div>
+          <ol class="cdc-flow" aria-label="Sequência recomendada">
+            <li>Adiciona a fatura</li>
+            <li>Revê o vencimento</li>
+            <li>Regista o pagamento</li>
+          </ol>
+        </div>
         <nav class="section-tabs" aria-label="Vistas de faturas"><button class="section-tab" type="button" data-page="bills">Lista de faturas</button><button class="section-tab" type="button" data-page="calendar">Calendário</button></nav>
         <div class="bill-command-bar">
           <div class="search-wrap bill-search-wrap"><label class="sr-only" for="billSearch">Pesquisar faturas</label><input id="billSearch" type="search" placeholder="Pesquisar por descrição, fornecedor ou referência..." autocomplete="off" /></div>
@@ -142,10 +166,62 @@
         <div id="billSummary" class="bill-summary-grid" aria-live="polite"></div>
         <div id="billsList" class="bill-results" aria-live="polite"></div>
       </section>
-      <section id="page-calendar" class="page"><nav class="section-tabs" aria-label="Vistas de faturas"><button class="section-tab" type="button" data-page="bills">Lista de faturas</button><button class="section-tab" type="button" data-page="calendar">Calendário</button></nav><article class="panel"><div class="panel-head"><div><h2>Calendário mensal</h2><p>Consulte o que foi efetivamente gasto e os vencimentos de cada mês.</p></div></div><div id="calendarMonthSummary" class="calendar-summary-grid" aria-label="Resumo financeiro do mês"></div><div class="calendar-history-wrap"><div><strong>Histórico mensal</strong><small>Os meses anteriores ficam guardados. Toque num mês para consultar.</small></div><div id="calendarHistory" class="calendar-history" aria-label="Histórico de gastos mensais"></div></div><div id="calendarGrid" class="calendar-grid"></div><div class="panel-head calendar-agenda-head"><div><h3>Vencimentos do mês</h3><p>Faturas organizadas pela data de vencimento.</p></div></div><div id="calendarAgenda" class="stack-list"></div></article></section>
-      <section id="page-planning" class="page"><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Planeamento mensal</h2><p>O saldo atual representa o saldo real da sua conta; o saldo inicial serve apenas para conciliação dos registos do mês.</p></div></div><form id="monthPlanForm" class="form-grid"><label>Saldo atual da conta<input id="accountBalance" inputmode="decimal" placeholder="0,00" autocomplete="off" /><small>Copie o saldo disponível mostrado pelo seu banco. A aplicação não acede automaticamente à conta bancária.</small></label><div id="accountBalanceInfo" class="account-balance-info" aria-live="polite"></div><label>Saldo inicial do mês<input id="openingBalance" inputmode="decimal" placeholder="0,00" /></label><label>Orçamento do mês<input id="monthlyBudget" inputmode="decimal" placeholder="0,00" /></label><button class="btn primary" type="submit">Guardar planeamento</button></form></article><article class="panel"><div class="panel-head"><div><h2>Rendimentos</h2><p>Salários, reembolsos e outras entradas.</p></div><button id="newIncomeBtn" class="btn secondary">+ Rendimento</button></div><div id="incomeList" class="stack-list"></div></article></div></section>
+      <section id="page-calendar" class="page">
+        <div class="cdc-page-overview" aria-label="Orientação da área">
+          <div class="cdc-page-overview-copy">
+            <p class="cdc-overview-eyebrow">Datas e vencimentos</p>
+            <h2>Contas organizadas por dia</h2>
+            <p class="cdc-overview-summary">Consulta o que vence e o que já foi pago, sem perder de vista o mês escolhido.</p>
+          </div>
+          <ol class="cdc-flow" aria-label="Sequência recomendada">
+            <li>Escolhe o mês</li>
+            <li>Consulta os dias</li>
+            <li>Abre cada conta</li>
+          </ol>
+        </div><nav class="section-tabs" aria-label="Vistas de faturas"><button class="section-tab" type="button" data-page="bills">Lista de faturas</button><button class="section-tab" type="button" data-page="calendar">Calendário</button></nav><article class="panel"><div class="panel-head"><div><h2>Calendário mensal</h2><p>Consulte o que foi efetivamente gasto e os vencimentos de cada mês.</p></div></div><div id="calendarMonthSummary" class="calendar-summary-grid" aria-label="Resumo financeiro do mês"></div><div class="calendar-history-wrap"><div><strong>Histórico mensal</strong><small>Os meses anteriores ficam guardados. Toque num mês para consultar.</small></div><div id="calendarHistory" class="calendar-history" aria-label="Histórico de gastos mensais"></div></div><div id="calendarGrid" class="calendar-grid"></div><div class="panel-head calendar-agenda-head"><div><h3>Vencimentos do mês</h3><p>Faturas organizadas pela data de vencimento.</p></div></div><div id="calendarAgenda" class="stack-list"></div></article></section>
+      <section id="page-planning" class="page">
+        <div class="cdc-page-overview" aria-label="Orientação da área">
+          <div class="cdc-page-overview-copy">
+            <p class="cdc-overview-eyebrow">Planeamento</p>
+            <h2>Organiza o dinheiro do mês</h2>
+            <p class="cdc-overview-summary">Mantém o saldo atualizado e compara o orçamento com as despesas registadas.</p>
+          </div>
+          <ol class="cdc-flow" aria-label="Sequência recomendada">
+            <li>Indica o saldo</li>
+            <li>Define o orçamento</li>
+            <li>Consulta a diferença</li>
+          </ol>
+        </div><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav>
+        <section class="cdc-plan-summary" aria-labelledby="cdcPlanSummaryTitle">
+          <div class="cdc-plan-summary-head">
+            <div><p class="cdc-plan-section-kicker">A tua situação financeira</p><h3 id="cdcPlanSummaryTitle">Resumo do mês</h3><p>Valores atuais, despesas pagas e compromissos por liquidar.</p></div>
+            <span class="cdc-plan-private-pill">Cálculo local</span>
+          </div>
+          <div id="planningKpis" class="cdc-plan-kpis" aria-live="polite"></div>
+          <div id="planningProjection" class="cdc-plan-projection" aria-live="polite"></div>
+        </section>
+        <div class="two-col cdc-plan-workspace"><article class="panel cdc-plan-account-card"><div class="panel-head"><div><h2>Atualizar saldo e orçamento</h2><p>O saldo atual representa o saldo real da sua conta; o saldo inicial serve apenas para conciliação dos registos do mês.</p></div></div><form id="monthPlanForm" class="form-grid"><label>Saldo atual da conta<input id="accountBalance" inputmode="decimal" placeholder="0,00" autocomplete="off" /><small>Copie o saldo disponível mostrado pelo seu banco. A aplicação não acede automaticamente à conta bancária.</small></label><div id="accountBalanceInfo" class="account-balance-info" aria-live="polite"></div><label>Saldo inicial do mês<input id="openingBalance" inputmode="decimal" placeholder="0,00" /></label><label>Orçamento do mês<input id="monthlyBudget" inputmode="decimal" placeholder="0,00" /></label><button class="btn primary" type="submit">Guardar planeamento</button></form></article><article class="panel"><div class="panel-head"><div><h2>Rendimentos recebidos</h2><p>Salários, apoios e outras entradas deste mês. Consulta cada movimento abaixo.</p></div><button id="newIncomeBtn" class="btn secondary">+ Rendimento</button></div><div id="incomeList" class="stack-list"></div></article></div>
+        <article class="panel cdc-plan-upcoming-panel" aria-labelledby="cdcPlanUpcomingTitle">
+          <div class="panel-head">
+            <div><h2 id="cdcPlanUpcomingTitle">Próximas contas por pagar</h2><p>Inclui contas vencidas e futuros vencimentos já registados, mesmo noutros meses.</p></div>
+            <button class="btn secondary" type="button" data-go="bills">Ver todas as faturas</button>
+          </div>
+          <div id="planningUpcomingList" class="cdc-plan-upcoming-list" aria-live="polite"></div>
+        </article></section>
 
       <section id="page-market" class="page">
+        <div class="cdc-page-overview" aria-label="Orientação da área">
+          <div class="cdc-page-overview-copy">
+            <p class="cdc-overview-eyebrow">Lista de compras</p>
+            <h2>Do planeado ao comprado</h2>
+            <p class="cdc-overview-summary">Controla os produtos, os preços estimados e o que realmente gastaste.</p>
+          </div>
+          <ol class="cdc-flow" aria-label="Sequência recomendada">
+            <li>Adiciona o produto</li>
+            <li>Confirma o preço</li>
+            <li>Marca como comprado</li>
+          </ol>
+        </div>
         <div class="market-command-bar">
           <div class="search-wrap market-search-wrap"><label class="sr-only" for="marketSearch">Pesquisar lista de compras</label><input id="marketSearch" type="search" placeholder="Pesquisar produto ou categoria..." autocomplete="off" /></div>
           <button id="newMarketBtn" class="btn primary market-new-btn" type="button">+ Adicionar item</button>
@@ -161,6 +237,18 @@
         <div id="marketList" class="market-results" aria-live="polite"></div>
       </section>
       <section id="page-petshare" class="page">
+        <div class="cdc-page-overview" aria-label="Orientação da área">
+          <div class="cdc-page-overview-copy">
+            <p class="cdc-overview-eyebrow">Partilha de cuidados</p>
+            <h2>Contas claras dos cuidados</h2>
+            <p class="cdc-overview-summary">Configura o cálculo e consulta os registos e pagamentos associados.</p>
+          </div>
+          <ol class="cdc-flow" aria-label="Sequência recomendada">
+            <li>Configura o cálculo</li>
+            <li>Regista os dias</li>
+            <li>Confere os movimentos</li>
+          </ol>
+        </div>
         <section class="walli-share-hero" aria-labelledby="walliShareTitle">
           <div class="walli-hero-identity" aria-hidden="true">
             <span id="walliHeroIcon" class="walli-hero-paw"></span>
@@ -290,6 +378,7 @@
       </section>
       <section id="page-reports" class="page">
   <div class="debt-report-heading"><div><h2>Visão financeira da casa</h2><p>Receitas, despesas, dívidas e dinheiro remanescente do mês selecionado.</p></div><span class="debt-report-local-note">Dados do teu cofre local</span></div>
+  <ol class="cdc-flow cdc-reports-flow" aria-label="Como consultar os relatórios"><li>Consulta os valores do mês</li><li>Compara pagos e por pagar</li><li>Abre os detalhes de cada conta</li></ol>
   <div id="reportCards" class="debt-report-top-kpis"></div>
   <article class="panel debt-report-panel" aria-labelledby="debtReportTitle">
     <div class="panel-head"><div><h2 id="debtReportTitle">Dívidas e saldo remanescente</h2><p>Valores pagos, não pagos e a pagar, sem misturar pagamentos com vencimentos.</p></div></div>
@@ -316,8 +405,32 @@
     <article class="panel"><div class="panel-head"><div><h2>Últimos 6 meses</h2><p>Pagamentos e compras efetivas.</p></div></div><div id="monthlyTrend" class="trend-chart"></div></article>
   </div>
 </section>
-      <section id="page-goals" class="page"><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav><div class="section-toolbar"><div><h2>Metas de poupança</h2><p class="muted">Objetivos acompanhados separadamente do orçamento mensal.</p></div><button id="newGoalBtn" class="btn primary">+ Novo objetivo</button></div><div id="goalList" class="goal-grid"></div></section>
-      <section id="page-security" class="page"><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Estado de segurança</h2><p>Confirmações locais antes de usar dados reais.</p></div></div><div id="securityStatusGrid" class="security-grid"></div><button id="securityLockBtn" class="btn secondary">Bloquear agora</button></article><article class="panel"><h2>Backup cifrado</h2><p>Exporte apenas envelopes cifrados. O restauro valida versão, estrutura e integridade antes de substituir o cofre local.</p><div id="securityBackupInfo" class="section-gap"></div><div class="button-row"><button id="exportBackupBtn" class="btn primary">Exportar backup</button><label class="btn secondary file-btn">Restaurar backup<input id="importBackupInput" type="file" accept="application/json,.json" hidden /></label></div><p id="backupMessage" class="form-message" role="status"></p></article><article id="syncPanel" class="panel span-2">
+      <section id="page-goals" class="page">
+        <div class="cdc-page-overview" aria-label="Orientação da área">
+          <div class="cdc-page-overview-copy">
+            <p class="cdc-overview-eyebrow">Poupança</p>
+            <h2>Segue as tuas metas</h2>
+            <p class="cdc-overview-summary">Cria objetivos e acompanha o valor acumulado sem o misturar com o saldo bancário.</p>
+          </div>
+          <ol class="cdc-flow" aria-label="Sequência recomendada">
+            <li>Cria um objetivo</li>
+            <li>Regista valores</li>
+            <li>Acompanha o progresso</li>
+          </ol>
+        </div><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav><div class="section-toolbar"><div><h2>Metas de poupança</h2><p class="muted">Objetivos acompanhados separadamente do orçamento mensal.</p></div><button id="newGoalBtn" class="btn primary">+ Novo objetivo</button></div><div id="goalList" class="goal-grid"></div></section>
+      <section id="page-security" class="page">
+        <div class="cdc-page-overview" aria-label="Orientação da área">
+          <div class="cdc-page-overview-copy">
+            <p class="cdc-overview-eyebrow">Segurança pessoal</p>
+            <h2>Protege e recupera os dados</h2>
+            <p class="cdc-overview-summary">Gere o bloqueio do cofre, os backups cifrados e a sincronização opcional.</p>
+          </div>
+          <ol class="cdc-flow" aria-label="Sequência recomendada">
+            <li>Verifica a proteção</li>
+            <li>Guarda um backup cifrado</li>
+            <li>Revê a sincronização</li>
+          </ol>
+        </div><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Estado de segurança</h2><p>Confirmações locais antes de usar dados reais.</p></div></div><div id="securityStatusGrid" class="security-grid"></div><button id="securityLockBtn" class="btn secondary">Bloquear agora</button></article><article class="panel"><h2>Backup cifrado</h2><p>Exporte apenas envelopes cifrados. O restauro valida versão, estrutura e integridade antes de substituir o cofre local.</p><div id="securityBackupInfo" class="section-gap"></div><div class="button-row"><button id="exportBackupBtn" class="btn primary">Exportar backup</button><label class="btn secondary file-btn">Restaurar backup<input id="importBackupInput" type="file" accept="application/json,.json" hidden /></label></div><p id="backupMessage" class="form-message" role="status"></p></article><article id="syncPanel" class="panel span-2">
   <div class="panel-head"><div><h2>Sincronização opcional cifrada</h2><p>Por padrão, cada navegador mantém apenas o seu cofre local. Se quiser sincronizar dispositivos, configure um repositório GitHub privado seu.</p></div><span id="syncStatusBadge" class="status-chip normal">Não configurado</span></div>
   <div class="detail-grid">
     <div class="detail-item"><small>Estado</small><strong id="syncStatusText">Sincronização não configurada.</strong></div>
@@ -378,6 +491,18 @@
   </div>
 </article><article class="panel span-2"><div class="panel-head"><div><h2>Políticas ativas</h2><p>Regras aplicadas para impedir fuga de dados financeiros ou pessoais.</p></div></div><div id="securityPolicyList"></div></article></div></section>
       <section id="page-diagnostics" class="page">
+        <div class="cdc-page-overview" aria-label="Orientação da área">
+          <div class="cdc-page-overview-copy">
+            <p class="cdc-overview-eyebrow">Integridade</p>
+            <h2>Verifica a saúde dos registos</h2>
+            <p class="cdc-overview-summary">Consulta os diagnósticos sem alterar os dados e identifica situações a corrigir.</p>
+          </div>
+          <ol class="cdc-flow" aria-label="Sequência recomendada">
+            <li>Consulta o estado</li>
+            <li>Analisa alertas</li>
+            <li>Corrige na origem</li>
+          </ol>
+        </div>
         <nav class="section-tabs" aria-label="Vistas de definições"><button class="section-tab" type="button" data-page="settings">Preferências</button><button class="section-tab" type="button" data-page="diagnostics">Integridade</button></nav>
         <div class="two-col">
           <article class="panel"><div class="panel-head"><div><h2>Diagnóstico da aplicação</h2><p>Estado técnico sem expor dados financeiros detalhados.</p></div></div><div id="diagnosticSummary" class="detail-grid"></div></article>
@@ -385,6 +510,18 @@
         </div>
       </section>
       <section id="page-settings" class="page">
+        <div class="cdc-page-overview" aria-label="Orientação da área">
+          <div class="cdc-page-overview-copy">
+            <p class="cdc-overview-eyebrow">Preferências</p>
+            <h2>Ajusta a aplicação</h2>
+            <p class="cdc-overview-summary">Personaliza a apresentação e guarda as preferências sem mexer nos teus movimentos.</p>
+          </div>
+          <ol class="cdc-flow" aria-label="Sequência recomendada">
+            <li>Escolhe o visual</li>
+            <li>Guarda as opções</li>
+            <li>Protege o cofre</li>
+          </ol>
+        </div>
         <nav class="section-tabs" aria-label="Vistas de definições"><button class="section-tab" type="button" data-page="settings">Preferências</button><button class="section-tab" type="button" data-page="diagnostics">Integridade</button></nav>
         <article class="panel narrow">
           <h2>Preferências</h2>
@@ -394,8 +531,11 @@
             <label>Modo visual<select id="themeSelect"><option value="light">Claro</option><option value="dark">Escuro</option><option value="system">Sistema</option></select></label>
             <button class="btn primary" type="submit">Guardar preferências</button>
           </form>
-          <hr />
-          <button id="resetDataBtn" class="btn danger">Apagar todos os dados locais</button>
+          <div class="cdc-danger-zone" role="region" aria-label="Operação irreversível">
+            <h3>Eliminar os dados locais</h3>
+            <p>Esta operação é destrutiva. Confirma primeiro que tens um backup cifrado, se pretendes recuperar os teus registos.</p>
+            <button id="resetDataBtn" class="btn danger" type="button">Apagar todos os dados locais</button>
+          </div>
         </article>
       </section>
     </main>

@@ -114,6 +114,7 @@ jobs:
           node tests/v76-modern-ui.test.cjs
           node tests/v76-product-pages.test.cjs
           node tests/v76-mobile-shell.test.cjs
+          node tests/linear-pages.test.cjs
           node tests/ui-architecture-contract.test.cjs
           node tests/app-update.test.cjs
           node tests/security.test.cjs

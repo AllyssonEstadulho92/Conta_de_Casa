@@ -1199,6 +1199,320 @@ html.cdc-v75 #page-bills #billFiltersToggle{
 }
 
 
+/* 76-linear-page-flow1: hierarquia comum para as 11 áreas sem interferir com
+   mecanismos de navegação, tabelas, cálculos, cofre, câmara ou sincronização. */
+html.cdc-v75 .cdc-page-overview{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(245px,.88fr);
+  gap:clamp(12px,2.1vw,25px);
+  align-items:center;
+  margin:0 0 17px;
+  padding:clamp(16px,2.2vw,23px);
+  border:1px solid var(--v76-border);
+  border-radius:var(--v76-radius-lg);
+  background:linear-gradient(115deg,var(--v76-surface) 0%,var(--v76-surface-soft) 100%);
+  box-shadow:var(--v76-shadow-xs);
+  min-width:0;
+}
+html.cdc-v75 .cdc-page-overview-copy,
+html.cdc-v75 .cdc-page-overview-copy>*{min-width:0}
+html.cdc-v75 .cdc-overview-eyebrow{
+  margin:0 0 6px;
+  color:var(--v76-primary);
+  text-transform:uppercase;
+  font-size:.69rem;
+  font-weight:800;
+  letter-spacing:.075em;
+}
+html.cdc-v75 .cdc-page-overview h2{
+  color:var(--v76-text);
+  font-size:clamp(1.13rem,2vw,1.5rem);
+  line-height:1.24;
+  letter-spacing:-.025em;
+  margin:0 0 7px;
+  font-weight:780;
+}
+html.cdc-v75 .cdc-overview-summary{
+  color:var(--v76-muted);
+  font-size:.84rem;
+  line-height:1.55;
+  max-width:67ch;
+  margin:0;
+}
+html.cdc-v75 .cdc-flow{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  list-style:none;
+  margin:0;
+  padding:0;
+  counter-reset:cdc-flow;
+  min-width:0;
+}
+html.cdc-v75 .cdc-flow li{
+  counter-increment:cdc-flow;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:7px;
+  min-width:0;
+  min-height:76px;
+  padding:10px;
+  border-radius:var(--v76-radius-sm);
+  border:1px solid var(--v76-border);
+  background:var(--v76-surface);
+  color:var(--v76-text);
+  font-size:.76rem;
+  font-weight:650;
+  line-height:1.35;
+  overflow-wrap:anywhere;
+}
+html.cdc-v75 .cdc-flow li::before{
+  content:counter(cdc-flow);
+  flex:0 0 auto;
+  display:inline-grid;
+  place-items:center;
+  width:23px;
+  height:23px;
+  color:var(--v76-primary-strong);
+  background:var(--v76-surface-accent);
+  border:1px solid color-mix(in srgb,var(--v76-primary) 14%,var(--v76-border));
+  border-radius:50%;
+  font-weight:850;
+  font-size:.73rem;
+}
+html.cdc-v75 .cdc-reports-flow{
+  margin:0 0 17px;
+}
+html.cdc-v75 .cdc-reports-flow li{
+  min-height:56px;
+  flex-direction:row;
+  justify-content:flex-start;
+  align-items:center;
+  gap:9px;
+}
+/* Uma única cadência para secções, sem alterar a geometria de menus/dialogs. */
+html.cdc-v75 :is(#page-bills,#page-market) > :is(.bill-command-bar,.market-command-bar),
+html.cdc-v75 :is(#page-bills,#page-market) > :is(.bill-filter-grid,.market-filter-grid){
+  margin-block-end:12px;
+}
+html.cdc-v75 :is(#page-calendar,#page-planning,#page-goals,#page-settings,#page-diagnostics) > .section-tabs{
+  margin-bottom:15px;
+}
+html.cdc-v75 :is(#page-calendar,#page-planning,#page-goals,#page-settings,#page-diagnostics) > :is(.panel,.two-col),
+html.cdc-v75 #page-petshare > .walli-share-hero{
+  margin-top:12px;
+}
+html.cdc-v75 :is(#page-goals,#page-planning,#page-settings,#page-diagnostics,#page-security) :is(.panel,.goal-card){
+  min-width:0;
+}
+html.cdc-v75 .cdc-danger-zone{
+  margin-top:22px;
+  padding:17px;
+  border:1px solid color-mix(in srgb,var(--v76-danger) 40%,var(--v76-border));
+  background:color-mix(in srgb,var(--v76-danger) 5%,var(--v76-surface));
+  border-radius:var(--v76-radius-sm);
+}
+html.cdc-v75 .cdc-danger-zone h3{
+  margin:0 0 7px;
+  color:var(--v76-danger);
+  font-size:.96rem;
+}
+html.cdc-v75 .cdc-danger-zone p{
+  color:var(--v76-muted);
+  font-size:.83rem;
+  line-height:1.5;
+  margin:0 0 14px;
+}
+html.cdc-v75 .cdc-danger-zone .btn{min-height:44px;max-width:100%;white-space:normal}
+@media(max-width:1090px){
+  html.cdc-v75 .cdc-page-overview{
+    grid-template-columns:minmax(0,1fr);
+  }
+}
+@media(max-width:620px){
+  html.cdc-v75 .cdc-page-overview{
+    padding:14px;
+    border-radius:16px;
+    gap:12px;
+    margin-bottom:12px;
+  }
+  html.cdc-v75 .cdc-page-overview h2{font-size:1.12rem}
+  html.cdc-v75 .cdc-overview-summary{font-size:.79rem}
+  html.cdc-v75 .cdc-flow{gap:6px}
+  html.cdc-v75 .cdc-flow li{
+    min-height:60px;
+    padding:8px;
+    font-size:.69rem;
+    gap:5px;
+  }
+  html.cdc-v75 .cdc-flow li::before{width:20px;height:20px;font-size:.65rem}
+  html.cdc-v75 .cdc-reports-flow li{flex-direction:column;align-items:flex-start;min-height:67px}
+}
+@media(max-width:340px){
+  html.cdc-v75 .cdc-flow{grid-template-columns:minmax(0,1fr)}
+  html.cdc-v75 .cdc-flow li,
+  html.cdc-v75 .cdc-reports-flow li{
+    min-height:43px;
+    flex-direction:row;
+    align-items:center;
+  }
+}
+@media(forced-colors:active){
+  html.cdc-v75 :is(.cdc-page-overview,.cdc-flow li,.cdc-danger-zone){
+    background:Canvas;
+    color:CanvasText;
+    border:1px solid CanvasText;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  html.cdc-v75 .cdc-page-overview,
+  html.cdc-v75 .cdc-flow li{animation:none;transition:none}
+}
+
+
+/* 76-planning-redesign2: leitura financeira simples sem tocar nos formulários antigos. */
+html.cdc-v75 #page-planning>.cdc-plan-summary,
+html.cdc-v75 #page-planning>.cdc-plan-upcoming-panel{
+  margin:16px 0;
+  min-width:0;
+}
+html.cdc-v75 .cdc-plan-summary{
+  padding:clamp(16px,2.2vw,24px);
+  border:1px solid var(--v76-border);
+  border-radius:var(--v76-radius-lg);
+  background:var(--v76-surface);
+  box-shadow:var(--v76-shadow-xs);
+}
+html.cdc-v75 .cdc-plan-summary-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:17px;
+}
+html.cdc-v75 .cdc-plan-section-kicker{
+  margin:0 0 5px;
+  color:var(--v76-primary);
+  text-transform:uppercase;
+  font-weight:780;
+  font-size:.69rem;
+  letter-spacing:.07em;
+}
+html.cdc-v75 .cdc-plan-summary-head h3{font-size:1.12rem;line-height:1.25;margin:0 0 4px;color:var(--v76-text);font-weight:760}
+html.cdc-v75 .cdc-plan-summary-head p:not(.cdc-plan-section-kicker){color:var(--v76-muted);font-size:.82rem;line-height:1.5;margin:0}
+html.cdc-v75 .cdc-plan-private-pill{
+  flex:0 0 auto;
+  border:1px solid var(--v76-border);
+  background:var(--v76-surface-accent);
+  color:var(--v76-primary);
+  border-radius:999px;
+  padding:8px 11px;
+  font-size:.71rem;
+  font-weight:750;
+}
+html.cdc-v75 .cdc-plan-kpis{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:11px;
+}
+html.cdc-v75 .cdc-plan-kpi{
+  min-width:0;display:flex;flex-direction:column;gap:9px;
+  padding:15px;
+  border:1px solid var(--v76-border);
+  border-radius:15px;
+  background:var(--v76-surface-soft);
+}
+html.cdc-v75 .cdc-plan-kpi.balance{background:color-mix(in srgb,var(--v76-primary) 8%,var(--v76-surface))}
+html.cdc-v75 .cdc-plan-kpi.income{background:color-mix(in srgb,var(--v76-success) 7%,var(--v76-surface))}
+html.cdc-v75 .cdc-plan-kpi.pending{background:color-mix(in srgb,var(--v76-warning) 8%,var(--v76-surface))}
+html.cdc-v75 .cdc-plan-kpi.spent{background:color-mix(in srgb,var(--v76-danger) 5%,var(--v76-surface))}
+html.cdc-v75 .cdc-plan-kpi-label{font-weight:740;color:var(--v76-text);font-size:.79rem;line-height:1.35}
+html.cdc-v75 .cdc-plan-kpi strong{font-size:clamp(1.05rem,1.7vw,1.5rem);letter-spacing:-.028em;line-height:1.2;color:var(--v76-text);overflow-wrap:anywhere}
+html.cdc-v75 .cdc-plan-kpi.income strong{color:var(--v76-success)}
+html.cdc-v75 .cdc-plan-kpi.pending strong{color:var(--v76-warning)}
+html.cdc-v75 .cdc-plan-kpi.spent strong{color:var(--v76-danger)}
+html.cdc-v75 .cdc-plan-kpi small{font-size:.72rem;line-height:1.45;color:var(--v76-muted)}
+html.cdc-v75 .cdc-plan-projection{
+  margin-top:13px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  border:1px solid color-mix(in srgb,var(--v76-success) 23%,var(--v76-border));
+  background:color-mix(in srgb,var(--v76-success) 8%,var(--v76-surface));
+  border-radius:15px;
+  padding:15px 17px;
+}
+html.cdc-v75 .cdc-plan-projection-copy{min-width:0;display:flex;flex-direction:column;gap:5px}
+html.cdc-v75 .cdc-plan-projection-copy strong{color:var(--v76-text);font-size:.9rem}
+html.cdc-v75 .cdc-plan-projection-copy small{color:var(--v76-muted);font-size:.76rem;line-height:1.5}
+html.cdc-v75 .cdc-plan-projection-value{font-size:clamp(1.25rem,2.2vw,1.7rem);font-weight:800;color:var(--v76-success);text-align:right;overflow-wrap:anywhere}
+html.cdc-v75 .cdc-plan-projection-value.is-negative{color:var(--v76-danger)}
+html.cdc-v75 #page-planning>.cdc-plan-workspace{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:start;
+  gap:14px;
+  margin:16px 0;
+}
+html.cdc-v75 #page-planning>.cdc-plan-workspace>.panel{min-width:0;margin:0}
+html.cdc-v75 #page-planning .cdc-plan-account-card .panel-head{margin-bottom:14px}
+html.cdc-v75 #page-planning #monthPlanForm{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  column-gap:11px;
+  row-gap:15px;
+  align-items:start;
+}
+html.cdc-v75 #page-planning #monthPlanForm>label:first-of-type,
+html.cdc-v75 #page-planning #accountBalanceInfo,
+html.cdc-v75 #page-planning #monthPlanForm>.btn[type=submit]{grid-column:1/-1}
+html.cdc-v75 #page-planning #monthPlanForm label{
+  min-width:0;display:flex;flex-direction:column;gap:7px;color:var(--v76-text);font-size:.82rem;font-weight:700;
+}
+html.cdc-v75 #page-planning #monthPlanForm label small{
+  font-size:.73rem;color:var(--v76-muted);line-height:1.48;font-weight:450;
+}
+html.cdc-v75 #page-planning #monthPlanForm label input{
+  width:100%;min-width:0;min-height:46px;font-size:1rem;font-variant-numeric:tabular-nums;
+}
+html.cdc-v75 #page-planning #monthPlanForm>.btn[type=submit]{min-height:48px}
+html.cdc-v75 #page-planning #accountBalanceInfo .detail-grid{margin:0}
+html.cdc-v75 #page-planning #incomeList{min-width:0}
+html.cdc-v75 .cdc-plan-upcoming-panel>.panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px}
+html.cdc-v75 .cdc-plan-upcoming-panel>.panel-head .btn{flex:0 0 auto}
+html.cdc-v75 .cdc-plan-upcoming-list{display:grid;gap:8px}
+html.cdc-v75 .cdc-plan-upcoming-row{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:12px 14px;border:1px solid var(--v76-border);background:var(--v76-surface-soft);
+  border-radius:12px;
+}
+html.cdc-v75 .cdc-plan-upcoming-item{min-width:0;display:grid;gap:4px}
+html.cdc-v75 .cdc-plan-upcoming-item strong{font-size:.85rem;color:var(--v76-text);overflow-wrap:anywhere}
+html.cdc-v75 .cdc-plan-upcoming-item small{font-size:.73rem;color:var(--v76-muted);line-height:1.4}
+html.cdc-v75 .cdc-plan-upcoming-value{font-weight:790;color:var(--v76-text);white-space:nowrap;font-variant-numeric:tabular-nums}
+html.cdc-v75 .cdc-plan-upcoming-value.overdue{color:var(--v76-danger)}
+html.cdc-v75 .cdc-plan-upcoming-value.today{color:var(--v76-warning)}
+html.cdc-v75 .cdc-plan-empty{margin:0;padding:15px;color:var(--v76-muted);text-align:center}
+@media(max-width:1100px){
+  html.cdc-v75 .cdc-plan-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  html.cdc-v75 #page-planning>.cdc-plan-workspace{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:620px){
+  html.cdc-v75 .cdc-plan-summary{padding:13px}
+  html.cdc-v75 .cdc-plan-summary-head{flex-direction:column;gap:8px}
+  html.cdc-v75 .cdc-plan-kpis{gap:8px}
+  html.cdc-v75 .cdc-plan-kpi{padding:11px;gap:7px}
+  html.cdc-v75 .cdc-plan-kpi strong{font-size:1.1rem}
+  html.cdc-v75 .cdc-plan-projection{align-items:flex-start;flex-direction:column;gap:7px;padding:13px}
+  html.cdc-v75 .cdc-plan-projection-value{text-align:left;font-size:1.45rem}
+  html.cdc-v75 #page-planning #monthPlanForm{grid-template-columns:minmax(0,1fr)}
+  html.cdc-v75 #page-planning .cdc-plan-upcoming-panel>.panel-head{align-items:flex-start;flex-direction:column}
+  html.cdc-v75 .cdc-plan-upcoming-panel>.panel-head .btn{max-width:100%;width:100%}
+}
+@media(max-width:345px){
+  html.cdc-v75 .cdc-plan-kpis{grid-template-columns:minmax(0,1fr)}
+  html.cdc-v75 .cdc-plan-upcoming-row{align-items:flex-start;flex-direction:column}
+}
+@media(forced-colors:active){
+  html.cdc-v75 :is(.cdc-plan-summary,.cdc-plan-kpi,.cdc-plan-projection,.cdc-plan-upcoming-row){background:Canvas;color:CanvasText;border:1px solid CanvasText}
+}
+
 /* 76-market-filter-visual-qa1: os filtros do Mercado não se podem sobrepor
    quando as regras legadas flex (164/190px) coexistem com a grelha v76.
    A hierarquia, as opções e os handlers permanecem inalterados. */
@@ -1241,3 +1555,5 @@ html.cdc-v75 #page-bills #billFiltersToggle{
     grid-template-columns:minmax(0,1fr)!important;
   }
 }
+
+
