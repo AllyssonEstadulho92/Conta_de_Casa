@@ -1,5 +1,12 @@
 # Decisões Técnicas — Conta de Casa
 
+## D-161 — dock móvel com «Mais» e cache atómica (01/11/2026)
+
+Decisão: preservar quatro destinos financeiros diretos, acrescentar um quinto acesso «Mais» à navegação secundária e corrigir o CSS legado que tornava o separador Plano invisível em telemóveis. «Mais» é uma ação de abrir diálogo, não uma rota. A atualização dos scripts de navegação e dos estilos deve usar revisões sincronizadas, incluindo `core.js`. Mantêm-se os componentes e controladores anteriores, reduzindo regressões.
+
+O PIN escuro aprovado não implica autenticação biométrica: qualquer indicação de Face ID só poderá surgir após implementação validada e segura. A exclusão visual do Mercado não autoriza eliminação do histórico contabilístico existente.
+
+
 ## D-161 — cofre escuro com opções recolhidas e Mercado fora da navegação (01/11/2026)
 
 Aprovar um ecrã de acesso discreto baseado no protótipo escolhido: indicadores únicos do PIN, teclado numérico e ações secundárias recolhidas. Preservar palavra-passe, visualização consciente de credencial, alteração de PIN, recuperação e importação cifrada. Não apresentar Face ID funcional sem implementação segura, disponibilidade real e testes de integração com as chaves do cofre.
