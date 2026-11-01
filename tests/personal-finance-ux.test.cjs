@@ -62,7 +62,7 @@ assert.match(shell,/@media\(prefers-reduced-motion:reduce\)/);
 assert.match(build,/const DASHBOARD_REV = '76-ux-retired-market3'/);
 assert.match(build,/const MOBILE_SHELL_REV = '76-ux-retired-market3'/);
 assert.match(build,/const SERVICE_WORKER_REV = '76-ux-retired-market3'/);
-assert.match(build,/const ARCHITECTURE_REV = '76-personal-finance-ux1'/);
+assert.match(build,/const ARCHITECTURE_REV = '76-ux-retired-market3'/);
 assert.match(build,/events\.js\?v=\$\{SERVICE_WORKER_REV\}/);
 assert.doesNotThrow(()=>new vm.Script(render));
 assert.doesNotThrow(()=>new vm.Script(events));
