@@ -1,5 +1,12 @@
 # Estado do Projeto — Conta de Casa
 
+## Conclusão da navegação inferior e preparação de publicação (01/11/2026)
+
+**Alteração adicional:** a barra inferior para telemóvel foi corrigida para cinco destinos efetivamente visíveis: Início, Faturas, Plano, Relatórios e Mais. «Mais» abre o menu secundário existente e reflete o seu estado de expansão. Foi eliminada a regra antiga que ocultava o terceiro separador. O script `core.js` passa a receber revisão explícita de cache, tal como `render.js`, `events.js` e o CSS móvel, para evitar versões misturadas durante a atualização da PWA.
+
+**Limites:** Face ID não foi implementado. O Mercado continua oculto, mas os dados de compras antigos mantêm-se no cofre e nos cálculos; as dependências legadas permanecem para compatibilidade. Não há alterações à cifra, PIN mínimo, backups, `STATE_VERSION` ou sincronização. CI e TypeScript são obrigatórios; a verificação visual e de desbloqueio em iPhone físico continua pendente após a publicação.
+
+
 ## Renovação visual aprovada do PIN e retirada de Mercado (01/11/2026)
 
 **Branch isolada:** `ui/approved-dark-vault-20261101`, baseada em `main` após a correção do saldo mensal (#229).
