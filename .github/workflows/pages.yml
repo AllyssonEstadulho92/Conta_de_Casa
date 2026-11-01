@@ -115,6 +115,7 @@ jobs:
           node tests/v76-product-pages.test.cjs
           node tests/v76-mobile-shell.test.cjs
           node tests/linear-pages.test.cjs
+          node tests/approved-vault-market-retirement.test.cjs
           node tests/personal-finance-ux.test.cjs
           node tests/monthly-cashflow-menu.test.cjs
           node tests/ui-architecture-contract.test.cjs
