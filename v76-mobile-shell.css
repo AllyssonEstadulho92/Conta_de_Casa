@@ -1241,3 +1241,176 @@ html.cdc-v75 #page-bills #billFiltersToggle{
     grid-template-columns:minmax(0,1fr)!important;
   }
 }
+
+
+/* 76-linear-page-flow1: hierarquia comum para as 11 áreas sem interferir com
+   mecanismos de navegação, tabelas, cálculos, cofre, câmara ou sincronização. */
+html.cdc-v75 .cdc-page-overview{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(245px,.88fr);
+  gap:clamp(12px,2.1vw,25px);
+  align-items:center;
+  margin:0 0 17px;
+  padding:clamp(16px,2.2vw,23px);
+  border:1px solid var(--v76-border);
+  border-radius:var(--v76-radius-lg);
+  background:linear-gradient(115deg,var(--v76-surface) 0%,var(--v76-surface-soft) 100%);
+  box-shadow:var(--v76-shadow-xs);
+  min-width:0;
+}
+html.cdc-v75 .cdc-page-overview-copy,
+html.cdc-v75 .cdc-page-overview-copy>*{min-width:0}
+html.cdc-v75 .cdc-overview-eyebrow{
+  margin:0 0 6px;
+  color:var(--v76-primary);
+  text-transform:uppercase;
+  font-size:.69rem;
+  font-weight:800;
+  letter-spacing:.075em;
+}
+html.cdc-v75 .cdc-page-overview h2{
+  color:var(--v76-text);
+  font-size:clamp(1.13rem,2vw,1.5rem);
+  line-height:1.24;
+  letter-spacing:-.025em;
+  margin:0 0 7px;
+  font-weight:780;
+}
+html.cdc-v75 .cdc-overview-summary{
+  color:var(--v76-muted);
+  font-size:.84rem;
+  line-height:1.55;
+  max-width:67ch;
+  margin:0;
+}
+html.cdc-v75 .cdc-flow{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  list-style:none;
+  margin:0;
+  padding:0;
+  counter-reset:cdc-flow;
+  min-width:0;
+}
+html.cdc-v75 .cdc-flow li{
+  counter-increment:cdc-flow;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:7px;
+  min-width:0;
+  min-height:76px;
+  padding:10px;
+  border-radius:var(--v76-radius-sm);
+  border:1px solid var(--v76-border);
+  background:var(--v76-surface);
+  color:var(--v76-text);
+  font-size:.76rem;
+  font-weight:650;
+  line-height:1.35;
+  overflow-wrap:anywhere;
+}
+html.cdc-v75 .cdc-flow li::before{
+  content:counter(cdc-flow);
+  flex:0 0 auto;
+  display:inline-grid;
+  place-items:center;
+  width:23px;
+  height:23px;
+  color:var(--v76-primary-strong);
+  background:var(--v76-surface-accent);
+  border:1px solid color-mix(in srgb,var(--v76-primary) 14%,var(--v76-border));
+  border-radius:50%;
+  font-weight:850;
+  font-size:.73rem;
+}
+html.cdc-v75 .cdc-reports-flow{
+  margin:0 0 17px;
+}
+html.cdc-v75 .cdc-reports-flow li{
+  min-height:56px;
+  flex-direction:row;
+  justify-content:flex-start;
+  align-items:center;
+  gap:9px;
+}
+/* Uma única cadência para secções, sem alterar a geometria de menus/dialogs. */
+html.cdc-v75 :is(#page-bills,#page-market) > :is(.bill-command-bar,.market-command-bar),
+html.cdc-v75 :is(#page-bills,#page-market) > :is(.bill-filter-grid,.market-filter-grid){
+  margin-block-end:12px;
+}
+html.cdc-v75 :is(#page-calendar,#page-planning,#page-goals,#page-settings,#page-diagnostics) > .section-tabs{
+  margin-bottom:15px;
+}
+html.cdc-v75 :is(#page-calendar,#page-planning,#page-goals,#page-settings,#page-diagnostics) > :is(.panel,.two-col),
+html.cdc-v75 #page-petshare > .walli-share-hero{
+  margin-top:12px;
+}
+html.cdc-v75 :is(#page-goals,#page-planning,#page-settings,#page-diagnostics,#page-security) :is(.panel,.goal-card){
+  min-width:0;
+}
+html.cdc-v75 .cdc-danger-zone{
+  margin-top:22px;
+  padding:17px;
+  border:1px solid color-mix(in srgb,var(--v76-danger) 40%,var(--v76-border));
+  background:color-mix(in srgb,var(--v76-danger) 5%,var(--v76-surface));
+  border-radius:var(--v76-radius-sm);
+}
+html.cdc-v75 .cdc-danger-zone h3{
+  margin:0 0 7px;
+  color:var(--v76-danger);
+  font-size:.96rem;
+}
+html.cdc-v75 .cdc-danger-zone p{
+  color:var(--v76-muted);
+  font-size:.83rem;
+  line-height:1.5;
+  margin:0 0 14px;
+}
+html.cdc-v75 .cdc-danger-zone .btn{min-height:44px;max-width:100%;white-space:normal}
+@media(max-width:1090px){
+  html.cdc-v75 .cdc-page-overview{
+    grid-template-columns:minmax(0,1fr);
+  }
+}
+@media(max-width:620px){
+  html.cdc-v75 .cdc-page-overview{
+    padding:14px;
+    border-radius:16px;
+    gap:12px;
+    margin-bottom:12px;
+  }
+  html.cdc-v75 .cdc-page-overview h2{font-size:1.12rem}
+  html.cdc-v75 .cdc-overview-summary{font-size:.79rem}
+  html.cdc-v75 .cdc-flow{gap:6px}
+  html.cdc-v75 .cdc-flow li{
+    min-height:60px;
+    padding:8px;
+    font-size:.69rem;
+    gap:5px;
+  }
+  html.cdc-v75 .cdc-flow li::before{width:20px;height:20px;font-size:.65rem}
+  html.cdc-v75 .cdc-reports-flow li{flex-direction:column;align-items:flex-start;min-height:67px}
+}
+@media(max-width:340px){
+  html.cdc-v75 .cdc-flow{grid-template-columns:minmax(0,1fr)}
+  html.cdc-v75 .cdc-flow li,
+  html.cdc-v75 .cdc-reports-flow li{
+    min-height:43px;
+    flex-direction:row;
+    align-items:center;
+  }
+}
+@media(forced-colors:active){
+  html.cdc-v75 :is(.cdc-page-overview,.cdc-flow li,.cdc-danger-zone){
+    background:Canvas;
+    color:CanvasText;
+    border:1px solid CanvasText;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  html.cdc-v75 .cdc-page-overview,
+  html.cdc-v75 .cdc-flow li{animation:none;transition:none}
+}
