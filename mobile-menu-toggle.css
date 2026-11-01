@@ -317,3 +317,14 @@
     background:ButtonFace!important;
   }
 }
+
+
+/* Um único X visível: o botão do cabeçalho não se sobrepõe ao X do diálogo.
+   A animação permanece no controlador existente e o foco regressa no fecho. */
+@media(max-width:820px){
+  html:has(#mobileDrawer[open]) #mobileMenuBtn,
+  #mobileMenuBtn[data-menu-state="open"]{
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+}
