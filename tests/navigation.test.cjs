@@ -21,7 +21,7 @@ for (const group of ['Principal','Finanças','Análise','Sistema']) {
 assert.match(core, /calendar: \{[^}]*navParent:'bills'/);
 assert.match(core, /goals: \{[^}]*navParent:'planning'/);
 assert.match(core, /diagnostics: \{[^}]*navParent:'settings'/);
-assert.match(core, /MOBILE_NAV_ITEMS = Object\.freeze\(\['dashboard','bills','market','reports'\]\)/);
+assert.match(core, /MOBILE_NAV_ITEMS = Object\.freeze\(\['dashboard','bills','planning','reports'\]\)/);
 
 assert.match(render, /function navigationGroupsHtml\(\)/);
 assert.match(render, /setHTML\('#drawerNav',groups\)/);
