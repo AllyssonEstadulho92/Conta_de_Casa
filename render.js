@@ -125,6 +125,19 @@ function dashboardAlertItems(n = dashboardNumbers()) {
     add('critical-due','warning',`${n.criticalCount} vencimento${n.criticalCount===1?'':'s'} hoje`,
       'Inclui faturas de outros meses, se existirem.','Ver vencimentos','bills',null,'','',n.criticalFirstMonth);
   }
+  // Vencimentos dos próximos sete dias, sem repetir as faturas que vencem hoje.
+  const upcomingBills=activeUnpaidBills().filter(bill=>{
+    const days=billDaysUntil(bill);
+    return Number.isFinite(days)&&days>=1&&days<=7;
+  });
+  if(upcomingBills.length){
+    const next=upcomingBills.slice().sort(compareBillsByDue)[0];
+    add('upcoming-week','info',
+      `${upcomingBills.length} conta${upcomingBills.length===1?'':'s'} a vencer nos próximos 7 dias`,
+      'Valores por liquidar, incluindo faturas de outros meses.',
+      'Consultar faturas','bills',sumCents(upcomingBills.map(remainingForBill)),
+      'Total a vencer: ','.',next?(billDueDateKey(next)||'').slice(0,7):'');
+  }
   if (n.projected < 0) {
     add('negative-projection','danger','Saldo projetado negativo','As obrigações em aberto ultrapassam o saldo atual projetado.','Abrir planeamento','planning',Math.abs(n.projected),'Falta projetada: ','.');
   }
@@ -145,7 +158,7 @@ function dashboardAlertPanelHtml(item) {
 }
 
 function alertCenterItemHtml(item) {
-  const severity=item.tone==='danger'?'Urgente':'Atenção';
+  const severity=item.tone==='danger'?'Urgente':item.tone==='info'?'Próximo vencimento':'Atenção';
   const monthAttr=item.monthTarget?` data-month-target="${attr(item.monthTarget)}"`:'';
   return `<article class="alert-center-item ${attr(item.tone)}" role="listitem" data-alert-id="${attr(item.id)}">
     <span class="alert-center-indicator" aria-hidden="true"></span>
@@ -165,8 +178,17 @@ function renderAlertCenter(items = dashboardAlertItems()) {
   summary.textContent=count
     ? `${count} alerta${count===1?'':'s'} ativo${count===1?'':'s'} neste momento`
     : 'Sem alertas ativos neste momento';
+  // As categorias são informativas: não são notificações push nem dados persistidos.
+  const groups=[
+    ['urgentes','Prioritários',item=>item.tone==='danger'||item.id==='critical-due'],
+    ['vencimentos','A vencer',item=>item.id==='upcoming-week'],
+    ['verificar','A verificar',item=>item.tone!=='danger'&&item.id!=='critical-due'&&item.id!=='upcoming-week']
+  ];
   setHTML(list,count
-    ? items.map(alertCenterItemHtml).join('')
+    ? groups.map(([key,title,match])=>{
+        const group=items.filter(match);
+        return group.length?`<section class="cdc-alert-group" aria-label="${esc(title)}"><h3 class="cdc-alert-group-title">${esc(title)} <span data-money>${group.length}</span></h3>${group.map(alertCenterItemHtml).join('')}</section>`:'';
+      }).join('')
     : '<div class="alert-center-empty"><strong>Está tudo em ordem</strong><p>Não existem alertas financeiros ativos.</p></div>');
 }
 
