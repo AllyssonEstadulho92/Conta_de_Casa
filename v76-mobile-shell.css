@@ -1697,6 +1697,15 @@ html.cdc-v75 .alert-center-item.info{
 }
 
 
+/* O menu lateral fica no top-layer: esconder o hamburger de fundo até ao fecho real.
+   O X acessível e focável dentro do painel mantém-se intacto. */
+@media(max-width:820px){
+  html:has(#mobileDrawer[open]) #mobileMenuBtn,
+  #mobileMenuBtn[data-menu-state="open"]{
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+}
 /* 76-monthly-result-and-menu-fix1: destacar fluxo real e reduzir confusão do saldo. */
 html.cdc-v75 #page-planning .cdc-plan-projection{
   display:grid!important;
