@@ -1,5 +1,14 @@
 # Changelog Técnico — Conta de Casa
 
+## Por publicar — acesso privado e navegação simplificada (01/11/2026)
+
+- Ecrã de PIN renovado em estilo escuro com marca centrada, linha única de indicadores e teclado numérico mais espaçado.
+- Opções de palavra-passe, alteração de PIN, recuperação e importação recolhidas numa divulgação acessível.
+- Mercado ocultado e retirado dos menus e do atalho Adicionar; o histórico de compras e o seu impacto contabilístico são preservados.
+- Correções de contratos de navegação, PWA e cache. Sem mudança ao `STATE_VERSION`, cifras, PIN, backup ou sincronização.
+- Face ID não é apresentado como funcionalidade implementada.
+
+
 ## Ainda por publicar — resultado mensal e menu móvel (01/11/2026)
 
 - Novo indicador principal, automaticamente calculado como receitas menos despesas registadas no mês, independente do saldo bancário manual.
