@@ -1,5 +1,12 @@
 # Decisões Técnicas — Conta de Casa
 
+## D-159 — Sistema visual linear e Plano Mensal renovado (01/11/2026)
+
+Decisão: dar às 11 áreas uma descrição e três passos orientadores, mantendo a navegação e as funcionalidades. O Plano Mensal recebe uma hierarquia de resumo, orçamento existente, edição do saldo, rendimentos e vencimentos próximos. A intervenção usa os cálculos atuais sem recalcular dívidas numa lógica paralela e não altera o saldo de referência. O saldo projetado é explicitamente uma estimativa calculada subtraindo contas em aberto do mês selecionado. A lista de prioridades atravessa meses mas é separada contabilisticamente do total mensal, prevenindo dupla contagem.
+
+O botão de eliminação local passa para uma zona visual de perigo, sem mudar o procedimento. O CSS novo é colocado na autoridade `v76-mobile-shell.css`, preservando a última correção do Mercado. Validação real no iPhone é necessária antes de considerar a nova apresentação definitiva.
+
+
 **Extensão visual D-158 (01/11/2026):** a apresentação segue a referência fornecida pelo utilizador, mas mantém todas as categorias monetárias sem dupla contagem. O total da dívida inclui vencido, hoje, futuro e vencimento por confirmar; o estado "em atraso" pode coexistir com pagamento parcial, por isso os filtros são deliberadamente sobrepostos e o gráfico utiliza apenas estados mutuamente exclusivos. Os indicadores usam euros e exclusivamente dados reais do cofre. Sem dependências externas, sem alteração ao schema, sem autorização para publicar dados privados no Git.\n\n
 ## D-158 — estatísticas de faturas por vencimento e saldo real versus simulado (31/10/2026)
 
