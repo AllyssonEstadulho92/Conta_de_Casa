@@ -39,7 +39,7 @@ assert.match(shell,/html\.cdc-v75 \.cdc-flow li/);
 assert.match(shell,/@media\(max-width:620px\)/);
 assert.match(shell,/@media\(forced-colors:active\)/);
 assert.match(shell,/@media\(prefers-reduced-motion:reduce\)/);
-assert.match(build,/const MOBILE_SHELL_REV = '76-personal-finance-ux1'/);
+assert.match(build,/const MOBILE_SHELL_REV = '76-monthly-cashflow1'/);
 assert.match(build,/v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/);
 assert.match(sw,/'\.\/v76-mobile-shell\.css'/);
 assert.ok(shell.indexOf('76-linear-page-flow1')<shell.indexOf('76-market-filter-visual-qa1'),
@@ -75,7 +75,7 @@ assert.match(shell,/cdc-plan-kpis/);
 assert.match(shell,/cdc-plan-projection/);
 assert.match(shell,/#monthPlanForm/);
 assert.match(shell,/@media\(max-width:620px\)/);
-assert.match(build,/const DASHBOARD_REV = '76-personal-finance-ux1'/);
-assert.match(build,/const SERVICE_WORKER_REV = '76-personal-finance-ux1'/);
+assert.match(build,/const DASHBOARD_REV = '76-monthly-cashflow1'/);
+assert.match(build,/const SERVICE_WORKER_REV = '76-monthly-cashflow1'/);
 
 console.log('Linear visual system on all pages: OK');
