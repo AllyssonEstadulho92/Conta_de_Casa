@@ -1,5 +1,6 @@
 # Decisões Técnicas — Conta de Casa
 
+**Extensão visual D-158 (01/11/2026):** a apresentação segue a referência fornecida pelo utilizador, mas mantém todas as categorias monetárias sem dupla contagem. O total da dívida inclui vencido, hoje, futuro e vencimento por confirmar; o estado "em atraso" pode coexistir com pagamento parcial, por isso os filtros são deliberadamente sobrepostos e o gráfico utiliza apenas estados mutuamente exclusivos. Os indicadores usam euros e exclusivamente dados reais do cofre. Sem dependências externas, sem alteração ao schema, sem autorização para publicar dados privados no Git.\n\n
 ## D-158 — estatísticas de faturas por vencimento e saldo real versus simulado (31/10/2026)
 
 Decisão: introduzir em Relatórios uma visão financeira dupla, mês de vencimento e todas as faturas registadas, preservando a contabilidade de caixa existente. Estados mutuamente exclusivos: paga integralmente, parcialmente paga ou sem pagamentos; a dívida remanescente reparte-se em atrasada, hoje, futura e sem vencimento válido. Vencimentos a sete dias são subconjunto dos futuros, não uma parcela adicional. Excluir canceladas/arquivadas e sinalizar faturas com valores inválidos e pagamentos excessivos sem compensação automática.
