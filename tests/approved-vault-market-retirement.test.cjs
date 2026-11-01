@@ -22,6 +22,7 @@ assert.equal((vault.match(/class="cdc-pin-pips"/g)||[]).length,1);
 assert.equal((vault.match(/<i><\/i>/g)||[]).length,8);
 assert.match(events,/\(slot\|\|unlockBox\)\.appendChild\(actions\)/);
 assert.match(events,/optionsPanel\.hidden=!opening/);
+assert.match(events,/input\.type='password';[\s\S]*reveal\.textContent='Mostrar PIN'/);
 assert.match(events,/importControl\.addEventListener\('click'/);
 assert.match(events,/input\.readOnly=pinMode/);
 assert.match(events,/input\.tabIndex=pinMode\?-1:0/);
