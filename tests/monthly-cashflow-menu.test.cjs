@@ -34,7 +34,7 @@ assert.match(a['#planningProjection'],/Recebido menos gasto/);
 assert.match(a['#planningProjection'],/Sem faturas pendentes neste mês/);
 assert.doesNotMatch(a['#planningProjection'],/Saldo estimado após liquidar/);
 assert.match(a['#planningKpis'],/Saldo informado/);
-assert.match(a['#planningKpis'],/Introduzido manualmente/);
+assert.match(a['#planningKpis'],/Referência atualizada por ti/);
 assert.match(a['#planningKpis'],/Gasto/);
 assert.match(a['#planningKpis'],/Por pagar/);
 
