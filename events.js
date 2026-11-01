@@ -57,6 +57,7 @@ function setVaultEntryMode(mode = 'pin') {
   else toggle.textContent=pinMode?'Usar palavra-passe':'Usar teclado PIN';
   toggle.setAttribute('aria-pressed',String(!pinMode));
   if(!pinMode) requestAnimationFrame(()=>input.focus({preventScroll:true}));
+  updateVaultPinVisual();
 }
 
 // Indicador apenas visual: não regista nem transmite a credencial.
@@ -904,7 +905,10 @@ async function initVaultUi() {
         msg.textContent='Não foi possível desbloquear o cofre neste dispositivo.';
       }
       msg.classList.add('error');
-    }finally{$('#unlockVaultBtn').disabled=false;}
+    }finally{
+      $('#unlockVaultBtn').disabled=false;
+      updateVaultPinVisual();
+    }
   };
   $('#unlockVaultBtn').addEventListener('click',unlock); $('#unlockPassphrase').addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
 }
