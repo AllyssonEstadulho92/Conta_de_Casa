@@ -561,8 +561,9 @@ function debtScopeHtml(stats) {
   const cards=[
     debtSummaryCard('Total das faturas',stats.totalCents,'primary',`${stats.billCount} faturas válidas`),
     debtSummaryCard('Já liquidado nessas faturas',stats.paidAllocatedCents,'success','Inclui pagamentos parciais'),
-    debtSummaryCard('Ainda por pagar',stats.outstandingCents,'warning','Inclui vencidas e futuras'),
-    debtSummaryCard('Em atraso',stats.overdueCents,'danger',`${stats.overdueCount} vencida(s)`)
+    debtSummaryCard('Em dívida · total',stats.outstandingCents,'warning','Em atraso, hoje e futuras'),
+    debtSummaryCard('Em atraso',stats.overdueCents,'danger',`${stats.overdueCount} vencida(s)`),
+    debtSummaryCard('A vencer',sumCents([stats.dueTodayCents,stats.futureCents]),'info','Hoje e datas futuras')
   ];
   const note=[
     `Vencem hoje: ${money(stats.dueTodayCents)} (${stats.dueTodayCount}).`,
@@ -678,6 +679,8 @@ function renderDebtStatistics() {
   const s=debtBalanceStatistics(selectedMonth);
   setHTML('#debtMonthSummary',debtScopeHtml(s.period));
   setHTML('#debtAllSummary',debtScopeHtml(s.all));
+  renderDebtStatus(s.all);
+  renderDebtAccounts();
   const balanceLabel=s.hasAccountBalance
     ? `Saldo introduzido manualmente${s.balanceUpdatedAt?' · '+fmtDateTime(s.balanceUpdatedAt):''}`
     : 'Saldo calculado pelos movimentos registados, não confirmado com o banco';
@@ -698,8 +701,15 @@ function renderReports() {
   renderDebtStatistics();
   const n=monthNumbers();
   const expenses=n.cashSpent;
-  const saved=sumCents([n.incomes,-expenses]);
-  setHTML('#reportCards', [['Rendimentos',n.incomes,'success'],['Despesas efetivas',expenses,'danger'],['Resultado do mês',saved,saved<0?'danger':'success'],['Por pagar',n.pending,'primary']].map(([l,v,k])=>`<article class="kpi ${k}"><span class="label">${l}</span><strong data-money>${money(v)}</strong></article>`).join(''));
+  const s=debtBalanceStatistics(selectedMonth);
+  const isCurrent=selectedMonth===currentLocalMonthKey();
+  const items=[
+    ['Receitas do mês',n.incomes,'success','Rendimentos recebidos'],
+    ['Despesas do mês',expenses,'danger','Pagamentos e compras'],
+    [isCurrent?'Saldo atual':'Saldo do mês',n.current,n.current<0?'danger':'primary',n.hasAccountBalance?'Introduzido manualmente':'Estimado pelos registos'],
+    ['Em dívida · total',s.all.outstandingCents,'warning','Todas as faturas por liquidar']
+  ];
+  setHTML('#reportCards',items.map(([label,value,tone,note])=>`<article class="debt-top-card ${attr(tone)}"><span class="debt-top-label">${esc(label)}</span><strong data-money>${money(value)}</strong><small>${esc(note)}</small></article>`).join(''));
   renderCategoryBars('#reportCategoryBars',cashCategoryTotals());
   const vals=monthlySpendHistory(selectedMonth,6).map(item=>[item.month,item.total]);
   const max=Math.max(...vals.map(v=>v[1]),1);
