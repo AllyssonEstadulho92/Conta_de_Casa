@@ -119,6 +119,10 @@ function wireVaultPinPad() {
       if(!opening){
         screen?.classList.remove('vault-import-open');
         importControl?.setAttribute('aria-expanded','false');
+        // Nunca deixar o segredo à vista quando as opções são recolhidas.
+        input.type='password';
+        const reveal=$('#togglePinVisibility')?.querySelector('span:last-child');
+        if(reveal)reveal.textContent='Mostrar PIN';
         optionsToggle.focus({preventScroll:true});
       }
     });
