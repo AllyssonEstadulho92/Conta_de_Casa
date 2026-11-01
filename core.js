@@ -58,7 +58,7 @@ const PAGE_META = Object.freeze({
   calendar: { label:'Calendário financeiro', context:'Finanças · Faturas', icon:'calendar', navParent:'bills' },
   planning: { label:'Planeamento', context:'Finanças', icon:'plan', navParent:'planning' },
   goals: { label:'Objetivos', context:'Finanças · Planeamento', icon:'goal', navParent:'planning' },
-  market: { label:'Lista de compras', context:'Compras', icon:'market', navParent:'market' },
+
   reports: { label:'Relatórios', context:'Análise', icon:'report', navParent:'reports' },
   security: { label:'Segurança e sincronização', context:'Sistema', icon:'shield', navParent:'security' },
   diagnostics: { label:'Integridade da aplicação', context:'Sistema · Definições', icon:'report', navParent:'settings' },
@@ -69,13 +69,13 @@ const PAGE_META = Object.freeze({
 const NAV_GROUPS = Object.freeze([
   { label:'Principal', items:['dashboard'] },
   { label:'Finanças', items:['bills','planning'] },
-  { label:'Compras', items:['market'] },
+
   { label:'Animais', items:['petshare'] },
   { label:'Análise', items:['reports'] },
   { label:'Sistema', items:['security','settings'] }
 ]);
 
-const MOBILE_NAV_ITEMS = Object.freeze(['dashboard','bills','market','reports']);
+const MOBILE_NAV_ITEMS = Object.freeze(['dashboard','bills','planning','reports']);
 const NAV_ITEMS = Object.entries(PAGE_META).map(([id,meta])=>[id,meta.label,meta.icon]);
 
 function icon(name, size = 19) {
