@@ -421,7 +421,7 @@ function wireEvents(){
     const b=e.target.closest('[data-quick]');
     if(!b)return;
     $('#quickDialog').close();
-    ({bill:openBillForm,income:openIncomeForm,market:openMarketForm,goal:openGoalForm})[b.dataset.quick]?.();
+    ({bill:openBillForm,income:openIncomeForm,goal:openGoalForm})[b.dataset.quick]?.();
   });
   $('#newBillBtn').addEventListener('click',()=>openBillForm()); $('#newIncomeBtn').addEventListener('click',openIncomeForm); $('#newMarketBtn').addEventListener('click',()=>openMarketForm()); $('#newGoalBtn').addEventListener('click',openGoalForm);
   $('#kpiGrid').addEventListener('click',e=>{if(e.target.closest('[data-update-balance]'))openAccountBalanceForm();});
