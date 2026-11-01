@@ -2009,3 +2009,9 @@ html.cdc-v75 #vaultScreen.vault-unlock-active .privacy-note{color:var(--lock-mut
     background:Canvas!important;color:CanvasText!important;border-color:CanvasText!important;
   }
 }
+
+/* Retirada visível de Mercado: garantir que nenhum estilo antigo substitui hidden. */
+html.cdc-v75 #page-market.retired-page[hidden]{
+  display:none!important;
+  visibility:hidden!important;
+}
