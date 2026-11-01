@@ -211,7 +211,7 @@ try {
   assert.doesNotMatch(index,/unpkg\.com/);
   assert.ok(fs.existsSync(path.join(dist,'zxing-browser.min.js')));
   assert.ok(fs.existsSync(path.join(dist,'ZXING_BROWSER_LICENSE.txt')));
-  assert.match(events, /\.\/sw\.js\?v=76-debt-statistics1/);
+  assert.match(events, /\.\/sw\.js\?v=76-linear-planning2/);
   assert.match(builtSw,/const CACHE = 'conta-de-casa-public-v76-(?:[0-9a-f]{7}|local)';/,'built Service Worker must use the exact deterministic build cache key');
   assert.doesNotMatch(builtSw,/conta-de-casa-public-v76-version-alignment1-/,'built cache key must remain compact');
   assert.equal(distManifest.latestVersion,'v76');
