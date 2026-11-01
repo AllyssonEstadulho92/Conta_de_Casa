@@ -1,5 +1,14 @@
 # Changelog Técnico — Conta de Casa
 
+## Ainda por publicar — resultado mensal e menu móvel (01/11/2026)
+
+- Novo indicador principal, automaticamente calculado como receitas menos despesas registadas no mês, independente do saldo bancário manual.
+- Saldo informado ou calculado apresentado em cartão próprio; projeção após dívidas apenas quando há faturas pendentes.
+- Sinalização de compras cujo preço real ainda não foi confirmado.
+- Correção do X duplicado no menu móvel, preservando o botão de fecho do painel.
+- Testes e revisões de cache Safari/PWA. Sem migração do cofre ou alteração de valores gravados.
+
+
 ## Por publicar — aperfeiçoamentos de finanças pessoais, alertas, menu e PIN (01/11/2026)
 
 - Plano Mensal com projeção em destaque e distinção entre saldo, despesas confirmadas e obrigações ainda por pagar.

@@ -1,5 +1,17 @@
 # TODO — Conta de Casa
 
+## Correções solicitadas em capturas do iPhone (01/11/2026)
+
+- [x] Separar automaticamente receitas menos despesas do saldo bancário manual.
+- [x] Evitar apresentar o mesmo valor como projeção quando não há faturas pendentes.
+- [x] Indicar quando existem compras com preço apenas estimado.
+- [x] Ocultar o segundo X por trás do menu móvel, sem mexer no controlador existente.
+- [x] Introduzir testes de cálculo e regressões de interface e cache.
+- [ ] Confirmar CI, TypeScript e Pages da proposta de correção.
+- [ ] Validar no Safari/iPhone os valores, modo discreto, abertura/fecho do menu, navegação e foco.
+- [ ] Confirmar com saldos conciliados que a apresentação corresponde aos movimentos registados, sem transmitir dados reais para GitHub.
+
+
 ## Revisão transversal de finanças pessoais e apresentação (01/11/2026)
 
 - [x] Confirmar a base real da aplicação, dependências críticas e PRs abertas.

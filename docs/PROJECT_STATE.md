@@ -1,5 +1,16 @@
 # Estado do Projeto — Conta de Casa
 
+## Correção do resultado financeiro e do menu móvel (01/11/2026)
+
+**Factos observados em capturas do iPhone:** o Plano Mensal apresentava exatamente 955,96 € tanto no saldo atual como na projeção, porque não existiam faturas pendentes a descontar; a interface não esclarecia o resultado das receitas menos despesas. O menu lateral mostrava dois X simultaneamente, um no cabeçalho de fundo e outro no painel.
+
+**Correção preparada:** o destaque financeiro do Plano passa a calcular automaticamente, sem solicitar saldo bancário, `receitas registadas - pagamentos de faturas registados - compras efetivas registadas` através de `n.incomes - n.cashSpent`. Os cartões distinguem recebido, gasto, faturas do mês por liquidar e saldo informado ou calculado. A projeção do saldo após dívidas só aparece quando há dívida pendente; caso contrário, indica que não há nada mais a descontar. Compras com preço ainda estimado são explicitadas. A diferença entre resultado dos movimentos e saldo bancário é comunicada: sem acesso ao banco e sem registos completos, a aplicação não pode afirmar o saldo bancário real.
+
+**Menu:** enquanto `#mobileDrawer` estiver `open`, o botão `#mobileMenuBtn` de fundo não é visível nem interativo. O X de fecho já existente no próprio diálogo mantém-se. O controlador de teclado, swipe, foco e reduced-motion não foi duplicado nem alterado.
+
+**Estado:** implementação em branch isolada `fix/monthly-actual-balance-menu-x-20261101`, baseada no merge #228. Sem mudanças no cofre, schema, PIN, autenticação, cifragem, movimentos, backups e sincronização. Necessário CI/TypeScript/Pages e teste físico no iPhone antes da publicação.
+
+
 ## Evolução transversal de finanças pessoais e UI/UX (01/11/2026)
 
 **Intervenção em avaliação:** branch `feat/personal-finance-ux-20261101`, baseada na versão publicada após a PR #227. No Plano, a previsão após contas passa a ser o primeiro indicador, seguida de saldo atual, gasto efetivamente realizado e ainda por pagar. O cartão de orçamento continua a utilizar a contabilidade e o único formulário preexistentes; o bloco de prioridades surge antes dos campos de edição. O orçamento é apresentado a seguir à projeção, preservando a navegação mensal e as categorias.

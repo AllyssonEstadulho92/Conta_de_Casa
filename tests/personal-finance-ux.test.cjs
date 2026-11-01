@@ -19,11 +19,11 @@ assert.ok(plan.indexOf('id="planningProjection"')<plan.indexOf('id="planningKpis
 assert.ok(plan.indexOf('id="planningKpis"')<plan.indexOf('id="planningUpcomingList"'));
 assert.ok(plan.indexOf('id="planningUpcomingList"')<plan.indexOf('id="monthPlanForm"'));
 assert.equal((plan.match(/id="monthPlanForm"/g)||[]).length,1);
-assert.match(render,/\['Saldo atual',n\.current/);
-assert.match(render,/\['Gasto no mês',n\.cashSpent/);
-assert.match(render,/\['Ainda por pagar',n\.outstanding/);
+assert.match(render,/\['Recebido',n\.incomes/);
+assert.match(render,/\['Gasto',n\.cashSpent/);
+assert.match(render,/\['Por pagar',n\.outstanding/);
 assert.match(render,/n\.projected/);
-assert.match(render,/Não volta a descontar despesas já pagas/);
+assert.match(render,/Não é o saldo bancário/);
 assert.match(architecture,/\(summary\|\|tabs\)\.insertAdjacentElement\('afterend',rootNode\)/);
 assert.match(finance,/const projected = sumCents\(\[current,-outstanding\]\)/);
 assert.match(finance,/const cashSpent = sumCents\(\[paymentTotal,marketSpent\]\)/);
@@ -59,9 +59,9 @@ assert.match(shell,/\.mobile-menu-btn\[data-menu-state="open"\] \.mobile-menu-gl
 assert.match(shell,/@media\(prefers-reduced-motion:reduce\)/);
 
 // PWA e segurança: versões atualizadas, sem migrações nem credenciais reais.
-assert.match(build,/const DASHBOARD_REV = '76-personal-finance-ux1'/);
-assert.match(build,/const MOBILE_SHELL_REV = '76-personal-finance-ux1'/);
-assert.match(build,/const SERVICE_WORKER_REV = '76-personal-finance-ux1'/);
+assert.match(build,/const DASHBOARD_REV = '76-monthly-cashflow1'/);
+assert.match(build,/const MOBILE_SHELL_REV = '76-monthly-cashflow1'/);
+assert.match(build,/const SERVICE_WORKER_REV = '76-monthly-cashflow1'/);
 assert.match(build,/const ARCHITECTURE_REV = '76-personal-finance-ux1'/);
 assert.match(build,/events\.js\?v=\$\{SERVICE_WORKER_REV\}/);
 assert.doesNotThrow(()=>new vm.Script(render));

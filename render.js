@@ -438,15 +438,38 @@ function renderCalendar() {
 function planningOverviewCard(label,value,kind,note) {
   return `<article class="cdc-plan-kpi ${attr(kind)}"><span class="cdc-plan-kpi-label">${esc(label)}</span><strong data-money>${money(value)}</strong><small>${esc(note)}</small></article>`;
 }
+// O resultado do mês é o fluxo de caixa registado, não o saldo do banco.
+// Não depende da introdução manual de um saldo atual e não deduz pagamentos duas vezes.
+function planningMonthlyResult(n) {
+  return sumCents([n.incomes,-n.cashSpent]);
+}
 function renderPlanningOverview(n){
+  const result=planningMonthlyResult(n);
+  const hasUnpaid=n.outstanding>0;
+  const marketNote=n.marketEstimatedCount>0
+    ? `Inclui ${n.marketEstimatedCount} compra${n.marketEstimatedCount===1?'':'s'} com preço estimado.`
+    : '';
   const items=[
-    ['Saldo atual',n.current,'balance',n.hasAccountBalance?'Introduzido manualmente':'Estimado pelos registos'],
-    ['Gasto no mês',n.cashSpent,'spent','Pagamentos e compras já realizados'],
-    ['Ainda por pagar',n.outstanding,'pending','Faturas em aberto do mês']
+    ['Recebido',n.incomes,'income','Rendimentos registados'],
+    ['Gasto',n.cashSpent,'spent',marketNote||'Pagamentos e compras registados'],
+    ['Por pagar',n.outstanding,'pending','Faturas deste mês por liquidar'],
+    [n.hasAccountBalance?'Saldo informado':'Saldo calculado',n.hasAccountBalance?n.current:n.ledgerCurrent,'balance',
+      n.hasAccountBalance?'Referência atualizada por ti':'Saldo inicial + entradas − saídas; sujeito aos registos']
   ];
   setHTML('#planningKpis',items.map(row=>planningOverviewCard(...row)).join(''));
-  const source=n.hasAccountBalance?'Saldo introduzido por ti':'Saldo estimado pelos movimentos';
-  setHTML('#planningProjection',`<span class="cdc-plan-projection-copy"><small>PREVISÃO APÓS AS CONTAS</small><strong>Quanto poderá sobrar</strong><small>${esc(source)} menos faturas por pagar do mês. Não volta a descontar despesas já pagas.</small></span><strong class="cdc-plan-projection-value ${n.projected<0?'is-negative':''}" data-money>${money(n.projected)}</strong>`);
+  const resultNote=marketNote
+    ? `Receitas menos pagamentos e compras registados. ${marketNote} Não é o saldo bancário.`
+    : 'Receitas registadas menos pagamentos e compras do mês. Não é o saldo bancário.';
+  const future=hasUnpaid
+    ? `<div class="cdc-plan-projection-next"><span>Saldo estimado após liquidar as faturas pendentes</span><strong data-money>${money(n.projected)}</strong></div>`
+    : '<div class="cdc-plan-projection-next is-settled"><span>Sem faturas pendentes neste mês. Não há valores por descontar novamente.</span></div>';
+  setHTML('#planningProjection',`<span class="cdc-plan-projection-copy">
+    <small>RESULTADO AUTOMÁTICO DO MÊS</small>
+    <strong>Recebido menos gasto</strong>
+    <small>${esc(resultNote)}</small>
+  </span>
+  <strong class="cdc-plan-projection-value ${result<0?'is-negative':''}" data-money>${money(result)}</strong>
+  ${future}`);
 }
 function renderPlanningUpcoming(){
   const pending=activeUnpaidBills().slice().sort(compareBillsByDue).slice(0,5);
