@@ -201,17 +201,18 @@
             <div><p class="cdc-plan-section-kicker">A tua situação financeira</p><h3 id="cdcPlanSummaryTitle">Resumo do mês</h3><p>Valores atuais, despesas pagas e compromissos por liquidar.</p></div>
             <span class="cdc-plan-private-pill">Cálculo local</span>
           </div>
-          <div id="planningKpis" class="cdc-plan-kpis" aria-live="polite"></div>
           <div id="planningProjection" class="cdc-plan-projection" aria-live="polite"></div>
+          <div id="planningKpis" class="cdc-plan-kpis" aria-live="polite"></div>
         </section>
-        <div class="two-col cdc-plan-workspace"><article class="panel cdc-plan-account-card"><div class="panel-head"><div><h2>Atualizar saldo e orçamento</h2><p>O saldo atual representa o saldo real da sua conta; o saldo inicial serve apenas para conciliação dos registos do mês.</p></div></div><form id="monthPlanForm" class="form-grid"><label>Saldo atual da conta<input id="accountBalance" inputmode="decimal" placeholder="0,00" autocomplete="off" /><small>Copie o saldo disponível mostrado pelo seu banco. A aplicação não acede automaticamente à conta bancária.</small></label><div id="accountBalanceInfo" class="account-balance-info" aria-live="polite"></div><label>Saldo inicial do mês<input id="openingBalance" inputmode="decimal" placeholder="0,00" /></label><label>Orçamento do mês<input id="monthlyBudget" inputmode="decimal" placeholder="0,00" /></label><button class="btn primary" type="submit">Guardar planeamento</button></form></article><article class="panel"><div class="panel-head"><div><h2>Rendimentos recebidos</h2><p>Salários, apoios e outras entradas deste mês. Consulta cada movimento abaixo.</p></div><button id="newIncomeBtn" class="btn secondary">+ Rendimento</button></div><div id="incomeList" class="stack-list"></div></article></div>
         <article class="panel cdc-plan-upcoming-panel" aria-labelledby="cdcPlanUpcomingTitle">
           <div class="panel-head">
             <div><h2 id="cdcPlanUpcomingTitle">Próximas contas por pagar</h2><p>Inclui contas vencidas e futuros vencimentos já registados, mesmo noutros meses.</p></div>
             <button class="btn secondary" type="button" data-go="bills">Ver todas as faturas</button>
           </div>
           <div id="planningUpcomingList" class="cdc-plan-upcoming-list" aria-live="polite"></div>
-        </article></section>
+        </article>
+        <div class="two-col cdc-plan-workspace"><article class="panel cdc-plan-account-card"><div class="panel-head"><div><h2>Atualizar saldo e orçamento</h2><p>O saldo atual representa o saldo real da sua conta; o saldo inicial serve apenas para conciliação dos registos do mês.</p></div></div><form id="monthPlanForm" class="form-grid"><label>Saldo atual da conta<input id="accountBalance" inputmode="decimal" placeholder="0,00" autocomplete="off" /><small>Copie o saldo disponível mostrado pelo seu banco. A aplicação não acede automaticamente à conta bancária.</small></label><div id="accountBalanceInfo" class="account-balance-info" aria-live="polite"></div><label>Saldo inicial do mês<input id="openingBalance" inputmode="decimal" placeholder="0,00" /></label><label>Orçamento do mês<input id="monthlyBudget" inputmode="decimal" placeholder="0,00" /></label><button class="btn primary" type="submit">Guardar planeamento</button></form></article><article class="panel"><div class="panel-head"><div><h2>Rendimentos recebidos</h2><p>Salários, apoios e outras entradas deste mês. Consulta cada movimento abaixo.</p></div><button id="newIncomeBtn" class="btn secondary">+ Rendimento</button></div><div id="incomeList" class="stack-list"></div></article></div>
+        </section>
 
       <section id="page-market" class="page">
         <div class="cdc-page-overview" aria-label="Orientação da área">
