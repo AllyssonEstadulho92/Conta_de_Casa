@@ -47,4 +47,35 @@ assert.ok(shell.indexOf('76-linear-page-flow1')<shell.indexOf('76-market-filter-
 const eventCode=fs.readFileSync('events.js','utf8');
 assert.match(eventCode,/\['#billStatusFilter','#billCategoryFilter','#billDateFrom','#billDateTo','#billSort'\]/);
 assert.match(eventCode,/\['#marketStatusFilter','#marketCategoryFilter','#marketSort'\]/);
+
+// O Plano Mensal usa os mesmos valores e identificadores canónicos do cofre.
+const planning=html.slice(html.indexOf('<section id="page-planning"'),html.indexOf('<section id="page-market"'));
+for(const id of ['planningKpis','planningProjection','planningUpcomingList','monthPlanForm','accountBalance','openingBalance','monthlyBudget','accountBalanceInfo','incomeList','newIncomeBtn']){
+  assert.match(planning,new RegExp('id="'+id+'"'));
+}
+assert.equal((planning.match(/id="monthPlanForm"/g)||[]).length,1,'one canonical plan form');
+assert.match(planning,/cdc-plan-summary/);
+assert.match(planning,/cdc-plan-workspace/);
+assert.match(planning,/cdc-plan-upcoming-panel/);
+assert.match(planning,/data-go="bills"/);
+const render=fs.readFileSync('render.js','utf8');
+assert.match(render,/function renderPlanningOverview\(n\)/);
+assert.match(render,/function renderPlanningUpcoming\(\)/);
+assert.match(render,/renderPlanningOverview\(n\);/);
+assert.match(render,/renderPlanningUpcoming\(\);/);
+assert.match(render,/n\.current/);
+assert.match(render,/n\.incomes/);
+assert.match(render,/n\.cashSpent/);
+assert.match(render,/n\.outstanding/);
+assert.match(render,/n\.projected/);
+assert.match(render,/activeUnpaidBills\(\)/);
+assert.match(render,/\.slice\(0,5\)/);
+assert.match(shell,/76-planning-redesign2/);
+assert.match(shell,/cdc-plan-kpis/);
+assert.match(shell,/cdc-plan-projection/);
+assert.match(shell,/#monthPlanForm/);
+assert.match(shell,/@media\(max-width:620px\)/);
+assert.match(build,/const DASHBOARD_REV = '76-linear-planning2'/);
+assert.match(build,/const SERVICE_WORKER_REV = '76-linear-planning2'/);
+
 console.log('Linear visual system on all pages: OK');
