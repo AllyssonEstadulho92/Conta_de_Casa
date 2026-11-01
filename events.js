@@ -807,6 +807,10 @@ async function initVaultUi() {
     togglePin.addEventListener('click',()=>{
       const input=$('#unlockPassphrase');
       const show=input.type==='password';
+      if(show && $('#vaultUnlock')?.classList.contains('pin-entry-mode')){
+        // Mostrar a credencial é uma ação explícita dentro das opções recolhidas.
+        setVaultEntryMode('text');
+      }
       input.type=show?'text':'password';
       const label=togglePin.querySelector('span:last-child');
       if(label)label.textContent=show?'Ocultar PIN':'Mostrar PIN';
