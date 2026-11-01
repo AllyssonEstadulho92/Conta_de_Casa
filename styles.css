@@ -1107,3 +1107,94 @@ html.keyboard-open
 @media(max-width:1000px){.debt-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.debt-stats-grid,.debt-counts{grid-template-columns:repeat(2,minmax(0,1fr))}.debt-balance-line{align-items:flex-start;flex-direction:column;gap:5px}.debt-balance-line strong{text-align:left}}
 @media(max-width:350px){.debt-stats-grid,.debt-counts{grid-template-columns:1fr}}
+
+/* Painel de Relatórios (2026-11): blocos claros, separação contabilística e adaptação ao iPhone. */
+.debt-report-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}
+.debt-report-heading h2{font-size:clamp(1.35rem,2.5vw,1.95rem);margin-bottom:5px;color:var(--text)}
+.debt-report-heading p{font-size:.9rem;color:var(--muted);margin:0;line-height:1.5}
+.debt-report-local-note{display:inline-flex;border:1px solid var(--border);border-radius:99px;padding:7px 11px;color:var(--muted);font-size:.74rem;white-space:nowrap}
+.debt-report-top-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:18px}
+.debt-top-card{border:1px solid var(--border);background:var(--surface);border-radius:18px;padding:18px;min-width:0;display:flex;flex-direction:column;gap:9px;box-shadow:0 6px 16px rgba(20,35,60,.035)}
+.debt-top-label{font-size:.87rem;color:var(--text);font-weight:700}
+.debt-top-card strong{font-size:clamp(1.3rem,2vw,1.85rem);line-height:1.2;overflow-wrap:anywhere}
+.debt-top-card small{color:var(--muted);font-size:.75rem;line-height:1.4}
+.debt-top-card.success strong{color:var(--success)}
+.debt-top-card.danger strong{color:var(--danger)}
+.debt-top-card.warning strong{color:#b85f00}
+.debt-top-card.primary strong{color:var(--primary)}
+.debt-report-panel{margin-bottom:18px}
+.debt-report-panel .panel-head{margin-bottom:4px}
+.debt-report-panel .panel-head h2{font-size:1.2rem}
+.debt-report-panel .debt-stats-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+.debt-report-panel .debt-stat-card{background:var(--surface);border-radius:14px;border:1px solid var(--border)}
+.debt-report-panel .debt-stat-card.primary{background:color-mix(in srgb,var(--primary) 7%,var(--surface))}
+.debt-report-panel .debt-stat-card.success{background:color-mix(in srgb,var(--success) 7%,var(--surface))}
+.debt-report-panel .debt-stat-card.danger{background:color-mix(in srgb,var(--danger) 6%,var(--surface))}
+.debt-report-panel .debt-stat-card.warning{background:color-mix(in srgb,var(--warning) 8%,var(--surface))}
+.debt-report-panel .debt-stat-card.info{background:color-mix(in srgb,var(--primary) 5%,var(--surface))}
+.debt-stat-card.info strong{color:var(--primary)}
+.debt-report-insights{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
+.debt-insight-card{min-width:0;border:1px solid var(--border);border-radius:16px;padding:17px;background:var(--surface)}
+.debt-insight-card h3{font-size:1rem;margin:0 0 14px}
+.debt-status-layout{display:flex;align-items:center;gap:22px}
+.debt-donut{flex:0 0 152px;width:152px;height:152px;border-radius:50%;display:grid;place-items:center}
+.debt-donut-center{height:106px;width:106px;background:var(--surface);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.debt-donut-center strong{font-size:1.65rem}
+.debt-donut-center small{font-size:.72rem;color:var(--muted)}
+.debt-status-legend{flex:1;min-width:0;display:grid;gap:8px}
+.debt-status-legend>div{display:grid;grid-template-columns:9px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:.77rem}
+.debt-status-legend strong{white-space:nowrap;font-size:.8rem}
+.debt-dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.debt-dot.paid{background:#159455}.debt-dot.partial{background:#3479d6}.debt-dot.unpaid{background:#e8a53c}.debt-dot.overdue{background:var(--danger)}
+.debt-overdue-inline{padding-top:8px;border-top:1px solid var(--border)}
+.debt-insight-card .debt-balance-summary{border:0;padding:0;background:none}
+.debt-insight-card .debt-balance-line:last-of-type{margin-top:10px;border-radius:12px;padding:13px;background:color-mix(in srgb,var(--success) 10%,var(--surface))}
+.debt-account-panel{margin-bottom:18px}
+.debt-account-filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 16px}
+.debt-filter-chip{border-radius:999px;border:1px solid var(--border);background:var(--surface);padding:9px 12px;color:var(--text);font-size:.8rem;min-height:40px;font-weight:650}
+.debt-filter-chip.active{background:#123c49;color:#fff;border-color:#123c49}
+.debt-filter-chip:focus-visible,.debt-ledger-row:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.debt-filter-chip span{margin-left:4px}
+.debt-account-list{max-width:100%}
+.debt-ledger-heading,.debt-ledger-row{display:grid;grid-template-columns:minmax(190px,2.1fr) minmax(105px,1.1fr) repeat(3,minmax(82px,1fr)) minmax(110px,1.1fr);gap:12px;align-items:center}
+.debt-ledger-heading{background:var(--surface-2);border-radius:12px;padding:13px 12px;font-size:.74rem;font-weight:750;color:var(--muted)}
+.debt-ledger-row{width:100%;min-height:60px;padding:10px 12px;border:0;border-bottom:1px solid var(--border);background:var(--surface);color:var(--text);text-align:left;cursor:pointer}
+.debt-ledger-row:hover{background:var(--surface-2)}
+.debt-ledger-name{min-width:0;display:flex;flex-direction:column;gap:4px}
+.debt-ledger-name strong{font-size:.86rem;overflow-wrap:anywhere}
+.debt-ledger-name small{color:var(--muted);font-size:.72rem}
+.debt-ledger-cell{font-size:.79rem;overflow-wrap:anywhere}
+.debt-ledger-state .status-chip{white-space:normal;text-align:center}
+.debt-more-btn{width:100%;margin-top:13px}
+.debt-report-extras{margin-bottom:20px}
+#app.money-hidden .debt-donut,#app.money-hidden .debt-ledger-row .debt-sensitive{filter:blur(8px);user-select:none}
+#app.money-hidden .debt-ledger-row{pointer-events:none}
+@media(max-width:1200px){.debt-report-top-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.debt-report-panel .debt-stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.debt-status-layout{gap:13px}.debt-donut{flex-basis:125px;width:125px;height:125px}.debt-donut-center{width:89px;height:89px}}
+@media(max-width:900px){.debt-report-insights{grid-template-columns:1fr}.debt-ledger-heading,.debt-ledger-row{grid-template-columns:minmax(150px,2fr) repeat(5,minmax(76px,1fr));gap:8px}.debt-account-list{overflow-x:auto}.debt-ledger-heading,.debt-ledger-row{min-width:740px}}
+@media(max-width:600px){
+ .debt-report-heading{flex-direction:column;gap:9px}
+ .debt-report-local-note{white-space:normal}
+ .debt-report-top-kpis{gap:8px}
+ .debt-top-card{padding:12px;gap:7px;border-radius:13px}
+ .debt-top-card strong{font-size:1.18rem}
+ .debt-top-label{font-size:.78rem}
+ .debt-report-panel .debt-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .debt-report-panel .debt-stat-card{padding:11px}
+ .debt-stat-card strong{font-size:1.05rem}
+ .debt-status-layout{gap:11px;align-items:flex-start}
+ .debt-donut{flex:0 0 110px;width:110px;height:110px}
+ .debt-donut-center{width:78px;height:78px}
+ .debt-donut-center strong{font-size:1.2rem}
+ .debt-status-legend>div{gap:5px;font-size:.7rem}
+ .debt-status-legend strong{font-size:.7rem}
+ .debt-account-filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-bottom:6px}
+ .debt-filter-chip{flex:0 0 auto}
+ .debt-ledger-heading{display:none}
+ .debt-account-list{overflow-x:visible}
+ .debt-ledger-rows{display:grid;gap:9px}
+ .debt-ledger-row{min-width:0;grid-template-columns:minmax(0,1fr) minmax(0,1fr);padding:13px;border:1px solid var(--border);border-radius:13px;gap:9px}
+ .debt-ledger-name{grid-column:1/-1;border-bottom:1px solid var(--border);padding-bottom:9px}
+ .debt-ledger-cell:before{content:attr(data-label);display:block;font-size:.68rem;color:var(--muted);margin-bottom:3px}
+ .debt-ledger-state{grid-column:1/-1}
+}
+@media(max-width:340px){.debt-report-top-kpis,.debt-report-panel .debt-stats-grid{grid-template-columns:1fr}.debt-status-layout{flex-direction:column}}
