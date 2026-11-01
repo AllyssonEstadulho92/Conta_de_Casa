@@ -42,8 +42,10 @@ function renderNav() {
   setHTML('#drawerNav',groups);
   setHTML('#mobileNav',MOBILE_NAV_ITEMS.map(id=>{
     const meta=PAGE_META[id];
-    return `<button class="nav-btn" type="button" data-mobile="${attr(id)}" aria-label="${attr(meta.label)}">${icon(meta.icon)}<span>${esc(meta.label.replace('Lista de ',''))}</span></button>`;
-  }).join(''));
+    const shortLabel=id==='planning'?'Plano':meta.label.replace('Lista de ','');
+    return `<button class="nav-btn" type="button" data-mobile="${attr(id)}" aria-label="${attr(meta.label)}">${icon(meta.icon)}<span>${esc(shortLabel)}</span></button>`;
+  }).join('')+
+  `<button class="nav-btn" type="button" data-mobile-more aria-label="Abrir mais opções" aria-controls="mobileDrawer" aria-expanded="false">${icon('more')}<span>Mais</span></button>`);
 }
 function showPage(page) {
   const known = PAGE_META[page] ? page : 'dashboard';
