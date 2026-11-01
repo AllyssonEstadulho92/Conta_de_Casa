@@ -44,6 +44,10 @@
         <label class="vault-unlock-input-label">Palavra-passe/PIN
           <input id="unlockPassphrase" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" aria-describedby="vaultUnlockHint" placeholder="○ ○ ○ ○ ○ ○ ○ ○" />
         </label>
+        <div id="vaultPinVisual" class="cdc-pin-visual" aria-hidden="true">
+          <span class="cdc-pin-pips"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+          <small>Introdução protegida</small>
+        </div>
         <div id="vaultPinPad" class="vault-pin-pad" aria-label="Teclado numérico do PIN">
           <div class="vault-keypad">
             <button class="vault-key" type="button" data-pin-key="1"><strong>1</strong><small></small></button>
