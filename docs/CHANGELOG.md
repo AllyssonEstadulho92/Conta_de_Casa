@@ -1,5 +1,6 @@
 # Changelog Técnico — Conta de Casa
 
+**Aperfeiçoamento de apresentação solicitado em 01/11/2026:** Relatórios reorganizados em cartões superiores, âmbitos de dívida, gráfico de distribuição, saldo remanescente e todas as contas com filtros (pagas, parciais, sem pagamentos, em atraso, a vencer e por corrigir), expansão gradual e abertura dos detalhes. Usa os valores reais cifrados no cofre, sem dados financeiros no código público. Sem migração de dados.\n\n
 ## Por publicar — estatísticas de dívidas e saldo (31/10/2026)
 
 - Nova vista em Relatórios: mês selecionado e todas as faturas, com somas de valores totais, pagos, em falta, atrasados, vencimentos atuais e futuros, e contagens por estado.
