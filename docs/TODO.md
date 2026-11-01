@@ -1,5 +1,18 @@
 # TODO — Conta de Casa
 
+## Revisão final para publicação (01/11/2026)
+
+- [x] Corrigir dock móvel para Início, Faturas, Plano, Relatórios e Mais.
+- [x] Corrigir visibilidade do terceiro separador e ligação acessível de Mais ao painel existente.
+- [x] Invalidar cache dos scripts principais e da shell móvel em conjunto.
+- [x] Acrescentar contratos de regressão para PIN único, Mercado retirado e navegação de cinco destinos.
+- [ ] Confirmar todas as execuções de CI e TypeScript da proposta.
+- [ ] Validar ecrã PIN, navegação, abertura de opções e recuperação no Safari/iPhone real.
+- [ ] Verificar visual em modo claro, escuro, alto contraste e movimento reduzido.
+- [ ] Testar importação/restauro num cofre fictício antes de uma migração de dados pessoais.
+- [ ] Só remover scripts legados de compras após auditoria de dependências e dados históricos.
+
+
 ## PIN aprovado e desativação de Mercado (01/11/2026)
 
 - [x] Aplicar aparência escura aprovada ao desbloqueio móvel e manter um único indicador do PIN.
