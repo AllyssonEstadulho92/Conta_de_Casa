@@ -573,6 +573,107 @@ function debtScopeHtml(stats) {
   if(stats.overpaidCount)note.push(`${stats.overpaidCount} fatura(s) com pagamentos em excesso, no valor de ${money(stats.overpaidCents)}; não compensam dívidas diferentes.`);
   return `<div class="debt-stats-grid">${cards.join('')}</div>${debtSummaryCounts(stats)}<p class="debt-stats-note" data-money>${esc(note.join(' '))}</p>`;
 }
+
+let debtAccountsFilter='all';
+let debtAccountsLimit=24;
+function debtAccountKind(bill, now=new Date()) {
+  const ledger=billLedger(bill);
+  if(!ledger.valid) return 'invalid';
+  if(ledger.remainingCents===0) return 'paid';
+  const days=billDaysUntil(bill,now);
+  if(!Number.isFinite(days)) return 'unknown';
+  if(days<0) return 'overdue';
+  if(ledger.paidCents>0) return 'partial';
+  return 'unpaid';
+}
+function debtAccountFilterMatches(bill,filter,now=new Date()){
+  const ledger=billLedger(bill);
+  const days=billDaysUntil(bill,now);
+  if(filter==='all')return true;
+  if(filter==='invalid')return !ledger.valid || (ledger.remainingCents>0&&!Number.isFinite(days));
+  if(!ledger.valid)return false;
+  if(filter==='paid')return ledger.remainingCents===0;
+  if(filter==='partial')return ledger.remainingCents>0&&ledger.paidCents>0;
+  if(filter==='unpaid')return ledger.remainingCents>0&&ledger.paidCents===0;
+  if(filter==='overdue')return ledger.remainingCents>0&&Number.isFinite(days)&&days<0;
+  if(filter==='future')return ledger.remainingCents>0&&Number.isFinite(days)&&days>=0;
+  return false;
+}
+function renderDebtStatus(stats){
+  const count=stats.billCount;
+  const paid=stats.fullyPaidCount;
+  const partial=stats.partlyPaidCount;
+  const unpaid=stats.unpaidCount;
+  const percent=value=>count?Math.round(value/count*100):0;
+  setHTML('#debtStatusSummary',`
+    <div class="debt-status-layout">
+      <div class="debt-donut" id="debtStatusDonut" role="img" aria-label="Distribuição: pagas ${paid}, parcialmente pagas ${partial}, sem pagamentos ${unpaid}">
+        <div class="debt-donut-center"><strong data-money>${count}</strong><small>contas</small></div>
+      </div>
+      <div class="debt-status-legend">
+        <div><span class="debt-dot paid"></span><span>Pagas</span><strong data-money>${paid} (${percent(paid)}%)</strong></div>
+        <div><span class="debt-dot partial"></span><span>Parciais</span><strong data-money>${partial} (${percent(partial)}%)</strong></div>
+        <div><span class="debt-dot unpaid"></span><span>Sem pagamentos</span><strong data-money>${unpaid} (${percent(unpaid)}%)</strong></div>
+        <div class="debt-overdue-inline"><span class="debt-dot overdue"></span><span>Em atraso</span><strong data-money>${stats.overdueCount}</strong></div>
+      </div>
+    </div>
+    <p class="debt-balance-note">As contas em atraso também podem estar parciais ou sem pagamentos. Não são somadas novamente ao total.</p>
+  `);
+  const donut=$('#debtStatusDonut');
+  if(donut){
+    const p=count?paid/count*100:0;
+    const q=count?(paid+partial)/count*100:0;
+    donut.style.background=count
+      ? `conic-gradient(#159455 0% ${p}%,#3479d6 ${p}% ${q}%,#e8a53c ${q}% 100%)`
+      : 'conic-gradient(#e5eaf0 0% 100%)';
+  }
+}
+function debtAccountEntryHtml(bill,now){
+  const ledger=billLedger(bill);
+  const kind=debtAccountKind(bill,now);
+  const st=billStatus(bill,now);
+  const label=kind==='invalid'?'Dados inválidos':kind==='unknown'?'Vencimento por confirmar':
+    kind==='overdue'?(ledger.paidCents>0?'Atraso · parcial':'Em atraso'):
+    kind==='paid'?'Paga':kind==='partial'?'Parcial':st==='due-today'?'Vence hoje':'Por pagar';
+  const css=kind==='unknown'?'warning':kind==='overdue'?'overdue':kind==='paid'?'paid':kind==='partial'?'partial':kind==='invalid'?'invalid':'pending';
+  const rawPaid=ledger.valid?Math.min(ledger.totalCents,ledger.paidCents):NaN;
+  const due=billDueDateKey(bill);
+  return `<button class="debt-ledger-row" type="button" data-debt-bill="${attr(bill.id)}" aria-label="Abrir detalhes da fatura">
+    <span class="debt-ledger-name debt-sensitive"><strong>${esc(bill.title||'Fatura sem descrição')}</strong><small>${esc(bill.category||'Outros')}</small></span>
+    <span class="debt-ledger-cell debt-sensitive" data-label="Vencimento">${due?esc(fmtDate(due)):'Por confirmar'}</span>
+    <span class="debt-ledger-cell debt-sensitive" data-label="Valor" data-money>${money(ledger.totalCents)}</span>
+    <span class="debt-ledger-cell debt-sensitive" data-label="Pago" data-money>${money(rawPaid)}</span>
+    <span class="debt-ledger-cell debt-sensitive" data-label="Em dívida" data-money>${money(ledger.remainingCents)}</span>
+    <span class="debt-ledger-cell debt-ledger-state debt-sensitive" data-label="Estado"><span class="status-chip ${attr(css)}">${esc(label)}</span></span>
+  </button>`;
+}
+function renderDebtAccounts(){
+  const now=new Date();
+  const bills=(appState?.bills||[]).filter(b=>!b.cancelled&&!b.archived)
+    .sort((a,b)=>{
+      const aDue=billDueDateKey(a)||'9999-12-31';
+      const bDue=billDueDateKey(b)||'9999-12-31';
+      return aDue.localeCompare(bDue)||String(a.title||'').localeCompare(String(b.title||''),'pt-PT');
+    });
+  const tabs=[
+    ['all','Todas'],['paid','Pagas'],['partial','Parciais'],
+    ['unpaid','Sem pagamentos'],['overdue','Em atraso'],
+    ['future','A vencer'],['invalid','Por corrigir']
+  ];
+  if(!tabs.some(([value])=>value===debtAccountsFilter))debtAccountsFilter='all';
+  setHTML('#debtAccountsFilters',tabs.map(([value,label])=>{
+    const num=bills.filter(b=>debtAccountFilterMatches(b,value,now)).length;
+    return `<button type="button" data-debt-filter="${attr(value)}" class="debt-filter-chip${debtAccountsFilter===value?' active':''}" aria-pressed="${debtAccountsFilter===value?'true':'false'}">${esc(label)} <span data-money>${num}</span></button>`;
+  }).join(''));
+  const filtered=bills.filter(b=>debtAccountFilterMatches(b,debtAccountsFilter,now));
+  const visible=filtered.slice(0,debtAccountsLimit);
+  const heading=`<div class="debt-ledger-heading" aria-hidden="true"><span>Conta / descrição</span><span>Vencimento</span><span>Valor</span><span>Pago</span><span>Em dívida</span><span>Estado</span></div>`;
+  const rows=visible.map(b=>debtAccountEntryHtml(b,now)).join('');
+  const more=filtered.length>visible.length?`<button class="btn secondary debt-more-btn" type="button" data-debt-more>Mostrar mais contas (${filtered.length-visible.length} restantes)</button>`:'';
+  setHTML('#debtAccountsList',filtered.length
+    ? `${heading}<div class="debt-ledger-rows">${rows}</div>${more}`
+    : '<p class="empty">Não existem contas neste estado.</p>');
+}
 function renderDebtStatistics() {
   const s=debtBalanceStatistics(selectedMonth);
   setHTML('#debtMonthSummary',debtScopeHtml(s.period));
