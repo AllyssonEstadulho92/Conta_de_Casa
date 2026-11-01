@@ -75,7 +75,7 @@ assert.match(css,/@media\(prefers-reduced-motion:reduce\)[\s\S]*\.drawer-close-g
 assert.doesNotMatch(css,/\.drawer-head>#drawerCloseBtn\{display:none!important\}/,'final menu CSS must never hide the only close control');
 
 assert.match(prepare,/const BUILD = 'v76'/);
-assert.match(prepare,/const MENU_REV = '76-monthly-cashflow1'/);
+assert.match(prepare,/const MENU_REV = '73-menu8'/);
 assert.ok(sw.includes("'./mobile-menu-toggle.css'"));
 assert.ok(sw.includes("'./mobile-menu-toggle.js'"));
 assert.match(architecture,/DRAWER_GROUPS/);
