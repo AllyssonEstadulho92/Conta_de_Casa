@@ -1,5 +1,16 @@
 # Estado do Projeto — Conta de Casa
 
+## Evolução transversal de finanças pessoais e UI/UX (01/11/2026)
+
+**Intervenção em avaliação:** branch `feat/personal-finance-ux-20261101`, baseada na versão publicada após a PR #227. No Plano, a previsão após contas passa a ser o primeiro indicador, seguida de saldo atual, gasto efetivamente realizado e ainda por pagar. O cartão de orçamento continua a utilizar a contabilidade e o único formulário preexistentes; o bloco de prioridades surge antes dos campos de edição. O orçamento é apresentado a seguir à projeção, preservando a navegação mensal e as categorias.
+
+**Notificações:** agrupamento por prioridade, vencimentos futuros (dias 1 a 7, excluindo hoje) e informação a verificar, sem criar sincronização, notificações push ou gravação de estados de leitura. Os atrasos e vencimentos de hoje continuam calculados com as funções financeiras existentes.
+
+**Menu e PIN:** animação de três linhas para X com botão de fecho dentro do `dialog` original; novo indicador de oito pontos, exclusivamente visual e sem persistência do PIN. A validação criptográfica, os campos existentes, a opção de palavra-passe e o mecanismo de recuperação ficam intactos. Atenção: os pontos não fixam o comprimento da credencial, que continua a exigir os mesmos requisitos técnicos.
+
+**Limites e risco:** sem mudanças de `STATE_VERSION`, PBKDF2/AES-GCM, IndexedDB, registos, fórmulas de saldos, scanner, ficheiros de backup ou sincronização. Não foi acedido qualquer cofre de utilizador. Continuam independentes as PRs #223 (leitura de faturas) e #224 (reforço de segurança). O repositório e o Pages continuam públicos; o conteúdo financeiro não é publicado automaticamente. Pendente CI, inspeção visual em iPhone/Safari e revisão de integração.
+
+
 ## Experiência visual linear e redesenho do Plano Mensal (01/11/2026)
 
 **Estado da implementação:** branch `ui/linear-page-experience-20261101`, baseada na main após a PR #226. As 11 vistas continuam com os seus componentes e controlos, mas recebem um guia contextual curto e um percurso de três passos. Relatórios mantém os KPIs e a carteira de dívidas introduzidos em #226.

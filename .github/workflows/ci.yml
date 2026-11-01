@@ -193,6 +193,9 @@ jobs:
       - name: v76 product page hierarchy tests
         run: node tests/v76-product-pages.test.cjs
 
+      - name: Personal finance UI and privacy contracts
+        run: node tests/personal-finance-ux.test.cjs
+
       - name: Linear page structure and navigation tests
         run: node tests/linear-pages.test.cjs
 

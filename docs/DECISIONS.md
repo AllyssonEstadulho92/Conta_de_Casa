@@ -1,5 +1,12 @@
 # Decisões Técnicas — Conta de Casa
 
+## D-160 — leitura financeira sem dupla subtração e UX coerente (01/11/2026)
+
+Decisão: a prioridade visual do Plano é mostrar o **saldo projetado depois das faturas em aberto** e distinguir este valor do saldo bancário atual e do orçamento restante. Evitar expressões como «sobra real» quando o ponto de partida é estimado ou existem movimentos futuros ainda não registados. A despesa realizada (`cashSpent`) é apenas informativa, não volta a ser descontada de um saldo bancário atual introduzido manualmente.
+
+Alertas locais agrupados por criticidade, com vencimentos próximos calculados sem incluir as contas que vencem hoje. A experiência do menu mantém um só controlador e um X acessível no diálogo; a apresentação do PIN ganha feedback visual mas não revela nem persiste caracteres e não altera as exigências de autenticação. A revisão está isolada e exige QA físico antes de conclusão definitiva.
+
+
 ## D-159 — Sistema visual linear e Plano Mensal renovado (01/11/2026)
 
 Decisão: dar às 11 áreas uma descrição e três passos orientadores, mantendo a navegação e as funcionalidades. O Plano Mensal recebe uma hierarquia de resumo, orçamento existente, edição do saldo, rendimentos e vencimentos próximos. A intervenção usa os cálculos atuais sem recalcular dívidas numa lógica paralela e não altera o saldo de referência. O saldo projetado é explicitamente uma estimativa calculada subtraindo contas em aberto do mês selecionado. A lista de prioridades atravessa meses mas é separada contabilisticamente do total mensal, prevenindo dupla contagem.

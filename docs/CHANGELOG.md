@@ -1,5 +1,16 @@
 # Changelog Técnico — Conta de Casa
 
+## Por publicar — aperfeiçoamentos de finanças pessoais, alertas, menu e PIN (01/11/2026)
+
+- Plano Mensal com projeção em destaque e distinção entre saldo, despesas confirmadas e obrigações ainda por pagar.
+- Orçamento na sequência financeira principal, seguido de vencimentos prioritários e edição do planeamento.
+- Alertas locais agrupados em «Prioritários», «A vencer» e «A verificar», incluindo os próximos sete dias sem repetir os vencimentos de hoje.
+- Menu móvel com transformação de três traços em X, reaproveitando o controlador e o fecho acessível do diálogo.
+- PIN com indicador visual discreto de introdução, sem recolha nem persistência extra.
+- Ajustes responsivos, suporte a movimento reduzido, testes e invalidação de cache do Pages.
+- Sem alteração a dados, modelo financeiro, criptografia, PIN, backup ou sincronização.
+
+
 ## Por publicar — Plano Mensal reorganizado e linguagem visual linear (01/11/2026)
 
 - Padronizados títulos, explicações e sequências de utilização para as onze áreas.

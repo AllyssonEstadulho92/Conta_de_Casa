@@ -1,5 +1,16 @@
 # Arquitetura — Conta de Casa
 
+## Contratos UI/UX financeiros e interação do cofre (01/11/2026)
+
+A página Plano Mensal agora ordena `planningProjection`, `planningKpis`, orçamento, `planningUpcomingList` e `monthPlanForm`. `ensurePlanningShell` do `v75-architecture.js` insere o orçamento após o resumo se disponível; o formulário existente permanece o único ponto de gravação. `renderPlanningOverview` lê apenas `monthNumbers()` e distingue o saldo atual (`current`), o dinheiro efetivamente gasto (`cashSpent`), o ainda devido no mês (`outstanding`) e a projeção (`projected=current-outstanding`). Despesas pagas não são subtraídas novamente do saldo informado manualmente.
+
+`dashboardAlertItems` acrescenta avisos de vencimento entre um e sete dias futuros através de `activeUnpaidBills`, `billDaysUntil`, `remainingForBill` e `billDueDateKey`; `renderAlertCenter` organiza avisos por três grupos de leitura. Não há servidor ou persistência adicional.
+
+`mobile-menu-toggle.js` continua como controlador exclusivo, com `data-menu-state` e X dentro do diálogo; regras CSS transitam os três traços do trigger para o símbolo X. O ecrã do cofre utiliza `vaultPinVisual` para oito pontos decorativos associados apenas a `input.value.length` em memória, sendo ocultados no modo palavra-passe. A cifra e a validação continuam inalteradas.
+
+Revisões `DASHBOARD_REV`, `MOBILE_SHELL_REV`, `ARCHITECTURE_REV` e `SERVICE_WORKER_REV` sincronizadas com a nova interface. `events.js` também recebe revisão de URL ao gerar o Pages. Sem novos endpoints nem alterações à política de sincronização.
+
+
 ## Linguagem visual por área e Plano Mensal (01/11/2026)
 
 A camada final `v76-mobile-shell.css` alberga o novo componente contextual `.cdc-page-overview`, a sequência informativa `.cdc-flow` e o desenho do Plano Mensal, inseridos antes da última autoridade CSS do Mercado. Os guias não têm listeners nem dados financeiros.

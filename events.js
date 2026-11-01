@@ -57,6 +57,17 @@ function setVaultEntryMode(mode = 'pin') {
   else toggle.textContent=pinMode?'Usar palavra-passe':'Usar teclado PIN';
   toggle.setAttribute('aria-pressed',String(!pinMode));
   if(!pinMode) requestAnimationFrame(()=>input.focus({preventScroll:true}));
+  updateVaultPinVisual();
+}
+
+// Indicador apenas visual: não regista nem transmite a credencial.
+function updateVaultPinVisual(){
+  const input=$('#unlockPassphrase');
+  const visual=$('#vaultPinVisual');
+  if(!input||!visual)return;
+  const n=Math.min(8,input.value.length);
+  const dots=visual.querySelectorAll('.cdc-pin-pips i');
+  dots.forEach((dot,index)=>dot.classList.toggle('is-filled',index<n));
 }
 
 function wireVaultPinPad() {
@@ -67,6 +78,8 @@ function wireVaultPinPad() {
   const unlock=$('#vaultUnlock');
   if(!pad||!input||!toggle||!unlock) return;
   vaultPinPadWired=true;
+  input.addEventListener('input',updateVaultPinVisual);
+  updateVaultPinVisual();
 
   pad.addEventListener('click',e=>{
     const digit=e.target.closest('[data-pin-key]');
@@ -892,7 +905,10 @@ async function initVaultUi() {
         msg.textContent='Não foi possível desbloquear o cofre neste dispositivo.';
       }
       msg.classList.add('error');
-    }finally{$('#unlockVaultBtn').disabled=false;}
+    }finally{
+      $('#unlockVaultBtn').disabled=false;
+      updateVaultPinVisual();
+    }
   };
   $('#unlockVaultBtn').addEventListener('click',unlock); $('#unlockPassphrase').addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
 }
