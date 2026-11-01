@@ -85,7 +85,7 @@ function renderPage(page) {
   if (page==='bills') renderBills();
   if (page==='calendar') renderCalendar();
   if (page==='planning') renderPlanning();
-  if (page==='market') renderMarket();
+  // Mercado desativado na navegação. Preservam-se apenas dados históricos no cofre.
   if (page==='reports') renderReports();
   if (page==='goals') renderGoals();
   if (page==='security') renderSecurity();
