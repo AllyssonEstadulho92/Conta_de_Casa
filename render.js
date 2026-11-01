@@ -440,13 +440,13 @@ function planningOverviewCard(label,value,kind,note) {
 }
 function renderPlanningOverview(n){
   const items=[
-    ['Saldo de referência',n.current,'balance',n.hasAccountBalance?'Saldo informado por ti':'Estimado com os movimentos registados'],
-    ['Receitas recebidas',n.incomes,'income','Entradas registadas no mês'],
-    ['Despesas pagas',n.cashSpent,'spent','Pagamentos e compras efetivas'],
-    ['Contas em aberto',n.outstanding,'pending','Faturas do mês ainda por liquidar']
+    ['Saldo atual',n.current,'balance',n.hasAccountBalance?'Introduzido manualmente':'Estimado pelos registos'],
+    ['Gasto no mês',n.cashSpent,'spent','Pagamentos e compras já realizados'],
+    ['Ainda por pagar',n.outstanding,'pending','Faturas em aberto do mês']
   ];
   setHTML('#planningKpis',items.map(row=>planningOverviewCard(...row)).join(''));
-  setHTML('#planningProjection',`<span class="cdc-plan-projection-copy"><strong>Saldo após pagar as contas do mês</strong><small>Projeção: saldo de referência menos obrigações em aberto deste mês. Não inclui receitas futuras.</small></span><strong class="cdc-plan-projection-value ${n.projected<0?'is-negative':''}" data-money>${money(n.projected)}</strong>`);
+  const source=n.hasAccountBalance?'Saldo introduzido por ti':'Saldo estimado pelos movimentos';
+  setHTML('#planningProjection',`<span class="cdc-plan-projection-copy"><small>PREVISÃO APÓS AS CONTAS</small><strong>Quanto poderá sobrar</strong><small>${esc(source)} menos faturas por pagar do mês. Não volta a descontar despesas já pagas.</small></span><strong class="cdc-plan-projection-value ${n.projected<0?'is-negative':''}" data-money>${money(n.projected)}</strong>`);
 }
 function renderPlanningUpcoming(){
   const pending=activeUnpaidBills().slice().sort(compareBillsByDue).slice(0,5);
