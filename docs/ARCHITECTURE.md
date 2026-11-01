@@ -1,5 +1,19 @@
 # Arquitetura — Conta de Casa
 
+## Navegação móvel e cofre aprovado (01/11/2026)
+
+O dock é renderizado por `renderNav()` com quatro rotas financeiras de `MOBILE_NAV_ITEMS` e uma ação separada `data-mobile-more` que abre `#mobileDrawer` através do controlador existente, sem criar rota fictícia. A classe CSS de autoridade `v76-mobile-shell.css` impõe cinco colunas e repõe a visibilidade do terceiro item anteriormente oculto. `events.js` sincroniza o `aria-expanded` de «Mais» com a abertura e fecho do diálogo. `scripts/prepare-pages.cjs` altera revisões de `core.js`, `render.js`, `events.js`, `v76-mobile-shell.css` e do service worker, prevenindo a mistura de menus antigos e novos.
+
+No acesso, `#unlockPassphrase` mantém a única entrada criptográfica real; quando o modo PIN está ativo o campo é visualmente ocultado, mas o valor é preenchido exclusivamente pelos botões de teclado. `#vaultPinVisual` é apresentação sem estado persistente. O painel `#vaultOptionsPanel` expande opções de palavra-passe, mostrar/alterar PIN, ajuda e importação. A recuperação usa os handlers existentes. Não existe suporte WebAuthn ou Face ID aprovado nesta entrega.
+
+
+## Coerência visual do cofre e retirada progressiva do Mercado (01/11/2026)
+
+`index.html` contém `#vaultOptionsToggle`, `#vaultOptionsPanel[hidden]` e `#vaultRecoverySlot`; `installPinRecoveryUi` em `events.js` monta as ações secundárias existentes nesse slot. `wireVaultPinPad` faz a divulgação acessível das opções e a abertura explícita de transferência cifrada; `setVaultEntryMode` mantém uma única credencial real em `#unlockPassphrase`. O CSS final está encapsulado em `html.cdc-v75 #vaultScreen.vault-unlock-active` na camada `v76-mobile-shell.css`, isolando a vista escura do resto do produto. Uma linha de oito pontos é decorativa e não limita o comprimento do PIN, exigido por validação existente. Não há biblioteca biométrica nem persistência de credenciais.
+
+As rotas `PAGE_META` e `NAV_GROUPS` de `core.js` e a segunda camada de navegação `v75-architecture.js` excluem Mercado. `renderPage` não chama `renderMarket`. A secção HTML antiga mantém-se oculta, sem rota, com os IDs preservados para não rebentar os listeners que ainda existem em `events.js`. Os valores históricos continuam em `appState.market`, as contas e a projeção em `finance.js` conservam os mesmos algoritmos, e o bundle mantém ficheiros legados até remoção testada independentemente.
+
+
 ## Resultado mensal automático e X único do menu (01/11/2026)
 
 A função pura `planningMonthlyResult(n)` apresenta o saldo líquido dos movimentos do mês através de `sumCents([n.incomes,-n.cashSpent])`, reaproveitando `monthNumbers` e não a referência bancária manual. Não altera persistência nem contabilização existente. O ecrã do Plano usa uma medida derivada de receitas e despesas registadas e identifica a natureza estimada de compras sem preço real. O saldo bancário informado e o saldo `ledgerCurrent` permanecem separados; quando não há dívida em aberto não se duplica `n.projected` como se fosse novo dinheiro.

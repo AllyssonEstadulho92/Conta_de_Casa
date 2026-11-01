@@ -202,6 +202,9 @@ jobs:
       - name: Linear page structure and navigation tests
         run: node tests/linear-pages.test.cjs
 
+      - name: Dark PIN and retired Market navigation tests
+        run: node tests/approved-vault-market-retirement.test.cjs
+
       - name: v76 mobile shell safe-area tests
         run: node tests/v76-mobile-shell.test.cjs
 

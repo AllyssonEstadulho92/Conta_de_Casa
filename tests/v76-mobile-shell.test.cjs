@@ -107,7 +107,7 @@ assert.match(shell,/forced-colors:active/);
 assert.equal(pkg.version,'0.76.0');
 assert.match(prepare,/const BUILD = 'v76'/);
 assert.match(prepare,/const MODERN_UI_REV = '76-visual-audit1'/);
-assert.match(prepare,/const MOBILE_SHELL_REV = '76-monthly-cashflow1'/);
+assert.match(prepare,/const MOBILE_SHELL_REV = '76-approved-vault-nav4'/);
 assert.match(prepare,/v76-modern-ui\.css\?v=\$\{MODERN_UI_REV\}[\s\S]*v76-mobile-shell\.css\?v=\$\{MOBILE_SHELL_REV\}/);
 assert.ok(sw.includes("'./v76-mobile-shell.css'"));
 
@@ -118,7 +118,7 @@ try{
   assert.match(builtIndex,/name="app-version" content="0\.76\.0"/);
   assert.match(builtIndex,/name="app-build" content="v76"/);
   assert.match(builtIndex,/v76-modern-ui\.css\?v=76-visual-audit1/);
-  assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-monthly-cashflow1/);
+  assert.match(builtIndex,/v76-mobile-shell\.css\?v=76-approved-vault-nav4/);
   assert.ok(builtIndex.indexOf('v76-modern-ui.css')<builtIndex.indexOf('v76-mobile-shell.css'),'mobile shell must remain the final mobile shell authority');
   const builtShell=read('dist/v76-mobile-shell.css');
   assert.match(builtShell,/76-shell-coherence1/);
@@ -141,7 +141,7 @@ assert.match(marketFilterFit,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!
 assert.match(marketFilterFit,/\.market-filter-field:nth-child\(3\)\{[\s\S]*min-width:0!important;[\s\S]*max-width:none!important;[\s\S]*grid-column:auto!important/);
 assert.match(marketFilterFit,/\.market-filter-clear\{[\s\S]*min-width:0!important;[\s\S]*grid-column:auto!important/);
 assert.match(marketFilterFit,/@media\(max-width:359px\)[\s\S]*grid-template-columns:minmax\(0,1fr\)!important/);
-assert.doesNotMatch(marketFilterFit,/display:none!important/,'keep all market filters available');
+assert.match(shell,/#page-market\.retired-page\[hidden\]\{[\s\S]*display:none!important/,'retired Market must stay hidden despite legacy CSS');
 assert.match(shell,/76-market-mobile-visual-fix1/,'mobile shell must preserve the screenshot-driven add-product correction');
 assert.match(shell,/market-add-product-prototype \.dialog-head\{[\s\S]*min-height:calc\(88px \+ env\(safe-area-inset-top,0px\)\)!important[\s\S]*padding:calc\(12px \+ env\(safe-area-inset-top,0px\)\) 14px 12px!important/,'safe-area must increase header geometry instead of clipping its controls');
 assert.match(shell,/@media\(max-width:620px\) and \(display-mode:browser\)[\s\S]*padding-bottom:calc\(88px \+ env\(safe-area-inset-bottom,0px\)\)!important/,'Safari browser mode must reserve scroll clearance above the bottom toolbar');

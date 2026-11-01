@@ -42,8 +42,10 @@ function renderNav() {
   setHTML('#drawerNav',groups);
   setHTML('#mobileNav',MOBILE_NAV_ITEMS.map(id=>{
     const meta=PAGE_META[id];
-    return `<button class="nav-btn" type="button" data-mobile="${attr(id)}" aria-label="${attr(meta.label)}">${icon(meta.icon)}<span>${esc(meta.label.replace('Lista de ',''))}</span></button>`;
-  }).join(''));
+    const shortLabel=id==='planning'?'Plano':meta.label.replace('Lista de ','');
+    return `<button class="nav-btn" type="button" data-mobile="${attr(id)}" aria-label="${attr(meta.label)}">${icon(meta.icon)}<span>${esc(shortLabel)}</span></button>`;
+  }).join('')+
+  `<button class="nav-btn" type="button" data-mobile-more aria-label="Abrir mais opções" aria-controls="mobileDrawer" aria-expanded="false">${icon('more')}<span>Mais</span></button>`);
 }
 function showPage(page) {
   const known = PAGE_META[page] ? page : 'dashboard';
@@ -85,7 +87,7 @@ function renderPage(page) {
   if (page==='bills') renderBills();
   if (page==='calendar') renderCalendar();
   if (page==='planning') renderPlanning();
-  if (page==='market') renderMarket();
+  // Mercado desativado na navegação. Preservam-se apenas dados históricos no cofre.
   if (page==='reports') renderReports();
   if (page==='goals') renderGoals();
   if (page==='security') renderSecurity();
@@ -111,7 +113,7 @@ function dashboardAlertItems(n = dashboardNumbers()) {
     add('market-price-unconfirmed','warning',
       `${count} compra${count===1?'':'s'} com preço por confirmar`,
       'O valor contabilizado no mês inclui estimativas até registar o preço realmente pago.',
-      'Rever preços','market',n.marketEstimatedCents,'Estimativa incluída: ','.');
+      'Consultar histórico','reports',n.marketEstimatedCents,'Estimativa histórica: ','.');
   }
   if (n.overdueCount) {
     add('overdue','danger',`${n.overdueCount} fatura${n.overdueCount===1?'':'s'} em atraso neste mês`,'Reveja os pagamentos pendentes.','Ver faturas','bills',n.overdue,'Total em atraso: ','.');
@@ -402,7 +404,7 @@ function renderCalendar() {
   setHTML('#calendarMonthSummary',[
     ['Gasto no mês',numbers.cashSpent,'Pagamentos + compras','primary'],
     ['Faturas pagas',numbers.paymentTotal,'Pagamentos registados','success'],
-    ['Mercado',numbers.marketSpent,numbers.marketEstimatedCount?`${numbers.marketEstimatedCount} compra${numbers.marketEstimatedCount===1?'':'s'} sem preço real`:'Compras concluídas','normal'],
+    ['Compras anteriores',numbers.marketSpent,numbers.marketEstimatedCount?`${numbers.marketEstimatedCount} compra${numbers.marketEstimatedCount===1?'':'s'} sem preço real`:'Compras concluídas','normal'],
     ['Por pagar',numbers.outstanding,'Faturas ainda pendentes',numbers.outstanding>0?'warning':'normal']
   ].map(([label,value,sub,kind])=>`<article class="calendar-summary-item ${kind}"><span>${esc(label)}</span><strong data-money>${money(value)}</strong><small>${esc(sub)}</small></article>`).join(''));
 

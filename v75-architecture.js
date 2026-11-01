@@ -96,7 +96,7 @@
     dashboard:['Início','Visão geral'],
     bills:['Despesas','Movimentos'],
     calendar:['Calendário','Despesas'],
-    market:['Mercado','Compras'],
+
     planning:['Planeamento','Orçamento'],
     goals:['Metas','Poupança'],
     reports:['Relatórios','Análise'],
@@ -106,7 +106,7 @@
     petshare:['Partilha do Walli','Animais']
   });
   const DRAWER_GROUPS=Object.freeze([
-    {label:'Principal',items:[['dashboard','Início','home'],['bills','Despesas','bill'],['planning','Planeamento','plan'],['market','Mercado','market']]},
+    {label:'Principal',items:[['dashboard','Início','home'],['bills','Despesas','bill'],['planning','Planeamento','plan']]},
     {label:'Animais',items:[['petshare','Partilha do Walli','paw']]},
     {label:'Análise',items:[['reports','Relatórios','report']]},
     {label:'Sistema',items:[['security','Segurança e sincronização','shield'],['settings','Definições','settings']]}
@@ -114,7 +114,7 @@
   const MOBILE_NAV=Object.freeze([
     ['dashboard','Início','home'],
     ['bills','Despesas','bill'],
-    ['market','Mercado','market'],
+    ['reports','Relatórios','report'],
     ['planning','Plano','plan'],
     ['settings','Mais','more']
   ]);

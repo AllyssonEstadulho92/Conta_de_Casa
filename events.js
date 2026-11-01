@@ -51,7 +51,15 @@ function setVaultEntryMode(mode = 'pin') {
   box.classList.toggle('pin-entry-mode',pinMode);
   box.classList.toggle('text-entry-mode',!pinMode);
   input.readOnly=pinMode;
+  input.tabIndex=pinMode?-1:0;
   input.setAttribute('inputmode',pinMode?'none':'text');
+  // Ao regressar ao teclado numérico nunca conservar o PIN visível.
+  if(pinMode && input.type==='text'){
+    input.type='password';
+    const visibility=$('#togglePinVisibility');
+    const text=visibility?.querySelector('span:last-child');
+    if(text)text.textContent='Mostrar PIN';
+  }
   const label=toggle.querySelector('.vault-keyboard-label');
   if(label)label.textContent=pinMode?'Usar palavra-passe':'Usar teclado PIN';
   else toggle.textContent=pinMode?'Usar palavra-passe':'Usar teclado PIN';
@@ -99,6 +107,40 @@ function wireVaultPinPad() {
   toggle.addEventListener('click',()=>{
     setVaultEntryMode(unlock.classList.contains('pin-entry-mode')?'text':'pin');
   });
+  const optionsToggle=$('#vaultOptionsToggle');
+  const optionsPanel=$('#vaultOptionsPanel');
+  const importControl=$('#vaultImportFromOptions');
+  const screen=$('#vaultScreen');
+  if(optionsToggle && optionsPanel){
+    optionsToggle.addEventListener('click',()=>{
+      const opening=optionsPanel.hidden;
+      optionsPanel.hidden=!opening;
+      optionsToggle.setAttribute('aria-expanded',String(opening));
+      if(!opening){
+        screen?.classList.remove('vault-import-open');
+        importControl?.setAttribute('aria-expanded','false');
+        // Nunca deixar o segredo à vista quando as opções são recolhidas.
+        input.type='password';
+        const reveal=$('#togglePinVisibility')?.querySelector('span:last-child');
+        if(reveal)reveal.textContent='Mostrar PIN';
+        optionsToggle.focus({preventScroll:true});
+      }
+    });
+  }
+  if(importControl){
+    importControl.addEventListener('click',()=>{
+      const opening=!screen?.classList.contains('vault-import-open');
+      screen?.classList.toggle('vault-import-open',opening);
+      importControl.setAttribute('aria-expanded',String(opening));
+      if(opening){
+        const transfer=$('#vaultTransferPanel');
+        const toggleTransfer=$('#vaultTransferToggle');
+        if(transfer?.hidden)toggleTransfer?.click();
+        toggleTransfer?.focus({preventScroll:true});
+      }
+    });
+  }
+
 
   vaultPinMedia=window.matchMedia('(max-width: 820px)');
   const applyMode=()=>setVaultEntryMode(vaultPinMedia.matches?'pin':'text');
@@ -136,7 +178,8 @@ function installPinRecoveryUi() {
         <button id="resetLocalVaultBtn" class="btn danger full" type="button">Recriar acesso local</button>
         <small>Apaga somente o cofre local deste navegador. Não apaga o computador nem backups externos.</small>
       </div>`);
-    unlockBox.appendChild(actions);
+    const slot=$('#vaultRecoverySlot');
+    (slot||unlockBox).appendChild(actions);
   }
 
   const securityGrid = $('#page-security .two-col');
@@ -346,7 +389,16 @@ function wireEvents(){
   eventsWired = true;
   $('#desktopNav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)showPage(b.dataset.page);});
   $('#drawerNav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)showPage(b.dataset.page);});
-  $('#mobileNav').addEventListener('click',e=>{const b=e.target.closest('[data-mobile]');if(b)showPage(b.dataset.mobile);});
+  $('#mobileNav').addEventListener('click',e=>{
+    const more=e.target.closest('[data-mobile-more]');
+    if(more){
+      openMobileDrawer();
+      more.setAttribute('aria-expanded','true');
+      return;
+    }
+    const b=e.target.closest('[data-mobile]');
+    if(b)showPage(b.dataset.mobile);
+  });
   if (typeof wireWalliShareEvents === 'function') wireWalliShareEvents();
   $('#sidebarToggle').addEventListener('click',()=>{
     sidebarPreference=!document.documentElement.classList.contains('sidebar-collapsed');
@@ -359,6 +411,7 @@ function wireEvents(){
   $('#mobileDrawer').addEventListener('close',()=>{
     $('#mobileDrawer').classList.remove('open');
     $('#mobileMenuBtn')?.setAttribute('aria-expanded','false');
+    $('#mobileNav [data-mobile-more]')?.setAttribute('aria-expanded','false');
   });
   $('#quickAddBtn').addEventListener('click',()=>$('#quickDialog').showModal());
   document.addEventListener('click',e=>{
@@ -382,7 +435,7 @@ function wireEvents(){
     const b=e.target.closest('[data-quick]');
     if(!b)return;
     $('#quickDialog').close();
-    ({bill:openBillForm,income:openIncomeForm,market:openMarketForm,goal:openGoalForm})[b.dataset.quick]?.();
+    ({bill:openBillForm,income:openIncomeForm,goal:openGoalForm})[b.dataset.quick]?.();
   });
   $('#newBillBtn').addEventListener('click',()=>openBillForm()); $('#newIncomeBtn').addEventListener('click',openIncomeForm); $('#newMarketBtn').addEventListener('click',()=>openMarketForm()); $('#newGoalBtn').addEventListener('click',openGoalForm);
   $('#kpiGrid').addEventListener('click',e=>{if(e.target.closest('[data-update-balance]'))openAccountBalanceForm();});
@@ -768,6 +821,10 @@ async function initVaultUi() {
     togglePin.addEventListener('click',()=>{
       const input=$('#unlockPassphrase');
       const show=input.type==='password';
+      if(show && $('#vaultUnlock')?.classList.contains('pin-entry-mode')){
+        // Mostrar a credencial é uma ação explícita dentro das opções recolhidas.
+        setVaultEntryMode('text');
+      }
       input.type=show?'text':'password';
       const label=togglePin.querySelector('span:last-child');
       if(label)label.textContent=show?'Ocultar PIN':'Mostrar PIN';

@@ -26,7 +26,7 @@
 <body>
   <div id="vaultScreen" class="vault-screen">
     <div class="vault-card">
-      <div class="brand brand-large vault-brand"><span class="brand-mark" aria-hidden="true"></span><div><strong>Conta de Casa</strong><small>Suas finanças em casa · cofre privado</small></div></div>
+      <div class="brand brand-large vault-brand"><span class="brand-mark" aria-hidden="true"></span><div><strong>Conta de Casa</strong><small>As tuas finanças em segurança</small></div></div>
       <div id="vaultCreate">
         <h1>Criar cofre local</h1>
         <p>Este cofre começa vazio. Defina uma palavra-passe ou PIN com pelo menos 8 caracteres. A credencial não é guardada; serve apenas para derivar a chave que cifra os dados neste navegador.</p>
@@ -37,16 +37,16 @@
       <div id="vaultUnlock" hidden>
         <div class="vault-unlock-intro">
           <span class="vault-lock-badge" aria-hidden="true"></span>
-          <p class="vault-eyebrow">Acesso seguro</p>
+          <p class="vault-eyebrow">Cofre privado</p>
           <h1>Introduza o seu PIN</h1>
-          <p id="vaultUnlockHint">Cofre local encriptado. A chave permanece apenas durante esta sessão.</p>
+          <p id="vaultUnlockHint">As tuas finanças em segurança. Introduz o PIN deste dispositivo.</p>
         </div>
         <label class="vault-unlock-input-label">Palavra-passe/PIN
-          <input id="unlockPassphrase" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" aria-describedby="vaultUnlockHint" placeholder="○ ○ ○ ○ ○ ○ ○ ○" />
+          <input id="unlockPassphrase" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" aria-describedby="vaultUnlockHint" aria-label="PIN ou palavra-passe do cofre" />
         </label>
         <div id="vaultPinVisual" class="cdc-pin-visual" aria-hidden="true">
           <span class="cdc-pin-pips"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-          <small>Introdução protegida</small>
+          <small id="vaultPinProgressText">Introdução protegida</small>
         </div>
         <div id="vaultPinPad" class="vault-pin-pad" aria-label="Teclado numérico do PIN">
           <div class="vault-keypad">
@@ -65,7 +65,14 @@
           </div>
         </div>
         <button id="unlockVaultBtn" class="btn primary full vault-enter-btn"><span class="vault-enter-label">Entrar</span><span class="vault-enter-arrow" aria-hidden="true"></span></button>
-        <button id="vaultKeyboardModeToggle" class="btn secondary full vault-keyboard-toggle" type="button"><span class="vault-keyboard-icon" aria-hidden="true"></span><span class="vault-keyboard-label">Usar palavra-passe</span></button>
+        <div class="vault-access-options">
+          <button id="vaultOptionsToggle" class="vault-options-toggle" type="button" aria-expanded="false" aria-controls="vaultOptionsPanel">Opções de acesso <span aria-hidden="true">⌄</span></button>
+          <div id="vaultOptionsPanel" class="vault-options-panel" hidden>
+            <button id="vaultKeyboardModeToggle" class="btn secondary full vault-keyboard-toggle" type="button"><span class="vault-keyboard-icon" aria-hidden="true"></span><span class="vault-keyboard-label">Usar palavra-passe</span></button>
+            <div id="vaultRecoverySlot"></div>
+            <button id="vaultImportFromOptions" class="vault-option-import" type="button" aria-expanded="false" aria-controls="vaultTransferPanel">Importar cofre cifrado</button>
+          </div>
+        </div>
       </div>
 
       <div class="vault-transfer">
@@ -214,7 +221,7 @@
         <div class="two-col cdc-plan-workspace"><article class="panel cdc-plan-account-card"><div class="panel-head"><div><h2>Atualizar saldo e orçamento</h2><p>O saldo atual representa o saldo real da sua conta; o saldo inicial serve apenas para conciliação dos registos do mês.</p></div></div><form id="monthPlanForm" class="form-grid"><label>Saldo atual da conta<input id="accountBalance" inputmode="decimal" placeholder="0,00" autocomplete="off" /><small>Copie o saldo disponível mostrado pelo seu banco. A aplicação não acede automaticamente à conta bancária.</small></label><div id="accountBalanceInfo" class="account-balance-info" aria-live="polite"></div><label>Saldo inicial do mês<input id="openingBalance" inputmode="decimal" placeholder="0,00" /></label><label>Orçamento do mês<input id="monthlyBudget" inputmode="decimal" placeholder="0,00" /></label><button class="btn primary" type="submit">Guardar planeamento</button></form></article><article class="panel"><div class="panel-head"><div><h2>Rendimentos recebidos</h2><p>Salários, apoios e outras entradas deste mês. Consulta cada movimento abaixo.</p></div><button id="newIncomeBtn" class="btn secondary">+ Rendimento</button></div><div id="incomeList" class="stack-list"></div></article></div>
         </section>
 
-      <section id="page-market" class="page">
+      <section id="page-market" class="retired-page" hidden aria-hidden="true" data-retired="true">
         <div class="cdc-page-overview" aria-label="Orientação da área">
           <div class="cdc-page-overview-copy">
             <p class="cdc-overview-eyebrow">Lista de compras</p>
@@ -579,7 +586,7 @@
         <h2 id="quickDialogTitle">Adicionar</h2>
         <button class="icon-btn dialog-close" type="button" data-close-quick-dialog aria-label="Fechar janela">×</button>
       </div>
-      <div class="quick-grid"><button type="button" data-quick="bill">Fatura</button><button type="button" data-quick="income">Rendimento</button><button type="button" data-quick="market">Mercado</button><button type="button" data-quick="goal">Objetivo</button></div>
+      <div class="quick-grid"><button type="button" data-quick="bill">Fatura</button><button type="button" data-quick="income">Rendimento</button><button type="button" data-quick="goal">Objetivo</button></div>
     </div>
   </dialog>
 

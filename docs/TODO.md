@@ -1,5 +1,33 @@
 # TODO — Conta de Casa
 
+## Revisão final para publicação (01/11/2026)
+
+- [x] Corrigir dock móvel para Início, Faturas, Plano, Relatórios e Mais.
+- [x] Corrigir visibilidade do terceiro separador e ligação acessível de Mais ao painel existente.
+- [x] Invalidar cache dos scripts principais e da shell móvel em conjunto.
+- [x] Acrescentar contratos de regressão para PIN único, Mercado retirado e navegação de cinco destinos.
+- [ ] Confirmar todas as execuções de CI e TypeScript da proposta.
+- [ ] Validar ecrã PIN, navegação, abertura de opções e recuperação no Safari/iPhone real.
+- [ ] Verificar visual em modo claro, escuro, alto contraste e movimento reduzido.
+- [ ] Testar importação/restauro num cofre fictício antes de uma migração de dados pessoais.
+- [ ] Só remover scripts legados de compras após auditoria de dependências e dados históricos.
+
+
+## PIN aprovado e desativação de Mercado (01/11/2026)
+
+- [x] Aplicar aparência escura aprovada ao desbloqueio móvel e manter um único indicador do PIN.
+- [x] Recolher opções de palavra-passe, mostrar PIN, alteração, recuperação e transferência sem remover ações.
+- [x] Adaptar teclado, foco, responsive, movimento reduzido e alto contraste.
+- [x] Remover Mercado de menus, dock, quick add e rota; manter dados antigos e contabilização.
+- [x] Atualizar os contratos de navegação e revisão de cache do site.
+- [x] Adicionar testes de integridade do cofre e desativação de Mercado.
+- [ ] Concluir CI e TypeScript, construção e revisão da proposta.
+- [ ] Validar com dados fictícios no iPhone real: PIN, palavra-passe, alteração e recuperação sem perdas.
+- [ ] Confirmar que a navegação e os relatórios não encaminham para Mercado; validar o histórico.
+- [ ] Auditar dependências e criar migração separada antes de remover elementos legados.
+- [ ] Só integrar e publicar após QA e aprovação do visual final.
+
+
 ## Correções solicitadas em capturas do iPhone (01/11/2026)
 
 - [x] Separar automaticamente receitas menos despesas do saldo bancário manual.
