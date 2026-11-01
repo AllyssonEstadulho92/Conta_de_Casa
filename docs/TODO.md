@@ -1,5 +1,20 @@
 # TODO — Conta de Casa
 
+## Revisão transversal de finanças pessoais e apresentação (01/11/2026)
+
+- [x] Confirmar a base real da aplicação, dependências críticas e PRs abertas.
+- [x] Distinguir projeção, saldo atual, gasto confirmado e contas ainda por pagar no Plano.
+- [x] Aproximar o orçamento e os próximos vencimentos da primeira leitura, mantendo o formulário único.
+- [x] Agrupar notificações existentes e incluir faturas a vencer entre um e sete dias.
+- [x] Aperfeiçoar transição hambúrguer/X sem duplicar a lógica do menu.
+- [x] Introduzir feedback visual não persistente do PIN e preservar o modo palavra-passe.
+- [x] Atualizar chaves de cache e adicionar contrato de regressão.
+- [ ] Confirmar suite CI, TypeScript e compilação Pages.
+- [ ] Validar no iPhone os pontos do PIN, os alertas, o menu e a ordem do Plano com dados fictícios.
+- [ ] Avaliar futuramente acessibilidade, contraste, notificação sem rede e tempo de resposta em dispositivo real.
+- [ ] Integrar separadamente e testar PRs #223 e #224. Não alterar a privacidade do alojamento sem plano de migração.
+
+
 ## Reformulação visual linear e Plano Mensal (01/11/2026)
 
 - [x] Auditar as 11 páginas existentes, os controlos, as camadas CSS e os formulários.
