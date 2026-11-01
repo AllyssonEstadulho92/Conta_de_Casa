@@ -50,7 +50,7 @@ assert.match(b['#planningProjection'],/preço estimado/);
 assert.match(b['#planningKpis'],/preço estimado/);
 assert.match(b['#planningProjection'],/data-money/);
 
-const menuCss=fs.readFileSync('mobile-menu-toggle.css','utf8');
+const shell=fs.readFileSync('v76-mobile-shell.css','utf8');
 assert.match(shell,/html:has\(#mobileDrawer\[open\]\) #mobileMenuBtn/);
 assert.match(shell,/visibility:hidden!important/);
 assert.match(shell,/pointer-events:none!important/);
@@ -58,7 +58,7 @@ const menuJs=fs.readFileSync('mobile-menu-toggle.js','utf8');
 assert.match(menuJs,/function focusTrigger\(/);
 assert.match(menuJs,/function focusClose\(/);
 assert.match(menuJs,/closeButton\.addEventListener\('click'/);
-const shell=fs.readFileSync('v76-mobile-shell.css','utf8');
+
 assert.match(shell,/76-monthly-result-and-menu-fix1/);
 assert.match(shell,/cdc-plan-projection-next/);
 const prepare=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
