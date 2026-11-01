@@ -1,5 +1,12 @@
 # Decisões Técnicas — Conta de Casa
 
+## D-160 — resultado dos movimentos não é saldo bancário (01/11/2026)
+
+Decisão: apresentar no Plano o resultado automático das receitas menos despesas registadas. Continuar a mostrar saldo bancário introduzido pelo utilizador como referência, mas **não** declarar que o resultado do mês corresponde ao dinheiro efetivo no banco quando falta conciliação. Não descontar pagamentos concluídos duas vezes. Só destacar saldo projetado após contas pendentes quando existirem montantes por pagar.
+
+Decisão visual: quando o menu móvel estiver aberto, mostrar apenas o X do próprio painel e ocultar o botão de fundo até ao fecho real. Preferir CSS sobre novo controlador, preservando interação por teclado, gestos e regras de acessibilidade.
+
+
 ## D-160 — leitura financeira sem dupla subtração e UX coerente (01/11/2026)
 
 Decisão: a prioridade visual do Plano é mostrar o **saldo projetado depois das faturas em aberto** e distinguir este valor do saldo bancário atual e do orçamento restante. Evitar expressões como «sobra real» quando o ponto de partida é estimado ou existem movimentos futuros ainda não registados. A despesa realizada (`cashSpent`) é apenas informativa, não volta a ser descontada de um saldo bancário atual introduzido manualmente.
