@@ -399,6 +399,24 @@ function wireEvents(){
     if(window.matchMedia?.('(max-width: 820px)')?.matches)setBillFiltersOpen(false);
   };
   $('#billClearFilters')?.addEventListener('click',clearBillFilters);
+  $('#debtAccountsFilters')?.addEventListener('click',e=>{
+    const chip=e.target.closest('[data-debt-filter]');
+    if(!chip)return;
+    const filter=chip.dataset.debtFilter;
+    if(!['all','paid','partial','unpaid','overdue','future','invalid'].includes(filter))return;
+    debtAccountsFilter=filter;
+    debtAccountsLimit=24;
+    renderDebtAccounts();
+  });
+  $('#debtAccountsList')?.addEventListener('click',e=>{
+    if(e.target.closest('[data-debt-more]')){
+      debtAccountsLimit+=24;
+      renderDebtAccounts();
+      return;
+    }
+    const row=e.target.closest('[data-debt-bill]');
+    if(row)openBillDetail(row.dataset.debtBill);
+  });
   $('#billsList').addEventListener('click',async e=>{
     const clear=e.target.closest('[data-clear-bill-filters]');
     if(clear){clearBillFilters();return;}
