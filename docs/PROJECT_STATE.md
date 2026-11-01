@@ -1,5 +1,16 @@
 # Estado do Projeto — Conta de Casa
 
+## Experiência visual linear e redesenho do Plano Mensal (01/11/2026)
+
+**Estado da implementação:** branch `ui/linear-page-experience-20261101`, baseada na main após a PR #226. As 11 vistas continuam com os seus componentes e controlos, mas recebem um guia contextual curto e um percurso de três passos. Relatórios mantém os KPIs e a carteira de dívidas introduzidos em #226.
+
+**Plano Mensal:** redesenhado por pedido explícito do utilizador. Acrescenta cartões de saldo de referência, receitas recebidas, despesas pagas e contas em aberto, além do saldo projetado após obrigações do mês e de uma lista de até cinco contas vencidas/a vencer, incluindo outros meses. O orçamento visual existente (anel, valores e categorias), a navegação mensal e o formulário `monthPlanForm` permanecem canónicos, sem duplicações. O saldo real é sempre identificado como manual ou estimado. A lista de vencimentos não altera valores. O visual adapta-se a iPhone, tablet e computador.
+
+**Atenção a dados:** sem alterações ao PIN, cifra, `STATE_VERSION`, IndexedDB, faturas, sincronização, scanner, QR e saldos guardados. Não foram lidos valores reais do utilizador. A área de eliminação foi isolada visualmente, mantendo o mesmo botão e handler. A PR #223 (faturas) e a #224 (privacidade) permanecem independentes.
+
+**QA pendente:** CI, Typescript, build Pages e ensaio físico no Safari/iPhone para verificar a sequência, orçamento, formulários, legibilidade, modo discreto e atualização da PWA.
+
+
 **Atualização visual solicitada em 01/11/2026:** o relatório foi reorganizado para corresponder à referência aprovada, mantendo euros e dados reais do cofre. Passou a ter quatro indicadores superiores, carteira do mês, carteira global, distribuição gráfica dos estados, projeção de saldo e lista detalhada de faturas com filtros, navegação para os detalhes e paginação de 24 em 24 registos. A separação entre atrasos e contas sem pagamentos é explicitada para evitar contagens erradas. A aparência adapta-se a desktop, tablet e iPhone. Fatura, data, valor e estado são derivados do cofre, sem exemplos fictícios e sem novos serviços de rede. Mantém-se o bloqueio de dados pessoais do modo discreto. PR #226 continua sujeita às verificações CI e validação no iPhone.\n\n
 ## Estatísticas de dívidas e saldo remanescente (31/10/2026, proposta)
 
