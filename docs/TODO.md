@@ -1,5 +1,20 @@
 # TODO — Conta de Casa
 
+## PIN aprovado e desativação de Mercado (01/11/2026)
+
+- [x] Aplicar aparência escura aprovada ao desbloqueio móvel e manter um único indicador do PIN.
+- [x] Recolher opções de palavra-passe, mostrar PIN, alteração, recuperação e transferência sem remover ações.
+- [x] Adaptar teclado, foco, responsive, movimento reduzido e alto contraste.
+- [x] Remover Mercado de menus, dock, quick add e rota; manter dados antigos e contabilização.
+- [x] Atualizar os contratos de navegação e revisão de cache do site.
+- [x] Adicionar testes de integridade do cofre e desativação de Mercado.
+- [ ] Concluir CI e TypeScript, construção e revisão da proposta.
+- [ ] Validar com dados fictícios no iPhone real: PIN, palavra-passe, alteração e recuperação sem perdas.
+- [ ] Confirmar que a navegação e os relatórios não encaminham para Mercado; validar o histórico.
+- [ ] Auditar dependências e criar migração separada antes de remover elementos legados.
+- [ ] Só integrar e publicar após QA e aprovação do visual final.
+
+
 ## Correções solicitadas em capturas do iPhone (01/11/2026)
 
 - [x] Separar automaticamente receitas menos despesas do saldo bancário manual.
