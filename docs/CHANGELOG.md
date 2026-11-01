@@ -1,5 +1,16 @@
 # Changelog Técnico — Conta de Casa
 
+## Por publicar — Plano Mensal reorganizado e linguagem visual linear (01/11/2026)
+
+- Padronizados títulos, explicações e sequências de utilização para as onze áreas.
+- Plano Mensal com resumo do saldo, receitas recebidas, despesas pagas, contas em aberto e projeção após obrigações mensais.
+- Lista de até cinco contas por pagar, com vencimentos de vários meses e ligação à lista de faturas.
+- Orçamento visual existente, campos de saldo, formulários e rendimentos preservados.
+- Nova apresentação adaptada a desktop, tablet e smartphone e ação de eliminação destacada.
+- Revisões de cache de `render.js`, `v76-mobile-shell.css` e service worker atualizadas para evitar mostrar a interface anterior.
+- Sem migração de dados nem alterações a cifras, PIN, faturas, saldos guardados ou sincronização.
+
+
 **Aperfeiçoamento de apresentação solicitado em 01/11/2026:** Relatórios reorganizados em cartões superiores, âmbitos de dívida, gráfico de distribuição, saldo remanescente e todas as contas com filtros (pagas, parciais, sem pagamentos, em atraso, a vencer e por corrigir), expansão gradual e abertura dos detalhes. Usa os valores reais cifrados no cofre, sem dados financeiros no código público. Sem migração de dados.\n\n
 ## Por publicar — estatísticas de dívidas e saldo (31/10/2026)
 
