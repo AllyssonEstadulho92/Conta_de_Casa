@@ -108,4 +108,32 @@ for(const id of ['debtMonthSummary','debtAllSummary','debtBalanceSummary']){
 }
 assert.match(css,/\.debt-stats-grid/);
 assert.match(css,/@media\(max-width:600px\)/);
+
+// Os estados financeiros devem ser coerentes nas vistas filtradas.
+// Atrasos são subconjunto das faturas não liquidadas e podem conter pagamentos parciais.
+vm.runInContext(render,ctx);
+const nowExpr='new Date(2026,9,31,12)';
+assert.equal(vm.runInContext(`debtAccountFilterMatches(appState.bills[0],'paid',${nowExpr})`,ctx),true);
+assert.equal(vm.runInContext(`debtAccountFilterMatches(appState.bills[1],'partial',${nowExpr})`,ctx),true);
+assert.equal(vm.runInContext(`debtAccountFilterMatches(appState.bills[1],'overdue',${nowExpr})`,ctx),true);
+assert.equal(vm.runInContext(`debtAccountFilterMatches(appState.bills[3],'future',${nowExpr})`,ctx),true);
+assert.equal(vm.runInContext(`debtAccountFilterMatches(appState.bills[6],'invalid',${nowExpr})`,ctx),true);
+assert.equal(vm.runInContext(`debtAccountFilterMatches(appState.bills[9],'invalid',${nowExpr})`,ctx),true);
+const safeRow=vm.runInContext(`debtAccountEntryHtml({...appState.bills[1],title:'<img src=x onerror=alert(1)>'},${nowExpr})`,ctx);
+assert.doesNotMatch(safeRow,/<img/);
+assert.match(safeRow,/&lt;img/);
+assert.match(safeRow,/data-debt-bill/);
+assert.match(render,/function renderDebtAccounts\(/);
+assert.match(render,/function renderDebtStatus\(/);
+assert.match(render,/const items=\[/);
+const events=fs.readFileSync('events.js','utf8');
+assert.match(events,/debtAccountsFilters/);
+assert.match(events,/debtAccountsList/);
+for(const id of ['debtAccountsFilters','debtAccountsList','debtStatusSummary','reportCards']){
+  assert.match(html,new RegExp('id="'+id+'"'));
+}
+assert.match(css,/debt-ledger-row/);
+assert.match(css,/debt-report-top-kpis/);
+assert.match(css,/money-hidden.*debt-ledger-row/);
+
 console.log('Estatísticas de dívidas e saldo: OK');
