@@ -1,5 +1,14 @@
 # Changelog Técnico — Conta de Casa
 
+## Em preparação — UI/UX aprovada para utilização pessoal (01/11/2026)
+
+- Desbloqueio com fundo escuro, indicadores únicos, teclado arredondado e opções de palavra-passe/alteração/recuperação recolhidas.
+- Mercado retirado dos menus e atalhos, mantendo o histórico cifrado e a sua contabilização.
+- Navegação inferior simplificada para Início, Faturas, Plano, Relatórios e Mais, corrigindo o separador que podia ficar invisível.
+- Revisões da PWA atualizadas para `core.js`, `render.js`, `events.js`, CSS móvel e service worker.
+- Sem alteração do cofre, PIN, saldos gravados, métodos de pagamento ou sincronização; Face ID não implementado.
+
+
 ## Por publicar — acesso privado e navegação simplificada (01/11/2026)
 
 - Ecrã de PIN renovado em estilo escuro com marca centrada, linha única de indicadores e teclado numérico mais espaçado.
