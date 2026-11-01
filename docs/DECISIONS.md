@@ -1,5 +1,12 @@
 # Decisões Técnicas — Conta de Casa
 
+## D-161 — cofre escuro com opções recolhidas e Mercado fora da navegação (01/11/2026)
+
+Aprovar um ecrã de acesso discreto baseado no protótipo escolhido: indicadores únicos do PIN, teclado numérico e ações secundárias recolhidas. Preservar palavra-passe, visualização consciente de credencial, alteração de PIN, recuperação e importação cifrada. Não apresentar Face ID funcional sem implementação segura, disponibilidade real e testes de integração com as chaves do cofre.
+
+Retirar a funcionalidade Mercado do percurso normal do utilizador por ter erros, sem apagar registos e sem retirar as compras antigas da contabilidade. A desativação é progressiva: remover rota e atalhos, ocultar a estrutura legada e manter os scripts e IDs requeridos pelos listeners até um teste de migração. Esta decisão minimiza o risco de perda de dados e diferenças inesperadas nos saldos.
+
+
 ## D-160 — resultado dos movimentos não é saldo bancário (01/11/2026)
 
 Decisão: apresentar no Plano o resultado automático das receitas menos despesas registadas. Continuar a mostrar saldo bancário introduzido pelo utilizador como referência, mas **não** declarar que o resultado do mês corresponde ao dinheiro efetivo no banco quando falta conciliação. Não descontar pagamentos concluídos duas vezes. Só destacar saldo projetado após contas pendentes quando existirem montantes por pagar.
