@@ -1,5 +1,12 @@
 # Arquitetura — Conta de Casa
 
+## Resultado mensal automático e X único do menu (01/11/2026)
+
+A função pura `planningMonthlyResult(n)` apresenta o saldo líquido dos movimentos do mês através de `sumCents([n.incomes,-n.cashSpent])`, reaproveitando `monthNumbers` e não a referência bancária manual. Não altera persistência nem contabilização existente. O ecrã do Plano usa uma medida derivada de receitas e despesas registadas e identifica a natureza estimada de compras sem preço real. O saldo bancário informado e o saldo `ledgerCurrent` permanecem separados; quando não há dívida em aberto não se duplica `n.projected` como se fosse novo dinheiro.
+
+O menu usa o controlador existente `mobile-menu-toggle.js`, mantendo o X de `#drawerCloseBtn` no diálogo. Em ecrãs móveis, CSS `:has(#mobileDrawer[open]) #mobileMenuBtn` oculta o ícone subjacente até o diálogo efetivamente fechar. Não se toca nas transições, gestão de foco, `aria-expanded`, gestos, abertura ou encerramento do cofre. A revisão de cache é atualizada para o Safari/PWA.
+
+
 ## Contratos UI/UX financeiros e interação do cofre (01/11/2026)
 
 A página Plano Mensal agora ordena `planningProjection`, `planningKpis`, orçamento, `planningUpcomingList` e `monthPlanForm`. `ensurePlanningShell` do `v75-architecture.js` insere o orçamento após o resumo se disponível; o formulário existente permanece o único ponto de gravação. `renderPlanningOverview` lê apenas `monthNumbers()` e distingue o saldo atual (`current`), o dinheiro efetivamente gasto (`cashSpent`), o ainda devido no mês (`outstanding`) e a projeção (`projected=current-outstanding`). Despesas pagas não são subtraídas novamente do saldo informado manualmente.
