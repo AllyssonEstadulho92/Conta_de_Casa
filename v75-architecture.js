@@ -339,7 +339,8 @@
       rootNode=document.createElement('section');
       rootNode.id='cdcPlanningOverview';
       rootNode.className='cdc-planning-overview v75-planning-overview';
-      tabs.insertAdjacentElement('afterend',rootNode);
+      const summary=q('.cdc-plan-summary',page);
+      (summary||tabs).insertAdjacentElement('afterend',rootNode);
     }
     return rootNode;
   }
