@@ -192,7 +192,7 @@ try {
   assert.match(index, /app-update\.js\?v=76-version-alignment1/);
   assert.match(index, /market-brand\.css\?v=74-ui1/);
   assert.match(index, /market-shopping-focus\.css\?v=74-shopping2/);
-  assert.match(index, /mobile-menu-toggle\.css\?v=76-monthly-cashflow1/);
+  assert.match(index, /mobile-menu-toggle\.css\?v=73-menu8/);
   assert.match(index, /v75-architecture\.css\?v=76-personal-finance-ux1/);
   assert.match(index, /v76-planning-more\.css\?v=76-planning-more1/);
   assert.match(index, /v75-header-refinement\.css\?v=75-header2/);
@@ -219,8 +219,8 @@ try {
   assert.equal(distWebManifest.background_color,'#f4f8f8');
   assert.equal(distWebManifest.theme_color,'#f4f8f8');
   assert.ok(index.indexOf('sync.js?v=76') < index.indexOf('sync-conflict-policy.js?v=74-ui1'));
-  assert.ok(index.indexOf('market-shopping-focus.js?v=74-shopping2') < index.indexOf('mobile-menu-toggle.js?v=76-monthly-cashflow1'));
-  assert.ok(index.indexOf('mobile-menu-toggle.js?v=76-monthly-cashflow1') < index.indexOf('v75-architecture.js?v=76-personal-finance-ux1'));
+  assert.ok(index.indexOf('market-shopping-focus.js?v=74-shopping2') < index.indexOf('mobile-menu-toggle.js?v=73-menu8'));
+  assert.ok(index.indexOf('mobile-menu-toggle.js?v=73-menu8') < index.indexOf('v75-architecture.js?v=76-personal-finance-ux1'));
   assert.ok(index.indexOf('v75-architecture.js?v=76-personal-finance-ux1') < index.indexOf('v75-stability.js?v=75-stability1'));
   for(const asset of ['app-update.css','v76-version-about.css','app-update.js','design-system.css','v64-runtime.js','market-shopping-focus.css','market-shopping-focus.js','mobile-menu-toggle.css','mobile-menu-toggle.js','v75-architecture.css','v76-planning-more.css','v75-architecture.js','v75-stability.css','v75-stability.js','v75-layout-polish.css','v75-drawer-theme.css','release-manifest.json'])assert.ok(fs.existsSync(path.join(dist,asset)),`${asset} must exist in dist`);
   for(const retired of ['v74-experience.css','v74-experience.js','v75-market-featured.css','v75-market-featured.js'])assert.ok(!fs.existsSync(path.join(dist,retired)),`${retired} must not exist in dist`);
