@@ -59,6 +59,16 @@ function setVaultEntryMode(mode = 'pin') {
   if(!pinMode) requestAnimationFrame(()=>input.focus({preventScroll:true}));
 }
 
+// Indicador apenas visual: não regista nem transmite a credencial.
+function updateVaultPinVisual(){
+  const input=$('#unlockPassphrase');
+  const visual=$('#vaultPinVisual');
+  if(!input||!visual)return;
+  const n=Math.min(8,input.value.length);
+  const dots=visual.querySelectorAll('.cdc-pin-pips i');
+  dots.forEach((dot,index)=>dot.classList.toggle('is-filled',index<n));
+}
+
 function wireVaultPinPad() {
   if(vaultPinPadWired) return;
   const pad=$('#vaultPinPad');
@@ -67,6 +77,8 @@ function wireVaultPinPad() {
   const unlock=$('#vaultUnlock');
   if(!pad||!input||!toggle||!unlock) return;
   vaultPinPadWired=true;
+  input.addEventListener('input',updateVaultPinVisual);
+  updateVaultPinVisual();
 
   pad.addEventListener('click',e=>{
     const digit=e.target.closest('[data-pin-key]');
