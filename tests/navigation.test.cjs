@@ -14,7 +14,7 @@ const index = fs.readFileSync(path.join(ROOT, 'index.html'),'utf8');
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'),'utf8');
 assert.match(sw,/const CACHE = 'conta-de-casa-public-v76-build';/,'PWA cache invalidation must follow deterministic build identity.');
 
-for (const group of ['Principal','Finanças','Compras','Análise','Sistema']) {
+for (const group of ['Principal','Finanças','Análise','Sistema']) {
   assert.match(core,new RegExp(`label:'${group}'`),`navigation group ${group} must exist`);
 }
 
@@ -62,6 +62,7 @@ const metaMatch = core.match(/const PAGE_META = Object\.freeze\(\{([\s\S]*?)\n\}
 assert.ok(metaMatch, 'PAGE_META must be statically discoverable for integrity audit');
 const metaRoutes = [...metaMatch[1].matchAll(/^\s{2}([a-z][a-z0-9-]*):\s*\{/gm)].map(match=>match[1]).sort();
 const pageRoutes = [...index.matchAll(/id="page-([a-z][a-z0-9-]*)"\s+class="page(?:\s|\")/g)].map(match=>match[1]).sort();
+assert.match(index, /id="page-market" class="retired-page" hidden/, 'retired Market must not be routed');
 const renderRoutes = [...render.matchAll(/if \(page==='([a-z][a-z0-9-]*)'\) render[A-Za-z0-9_]+\(\);/g)].map(match=>match[1]).sort();
 
 assert.deepEqual(pageRoutes, metaRoutes, 'every PAGE_META route must have exactly one page section and no orphan pages may exist');
@@ -91,9 +92,9 @@ try {
   assert.match(builtIndex, /<meta name="app-build-id" content="(?:[0-9a-f]{7}|local)"\s*\/>/);
   assert.match(builtIndex, /v76-modern-ui\.css\?v=76-visual-audit1/);
   assert.match(builtIndex, /v76-product-pages\.css\?v=76-add-product-prototype2/);
-  assert.match(builtIndex, /render\.js\?v=76-monthly-cashflow1/);
+  assert.match(builtIndex, /render\.js\?v=76-ux-retired-market3/);
   assert.match(builtIndex, /finance\.js\?v=76-debt-statistics1/);
-  assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-monthly-cashflow1/);
+  assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-ux-retired-market3/);
   assert.match(builtIndex, /v75-usability\.css\?v=76-auth-viewport-fit1/);
 
   const builtIds = [...builtIndex.matchAll(/\sid="([^"]+)"/g)].map(match=>match[1]);
