@@ -90,9 +90,9 @@ assert.match(brandingJs,/marketProductImages\s*=\s*'verified'/);
 assert.doesNotMatch(brandingJs,/appState|estimatedCents|actualCents|saveState|commit\(/,'branding must not mutate financial state');
 
 assert.match(planningMore,/76-planning-more1/);
-assert.match(architectureCss,/\.mobile-nav \.nav-btn,html\.cdc-v75 \.mobile-nav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/,'Mercado must remain visible in the primary navigation');
+assert.match(index,/id="page-market" class="retired-page" hidden/,'Mercado deve permanecer oculto na interface');
 assert.match(architectureCss,/\.cdc-product-grid[\s\S]*repeat\(3,minmax\(0,1fr\)\)/,'current market grid must remain compact');
-assert.match(architectureJs,/market:\['Mercado','Compras'\]/);
+assert.doesNotMatch(architectureJs,/market:\['Mercado','Compras'\]/);
 assert.doesNotMatch(architectureJs,/root\.CDCV74/,'current architecture must not call the retired v74 runtime');
 assert.doesNotMatch(architectureJs,/saveState\(|commit\(|estimatedCents\s*=|actualCents\s*=/,'architecture overlay must not mutate market financial state');
 
