@@ -1,5 +1,21 @@
 # TODO — Conta de Casa
 
+## Reformulação visual linear e Plano Mensal (01/11/2026)
+
+- [x] Auditar as 11 páginas existentes, os controlos, as camadas CSS e os formulários.
+- [x] Acrescentar guias breves e sequência de três passos, mantendo os identificadores e listeners.
+- [x] Redesenhar Plano Mensal com cartões para saldo, rendimentos, despesas e dívida do mês.
+- [x] Acrescentar saldo projetado com distinção entre referência manual e estimativa.
+- [x] Apresentar até cinco próximas contas sem esconder vencimentos de outros meses.
+- [x] Manter orçamento visual, formulário único, lista de rendimentos e funções de registo.
+- [x] Reforçar o aviso visual da ação de eliminação local.
+- [x] Atualizar revisões da PWA e contratos estáticos de regressão.
+- [ ] Confirmar CI, TypeScript e publicação controlada da nova apresentação.
+- [ ] Testar em Safari/iPhone e computador, inclusive modo discreto, teclado, zoom e layout.
+- [ ] Rever compatibilidade com PR #223 e #224 antes da sua integração.
+- [ ] Continuar consolidação de CSS legado apenas após QA físico.
+
+
 - [x] Reorganizar Relatórios com quatro indicadores, estado das contas, saldo e projeção e tabela de faturas com filtros.\n- [x] Criar visual responsivo inspirado na referência, sem copiar valores nem moeda fictícia.\n- [x] Acrescentar testes estáticos, filtros e escape das descrições.\n- [ ] Validar regressões completas e distribuição GitHub Pages na atualização do dia 01/11/2026.\n- [ ] Testar no iPhone os filtros, contas e modo discreto com dados fictícios.\n\n
 ## Estatísticas de dívidas e saldo (31/10/2026)
 
