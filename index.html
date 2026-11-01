@@ -37,16 +37,16 @@
       <div id="vaultUnlock" hidden>
         <div class="vault-unlock-intro">
           <span class="vault-lock-badge" aria-hidden="true"></span>
-          <p class="vault-eyebrow">Acesso seguro</p>
+          <p class="vault-eyebrow">Cofre privado</p>
           <h1>Introduza o seu PIN</h1>
-          <p id="vaultUnlockHint">Cofre local encriptado. A chave permanece apenas durante esta sessão.</p>
+          <p id="vaultUnlockHint">As tuas finanças em segurança. Introduz o PIN deste dispositivo.</p>
         </div>
         <label class="vault-unlock-input-label">Palavra-passe/PIN
-          <input id="unlockPassphrase" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" aria-describedby="vaultUnlockHint" placeholder="○ ○ ○ ○ ○ ○ ○ ○" />
+          <input id="unlockPassphrase" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" aria-describedby="vaultUnlockHint" aria-label="PIN ou palavra-passe do cofre" />
         </label>
         <div id="vaultPinVisual" class="cdc-pin-visual" aria-hidden="true">
           <span class="cdc-pin-pips"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-          <small>Introdução protegida</small>
+          <small id="vaultPinProgressText">Introdução protegida</small>
         </div>
         <div id="vaultPinPad" class="vault-pin-pad" aria-label="Teclado numérico do PIN">
           <div class="vault-keypad">
@@ -65,7 +65,14 @@
           </div>
         </div>
         <button id="unlockVaultBtn" class="btn primary full vault-enter-btn"><span class="vault-enter-label">Entrar</span><span class="vault-enter-arrow" aria-hidden="true"></span></button>
-        <button id="vaultKeyboardModeToggle" class="btn secondary full vault-keyboard-toggle" type="button"><span class="vault-keyboard-icon" aria-hidden="true"></span><span class="vault-keyboard-label">Usar palavra-passe</span></button>
+        <div class="vault-access-options">
+          <button id="vaultOptionsToggle" class="vault-options-toggle" type="button" aria-expanded="false" aria-controls="vaultOptionsPanel">Opções de acesso <span aria-hidden="true">⌄</span></button>
+          <div id="vaultOptionsPanel" class="vault-options-panel" hidden>
+            <button id="vaultKeyboardModeToggle" class="btn secondary full vault-keyboard-toggle" type="button"><span class="vault-keyboard-icon" aria-hidden="true"></span><span class="vault-keyboard-label">Usar palavra-passe</span></button>
+            <div id="vaultRecoverySlot"></div>
+            <button id="vaultImportFromOptions" class="vault-option-import" type="button" aria-expanded="false" aria-controls="vaultTransferPanel">Importar cofre cifrado</button>
+          </div>
+        </div>
       </div>
 
       <div class="vault-transfer">
