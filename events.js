@@ -51,7 +51,15 @@ function setVaultEntryMode(mode = 'pin') {
   box.classList.toggle('pin-entry-mode',pinMode);
   box.classList.toggle('text-entry-mode',!pinMode);
   input.readOnly=pinMode;
+  input.tabIndex=pinMode?-1:0;
   input.setAttribute('inputmode',pinMode?'none':'text');
+  // Ao regressar ao teclado numérico nunca conservar o PIN visível.
+  if(pinMode && input.type==='text'){
+    input.type='password';
+    const visibility=$('#togglePinVisibility');
+    const text=visibility?.querySelector('span:last-child');
+    if(text)text.textContent='Mostrar PIN';
+  }
   const label=toggle.querySelector('.vault-keyboard-label');
   if(label)label.textContent=pinMode?'Usar palavra-passe':'Usar teclado PIN';
   else toggle.textContent=pinMode?'Usar palavra-passe':'Usar teclado PIN';
@@ -99,6 +107,36 @@ function wireVaultPinPad() {
   toggle.addEventListener('click',()=>{
     setVaultEntryMode(unlock.classList.contains('pin-entry-mode')?'text':'pin');
   });
+  const optionsToggle=$('#vaultOptionsToggle');
+  const optionsPanel=$('#vaultOptionsPanel');
+  const importControl=$('#vaultImportFromOptions');
+  const screen=$('#vaultScreen');
+  if(optionsToggle && optionsPanel){
+    optionsToggle.addEventListener('click',()=>{
+      const opening=optionsPanel.hidden;
+      optionsPanel.hidden=!opening;
+      optionsToggle.setAttribute('aria-expanded',String(opening));
+      if(!opening){
+        screen?.classList.remove('vault-import-open');
+        importControl?.setAttribute('aria-expanded','false');
+        optionsToggle.focus({preventScroll:true});
+      }
+    });
+  }
+  if(importControl){
+    importControl.addEventListener('click',()=>{
+      const opening=!screen?.classList.contains('vault-import-open');
+      screen?.classList.toggle('vault-import-open',opening);
+      importControl.setAttribute('aria-expanded',String(opening));
+      if(opening){
+        const transfer=$('#vaultTransferPanel');
+        const toggleTransfer=$('#vaultTransferToggle');
+        if(transfer?.hidden)toggleTransfer?.click();
+        toggleTransfer?.focus({preventScroll:true});
+      }
+    });
+  }
+
 
   vaultPinMedia=window.matchMedia('(max-width: 820px)');
   const applyMode=()=>setVaultEntryMode(vaultPinMedia.matches?'pin':'text');
@@ -136,7 +174,8 @@ function installPinRecoveryUi() {
         <button id="resetLocalVaultBtn" class="btn danger full" type="button">Recriar acesso local</button>
         <small>Apaga somente o cofre local deste navegador. Não apaga o computador nem backups externos.</small>
       </div>`);
-    unlockBox.appendChild(actions);
+    const slot=$('#vaultRecoverySlot');
+    (slot||unlockBox).appendChild(actions);
   }
 
   const securityGrid = $('#page-security .two-col');
