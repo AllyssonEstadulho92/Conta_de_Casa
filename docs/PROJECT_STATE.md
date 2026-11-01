@@ -1,5 +1,16 @@
 # Estado do Projeto — Conta de Casa
 
+## Renovação visual aprovada do PIN e retirada de Mercado (01/11/2026)
+
+**Branch isolada:** `ui/approved-dark-vault-20261101`, baseada em `main` após a correção do saldo mensal (#229).
+
+**Intervenção:** a vista móvel de desbloqueio recebeu o design escuro aprovado: marca centrada, título e uma só fila de oito indicadores, teclado em três colunas com espaçamento e botão Entrar discreto. O campo de palavra-passe permanece funcional mas fica fora da apresentação do modo numérico. As funções de palavra-passe, mostrar/alterar PIN, ajuda e importação de backup ficam sob «Opções de acesso», com estados `aria-expanded` e acesso por teclado. A validação criptográfica, PIN mínimo de oito caracteres e recuperações existentes permanecem inalterados. A referência visual com Face ID não autoriza autenticação biométrica: não foi implementada nem prometida.
+
+**Mercado:** retirado de todos os menus principais e móveis, dos atalhos rápidos e do encaminhamento para o ecrã. `#page-market` continua no DOM como compatibilidade legada não navegável (`retired-page`, `hidden`, `aria-hidden`) para preservar os listeners antigos até a migração ser verificada. O histórico `appState.market` e a contabilização canónica das compras antigas **continuam intactos**, para não perder nem alterar valores dos meses anteriores, orçamentos, backups ou relatórios. Os scripts de suporte legados ainda estão no bundle para evitar falhas na arrancada; não há nova funcionalidade de Mercado para o utilizador.
+
+**QA necessário:** confirmar CI, TypeScript, construção de Pages, acesso por PIN e palavra-passe, esconder/mostrar, alterar, recuperação e importação; no Safari/iPhone verificar teclado, rotação, viewport pequeno, safe area, modo de contraste e mudança de tema. A navegação não deve expor Mercado; nenhum dado pessoal deve sair do cofre. A integração e publicação permanecem pendentes até validação.
+
+
 ## Correção do resultado financeiro e do menu móvel (01/11/2026)
 
 **Factos observados em capturas do iPhone:** o Plano Mensal apresentava exatamente 955,96 € tanto no saldo atual como na projeção, porque não existiam faturas pendentes a descontar; a interface não esclarecia o resultado das receitas menos despesas. O menu lateral mostrava dois X simultaneamente, um no cabeçalho de fundo e outro no painel.
