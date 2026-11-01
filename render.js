@@ -413,9 +413,35 @@ function renderCalendar() {
   setHTML('#calendarAgenda', monthBills.length?monthBills.map(b=>billRowHtml(b)).join(''):empty('Sem vencimentos neste mês.'));
 }
 
+function planningOverviewCard(label,value,kind,note) {
+  return `<article class="cdc-plan-kpi ${attr(kind)}"><span class="cdc-plan-kpi-label">${esc(label)}</span><strong data-money>${money(value)}</strong><small>${esc(note)}</small></article>`;
+}
+function renderPlanningOverview(n){
+  const items=[
+    ['Saldo de referência',n.current,'balance',n.hasAccountBalance?'Saldo informado por ti':'Estimado com os movimentos registados'],
+    ['Receitas recebidas',n.incomes,'income','Entradas registadas no mês'],
+    ['Despesas pagas',n.cashSpent,'spent','Pagamentos e compras efetivas'],
+    ['Contas em aberto',n.outstanding,'pending','Faturas do mês ainda por liquidar']
+  ];
+  setHTML('#planningKpis',items.map(row=>planningOverviewCard(...row)).join(''));
+  setHTML('#planningProjection',`<span class="cdc-plan-projection-copy"><strong>Saldo após pagar as contas do mês</strong><small>Projeção: saldo de referência menos obrigações em aberto deste mês. Não inclui receitas futuras.</small></span><strong class="cdc-plan-projection-value ${n.projected<0?'is-negative':''}" data-money>${money(n.projected)}</strong>`);
+}
+function renderPlanningUpcoming(){
+  const pending=activeUnpaidBills().slice().sort(compareBillsByDue).slice(0,5);
+  setHTML('#planningUpcomingList',pending.length?pending.map(b=>{
+    const days=billDaysUntil(b);
+    const label=!Number.isFinite(days)?'Data por confirmar':days<0?'Em atraso':days===0?'Vence hoje':`Em ${days} dia${days===1?'':'s'}`;
+    const kind=Number.isFinite(days)&&days<0?'overdue':days===0?'today':'pending';
+    const due=billDueDateKey(b);
+    return `<div class="cdc-plan-upcoming-row"><div class="cdc-plan-upcoming-item"><strong>${esc(b.title||'Fatura sem descrição')}</strong><small>${due?esc(fmtDate(due)):'Vencimento por confirmar'} · ${esc(label)}</small></div><span class="cdc-plan-upcoming-value ${attr(kind)}" data-money>${money(remainingForBill(b))}</span></div>`;
+  }).join(''):'<p class="cdc-plan-empty">Não existem contas por pagar registadas.</p>');
+}
+
 function renderPlanning() {
   const p=monthProfile();
   const n=monthNumbers();
+  renderPlanningOverview(n);
+  renderPlanningUpcoming();
   $('#accountBalance').value=Number.isSafeInteger(p.accountBalanceCents)?(p.accountBalanceCents/100).toFixed(2).replace('.',','):'';
   $('#openingBalance').value=p.openingBalanceCents===0?'':(p.openingBalanceCents/100).toFixed(2).replace('.',',');
   $('#monthlyBudget').value=p.budgetCents===0?'':(p.budgetCents/100).toFixed(2).replace('.',',');
