@@ -288,7 +288,34 @@
           </article>
         </div>
       </section>
-      <section id="page-reports" class="page"><div id="reportCards" class="kpi-grid"></div><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Por categoria</h2><p>Distribuição do mês.</p></div></div><div id="reportCategoryBars" class="bar-list"></div></article><article class="panel"><div class="panel-head"><div><h2>Últimos 6 meses</h2><p>Pagamentos e compras efetivas.</p></div></div><div id="monthlyTrend" class="trend-chart"></div></article></div></section>
+      <section id="page-reports" class="page">
+  <div class="debt-report-heading"><div><h2>Visão financeira da casa</h2><p>Receitas, despesas, dívidas e dinheiro remanescente do mês selecionado.</p></div><span class="debt-report-local-note">Dados do teu cofre local</span></div>
+  <div id="reportCards" class="debt-report-top-kpis"></div>
+  <article class="panel debt-report-panel" aria-labelledby="debtReportTitle">
+    <div class="panel-head"><div><h2 id="debtReportTitle">Dívidas e saldo remanescente</h2><p>Valores pagos, não pagos e a pagar, sem misturar pagamentos com vencimentos.</p></div></div>
+    <div class="debt-scope"><h3>Mês selecionado</h3><p>Contas com vencimento neste mês, mesmo que pagas antes.</p><div id="debtMonthSummary" aria-live="polite"></div></div>
+    <div class="debt-scope"><h3>Todas as contas registadas</h3><p>Inclui vencimentos antigos e futuros já registados. Não inclui contas canceladas ou arquivadas.</p><div id="debtAllSummary" aria-live="polite"></div></div>
+    <div class="debt-report-insights">
+      <section class="debt-insight-card" aria-labelledby="debtStatusHeading">
+        <h3 id="debtStatusHeading">Situação das contas</h3>
+        <div id="debtStatusSummary" aria-live="polite"></div>
+      </section>
+      <section class="debt-insight-card" aria-labelledby="debtBalanceHeading">
+        <h3 id="debtBalanceHeading">Saldo e projeção</h3>
+        <div id="debtBalanceSummary" class="debt-balance-summary" aria-live="polite"></div>
+      </section>
+    </div>
+  </article>
+  <article class="panel debt-account-panel" aria-labelledby="debtAccountsHeading">
+    <div class="panel-head"><div><h2 id="debtAccountsHeading">Todas as contas</h2><p>Consulta cada fatura, o montante pago e o que ainda falta liquidar. Seleciona uma linha para abrir os detalhes.</p></div></div>
+    <div id="debtAccountsFilters" class="debt-account-filters" aria-label="Filtrar contas por estado"></div>
+    <div id="debtAccountsList" class="debt-account-list" aria-live="polite"></div>
+  </article>
+  <div class="two-col debt-report-extras">
+    <article class="panel"><div class="panel-head"><div><h2>Despesas por categoria</h2><p>Pagamentos e compras registados no mês.</p></div></div><div id="reportCategoryBars" class="bar-list"></div></article>
+    <article class="panel"><div class="panel-head"><div><h2>Últimos 6 meses</h2><p>Pagamentos e compras efetivas.</p></div></div><div id="monthlyTrend" class="trend-chart"></div></article>
+  </div>
+</section>
       <section id="page-goals" class="page"><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav><div class="section-toolbar"><div><h2>Metas de poupança</h2><p class="muted">Objetivos acompanhados separadamente do orçamento mensal.</p></div><button id="newGoalBtn" class="btn primary">+ Novo objetivo</button></div><div id="goalList" class="goal-grid"></div></section>
       <section id="page-security" class="page"><div class="two-col"><article class="panel"><div class="panel-head"><div><h2>Estado de segurança</h2><p>Confirmações locais antes de usar dados reais.</p></div></div><div id="securityStatusGrid" class="security-grid"></div><button id="securityLockBtn" class="btn secondary">Bloquear agora</button></article><article class="panel"><h2>Backup cifrado</h2><p>Exporte apenas envelopes cifrados. O restauro valida versão, estrutura e integridade antes de substituir o cofre local.</p><div id="securityBackupInfo" class="section-gap"></div><div class="button-row"><button id="exportBackupBtn" class="btn primary">Exportar backup</button><label class="btn secondary file-btn">Restaurar backup<input id="importBackupInput" type="file" accept="application/json,.json" hidden /></label></div><p id="backupMessage" class="form-message" role="status"></p></article><article id="syncPanel" class="panel span-2">
   <div class="panel-head"><div><h2>Sincronização opcional cifrada</h2><p>Por padrão, cada navegador mantém apenas o seu cofre local. Se quiser sincronizar dispositivos, configure um repositório GitHub privado seu.</p></div><span id="syncStatusBadge" class="status-chip normal">Não configurado</span></div>

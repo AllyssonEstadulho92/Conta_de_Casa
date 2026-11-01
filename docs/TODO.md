@@ -1,5 +1,19 @@
 # TODO — Conta de Casa
 
+- [x] Reorganizar Relatórios com quatro indicadores, estado das contas, saldo e projeção e tabela de faturas com filtros.\n- [x] Criar visual responsivo inspirado na referência, sem copiar valores nem moeda fictícia.\n- [x] Acrescentar testes estáticos, filtros e escape das descrições.\n- [ ] Validar regressões completas e distribuição GitHub Pages na atualização do dia 01/11/2026.\n- [ ] Testar no iPhone os filtros, contas e modo discreto com dados fictícios.\n\n
+## Estatísticas de dívidas e saldo (31/10/2026)
+
+- [x] Especificar visão do mês selecionado e de todas as faturas registadas, sem misturar pagamentos por data com faturas por vencimento.
+- [x] Calcular total, liquidado, por pagar, atrasado, vencimentos futuros, parciais, anomalias e contagens.
+- [x] Integrar cartões de relatórios e projeção do saldo, com distinção entre saldo confirmado manualmente e estimado.
+- [x] Marcar quantias, contagens e notas com `data-money` para o modo discreto.
+- [x] Acrescentar regressões e invalidação de cache.
+- [ ] Confirmar CI/Pages/TypeScript.
+- [ ] Validar Safari/iPhone com cofre fictício e modo de privacidade.
+- [ ] Integrar com as propostas #223 e #224 apenas após resolução de conflitos e QA físico.
+- [ ] Testar restauro e verificar integridade financeira num perfil isolado antes de dados reais.
+
+
 Atualizado: 27 de outubro de 2026
 
 ## P1 — Utilidade diária do Início entre meses (27/10/2026)

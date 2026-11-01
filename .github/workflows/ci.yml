@@ -88,6 +88,9 @@ jobs:
       - name: Cross-month bill visibility and accounting
         run: node tests/cross-month-visibility.test.cjs
 
+      - name: Debt and remaining-balance statistics tests
+        run: node tests/debt-statistics.test.cjs
+
       - name: User isolation and clean-vault tests
         run: node tests/isolation.test.cjs
 

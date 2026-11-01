@@ -26,8 +26,8 @@ const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const MODERN_UI_REV = '76-visual-audit1';
 const PRODUCT_PAGES_REV = '76-add-product-prototype2';
-const DASHBOARD_REV = '76-cross-month-visibility1';
-const FINANCE_REV = '76-cross-month-visibility1';
+const DASHBOARD_REV = '76-debt-statistics1';
+const FINANCE_REV = '76-debt-statistics1';
 const MOBILE_SHELL_REV = '76-market-filter-visual-qa1';
 const ARCHITECTURE_REV = '76-budget-commitment4';
 const PLANNING_MORE_REV = '76-planning-more1';
@@ -48,7 +48,7 @@ const PHOTO_LOADER_REV = '76-photo-card3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
 const ZXING_REV = '76-local-zxing1';
-const SERVICE_WORKER_REV = '76-cross-month-visibility1';
+const SERVICE_WORKER_REV = '76-debt-statistics1';
 const WALLI_SHARE_REV = '76-walli-enhancements6';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
@@ -187,6 +187,7 @@ if(!index.includes('name="app-version"')){
 }
 index=index.replace(/<meta name="theme-color" content="[^"]+"\s*\/>/,'<meta name="theme-color" content="#f4f8f8" />');
 index=index.replaceAll('?v=53',`?v=${BUILD.slice(1)}`);
+index=index.replace(/styles\.css\?v=[^"']+/, 'styles.css?v=76-debt-statistics1');
 index=index.replace(/invoice-capture\.css\?v=[^"']+/,`invoice-capture.css?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/invoice-capture\.js\?v=[^"']+/,`invoice-capture.js?v=${INVOICE_CAPTURE_REV}`);
 index=index.replace(/render\.js\?v=[^"']+/,`render.js?v=${DASHBOARD_REV}`);

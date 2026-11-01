@@ -1,5 +1,15 @@
 # Estado do Projeto — Conta de Casa
 
+**Atualização visual solicitada em 01/11/2026:** o relatório foi reorganizado para corresponder à referência aprovada, mantendo euros e dados reais do cofre. Passou a ter quatro indicadores superiores, carteira do mês, carteira global, distribuição gráfica dos estados, projeção de saldo e lista detalhada de faturas com filtros, navegação para os detalhes e paginação de 24 em 24 registos. A separação entre atrasos e contas sem pagamentos é explicitada para evitar contagens erradas. A aparência adapta-se a desktop, tablet e iPhone. Fatura, data, valor e estado são derivados do cofre, sem exemplos fictícios e sem novos serviços de rede. Mantém-se o bloqueio de dados pessoais do modo discreto. PR #226 continua sujeita às verificações CI e validação no iPhone.\n\n
+## Estatísticas de dívidas e saldo remanescente (31/10/2026, proposta)
+
+A nova vista em Relatórios separa carteira do mês selecionado (faturas cujo vencimento pertence ao mês) e carteira global (todas as faturas válidas ativas registadas). Apresenta total, pagamentos imputados, valores por liquidar, atrasos, vencimentos de hoje, vencimentos futuros e até sete dias, quantidades pagas/parciais/não pagas, datas em falta e anomalias monetárias. Calcula os montantes exclusivamente a partir do cofre local em memória, sem envio para servidores.
+
+O pagamento antecipado é atribuído à fatura para a carteira de obrigações, mas o fluxo de caixa usa a data efetiva do pagamento. Pagamentos em excesso são sinalizados separadamente e nunca abatem outras faturas. Contas canceladas/arquivadas e valores inválidos não contaminam os totais; faturas sem vencimento válido entram na dívida global com sinalização. Faturas recorrentes só contam quando a ocorrência já está efetivamente registada. O saldo projetado global só se apresenta ao consultar o mês corrente e mostra se o saldo de referência foi introduzido manualmente ou estimado pelos registos.
+
+Branch: `feature/debt-statistics-20261031`. Não altera schema, `STATE_VERSION=5`, PIN, dados financeiros, sincronização, backup, nem a versão pública. Teste automático de regressão em `tests/debt-statistics.test.cjs` e CI/Pages, com validação iPhone e revisão de integração ainda pendentes. Esta PR é independente das propostas #223 e #224.
+
+
 Atualizado: 27 de outubro de 2026
 Versão técnica: `0.76.0`  
 Release pública: `v76`  

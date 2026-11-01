@@ -316,6 +316,79 @@ function dashboardNumbers(month = selectedMonth, now = new Date()) {
     otherOverdueFirstMonth:otherOverdueBills.length?billDueDateKey(otherOverdueBills[0]).slice(0,7):''
   };
 }
+// Estatística apenas de leitura. Inclui todas as ocorrências de faturas já registadas,
+// mas não cria previsões de recorrências futuras ainda não existentes no cofre.
+function billPortfolioStatistics(month = null, now = new Date()) {
+  const summary = {
+    billCount:0, fullyPaidCount:0, partlyPaidCount:0, unpaidCount:0,
+    outstandingCount:0, overdueCount:0, dueTodayCount:0, futureCount:0,
+    next7Count:0, unknownDueCount:0, invalidCount:0, overpaidCount:0,
+    totalCents:0, paidAllocatedCents:0, outstandingCents:0,
+    overdueCents:0, dueTodayCents:0, futureCents:0, next7Cents:0,
+    unknownDueCents:0, overpaidCents:0
+  };
+  for (const bill of appState?.bills || []) {
+    if (bill.cancelled || bill.archived || (month!==null && !billInMonth(bill,month))) continue;
+    const ledger = billLedger(bill);
+    if (!ledger.valid) { summary.invalidCount++; continue; }
+    summary.billCount++;
+    summary.totalCents = sumCents([summary.totalCents,ledger.totalCents]);
+    // Um pagamento em excesso é sinalizado separadamente, nunca reduz dívidas de outras faturas.
+    const allocated = Math.min(ledger.totalCents,ledger.paidCents);
+    summary.paidAllocatedCents = sumCents([summary.paidAllocatedCents,allocated]);
+    summary.outstandingCents = sumCents([summary.outstandingCents,ledger.remainingCents]);
+    if (ledger.overpaidCents>0) {
+      summary.overpaidCount++;
+      summary.overpaidCents = sumCents([summary.overpaidCents,ledger.overpaidCents]);
+    }
+    if (ledger.remainingCents===0) { summary.fullyPaidCount++; continue; }
+    summary.outstandingCount++;
+    if (ledger.paidCents>0) summary.partlyPaidCount++;
+    else summary.unpaidCount++;
+
+    const days=billDaysUntil(bill,now);
+    if (!Number.isFinite(days)) {
+      summary.unknownDueCount++;
+      summary.unknownDueCents=sumCents([summary.unknownDueCents,ledger.remainingCents]);
+    } else if(days<0) {
+      summary.overdueCount++;
+      summary.overdueCents=sumCents([summary.overdueCents,ledger.remainingCents]);
+    } else if(days===0) {
+      summary.dueTodayCount++;
+      summary.dueTodayCents=sumCents([summary.dueTodayCents,ledger.remainingCents]);
+    } else {
+      summary.futureCount++;
+      summary.futureCents=sumCents([summary.futureCents,ledger.remainingCents]);
+      if(days<=7) {
+        summary.next7Count++;
+        summary.next7Cents=sumCents([summary.next7Cents,ledger.remainingCents]);
+      }
+    }
+  }
+  return summary;
+}
+
+// A data de pagamento (fluxo de caixa) é independente da data de vencimento
+// da fatura (carteira de obrigações). Não somar estas medidas entre si.
+function debtBalanceStatistics(month = selectedMonth, now = new Date()) {
+  const n=monthNumbers(month,now);
+  const period=billPortfolioStatistics(month,now);
+  const all=billPortfolioStatistics(null,now);
+  const isCurrentMonth=month===currentLocalMonthKey(now);
+  return {
+    month, period, all,
+    paymentInMonthCents:n.paymentTotal,
+    currentBalanceCents:n.current,
+    hasAccountBalance:n.hasAccountBalance,
+    balanceUpdatedAt:n.profile.accountBalanceUpdatedAt||null,
+    projectedMonthCents:sumCents([n.current,-period.outstandingCents]),
+    // O saldo global só faz sentido tomando como ponto de partida o mês corrente.
+    projectedAllCents:isCurrentMonth?sumCents([n.current,-all.outstandingCents]):null,
+    projectedAllIsEstimate:!n.hasAccountBalance,
+    canProjectAll:isCurrentMonth
+  };
+}
+
 function categoryTotals(month = selectedMonth) {
   const map = new Map();
   const payments = budgetPaymentsForMonth(month);

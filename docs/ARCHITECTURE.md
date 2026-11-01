@@ -1,5 +1,13 @@
 # Arquitetura — Conta de Casa
 
+**Atualização visual 01/11/2026:** `renderReports` agora apresenta KPIs de receitas, despesas efetivas, saldo de referência e dívidas globais, seguidos de carteira do mês e global. `renderDebtStatus` desenha um gráfico local, sem bibliotecas externas, com três grupos disjuntos (paga, parcial, sem pagamentos); atrasos são subconjunto destacado. `renderDebtAccounts` filtra e mostra até 24 linhas por página, com delegação em `events.js` para trocar filtros, expandir e abrir `openBillDetail`. Não cria endpoints nem altera a persistência. A marcação `data-money` continua a ocultar valores e contagens no modo discreto; os nomes e estados das contas são também desfocados nesse modo.\n\n
+## Vista de estatísticas financeiras, sem persistência (31/10/2026)
+
+`finance.js` concentra `billPortfolioStatistics(month,now)` e `debtBalanceStatistics(month,now)`, que dependem apenas de `billLedger`, `billDaysUntil`, `billInMonth`, `monthNumbers` e `sumCents`. Não escrevem no cofre. A vista `renderDebtStatistics` em `render.js` é invocada por `renderReports`, escreve nos três destinos do HTML (`debtMonthSummary`, `debtAllSummary`, `debtBalanceSummary`) e preserva `data-money` para o modo de privacidade.
+
+Semântica: carteira por vencimento não equivale a desembolso no mês; pagamentos de uma fatura podem ter datas distintas. Os totais do portefólio contabilizam `min(total,paid)` e o remanescente `max(total-paid,0)`, sem compensar faturas diferentes. Vencimentos desconhecidos são classificados separadamente, mas incluídos no total global. Um saldo global com obrigações futuras apenas é simulado a partir do mês atual. O utilizador deve confirmar o saldo de conta manualmente se desejar refletir informação bancária real. Contas futuras ainda não geradas não entram na simulação. Valores e datas continuam derivados localmente.
+
+
 Atualizado: 9 de outubro de 2026
 Versão: `0.76.0`  
 Release pública: `v76`  
