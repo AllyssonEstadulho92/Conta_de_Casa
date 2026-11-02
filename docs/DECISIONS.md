@@ -1,5 +1,11 @@
 # Decisões Técnicas — Conta de Casa
 
+## D-167 — OCR local facultativo e extrato derivado do livro de movimentos (02/11/2026)
+
+O QR AT mantém prioridade porque permite extrair campos estruturados que o OCR pode confundir. O modo de fotografia passa a oferecer reconhecimento de texto português como ação separada e explícita; os ficheiros do motor, do Web Worker, do WASM e do idioma são servidos pela própria origem e descarregados apenas por escolha do utilizador. A CSP permite `wasm-unsafe-eval`, sem permitir `unsafe-eval` de JavaScript; as imagens não são armazenadas nem enviadas a uma API. OCR só sugere valores identificáveis, nunca cria ou liquida faturas automaticamente, e exige revisão manual de fornecedor, montante, data e restantes campos. O modelo não entra no precache obrigatório da PWA devido ao peso; a primeira utilização necessita de rede e a ausência de OCR não pode bloquear a entrada manual.
+
+O extrato mensal é uma projeção read-only das tabelas existentes de rendimentos, pagamentos e de compras efetivamente registadas; faturas pendentes são excluídas. Os preços estimados de compras permanecem identificados. CSV é exportado por iniciativa explícita e escapado contra injeção de fórmulas, incluindo valores numéricos negativos derivados apenas do modelo validado; não é partilhado com servidores. Sem alterações à cifra, PIN, esquema de armazenamento, sincronização ou backup. A qualidade do reconhecimento e a integração física Safari/iPhone permanecem pendentes até execução no dispositivo.
+
 ## D-166 — uniformizar Walli preservando o domínio (02/11/2026)
 
 A Partilha do Walli passa a usar a mesma hierarquia visual do Calendário e Plano: título, mês, indicadores prioritários, detalhes expansíveis e cartões de registo. Não se duplica o seletor persistido, nem se reescreve a lógica de atribuição de dias, cálculo proporcional, passeios, pagamentos parciais, prestações ou integração na categoria Animais. A organização visual não oculta ações financeiras: pagar, dividir, configurar, editar e consultar movimentos continuam disponíveis. Mudanças de domínio exigirão testes financeiros próprios e autorização separada.

@@ -59,6 +59,6 @@ assert.match(events,/openMobileDrawer\(\)/);
 assert.match(events,/\$\('#mobileNav \[data-mobile-more\]'\)\?\.setAttribute\('aria-expanded','false'\)/);
 assert.match(shell,/body #mobileNav[\s\S]*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/);
 assert.match(shell,/body #mobileNav \.nav-btn:nth-child\(3\)[\s\S]*visibility:visible!important/);
-assert.match(builder,/const DASHBOARD_REV = '77-walli-unified1'/);
-assert.match(builder,/const SERVICE_WORKER_REV = '77-walli-unified1'/);
+assert.match(builder,/const DASHBOARD_REV = '78-invoice-statement1'/);
+assert.match(builder,/const SERVICE_WORKER_REV = '78-invoice-statement1'/);
 console.log('Dark PIN and retired Market navigation: OK');

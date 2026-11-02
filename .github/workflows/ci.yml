@@ -106,6 +106,9 @@ jobs:
       - name: Invoice QR capture tests
         run: node tests/invoice-capture.test.cjs
 
+      - name: Monthly statement reconciliation and CSV safety tests
+        run: node tests/monthly-statement.test.cjs
+
       - name: Market category tests
         run: node tests/market-categories.test.cjs
 

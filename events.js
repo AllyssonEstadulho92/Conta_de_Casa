@@ -633,6 +633,24 @@ function wireEvents(){
     const next=picker?.value||selectedMonth;
     if(!selectMonthContext(next))picker.value=selectedMonth;
   });
+  $('#exportMonthlyStatementBtn')?.addEventListener('click',()=>{
+    if(!appState||!/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(selectedMonth))return;
+    const csv=monthlyStatementCsv(selectedMonth);
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const objectUrl=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=objectUrl;
+    link.download=`conta-de-casa-extrato-${selectedMonth}.csv`;
+    link.style.display='none';
+    document.body.appendChild(link);
+    try{
+      link.click();
+      toast('Extrato preparado. No iPhone, guarda o ficheiro em Ficheiros se o Safari apresentar a opção.');
+    }finally{
+      link.remove();
+      setTimeout(()=>URL.revokeObjectURL(objectUrl),30000);
+    }
+  });
   $('#monthPlanForm').addEventListener('submit',async e=>{
     e.preventDefault();
     const balanceRaw=$('#accountBalance').value.trim();

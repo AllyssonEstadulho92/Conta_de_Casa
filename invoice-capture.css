@@ -411,3 +411,14 @@ html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm .button-row .btn.pri
   html.cdc-v75 #formDialog[data-v75-kind="expense"] #billForm>.v75-bill-tabs [data-v75-bill-mode].active{background:Highlight!important;color:HighlightText!important}
   html.cdc-v75 #formDialog[data-v75-kind="expense"] .dialog-close::before{background:ButtonText!important}
 }
+/* 78-local-ocr1: OCR opcional no mesmo cartão, sem alterar os controlos nativos de iOS. */
+#formDialog [data-invoice-capture] .invoice-ocr-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;min-height:44px}
+#formDialog [data-invoice-capture] .invoice-ocr-button input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+#formDialog [data-invoice-capture] .invoice-ocr-button:focus-within{outline:3px solid var(--v76-accent,#0a9);outline-offset:2px}
+#formDialog [data-invoice-capture] .invoice-ocr-button:has(input:disabled){opacity:.55;pointer-events:none}
+#formDialog .invoice-ocr-note{display:block;color:var(--v76-muted,var(--muted));font-size:.75rem;line-height:1.5}
+#formDialog[data-v75-bill-mode="manual"] .invoice-ocr-button,
+#formDialog[data-v75-bill-mode="qr"] .invoice-ocr-button,
+#formDialog[data-v75-bill-mode="manual"] .invoice-ocr-note,
+#formDialog[data-v75-bill-mode="qr"] .invoice-ocr-note{display:none!important}
+@media(max-width:430px){#formDialog .invoice-ocr-button{width:100%;max-width:100%;white-space:normal;text-align:center}}

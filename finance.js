@@ -259,6 +259,68 @@ function spendingForDate(dateKey) {
   return { paymentTotal, marketSpent, total:sumCents([paymentTotal,marketSpent]) };
 }
 
+// Extrato do mês por DATA do movimento, não pela data de vencimento.
+// Não cria lançamentos nem confunde faturas em aberto com dinheiro gasto.
+function monthlyStatementRows(month = selectedMonth) {
+  if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(String(month||''))||!appState)return [];
+  const bills=new Map((appState.bills||[]).map(b=>[String(b.id),b]));
+  const rows=[];
+  for(const income of appState.incomes||[]){
+    if(!inSelectedMonth(income.receivedAt,month)||!Number.isSafeInteger(income.amountCents)||income.amountCents<0)continue;
+    rows.push({
+      id:String(income.id),type:'Receita',direction:'in',date:dateKeyFromValue(income.receivedAt),
+      description:income.description||'Rendimento sem descrição',category:'Rendimentos',
+      provider:'',method:'',reference:'',amountCents:income.amountCents,estimated:false
+    });
+  }
+  for(const payment of appState.payments||[]){
+    if(!inSelectedMonth(payment.paidAt,month)||!Number.isSafeInteger(payment.amountCents)||payment.amountCents<0)continue;
+    const bill=bills.get(String(payment.billId));
+    rows.push({
+      id:String(payment.id),type:'Pagamento',direction:'out',date:dateKeyFromValue(payment.paidAt),
+      description:bill?.title||'Pagamento de fatura sem descrição',
+      category:bill?.category||'Outros',provider:bill?.provider||'',
+      method:payment.method||'',reference:bill?.reference||'',
+      amountCents:payment.amountCents,estimated:false
+    });
+  }
+  for(const item of appState.market||[]){
+    if(!item.purchased||!inSelectedMonth(item.purchasedAt||item.updatedAt,month))continue;
+    const amountCents=marketLineCents(item.actualCents||item.estimatedCents||0,item.quantity);
+    if(!Number.isSafeInteger(amountCents)||amountCents<0)continue;
+    rows.push({
+      id:String(item.id),type:'Compra',direction:'out',date:dateKeyFromValue(item.purchasedAt||item.updatedAt),
+      description:item.name||'Compra sem descrição',category:item.category||'Outros',
+      provider:'',method:'',reference:'',amountCents,
+      estimated:!(item.actualCents>0)
+    });
+  }
+  return rows.sort((a,b)=>b.date.localeCompare(a.date)||a.description.localeCompare(b.description,'pt-PT')||a.id.localeCompare(b.id));
+}
+
+// Exportação segura para folhas de cálculo: células tratadas como TEXTO,
+// impedindo que descrições de terceiros executem fórmulas no Excel/Sheets.
+function monthlyStatementCsv(month = selectedMonth) {
+  const rows=monthlyStatementRows(month);
+  const csvCell=(value,trustedNumeric=false)=>{
+    let text=String(value??'').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,' ');
+    if(!trustedNumeric&&/^[\s]*[=+\-@]/.test(text))text=`'${text}`;
+    return `"${text.replace(/"/g,'""')}"`;
+  };
+  const header=['Data','Tipo','Fluxo','Descrição','Categoria','Fornecedor','Método','Referência','Valor (EUR)','Estimado'];
+  const moneyCell=cents=>(cents/100).toFixed(2).replace('.',',');
+  const body=rows.map(row=>[
+    row.date,row.type,row.direction==='in'?'Entrada':'Saída',row.description,row.category,row.provider,row.method,row.reference,
+    moneyCell(row.direction==='in'?row.amountCents:-row.amountCents),row.estimated?'Sim':'Não'
+  ].map((value,index)=>csvCell(value,index===8)).join(';'));
+  const incomeTotal=sumCents(rows.filter(row=>row.direction==='in').map(row=>row.amountCents));
+  const expenseTotal=sumCents(rows.filter(row=>row.direction==='out').map(row=>row.amountCents));
+  for(const [label,cents] of [['TOTAL DE ENTRADAS',incomeTotal],['TOTAL DE SAÍDAS',-expenseTotal],['RESULTADO DO MÊS',incomeTotal-expenseTotal]]){
+    body.push(['',label,'','','','','','',moneyCell(cents),''].map((value,index)=>csvCell(value,index===8)).join(';'));
+  }
+  return '\ufeff'+[header.map(value=>csvCell(value)).join(';'),...body].join('\r\n')+'\r\n';
+}
+
 function monthlySpendHistory(month = selectedMonth, count = 6) {
   if(!/^\d{4}-\d{2}$/.test(String(month||'')))return [];
   const safeCount=clamp(Math.trunc(Number(count)||6),1,24);

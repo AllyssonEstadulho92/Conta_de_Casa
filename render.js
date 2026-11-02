@@ -878,6 +878,23 @@ function renderReports() {
   const vals=monthlySpendHistory(selectedMonth,6).map(item=>[item.month,item.total]);
   const max=Math.max(...vals.map(v=>v[1]),1);
   setHTML('#monthlyTrend', vals.map(([mk,v])=>`<div class="trend-col"><em data-money>${money(v)}</em><div class="trend-bar" data-height="${Math.max(3,v/max*165)}"></div><small>${new Intl.DateTimeFormat('pt-PT',{month:'short'}).format(new Date(`${mk}-01T12:00:00`))}</small></div>`).join(''));
+  renderMonthlyStatement();
+}
+
+function renderMonthlyStatement(){
+  const rows=monthlyStatementRows(selectedMonth);
+  const received=sumCents(rows.filter(row=>row.direction==='in').map(row=>row.amountCents));
+  const spent=sumCents(rows.filter(row=>row.direction==='out').map(row=>row.amountCents));
+  const estimated=rows.filter(row=>row.estimated).length;
+  setHTML('#monthlyStatementSummary',`<div><span>Recebido</span><strong data-money>${money(received)}</strong></div><div><span>Gasto</span><strong data-money>${money(spent)}</strong></div><div><span>Resultado do mês</span><strong data-money>${money(received-spent)}</strong></div><div><span>Movimentos</span><strong>${rows.length}</strong></div>`);
+  const items=rows.slice(0,50).map(row=>`<div class="cdc-statement-row">
+    <span class="cdc-statement-type" aria-hidden="true">${icon(row.type==='Pagamento'?'navBills':row.type==='Receita'?'banknote':'market',19)}</span>
+    <span class="cdc-statement-copy"><strong>${esc(row.description)}</strong><small>${esc(fmtDate(row.date))} · ${esc(row.category)} · ${esc(row.type)}${row.estimated?' · Valor estimado':''}</small></span>
+    <strong class="cdc-statement-amount" data-money>${row.direction==='in'?'+':'−'}${money(row.amountCents)}</strong>
+  </div>`).join('');
+  const notice=estimated?`<p class="cdc-statement-estimate">${estimated} compra${estimated===1?'':'s'} sem preço real: os respetivos valores são estimados.</p>`:'';
+  const hidden=rows.length>50?`<p class="cdc-statement-estimate">A mostrar 50 de ${rows.length} movimentos. O CSV contém todos.</p>`:'';
+  setHTML('#monthlyStatementList',(items||'<p class="cdc-statement-empty">Ainda não há pagamentos ou compras registados neste mês.</p>')+notice+hidden);
 }
 
 function renderGoals() {

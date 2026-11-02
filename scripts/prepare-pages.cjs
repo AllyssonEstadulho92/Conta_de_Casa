@@ -13,7 +13,17 @@ const GENERATED_PUBLIC_FILES = Object.freeze({
   'sync-conflict-policy.js': path.join(GENERATED, 'sync-conflict-policy.js'),
   'date-calculator.js': path.join(GENERATED, 'date-calculator.js'),
   'zxing-browser.min.js': path.join(GENERATED, 'zxing-browser.min.js'),
-  'ZXING_BROWSER_LICENSE.txt': path.join(GENERATED, 'ZXING_BROWSER_LICENSE.txt')
+  'ZXING_BROWSER_LICENSE.txt': path.join(GENERATED, 'ZXING_BROWSER_LICENSE.txt'),
+  'tesseract.min.js': path.join(ROOT, 'node_modules/tesseract.js/dist/tesseract.min.js'),
+  'tesseract-worker.min.js': path.join(ROOT, 'node_modules/tesseract.js/dist/worker.min.js'),
+  'tesseract-core-lstm.wasm.js': path.join(ROOT, 'node_modules/tesseract.js-core/tesseract-core-lstm.wasm.js'),
+  'tesseract-core-lstm.wasm': path.join(ROOT, 'node_modules/tesseract.js-core/tesseract-core-lstm.wasm'),
+  'tesseract-core-simd-lstm.wasm.js': path.join(ROOT, 'node_modules/tesseract.js-core/tesseract-core-simd-lstm.wasm.js'),
+  'tesseract-core-simd-lstm.wasm': path.join(ROOT, 'node_modules/tesseract.js-core/tesseract-core-simd-lstm.wasm'),
+  'tesseract-core-relaxedsimd-lstm.wasm.js': path.join(ROOT, 'node_modules/tesseract.js-core/tesseract-core-relaxedsimd-lstm.wasm.js'),
+  'tesseract-core-relaxedsimd-lstm.wasm': path.join(ROOT, 'node_modules/tesseract.js-core/tesseract-core-relaxedsimd-lstm.wasm'),
+  'por.traineddata.gz': path.join(ROOT, 'node_modules/@tesseract.js-data/por/4.0.0_best_int/por.traineddata.gz'),
+  'TESSERACT_OCR_LICENSE.txt': path.join(ROOT, 'node_modules/tesseract.js/LICENSE.md')
 });
 const PACKAGE = JSON.parse(fs.readFileSync(path.join(ROOT,'package.json'),'utf8'));
 const APP_VERSION = String(PACKAGE.version||'').trim();
@@ -26,10 +36,10 @@ const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const MODERN_UI_REV = '76-visual-audit1';
 const PRODUCT_PAGES_REV = '76-add-product-prototype2';
-const DASHBOARD_REV = '77-walli-unified1';
-const FINANCE_REV = '77-walli-unified1';
+const DASHBOARD_REV = '78-invoice-statement1';
+const FINANCE_REV = '78-invoice-statement1';
 const MOBILE_SHELL_REV = '76-approved-vault-nav4';
-const FINANCE_SCREENS_REV = '77-walli-unified1';
+const FINANCE_SCREENS_REV = '78-invoice-statement1';
 const ARCHITECTURE_REV = '77-walli-unified1';
 const PLANNING_MORE_REV = '76-planning-more1';
 const HEADER_REV = '75-header2';
@@ -47,9 +57,9 @@ const CATALOG_REV = '76-add-product-prototype1';
 const PD_PHOTO_REV = '76-pingo-priority3';
 const PHOTO_LOADER_REV = '76-photo-card3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
-const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
+const INVOICE_CAPTURE_REV = '78-local-ocr1';
 const ZXING_REV = '76-local-zxing1';
-const SERVICE_WORKER_REV = '77-walli-unified1';
+const SERVICE_WORKER_REV = '78-invoice-statement1';
 const WALLI_SHARE_REV = '77-walli-unified1';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
@@ -140,6 +150,16 @@ const PUBLIC_FILES = Object.freeze([
   'date-calculator.js',
   'zxing-browser.min.js',
   'ZXING_BROWSER_LICENSE.txt',
+  'tesseract.min.js',
+  'tesseract-worker.min.js',
+  'tesseract-core-lstm.wasm.js',
+  'tesseract-core-lstm.wasm',
+  'tesseract-core-simd-lstm.wasm.js',
+  'tesseract-core-simd-lstm.wasm',
+  'tesseract-core-relaxedsimd-lstm.wasm.js',
+  'tesseract-core-relaxedsimd-lstm.wasm',
+  'por.traineddata.gz',
+  'TESSERACT_OCR_LICENSE.txt',
   'v75-stability.js',
   'v75-startup-guard.js',
   'v75-market-flow.js',

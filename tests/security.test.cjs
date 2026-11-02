@@ -101,7 +101,7 @@ for (const file of executableFiles) {
 const render = fs.readFileSync('render.js','utf8');
 const index = fs.readFileSync('index.html','utf8');
 assert.match(index, /Content-Security-Policy/);
-assert.match(index, /script-src 'self';/);
+assert.match(index, /script-src 'self' 'wasm-unsafe-eval';/,'allow local WASM OCR without arbitrary JavaScript eval');
 assert.doesNotMatch(index,/unpkg\.com/,'CSP and static HTML must not depend on the removed ZXing CDN');
 assert.match(render,/ZXing 0\.2\.0 empacotado localmente/,'Security copy must disclose the local pinned scanner runtime');
 assert.match(render,/sem dependência de CDN/,'Security copy must state that scanner decoding no longer depends on a CDN');

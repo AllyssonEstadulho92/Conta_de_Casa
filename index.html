@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.openfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://world.openfoodfacts.org; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; media-src 'self' blob:; manifest-src 'self'; worker-src 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://images.openfoodfacts.org; connect-src 'self' https://api.github.com https://cesta.pt https://world.openfoodfacts.org; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; media-src 'self' blob:; manifest-src 'self'; worker-src 'self'" />
   <meta name="referrer" content="no-referrer" />
   <meta name="barcode-reader-src" content="./.generated/zxing-browser.min.js?v=76-local-zxing1" />
   <meta name="theme-color" content="#f7f9fc" />
@@ -441,6 +441,15 @@
   <div class="debt-report-heading"><div><h2>Visão financeira da casa</h2><p>Receitas, despesas, dívidas e dinheiro remanescente do mês selecionado.</p></div><span class="debt-report-local-note">Dados do teu cofre local</span></div>
   <ol class="cdc-flow cdc-reports-flow" aria-label="Como consultar os relatórios"><li>Consulta os valores do mês</li><li>Compara pagos e por pagar</li><li>Abre os detalhes de cada conta</li></ol>
   <div id="reportCards" class="debt-report-top-kpis"></div>
+  <article class="panel cdc-monthly-statement" aria-labelledby="monthlyStatementTitle">
+    <div class="cdc-statement-heading">
+      <div><h2 id="monthlyStatementTitle">Extrato mensal de movimentos</h2><p>Receitas, pagamentos e compras do mês escolhido; exclui faturas ainda por pagar.</p></div>
+      <button id="exportMonthlyStatementBtn" class="btn primary" type="button" aria-label="Exportar extrato mensal em CSV">Exportar CSV</button>
+    </div>
+    <div id="monthlyStatementSummary" class="cdc-statement-summary" aria-live="polite"></div>
+    <div id="monthlyStatementList" class="cdc-statement-list" aria-live="polite"></div>
+    <p class="cdc-statement-privacy">A exportação é preparada neste dispositivo. O ficheiro contém valores financeiros; guarda-o num local protegido.</p>
+  </article>
   <article class="panel debt-report-panel" aria-labelledby="debtReportTitle">
     <div class="panel-head"><div><h2 id="debtReportTitle">Dívidas e saldo remanescente</h2><p>Valores pagos, não pagos e a pagar, sem misturar pagamentos com vencimentos.</p></div></div>
     <div class="debt-scope"><h3>Mês selecionado</h3><p>Contas com vencimento neste mês, mesmo que pagas antes.</p><div id="debtMonthSummary" aria-live="polite"></div></div>

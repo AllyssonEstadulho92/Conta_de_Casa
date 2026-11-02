@@ -85,6 +85,7 @@ jobs:
           node tests/date-timezone.test.cjs
           node tests/form-regression.test.cjs
           node tests/invoice-capture.test.cjs
+          node tests/monthly-statement.test.cjs
           node tests/market-categories.test.cjs
           node tests/market-category-groups.test.cjs
           node tests/market-shopping-focus.test.cjs

@@ -1,5 +1,13 @@
 # Changelog
 
+## Leitura local de faturas e extrato mensal (02/11/2026)
+
+- Novo reconhecimento OCR em português como ação opcional na fotografia de fatura, executado no dispositivo através de motor e modelos locais do mesmo domínio; o QR AT continua a ser o modo mais fiável.
+- OCR sugere apenas total, vencimento, descrição e referência quando reconhecíveis. Não grava imagens, não cria pagamentos e exige confirmação manual. Primeira utilização requer descarregar ficheiros de reconhecimento relativamente grandes.
+- Relatórios incluem extrato mensal de receitas, pagamentos e compras, quantidades e indicação dos preços estimados; exportação CSV em euros, com neutralização de fórmulas perigosas para folhas de cálculo.
+- Checklist de validação no iPhone real em `docs/IPHONE_QA_CHECKLIST.md`; Face ID, permissões, Safari e partilha não são marcados como testados remotamente.
+- Sem alteração ao formato do cofre, PIN, cifra ou dados financeiros persistidos.
+
 ## Partilha do Walli no novo visual (02/11/2026)
 
 - Menu Mais > Partilha do Walli agora apresenta título, mês e cartões consistentes com as outras páginas.

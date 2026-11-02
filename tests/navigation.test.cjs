@@ -92,8 +92,8 @@ try {
   assert.match(builtIndex, /<meta name="app-build-id" content="(?:[0-9a-f]{7}|local)"\s*\/>/);
   assert.match(builtIndex, /v76-modern-ui\.css\?v=76-visual-audit1/);
   assert.match(builtIndex, /v76-product-pages\.css\?v=76-add-product-prototype2/);
-  assert.match(builtIndex, /render\.js\?v=77-walli-unified1/);
-  assert.match(builtIndex, /finance\.js\?v=77-walli-unified1/);
+  assert.match(builtIndex, /render\.js\?v=78-invoice-statement1/);
+  assert.match(builtIndex, /finance\.js\?v=78-invoice-statement1/);
   assert.match(builtIndex, /v76-mobile-shell\.css\?v=76-approved-vault-nav4/);
   assert.match(builtIndex, /v75-usability\.css\?v=76-auth-viewport-fit1/);
 

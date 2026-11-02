@@ -1,5 +1,17 @@
 # TODO — Conta de Casa
 
+## Faturas, extrato mensal e Safari físico (02/11/2026)
+
+- [x] Integrar OCR opcional em português com carregamento local, revisão dos campos e sem envio das fotografias.
+- [x] Manter QR AT como fonte preferida e entrada manual segura quando OCR não identifica os dados.
+- [x] Gerar extrato do mês a partir de rendimentos, pagamentos e compras reais, incluindo quantidade e preços estimados.
+- [x] Exportar CSV em EUR e proteger campos contra interpretação como fórmulas em folhas de cálculo.
+- [x] Acrescentar testes de parser OCR, reconciliação do extrato, CSV e integração do build de Pages.
+- [ ] Executar a validação presencial no iPhone com a lista `docs/IPHONE_QA_CHECKLIST.md` e um backup cifrado prévio.
+- [ ] Confirmar em faturas reais de formatos distintos a qualidade dos totais e datas reconhecidos por OCR; não declarar 100% de precisão.
+- [ ] Experimentar partilha/abertura do CSV em Numbers, Excel e Ficheiros no Safari real.
+- [ ] Testar Face ID somente quando existir uma implementação autenticada e segura; o PIN continua o caminho de acesso.
+
 ## Partilha do Walli, continuidade visual (02/11/2026)
 
 - [x] Colocar título e seletor de mês iguais aos da navegação financeira nova.

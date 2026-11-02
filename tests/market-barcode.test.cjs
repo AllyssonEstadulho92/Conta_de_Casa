@@ -10,7 +10,7 @@ const pages=fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 
 assert.match(index,/market-barcode\.css\?v=53/);
 assert.match(index,/market-barcode\.js\?v=53/);
-assert.match(index,/script-src 'self';/);
+assert.match(index,/script-src 'self' 'wasm-unsafe-eval';/,'strict scripts with WASM capability for local OCR');
 assert.doesNotMatch(index,/unpkg\.com/);
 assert.match(index,/connect-src 'self' https:\/\/api\.github\.com https:\/\/cesta\.pt https:\/\/world\.openfoodfacts\.org;/);
 for(const asset of ['market-barcode.css','market-barcode.js','zxing-browser.min.js','ZXING_BROWSER_LICENSE.txt']){

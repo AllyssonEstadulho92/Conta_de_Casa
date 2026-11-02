@@ -752,3 +752,23 @@ html.cdc-v75 #page-petshare .walli-day.active{
   html.cdc-v75 #page-petshare .cdc-walli-activity-grid .walli-card-icon{width:27px;height:27px;flex-basis:27px}
   html.cdc-v75 #page-petshare .cdc-walli-activity-grid .walli-card-head{font-size:.7rem}
 }
+/* 78-invoice-statement1: extrato com o mesmo sistema de cartões do plano e das contas. */
+html.cdc-v75 .cdc-monthly-statement{display:grid;gap:15px;border:1px solid var(--v76-border);border-radius:21px;background:var(--v76-surface);padding:clamp(14px,3vw,23px)}
+html.cdc-v75 .cdc-statement-heading{display:flex;align-items:center;justify-content:space-between;gap:13px;flex-wrap:wrap}
+html.cdc-v75 .cdc-statement-heading h2{margin:0;font-size:1.08rem;color:var(--v76-text)}
+html.cdc-v75 .cdc-statement-heading p{margin:4px 0 0;color:var(--v76-muted);font-size:.8rem}
+html.cdc-v75 .cdc-statement-heading button{min-height:44px;flex-shrink:0}
+html.cdc-v75 .cdc-statement-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+html.cdc-v75 .cdc-statement-summary>div{display:grid;gap:5px;padding:13px 14px;border:1px solid var(--v76-border);border-radius:14px;background:var(--v76-surface-soft)}
+html.cdc-v75 .cdc-statement-summary span{color:var(--v76-muted);font-size:.75rem}
+html.cdc-v75 .cdc-statement-summary strong{color:var(--v76-text);font-size:1.1rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+html.cdc-v75 .cdc-statement-list{display:grid;gap:7px}
+html.cdc-v75 .cdc-statement-row{display:flex;gap:11px;align-items:center;padding:12px 10px;border:1px solid var(--v76-border);border-radius:13px;background:var(--v76-surface)}
+html.cdc-v75 .cdc-statement-type{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:var(--v76-surface-accent);color:var(--v76-primary)}
+html.cdc-v75 .cdc-statement-copy{display:grid;gap:3px;flex:1;min-width:0}
+html.cdc-v75 .cdc-statement-copy strong{font-size:.83rem;color:var(--v76-text);overflow-wrap:anywhere}
+html.cdc-v75 .cdc-statement-copy small{font-size:.71rem;color:var(--v76-muted);overflow-wrap:anywhere}
+html.cdc-v75 .cdc-statement-amount{font-size:.88rem;color:var(--v76-text);font-variant-numeric:tabular-nums;white-space:nowrap}
+html.cdc-v75 .cdc-statement-privacy,html.cdc-v75 .cdc-statement-empty,html.cdc-v75 .cdc-statement-estimate{font-size:.75rem;color:var(--v76-muted);margin:0;line-height:1.5}
+html.cdc-v75 .cdc-statement-estimate{padding:9px 12px;border-radius:10px;background:var(--v76-surface-soft)}
+@media(max-width:430px){html.cdc-v75 .cdc-statement-heading{align-items:stretch}html.cdc-v75 .cdc-statement-heading button{width:100%}html.cdc-v75 .cdc-statement-amount{font-size:.8rem}html.cdc-v75 .cdc-statement-row{gap:8px}}

@@ -1,24 +1,26 @@
 'use strict';
 
 /* Conta de Casa — captura assistida de faturas portuguesas.
- * Lê o Código QR definido pela AT a partir da câmara ou de uma imagem local.
- * O ficheiro/imagem nunca é guardado; os dados só preenchem o formulário após confirmação.
+ * Lê o Código QR definido pela AT a partir da câmara/imagem ou analisa texto com OCR local opcional.
+ * A imagem não é guardada; sugestões exigem revisão antes de guardar a fatura.
  * 76-expense-mode-stability1 mantém imagem e câmara separadas, sem OCR fictício.
  * 76-expense-mode-action1 torna Manual / Ler fatura / QR Code ações diretas: foco, ficheiro e câmara.
  * 76-invoice-capture-warmup1 prepara o leitor QR em background quando o formulário abre, reduzindo a espera no primeiro uso.
  * 76-expense-native-input4 usa controlos file/capture nativos no iOS para evitar bloqueios de input.click()/getUserMedia.
  * 76-expense-picker-unblock6 não pré-carrega ZXing em touch/iOS antes da escolha nativa.
  * 76-invoice-autofill7 preenche automaticamente os campos seguros logo após um QR AT válido.
+ * 78-local-ocr1 acrescenta OCR português opcional, local e sob confirmação; QR continua prioritário.
  */
 (function installInvoiceCapture(root){
   const MAX_IMAGE_BYTES=15*1024*1024;
   const ZXING_LOAD_TIMEOUT_MS=12000;
   const LOCAL_ZXING_FILE='zxing-browser.min.js';
+  const OCR_LOAD_TIMEOUT_MS=18000;
   const MODE_COPY=Object.freeze({
     image:Object.freeze({
       title:'Ler fatura por imagem',
       subtitle:'Fotografia com QR da Autoridade Tributária',
-      description:'Selecione uma fotografia da fatura. A aplicação procura o código QR da AT na imagem; não faz OCR do texto completo. A imagem é processada neste dispositivo e não é guardada nem enviada.',
+      description:'Selecione uma fotografia para ler o QR da AT ou escolha «Ler texto da fotografia» para reconhecimento de texto em português. A leitura é feita neste dispositivo, sem enviar nem guardar a imagem. Confirme todos os valores.',
       icon:'image',
       action:'Selecionar imagem'
     }),
@@ -36,6 +38,8 @@
   let scannerBusy=false;
   let pendingInvoice=null;
   let zxingPromise=null;
+  let ocrScriptPromise=null;
+  let ocrBusy=false;
   let readerWarmupScheduled=false;
 
   const clean=(value,max=180)=>String(value??'')
@@ -96,6 +100,66 @@
       totalCents,taxCents:taxCents===null?0:taxCents,
       certificate:clean(fields.R,40),hashFragment:clean(fields.Q,12)
     });
+  }
+
+  function parseOcrDate(value){
+    const match=/^(\d{1,4})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/.exec(String(value||'').trim());
+    if(!match)return '';
+    let year,month,day;
+    if(match[1].length===4){year=Number(match[1]);month=Number(match[2]);day=Number(match[3]);}
+    else{day=Number(match[1]);month=Number(match[2]);year=Number(match[3]);if(year<100)year+=2000;}
+    if(year<2000||year>2100)return '';
+    const date=new Date(Date.UTC(year,month-1,day));
+    return date.getUTCFullYear()===year&&date.getUTCMonth()===month-1&&date.getUTCDate()===day
+      ?`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`:'';
+  }
+
+  function parseOcrMoney(value){
+    const text=String(value||'').replace(/[\s\u00a0€]/g,'').trim();
+    if(!/^\d{1,3}(?:\.\d{3})*,\d{2}$|^\d{1,7},\d{2}$|^\d{1,7}\.\d{2}$/.test(text))return null;
+    const decimal=text.lastIndexOf(',')>text.lastIndexOf('.')?',':'.';
+    const normalized=text.replace(decimal===','?/\./g:/,/g,'').replace(decimal,'.');
+    const number=Number(normalized);
+    const cents=Math.round(number*100);
+    return Number.isSafeInteger(cents)&&cents>0?cents:null;
+  }
+
+  function parseInvoiceOcrText(raw){
+    const lines=String(raw||'').slice(0,12000).split(/\r?\n/).map(line=>clean(line,220)).filter(Boolean);
+    let amountCents=null,dueDate='',documentId='',paymentEntity='',paymentReference='',provider='';
+    for(const line of lines){
+      if(amountCents===null&&/\b(?:total(?:\s+a\s+pagar)?|valor\s+a\s+pagar|montante\s+a\s+pagar)\b/i.test(line)
+        &&!/sub\s*total|iva|desconto|troco|total\s+sem/i.test(line)){
+        const amounts=[...line.matchAll(/\d{1,3}(?:[.\s]\d{3})*,\d{2}|\d{1,7}[,.]\d{2}/g)]
+          .map(match=>parseOcrMoney(match[0])).filter(value=>value!==null);
+        if(amounts.length)amountCents=amounts[amounts.length-1];
+      }
+      if(!dueDate&&/vencimento|data\s+limite|pagar\s+at[eé]|limite\s+de\s+pagamento/i.test(line)){
+        const match=line.match(/\d{1,4}[\/.\-]\d{1,2}[\/.\-]\d{2,4}/);
+        if(match)dueDate=parseOcrDate(match[0]);
+      }
+      if(!documentId&&/\b(?:fatura|factura)(?:\s+(?:n[.º°o]*|número))?\s*[:#-]?\s*[a-z0-9][a-z0-9\s\/-]{3,55}/i.test(line)){
+        const match=line.match(/\b(?:fatura|factura)(?:\s+(?:n[.º°o]*|número))?\s*[:#-]?\s*([a-z0-9][a-z0-9\/-]{3,45})/i);
+        if(match)documentId=clean(match[1],50);
+      }
+      if(!paymentEntity){
+        const match=line.match(/(?:^|\b)entidade(?:\s+multibanco)?\s*[:#-]?\s*(\d{5})(?!\d)/i);
+        if(match)paymentEntity=match[1];
+      }
+      if(!paymentReference){
+        const match=line.match(/(?:^|\b)refer[eê]ncia(?:\s+(?:mb|multibanco|pagamento))?\s*[:#-]?\s*(\d[\d\s]{7,12}\d)(?!\d)/i);
+        if(match){
+          const digits=match[1].replace(/\s/g,'');
+          if(digits.length===9)paymentReference=digits;
+        }
+      }
+      if(!provider){
+        const match=line.match(/^\s*(?:fornecedor|emitente)\s*[:#-]\s*(.{4,80})$/i);
+        if(match&&!/\d{7,}/.test(match[1]))provider=clean(match[1],80);
+      }
+    }
+    return Object.freeze({amountCents,dueDate,documentId,paymentEntity,paymentReference,provider,
+      hasSuggestions:amountCents!==null||Boolean(dueDate)||Boolean(documentId)||Boolean(paymentEntity)||Boolean(paymentReference)||Boolean(provider)});
   }
 
   function centsText(cents){
@@ -190,6 +254,114 @@
     return zxingPromise;
   }
 
+  function loadOcrScript(){
+    if(root.Tesseract?.createWorker)return Promise.resolve(root.Tesseract);
+    if(ocrScriptPromise)return ocrScriptPromise;
+    ocrScriptPromise=new Promise((resolve,reject)=>{
+      const source=new URL('./tesseract.min.js',location.href);
+      if(source.origin!==location.origin){reject(new Error('ocr-origin-invalid'));return;}
+      const script=document.createElement('script');
+      script.src=source.href;
+      script.async=true;
+      script.referrerPolicy='no-referrer';
+      script.dataset.invoiceOcr='';
+      const timer=setTimeout(()=>reject(new Error('ocr-script-timeout')),OCR_LOAD_TIMEOUT_MS);
+      script.addEventListener('load',()=>{
+        clearTimeout(timer);
+        root.Tesseract?.createWorker?resolve(root.Tesseract):reject(new Error('ocr-script-unavailable'));
+      },{once:true});
+      script.addEventListener('error',()=>{clearTimeout(timer);reject(new Error('ocr-script-failed'));},{once:true});
+      document.head.appendChild(script);
+    }).catch(error=>{ocrScriptPromise=null;throw error;});
+    return ocrScriptPromise;
+  }
+
+  async function prepareOcrImage(file){
+    if(!root.createImageBitmap)return file;
+    let bitmap=null,canvas=null;
+    try{
+      bitmap=await root.createImageBitmap(file);
+      const ratio=Math.min(1,1800/Math.max(bitmap.width,bitmap.height));
+      if(ratio===1)return file;
+      canvas=document.createElement('canvas');
+      canvas.width=Math.max(1,Math.round(bitmap.width*ratio));
+      canvas.height=Math.max(1,Math.round(bitmap.height*ratio));
+      const context=canvas.getContext('2d');
+      if(!context)return file;
+      context.drawImage(bitmap,0,0,canvas.width,canvas.height);
+      return await new Promise(resolve=>canvas.toBlob(blob=>resolve(blob||file),'image/jpeg',0.86));
+    }catch(_error){return file;}
+    finally{try{bitmap?.close?.();}catch(_error){}if(canvas){canvas.width=0;canvas.height=0;}}
+  }
+
+  function showOcrPreview(data){
+    const form=document.querySelector('#billForm');
+    const changed=[];
+    const reference=[data.paymentEntity?`Entidade ${data.paymentEntity}`:'',data.paymentReference?`Referência ${data.paymentReference}`:'',data.documentId?`Fatura ${data.documentId}`:''].filter(Boolean).join(' · ');
+    if(form&&!String(form.elements.id?.value||'')){
+      if(data.documentId&&setBlankField(form.elements.title,clean(`Fatura ${data.documentId}`,80)))changed.push('Descrição');
+      if(data.provider&&setBlankField(form.elements.provider,data.provider))changed.push('Fornecedor');
+      if(reference&&setBlankField(form.elements.reference,reference))changed.push('Referência');
+      if(data.amountCents!==null&&setBlankField(form.elements.amount,(data.amountCents/100).toFixed(2).replace('.',',')))changed.push('Valor');
+      if(data.dueDate&&setBlankField(form.elements.dueDate,data.dueDate))changed.push('Vencimento');
+      form.dataset.invoiceOcrReview='true';
+    }
+    const preview=document.querySelector('#invoiceCapturePreview');
+    if(!preview)return;
+    const suggestions=[
+      data.documentId?['Documento provável',data.documentId]:null,
+      data.provider?['Fornecedor provável',data.provider]:null,
+      reference?['Pagamento / referência provável',reference]:null,
+      data.amountCents!==null?['Total provável',centsText(data.amountCents)]:null,
+      data.dueDate?['Vencimento provável',data.dueDate.split('-').reverse().join('/')]:null
+    ].filter(Boolean);
+    preview.innerHTML=`<div class="invoice-capture-preview-head"><div>${icon('receipt',18)}<strong>Texto analisado neste dispositivo</strong></div></div>
+      <div class="invoice-capture-preview-grid">${suggestions.map(([label,value])=>`<span><small>${escapeHtml(label)}</small><strong>${escapeHtml(value)}</strong></span>`).join('')}</div>
+      <small class="invoice-capture-review-note">Reconhecimento de texto pode errar números e datas. Verifica a fotografia original, o valor, o vencimento, a descrição, o fornecedor e a categoria antes de guardar. O texto não substitui o QR certificado da AT.</small>`;
+    preview.hidden=false;
+    status(changed.length?`OCR concluído. Preenchidos: ${changed.join(', ')}. Confirma cuidadosamente os campos antes de guardar.`:'OCR concluído. Foram encontrados dados possíveis; confirma-os antes de guardar.','warning');
+  }
+
+  async function scanInvoiceText(file){
+    if(!file||ocrBusy)return;
+    if(!String(file.type||'').startsWith('image/')||file.size<=0||file.size>MAX_IMAGE_BYTES){
+      status('Seleciona uma fotografia de até 15 MB. PDFs ainda não são suportados.','warning');return;
+    }
+    ocrBusy=true;
+    const session=scannerSession;
+    const form=document.querySelector('#billForm');
+    const controls=document.querySelectorAll('.invoice-ocr-button input');
+    controls.forEach(control=>{control.disabled=true;});
+    status('A preparar o reconhecimento de texto português. Na primeira utilização, é necessário descarregar o motor; pode demorar alguns segundos…');
+    let worker=null;
+    try{
+      const tesseract=await loadOcrScript();
+      const base=new URL('./',location.href).href;
+      worker=await tesseract.createWorker('por',1,{
+        workerPath:new URL('tesseract-worker.min.js',base).href,
+        corePath:base,
+        langPath:base,
+        workerBlobURL:false,
+        gzip:true,
+        logger:message=>{
+          if(message?.status==='recognizing text')status(`A ler texto na fotografia… ${Math.round(Math.max(0,Math.min(1,message.progress||0))*100)}%`);
+        }
+      });
+      const prepared=await prepareOcrImage(file);
+      const result=await worker.recognize(prepared);
+      if(session!==scannerSession||document.querySelector('#billForm')!==form||!document.querySelector('#formDialog')?.open||currentCaptureMode()!=='image')return;
+      const data=parseInvoiceOcrText(result?.data?.text||'');
+      if(data.hasSuggestions)showOcrPreview(data);
+      else status('A fotografia foi analisada, mas não foi possível identificar total, vencimento ou referência com segurança. Preenche os dados manualmente ou tenta uma imagem mais nítida.','warning');
+    }catch(_error){
+      status('O reconhecimento de texto não ficou disponível neste dispositivo. Verifica a ligação na primeira utilização ou preenche a fatura manualmente.','warning');
+    }finally{
+      try{await worker?.terminate?.();}catch(_error){}
+      controls.forEach(control=>{control.disabled=false;});
+      ocrBusy=false;
+    }
+  }
+
   function status(message,tone='normal'){
     const node=document.querySelector('#invoiceCaptureStatus');
     if(!node)return;
@@ -278,7 +450,9 @@
       <div class="invoice-capture-actions">
         <button class="btn secondary" type="button" data-invoice-camera>${icon('qr',19)}<span data-invoice-camera-label>Abrir câmara</span></button>
         <label class="btn secondary file-btn invoice-image-button">${icon('image',19)}<span data-invoice-image-label>Selecionar imagem</span><input id="invoiceImageInput" type="file" accept="image/*" hidden></label>
+        <label class="btn secondary file-btn invoice-ocr-button">${icon('receipt',19)}<span>Ler texto da fotografia (OCR)</span><input id="invoiceOcrInput" type="file" accept="image/*" hidden></label>
       </div>
+      <small class="invoice-ocr-note">O OCR é opcional, funciona localmente e precisa de descarregar o motor em português na primeira utilização. Pode demorar no iPhone e exige revisão manual.</small>
       <p id="invoiceCaptureStatus" class="invoice-capture-status" role="status" aria-live="polite" hidden></p>
       <div id="invoiceCapturePreview" class="invoice-capture-preview" hidden></div>
     </section>`;
@@ -427,7 +601,7 @@
     }catch(_error){
       status(mode==='qr'
         ?'Não foi possível ler o QR nesta fotografia. Tente novamente com o código mais próximo e bem iluminado.'
-        :'Não foi possível encontrar um QR de faturação legível nesta imagem. Tente uma fotografia mais nítida.','warning');
+        :'QR da AT não encontrado. Se a fatura não tiver QR legível, usa «Ler texto da fotografia (OCR)» ou preenche os dados manualmente.','warning');
     }finally{
       URL.revokeObjectURL(objectUrl);
     }
@@ -457,14 +631,16 @@
 
     let mode='';
     if(input.id==='invoiceImageInput')mode='image';
+    else if(input.id==='invoiceOcrInput')mode='ocr';
     else if(input.matches('[data-v75-native-invoice]'))mode=input.dataset.v75NativeInvoice||'';
     else return;
 
-    if(!['image','qr'].includes(mode)){input.value='';return;}
+    if(!['image','qr','ocr'].includes(mode)){input.value='';return;}
     const file=input.files?.[0]||null;
     if(!file){input.value='';return;}
 
-    scanImage(file,mode).finally(()=>{input.value='';});
+    const operation=mode==='ocr'?scanInvoiceText(file):scanImage(file,mode);
+    operation.finally(()=>{input.value='';});
   }
 
   function focusManualField(){
@@ -511,11 +687,18 @@
     const body=document.body;
     if(body)observer.observe(body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-v75-bill-mode','open']});
     ensureCaptureUi();
+    document.querySelector('#formDialog')?.addEventListener('close',()=>{
+      closeScanner(false);
+      pendingInvoice=null;
+      const preview=document.querySelector('#invoiceCapturePreview');
+      if(preview){preview.innerHTML='';preview.hidden=true;}
+      status('');
+    });
     document.addEventListener('visibilitychange',()=>{if(document.hidden)closeScanner(false);});
     root.addEventListener('pagehide',()=>closeScanner(false));
   }
 
-  root.CDCInvoiceCapture=Object.freeze({parseAtInvoiceQr,parseMoneyCents,parseAtDate,syncCaptureMode,currentCaptureMode,scanImage});
+  root.CDCInvoiceCapture=Object.freeze({parseAtInvoiceQr,parseMoneyCents,parseAtDate,parseInvoiceOcrText,syncCaptureMode,currentCaptureMode,scanImage,scanInvoiceText});
   if(typeof document!=='undefined'){
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installDom,{once:true});
     else installDom();
