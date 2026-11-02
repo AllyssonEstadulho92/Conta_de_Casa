@@ -61,4 +61,42 @@ assert.deepEqual(Array.from(unpaid),['a','c'],'A pagar must include partially pa
 const paid=vm.runInContext("filterBills(appState.bills,{status:'paid'}).map(b=>b.id)",context);
 assert.deepEqual(Array.from(paid),['b']);
 
+// 79-notifications-approved1: o filtro HTML local não admite <section>.
+// Os antigos grupos com essa tag eram convertidos num único nó de texto.
+vm.runInContext(read('render.js'),context);
+const output={html:''};
+const summary={textContent:''};
+const chips=['all','important','info'].map(alertFilter=>({dataset:{alertFilter},setAttribute(name,value){this[name]=value;}}));
+const tabs={dataset:{filter:'all'},querySelectorAll:()=>chips};
+context.document={querySelector:selector=>({'#alertCenterList':output,'#alertCenterSummary':summary,'#alertFilterTabs':tabs})[selector]||null};
+context.setHTML=(target,markup)=>{target.html=markup};
+context.sampleActivity=[
+  {id:'a1',text:'Atividade local registada',type:'general',at:new Date().toISOString()},
+  {id:'a2',text:'Pagamento registado',type:'payment',at:'2026-10-31T20:24:00'},
+  {id:'a3',text:'Fatura atualizada',type:'bill',at:'2026-10-31T20:23:00'}
+];
+vm.runInContext('appState.activity=sampleActivity',context);
+const sample=[{id:'balance-unconfirmed',tone:'warning',title:'Saldo bancário por confirmar',description:'O saldo apresentado é uma estimativa baseada nos registos internos.',actionLabel:'Atualizar saldo',page:'planning'}];
+context.alertItems=sample;
+vm.runInContext('renderAlertCenter(alertItems)',context);
+assert.match(summary.textContent,/1 alerta ativo · 3 atividades recentes/);
+assert.doesNotMatch(output.html,/<section\b/,'no unsupported section elements may flatten the notifications into plain text');
+assert.match(output.html,/class="cdc-alert-group cdc-alert-group-verificar"/);
+assert.match(output.html,/class="alert-center-item warning"/);
+assert.match(output.html,/Saldo bancário por confirmar/);
+assert.match(output.html,/data-go="planning"/,'the verified-balance action must remain operational');
+assert.match(output.html,/class="cdc-alert-recent"|class="cdc-alert-group cdc-alert-recent"/);
+assert.match(output.html,/class="cdc-alert-date-group"/);
+assert.match(output.html,/31 de outubro/);
+assert.match(output.html,/cdc-alert-activity-time/);
+assert.match(output.html,/cdc-alert-activity-payment/);
+assert.match(output.html,/cdc-alert-activity-bill/);
+tabs.dataset.filter='important';
+vm.runInContext('renderAlertCenter(alertItems)',context);
+assert.doesNotMatch(output.html,/cdc-alert-activity-payment/,'Important filter must still exclude activity');
+assert.match(css,/79-notifications-approved1/);
+assert.match(css,/#alertCenterDialog \.cdc-alert-activity-copy/);
+assert.match(css,/#alertCenterDialog \.alert-center-item/);
+assert.equal(vm.runInContext("notificationDateLabel('2026-11-02T08:24:00',new Date('2026-11-02T12:00:00'))",context),'Hoje · 02 nov.');
+
 console.log('Ecrãs financeiros e filtros rápidos: OK');

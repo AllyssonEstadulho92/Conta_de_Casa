@@ -163,14 +163,50 @@ function dashboardAlertPanelHtml(item) {
 function alertCenterItemHtml(item) {
   const severity=item.tone==='danger'?'Urgente':item.tone==='info'?'Próximo vencimento':'Atenção';
   const monthAttr=item.monthTarget?` data-month-target="${attr(item.monthTarget)}"`:'';
-  return `<article class="alert-center-item ${attr(item.tone)}" role="listitem" data-alert-id="${attr(item.id)}">
-    <span class="alert-center-indicator" aria-hidden="true"></span>
+  const itemIcon=item.tone==='danger'?'warning':item.tone==='info'?'calendar':'alert';
+  return `<article class="alert-center-item ${attr(item.tone)}" role="listitem" aria-label="${esc(severity)}: ${attr(item.title)}" data-alert-id="${attr(item.id)}">
+    <span class="alert-center-symbol" aria-hidden="true">${icon(itemIcon,22)}</span>
     <div class="alert-center-copy">
-      <div class="alert-center-item-head"><strong>${esc(item.title)}</strong><span class="alert-center-severity">${severity}</span></div>
+      <strong class="alert-center-title">${esc(item.title)}</strong>
       <p>${dashboardAlertDescriptionHtml(item)}</p>
     </div>
     <button class="btn secondary alert-center-action" type="button" data-go="${attr(item.page)}"${monthAttr}>${esc(item.actionLabel)}</button>
   </article>`;
+}
+
+function notificationDateLabel(value,now=new Date()) {
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime()))return 'Sem data';
+  if(date.toDateString()===now.toDateString()){
+    const month=new Intl.DateTimeFormat('pt-PT',{month:'short'}).format(date);
+    return `Hoje · ${String(date.getDate()).padStart(2,'0')} ${month}`;
+  }
+  return new Intl.DateTimeFormat('pt-PT',{day:'numeric',month:'long'}).format(date);
+}
+
+function notificationActivityHtml(activity){
+  const type=['payment','bill'].includes(activity.type)?activity.type:'info';
+  const name=type==='payment'?'circleCheck':type==='bill'?'receipt':'info';
+  const date=new Date(activity.at);
+  const time=Number.isNaN(date.getTime())?'—':new Intl.DateTimeFormat('pt-PT',{hour:'2-digit',minute:'2-digit'}).format(date);
+  return `<article class="cdc-alert-activity cdc-alert-activity-${type}" role="listitem">
+    <span class="cdc-alert-activity-icon" aria-hidden="true">${icon(name,21)}</span>
+    <div class="cdc-alert-activity-copy"><strong>${esc(activity.text||'Registo atualizado')}</strong><small>Alteração guardada neste dispositivo</small></div>
+    <span class="cdc-alert-activity-time" aria-label="Hora: ${esc(time)}">${esc(time)}</span>
+  </article>`;
+}
+
+function notificationActivityGroups(activities){
+  const days=new Map();
+  for(const activity of activities){
+    const label=notificationDateLabel(activity.at);
+    if(!days.has(label))days.set(label,[]);
+    days.get(label).push(activity);
+  }
+  return [...days].map(([label,group])=>`<div class="cdc-alert-date-group" role="group" aria-label="${attr(label)}">
+    <h3 class="cdc-alert-date-title">${esc(label)}</h3>
+    ${group.map(notificationActivityHtml).join('')}
+  </div>`).join('');
 }
 
 function renderAlertCenter(items = dashboardAlertItems()) {
@@ -183,8 +219,9 @@ function renderAlertCenter(items = dashboardAlertItems()) {
   const visible=items.filter(item=>filter==='all'||(filter==='important'
     ? item.tone==='danger'||item.id==='critical-due'||item.tone==='warning'
     : item.tone==='info'));
-  summary.textContent=count
-    ? `${count} alerta${count===1?'':'s'} ativo${count===1?'':'s'} · ${visible.length} nesta vista`
+  const recent=filter==='important'?[]:(appState?.activity||[]).slice(0,5);
+  summary.textContent=count||recent.length
+    ? `${count} alerta${count===1?'':'s'} ativo${count===1?'':'s'} · ${recent.length} atividade${recent.length===1?'':'s'} recente${recent.length===1?'':'s'}`
     : 'Sem alertas ativos neste momento';
   tabs?.querySelectorAll('[data-alert-filter]').forEach(button=>{
     button.setAttribute('aria-pressed',String(button.dataset.alertFilter===filter));
@@ -195,14 +232,13 @@ function renderAlertCenter(items = dashboardAlertItems()) {
     ['vencimentos','A vencer',item=>item.id==='upcoming-week'],
     ['verificar','A verificar',item=>item.tone!=='danger'&&item.id!=='critical-due'&&item.id!=='upcoming-week']
   ];
-  const recent=filter==='important'?[]:(appState?.activity||[]).slice(0,5);
   const activeHtml=visible.length
     ? groups.map(([key,title,match])=>{
         const group=visible.filter(match);
-        return group.length?`<section class="cdc-alert-group" aria-label="${esc(title)}"><h3 class="cdc-alert-group-title">${esc(title)} <span data-money>${group.length}</span></h3>${group.map(alertCenterItemHtml).join('')}</section>`:'';
+        return group.length?`<div class="cdc-alert-group cdc-alert-group-${key}" role="group" aria-label="${attr(title)}"><h3 class="cdc-alert-group-title">${esc(title)} <span class="cdc-alert-count">${group.length}</span></h3>${group.map(alertCenterItemHtml).join('')}</div>`:'';
       }).join(''):'';
   const recentHtml=recent.length
-    ? `<section class="cdc-alert-group cdc-alert-recent" aria-label="Atividade recente"><h3 class="cdc-alert-group-title">Recentes</h3>${recent.map(a=>`<article class="cdc-alert-activity"><span aria-hidden="true">${icon('circleCheck',19)}</span><div><strong>${esc(a.text||'Registo atualizado')}</strong><small>${esc(fmtDateTime(a.at))}</small></div></article>`).join('')}</section>`
+    ? `<div class="cdc-alert-group cdc-alert-recent" role="group" aria-label="Atividade recente"><h3 class="cdc-alert-group-title">Atividade recente</h3>${notificationActivityGroups(recent)}</div>`
     : '';
   setHTML(list,activeHtml+recentHtml||`<div class="alert-center-empty"><strong>${count?'Sem alertas nesta categoria':'Está tudo em ordem'}</strong><p>${count?'Experimenta outro filtro para consultar os alertas atuais.':'Não existem alertas financeiros ativos.'}</p></div>`);
 }

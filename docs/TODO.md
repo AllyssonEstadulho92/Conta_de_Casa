@@ -1,5 +1,13 @@
 # TODO — Conta de Casa
 
+## Notificações — apresentação aprovada (02/11/2026)
+
+- [x] Corrigir os grupos convertidos em texto corrido sem alargar o sanitizador global.
+- [x] Separar alertas, atividades e datas em cartões, conforme o protótipo validado.
+- [x] Manter os filtros Todas, Importantes e Informativas e as ações existentes.
+- [x] Cobrir a renderização e os filtros em testes automatizados.
+- [ ] Confirmar o resultado visual presencialmente no Safari/iPhone real com o cofre existente.
+
 ## Faturas, extrato mensal e Safari físico (02/11/2026)
 
 - [x] Integrar OCR opcional em português com carregamento local, revisão dos campos e sem envio das fotografias.

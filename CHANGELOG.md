@@ -1,5 +1,12 @@
 # Changelog
 
+## Notificações — protótipo aprovado (02/11/2026)
+
+- Corrigida a causa da apresentação em texto corrido: os grupos de notificações usavam uma tag não permitida pelo sanitizador HTML local; os cartões passam a utilizar elementos autorizados, sem reduzir as regras de segurança.
+- Aplicada apenas ao centro de Notificações a hierarquia visual aprovada: alertas destacados, filtros existentes, ações preservadas, atividades em cartões individuais e agrupamento por data e hora.
+- A contagem no cabeçalho passa a distinguir os alertas ativos das atividades recentes reais, sem criar eventos fictícios.
+- Não há alterações ao cofre, PIN, Plano, Contas, menu Mais, lógica financeira ou persistência.
+
 ## Leitura local de faturas e extrato mensal (02/11/2026)
 
 - Novo reconhecimento OCR em português como ação opcional na fotografia de fatura, executado no dispositivo através de motor e modelos locais do mesmo domínio; o QR AT continua a ser o modo mais fiável.

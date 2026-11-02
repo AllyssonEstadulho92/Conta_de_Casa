@@ -75,7 +75,7 @@ assert.match(shell,/cdc-plan-kpis/);
 assert.match(shell,/cdc-plan-projection/);
 assert.match(shell,/#monthPlanForm/);
 assert.match(shell,/@media\(max-width:620px\)/);
-assert.match(build,/const DASHBOARD_REV = '78-invoice-statement1'/);
-assert.match(build,/const SERVICE_WORKER_REV = '78-invoice-statement1'/);
+assert.match(build,/const DASHBOARD_REV = '79-notifications-approved1'/);
+assert.match(build,/const SERVICE_WORKER_REV = '79-notifications-approved1'/);
 
 console.log('Linear visual system on all pages: OK');
