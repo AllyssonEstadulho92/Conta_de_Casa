@@ -60,9 +60,9 @@ assert.match(shell,/\.mobile-menu-btn\[data-menu-state="open"\] \.mobile-menu-gl
 assert.match(shell,/@media\(prefers-reduced-motion:reduce\)/);
 
 // PWA e segurança: versões atualizadas, sem migrações nem credenciais reais.
-assert.match(build,/const DASHBOARD_REV = '79-notifications-approved1'/);
+assert.match(build,/const DASHBOARD_REV = '80-planning-breakdown1'/);
 assert.match(build,/const MOBILE_SHELL_REV = '76-approved-vault-nav4'/);
-assert.match(build,/const SERVICE_WORKER_REV = '79-notifications-approved1'/);
+assert.match(build,/const SERVICE_WORKER_REV = '80-planning-breakdown1'/);
 assert.match(build,/const ARCHITECTURE_REV = '77-walli-unified1'/);
 assert.match(build,/events\.js\?v=\$\{SERVICE_WORKER_REV\}/);
 assert.doesNotThrow(()=>new vm.Script(render));

@@ -560,12 +560,19 @@ function renderPlanningBudgetSnapshot(n){
     ? `<div class="cdc-budget-state ${over?'is-over':'is-ok'}">${icon(over?'alert':'shield',20)}<span><strong>${over?'Orçamento ultrapassado':'Dentro do orçamento'}</strong><small>${over?'Os compromissos excedem o limite mensal.':`Ainda tens ${money(available)} disponíveis, depois dos compromissos.`}</small></span></div>`
     : `<div class="cdc-budget-state is-unset">${icon('info',20)}<span><strong>Orçamento por definir</strong><small>Define um limite para veres o progresso e o valor disponível.</small></span><button type="button" class="btn secondary" data-focus-budget>Definir</button></div>`;
   setHTML('#planningBudgetSnapshot',`<div class="cdc-budget-overview">
-    <div class="cdc-budget-ring cdc-v77-budget-ring ${hasBudget?'':'is-unset'}" ${progressAttributes} style="--cdc-budget-progress:${progress}%"><strong>${hasBudget?`${percent}%`:'—'}</strong></div>
+    <div class="cdc-budget-ring cdc-v77-budget-ring ${hasBudget?'':'is-unset'}" ${progressAttributes}><strong>${hasBudget?`${percent}%`:'—'}</strong></div>
     <div class="cdc-budget-overview-copy"><span>Orçamento mensal</span><strong${hasBudget?' data-money':''}>${hasBudget?money(budget):'Por definir'}</strong><small data-money>${money(committed)} comprometidos</small></div>
   </div>
-  <dl class="cdc-budget-breakdown"><div><dt><i class="spent"></i>Gasto (efetivo)</dt><dd data-money>${money(spent)}</dd></div><div><dt><i class="pending"></i>Por pagar (compromissos)</dt><dd data-money>${money(pending)}</dd></div><div class="remaining"><dt><i class="remaining"></i>${over?'Acima do orçamento':'Disponível'}</dt><dd${hasBudget?' data-money':''}>${hasBudget?money(Math.abs(available)):'—'}</dd></div></dl>
+  <div class="cdc-budget-breakdown" role="list">
+    <div role="listitem"><span class="cdc-budget-breakdown-label"><span class="cdc-budget-dot spent" aria-hidden="true"></span>Gasto (efetivo)</span><strong class="cdc-budget-breakdown-value" data-money>${money(spent)}</strong></div>
+    <div role="listitem"><span class="cdc-budget-breakdown-label"><span class="cdc-budget-dot pending" aria-hidden="true"></span>Por pagar (compromissos)</span><strong class="cdc-budget-breakdown-value" data-money>${money(pending)}</strong></div>
+    <div class="remaining" role="listitem"><span class="cdc-budget-breakdown-label"><span class="cdc-budget-dot remaining" aria-hidden="true"></span>${over?'Acima do orçamento':'Disponível'}</span><strong class="cdc-budget-breakdown-value"${hasBudget?' data-money':''}>${hasBudget?money(Math.abs(available)):'—'}</strong></div>
+  </div>
   ${n.marketEstimatedCount>0?`<p class="cdc-budget-estimate-note">Inclui ${n.marketEstimatedCount} compra${n.marketEstimatedCount===1?'':'s'} com valor estimado.</p>`:''}
   ${state}`);
+  // O filtro HTML retira atributos style; aplica apenas um valor numérico controlado ao anel já validado.
+  const ring=$('#planningBudgetSnapshot .cdc-v77-budget-ring');
+  if(ring)ring.style.setProperty('--cdc-budget-progress',`${progress}%`);
 }
 function renderPlanningOverview(n){
   const result=planningMonthlyResult(n);

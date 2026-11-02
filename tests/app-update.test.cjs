@@ -143,7 +143,7 @@ assert.match(prepare, /const APP_VERSION = String\(PACKAGE\.version/);
 assert.match(prepare, /git'.*rev-parse.*--short=7.*HEAD/s);
 assert.match(prepare, /const APP_UPDATE_REV = '76-version-alignment1'/);
 assert.match(prepare, /const BUILD = 'v76'/);
-assert.match(prepare, /const SERVICE_WORKER_REV = '79-notifications-approved1'/);
+assert.match(prepare, /const SERVICE_WORKER_REV = '80-planning-breakdown1'/);
 assert.match(prepare, /name="app-version"/);
 assert.match(prepare, /name="app-build-id"/);
 assert.match(prepare, /name="app-build-date"/);
@@ -211,7 +211,7 @@ try {
   assert.doesNotMatch(index,/unpkg\.com/);
   assert.ok(fs.existsSync(path.join(dist,'zxing-browser.min.js')));
   assert.ok(fs.existsSync(path.join(dist,'ZXING_BROWSER_LICENSE.txt')));
-  assert.match(events, /\.\/sw\.js\?v=79-notifications-approved1/);
+  assert.match(events, /\.\/sw\.js\?v=80-planning-breakdown1/);
   assert.match(builtSw,/const CACHE = 'conta-de-casa-public-v76-(?:[0-9a-f]{7}|local)';/,'built Service Worker must use the exact deterministic build cache key');
   assert.doesNotMatch(builtSw,/conta-de-casa-public-v76-version-alignment1-/,'built cache key must remain compact');
   assert.equal(distManifest.latestVersion,'v76');

@@ -117,12 +117,12 @@ html.cdc-v75 .cdc-budget-overview-copy>strong{color:var(--v76-text);font-size:cl
 html.cdc-v75 .cdc-budget-overview-copy>small{font-size:.76rem}
 html.cdc-v75 .cdc-budget-breakdown{margin:17px 0 0;display:grid;gap:10px}
 html.cdc-v75 .cdc-budget-breakdown>div{display:flex;justify-content:space-between;gap:12px;align-items:center}
-html.cdc-v75 .cdc-budget-breakdown dt{display:flex;align-items:center;gap:9px;font-size:.82rem;color:var(--v76-text)}
-html.cdc-v75 .cdc-budget-breakdown dt i{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#d64e56}
-html.cdc-v75 .cdc-budget-breakdown dt i.pending{background:#36465a}
-html.cdc-v75 .cdc-budget-breakdown dt i.remaining{background:#3bbba3}
-html.cdc-v75 .cdc-budget-breakdown dd{margin:0;font-weight:740;color:var(--v76-text);font-variant-numeric:tabular-nums}
-html.cdc-v75 .cdc-budget-breakdown .remaining dd{color:var(--v76-success)}
+html.cdc-v75 .cdc-budget-breakdown .cdc-budget-breakdown-label{display:flex;align-items:center;gap:9px;min-width:0;font-size:.82rem;color:var(--v76-text)}
+html.cdc-v75 .cdc-budget-breakdown .cdc-budget-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#d64e56}
+html.cdc-v75 .cdc-budget-breakdown .cdc-budget-dot.pending{background:#36465a}
+html.cdc-v75 .cdc-budget-breakdown .cdc-budget-dot.remaining{background:#3bbba3}
+html.cdc-v75 .cdc-budget-breakdown .cdc-budget-breakdown-value{flex:0 0 auto;text-align:right;font-weight:740;color:var(--v76-text);font-variant-numeric:tabular-nums}
+html.cdc-v75 .cdc-budget-breakdown .remaining .cdc-budget-breakdown-value{color:var(--v76-success)}
 html.cdc-v75 .cdc-budget-state{
   display:flex;align-items:center;gap:13px;padding:12px;margin-top:17px;border-radius:13px;
   background:color-mix(in srgb,var(--v76-success) 11%,var(--v76-surface));color:var(--v76-success);
@@ -326,8 +326,8 @@ html.cdc-v75 #planningBudgetSnapshot .cdc-budget-overview-copy>strong{
 }
 html.cdc-v75 #planningBudgetSnapshot .cdc-budget-overview-copy>small{color:var(--v76-primary);font-weight:600}
 html.cdc-v75 #planningBudgetSnapshot .cdc-budget-breakdown{border-top:1px solid var(--v76-border);padding-top:14px}
-html.cdc-v75 #planningBudgetSnapshot .cdc-budget-breakdown dt{color:var(--v76-text)}
-html.cdc-v75 #planningBudgetSnapshot .cdc-budget-breakdown .remaining dd{
+html.cdc-v75 #planningBudgetSnapshot .cdc-budget-breakdown .cdc-budget-breakdown-label{color:var(--v76-text)}
+html.cdc-v75 #planningBudgetSnapshot .cdc-budget-breakdown .remaining .cdc-budget-breakdown-value{
   padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--v76-success) 10%,var(--v76-surface));
 }
 html.cdc-v75 #planningBudgetSnapshot .cdc-budget-state{min-height:66px}
@@ -404,8 +404,8 @@ html.cdc-v75 #page-settings .cdc-more-about-panel p{margin:6px 0 0;font-size:.79
     flex-basis:87px!important;min-width:87px!important;width:87px!important;height:87px!important;
   }
   html.cdc-v75 #planningBudgetSnapshot .cdc-budget-overview{gap:11px}
-  html.cdc-v75 #planningBudgetSnapshot .cdc-budget-breakdown dt{font-size:.74rem}
-  html.cdc-v75 #planningBudgetSnapshot .cdc-budget-breakdown dd{font-size:.77rem}
+  html.cdc-v75 #planningBudgetSnapshot .cdc-budget-breakdown .cdc-budget-breakdown-label{font-size:.74rem}
+  html.cdc-v75 #planningBudgetSnapshot .cdc-budget-breakdown .cdc-budget-breakdown-value{font-size:.77rem}
 }
 @media(forced-colors:active){
   html.cdc-v75 #planningBudgetSnapshot .cdc-v77-budget-ring{

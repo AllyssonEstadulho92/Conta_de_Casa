@@ -1,5 +1,13 @@
 # TODO — Conta de Casa
 
+## Plano Mensal, organização aprovada (02/11/2026)
+
+- [x] Identificar o motivo pelo qual as três linhas do orçamento apareciam como texto corrido.
+- [x] Restaurar a hierarquia do protótipo com pontos de estado, legendas à esquerda e valores à direita.
+- [x] Repor o progresso do círculo sem alterar o sanitizador nem a fórmula da percentagem.
+- [x] Testar markup admissível e os estados vazio, normal e orçamento ultrapassado.
+- [ ] Confirmar no Safari/iPhone físico o alinhamento com os dados existentes e diferentes tamanhos de letra.
+
 ## Notificações — apresentação aprovada (02/11/2026)
 
 - [x] Corrigir os grupos convertidos em texto corrido sem alargar o sanitizador global.

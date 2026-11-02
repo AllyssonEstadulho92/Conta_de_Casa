@@ -1,5 +1,13 @@
 # Estado do Projeto — Conta de Casa
 
+## Plano Mensal, linhas do orçamento e anel de progresso (02/11/2026)
+
+**Falha confirmada na captura:** Gasto (efetivo), Por pagar (compromissos) e Disponível apareciam colados, sem colunas ou indicadores. `renderPlanningBudgetSnapshot()` gerava `<dl>`, `<dt>`, `<dd>` e `<i>`, não permitidos por `sanitizeHtmlFragment()` em `core.js`; ao filtrar o HTML, o browser ficava apenas com texto corrido. O mesmo filtro removia `style="--cdc-budget-progress:..."`, impedindo que o círculo recebesse a percentagem calculada.
+
+**Correção limitada ao Plano:** os três pares de legenda/valor são agora linhas independentes com `div/span/strong`, `role=list/listitem` e os mesmos `data-money`. A variável CSS do anel é aplicada depois de `setHTML()` com uma percentagem numérica limitada entre 0 e 100. O orçamento, gasto, compromissos, disponível e respetivas fórmulas permanecem iguais. Não foi alargado o sanitizador nem alterado o cofre, PIN, sincronização ou a navegação. Revisão de cache preparada: `80-planning-breakdown1`.
+
+**Validação:** contratos adicionados para etiquetas admitidas, três linhas autónomas, estados sem orçamento/64%/130% e progresso visual limitado. Teste de visualização física no Safari/iPhone continua pendente.
+
 ## Partilha do Walli integrada no novo padrão visual (02/11/2026)
 
 **Pedido:** a Partilha do Walli deve usar a mesma linguagem de interface dos cinco destinos do protótipo e do novo Plano/Calendário. A navegação permanece em Mais > Outras funções. Foi acrescentado título centrado com ícone de pata, seletor mensal com os mesmos controlos das outras vistas, cartão principal de total a pagar, cartão de estado de pagamento e dois cartões compactos de dias/passeios. As métricas adicionais permanecem disponíveis numa secção expansível "Detalhes do cálculo". Formulários, pagamentos parciais, plano de prestações, calendário do Walli e registos continuam acessíveis.

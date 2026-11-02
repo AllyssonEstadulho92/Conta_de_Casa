@@ -122,10 +122,20 @@ assert.match(calendarSlots.get('#calendarGrid'),/data-calendar-day="1"/);
 assert.match(calendarSlots.get('#calendarGrid'),/aria-label="1 de novembro de 2026: sem movimentos registados"/);
 assert.match(calendarSlots.get('#calendarMonthSummary'),/12\.00 EUR/,'o calendário deve usar valores financeiros reais');
 sandbox.setHTML=(_selector,content)=>{snapshotHtml=content;};
+const ringProperties=[];
+sandbox.$=selector=>selector==='#planningBudgetSnapshot .cdc-v77-budget-ring'
+  ? {style:{setProperty:(name,value)=>ringProperties.push([name,value])}}
+  : null;
+const allowedTags=new Set([...read('core.js').match(/const ALLOWED_TAGS = new Set\(\[([^\]]+)\]\)/)?.[1].matchAll(/'([^']+)'/g)].map(match=>match[1]));
 
 const budgetSnapshot=(budgetCents,budgetUsed,outstanding)=>{
   sandbox.n={profile:{budgetCents},budgetUsed,outstanding,marketEstimatedCount:0};
   vm.runInContext('renderPlanningBudgetSnapshot(n)',sandbox);
+  for(const match of snapshotHtml.matchAll(/<\/?([a-z][a-z0-9]*)\b/g)){
+    assert.ok(allowedTags.has(match[1]),`<${match[1]}> não é aceite pelo filtro HTML do cartão Plano`);
+  }
+  assert.doesNotMatch(snapshotHtml,/\sstyle=/,'o filtro rejeita estilos inline no cartão do orçamento');
+  assert.equal((snapshotHtml.match(/role="listitem"/g)||[]).length,3,'os três valores devem ocupar linhas próprias');
   return snapshotHtml;
 };
 
@@ -134,15 +144,22 @@ assert.match(unset,/cdc-v77-budget-ring is-unset/);
 assert.match(unset,/Orçamento por definir/);
 assert.match(unset,/role="img"/);
 assert.doesNotMatch(unset,/Dentro do orçamento|0% comprometido/);
+assert.deepEqual(ringProperties.at(-1),['--cdc-budget-progress','0%']);
 
 const within=budgetSnapshot(150000,96000,0);
 assert.match(within,/64% comprometido/);
 assert.match(within,/540\.00 EUR/);
 assert.match(within,/Dentro do orçamento/);
+assert.match(within,/cdc-budget-dot spent/);
+assert.match(within,/cdc-budget-dot pending/);
+assert.match(within,/cdc-budget-dot remaining/);
+assert.match(within,/class="cdc-budget-breakdown-value" data-money/);
+assert.deepEqual(ringProperties.at(-1),['--cdc-budget-progress','64%']);
 
 const exceeded=budgetSnapshot(10000,12000,1000);
 assert.match(exceeded,/130% comprometido/);
 assert.match(exceeded,/aria-valuenow="100"/);
 assert.match(exceeded,/Orçamento ultrapassado/);
+assert.deepEqual(ringProperties.at(-1),['--cdc-budget-progress','100%']);
 
 console.log('Fidelidade e auditoria: cinco botões, Mais completo, notificações, saudação horária e calendário: OK');

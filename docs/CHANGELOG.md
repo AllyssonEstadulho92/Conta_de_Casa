@@ -1,5 +1,12 @@
 # Changelog Técnico — Conta de Casa
 
+## Correção da composição do orçamento no Plano (02/11/2026)
+
+- Corrigidos os rótulos e montantes que surgiam colados por remoção de etiquetas HTML não admitidas pelo filtro.
+- O cartão volta a separar gasto efetivo, compromissos por pagar e disponível em três linhas com pontos coloridos, tal como no protótipo aprovado.
+- Restaurada a cor de progresso do anel por CSS controlado depois do saneamento do DOM.
+- Nenhuma alteração a montantes, estado financeiro, cofre, PIN ou menu; revisão de cache `80-planning-breakdown1` e testes de regressão.
+
 ## Partilha do Walli unificada (02/11/2026)
 
 - Cabeçalho e seleção mensal no padrão do Plano e Calendário.

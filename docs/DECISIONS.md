@@ -1,5 +1,9 @@
 # Decisões Técnicas — Conta de Casa
 
+## D-168 — o Plano não pode gerar HTML que o próprio filtro transforme em texto (02/11/2026)
+
+Manter o sanitizador restritivo. Corrigir o template do cartão mensal para usar apenas etiquetas autorizadas, com três linhas de valores visualmente e semanticamente separadas. Como atributos `style` são removidos de `setHTML()`, atualizar a variável CSS do círculo apenas após a inserção no DOM, com percentagem calculada e limitada. Preservar os dados e os cálculos existentes, sem aumentar a superfície de XSS nem autorizar mudanças em outras páginas.
+
 ## D-167 — OCR local facultativo e extrato derivado do livro de movimentos (02/11/2026)
 
 O QR AT mantém prioridade porque permite extrair campos estruturados que o OCR pode confundir. O modo de fotografia passa a oferecer reconhecimento de texto português como ação separada e explícita; os ficheiros do motor, do Web Worker, do WASM e do idioma são servidos pela própria origem e descarregados apenas por escolha do utilizador. A CSP permite `wasm-unsafe-eval`, sem permitir `unsafe-eval` de JavaScript; as imagens não são armazenadas nem enviadas a uma API. OCR só sugere valores identificáveis, nunca cria ou liquida faturas automaticamente, e exige revisão manual de fornecedor, montante, data e restantes campos. O modelo não entra no precache obrigatório da PWA devido ao peso; a primeira utilização necessita de rede e a ausência de OCR não pode bloquear a entrada manual.
