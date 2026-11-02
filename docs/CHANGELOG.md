@@ -1,5 +1,14 @@
 # Changelog Técnico — Conta de Casa
 
+## Partilha do Walli unificada (02/11/2026)
+
+- Cabeçalho e seleção mensal no padrão do Plano e Calendário.
+- Indicadores agrupados: total, estado, dias, passeios e detalhes do cálculo.
+- Cartões, calendário e formulários uniformizados com a nova paleta e dimensões móveis.
+- Mantidos registos reais, pagamentos, planos por partes, anulações e histórico do cofre.
+- Atualização de cache `77-walli-unified1` e testes de contrato visual.
+
+
 ## Auditoria do menu e uniformização do Calendário (02/11/2026)
 
 - Apenas um sino por vista; contador preservado junto da saudação no Início.

@@ -1,5 +1,15 @@
 # TODO — Conta de Casa
 
+## Partilha do Walli, continuidade visual (02/11/2026)
+
+- [x] Colocar título e seletor de mês iguais aos da navegação financeira nova.
+- [x] Mostrar total/estado, dias/passeios e disponibilizar as restantes métricas em detalhes expansíveis.
+- [x] Manter todas as ações existentes, incluindo pagamentos fracionados e edições.
+- [x] Adaptar os cartões e o calendário do Walli para a paleta comum.
+- [x] Cobrir o novo contrato visual e os cálculos existentes em testes automatizados.
+- [ ] Confirmar a composição num iPhone real com dados no cofre, sem apagar armazenamento.
+
+
 ## Auditoria adicional do menu, relógio e Calendário (02/11/2026)
 
 - [x] Remover no Início apenas o sino do cabeçalho e preservar o badge no sino de boas-vindas.

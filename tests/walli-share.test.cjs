@@ -11,6 +11,8 @@ const index = fs.readFileSync('index.html','utf8');
 const sw = fs.readFileSync('sw.js','utf8');
 const prepare = fs.readFileSync('scripts/prepare-pages.cjs','utf8');
 const sync = fs.readFileSync('sync.js','utf8');
+const unifiedCss=fs.readFileSync('v76-finance-screens.css','utf8');
+const iconsSource=fs.readFileSync('ui-icons.js','utf8');
 
 function cleanDateKey(value) {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || ''));
@@ -113,6 +115,17 @@ assert.match(core,/petshare: \{ label:'Partilha do Walli', context:'Animais', ic
 assert.match(core,/petShare: normalizePetShare\(s\?\.petShare\)/);
 assert.match(architecture,/label:'Outras funções'[\s\S]*petshare','Partilha do Walli','paw'/);
 assert.match(index,/id="page-petshare"/);
+assert.match(index,/class="cdc-walli-screen-heading"/,'Walli deve ter título no novo padrão');
+assert.match(index,/id="walliMonthLabel"/,'Walli deve mostrar o mês atual');
+assert.match(index,/class="cdc-month-switch cdc-walli-month-switch"/,'o seletor mensal deve ser idêntico ao do Calendário e Plano');
+assert.match(index,/data-month-step="-1"/);
+assert.match(index,/data-month-step="1"/);
+assert.match(source,/walliMonthLabel\.textContent=monthLabel\(selectedMonth\)/,'o rótulo mensal deve acompanhar a seleção canónica');
+assert.match(source,/cdc-walli-spotlight/,'Walli deve dar prioridade ao valor e estado do mês');
+assert.match(source,/cdc-walli-activity-grid/,'os dias e passeios devem estar juntos');
+assert.match(source,/cdc-walli-breakdown/,'métricas detalhadas devem continuar acessíveis');
+assert.match(unifiedCss,/77-walli-unified1/,'Walli deve usar as cores e os cartões da nova interface');
+assert.match(iconsSource,/\.cdc-calendar-screen-heading \[data-cdc-icon\],\.cdc-walli-screen-heading \[data-cdc-icon\]/,'os títulos devem mostrar ícones reais');
 assert.match(index,/id="walliShareSettingsForm"/);
 assert.match(index,/id="walliCareForm"/);
 assert.match(source,/existing\.has\(day\)/,'overlapping care days must be rejected');
@@ -153,6 +166,27 @@ assert.match(source,/appState\.petShare\.payments\.push/,'reimbursements must be
 assert.doesNotMatch(source,/localStorage|sessionStorage/,'Walli financial data must stay inside the encrypted application state');
 assert.match(sw,/\.\/walli-share\.js/);
 assert.match(prepare,/'walli-share\.js'/);
-assert.match(prepare,/WALLI_SHARE_REV = '76-walli-enhancements6'/);
+assert.match(prepare,/WALLI_SHARE_REV = '77-walli-unified1'/);
 
-console.log('Walli share drawer/domain tests: OK');
+const walliSlots=new Map();
+const renderedMonth={textContent:''};
+context.$=selector=>selector==='#walliMonthLabel'?renderedMonth:null;
+context.setHTML=(selector,markup)=>walliSlots.set(selector,markup);
+context.icon=()=>'<svg aria-hidden="true"></svg>';
+context.money=cents=>(cents/100).toFixed(2)+' EUR';
+context.esc=value=>String(value);
+context.attr=value=>String(value);
+context.empty=value=>'<p>'+String(value)+'</p>';
+context.fmtDate=value=>String(value);
+context.currentLocalDateKey=()=> '2026-10-02';
+context.pad2=value=>String(value).padStart(2,'0');
+context.window.renderPetShare();
+assert.equal(renderedMonth.textContent,'Outubro de 2026');
+assert.match(walliSlots.get('#walliShareSummary'),/class="cdc-walli-spotlight"/);
+assert.match(walliSlots.get('#walliShareSummary'),/class="cdc-walli-activity-grid"/);
+assert.match(walliSlots.get('#walliShareSummary'),/class="cdc-walli-breakdown"/);
+assert.match(walliSlots.get('#walliShareSummary'),/Dividir pagamento/,'o plano de pagamentos deve permanecer funcional');
+assert.match(walliSlots.get('#walliShareCalendar'),/walli-calendar-grid/);
+assert.match(walliSlots.get('#walliShareRecords'),/data-walli-edit/);
+
+console.log('Walli: dados, pagamentos e visual unificado: OK');

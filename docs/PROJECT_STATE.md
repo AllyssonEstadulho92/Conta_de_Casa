@@ -1,5 +1,12 @@
 # Estado do Projeto — Conta de Casa
 
+## Partilha do Walli integrada no novo padrão visual (02/11/2026)
+
+**Pedido:** a Partilha do Walli deve usar a mesma linguagem de interface dos cinco destinos do protótipo e do novo Plano/Calendário. A navegação permanece em Mais > Outras funções. Foi acrescentado título centrado com ícone de pata, seletor mensal com os mesmos controlos das outras vistas, cartão principal de total a pagar, cartão de estado de pagamento e dois cartões compactos de dias/passeios. As métricas adicionais permanecem disponíveis numa secção expansível "Detalhes do cálculo". Formulários, pagamentos parciais, plano de prestações, calendário do Walli e registos continuam acessíveis.
+
+**Fonte da verdade:** `selectedMonth` é a única chave de mês; `walliShareSnapshot()` e os cálculos em cêntimos continuam a fornecer os dados reais. Esta revisão não altera contratos de cofre, pagamentos, anulações ou integração com Despesas. A camada visual está em `v76-finance-screens.css`, depois das regras do módulo.
+
+
 ## Auditoria e uniformização do cabeçalho, Mais e Calendário (02/11/2026)
 
 **Pedido:** no Início, mostrar apenas o sino junto da saudação; no telemóvel, remover o botão de três linhas; atualizar Bom dia/Boa tarde/Boa noite pela hora local; tornar o Calendário consistente com o novo Plano; e reunir no Mais as funções do menu lateral, incluindo ocultar valores e bloquear o cofre.

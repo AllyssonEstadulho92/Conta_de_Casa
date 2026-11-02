@@ -1,5 +1,10 @@
 # Arquitetura — Conta de Casa
 
+## Ecrã de Partilha do Walli, versão coerente com a interface móvel (02/11/2026)
+
+`index.html` oferece `#walliMonthLabel` e os botões `data-month-step` já tratados pelo controlador comum de `events.js`. O renderer de `walli-share.js` escreve o nome do mês via `monthLabel(selectedMonth)` e agrupa a saída de `snapshot()` em `.cdc-walli-spotlight` (total e estado), `.cdc-walli-activity-grid` (dias e passeios) e `.cdc-walli-breakdown` (restantes indicadores). O estado do grupo expansível não é armazenado no cofre. Todos os formulários conservam IDs, listeners e rotas. `v76-finance-screens.css` fornece estilos finais com os tokens `--v76-*` e responsividade móvel, reutilizando o calendário já existente do módulo. O cache bust `77-walli-unified1` atualiza `walli-share.js`, a camada visual, o shell e o service worker sem migrar dados.
+
+
 ## Cabeçalho, rotas secundárias e calendário canónicos (02/11/2026)
 
 `v75-architecture.js` continua a gerar a navegação canónica com cinco destinos. `MORE_GROUPS` possui três níveis: quatro ações prioritárias, Outras funções e Páginas do menu. Os últimos dois usam `<details>`, permitindo concentrar o antigo drawer no Mais sem alargar a dock. `data-v75-privacy` usa `setPrivacy()`, e `data-v75-lock` usa `lockApp('manual')` diretamente: não existe uma segunda implementação de segurança.

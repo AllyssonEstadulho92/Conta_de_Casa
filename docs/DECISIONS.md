@@ -1,5 +1,10 @@
 # Decisões Técnicas — Conta de Casa
 
+## D-166 — uniformizar Walli preservando o domínio (02/11/2026)
+
+A Partilha do Walli passa a usar a mesma hierarquia visual do Calendário e Plano: título, mês, indicadores prioritários, detalhes expansíveis e cartões de registo. Não se duplica o seletor persistido, nem se reescreve a lógica de atribuição de dias, cálculo proporcional, passeios, pagamentos parciais, prestações ou integração na categoria Animais. A organização visual não oculta ações financeiras: pagar, dividir, configurar, editar e consultar movimentos continuam disponíveis. Mudanças de domínio exigirão testes financeiros próprios e autorização separada.
+
+
 ## D-165 — menu Mais completo, notificações únicas e Calendário consistente (02/11/2026)
 
 O botão lateral de três linhas deixa de ser necessário no telemóvel. Os cinco destinos do protótipo permanecem na dock inferior; o Mais contém as páginas antigas e as ações rápidas do drawer, em grupos secundários expansíveis, sem perder funcionalidades. No Início aparece apenas o sino da saudação com contador; nas outras páginas permanece o sino do cabeçalho. Os alertas são derivados do cofre, não duplicados.

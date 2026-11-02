@@ -1,5 +1,12 @@
 # Changelog
 
+## Partilha do Walli no novo visual (02/11/2026)
+
+- Menu Mais > Partilha do Walli agora apresenta título, mês e cartões consistentes com as outras páginas.
+- Total, estado do pagamento, dias e passeios aparecem primeiro; os restantes cálculos ficam em detalhes expansíveis.
+- Mantidos todos os formulários, calendários e movimentos reais, sem alterar o cofre cifrado.
+
+
 ## Auditoria do cabeçalho, Calendário e menu Mais (02/11/2026)
 
 - Um só sino no Início, junto da saudação, com contador de notificações.

@@ -322,6 +322,8 @@
   function render(){
     if(!appState?.petShare)return;
     const data=snapshot(selectedMonth);
+    const walliMonthLabel=$('#walliMonthLabel');
+    if(walliMonthLabel)walliMonthLabel.textContent=monthLabel(selectedMonth);
     const petName=appState.petShare.petName||'Walli';
     const caregiver=appState.petShare.caregiverName||'Nuno';
     const metricHead=(iconName,label)=>'<div class="walli-card-head"><span class="walli-card-icon">'+icon(iconName,18)+'</span><span>'+label+'</span></div>';
@@ -358,13 +360,13 @@
       '</article>';
     }
 
-    let summary=
+    let summary='<div class="cdc-walli-spotlight">'+
       '<article class="walli-summary-card walli-total-card primary">'+
         metricHead('wallet','Total a pagar a '+esc(caregiver))+
         '<strong data-money>'+money(data.totalPayableCents)+'</strong>'+
         '<small>Parte base + custo dos passeios</small>'+
       '</article>'+
-      status+
+      status+'</div><div class="cdc-walli-activity-grid">'+
       '<article class="walli-summary-card walli-metric-card">'+
         metricHead('calendar','Dias com '+esc(caregiver))+
         '<strong>'+data.careDays.length+'</strong>'+
@@ -374,7 +376,7 @@
         metricHead('paw','Passeios automáticos')+
         '<strong>'+data.walkCount+'</strong>'+
         '<small>'+data.walksPerDay+' por dia × '+money(data.walkRateCents)+'</small>'+
-      '</article>'+
+      '</article></div><details class="cdc-walli-breakdown"><summary>Detalhes do cálculo <span aria-hidden="true">⌄</span></summary><div class="cdc-walli-breakdown-grid">'+
       '<article class="walli-summary-card walli-metric-card">'+
         metricHead('report','Parte base de '+esc(caregiver))+
         '<strong data-money>'+money(data.shareCents)+'</strong>'+
@@ -409,6 +411,7 @@
         '<small>Não é abatido ao total a pagar ao '+esc(caregiver)+'.</small>'+
       '</article>';
     }
+    summary+='</div></details>';
     setHTML('#walliShareSummary',summary);
     renderPaymentSplitPreview();
     renderPaymentPanel(data);

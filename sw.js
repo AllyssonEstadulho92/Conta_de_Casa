@@ -1,6 +1,6 @@
 'use strict';
 
-/* 77-clock-calendar-menu2: atualiza saudação, notificações, calendário e menu Mais sem alterar o formato dos dados. */
+/* 77-walli-unified1: preserva saudação, calendário e Mais e uniformiza a Partilha do Walli sem alterar dados. */
 const CACHE = 'conta-de-casa-public-v76-build';
 const NAVIGATION_TIMEOUT_MS = 4000;
 const PUBLIC_ASSETS = [

@@ -26,11 +26,11 @@ const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const MODERN_UI_REV = '76-visual-audit1';
 const PRODUCT_PAGES_REV = '76-add-product-prototype2';
-const DASHBOARD_REV = '77-clock-calendar-menu2';
-const FINANCE_REV = '77-clock-calendar-menu2';
+const DASHBOARD_REV = '77-walli-unified1';
+const FINANCE_REV = '77-walli-unified1';
 const MOBILE_SHELL_REV = '76-approved-vault-nav4';
-const FINANCE_SCREENS_REV = '77-clock-calendar-menu2';
-const ARCHITECTURE_REV = '77-clock-calendar-menu2';
+const FINANCE_SCREENS_REV = '77-walli-unified1';
+const ARCHITECTURE_REV = '77-walli-unified1';
 const PLANNING_MORE_REV = '76-planning-more1';
 const HEADER_REV = '75-header2';
 const STABILITY_REV = '75-stability1';
@@ -49,8 +49,8 @@ const PHOTO_LOADER_REV = '76-photo-card3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
 const ZXING_REV = '76-local-zxing1';
-const SERVICE_WORKER_REV = '77-clock-calendar-menu2';
-const WALLI_SHARE_REV = '76-walli-enhancements6';
+const SERVICE_WORKER_REV = '77-walli-unified1';
+const WALLI_SHARE_REV = '77-walli-unified1';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
   throw new Error(`Invalid package application version: ${APP_VERSION||'(empty)'}`);
