@@ -415,6 +415,28 @@ function wireEvents(){
   });
   $('#quickAddBtn').addEventListener('click',()=>$('#quickDialog').showModal());
   document.addEventListener('click',e=>{
+    const alertsShortcut=e.target.closest('[data-open-alerts]');
+    if(alertsShortcut){openAlertCenter();return;}
+    const privacyShortcut=e.target.closest('[data-toggle-privacy]');
+    if(privacyShortcut){setPrivacy(!privacyHidden);renderDashboard();return;}
+    const budgetShortcut=e.target.closest('[data-focus-budget]');
+    if(budgetShortcut){
+      const input=$('#monthlyBudget');
+      input?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+      input?.focus({preventScroll:true});
+      return;
+    }
+    const monthStep=e.target.closest('[data-month-step]');
+    if(monthStep){
+      const step=Number(monthStep.dataset.monthStep);
+      if(step!==1&&step!==-1)return;
+      const [year,month]=selectedMonth.split('-').map(Number);
+      const next=new Date(year,month-1+step,1);
+      if(next.getFullYear()<1900||next.getFullYear()>2100)return;
+      const value=`${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}`;
+      selectMonthContext(value);
+      return;
+    }
     const go=e.target.closest('[data-go]');
     if(go){
       // Os alertas de outros meses abrem a lista certa sem alterar valores gravados.
@@ -454,6 +476,14 @@ function wireEvents(){
     setBillFiltersOpen(!page?.classList.contains('bill-filters-open'));
   });
   ['#billStatusFilter','#billCategoryFilter','#billDateFrom','#billDateTo','#billSort'].forEach(sel=>$(sel)?.addEventListener('change',renderBills));
+  $('#billQuickFilters')?.addEventListener('click',e=>{
+    const button=e.target.closest('[data-bill-quick]');
+    if(!button)return;
+    const value=button.dataset.billQuick;
+    if(!['all','unpaid','paid','overdue'].includes(value))return;
+    $('#billStatusFilter').value=value;
+    renderBills();
+  });
   const clearBillFilters=()=>{
     $('#billSearch').value='';
     $('#billStatusFilter').value='all';
@@ -504,6 +534,7 @@ function wireEvents(){
   formDialog.addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
   formDialog.addEventListener('close',()=>{formDialog.classList.remove('detail-dialog');delete formDialog.dataset.mode;const back=formDialog.querySelector('[data-dialog-back]');if(back)back.hidden=true;});
   $('#upcomingBills').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
+  $('#planningUpcomingList')?.addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#calendarAgenda').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#calendarHistory')?.addEventListener('click',e=>{
     const button=e.target.closest('[data-calendar-month]');
@@ -661,6 +692,15 @@ function wireEvents(){
   $('#notificationsBtn').addEventListener('click',openAlertCenter);
   const alertCenterDialog=$('#alertCenterDialog');
   alertCenterDialog?.addEventListener('click',e=>{
+    const chip=e.target.closest('[data-alert-filter]');
+    if(chip){
+      const filter=chip.dataset.alertFilter;
+      if(['all','important','info'].includes(filter)){
+        $('#alertFilterTabs').dataset.filter=filter;
+        renderAlertCenter();
+      }
+      return;
+    }
     if(e.target===alertCenterDialog){closeAlertCenter();return;}
     if(e.target.closest('[data-close-alert-center]')){e.preventDefault();closeAlertCenter();return;}
     if(e.target.closest('[data-go]'))closeAlertCenter();

@@ -75,7 +75,7 @@ assert.match(shell,/cdc-plan-kpis/);
 assert.match(shell,/cdc-plan-projection/);
 assert.match(shell,/#monthPlanForm/);
 assert.match(shell,/@media\(max-width:620px\)/);
-assert.match(build,/const DASHBOARD_REV = '76-approved-vault-nav4'/);
-assert.match(build,/const SERVICE_WORKER_REV = '76-approved-vault-nav4'/);
+assert.match(build,/const DASHBOARD_REV = '77-prototype-fidelity1'/);
+assert.match(build,/const SERVICE_WORKER_REV = '77-prototype-fidelity1'/);
 
 console.log('Linear visual system on all pages: OK');

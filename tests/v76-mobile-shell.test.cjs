@@ -98,9 +98,9 @@ assert.match(coherence,/\.nav-drawer\.open::backdrop[\s\S]*rgba\(9,31,36,\.18\)/
 assert.match(coherence,/body \.mobile-nav\{[\s\S]*height:var\(--v76-shell-nav-height\)!important;[\s\S]*padding:6px!important/);
 assert.match(coherence,/\.mobile-nav \.nav-btn span\{[\s\S]*font-size:11\.5px!important[\s\S]*overflow:visible!important/);
 assert.match(architecture,/76-mobile-label-fit1/);
-assert.match(architecture,/\['planning','Plano','plan'\]/,'compact dock label must avoid truncating Planeamento while preserving the planning route');
-assert.match(architecture,/planning:\['Planeamento','Orçamento'\]/,'page title must remain Planeamento');
-assert.match(architecture,/\['planning','Planeamento','plan'\]/,'drawer label must remain the full route name');
+assert.match(architecture,/\['planning','Plano','navPlan'\]/,'the dock must use the prototype bars icon for Plano');
+assert.match(architecture,/planning:\['Plano Mensal','Orçamento'\]/,'page title must follow the monthly plan prototype');
+assert.match(architecture,/\['bills','Contas','navBills'\]/,'the drawer and dock must call bills Contas');
 
 assert.match(shell,/prefers-reduced-motion:reduce/);
 assert.match(shell,/forced-colors:active/);

@@ -1,5 +1,33 @@
 # Changelog Técnico — Conta de Casa
 
+## Integração pública autorizada (02/11/2026)
+
+- Preparada a revisão de fidelidade ao protótipo para a aplicação GitHub Pages principal, com os cinco menus na ordem pedida.
+- Mantidos os módulos financeiros canónicos e as proteções do cofre; não há migração de dados.
+- A entrega é efetuada pelo fluxo CI e Pages existente após testes e atualização do ramo `main`.
+
+
+## Em teste — fidelidade à imagem e navegação de cinco botões (01/11/2026)
+
+- Plano Mensal reorganizado como no protótipo, com um único anel de orçamento e estado sem orçamento definido na mesma composição.
+- Menu inferior e lateral alinhados: Início, Plano, Contas, Relatórios, Mais, com símbolos apropriados para cada destino.
+- Menu Mais com Perfil e preferências, Cofre e segurança, Exportar / Backup e Sobre a aplicação, além de funções secundárias acessíveis.
+- Contas e próximas despesas com cartões compactos e ícones associados ao tipo; edição e pagamentos continuam disponíveis.
+- Notificações com título do protótipo e atividades recentes reais, separadas dos avisos calculados.
+- Atualização de contratos, cache de recursos e documentação, sem migração de dados nem alteração da aplicação pública.
+
+## Em teste — continuação visual de Início, Plano, Contas e Notificações (01/11/2026)
+
+- Novo Início com atalhos e resumo real de saldo, entradas, saídas e resultado mensal.
+- Plano com mês navegável e anel do orçamento, sem confundir gasto realizado com compromissos pendentes.
+- Contas com seleção rápida de estado e cartões móveis compactos, mantendo pagamento, edição e detalhe.
+- Centro de Alertas com filtros de prioridade e informação, sem notificações artificiais.
+- Relatórios e menu secundário preservados; nova camada responsiva, contraste forçado e movimento reduzido.
+- Correção da falha de inserção do botão de atualizações em Definições e retirada do atalho Mercado do manifesto PWA.
+- Bundle e service worker atualizados; nenhuma mudança à cifra, dados persistidos, PIN, backups ou sincronização.
+- Versão de teste privada publicada em HTTPS para acesso exclusivo do proprietário; aplicação GitHub Pages não modificada.
+
+
 ## Em preparação — UI/UX aprovada para utilização pessoal (01/11/2026)
 
 - Desbloqueio com fundo escuro, indicadores únicos, teclado arredondado e opções de palavra-passe/alteração/recuperação recolhidas.

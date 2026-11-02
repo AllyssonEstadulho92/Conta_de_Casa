@@ -26,10 +26,11 @@ const SHOPPING_REV = '74-shopping2';
 const MENU_REV = '73-menu8';
 const MODERN_UI_REV = '76-visual-audit1';
 const PRODUCT_PAGES_REV = '76-add-product-prototype2';
-const DASHBOARD_REV = '76-approved-vault-nav4';
-const FINANCE_REV = '76-debt-statistics1';
+const DASHBOARD_REV = '77-prototype-fidelity1';
+const FINANCE_REV = '77-prototype-fidelity1';
 const MOBILE_SHELL_REV = '76-approved-vault-nav4';
-const ARCHITECTURE_REV = '76-ux-retired-market3';
+const FINANCE_SCREENS_REV = '77-prototype-fidelity1';
+const ARCHITECTURE_REV = '77-prototype-fidelity1';
 const PLANNING_MORE_REV = '76-planning-more1';
 const HEADER_REV = '75-header2';
 const STABILITY_REV = '75-stability1';
@@ -48,7 +49,7 @@ const PHOTO_LOADER_REV = '76-photo-card3';
 const DATE_CALCULATOR_REV = '76-date-calculator1';
 const INVOICE_CAPTURE_REV = '76-invoice-autofill7';
 const ZXING_REV = '76-local-zxing1';
-const SERVICE_WORKER_REV = '76-approved-vault-nav4';
+const SERVICE_WORKER_REV = '77-prototype-fidelity1';
 const WALLI_SHARE_REV = '76-walli-enhancements6';
 
 if(!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(APP_VERSION)){
@@ -105,6 +106,7 @@ const PUBLIC_FILES = Object.freeze([
   'v76-modern-ui.css',
   'v76-product-pages.css',
   'v76-mobile-shell.css',
+  'v76-finance-screens.css',
   'date-calculator.css',
   'core.js',
   'finance.js',
@@ -194,6 +196,7 @@ index=index.replace(/core\.js\?v=[^"']+/, `core.js?v=${SERVICE_WORKER_REV}`);
 index=index.replace(/render\.js\?v=[^"']+/,`render.js?v=${DASHBOARD_REV}`);
 index=index.replace(/events\.js\?v=[^"']+/,`events.js?v=${SERVICE_WORKER_REV}`);
 index=index.replace(/finance\.js\?v=[^"']+/,`finance.js?v=${FINANCE_REV}`);
+index=index.replace(/ui-icons\.js\?v=[^"']+/,`ui-icons.js?v=${DASHBOARD_REV}`);
 index=index.replace(/walli-share\.js\?v=[^"']+/,`walli-share.js?v=${WALLI_SHARE_REV}`);
 index=index.replace(/<meta name="barcode-reader-src" content="[^"]+"\s*\/>/,`<meta name="barcode-reader-src" content="./zxing-browser.min.js?v=${ZXING_REV}" />`);
 index=index.replace(/<strong id="appBuildVersion">[^<]+<\/strong>/,`<strong id="appBuildVersion">${APP_VERSION} · ${BUILD}</strong>`);
@@ -234,6 +237,7 @@ if(!index.includes('v75-usability.css'))index=index.replace('</head>',`  <link r
 if(!index.includes('v76-modern-ui.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-modern-ui.css?v=${MODERN_UI_REV}" />\n</head>`);
 if(!index.includes('v76-product-pages.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-product-pages.css?v=${PRODUCT_PAGES_REV}" />\n</head>`);
 if(!index.includes('v76-mobile-shell.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-mobile-shell.css?v=${MOBILE_SHELL_REV}" />\n</head>`);
+if(!index.includes('v76-finance-screens.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./v76-finance-screens.css?v=${FINANCE_SCREENS_REV}" />\n</head>`);
 if(!index.includes('date-calculator.css'))index=index.replace('</head>',`  <link rel="stylesheet" href="./date-calculator.css?v=${DATE_CALCULATOR_REV}" />\n</head>`);
 
 const syncScript=`<script src="./sync.js?v=${BUILD.slice(1)}" defer></script>`;

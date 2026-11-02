@@ -1,5 +1,28 @@
 # Changelog
 
+## Interface do protótipo, integração GitHub Pages (02/11/2026)
+
+- Preparada a aplicação principal para o mesmo visual de Início, Plano Mensal, Contas, Notificações e menu Mais da versão privada.
+- Cinco botões na ordem Início, Plano, Contas, Relatórios e Mais, com ícones coerentes.
+- Preservados os dados do cofre e a lógica financeira, sem criar movimentos fictícios.
+
+
+## v77: visual do protótipo e menus (em teste privado)
+
+- Ecrãs financeiros e navegação reorganizados com cinco botões e ícones do protótipo.
+- Plano com anel mesmo sem orçamento e sem cartão duplicado, usando cálculos reais.
+- Contas e Notificações com apresentação compacta e ações preservadas.
+- Menu Mais com quatro acessos principais e funções adicionais recolhidas.
+- Sem alterações a cofre, dados cifrados, pagamentos ou versão pública.
+
+## v76: continuação da interface financeira (em teste)
+
+- Início, Plano, Contas e Notificações reorganizados em torno dos valores já existentes no cofre.
+- Filtros rápidos e lista móvel de contas mais compacta, com ações preservadas.
+- Correção do lançador de atualizações nas Definições e do atalho Mercado no manifesto PWA.
+- Sem alterações de formato de dados, cifra, PIN ou sincronização.
+
+
 ## v76: scanner ZXing local e funcionamento offline
 
 - `@zxing/browser@0.2.0` passa a ser empacotado no build em vez de carregado por CDN;

@@ -431,7 +431,9 @@ function filterBills(bills, criteria = {}) {
     const due=billDueDateKey(bill);
     const text=`${bill.title||''} ${bill.provider||''} ${bill.category||''} ${bill.reference||''}`.toLocaleLowerCase('pt-PT');
     if(search&&!text.includes(search)) return false;
-    if(status!=='all'&&billStatus(bill)!==status) return false;
+    if(status==='unpaid'){
+      if(bill.cancelled||remainingForBill(bill)<=0||!billLedger(bill).valid) return false;
+    }else if(status!=='all'&&billStatus(bill)!==status) return false;
     if(category!=='all'&&(bill.category||'Outros')!==category) return false;
     if(from&&(!due||due<from)) return false;
     if(to&&(!due||due>to)) return false;

@@ -24,6 +24,13 @@
   const ICON_SEMANTICS_REVISION='76-pin-prototype1';
   const LUCIDE_ICONS=Object.freeze({
     home:'<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    navPlan:'<path d="M4 20v-8"/><path d="M12 20V4"/><path d="M20 20v-12"/>',
+    navBills:'<rect x="2.5" y="4.5" width="19" height="15" rx="2.6"/><path d="M2.5 10h19"/><path d="M6.5 15h4"/>',
+    navReports:'<path d="M21.2 14a9.3 9.3 0 1 1-11.3-11.3"/><path d="M13 2.5A9.5 9.5 0 0 1 21.5 11H13z"/>',
+    droplet:'<path d="M12 22a8 8 0 0 0 8-8c0-4.1-8-12-8-12S4 9.9 4 14a8 8 0 0 0 8 8Z"/>',
+    wifi:'<path d="M2 8.8a15 15 0 0 1 20 0"/><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16.1a5 5 0 0 1 7 0"/><circle cx="12" cy="20" r="1"/>',
+    smartphone:'<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>',
+    zap:'<path d="m13 2-9 12h7l-1 8 10-12h-7z"/>',
     bill:'<path d="M13 16H8"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>',
     receipt:'<path d="M13 16H8"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>',
     calendar:'<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/>',
@@ -260,6 +267,10 @@
   }
 
   function hydrateDashboard(root=document){
+    root.querySelectorAll?.('.cdc-shortcut-icon[data-cdc-icon]').forEach(slot=>fillIcon(slot,slot.dataset.cdcIcon,23));
+    root.querySelectorAll?.('.cdc-plan-screen-heading [data-cdc-icon]').forEach(slot=>fillIcon(slot,slot.dataset.cdcIcon,21));
+    root.querySelectorAll?.('.cdc-welcome-avatar').forEach(slot=>fillIcon(slot,'home',23));
+    root.querySelectorAll?.('.cdc-welcome-alert').forEach(button=>fillIcon(button,'alert',22));
     root.querySelectorAll?.('.dashboard-priority-panel .dashboard-feature-icon').forEach(slot=>fillIcon(slot,'calendar',22));
     root.querySelectorAll?.('.dashboard-budget-panel .dashboard-feature-icon').forEach(slot=>fillIcon(slot,'report',22));
     root.querySelectorAll?.('.dashboard-budget-open').forEach(button=>fillIcon(button,'chevron',19));

@@ -16,7 +16,8 @@ const build=read('scripts/prepare-pages.cjs');
 // A página deve ajudar a distinguir dinheiro real de projeções.
 const plan=html.slice(html.indexOf('<section id="page-planning"'),html.indexOf('<section id="page-market"'));
 assert.ok(plan.indexOf('id="planningProjection"')<plan.indexOf('id="planningKpis"'));
-assert.ok(plan.indexOf('id="planningKpis"')<plan.indexOf('id="planningUpcomingList"'));
+assert.ok(plan.indexOf('id="planningBudgetSnapshot"')<plan.indexOf('id="planningUpcomingList"'));
+assert.ok(plan.indexOf('id="planningUpcomingList"')<plan.indexOf('id="planningProjection"'));
 assert.ok(plan.indexOf('id="planningUpcomingList"')<plan.indexOf('id="monthPlanForm"'));
 assert.equal((plan.match(/id="monthPlanForm"/g)||[]).length,1);
 assert.match(render,/\['Recebido',n\.incomes/);
@@ -59,10 +60,10 @@ assert.match(shell,/\.mobile-menu-btn\[data-menu-state="open"\] \.mobile-menu-gl
 assert.match(shell,/@media\(prefers-reduced-motion:reduce\)/);
 
 // PWA e segurança: versões atualizadas, sem migrações nem credenciais reais.
-assert.match(build,/const DASHBOARD_REV = '76-approved-vault-nav4'/);
+assert.match(build,/const DASHBOARD_REV = '77-prototype-fidelity1'/);
 assert.match(build,/const MOBILE_SHELL_REV = '76-approved-vault-nav4'/);
-assert.match(build,/const SERVICE_WORKER_REV = '76-approved-vault-nav4'/);
-assert.match(build,/const ARCHITECTURE_REV = '76-ux-retired-market3'/);
+assert.match(build,/const SERVICE_WORKER_REV = '77-prototype-fidelity1'/);
+assert.match(build,/const ARCHITECTURE_REV = '77-prototype-fidelity1'/);
 assert.match(build,/events\.js\?v=\$\{SERVICE_WORKER_REV\}/);
 assert.doesNotThrow(()=>new vm.Script(render));
 assert.doesNotThrow(()=>new vm.Script(events));

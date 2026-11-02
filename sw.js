@@ -1,5 +1,6 @@
 'use strict';
 
+/* 77-prototype-fidelity1: atualiza a shell privada e os cinco destinos sem alterar o formato dos dados. */
 const CACHE = 'conta-de-casa-public-v76-build';
 const NAVIGATION_TIMEOUT_MS = 4000;
 const PUBLIC_ASSETS = [
@@ -36,6 +37,7 @@ const PUBLIC_ASSETS = [
   './v76-modern-ui.css',
   './v76-product-pages.css',
   './v76-mobile-shell.css',
+  './v76-finance-screens.css',
   './date-calculator.css',
   './core.js',
   './finance.js',

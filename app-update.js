@@ -273,7 +273,10 @@
     const resetButton=panel.querySelector('#resetDataBtn');
     const block=document.createElement('section');block.className='settings-software-update-block';block.setAttribute('aria-label','Versão e atualizações da aplicação');
     block.innerHTML=`<button class="settings-software-update-row" type="button" data-open-software-update><span class="settings-software-update-icon" aria-hidden="true">${icon('refresh',22)}</span><span class="settings-software-update-copy"><strong>Versão e Atualizações</strong><small>Conta de Casa ${escapeHtml(appVersion())} · Build ${escapeHtml(buildId())}</small></span><span class="settings-software-update-chevron" aria-hidden="true">${icon('chevron',20)}</span></button>`;
-    panel.insertBefore(block,resetButton?.previousElementSibling||resetButton||null);
+    // O botão de reposição é filho da zona de perigo, não do painel.
+    // insertBefore exige uma referência que seja filha direta do painel.
+    const dangerZone=resetButton?.closest('.cdc-danger-zone');
+    panel.insertBefore(block,dangerZone?.parentElement===panel?dangerZone:null);
     block.querySelector('[data-open-software-update]')?.addEventListener('click',openDialog);
   }
 

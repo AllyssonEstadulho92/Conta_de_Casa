@@ -74,7 +74,7 @@ assert.match(index,/class="icon-btn dialog-back"[^>]*data-dialog-back[^>]*aria-l
 assert.match(index,/class="icon-btn dialog-close"[^>]*data-close-dialog[^>]*aria-label="Fechar janela"/,'dialog close control must remain a distinct accessible action');
 assert.match(index,/id="notificationsBtn"[\s\S]*aria-label="Centro de Alertas, sem alertas ativos"[\s\S]*aria-controls="alertCenterDialog"[\s\S]*aria-haspopup="dialog"[\s\S]*aria-expanded="false"/);
 assert.match(index,/id="alertCenterDialog"[\s\S]*aria-labelledby="alertCenterTitle"[\s\S]*aria-describedby="alertCenterSummary"/);
-assert.match(index,/data-close-alert-center aria-label="Fechar Centro de Alertas"/);
+assert.match(index,/data-close-alert-center aria-label="Fechar Notificações"/);
 assert.match(index,/id="alertCenterSummary"[\s\S]*aria-live="polite"/);
 assert.match(index,/id="alertCenterList"[\s\S]*role="list"[\s\S]*aria-live="polite"/);
 assert.match(events,/alertCenterDialog\?\.addEventListener\('cancel',[\s\S]*closeAlertCenter\(\)/,'Escape must close the modal alert center through the canonical close path');

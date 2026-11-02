@@ -111,7 +111,7 @@ assert.equal(context.window.walliSharePreviousMonthKey('2026-10'),'2026-09');
 
 assert.match(core,/petshare: \{ label:'Partilha do Walli', context:'Animais', icon:'paw'/);
 assert.match(core,/petShare: normalizePetShare\(s\?\.petShare\)/);
-assert.match(architecture,/label:'Animais'[\s\S]*petshare','Partilha do Walli','paw'/);
+assert.match(architecture,/label:'Outras funções'[\s\S]*petshare','Partilha do Walli','paw'/);
 assert.match(index,/id="page-petshare"/);
 assert.match(index,/id="walliShareSettingsForm"/);
 assert.match(index,/id="walliCareForm"/);

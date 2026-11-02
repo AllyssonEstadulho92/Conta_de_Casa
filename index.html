@@ -124,6 +124,17 @@
       </header>
 
       <section id="page-dashboard" class="page active">
+        <div class="cdc-dashboard-welcome">
+          <span class="cdc-welcome-avatar" aria-hidden="true"></span>
+          <div><strong id="dashboardWelcomeText">Bem-vindo à tua conta</strong><small>Os teus movimentos, num só lugar.</small></div>
+          <button class="cdc-welcome-alert" type="button" data-open-alerts aria-label="Consultar notificações"></button>
+        </div>
+        <nav class="cdc-dashboard-shortcuts" aria-label="Acesso rápido">
+          <button class="cdc-shortcut is-current" type="button" data-go="dashboard" aria-current="page"><span class="cdc-shortcut-icon" data-cdc-icon="home" aria-hidden="true"></span>Início</button>
+          <button class="cdc-shortcut" type="button" data-go="planning"><span class="cdc-shortcut-icon" data-cdc-icon="navPlan" aria-hidden="true"></span>Plano</button>
+          <button class="cdc-shortcut" type="button" data-go="bills"><span class="cdc-shortcut-icon" data-cdc-icon="navBills" aria-hidden="true"></span>Contas</button>
+        </nav>
+        <section id="dashboardHero" class="cdc-dashboard-hero" aria-label="Resumo financeiro do mês" aria-live="polite"></section>
         <div class="cdc-page-overview" aria-label="Orientação da área">
           <div class="cdc-page-overview-copy">
             <p class="cdc-overview-eyebrow">Visão geral</p>
@@ -166,8 +177,14 @@
           <button id="billFiltersToggle" class="btn secondary bill-filter-toggle" type="button" aria-expanded="false" aria-controls="billFilterGrid"><span>Filtros</span><span id="billFilterCount" class="bill-filter-count" hidden>0</span></button>
           <button id="newBillBtn" class="btn primary bill-new-btn" type="button">+ Nova fatura</button>
         </div>
+        <div id="billQuickFilters" class="cdc-bill-quick-filters" role="group" aria-label="Estado das contas">
+          <button type="button" data-bill-quick="all" aria-pressed="true">Todas</button>
+          <button type="button" data-bill-quick="unpaid" aria-pressed="false">A pagar</button>
+          <button type="button" data-bill-quick="paid" aria-pressed="false">Pagas</button>
+          <button type="button" data-bill-quick="overdue" aria-pressed="false">Atrasadas</button>
+        </div>
         <div id="billFilterGrid" class="bill-filter-grid" role="group" aria-label="Filtros e ordenação de faturas">
-          <label class="bill-filter-field"><span>Estado</span><select id="billStatusFilter"><option value="all">Todos os estados</option><option value="pending">Por pagar</option><option value="partial">Pago parcialmente</option><option value="paid">Pago</option><option value="overdue">Em atraso</option><option value="due-today">Vence hoje</option><option value="cancelled">Cancelado</option><option value="invalid">Dados inválidos</option></select></label>
+          <label class="bill-filter-field"><span>Estado</span><select id="billStatusFilter"><option value="all">Todos os estados</option><option value="unpaid">Todas por liquidar</option><option value="pending">Por pagar</option><option value="partial">Pago parcialmente</option><option value="paid">Pago</option><option value="overdue">Em atraso</option><option value="due-today">Vence hoje</option><option value="cancelled">Cancelado</option><option value="invalid">Dados inválidos</option></select></label>
           <label class="bill-filter-field"><span>Categoria</span><select id="billCategoryFilter"><option value="all">Todas as categorias</option></select></label>
           <label class="bill-filter-field"><span>De</span><input id="billDateFrom" type="date" /></label>
           <label class="bill-filter-field"><span>Até</span><input id="billDateTo" type="date" /></label>
@@ -175,6 +192,7 @@
           <button id="billClearFilters" class="btn secondary bill-filter-clear" type="button">Limpar filtros</button>
         </div>
         <div id="billSummary" class="bill-summary-grid" aria-live="polite"></div>
+        <h2 id="billMonthHeading" class="cdc-bill-month-heading"></h2>
         <div id="billsList" class="bill-results" aria-live="polite"></div>
       </section>
       <section id="page-calendar" class="page">
@@ -202,7 +220,21 @@
             <li>Define o orçamento</li>
             <li>Consulta a diferença</li>
           </ol>
-        </div><nav class="section-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav>
+        </div>
+        <div class="cdc-plan-screen-heading"><h2>Plano Mensal</h2><button type="button" data-focus-budget aria-label="Definir ou editar o orçamento mensal" title="Definir ou editar orçamento"><span data-cdc-icon="calendar" aria-hidden="true"></span></button></div>
+        <div class="cdc-month-switch" role="group" aria-label="Navegação mensal do plano">
+          <button type="button" data-month-step="-1" aria-label="Mês anterior">‹</button>
+          <strong id="planningMonthLabel"></strong>
+          <button type="button" data-month-step="1" aria-label="Mês seguinte">›</button>
+        </div>
+        <section id="planningBudgetSnapshot" class="cdc-budget-snapshot" aria-label="Estado do orçamento mensal" aria-live="polite"></section>
+        <article class="panel cdc-plan-upcoming-panel" aria-labelledby="cdcPlanUpcomingTitle">
+          <div class="panel-head">
+            <div><h2 id="cdcPlanUpcomingTitle">Próximas contas</h2><p>Contas pendentes organizadas por vencimento.</p></div>
+            <button class="btn secondary" type="button" data-go="bills">Ver todas</button>
+          </div>
+          <div id="planningUpcomingList" class="cdc-plan-upcoming-list" aria-live="polite"></div>
+        </article>
         <section class="cdc-plan-summary" aria-labelledby="cdcPlanSummaryTitle">
           <div class="cdc-plan-summary-head">
             <div><p class="cdc-plan-section-kicker">A tua situação financeira</p><h3 id="cdcPlanSummaryTitle">Resumo do mês</h3><p>Valores atuais, despesas pagas e compromissos por liquidar.</p></div>
@@ -211,14 +243,8 @@
           <div id="planningProjection" class="cdc-plan-projection" aria-live="polite"></div>
           <div id="planningKpis" class="cdc-plan-kpis" aria-live="polite"></div>
         </section>
-        <article class="panel cdc-plan-upcoming-panel" aria-labelledby="cdcPlanUpcomingTitle">
-          <div class="panel-head">
-            <div><h2 id="cdcPlanUpcomingTitle">Próximas contas por pagar</h2><p>Inclui contas vencidas e futuros vencimentos já registados, mesmo noutros meses.</p></div>
-            <button class="btn secondary" type="button" data-go="bills">Ver todas as faturas</button>
-          </div>
-          <div id="planningUpcomingList" class="cdc-plan-upcoming-list" aria-live="polite"></div>
-        </article>
         <div class="two-col cdc-plan-workspace"><article class="panel cdc-plan-account-card"><div class="panel-head"><div><h2>Atualizar saldo e orçamento</h2><p>O saldo atual representa o saldo real da sua conta; o saldo inicial serve apenas para conciliação dos registos do mês.</p></div></div><form id="monthPlanForm" class="form-grid"><label>Saldo atual da conta<input id="accountBalance" inputmode="decimal" placeholder="0,00" autocomplete="off" /><small>Copie o saldo disponível mostrado pelo seu banco. A aplicação não acede automaticamente à conta bancária.</small></label><div id="accountBalanceInfo" class="account-balance-info" aria-live="polite"></div><label>Saldo inicial do mês<input id="openingBalance" inputmode="decimal" placeholder="0,00" /></label><label>Orçamento do mês<input id="monthlyBudget" inputmode="decimal" placeholder="0,00" /></label><button class="btn primary" type="submit">Guardar planeamento</button></form></article><article class="panel"><div class="panel-head"><div><h2>Rendimentos recebidos</h2><p>Salários, apoios e outras entradas deste mês. Consulta cada movimento abaixo.</p></div><button id="newIncomeBtn" class="btn secondary">+ Rendimento</button></div><div id="incomeList" class="stack-list"></div></article></div>
+        <nav class="section-tabs cdc-plan-secondary-tabs" aria-label="Vistas de planeamento"><button class="section-tab" type="button" data-page="planning">Plano mensal</button><button class="section-tab" type="button" data-page="goals">Objetivos</button></nav>
         </section>
 
       <section id="page-market" class="retired-page" hidden aria-hidden="true" data-retired="true">
@@ -595,11 +621,16 @@
       <header class="alert-center-head">
         <div>
           <p class="eyebrow">Conta de Casa</p>
-          <h2 id="alertCenterTitle">Centro de Alertas</h2>
+          <h2 id="alertCenterTitle">Notificações</h2>
           <p id="alertCenterSummary" class="alert-center-summary" aria-live="polite">Sem alertas ativos neste momento</p>
         </div>
-        <button class="icon-btn dialog-close alert-center-close" type="button" data-close-alert-center aria-label="Fechar Centro de Alertas">×</button>
+        <div class="cdc-alert-head-actions"><button class="icon-btn cdc-alert-settings" type="button" data-go="settings" aria-label="Abrir definições"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.7 4.1a2.3 2.3 0 0 1 4.6 0 2.3 2.3 0 0 0 3.3 1.9 2.3 2.3 0 0 1 2.3 4 2.3 2.3 0 0 0 0 3.9 2.3 2.3 0 0 1-2.3 4 2.3 2.3 0 0 0-3.3 1.9 2.3 2.3 0 0 1-4.6 0 2.3 2.3 0 0 0-3.3-1.9 2.3 2.3 0 0 1-2.3-4 2.3 2.3 0 0 0 0-3.9 2.3 2.3 0 0 1 2.3-4 2.3 2.3 0 0 0 3.3-1.9z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="icon-btn dialog-close alert-center-close" type="button" data-close-alert-center aria-label="Fechar Notificações">×</button></div>
       </header>
+      <div id="alertFilterTabs" class="cdc-alert-filter-tabs" role="group" aria-label="Filtrar notificações" data-filter="all">
+        <button type="button" data-alert-filter="all" aria-pressed="true">Todas</button>
+        <button type="button" data-alert-filter="important" aria-pressed="false">Importantes</button>
+        <button type="button" data-alert-filter="info" aria-pressed="false">Informativas</button>
+      </div>
       <div id="alertCenterList" class="alert-center-list" role="list" aria-live="polite"></div>
       <footer class="alert-center-footer">
         <span>Atualizado com os dados do mês selecionado.</span>

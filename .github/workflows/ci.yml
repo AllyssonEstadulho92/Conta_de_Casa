@@ -202,6 +202,11 @@ jobs:
       - name: Linear page structure and navigation tests
         run: node tests/linear-pages.test.cjs
 
+      - name: Ecrãs financeiros e fidelidade ao protótipo
+        run: |
+          node tests/finance-screens.test.cjs
+          node tests/prototype-fidelity.test.cjs
+
       - name: Dark PIN and retired Market navigation tests
         run: node tests/approved-vault-market-retirement.test.cjs
 

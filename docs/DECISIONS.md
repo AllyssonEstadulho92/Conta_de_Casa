@@ -1,5 +1,23 @@
 # Decisões Técnicas — Conta de Casa
 
+## D-164 — autorização de lançamento público (02/11/2026)
+
+Depois de publicar e testar tecnicamente o protótipo em ambiente privado, o utilizador autorizou a atualização da aplicação principal no GitHub Pages. A integração aproveita apenas os ficheiros de aplicação, documentação e testes; não copia a identidade da Site privada, credenciais, dados financeiros ou ficheiros de alojamento privado. O GitHub Actions existente continua responsável por validar e publicar a revisão do ramo `main`. Não modificar `STATE_VERSION`, IndexedDB, cifra, PIN, pagamentos nem backups.
+
+
+## D-163 — correspondência visual dos cinco ecrãs e dos menus (01/11/2026)
+
+O utilizador confirmou que pretende correspondência com a imagem também na forma, ordem e ícones dos botões, não apenas nas funcionalidades. O menu principal tem exatamente cinco destinos: Início, Plano, Contas, Relatórios e Mais. O menu Mais mostra primeiro quatro ações do protótipo e mantém as restantes num bloco secundário expansível, preservando segurança, Walli, objetivos e diagnóstico.
+
+Para evitar regressões financeiras, o gráfico usa apenas o orçamento e os compromissos calculados pelo cofre. No estado indefinido o mesmo cartão apresenta anel neutro, chamada para definir orçamento e nenhum montante disponível enganador. O adaptador visual antigo do Plano deixa de renderizar o segundo cartão. Ícones de contas são derivados dos dados existentes e as ações permanecem disponíveis via detalhe expansível. Nenhum evento ou pagamento é criado para preencher o protótipo.
+
+A experiência é publicada primeiro na Site privada, sem copiar dados nem substituir a versão pública do GitHub. A aprovação para um futuro lançamento público é uma decisão separada.
+
+## D-162 — concluir a referência visual por vistas canónicas
+
+O protótipo é uma referência de hierarquia, mas não deve substituir dados reais nem criar registos fictícios. O resumo, o orçamento, as contas e os alertas são novas composições de funções financeiras já existentes. Os atalhos de estado alimentam o filtro canónico, em vez de criar um segundo mecanismo. A interface usa uma camada de estilos separada e o sistema de ícones local para reduzir interferências com o PIN e os módulos legados. A versão fica isolada para QA físico, sem integração automática na aplicação pública.
+
+
 ## D-161 — dock móvel com «Mais» e cache atómica (01/11/2026)
 
 Decisão: preservar quatro destinos financeiros diretos, acrescentar um quinto acesso «Mais» à navegação secundária e corrigir o CSS legado que tornava o separador Plano invisível em telemóveis. «Mais» é uma ação de abrir diálogo, não uma rota. A atualização dos scripts de navegação e dos estilos deve usar revisões sincronizadas, incluindo `core.js`. Mantêm-se os componentes e controladores anteriores, reduzindo regressões.

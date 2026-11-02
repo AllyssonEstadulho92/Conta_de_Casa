@@ -177,21 +177,33 @@ function renderAlertCenter(items = dashboardAlertItems()) {
   const summary=$('#alertCenterSummary');
   if(!list||!summary)return;
   const count=items.length;
+  const tabs=$('#alertFilterTabs');
+  const filter=['all','important','info'].includes(tabs?.dataset.filter)?tabs.dataset.filter:'all';
+  const visible=items.filter(item=>filter==='all'||(filter==='important'
+    ? item.tone==='danger'||item.id==='critical-due'||item.tone==='warning'
+    : item.tone==='info'));
   summary.textContent=count
-    ? `${count} alerta${count===1?'':'s'} ativo${count===1?'':'s'} neste momento`
+    ? `${count} alerta${count===1?'':'s'} ativo${count===1?'':'s'} · ${visible.length} nesta vista`
     : 'Sem alertas ativos neste momento';
+  tabs?.querySelectorAll('[data-alert-filter]').forEach(button=>{
+    button.setAttribute('aria-pressed',String(button.dataset.alertFilter===filter));
+  });
   // As categorias são informativas: não são notificações push nem dados persistidos.
   const groups=[
     ['urgentes','Prioritários',item=>item.tone==='danger'||item.id==='critical-due'],
     ['vencimentos','A vencer',item=>item.id==='upcoming-week'],
     ['verificar','A verificar',item=>item.tone!=='danger'&&item.id!=='critical-due'&&item.id!=='upcoming-week']
   ];
-  setHTML(list,count
+  const recent=filter==='important'?[]:(appState?.activity||[]).slice(0,5);
+  const activeHtml=visible.length
     ? groups.map(([key,title,match])=>{
-        const group=items.filter(match);
+        const group=visible.filter(match);
         return group.length?`<section class="cdc-alert-group" aria-label="${esc(title)}"><h3 class="cdc-alert-group-title">${esc(title)} <span data-money>${group.length}</span></h3>${group.map(alertCenterItemHtml).join('')}</section>`:'';
-      }).join('')
-    : '<div class="alert-center-empty"><strong>Está tudo em ordem</strong><p>Não existem alertas financeiros ativos.</p></div>');
+      }).join(''):'';
+  const recentHtml=recent.length
+    ? `<section class="cdc-alert-group cdc-alert-recent" aria-label="Atividade recente"><h3 class="cdc-alert-group-title">Recentes</h3>${recent.map(a=>`<article class="cdc-alert-activity"><span aria-hidden="true">${icon('circleCheck',19)}</span><div><strong>${esc(a.text||'Registo atualizado')}</strong><small>${esc(fmtDateTime(a.at))}</small></div></article>`).join('')}</section>`
+    : '';
+  setHTML(list,activeHtml+recentHtml||`<div class="alert-center-empty"><strong>${count?'Sem alertas nesta categoria':'Está tudo em ordem'}</strong><p>${count?'Experimenta outro filtro para consultar os alertas atuais.':'Não existem alertas financeiros ativos.'}</p></div>`);
 }
 
 function updateAlertBadge() {
@@ -214,6 +226,18 @@ function updateAlertBadge() {
 
 function renderDashboard() {
   const n = dashboardNumbers();
+  const currentHour=new Date().getHours();
+  const greeting=currentHour<12?'Bom dia':currentHour<20?'Boa tarde':'Boa noite';
+  const givenName=String(appState.settings?.profileName||'').trim().split(/\s+/)[0];
+  const welcome=$('#dashboardWelcomeText');
+  if(welcome)welcome.textContent=givenName?`${greeting}, ${givenName}`:`${greeting}!`;
+  const result=planningMonthlyResult(n);
+  const monthLabel=new Intl.DateTimeFormat('pt-PT',{month:'long',year:'numeric'}).format(new Date(`${selectedMonth}-01T12:00:00`));
+  const balanceKind=n.hasAccountBalance?'Saldo da conta informado':'Saldo calculado pelos registos';
+  setHTML('#dashboardHero',`<div class="cdc-hero-heading"><div><h2>Resumo do mês</h2><small>${esc(monthLabel)}</small></div><button type="button" data-go="planning" aria-label="Abrir Plano Mensal">${icon('calendar',22)}</button></div>
+    <div class="cdc-hero-balance"><span>${esc(balanceKind)}</span><strong data-money>${money(n.current)}</strong><small>${n.hasAccountBalance?'Atualizado manualmente':'Estimativa sem acesso ao banco'}</small><button type="button" data-toggle-privacy aria-label="${privacyHidden?'Mostrar':'Ocultar'} valores">${icon(privacyHidden?'eye':'eyeOff',19)}</button></div>
+    <div class="cdc-hero-duo"><div><span>↑ Entradas</span><strong data-money>${money(n.incomes)}</strong></div><div><span>↓ Saídas registadas</span><strong data-money>${money(n.cashSpent)}</strong></div></div>
+    <div class="cdc-hero-result"><span>Resultado do mês <small>Receitas menos gastos</small></span><strong data-money>${result<0?'−':'+'}${money(Math.abs(result))}</strong></div>`);
   const paidBills = n.paymentTotal;
   const balanceSub=n.hasAccountBalance
     ? `Saldo da conta · ${n.profile.accountBalanceUpdatedAt?fmtDateTime(n.profile.accountBalanceUpdatedAt):'atualizado manualmente'}`
@@ -324,6 +348,12 @@ function renderBills() {
     categorySelect.value=categories.includes(selected)?selected:'all';
   }
   const filterState=billFilterState();
+  $('#billQuickFilters')?.querySelectorAll('[data-bill-quick]').forEach(button=>{
+    button.setAttribute('aria-pressed',String(button.dataset.billQuick===filterState.status));
+  });
+  const monthLabel=new Intl.DateTimeFormat('pt-PT',{month:'long',year:'numeric'}).format(new Date(`${selectedMonth}-01T12:00:00`));
+  const monthHeading=$('#billMonthHeading');
+  if(monthHeading)monthHeading.textContent=monthLabel.charAt(0).toLocaleUpperCase('pt-PT')+monthLabel.slice(1);
   const criteria={
     search:$('#billSearch')?.value||'',
     ...filterState
@@ -378,18 +408,28 @@ function billTableRowHtml(b) {
     <td><div class="bill-table-actions">${billActionsHtml(b)}</div></td>
   </tr>`;
 }
+function billVisual(b){
+  const label=String([b.title,b.category,b.provider].filter(Boolean).join(' ')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  if(/renda|aluguer|habitacao|casa/.test(label))return ['home','home'];
+  if(/eletric|energia|luz|gas/.test(label))return ['zap','energy'];
+  if(/agua|saneamento/.test(label))return ['droplet','water'];
+  if(/internet|wifi|fibra/.test(label))return ['wifi','internet'];
+  if(/telemovel|telefone|movel|comunicac/.test(label))return ['smartphone','phone'];
+  return ['navBills','other'];
+}
 function billCardHtml(b) {
   const st=billStatus(b), urg=billUrgency(b), rem=remainingForBill(b), paid=paidForBill(b.id);
   const [dueLabel,dueKind]=billDueSignal(b,st,urg);
-  const validProgress=Number.isSafeInteger(b.totalCents)&&b.totalCents>0&&Number.isSafeInteger(paid)&&paid>=0;
-  const pct=validProgress?clamp(paid/b.totalCents*100,0,100):0;
-  return `<article class="bill-mobile-card">
-    <div class="bill-mobile-head"><div><h3>${esc(b.title)}</h3><small>${esc(b.provider||'Sem fornecedor')}</small></div><span class="status-chip ${st}">${esc(statusLabel(st))}</span></div>
-    <div class="bill-mobile-focus"><div><span>Em falta</span><strong data-money>${money(rem)}</strong></div><span class="bill-due-signal ${dueKind}">${esc(dueLabel)}</span></div>
-    <div class="bill-mobile-due"><span>Vencimento</span><strong>${fmtDate(billDueDateKey(b))}</strong></div>
-    <div class="bill-mobile-finance"><div><span>Total</span><strong data-money>${money(b.totalCents)}</strong></div><div><span>Pago</span><strong data-money>${money(paid)}</strong></div><div><span>Categoria</span><strong>${esc(b.category||'Outros')}</strong></div></div>
-    <div class="progress ${st==='paid'?'success':st==='overdue'?'danger':'warning'}" aria-label="Progresso de pagamento"><span data-width="${pct}"></span></div>
-    <div class="bill-mobile-actions">${billActionsHtml(b,true)}</div>
+  const [billIcon,iconKind]=billVisual(b);
+  const primaryAmount=st==='paid'?b.totalCents:rem;
+  return `<article class="bill-mobile-card cdc-bill-compact">
+    <button type="button" class="cdc-bill-open" data-bill-id="${attr(b.id)}" aria-label="Abrir ${attr(b.title)}: ${attr(statusLabel(st))}">
+      <span class="cdc-bill-symbol is-${iconKind}" aria-hidden="true">${icon(billIcon,21)}</span>
+      <span class="cdc-bill-name"><strong>${esc(b.title)}</strong><span class="status-chip ${st}">${esc(statusLabel(st))}</span></span>
+      <span class="cdc-bill-amount"><strong data-money>${money(primaryAmount)}</strong><small>${fmtDate(billDueDateKey(b))}</small></span>
+      <span class="cdc-bill-chevron" aria-hidden="true">${icon('chevron',17)}</span>
+    </button>
+    <details class="cdc-bill-more-actions"><summary>Detalhes e ações</summary><div class="cdc-bill-details"><span>Valor total: <strong data-money>${money(b.totalCents)}</strong></span><span>Liquidado: <strong data-money>${money(paid)}</strong></span><span class="bill-due-signal ${dueKind}">${esc(dueLabel)}</span></div><div class="bill-mobile-actions">${billActionsHtml(b,true)}</div></details>
   </article>`;
 }
 
@@ -445,6 +485,30 @@ function planningOverviewCard(label,value,kind,note) {
 function planningMonthlyResult(n) {
   return sumCents([n.incomes,-n.cashSpent]);
 }
+function renderPlanningBudgetSnapshot(n){
+  const budget=n.profile.budgetCents||0;
+  const spent=n.budgetUsed;
+  const pending=n.outstanding;
+  const committed=sumCents([spent,pending]);
+  const available=sumCents([budget,-committed]);
+  const hasBudget=budget>0;
+  const percent=hasBudget?Math.max(0,Math.round(committed/budget*100)):0;
+  const progress=hasBudget?clamp(percent,0,100):0;
+  const over=hasBudget&&available<0;
+  const progressAttributes=hasBudget
+    ? `role="progressbar" aria-label="Orçamento comprometido" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" aria-valuetext="${percent}% comprometido"`
+    : 'role="img" aria-label="Orçamento mensal por definir"';
+  const state=hasBudget
+    ? `<div class="cdc-budget-state ${over?'is-over':'is-ok'}">${icon(over?'alert':'shield',20)}<span><strong>${over?'Orçamento ultrapassado':'Dentro do orçamento'}</strong><small>${over?'Os compromissos excedem o limite mensal.':`Ainda tens ${money(available)} disponíveis, depois dos compromissos.`}</small></span></div>`
+    : `<div class="cdc-budget-state is-unset">${icon('info',20)}<span><strong>Orçamento por definir</strong><small>Define um limite para veres o progresso e o valor disponível.</small></span><button type="button" class="btn secondary" data-focus-budget>Definir</button></div>`;
+  setHTML('#planningBudgetSnapshot',`<div class="cdc-budget-overview">
+    <div class="cdc-budget-ring cdc-v77-budget-ring ${hasBudget?'':'is-unset'}" ${progressAttributes} style="--cdc-budget-progress:${progress}%"><strong>${hasBudget?`${percent}%`:'—'}</strong></div>
+    <div class="cdc-budget-overview-copy"><span>Orçamento mensal</span><strong${hasBudget?' data-money':''}>${hasBudget?money(budget):'Por definir'}</strong><small data-money>${money(committed)} comprometidos</small></div>
+  </div>
+  <dl class="cdc-budget-breakdown"><div><dt><i class="spent"></i>Gasto (efetivo)</dt><dd data-money>${money(spent)}</dd></div><div><dt><i class="pending"></i>Por pagar (compromissos)</dt><dd data-money>${money(pending)}</dd></div><div class="remaining"><dt><i class="remaining"></i>${over?'Acima do orçamento':'Disponível'}</dt><dd${hasBudget?' data-money':''}>${hasBudget?money(Math.abs(available)):'—'}</dd></div></dl>
+  ${n.marketEstimatedCount>0?`<p class="cdc-budget-estimate-note">Inclui ${n.marketEstimatedCount} compra${n.marketEstimatedCount===1?'':'s'} com valor estimado.</p>`:''}
+  ${state}`);
+}
 function renderPlanningOverview(n){
   const result=planningMonthlyResult(n);
   const hasUnpaid=n.outstanding>0;
@@ -480,13 +544,18 @@ function renderPlanningUpcoming(){
     const label=!Number.isFinite(days)?'Data por confirmar':days<0?'Em atraso':days===0?'Vence hoje':`Em ${days} dia${days===1?'':'s'}`;
     const kind=Number.isFinite(days)&&days<0?'overdue':days===0?'today':'pending';
     const due=billDueDateKey(b);
-    return `<div class="cdc-plan-upcoming-row"><div class="cdc-plan-upcoming-item"><strong>${esc(b.title||'Fatura sem descrição')}</strong><small>${due?esc(fmtDate(due)):'Vencimento por confirmar'} · ${esc(label)}</small></div><span class="cdc-plan-upcoming-value ${attr(kind)}" data-money>${money(remainingForBill(b))}</span></div>`;
+    const [billIcon,iconKind]=billVisual(b);
+    return `<button type="button" class="cdc-plan-upcoming-row" data-bill-id="${attr(b.id)}" aria-label="Abrir fatura ${attr(b.title||'Sem descrição')}"><span class="cdc-plan-upcoming-icon is-${iconKind}" aria-hidden="true">${icon(billIcon,20)}</span><span class="cdc-plan-upcoming-item"><strong>${esc(b.title||'Fatura sem descrição')}</strong><small>${esc(label)}${due?` · ${esc(fmtDate(due))}`:''}</small></span><span class="cdc-plan-upcoming-value ${attr(kind)}" data-money>${money(remainingForBill(b))}</span><span aria-hidden="true">${icon('chevron',17)}</span></button>`;
   }).join(''):'<p class="cdc-plan-empty">Não existem contas por pagar registadas.</p>');
 }
 
 function renderPlanning() {
   const p=monthProfile();
   const n=monthNumbers();
+  const monthLabel=new Intl.DateTimeFormat('pt-PT',{month:'long',year:'numeric'}).format(new Date(`${selectedMonth}-01T12:00:00`));
+  const monthNode=$('#planningMonthLabel');
+  if(monthNode)monthNode.textContent=monthLabel.charAt(0).toLocaleUpperCase('pt-PT')+monthLabel.slice(1);
+  renderPlanningBudgetSnapshot(n);
   renderPlanningOverview(n);
   renderPlanningUpcoming();
   $('#accountBalance').value=Number.isSafeInteger(p.accountBalanceCents)?(p.accountBalanceCents/100).toFixed(2).replace('.',','):'';

@@ -1,7 +1,7 @@
 {
   "name": "Conta de Casa",
   "short_name": "ContaCasa",
-  "description": "Gestão privada de despesas, faturas, mercado e planeamento doméstico.",
+  "description": "Gestão privada de contas, faturas e planeamento doméstico.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -27,11 +27,6 @@
       "name": "Planeamento",
       "short_name": "Planear",
       "url": "./#planning"
-    },
-    {
-      "name": "Mercado",
-      "short_name": "Mercado",
-      "url": "./#market"
     }
   ],
   "display_override": [

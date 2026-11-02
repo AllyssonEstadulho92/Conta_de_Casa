@@ -1,5 +1,43 @@
 # Estado do Projeto — Conta de Casa
 
+## Integração autorizada na aplicação principal (02/11/2026)
+
+O utilizador autorizou expressamente a atualização de `https://allyssonestadulho92.github.io/Conta_de_Casa/#dashboard` com o visual completo testado na versão privada. O código foi transferido para o ramo de integração do repositório GitHub, preservando o cofre, o formato dos dados cifrados, a lógica de pagamentos e os mecanismos de cópia de segurança. A publicação pública depende da conclusão dos testes, da atualização do ramo `main` e do fluxo CI → GitHub Pages. Não há importação de dados entre o protótipo privado e a aplicação pública.
+
+**Verificação antes da publicação:** 59/59 ficheiros de testes Node aprovados, `npm run typecheck` aprovado e `npm run build:pages` concluído com os 74 recursos estáticos preparados. A versão pública continua sujeita ao CI e à publicação GitHub Pages após o push.
+
+
+## Fidelidade ao protótipo completo, incluindo menus (01/11/2026)
+
+**Pedido confirmado:** a imagem dos cinco telemóveis é referência visual para o PIN, Início, Plano Mensal, Contas, Notificações e menu inferior. Os cinco destinos diretos são, nesta ordem: **Início, Plano, Contas, Relatórios, Mais**. O ecrã Mais apresenta primeiro **Perfil e preferências, Cofre e segurança, Exportar / Backup, Sobre a aplicação**; as funções adicionais ficam numa secção expansível, sem perder acesso aos módulos existentes.
+
+**Falha identificada:** duas camadas independentes montavam seletores de mês e resumos de orçamento no Plano. A camada nova mostrava ainda uma simples mensagem em vez do gráfico quando o orçamento estava por definir; o anel era afetado por CSS histórico de `.cdc-budget-ring`. A composição ativa passa a desenhar apenas um cartão de orçamento, com o mesmo estado visual tanto sem orçamento como com valores reais. A distribuição por categoria permanece como detalhe secundário, sem repetir o cartão. O mês é comum ao cofre e à restante aplicação.
+
+**Especificação operacional:** o Plano apresenta título, seletor de mês, anel com percentagem se houver orçamento, valor mensal, gasto efetivo, compromissos por pagar, disponível e uma mensagem adequada ao estado. Seguem-se as próximas contas com ícones derivados do tipo de despesa, o resumo detalhado e o formulário canónico. Sem orçamento, o anel é neutro e diz «Por definir»; não se inventam percentagens nem valores disponíveis. Se existir orçamento, compromisso = `budgetUsed + outstanding`, disponível = `budgetCents - compromisso`; o progresso é limitado visualmente a 100%, mantendo a percentagem textual acima de 100% em caso de excesso. O resultado do mês continua a ser `incomes - cashSpent`, sem o confundir com o saldo bancário.
+
+**Outros ecrãs:** o Início mantém saldo, entradas, saídas e resultado derivados do cofre. Contas mostra filtros e linhas compactas com ícones por tipo de despesa e conserva as ações em detalhes expansíveis. Notificações apresenta alertas atuais e atividades recentes efetivamente registadas, sem criar mensagens fictícias. «Exportar / Backup» abre a secção de Segurança, sem executar a exportação automaticamente.
+
+**Privacidade e distribuição:** não se altera a cifra, credenciais, pagamentos, backups, persistência, sincronização nem o GitHub Pages público. As alterações destinam-se à versão HTTPS privada de teste, cujo cofre começa vazio e não recebe automaticamente os registos do utilizador. A versão pública só deverá ser atualizada após autorização explícita e validação da versão privada.
+
+**Aceitação:** cinco botões na ordem/ícones do protótipo, menu Mais simplificado, Plano sem duplicação em estados vazio/definido/excedido, valores sempre reais, ações de contas e cofre preservadas, testes automatizados e build sem erros. A validação visual em iPhone real após autenticação é ainda necessária.
+
+**Validação técnica executada:** 59/59 ficheiros de teste Node passaram em sequência, incluindo o novo contrato de ordem/ícones/menu e simulações do orçamento sem limite, a 64% e acima de 100%. `npm run typecheck` e `npm run build:pages` concluíram sem erros. Não foi possível confirmar visualmente o ecrã autenticado num Safari/iPhone real nesta sessão.
+
+## Continuação dos ecrãs financeiros após o PIN (01/11/2026)
+
+**Base verificada:** `main` em `4aad296` (#230), com a vista de PIN e o dock de cinco destinos já integrados no código. A referência enviada pelo utilizador é um protótipo, não prova de que os ecrãs existam na aplicação publicada.
+
+**Alteração de teste:** o Início passa a ter saudação opcional baseada no nome configurado, atalhos de navegação e um cartão de resumo com saldo informado/calculado, receitas, saídas e resultado automático. O Plano apresenta navegação mês a mês, anel do orçamento comprometido, discriminando utilizado, por liquidar e disponível. As Contas recebem filtros rápidos Todas/A pagar/Pagas/Atrasadas, uma lista móvel compacta e detalhes/pagamentos acessíveis. O Centro de Alertas permite filtrar avisos calculados em Todas/Importantes/Informativas. Relatórios e Mais preservam os seus módulos e ganham coerência visual via nova camada CSS.
+
+**Erro concreto corrigido:** `app-update.js` tentava `insertBefore` com um elemento interno da zona de eliminação, que não era filho direto do painel; o lançador de atualizações falhava com `NotFoundError`. Agora usa a zona de perigo como referência direta, sem modificar a ação de eliminação.
+
+**Segurança e dados:** não há novos valores persistidos, `STATE_VERSION`, alterações à cifra, PIN, IndexedDB, backups, pagamentos ou sincronização. A função de filtro A pagar inclui parciais e exclui liquidada/cancelada. O Mercado deixa também de aparecer nos atalhos do manifesto PWA, preservando o histórico legado. A referência visual de Face ID mantém-se apenas conceptual.
+
+**Distribuição:** a proposta permanece isolada da aplicação GitHub Pages. O arquivo de Pages inclui `v76-finance-screens.css` e revisão de scripts e do service worker para atualização consistente. A PR #223 (QR), #224 (privacidade) e #225 (relatório de pagamentos) continuam separadas.
+
+**Validação:** 58/58 ficheiros de teste Node passaram em sequência (`--test-concurrency=1`), com TypeScript e build Pages aprovados. Os testes devem ser executados em sequência porque alguns reconstroem/removem a pasta `dist`. O preview HTTP de desenvolvimento não disponibiliza Web Crypto em contexto seguro, pelo que a criação de cofre no browser de teste ficou bloqueada por limitação do ambiente. A versão HTTPS privada foi disponibilizada em `https://conta-de-casa-interface-teste-20261101.major-shell-6297.chatgpt.site`, exclusivamente para o proprietário e sem dados financeiros de origem. O browser de QA parou na autenticação do ChatGPT. Pendente: testar após autenticação e no Safari/iPhone com cofre fictício, e verificar cores e contraste.
+
+
 ## Conclusão da navegação inferior e preparação de publicação (01/11/2026)
 
 **Alteração adicional:** a barra inferior para telemóvel foi corrigida para cinco destinos efetivamente visíveis: Início, Faturas, Plano, Relatórios e Mais. «Mais» abre o menu secundário existente e reflete o seu estado de expansão. Foi eliminada a regra antiga que ocultava o terceiro separador. O script `core.js` passa a receber revisão explícita de cache, tal como `render.js`, `events.js` e o CSS móvel, para evitar versões misturadas durante a atualização da PWA.

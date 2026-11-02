@@ -94,35 +94,31 @@
   const REVISION='76-budget-commitment4';
   const LABELS=Object.freeze({
     dashboard:['Início','Visão geral'],
-    bills:['Despesas','Movimentos'],
+    bills:['Contas','Movimentos'],
     calendar:['Calendário','Despesas'],
 
-    planning:['Planeamento','Orçamento'],
+    planning:['Plano Mensal','Orçamento'],
     goals:['Metas','Poupança'],
     reports:['Relatórios','Análise'],
     security:['Segurança e sincronização','Conta e dados'],
     diagnostics:['Diagnóstico e integridade','Sistema'],
-    settings:['Definições','Aplicação'],
+    settings:['Mais','Conta de Casa'],
     petshare:['Partilha do Walli','Animais']
   });
   const DRAWER_GROUPS=Object.freeze([
-    {label:'Principal',items:[['dashboard','Início','home'],['bills','Despesas','bill'],['planning','Planeamento','plan']]},
-    {label:'Animais',items:[['petshare','Partilha do Walli','paw']]},
-    {label:'Análise',items:[['reports','Relatórios','report']]},
-    {label:'Sistema',items:[['security','Segurança e sincronização','shield'],['settings','Definições','settings']]}
+    {label:'Principal',items:[['dashboard','Início','home'],['planning','Plano','navPlan'],['bills','Contas','navBills'],['reports','Relatórios','navReports'],['settings','Mais','more']]},
+    {label:'Outras funções',items:[['petshare','Partilha do Walli','paw'],['security','Segurança e sincronização','shield']]}
   ]);
   const MOBILE_NAV=Object.freeze([
     ['dashboard','Início','home'],
-    ['bills','Despesas','bill'],
-    ['reports','Relatórios','report'],
-    ['planning','Plano','plan'],
+    ['planning','Plano','navPlan'],
+    ['bills','Contas','navBills'],
+    ['reports','Relatórios','navReports'],
     ['settings','Mais','more']
   ]);
   const MORE_GROUPS=Object.freeze([
-    {label:'Organização',items:[['reports','Relatórios','report','Análise de despesas e evolução'],['goals','Metas de poupança','goal','Objetivos e progresso']]},
-    {label:'Conta e dados',items:[['sync','Sincronização','sync','Estado entre dispositivos']]},
-    {label:'Segurança',items:[['security','Segurança e privacidade','shield','Cofre, backup e proteção'],['diagnostics','Diagnóstico e integridade','settings','Verificações técnicas']]},
-    {label:'Aplicação',items:[['theme','Aparência','theme','Claro, escuro ou sistema'],['preferences','Definições da aplicação','settings','Nome, moeda e preferências']]}
+    {label:'Menu Mais',items:[['preferences','Perfil e preferências','settings','Nome, moeda e preferências'],['security','Cofre e segurança','shield','Acesso e proteção dos dados'],['backup','Exportar / Backup','wallet','Cópia cifrada e restauro'],['about','Sobre a aplicação','info','Informações do Conta de Casa']]},
+    {label:'Outras funções',items:[['goals','Objetivos de poupança','goal','Metas e progresso'],['sync','Sincronização','sync','Ligação opcional entre dispositivos'],['diagnostics','Diagnóstico e integridade','settings','Verificações técnicas'],['theme','Aparência','theme','Tema claro, escuro ou sistema']]}
   ]);
 
   let scheduled=false;
@@ -290,7 +286,7 @@
   }
 
   function moreItemHtml(action,label,iconName,description){
-    const attrs=action==='sync'?'data-v75-sync':action==='theme'?'data-v75-theme':action==='preferences'?'data-v75-preferences':`data-v75-go="${attr(action)}"`;
+    const attrs=action==='sync'?'data-v75-sync':action==='theme'?'data-v75-theme':action==='preferences'?'data-v75-preferences':action==='backup'?'data-v75-backup':action==='about'?'data-v75-about aria-controls="cdcAboutPanel" aria-expanded="false"':`data-v75-go="${attr(action)}"`;
     return `<button type="button" class="v75-more-row" ${attrs}><span class="v75-more-icon">${iconMarkup(iconName,19)}</span><span><strong>${esc(label)}</strong><small>${esc(description||'')}</small></span><i aria-hidden="true">›</i></button>`;
   }
 
@@ -318,7 +314,9 @@
   }
 
   function moreArchitectureHtml(){
-    return `<button type="button" class="cdc-profile-card v75-profile-card" data-v75-preferences><span class="cdc-avatar" aria-hidden="true">${esc(initials())}</span><div><strong>${esc(profileName())}</strong><small>Conta de Casa · cofre privado</small></div><i aria-hidden="true">›</i></button>${MORE_GROUPS.map(group=>`<section class="v75-more-group" aria-label="${attr(group.label)}"><h2>${esc(group.label)}</h2><div>${group.items.map(([action,label,iconName,description])=>moreItemHtml(action,label,iconName,description)).join('')}</div></section>`).join('')}`;
+    const main=MORE_GROUPS[0];
+    const extra=MORE_GROUPS[1];
+    return `<section class="v75-more-group cdc-more-primary" aria-label="${attr(main.label)}"><div>${main.items.map(([action,label,iconName,description])=>moreItemHtml(action,label,iconName,description)).join('')}</div></section><div id="cdcAboutPanel" class="cdc-more-about-panel" hidden><strong>Conta de Casa</strong><p>Gestão privada de contas, orçamento e relatórios. Os registos permanecem cifrados no cofre do navegador. A versão de teste não importa automaticamente os dados da aplicação pública.</p></div><details class="cdc-more-extra"><summary>Outras funções</summary><section class="v75-more-group" aria-label="${attr(extra.label)}"><div>${extra.items.map(([action,label,iconName,description])=>moreItemHtml(action,label,iconName,description)).join('')}</div></section></details>`;
   }
 
   function renderMoreArchitecture(){
@@ -369,6 +367,14 @@
     return `${planningMonthHtml()}<section class="v76-planning-budget-card" aria-labelledby="v76BudgetTitle"><header class="v76-budget-card-head"><span class="v76-budget-card-icon" aria-hidden="true">${iconMarkup('plan',22)}</span><span class="v76-budget-card-copy"><strong id="v76BudgetTitle">Orçamento mensal</strong><small>Acompanhe os seus gastos e mantenha o controlo.</small></span><button type="button" class="v76-budget-head-action" data-v75-budget-focus>${iconMarkup('settings',18)}<span>${actionLabel}</span></button></header><section class="v75-budget-summary" aria-label="Resumo do orçamento"><div class="cdc-budget-ring${ringClass}" style="--pct:${hasBudget?metrics.pct:0}" aria-label="${attr(ringLabel)}"><div>${ringLead}${ringDetail}</div></div><div class="v75-budget-metrics"><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('banknote',20)}</span><span class="v76-budget-metric-copy"><small>Já utilizado</small><strong data-money>${moneyText(metrics.spent)}</strong></span></div><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('bill',20)}</span><span class="v76-budget-metric-copy"><small>Por pagar</small><strong data-money>${committedLabel}</strong></span></div><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('goal',20)}</span><span class="v76-budget-metric-copy"><small>Orçamento</small><strong${hasBudget?' data-money':''}>${budgetLabel}</strong></span><button type="button" class="v76-budget-metric-action" data-v75-budget-focus aria-label="${actionLabel} orçamento">${iconMarkup('chevron',18)}</button></div><div class="v76-budget-metric"><span class="v76-budget-metric-icon" aria-hidden="true">${iconMarkup('wallet',20)}</span><span class="v76-budget-metric-copy"><small>Disponível</small><strong${hasBudget?' data-money':''}${hasBudget&&metrics.availableReal<0?' class="danger-text"':''}>${availableRealLabel}</strong></span></div></div></section><div class="v76-budget-guidance"><span class="v76-budget-guidance-icon" aria-hidden="true">${iconMarkup('info',20)}</span><span><strong>${guidanceTitle}</strong><small>${guidanceText}</small></span><button type="button" data-v75-budget-focus aria-label="${actionLabel} orçamento">${iconMarkup('chevron',18)}</button></div><button type="button" class="btn primary v76-budget-cta" data-v75-budget-focus>${iconMarkup(ctaIcon,20)}<span>${ctaLabel}</span></button></section><div class="v75-section-heading"><strong>Despesas por categoria</strong><small>${entries.length?'Distribuição do mês':'Sem movimentos neste mês'}</small></div><div class="cdc-planning-categories">${entries.map(([name,value],index)=>{const pct=Math.round(Number(value||0)/total*100);return `<div><span class="cdc-category-dot ${['food','home','transport','health','other'][index%5]}" aria-hidden="true"></span><strong>${esc(name)}</strong><span class="cdc-plan-track"><i style="width:${Math.max(5,pct)}%"></i></span><b data-money>${moneyText(value)}</b></div>`;}).join('')||'<p class="cdc-empty-note">Ainda não existem despesas para distribuir.</p>'}</div>`;
   }
 
+  // O Plano visual principal pertence agora a renderPlanningBudgetSnapshot.
+  // Esta secção conserva somente a distribuição por categoria, sem repetir
+  // o seletor do mês nem um segundo cartão de orçamento.
+  function planningCategoriesHtml(entries){
+    const total=entries.reduce((sum,entry)=>sum+Number(entry[1]||0),0)||1;
+    return `<div class="v75-section-heading"><strong>Despesas por categoria</strong><small>${entries.length?'Distribuição do mês':'Sem movimentos neste mês'}</small></div><div class="cdc-planning-categories">${entries.map(([name,value],index)=>{const pct=Math.round(Number(value||0)/total*100);return `<div><span class="cdc-category-dot ${['food','home','transport','health','other'][index%5]}" aria-hidden="true"></span><strong>${esc(name)}</strong><span class="cdc-plan-track"><i style="width:${Math.max(5,pct)}%"></i></span><b data-money>${moneyText(value)}</b></div>`;}).join('')||'<p class="cdc-empty-note">Ainda não existem despesas para distribuir.</p>'}</div>`;
+  }
+
   function renderPlanningArchitecture(){
     const rootNode=ensurePlanningShell();
     if(!rootNode||!appReady())return;
@@ -376,7 +382,7 @@
     const entries=categoryEntries().slice(0,5);
     const key=`${selectedMonthKey()}|${metrics?.spent||0}|${metrics?.committed||0}|${metrics?.allocated||0}|${metrics?.rawPct||0}|${metrics?.budget||0}|${metrics?.availableReal||0}|${entries.map(entry=>`${entry[0]}:${entry[1]}`).join(',')}`;
     if(rootNode.dataset.v75Key===key)return;
-    const html=planningArchitectureHtml(metrics,entries);
+    const html=planningCategoriesHtml(entries);
     if(html){
       rootNode.innerHTML=html;
       rootNode.dataset.v75Key=key;
@@ -533,6 +539,16 @@
     },30);
   }
 
+  function handleBackup(){
+    if(typeof showPage==='function')showPage('security');
+    setTimeout(()=>{
+      const button=byId('exportBackupBtn');
+      if(!button)return;
+      button.scrollIntoView({block:'center',behavior:root.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?'auto':'smooth'});
+      button.focus({preventScroll:true});
+    },60);
+  }
+
   function focusPlanningBudget(){
     if(typeof showPage==='function'&&currentPageId()!=='planning')showPage('planning');
     const reduce=Boolean(root.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
@@ -620,6 +636,14 @@
       if(monthStep){event.preventDefault();stepMonth(monthStep.dataset.v75MonthStep);schedule();return;}
       const budgetFocus=target?.closest('[data-v75-budget-focus]');
       if(budgetFocus){event.preventDefault();focusPlanningBudget();schedule();return;}
+      if(target?.closest('[data-v75-backup]')){event.preventDefault();handleBackup();schedule();return;}
+      const about=target?.closest('[data-v75-about]');
+      if(about){
+        event.preventDefault();
+        const panel=byId('cdcAboutPanel');
+        if(panel){panel.hidden=!panel.hidden;about.setAttribute('aria-expanded',String(!panel.hidden));}
+        return;
+      }
       const go=target?.closest('[data-v75-go]');
       if(go){event.preventDefault();if(typeof showPage==='function')showPage(go.dataset.v75Go);schedule();return;}
       if(target?.closest('[data-v75-sync]')){event.preventDefault();handleSync();schedule();return;}

@@ -1,5 +1,26 @@
 # Arquitetura — Conta de Casa
 
+## Composição fiel ao protótipo e navegação (01/11/2026)
+
+`v75-architecture.js` continua a ser a autoridade do menu móvel e lateral. `MOBILE_NAV` e `DRAWER_GROUPS` partilham a ordem Início/Plano/Contas/Relatórios/Mais. Os ícones `navPlan`, `navBills` e `navReports` provêm de `ui-icons.js` e são locais e utilizáveis offline. `MORE_GROUPS[0]` contém as quatro ações principais; as funções secundárias ficam dentro de `<details>` para não alongar o primeiro ecrã. «Backup» apenas navega para `#exportBackupBtn` no ecrã Segurança; o utilizador é quem decide exportar.
+
+`index.html` define a ordem acessível do Plano: título, `#planningMonthLabel`, `#planningBudgetSnapshot`, `#planningUpcomingList`, `#planningProjection`, `#planningKpis`, edição do orçamento e objetivos. O renderer canónico `renderPlanningBudgetSnapshot()` mantém um único cartão também no estado sem orçamento. O adaptador `renderPlanningArchitecture()` desenha apenas categorias através de `planningCategoriesHtml()`, desativando visualmente o cartão de orçamento histórico. A nova classe `cdc-v77-budget-ring` isola o anel das regras antigas de `.cdc-budget-ring`. Os valores provêm exclusivamente de `monthNumbers()`, sem estado financeiro novo.
+
+`render.js/billVisual()` escolhe símbolos de despesas por categoria, título e fornecedor, com fallback neutro, sem alterar o objeto da fatura. A lista móvel mantém botões canónicos de detalhe, edição e pagamento dentro de um disclosure. Notificações combinam alertas calculados e atividade real do cofre, em secções separadas, sem criar eventos persistentes.
+
+As revisões `77-prototype-fidelity1` em `scripts/prepare-pages.cjs` invalidam a cache de `render.js`, `ui-icons.js`, `v75-architecture.js`, `v76-finance-screens.css`, `core.js`, `events.js`, `finance.js` e service worker. Os seletores e controladores de domínio não são duplicados.
+
+## Ecrãs financeiros, filtros e composição móvel (01/11/2026)
+
+`index.html` mantém os pontos de montagem canónicos. `render.js` deriva `#dashboardHero` exclusivamente de `dashboardNumbers()` e `planningMonthlyResult()`, e `#planningBudgetSnapshot` usa `budgetUsed + outstanding` para o compromisso, sem guardar uma nova métrica. `selectedMonth`, `monthProfile()` e o seletor existente continuam a única fonte de contexto mensal.
+
+Os filtros de estado de Contas são atalhos para `#billStatusFilter`; `finance.js/filterBills()` aceita o filtro derivado `unpaid`, incluindo pagamentos parciais com saldo e excluindo canceladas e pagamentos integralmente liquidados. O Centro de Alertas reutiliza `dashboardAlertItems()` e filtra apenas a lista renderizada, sem estados persistidos nem notificações push. Os novos botões `data-go`, `data-month-step`, `data-bill-id`, `data-toggle-privacy` e `data-alert-filter` usam os controladores existentes em `events.js`.
+
+`v76-finance-screens.css` é a última camada de apresentação das quatro vistas financeiras e do diálogo de alertas. Não altera a geometria de autenticação nem a autoridade `v76-mobile-shell.css` para dock/viewport. Os ícones novos da navegação são hidratados por `ui-icons.js` (Lucide local). O `scripts/prepare-pages.cjs` e `sw.js` incluem a camada no bundle e no precache, com revisão `76-finance-screens1` para os scripts financeiros.
+
+`app-update.js` monta o lançador antes de `.cdc-danger-zone`, filha direta do painel de Definições. O manifesto PWA já não contém o atalho para Mercado. Não há alterações ao schema, aos envelopes cifrados ou à política de sincronização.
+
+
 ## Navegação móvel e cofre aprovado (01/11/2026)
 
 O dock é renderizado por `renderNav()` com quatro rotas financeiras de `MOBILE_NAV_ITEMS` e uma ação separada `data-mobile-more` que abre `#mobileDrawer` através do controlador existente, sem criar rota fictícia. A classe CSS de autoridade `v76-mobile-shell.css` impõe cinco colunas e repõe a visibilidade do terceiro item anteriormente oculto. `events.js` sincroniza o `aria-expanded` de «Mais» com a abertura e fecho do diálogo. `scripts/prepare-pages.cjs` altera revisões de `core.js`, `render.js`, `events.js`, `v76-mobile-shell.css` e do service worker, prevenindo a mistura de menus antigos e novos.

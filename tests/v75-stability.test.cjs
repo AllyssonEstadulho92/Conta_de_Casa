@@ -82,9 +82,9 @@ assert.match(architecture,/76-architecture-consolidation1/);
 assert.match(architecture,/const MOBILE_NAV=Object\.freeze/);
 for(const marker of [
   "['dashboard','Início','home']",
-  "['bills','Despesas','bill']",
-  "['reports','Relatórios','report']",
-  "['planning','Planeamento','plan']",
+  "['planning','Plano','navPlan']",
+  "['bills','Contas','navBills']",
+  "['reports','Relatórios','navReports']",
   "['settings','Mais','more']"
 ])assert.ok(architecture.includes(marker),`architecture must own mobile destination ${marker}`);
 assert.match(architecture,/function syncNavigationArchitecture\(\)/);
@@ -117,7 +117,7 @@ try{
   assert.match(builtIndex,/v75-stability\.css\?v=75-stability1/);
   assert.match(builtIndex,/v75-pages\.css\?v=75-pages1/);
   assert.match(builtIndex,/v75-usability\.css\?v=76-auth-viewport-fit1/);
-  assert.match(builtIndex,/v75-architecture\.js\?v=76-ux-retired-market3/);
+  assert.match(builtIndex,/v75-architecture\.js\?v=77-prototype-fidelity1/);
   assert.match(builtIndex,/v75-stability\.js\?v=75-stability1/);
   assert.ok(builtIndex.indexOf('v75-stability.css')>builtIndex.indexOf('v75-header-refinement.css'));
   assert.ok(builtIndex.indexOf('v75-pages.css')>builtIndex.indexOf('v75-drawer-theme.css'));

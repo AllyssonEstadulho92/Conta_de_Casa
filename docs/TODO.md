@@ -1,5 +1,42 @@
 # TODO — Conta de Casa
 
+## Publicação autorizada no GitHub Pages (02/11/2026)
+
+- [x] Receber autorização explícita para atualizar a aplicação principal.
+- [x] Comparar a versão `main` do GitHub com a base da revisão privada.
+- [x] Transferir apenas os ficheiros da interface e os testes para o repositório GitHub.
+- [x] Executar 59 ficheiros de testes Node, TypeScript e build de Pages na árvore pública.
+- [ ] Atualizar `main` e confirmar o fluxo de publicação GitHub Actions.
+- [ ] Verificar visualmente a aplicação pública em dispositivo real com o cofre existente, sem apagar os dados.
+
+
+## Referência visual completa, revisão 77 (01/11/2026)
+
+- [x] Confirmar a imagem e especificar cinco ecrãs, menus e estados sem dados fictícios.
+- [x] Corrigir o Plano para mostrar um único cartão de orçamento e anel também sem limite definido.
+- [x] Reordenar o menu inferior e alinhar símbolos com Início, Plano, Contas, Relatórios e Mais.
+- [x] Simplificar Mais para as quatro ações principais do protótipo, preservando funções secundárias.
+- [x] Aproximar Contas e próximas contas do estilo compacto e manter ações de edição/pagamento.
+- [x] Apresentar atividade recente real no Centro de Notificações, com filtros existentes.
+- [ ] Confirmar o resultado visual e a interação em iPhone/Safari e ecrã de computador com cofre fictício.
+- [ ] Obter aprovação explícita antes de integrar alterações na aplicação pública.
+
+## Continuação do protótipo para os ecrãs restantes (01/11/2026)
+
+- [x] Inspecionar a `main` e distinguir implementação real do protótipo ilustrado.
+- [x] Renovar o Início com resumo financeiro calculado e acessos rápidos.
+- [x] Renovar o Plano com orçamento visual, compromissos e mudança de mês.
+- [x] Introduzir filtros rápidos e cartões compactos de Contas preservando ações.
+- [x] Acrescentar separadores de alertas sem criar notificações falsas.
+- [x] Corrigir `NotFoundError` do lançador de atualizações e retirar o atalho Mercado do manifesto.
+- [x] Atualizar bundle, cache, contratos de regressão e documentação.
+- [x] Verificar os 58 testes Node em sequência, TypeScript e build de Pages.
+- [x] Disponibilizar uma versão de teste privada em HTTPS, isolada do GitHub Pages.
+- [ ] Testar a versão separada em HTTPS no Safari/iPhone com cofre e dados fictícios.
+- [ ] Validar contraste, zoom, VoiceOver, rotação e modo discreto, inclusive labels acessíveis.
+- [ ] Rever a integração com #223, #224 e #225 antes de qualquer alteração à `main`.
+
+
 ## Revisão final para publicação (01/11/2026)
 
 - [x] Corrigir dock móvel para Início, Faturas, Plano, Relatórios e Mais.
