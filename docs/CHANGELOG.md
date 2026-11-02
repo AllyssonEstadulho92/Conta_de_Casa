@@ -1,5 +1,14 @@
 # Changelog Técnico — Conta de Casa
 
+## Auditoria do menu e uniformização do Calendário (02/11/2026)
+
+- Apenas um sino por vista; contador preservado junto da saudação no Início.
+- Botão hamburger oculto no telemóvel; todas as rotas e ações do drawer acessíveis em Mais.
+- Saudação local automática, com atualização por minuto e ao regressar à aplicação.
+- Calendário com a mesma composição visual do Plano e Contas, navegação mensal e valores reais, e consulta de dias que antes eram botões sem ação.
+- Testes de saudação, menu, notificações, calendário e cache `77-clock-calendar-menu2`.
+
+
 ## Integração pública autorizada (02/11/2026)
 
 - Preparada a revisão de fidelidade ao protótipo para a aplicação GitHub Pages principal, com os cinco menus na ordem pedida.

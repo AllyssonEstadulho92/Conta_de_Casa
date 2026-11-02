@@ -1,5 +1,14 @@
 # Arquitetura — Conta de Casa
 
+## Cabeçalho, rotas secundárias e calendário canónicos (02/11/2026)
+
+`v75-architecture.js` continua a gerar a navegação canónica com cinco destinos. `MORE_GROUPS` possui três níveis: quatro ações prioritárias, Outras funções e Páginas do menu. Os últimos dois usam `<details>`, permitindo concentrar o antigo drawer no Mais sem alargar a dock. `data-v75-privacy` usa `setPrivacy()`, e `data-v75-lock` usa `lockApp('manual')` diretamente: não existe uma segunda implementação de segurança.
+
+`render.js` centraliza `greetingForHour()` e `updateDashboardGreeting()`, com `new Date()` local. A única verificação periódica é a já existente `syncMonthRollover()`, agora a cada 60 segundos, também em `focus`/`visibilitychange`; não grava dados. `updateAlertBadge()` mantém o mesmo valor nos contadores do sino de cabeçalho e da saudação; as regras dependentes de `data-v75-page="dashboard"` mostram apenas o sino da saudação no Início.
+
+O Calendário reutiliza o `selectedMonth`, `monthNumbers()`, `spendingForDate()`, `monthlySpendHistory()`, `remainingForBill()` e os filtros de faturas canónicos. `data-month-step` chama o controlador de mês existente. O evento delegado em `#calendarGrid` abre `#calendarDayDialog`, com gastos e faturas reais; o detalhe da fatura reutiliza `openBillDetail()`. Não se cria estado financeiro, pagamento ou alerta adicional. A revisão `77-clock-calendar-menu2` invalida a cache da PWA.
+
+
 ## Composição fiel ao protótipo e navegação (01/11/2026)
 
 `v75-architecture.js` continua a ser a autoridade do menu móvel e lateral. `MOBILE_NAV` e `DRAWER_GROUPS` partilham a ordem Início/Plano/Contas/Relatórios/Mais. Os ícones `navPlan`, `navBills` e `navReports` provêm de `ui-icons.js` e são locais e utilizáveis offline. `MORE_GROUPS[0]` contém as quatro ações principais; as funções secundárias ficam dentro de `<details>` para não alongar o primeiro ecrã. «Backup» apenas navega para `#exportBackupBtn` no ecrã Segurança; o utilizador é quem decide exportar.

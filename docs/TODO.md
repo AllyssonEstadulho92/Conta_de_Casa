@@ -1,12 +1,23 @@
 # TODO — Conta de Casa
 
+## Auditoria adicional do menu, relógio e Calendário (02/11/2026)
+
+- [x] Remover no Início apenas o sino do cabeçalho e preservar o badge no sino de boas-vindas.
+- [x] Ocultar o botão de três linhas nos ecrãs móveis e deixar os cinco destinos da dock.
+- [x] Tornar a saudação automática pela hora local com atualização periódica, foco e visibilidade.
+- [x] Transferir as rotas e as ações Ocultar valores e Bloquear para Mais.
+- [x] Uniformizar o Calendário com o visual do Plano e Contas, com seleção de mês e quatro resumos reais.
+- [x] Tornar as células do Calendário funcionais, abrindo despesas e faturas do dia.
+- [ ] Validar o resultado visual no Safari/iPhone físico e num cofre real, sem limpar armazenamento.
+
+
 ## Publicação autorizada no GitHub Pages (02/11/2026)
 
 - [x] Receber autorização explícita para atualizar a aplicação principal.
 - [x] Comparar a versão `main` do GitHub com a base da revisão privada.
 - [x] Transferir apenas os ficheiros da interface e os testes para o repositório GitHub.
 - [x] Executar 59 ficheiros de testes Node, TypeScript e build de Pages na árvore pública.
-- [ ] Atualizar `main` e confirmar o fluxo de publicação GitHub Actions.
+- [x] Atualizar `main` e confirmar o fluxo de publicação GitHub Actions da primeira versão visual (`48529c4`).
 - [ ] Verificar visualmente a aplicação pública em dispositivo real com o cofre existente, sem apagar os dados.
 
 

@@ -1,10 +1,19 @@
 # Estado do Projeto — Conta de Casa
 
+## Auditoria e uniformização do cabeçalho, Mais e Calendário (02/11/2026)
+
+**Pedido:** no Início, mostrar apenas o sino junto da saudação; no telemóvel, remover o botão de três linhas; atualizar Bom dia/Boa tarde/Boa noite pela hora local; tornar o Calendário consistente com o novo Plano; e reunir no Mais as funções do menu lateral, incluindo ocultar valores e bloquear o cofre.
+
+**Implementação:** `v76-finance-screens.css` esconde apenas o sino superior do Início e o hamburger móvel, sem afetar o sino da saudação ou o cabeçalho das outras páginas. `ui-icons.js` preserva o contador do sino da saudação. `render.js` calcula a saudação pela hora do dispositivo (06–11 Bom dia, 12–19 Boa tarde, restantes Boa noite), atualizada em `events.js` a cada minuto, ao regressar à aplicação e ao mudar a visibilidade. O Mais contém os quatro itens prioritários da referência, funções adicionais, ações rápidas do menu lateral e os atalhos das páginas num grupo expansível. O Calendário tem cabeçalho, mudança de mês, quatro cartões de valores reais, grelha com legenda e estados, vencimentos e histórico, utilizando os mesmos tokens do novo visual. Os dias passam a abrir um diálogo real com os gastos e as contas da data.
+
+**Segurança dos dados:** nenhuma mudança ao armazenamento cifrado, PIN, migrações ou fórmula financeira. `selectedMonth` continua o único contexto mensal. A validação real em Safari/iPhone com o cofre do utilizador continua pendente.
+
+
 ## Integração autorizada na aplicação principal (02/11/2026)
 
-O utilizador autorizou expressamente a atualização de `https://allyssonestadulho92.github.io/Conta_de_Casa/#dashboard` com o visual completo testado na versão privada. O código foi transferido para o ramo de integração do repositório GitHub, preservando o cofre, o formato dos dados cifrados, a lógica de pagamentos e os mecanismos de cópia de segurança. A publicação pública depende da conclusão dos testes, da atualização do ramo `main` e do fluxo CI → GitHub Pages. Não há importação de dados entre o protótipo privado e a aplicação pública.
+O utilizador autorizou expressamente a atualização de `https://allyssonestadulho92.github.io/Conta_de_Casa/#dashboard` com o visual completo testado na versão privada. A primeira integração já foi publicada no ramo `main` como `48529c4`, validada pelo fluxo CI → GitHub Pages. O código preservou o cofre, o formato dos dados cifrados, a lógica de pagamentos e os mecanismos de cópia de segurança. Não há importação de dados entre o protótipo privado e a aplicação pública.
 
-**Verificação antes da publicação:** 59/59 ficheiros de testes Node aprovados, `npm run typecheck` aprovado e `npm run build:pages` concluído com os 74 recursos estáticos preparados. A versão pública continua sujeita ao CI e à publicação GitHub Pages após o push.
+**Verificação antes da publicação original:** 59/59 ficheiros de testes Node aprovados, `npm run typecheck` aprovado e `npm run build:pages` concluído com os 74 recursos estáticos preparados. A revisão posterior do Calendário e do menu é novamente validada antes do lançamento.
 
 
 ## Fidelidade ao protótipo completo, incluindo menus (01/11/2026)

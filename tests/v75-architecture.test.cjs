@@ -186,12 +186,12 @@ assert.match(invoiceCss,/@media\(forced-colors:active\)[\s\S]*\.v75-bill-tabs \[
 assert.match(invoiceCss,/\.v75-bill-native-tab>\[data-v75-native-invoice\]\{[\s\S]*position:absolute!important[\s\S]*opacity:\.001!important/,'native file inputs must cover the visual tab without relying on programmatic input.click()');
 
 assert.match(prepare,/const BUILD = 'v76'/);
-assert.match(prepare,/const ARCHITECTURE_REV = '77-prototype-fidelity1'/);
+assert.match(prepare,/const ARCHITECTURE_REV = '77-clock-calendar-menu2'/);
 assert.ok(prepare.includes("'v75-architecture.css'"));
 assert.ok(prepare.includes("'v75-architecture.js'"));
 assert.ok(prepare.includes("'invoice-capture.css'"));
 assert.match(prepare,/const INVOICE_CAPTURE_REV = '76-invoice-autofill7'/,'invoice runtime must use an independent cache-busting revision');
-assert.match(prepare,/const SERVICE_WORKER_REV = '77-prototype-fidelity1'/,'service worker URL must change for the current delivery');
+assert.match(prepare,/const SERVICE_WORKER_REV = '77-clock-calendar-menu2'/,'service worker URL must change for the current delivery');
 assert.ok(prepare.includes("invoice-capture\\.js\\?v=[^\"']+"),'Pages build must rewrite the invoice runtime query token');
 assert.ok(sw.includes("'./v75-architecture.css'"));
 assert.ok(sw.includes("'./v75-architecture.js'"));

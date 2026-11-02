@@ -1,6 +1,6 @@
 let eventsWired = false;
 let observedLocalMonth = currentLocalMonthKey();
-const MONTH_ROLLOVER_INTERVAL_MS = 5 * 60 * 1000;
+const MONTH_ROLLOVER_INTERVAL_MS = 60 * 1000;
 const APP_UPDATE_INTERVAL_MS = 15 * 60 * 1000;
 
 function selectMonthContext(value,{render=true,announce=true}={}){
@@ -20,6 +20,7 @@ function selectMonthContext(value,{render=true,announce=true}={}){
 
 function syncMonthRollover(){
   if(!appState)return;
+  updateDashboardGreeting();
   const nowMonth=currentLocalMonthKey();
   if(nowMonth===observedLocalMonth)return;
   const followCurrent=selectedMonth===observedLocalMonth;
@@ -376,12 +377,35 @@ function openAlertCenter() {
   renderAlertCenter();
   if(!dialog.open)dialog.showModal();
   $('#notificationsBtn')?.setAttribute('aria-expanded','true');
+  document.querySelector('.cdc-welcome-alert')?.setAttribute('aria-expanded','true');
 }
 
 function closeAlertCenter() {
   const dialog=$('#alertCenterDialog');
   if(dialog?.open)dialog.close();
   $('#notificationsBtn')?.setAttribute('aria-expanded','false');
+  document.querySelector('.cdc-welcome-alert')?.setAttribute('aria-expanded','false');
+}
+
+function openCalendarDay(day){
+  const numeric=Number(day);
+  const dialog=$('#calendarDayDialog');
+  if(!dialog||!Number.isInteger(numeric)||numeric<1||numeric>31)return;
+  const [year,month]=selectedMonth.split('-').map(Number);
+  const date=new Date(year,month-1,numeric);
+  if(date.getMonth()!==month-1)return;
+  const dateKey=`${year}-${pad2(month)}-${pad2(numeric)}`;
+  const spent=spendingForDate(dateKey);
+  const bills=appState.bills.filter(b=>billDueDateKey(b)===dateKey&&!b.archived&&!b.cancelled).sort(compareBillsByDue);
+  const title=new Intl.DateTimeFormat('pt-PT',{day:'numeric',month:'long',year:'numeric'}).format(date);
+  const titleEl=$('#calendarDayTitle');
+  if(titleEl)titleEl.textContent=title;
+  dialog.classList.toggle('money-hidden',privacyHidden);
+  const amounts=[['Pagamentos',spent.paymentTotal],['Compras',spent.marketSpent],['Total gasto',spent.total]]
+    .map(([label,cents])=>`<div class="cdc-calendar-day-total"><span>${esc(label)}</span><strong data-money>${money(cents)}</strong></div>`).join('');
+  const rows=bills.map(b=>`<button type="button" class="cdc-calendar-due-row" data-calendar-bill-id="${attr(b.id)}"><span><strong>${esc(b.title)}</strong><small>${esc(statusLabel(billStatus(b)))}</small></span><strong data-money>${money(remainingForBill(b))}</strong><span aria-hidden="true">›</span></button>`).join('');
+  setHTML('#calendarDayDetails',`<div class="cdc-calendar-day-totals">${amounts}</div><h3>Faturas com vencimento</h3>${rows||'<p class="cdc-calendar-day-empty">Sem faturas com vencimento neste dia.</p>'}`);
+  if(!dialog.open)dialog.showModal();
 }
 
 function wireEvents(){
@@ -536,6 +560,12 @@ function wireEvents(){
   $('#upcomingBills').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#planningUpcomingList')?.addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
   $('#calendarAgenda').addEventListener('click',e=>{const b=e.target.closest('[data-bill-id]');if(b)openBillDetail(b.dataset.billId);});
+  $('#calendarGrid')?.addEventListener('click',e=>{const day=e.target.closest('[data-calendar-day]');if(day)openCalendarDay(day.dataset.calendarDay);});
+  $('#calendarDayDialog')?.addEventListener('click',e=>{
+    if(e.target.closest('[data-close-calendar-day]')){$('#calendarDayDialog')?.close();return;}
+    const bill=e.target.closest('[data-calendar-bill-id]');
+    if(bill){$('#calendarDayDialog')?.close();openBillDetail(bill.dataset.calendarBillId);}
+  });
   $('#calendarHistory')?.addEventListener('click',e=>{
     const button=e.target.closest('[data-calendar-month]');
     if(!button)return;
@@ -706,7 +736,10 @@ function wireEvents(){
     if(e.target.closest('[data-go]'))closeAlertCenter();
   });
   alertCenterDialog?.addEventListener('cancel',e=>{e.preventDefault();closeAlertCenter();});
-  alertCenterDialog?.addEventListener('close',()=>$('#notificationsBtn')?.setAttribute('aria-expanded','false'));
+  alertCenterDialog?.addEventListener('close',()=>{
+    $('#notificationsBtn')?.setAttribute('aria-expanded','false');
+    document.querySelector('.cdc-welcome-alert')?.setAttribute('aria-expanded','false');
+  });
   window.addEventListener('focus',syncMonthRollover);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncMonthRollover();});
   setInterval(syncMonthRollover,MONTH_ROLLOVER_INTERVAL_MS);

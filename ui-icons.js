@@ -270,7 +270,7 @@
     root.querySelectorAll?.('.cdc-shortcut-icon[data-cdc-icon]').forEach(slot=>fillIcon(slot,slot.dataset.cdcIcon,23));
     root.querySelectorAll?.('.cdc-plan-screen-heading [data-cdc-icon]').forEach(slot=>fillIcon(slot,slot.dataset.cdcIcon,21));
     root.querySelectorAll?.('.cdc-welcome-avatar').forEach(slot=>fillIcon(slot,'home',23));
-    root.querySelectorAll?.('.cdc-welcome-alert').forEach(button=>fillIcon(button,'alert',22));
+    root.querySelectorAll?.('.cdc-welcome-alert').forEach(button=>preserveBadgeIcon(button,'alert',22));
     root.querySelectorAll?.('.dashboard-priority-panel .dashboard-feature-icon').forEach(slot=>fillIcon(slot,'calendar',22));
     root.querySelectorAll?.('.dashboard-budget-panel .dashboard-feature-icon').forEach(slot=>fillIcon(slot,'report',22));
     root.querySelectorAll?.('.dashboard-budget-open').forEach(button=>fillIcon(button,'chevron',19));

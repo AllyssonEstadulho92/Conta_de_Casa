@@ -60,10 +60,10 @@ assert.match(shell,/\.mobile-menu-btn\[data-menu-state="open"\] \.mobile-menu-gl
 assert.match(shell,/@media\(prefers-reduced-motion:reduce\)/);
 
 // PWA e segurança: versões atualizadas, sem migrações nem credenciais reais.
-assert.match(build,/const DASHBOARD_REV = '77-prototype-fidelity1'/);
+assert.match(build,/const DASHBOARD_REV = '77-clock-calendar-menu2'/);
 assert.match(build,/const MOBILE_SHELL_REV = '76-approved-vault-nav4'/);
-assert.match(build,/const SERVICE_WORKER_REV = '77-prototype-fidelity1'/);
-assert.match(build,/const ARCHITECTURE_REV = '77-prototype-fidelity1'/);
+assert.match(build,/const SERVICE_WORKER_REV = '77-clock-calendar-menu2'/);
+assert.match(build,/const ARCHITECTURE_REV = '77-clock-calendar-menu2'/);
 assert.match(build,/events\.js\?v=\$\{SERVICE_WORKER_REV\}/);
 assert.doesNotThrow(()=>new vm.Script(render));
 assert.doesNotThrow(()=>new vm.Script(events));

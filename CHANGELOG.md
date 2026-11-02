@@ -1,5 +1,14 @@
 # Changelog
 
+## Auditoria do cabeçalho, Calendário e menu Mais (02/11/2026)
+
+- Um só sino no Início, junto da saudação, com contador de notificações.
+- Menu de três linhas removido do cabeçalho no telemóvel; as funções do menu estão em Mais.
+- Saudação que muda automaticamente conforme a hora local do dispositivo.
+- Calendário redesenhado com os cartões do novo visual, seleção de mês, valores reais e consulta de despesas/vencimentos por dia.
+- Nenhuma alteração ao PIN, cofre cifrado ou registos financeiros.
+
+
 ## Interface do protótipo, integração GitHub Pages (02/11/2026)
 
 - Preparada a aplicação principal para o mesmo visual de Início, Plano Mensal, Contas, Notificações e menu Mais da versão privada.

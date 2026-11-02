@@ -1,5 +1,12 @@
 # Decisões Técnicas — Conta de Casa
 
+## D-165 — menu Mais completo, notificações únicas e Calendário consistente (02/11/2026)
+
+O botão lateral de três linhas deixa de ser necessário no telemóvel. Os cinco destinos do protótipo permanecem na dock inferior; o Mais contém as páginas antigas e as ações rápidas do drawer, em grupos secundários expansíveis, sem perder funcionalidades. No Início aparece apenas o sino da saudação com contador; nas outras páginas permanece o sino do cabeçalho. Os alertas são derivados do cofre, não duplicados.
+
+A saudação obedece à hora local do navegador e é revista uma vez por minuto; não exige localização, acesso a relógios externos ou permissões. O Calendário reutiliza os cálculos canónicos e dispõe de um diálogo acessível de consulta dos dias, com o mesmo conjunto de cores, cartões, navegação mensal e ícones da interface atual. O cofre e os dados persistidos não mudam.
+
+
 ## D-164 — autorização de lançamento público (02/11/2026)
 
 Depois de publicar e testar tecnicamente o protótipo em ambiente privado, o utilizador autorizou a atualização da aplicação principal no GitHub Pages. A integração aproveita apenas os ficheiros de aplicação, documentação e testes; não copia a identidade da Site privada, credenciais, dados financeiros ou ficheiros de alojamento privado. O GitHub Actions existente continua responsável por validar e publicar a revisão do ramo `main`. Não modificar `STATE_VERSION`, IndexedDB, cifra, PIN, pagamentos nem backups.

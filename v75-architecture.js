@@ -118,7 +118,8 @@
   ]);
   const MORE_GROUPS=Object.freeze([
     {label:'Menu Mais',items:[['preferences','Perfil e preferências','settings','Nome, moeda e preferências'],['security','Cofre e segurança','shield','Acesso e proteção dos dados'],['backup','Exportar / Backup','wallet','Cópia cifrada e restauro'],['about','Sobre a aplicação','info','Informações do Conta de Casa']]},
-    {label:'Outras funções',items:[['goals','Objetivos de poupança','goal','Metas e progresso'],['sync','Sincronização','sync','Ligação opcional entre dispositivos'],['diagnostics','Diagnóstico e integridade','settings','Verificações técnicas'],['theme','Aparência','theme','Tema claro, escuro ou sistema']]}
+    {label:'Outras funções',items:[['calendar','Calendário mensal','calendar','Datas, gastos e vencimentos'],['petshare','Partilha do Walli','paw','Registos e cuidados do Walli'],['goals','Objetivos de poupança','goal','Metas e progresso'],['sync','Sincronização','sync','Ligação opcional entre dispositivos'],['diagnostics','Diagnóstico e integridade','settings','Verificações técnicas'],['theme','Aparência','theme','Tema claro, escuro ou sistema'],['privacy','Mostrar / ocultar valores','eye','Privacidade dos montantes'],['lock','Bloquear aplicação','lock','Proteger o cofre agora']]},
+    {label:'Páginas do menu',items:[['dashboard','Início','home','Resumo financeiro'],['planning','Plano','navPlan','Orçamento mensal'],['bills','Contas','navBills','Faturas e pagamentos'],['reports','Relatórios','navReports','Análise dos movimentos'],['security','Segurança e sincronização','shield','Cofre e dados']]}
   ]);
 
   let scheduled=false;
@@ -286,7 +287,7 @@
   }
 
   function moreItemHtml(action,label,iconName,description){
-    const attrs=action==='sync'?'data-v75-sync':action==='theme'?'data-v75-theme':action==='preferences'?'data-v75-preferences':action==='backup'?'data-v75-backup':action==='about'?'data-v75-about aria-controls="cdcAboutPanel" aria-expanded="false"':`data-v75-go="${attr(action)}"`;
+    const attrs=action==='sync'?'data-v75-sync':action==='theme'?'data-v75-theme':action==='privacy'?'data-v75-privacy':action==='lock'?'data-v75-lock':action==='preferences'?'data-v75-preferences':action==='backup'?'data-v75-backup':action==='about'?'data-v75-about aria-controls="cdcAboutPanel" aria-expanded="false"':`data-v75-go="${attr(action)}"`;
     return `<button type="button" class="v75-more-row" ${attrs}><span class="v75-more-icon">${iconMarkup(iconName,19)}</span><span><strong>${esc(label)}</strong><small>${esc(description||'')}</small></span><i aria-hidden="true">›</i></button>`;
   }
 
@@ -315,8 +316,8 @@
 
   function moreArchitectureHtml(){
     const main=MORE_GROUPS[0];
-    const extra=MORE_GROUPS[1];
-    return `<section class="v75-more-group cdc-more-primary" aria-label="${attr(main.label)}"><div>${main.items.map(([action,label,iconName,description])=>moreItemHtml(action,label,iconName,description)).join('')}</div></section><div id="cdcAboutPanel" class="cdc-more-about-panel" hidden><strong>Conta de Casa</strong><p>Gestão privada de contas, orçamento e relatórios. Os registos permanecem cifrados no cofre do navegador. A versão de teste não importa automaticamente os dados da aplicação pública.</p></div><details class="cdc-more-extra"><summary>Outras funções</summary><section class="v75-more-group" aria-label="${attr(extra.label)}"><div>${extra.items.map(([action,label,iconName,description])=>moreItemHtml(action,label,iconName,description)).join('')}</div></section></details>`;
+    const sections=MORE_GROUPS.slice(1).map(group=>`<details class="cdc-more-extra"><summary>${esc(group.label)}</summary><section class="v75-more-group" aria-label="${attr(group.label)}"><div>${group.items.map(([action,label,iconName,description])=>moreItemHtml(action,label,iconName,description)).join('')}</div></section></details>`).join('');
+    return `<section class="v75-more-group cdc-more-primary" aria-label="${attr(main.label)}"><div>${main.items.map(([action,label,iconName,description])=>moreItemHtml(action,label,iconName,description)).join('')}</div></section><div id="cdcAboutPanel" class="cdc-more-about-panel" hidden><strong>Conta de Casa</strong><p>Gestão privada de contas, orçamento e relatórios. Os registos permanecem cifrados no cofre do navegador. A versão de teste não importa automaticamente os dados da aplicação pública.</p></div>${sections}`;
   }
 
   function renderMoreArchitecture(){
@@ -646,6 +647,8 @@
       }
       const go=target?.closest('[data-v75-go]');
       if(go){event.preventDefault();if(typeof showPage==='function')showPage(go.dataset.v75Go);schedule();return;}
+      if(target?.closest('[data-v75-privacy]')){event.preventDefault();if(typeof setPrivacy==='function')setPrivacy(!privacyHidden);schedule();return;}
+      if(target?.closest('[data-v75-lock]')){event.preventDefault();if(typeof lockApp==='function')lockApp('manual');return;}
       if(target?.closest('[data-v75-sync]')){event.preventDefault();handleSync();schedule();return;}
       if(target?.closest('[data-v75-theme]')){event.preventDefault();byId('themeToggle')?.click();setTimeout(schedule,0);return;}
       if(target?.closest('[data-v75-preferences]')){event.preventDefault();handlePreferences();schedule();return;}

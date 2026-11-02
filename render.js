@@ -11,6 +11,7 @@ function applyTheme() {
 function setPrivacy(hidden) {
   privacyHidden = hidden;
   $('#app').classList.toggle('money-hidden', hidden);
+  $('#calendarDayDialog')?.classList.toggle('money-hidden',hidden);
   const label=hidden?'Mostrar valores':'Ocultar valores';
   ['#privacyToggle','#drawerPrivacyToggle'].forEach(selector=>{
     const button=$(selector);
@@ -208,29 +209,44 @@ function renderAlertCenter(items = dashboardAlertItems()) {
 
 function updateAlertBadge() {
   const button=$('#notificationsBtn');
-  const badge=$('#alertBadge');
-  if(!button||!badge)return;
+  const welcomeButton=document.querySelector('.cdc-welcome-alert');
+  const badges=[$('#alertBadge'),$('#dashboardAlertBadge')].filter(Boolean);
+  if(!button||!badges.length)return;
   const items=dashboardAlertItems();
   const count=items.length;
-  badge.hidden=count===0;
-  badge.textContent=count>99?'99+':String(count);
-  badge.dataset.count=String(count);
+  badges.forEach(badge=>{
+    badge.hidden=count===0;
+    badge.textContent=count>99?'99+':String(count);
+    badge.dataset.count=String(count);
+  });
   const label=count
     ? `Centro de Alertas, ${count} alerta${count===1?'':'s'} ativo${count===1?'':'s'}`
     : 'Centro de Alertas, sem alertas ativos';
   button.setAttribute('aria-label',label);
   button.title=label;
+  if(welcomeButton){
+    welcomeButton.setAttribute('aria-label',label);
+    welcomeButton.title=label;
+  }
   const dialog=$('#alertCenterDialog');
   if(dialog?.open)renderAlertCenter(items);
 }
 
-function renderDashboard() {
-  const n = dashboardNumbers();
-  const currentHour=new Date().getHours();
-  const greeting=currentHour<12?'Bom dia':currentHour<20?'Boa tarde':'Boa noite';
+function greetingForHour(hour){
+  return hour>=6&&hour<12?'Bom dia':hour>=12&&hour<20?'Boa tarde':'Boa noite';
+}
+
+function updateDashboardGreeting(now=new Date()){
+  if(!appState)return;
+  const greeting=greetingForHour(now.getHours());
   const givenName=String(appState.settings?.profileName||'').trim().split(/\s+/)[0];
   const welcome=$('#dashboardWelcomeText');
   if(welcome)welcome.textContent=givenName?`${greeting}, ${givenName}`:`${greeting}!`;
+}
+
+function renderDashboard() {
+  const n = dashboardNumbers();
+  updateDashboardGreeting();
   const result=planningMonthlyResult(n);
   const monthLabel=new Intl.DateTimeFormat('pt-PT',{month:'long',year:'numeric'}).format(new Date(`${selectedMonth}-01T12:00:00`));
   const balanceKind=n.hasAccountBalance?'Saldo da conta informado':'Saldo calculado pelos registos';
@@ -435,9 +451,12 @@ function billCardHtml(b) {
 
 function renderCalendar() {
   const [year, month] = selectedMonth.split('-').map(Number);
+  const monthLabel=new Intl.DateTimeFormat('pt-PT',{month:'long',year:'numeric'}).format(new Date(year,month-1,1));
+  const calendarMonthLabel=$('#calendarMonthLabel');
+  if(calendarMonthLabel)calendarMonthLabel.textContent=monthLabel.replace(/^./,char=>char.toUpperCase());
   const first = new Date(year,month-1,1); const days=new Date(year,month,0).getDate();
   const offset=(first.getDay()+6)%7;
-  const headers=['S','T','Q','Q','S','S','D'].map(d=>`<div class="calendar-head">${d}</div>`).join('');
+  const headers=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].map(d=>`<div class="calendar-head">${d}</div>`).join('');
   const numbers=monthNumbers(selectedMonth);
   const history=monthlySpendHistory(selectedMonth,6);
 
@@ -454,7 +473,7 @@ function renderCalendar() {
     return `<button type="button" class="calendar-history-item${item.month===selectedMonth?' active':''}" data-calendar-month="${attr(item.month)}"><span>${esc(label)}</span><strong data-money>${money(item.total)}</strong></button>`;
   }).join(''));
 
-  const cells=[]; for(let i=0;i<offset;i++) cells.push('<div class="calendar-day out"></div>');
+  const cells=[]; for(let i=0;i<offset;i++) cells.push('<div class="calendar-day out" aria-hidden="true"></div>');
   const today=new Date();
   for(let day=1;day<=days;day++){
     const dayKey=`${year}-${pad2(month)}-${pad2(day)}`;
@@ -469,7 +488,10 @@ function renderCalendar() {
     ].join(' ');
     const dueLine=bills.length?`<small class="calendar-due">${bills.length} venc. · <span data-money>${money(dueTotal)}</span></small>`:'';
     const spentLine=spent.total>0?`<small class="calendar-spent">Gasto · <span data-money>${money(spent.total)}</span></small>`:'';
-    cells.push(`<button class="calendar-day ${cls}" data-calendar-day="${day}"><span class="day-num">${day}</span>${spentLine}${dueLine}</button>`);
+    const dayLabel=new Intl.DateTimeFormat('pt-PT',{day:'numeric',month:'long',year:'numeric'}).format(new Date(year,month-1,day));
+    const activity=[spent.total>0?'gastos registados':'',bills.length?`${bills.length} vencimento${bills.length===1?'':'s'} registado${bills.length===1?'':'s'}`:''].filter(Boolean).join('; ');
+    const markers=`<span class="calendar-day-markers" aria-hidden="true">${spent.total>0?'<i class="spent"></i>':''}${bills.length?`<i class="${overdue?'overdue':'due'}"></i>`:''}</span>`;
+    cells.push(`<button type="button" class="calendar-day ${cls}" data-calendar-day="${day}" aria-label="${attr(`${dayLabel}${activity?`: ${activity}`:': sem movimentos registados'}`)}"><span class="day-num">${day}</span>${markers}${spentLine}${dueLine}</button>`);
   }
   setHTML('#calendarGrid', headers+cells.join(''));
 
